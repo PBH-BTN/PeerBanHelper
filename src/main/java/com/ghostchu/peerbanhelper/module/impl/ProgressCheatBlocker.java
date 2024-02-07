@@ -39,11 +39,11 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
         final double actualProgress = (double) uploaded / torrentSize;
         final double clientProgress = peer.getProgress();
 
-        if(getConfig().getBoolean("block-excessive-clients") && (uploaded > torrentSize)){
+        if (getConfig().getBoolean("block-excessive-clients") && (uploaded > torrentSize)) {
             // 下载过量，检查
             long maxAllowedExcessiveThreshold = (long) (torrentSize * getConfig().getDouble("excessive-threshold"));
-            if(uploaded > maxAllowedExcessiveThreshold){
-                return new BanResult(true, "客户端下载过量：种子大小："+torrentSize+"，上传给此对等体的总量："+uploaded+"，最大允许的过量下载总量："+maxAllowedExcessiveThreshold);
+            if (uploaded > maxAllowedExcessiveThreshold) {
+                return new BanResult(true, "客户端下载过量：种子大小：" + torrentSize + "，上传给此对等体的总量：" + uploaded + "，最大允许的过量下载总量：" + maxAllowedExcessiveThreshold);
             }
         }
 
@@ -59,11 +59,13 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
         double rewindAllow = getConfig().getDouble("rewind-maximum-difference");
         if (rewindAllow > 0) {
             Double lastRecordedProgress = progressRecorder.getIfPresent(peer.getAddress());
+            progressRecorder.put(peer.getAddress(), peer.getProgress());
             if (lastRecordedProgress != null) {
                 double rewind = lastRecordedProgress - peer.getProgress();
                 boolean ban = rewind > rewindAllow;
                 return new BanResult(ban, "客户端进度：" + formatPercent(clientProgress) + "，实际进度：" + formatPercent(actualProgress) + "，上次记录进度：" + formatPercent(lastRecordedProgress) + "，本次进度：" + formatPercent(rewind) + "，差值：" + formatPercent(rewindAllow));
             }
+
         }
         return new BanResult(false, "客户端进度：" + formatPercent(clientProgress) + "，实际进度：" + formatPercent(actualProgress) + "，差值：" + formatPercent(difference));
     }
