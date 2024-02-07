@@ -141,7 +141,8 @@ PeerBanHelper 主要由以下几个功能模块组成：
 java -Xmx256M -XX:+UseG1GC -XX:+UseStringDeduplication -jar <JAR文件>
 ```
 
-运行后，生成 `config.yml` 和 `profile.yml`，配置后再次使用相同命令启动 PeerBanHelper 即可。
+运行后，生成 `config.yml` 和 `profile.yml`，配置后再次使用相同命令启动 PeerBanHelper 即可。  
+注意：如果您修改了配置文件，想让它生效的话，请重启 PeerBanHelper（对于Docker用户来说：重启容器）。
 
 ## 添加下载器
 
