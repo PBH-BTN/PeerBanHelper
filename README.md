@@ -2,9 +2,14 @@
 
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
-## 运营要求
+## 环境要求
 
 PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。
+
+## 支持的客户端
+
+* qBittorrent
+* 暂不支持 Transmission，缺少 Ban IP 的 API
 
 ## 功能概述
 
