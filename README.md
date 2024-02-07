@@ -169,6 +169,21 @@ client:
     username: "username"
     # 密码
     password: "password"
+  qb2:
+    type: qBittorrent
+    endpoint: "http://ip:8086" 
+    username: "username"
+    password: "password"
+  qb3:
+    type: qBittorrent
+    endpoint: "http://ip:8087" 
+    username: "username"
+    password: "password"
+  somuchqb:
+    type: qBittorrent
+    endpoint: "http://ip:8088" 
+    username: "username"
+    password: "password"
 ```
 
 
