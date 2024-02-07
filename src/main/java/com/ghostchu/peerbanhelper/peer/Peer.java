@@ -1,0 +1,60 @@
+package com.ghostchu.peerbanhelper.peer;
+
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+
+public interface Peer extends Comparable<Peer>{
+    /**
+     * 获取此对等体的 IP:端口 组
+     * @return 地址包装器
+     */
+    PeerAddress getAddress();
+
+    /**
+     * 获取此对等体的 PeerId
+     * @return PeerId，示例：-qB4250-
+     */
+    String getPeerId();
+
+    /**
+     * 获取此对等体的客户端名称
+     * @return 客户端名称，示例：qBittorrent/4.2.5
+     */
+
+    String getClientName();
+
+    /**
+     * 获取您从此对等体获取数据的速度
+     * @return 您从此对等体获取数据的速度 (bytes per second)
+     */
+    long getDownloadSpeed();
+
+    /**
+     * 获取您从此对等体获取数据的累计大小
+     * @return 获取的数据大小(bytes)
+     */
+
+    long getDownloaded();
+
+    /**
+     * 获取您向此对等体分享数据的速度
+     * @return 您向此对等体分享数据的速度 (bytes per second)
+     */
+
+    long getUploadedSpeed();
+
+    /**
+     * 获取您向此对等体提供数据的累计大小
+     * @return 提供的数据大小(bytes)
+     */
+    long getUploaded();
+
+    /**
+     * 对等体的下载进度
+     * @return 对等体当前文件的下载速度
+     */
+    double getProgress();
+    @Override
+    default int compareTo(Peer o){
+      return this.getAddress().compareTo(o.getAddress());
+    }
+}

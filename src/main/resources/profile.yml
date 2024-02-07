@@ -1,0 +1,68 @@
+# 检查频率（单位：毫秒）
+check-interval: 5000
+# 封禁持续时间（单位：毫秒）
+ban-duration: 3600000
+# 功能模块
+module:
+  # PeerId 封禁
+  peer-id-blacklist:
+    enabled: true
+    # 字符串匹配规则：
+    # <匹配方式>@<规则内容> 不区分大小写
+    # startsWith - 匹配开头
+    # endsWith - 匹配结尾
+    # contains - 包含子串
+    # equals - 完全匹配
+    # regex - 正则匹配
+    # length - 长度匹配，规则内容填写整数形式的长度
+    banned-peer-id:
+      - "startsWith@-XL" # Xunlei 万恶之源
+      - "startsWith@-SD"
+      - "startsWith@-XF"
+      - "startsWith@-QD" # QQDownload QQ旋风，假进度
+      - "startsWith@-BN"
+      - "startsWith@-DL"
+      - "startsWith@-TS" # Torrentstorm
+      - "startsWith@-FG" # FlashGet 快车
+      - "startsWith@-TT" # 土豆，流媒体播放器
+      - "startsWith@-NX" # Net Transport
+      - "startsWith@-SP" # 比特精灵，默认启用反吸血导致不给其他客户端上传
+      #- "startWith@FD6" # Free Download Manager，非标准 PeerId
+      - "startsWith@-GT0002" # 无限下载文件分片 https://github.com/anacrolix/torrent/discussions/891
+      - "startsWith@-GT0003" # 无限下载文件分片 https://github.com/anacrolix/torrent/discussions/891
+      - "contains@cacao"
+  # 客户端名称封禁
+  client-name-blacklist:
+    enabled: true
+    banned-client-name:
+      - "contains@github.com/anacrolix/torrent" # https://github.com/anacrolix/torrent/discussions/891
+      - "startsWith@qBittorrent/3.3.15" # https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues/432
+      #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
+  # 假进度检查
+  progress-cheat-blocker:
+    enabled: true
+    # Torrent 小于此值不进行检查（单位：字节），对等体可能来不及同步正确的下载进度
+    minimum-size: 50000000
+    # 最大差值，单位百分比（1.0 = 100% 0.5=50%）
+    # PeerBanHelper 根据 BT 客户端记录的向此对等体实际上传的字节数，计算该对等体的最小下载进度
+    # 并与对等体汇报给 BT 客户端下载进度进行比较
+    # 如果对等体汇报的总体下载进度远远低于我们上传给此对等体的数据量的比例，我们应考虑客户端正在汇报假进度
+    # 默认值为：8%
+    # 即：假设我们上传了 50% 的数据量给对方，对方汇报自己的下载进度只有 41%，差值大于 8%，进行封禁
+    # 对于自动识别迅雷、QQ旋风的变种非常有效，能够在不更新规则的情况下自动封禁报假进度的吸血客户端
+    maximum-difference: 0.08
+    # 进度倒退检测
+    # 默认：最多允许倒退 5% 的进度
+    # (考虑到有时文件片段在传输时可能因损坏而未通过校验被丢弃，我们允许客户端出现合理的进度倒退)
+    # 设置为 -1 以禁用此检测
+    rewind-maximum-difference: 0.05
+  # IP 地址/端口 封禁
+  ip-address-blocker:
+    enabled: true
+    # IP
+    ips:
+    #- 8.8.8.8
+    #- 9.9.9.9
+    # 端口
+    ports:
+    #- 2003
