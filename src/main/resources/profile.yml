@@ -59,6 +59,7 @@ module:
     # 禁止那些在同一个种子的累计下载量超过种子本身大小的客户端
     block-excessive-clients: true
     # 过量下载计算阈值
+    # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive-threshold)
     excessive-threshold: 1.5
   # IP 地址/端口 封禁
   ip-address-blocker:
