@@ -16,7 +16,7 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
 
     @Override
     public String getName() {
-        return "PeerIdBlacklist";
+        return "PeerId Blacklist";
     }
 
     @Override
