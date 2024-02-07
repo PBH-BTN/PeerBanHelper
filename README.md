@@ -1,5 +1,8 @@
 # PeerBanHelper
 
+> [!WARNING]
+> 项目处于早期开发阶段，可能存在错误，请关注新版本更新日志以获取最新信息！
+
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
 <img width="1177" alt="Snipaste_2024-02-07_22-20-37" src="https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f0fb97a5-1db8-4517-8dc8-d728b8df8237">
