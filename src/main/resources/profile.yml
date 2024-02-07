@@ -56,10 +56,19 @@ module:
     # (考虑到有时文件片段在传输时可能因损坏而未通过校验被丢弃，我们允许客户端出现合理的进度倒退)
     # 设置为 -1 以禁用此检测
     rewind-maximum-difference: 0.05
+    # 禁止那些在同一个种子的累计下载量超过种子本身大小的客户端
+    block-excessive-clients: true
+    # 过量下载计算阈值
+    excessive-threshold: 1.5
   # IP 地址/端口 封禁
   ip-address-blocker:
     enabled: true
-    # IP
+    # IP，支持 CIDR，其语法大致如下：
+    # ::/64
+    # a:b:c:d::a:b/64
+    # a:b:c:d:e:f:1.2.3.4/112
+    # 1.2.3.4/16
+    # 1.2.255.4/255.255.0.0
     ips:
     #- 8.8.8.8
     #- 9.9.9.9

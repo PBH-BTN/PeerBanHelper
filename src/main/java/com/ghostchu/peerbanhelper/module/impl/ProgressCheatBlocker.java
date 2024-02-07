@@ -33,11 +33,19 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
 
     @Override
     public BanResult shouldBanPeer(Torrent torrent, Peer peer) {
-        long uploaded = peer.getUploaded();
-        long torrentSize = torrent.getSize();
+        final long uploaded = peer.getUploaded();
+        final long torrentSize = torrent.getSize();
 
-        double actualProgress = (double) uploaded / torrentSize;
-        double clientProgress = peer.getProgress();
+        final double actualProgress = (double) uploaded / torrentSize;
+        final double clientProgress = peer.getProgress();
+
+        if(uploaded > torrentSize && getConfig().getBoolean("block-excessive-clients")){
+            // 下载过量，检查
+            long maxAllowedExcessiveThreshold = (long) (torrentSize * getConfig().getDouble("excessive-threshold"));
+            if(uploaded > maxAllowedExcessiveThreshold){
+                return new BanResult(true, "客户端下载过量：种子大小："+torrentSize+"，上传给此对等体的总量："+uploaded+"，最大允许的过量下载总量："+maxAllowedExcessiveThreshold);
+            }
+        }
 
         if (actualProgress - clientProgress <= 0) {
             return new BanResult(false, "客户端进度：" + formatPercent(clientProgress) + "，实际进度：" + formatPercent(actualProgress) + "，客户端的进度多于本地进度，跳过检测");
