@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  peerbanhelper:
+    image: "ghostchu/peerbanhelper:latest"
+    restart: unless-stopped
+    container_name: "peerbanhelper"
+    volumes:
+      - ./config.yml:/app/config.yml
+      - ./profile.yml:/app/profile.yml
+      - ./logs:/app/logs

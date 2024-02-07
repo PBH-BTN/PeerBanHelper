@@ -166,3 +166,8 @@ client:
     password: "password"
 ```
 
+
+## Docker 支持
+
+Docker 镜像为：`ghostchu/peerbanhelper`，不定期更新。
+如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
