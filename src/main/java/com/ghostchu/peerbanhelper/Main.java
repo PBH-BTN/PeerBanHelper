@@ -17,7 +17,9 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         log.info("PeerBanHelper - v1.0 - by Ghost_chu");
-        Unirest.config().setDefaultHeader("User-Agent", "PeerBanHelper/1.0");
+        Unirest.config()
+                .setDefaultHeader("User-Agent", "PeerBanHelper/1.0")
+                .enableCookieManagement(true);
         List<Downloader> downloaderList = new ArrayList<>();
         log.info("加载配置文件……");
         try {
