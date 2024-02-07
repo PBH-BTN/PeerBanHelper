@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         log.info("PeerBanHelper - v1.0 - by Ghost_chu");
         Unirest.config()
                 .setDefaultHeader("User-Agent", "PeerBanHelper/1.0")
@@ -46,7 +46,9 @@ public class Main {
             }
         }
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList, YamlConfiguration.loadConfiguration(new File("profile.yml")));
-
+        while (true){
+            Thread.sleep(30*1000);
+        }
     }
 
     private static boolean initConfiguration() throws IOException {

@@ -60,11 +60,11 @@ public class PeerBanHelperServer {
     public void banWave() {
         boolean needUpdate = false;
         for (Downloader downloader : this.downloaders) {
-            if (!downloader.login()) {
-                log.warn("登录到 {} ({}) 失败，跳过……", downloader.getName(), downloader.getEndpoint());
-                continue;
-            }
             try {
+                if (!downloader.login()) {
+                    log.warn("登录到 {} ({}) 失败，跳过……", downloader.getName(), downloader.getEndpoint());
+                    continue;
+                }
                 if (banDownloader(downloader)) {
                     needUpdate = true;
                 }
