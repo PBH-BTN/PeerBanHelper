@@ -88,11 +88,11 @@ public class PeerBanHelperServer {
 
         if (needUpdate) {
             for (Downloader downloader : this.downloaders) {
-                if (!downloader.login()) {
-                    log.warn("登录到 {} ({}) 失败，跳过……", downloader.getName(), downloader.getEndpoint());
-                    continue;
-                }
                 try {
+                    if (!downloader.login()) {
+                        log.warn("登录到 {} ({}) 失败，跳过……", downloader.getName(), downloader.getEndpoint());
+                        continue;
+                    }
                     downloader.setBanList(BAN_LIST.keySet());
                 } catch (Throwable th) {
                     log.warn("在更新 {} ({}) 的 BanList 时出现了一个非预期的错误", downloader.getName(), downloader.getEndpoint(), th);
