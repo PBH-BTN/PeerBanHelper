@@ -162,7 +162,8 @@ client:
     # 其它也许以后会加，但 Transmission 是没戏了，WebAPI 没办法给 Transmission 加黑 IP
     type: qBittorrent
     # 客户端地址
-    endpoint: "http://ip:8085"
+    # 如果程序在 docker 内运行，请不要填写 127.0.0.1，连不上的，得填 Docker 网络的网关地址，或者你的设备的 IP 地址（最好绑定静态 IP）
+    endpoint: "http://ip:8085" 
     # 登录信息（暂不支持 Basic Auth）
     # 用户名
     username: "username"
@@ -175,3 +176,55 @@ client:
 
 Docker 镜像为：`ghostchu/peerbanhelper`，不定期更新。  
 如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
+
+### 在群晖 DSM 上，使用 Container Manager 启动
+
+首先，为 PBH 创建文件夹，用于存放 PBH 的配置文件和日志。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/8ee3a716-f192-4392-8362-c7c6a1f6e11f)
+
+将提前准备好的 `config.yml`, `profile.yml` 文件上传到此文件夹中。然后，再新建一个名为 `logs` 的空白文件夹，用于存储日志。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/adecd0fb-9923-4363-903c-c084d0a26f11)
+
+
+在 Container Manager 中，选择项目，新增按钮，来源选择 “创建 docker-compose.yml”
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/3af676e7-3db5-496a-a480-3780a05dba21)
+
+输入项目名称，然后点击路径的 “设置路径” 按钮。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/a3ab5e8c-a65e-46af-b685-b6905321f567)
+
+选择刚刚创建的文件夹
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/19752dbe-90a0-4e83-a7af-7665c80e14d3)
+
+回到编辑框界面，在编辑框复制并粘贴下列内容：
+
+```yaml
+version: "3.9"
+services:
+  peerbanhelper:
+    image: "ghostchu/peerbanhelper:<最新版本号>"
+    restart: unless-stopped
+    container_name: "peerbanhelper"
+    volumes:
+      - ./config.yml:/app/config.yml
+      - ./profile.yml:/app/profile.yml
+      - ./logs:/app/logs
+```
+
+其中，`<最新版本号>` 请填写 [这个页面](https://hub.docker.com/r/ghostchu/peerbanhelper/tags) 上**除 `latest` 以外**的最新的版本的名称。在教程编写时，为 `1.2`。
+
+最后一路下一步，完成，即可创建。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/af63f641-699c-490b-9a7b-040dbfe1fd5e)
+
+最后，前往容器日志，确认程序正确运行即可。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f73183c0-a6c8-4a34-af2c-5fb276d5e0af)
+
+
+
+
