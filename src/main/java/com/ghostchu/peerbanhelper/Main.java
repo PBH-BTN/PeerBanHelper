@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        log.info("PeerBanHelper - v1.0 - by Ghost_chu");
+        log.info("PeerBanHelper - v1.1 - by Ghost_chu");
         Unirest.config()
                 .setDefaultHeader("User-Agent", "PeerBanHelper/1.1")
                 .enableCookieManagement(true);
