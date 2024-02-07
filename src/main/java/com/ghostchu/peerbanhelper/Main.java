@@ -18,7 +18,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         log.info("PeerBanHelper - v1.0 - by Ghost_chu");
         Unirest.config()
-                .setDefaultHeader("User-Agent", "PeerBanHelper/1.0")
+                .setDefaultHeader("User-Agent", "PeerBanHelper/1.1")
                 .enableCookieManagement(true);
         List<Downloader> downloaderList = new ArrayList<>();
         log.info("加载配置文件……");
