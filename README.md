@@ -2,9 +2,16 @@
 
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
-## 运营要求
+<img width="1177" alt="Snipaste_2024-02-07_22-20-37" src="https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f0fb97a5-1db8-4517-8dc8-d728b8df8237">
+
+## 环境要求
 
 PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。
+
+## 支持的客户端
+
+* qBittorrent
+* 暂不支持 Transmission，缺少 Ban IP 的 API
 
 ## 功能概述
 
@@ -124,5 +131,38 @@ PeerBanHelper 主要由以下几个功能模块组成：
     # 过量下载计算阈值
     # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive-threshold)
     excessive-threshold: 1.5
+```
+
+## 如何使用
+
+使用此命令启动 PeerBanHelper：
+
+```shell
+java -Xmx256M -XX:+UseG1GC -XX:+UseStringDeduplication -jar <JAR文件>
+```
+
+运行后，生成 `config.yml` 和 `profile.yml`，配置后再次使用相同命令启动 PeerBanHelper 即可。
+
+## 添加下载器
+
+PeerBanHelper 能够连接多个支持的下载器，并共享 IP 黑名单。但每个下载器只能被一个 PeerBanHelper 添加，多个 PBH 会导致操作 IP 黑名单时出现冲突。
+
+```yaml
+# 客户端设置
+client:
+  # 名字，可以自己起，会在日志中显示
+  my-really-good-best-ever-bittorrent-downloader:
+    # 客户端类型
+    # 支持的客户端列表：
+    # qBittorrent
+    # 其它也许以后会加，但 Transmission 是没戏了，WebAPI 没办法给 Transmission 加黑 IP
+    type: qBittorrent
+    # 客户端地址
+    endpoint: "http://ip:8085"
+    # 登录信息（暂不支持 Basic Auth）
+    # 用户名
+    username: "username"
+    # 密码
+    password: "password"
 ```
 
