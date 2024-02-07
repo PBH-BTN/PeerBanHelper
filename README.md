@@ -58,7 +58,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
       - "contains@cacao"
 ```
 
-## Client Name 黑名单
+### Client Name 黑名单
 
 部分客户端（如 Aria 2）会使用其它 BT 客户端（如：Transmission）的 Peer ID 伪装自己，但客户端名称仍然是自己的真实名称，这种情况可通过 Client Name 黑名单进行封禁。
 
@@ -72,7 +72,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
 ```
 
-## IP 黑名单
+### IP 黑名单
 
 有的客户端（如迅雷离线下载服务器）会使用匿名模式连接，使用通用客户端名称（libtorrent）和通用 Peer ID（-LTXXXX-）来连接您，但封禁通用名称/Peer ID 会误伤不少正常客户端。  
 对于这种情况，您可以直接封禁这些离线下载服务器的 IP 地址或 IP 段，或者使用的端口。
@@ -97,7 +97,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
     #- 2003
 ```
 
-## 虚假进度检查器
+### 虚假进度检查器
 
 此模块可谓是 PeerBanHelper 的灵魂，有助于您在不更新规则的情况下，发现那些伪装过的异常客户端。  
 其大体原理如下：
@@ -141,7 +141,8 @@ PeerBanHelper 主要由以下几个功能模块组成：
 java -Xmx256M -XX:+UseG1GC -XX:+UseStringDeduplication -jar <JAR文件>
 ```
 
-运行后，生成 `config.yml` 和 `profile.yml`，配置后再次使用相同命令启动 PeerBanHelper 即可。
+运行后，生成 `config.yml` 和 `profile.yml`，配置后再次使用相同命令启动 PeerBanHelper 即可。  
+注意：如果您修改了配置文件，想让它生效的话，请重启 PeerBanHelper（对于Docker用户来说：重启容器）。
 
 ## 添加下载器
 
@@ -169,5 +170,5 @@ client:
 
 ## Docker 支持
 
-Docker 镜像为：`ghostchu/peerbanhelper`，不定期更新。
+Docker 镜像为：`ghostchu/peerbanhelper`，不定期更新。  
 如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
