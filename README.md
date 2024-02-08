@@ -255,9 +255,11 @@ services:
 ### 配置 PBH 环境结构
 
 从 [Releases](https://github.com/Ghost-chu/PeerBanHelper/releases/latest) 下载最新版本的 PeerBanHelper。
+
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/23c2d00d-f42e-454e-a721-8a76045663f5)
 
-在合适新建一个文件夹，我选择在桌面上，并将 PBH 复制到此文件夹中。
+在合适新建一个文件夹，我选择在桌面上，并将刚刚下载的 PeerBanHelper 的 JAR 复制到此文件夹中。
+
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f79ab9d6-2086-48cd-a5e1-84b7b95c4507)
 
 在文件夹中创建一个 BAT 批处理文件（先新建一个文本文档，把 .txt 改成 .bat 即可，如果看不见 .txt 扩展名，请先[打开显示扩展名](https://blog.csdn.net/weixin_52799373/article/details/133306908)）
