@@ -14,3 +14,5 @@ client:
     username: "username"
     # 密码
     password: "password"
+server:
+  http: 9898

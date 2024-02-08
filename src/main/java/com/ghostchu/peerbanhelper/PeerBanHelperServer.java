@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,14 +27,26 @@ public class PeerBanHelperServer {
     private final YamlConfiguration profile;
     private final List<Downloader> downloaders;
     private final long banDuration;
+    private final int httpdPort;
     private List<FeatureModule> registeredModules = new ArrayList<>();
+    private BlacklistProvider blacklistProviderServer;
 
-    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile) {
+    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, int httpdPort) {
         this.downloaders = downloaders;
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
+        this.httpdPort = httpdPort;
         registerModules();
         registerTimer();
+       // registerBlacklistHttpServer();
+    }
+
+    private void registerBlacklistHttpServer() {
+        try {
+            this.blacklistProviderServer = new BlacklistProvider(httpdPort, this);
+        } catch (IOException e) {
+            log.warn("无法初始化 API 提供端点",e);
+        }
     }
 
     private void registerModules() {

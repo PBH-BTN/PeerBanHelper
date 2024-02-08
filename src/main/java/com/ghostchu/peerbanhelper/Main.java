@@ -43,11 +43,15 @@ public class Main {
                     downloaderList.add(new QBittorrent(client, endpoint, username, password));
                     log.info(" + qBittorrent -> {} ({})", client, endpoint);
                 }
+                case "transmission" -> {
+
+                }
             }
         }
-        PeerBanHelperServer server = new PeerBanHelperServer(downloaderList, YamlConfiguration.loadConfiguration(new File("profile.yml")));
-        while (true){
-            Thread.sleep(30*1000);
+        PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
+                YamlConfiguration.loadConfiguration(new File("profile.yml")), mainConfig.getInt("server.http"));
+        while (true) {
+            Thread.sleep(30 * 1000);
         }
     }
 
