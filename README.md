@@ -240,6 +240,60 @@ services:
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f73183c0-a6c8-4a34-af2c-5fb276d5e0af)
 
+## 在 Windows 上安装
+
+### 安装 Java 17
+
+打开 [Temurin OpenJDK 下载页面](https://adoptium.net/zh-CN/temurin/releases/?version=17&os=windows&package=jdk)，下载 msi 安装包，如果下载没反应，则可能需要科学上网。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/14e350e4-9831-41af-b0b6-b87d5b051a4f)
+
+运行 MSI 安装包，遇到图中页面时，点击所有条目前面的磁盘小图标，全部选择 “整个功能将安装在本地硬盘上”，随后一路下一步安装。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f0428971-5724-4e84-b34c-52c3ae0d1629)
+
+### 配置 PBH 环境结构
+
+从 [Releases](https://github.com/Ghost-chu/PeerBanHelper/releases/latest) 下载最新版本的 PeerBanHelper。
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/23c2d00d-f42e-454e-a721-8a76045663f5)
+
+在合适新建一个文件夹，我选择在桌面上，并将 PBH 复制到此文件夹中。
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f79ab9d6-2086-48cd-a5e1-84b7b95c4507)
+
+在文件夹中创建一个 BAT 批处理文件（先新建一个文本文档，把 .txt 改成 .bat 即可，如果看不见 .txt 扩展名，请先[打开显示扩展名](https://blog.csdn.net/weixin_52799373/article/details/133306908)）
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/a482b200-daa5-4249-99a5-e19090e01d4c)
+
+使用记事本打开并编辑此批处理文件，复制粘贴下面的内容到 BAT 文件中:
+
+```batch
+@echo off
+title PeerBanHelper
+:main
+java -Xmx256M -XX:+UseG1GC -XX:+UseStringDeduplication -jar PeerBanHelper.jar
+timeout /t 5 /nobreak >nul
+echo Restarting...
+goto main
+```
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/4bdc635a-54de-4e26-914e-9f3e5ad3e209)
+
+完成后保存退出，你的文件夹里面现在应该长得像这个样子。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/da7dd862-09ef-4290-a0b7-47e6bc2f3c06)
+
+双击你新建的批处理文件，脚本开始运行，出现提示配置的字样则说明您的环境和结构配置正确。关闭黑色窗口。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/1eba8bf8-0a06-4d58-a7e3-6481e8a86125)
+
+此时目录下应该自动生成了 `config.yml` 和 `profile.yml`：
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/c326e37b-115e-4db2-a6a9-6a4efe87927d)
+
+打开并按照教程正确配置它们，保存并退出，再次双击批处理文件启动 PBH，此时 PBH 应能开始工作。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/9dfd5b13-caae-46e2-9e88-ff53478f4b1a)
+
 
 ## 常见问题
 
