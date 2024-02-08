@@ -65,17 +65,17 @@ public class QBittorrent implements Downloader {
         for (TorrentDetail detail : torrentDetail) {
             // 过滤下，只要有传输的 Torrent，其它的就不查询了
             if (detail.getState().equals("uploading") || detail.getState().equals("downloading")) {
-                torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getTotalSize(), detail.getDownloaded()));
+                torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getTotalSize()));
             }
         }
         return torrents;
     }
 
     @Override
-    public List<Peer> getPeers(String torrentId) {
-        HttpResponse<String> resp = unirest.get(endpoint + "/sync/torrentPeers?hash=" + torrentId).asString();
+    public List<Peer> getPeers(Torrent torrent) {
+        HttpResponse<String> resp = unirest.get(endpoint + "/sync/torrentPeers?hash=" + torrent.getId()).asString();
         if (!resp.isSuccess()) {
-            throw new IllegalStateException("Failed to request peers list for torrent " + torrentId);
+            throw new IllegalStateException("Failed to request peers list for torrent " + torrent.getId());
         }
         JsonObject object = JsonParser.parseString(resp.getBody()).getAsJsonObject();
         JsonObject peers = object.getAsJsonObject("peers");

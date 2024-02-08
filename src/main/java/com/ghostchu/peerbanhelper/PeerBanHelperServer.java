@@ -120,7 +120,7 @@ public class PeerBanHelperServer {
         Map<Torrent, List<Peer>> map = new HashMap<>();
         int peers = 0;
         for (Torrent torrent : downloader.getTorrents()) {
-            map.put(torrent, downloader.getPeers(torrent.getId()));
+            map.put(torrent, downloader.getPeers(torrent));
         }
         for (Map.Entry<Torrent, List<Peer>> pair : map.entrySet()) {
             peers += pair.getValue().size();

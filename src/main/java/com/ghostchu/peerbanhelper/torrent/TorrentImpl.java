@@ -9,11 +9,10 @@ public class TorrentImpl implements Torrent {
     private long size;
     private long downloaded;
 
-    public TorrentImpl(String id, String name, long size, long downloaded) {
+    public TorrentImpl(String id, String name, long size) {
         this.id = id;
         this.name = name;
         this.size = size;
-        this.downloaded = downloaded;
     }
 
     @Override
@@ -31,9 +30,5 @@ public class TorrentImpl implements Torrent {
         return size;
     }
 
-    @Override
-    public long getDownloaded() {
-        return downloaded;
-    }
 
 }

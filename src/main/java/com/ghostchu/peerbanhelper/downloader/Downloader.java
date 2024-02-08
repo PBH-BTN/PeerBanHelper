@@ -25,10 +25,10 @@ public interface Downloader extends AutoCloseable{
 
     /**
      * 获取指定 Torrent 的对等体列表
-     * @param torrentId Torrent 唯一标识符
+     * @param torrent Torrent
      * @return 对等体列表
      */
-    List<Peer> getPeers(String torrentId);
+    List<Peer> getPeers(Torrent torrent);
 
     /**
      * 获取此下载器已设置的 BanList

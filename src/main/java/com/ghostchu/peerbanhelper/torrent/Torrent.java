@@ -19,9 +19,4 @@ public interface Torrent {
      */
     long getSize();
 
-    /**
-     * 获取目前该 Torrent 我们持有的大小
-     * @return 持有大小
-     */
-    long getDownloaded();
 }

@@ -153,6 +153,15 @@
         </plugins>
     </build>
 
+    <repositories>
+        <!--Transmission-->
+        <repository>
+            <id>reposilite-repository-releases</id>
+            <name>Reposilite Repository</name>
+            <url>https://maven.sergeybochkov.com/releases</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.konghq</groupId>
@@ -220,6 +229,11 @@
             <groupId>org.nanohttpd</groupId>
             <artifactId>nanohttpd</artifactId>
             <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>cordelia</groupId>
+            <artifactId>cordelia</artifactId>
+            <version>5.4.0.RELEASE</version>
         </dependency>
     </dependencies>
 </project>

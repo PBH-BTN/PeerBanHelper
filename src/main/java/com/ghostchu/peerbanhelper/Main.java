@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
+import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -44,7 +45,8 @@ public class Main {
                     log.info(" + qBittorrent -> {} ({})", client, endpoint);
                 }
                 case "transmission" -> {
-
+                    downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http")));
+                    log.info(" + Transmission -> {} ({})", client, endpoint);
                 }
             }
         }

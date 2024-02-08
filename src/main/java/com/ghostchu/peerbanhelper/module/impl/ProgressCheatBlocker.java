@@ -38,8 +38,8 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
 
         final double actualProgress = (double) uploaded / torrentSize;
         final double clientProgress = peer.getProgress();
-
-        if (getConfig().getBoolean("block-excessive-clients") && (uploaded > torrentSize)) {
+        // uploaded = -1 代表客户端不支持统计此 Peer 总上传量
+        if (uploaded != -1 && getConfig().getBoolean("block-excessive-clients") && (uploaded > torrentSize)) {
             // 下载过量，检查
             long maxAllowedExcessiveThreshold = (long) (torrentSize * getConfig().getDouble("excessive-threshold"));
             if (uploaded > maxAllowedExcessiveThreshold) {
