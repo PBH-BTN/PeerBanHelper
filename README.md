@@ -9,7 +9,8 @@
 
 ## 环境要求
 
-PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。
+PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。  
+配置文件在所有平台上需要统一使用 UTF-8 编码编辑和保存。如果您的 Windows 版本较旧，不支持 UTF-8 保存，请使用第三方文本编辑器如 Visual Studio Code 或者 Notepad++。
 
 ## 支持的客户端
 
