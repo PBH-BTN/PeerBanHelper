@@ -5,6 +5,7 @@ ban-duration: 3600000
 # 功能模块
 module:
   # PeerId 封禁
+  # 此模块对 Transmission 不起效
   peer-id-blacklist:
     enabled: true
     # 字符串匹配规则：
@@ -35,6 +36,15 @@ module:
   client-name-blacklist:
     enabled: true
     banned-client-name:
+      - "startsWith@-XL00"
+      - "contains@Xunlei"
+      - "startsWith@TaiPei-Torrent"
+      - "startsWith@Xfplay"
+      - "startsWith@BitSpirit"
+      - "contains@FlashGet"
+      - "contains@TuDou"
+      - "contains@TorrentStorm"
+      - "contains@QQDownload"
       - "contains@github.com/anacrolix/torrent" # https://github.com/anacrolix/torrent/discussions/891
       - "startsWith@qBittorrent/3.3.15" # https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues/432
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
@@ -56,7 +66,8 @@ module:
     # (考虑到有时文件片段在传输时可能因损坏而未通过校验被丢弃，我们允许客户端出现合理的进度倒退)
     # 设置为 -1 以禁用此检测
     rewind-maximum-difference: 0.05
-    # 禁止那些在同一个种子的累计下载量超过种子本身大小的客户端
+    # 过量下载：禁止那些在同一个种子的累计下载量超过种子本身大小的客户端
+    # 此模块对 Transmission 不起效
     block-excessive-clients: true
     # 过量下载计算阈值
     # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive-threshold)

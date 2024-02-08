@@ -72,6 +72,11 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
+    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+        // QB 很棒，什么都不需要做
+    }
+
+    @Override
     public List<Peer> getPeers(Torrent torrent) {
         HttpResponse<String> resp = unirest.get(endpoint + "/sync/torrentPeers?hash=" + torrent.getId()).asString();
         if (!resp.isSuccess()) {

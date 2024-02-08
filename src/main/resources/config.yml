@@ -14,6 +14,11 @@ client:
     username: "username"
     # 密码
     password: "password"
+  transmission:
+    type: Transmission
+    endpoint: "http://127.0.0.1:9091"
+    username: "admin"
+    password: "admin"
 # Http 服务器设置
 server:
   # 监听端口

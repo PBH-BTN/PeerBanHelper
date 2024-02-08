@@ -34,4 +34,8 @@ public class TRTorrent implements Torrent {
     public List<Peer> getPeers() {
         return backend.getPeers().stream().map(TRPeer::new).collect(Collectors.toList());
     }
+
+    public Integer getPeerLimit(){
+       return backend.getPeerLimit();
+    }
 }

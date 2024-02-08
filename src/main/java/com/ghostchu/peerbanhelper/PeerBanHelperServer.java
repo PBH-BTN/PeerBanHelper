@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,14 +39,14 @@ public class PeerBanHelperServer {
         this.httpdPort = httpdPort;
         registerModules();
         registerTimer();
-       // registerBlacklistHttpServer();
+        registerBlacklistHttpServer();
     }
 
     private void registerBlacklistHttpServer() {
         try {
             this.blacklistProviderServer = new BlacklistProvider(httpdPort, this);
         } catch (IOException e) {
-            log.warn("无法初始化 API 提供端点",e);
+            log.warn("无法初始化 API 提供端点", e);
         }
     }
 
@@ -62,7 +63,7 @@ public class PeerBanHelperServer {
     }
 
     private void registerTimer() {
-        PEER_CHECK_TIMER.scheduleAtFixedRate(new TimerTask() {
+        PEER_CHECK_TIMER.schedule(new TimerTask() {
             @Override
             public void run() {
                 banWave();
@@ -72,15 +73,18 @@ public class PeerBanHelperServer {
 
     public void banWave() {
         boolean needUpdate = false;
+        Set<Torrent> needRelaunched = new HashSet<>();
         for (Downloader downloader : this.downloaders) {
             try {
                 if (!downloader.login()) {
                     log.warn("登录到 {} ({}) 失败，跳过……", downloader.getName(), downloader.getEndpoint());
                     continue;
                 }
-                if (banDownloader(downloader)) {
+                Pair<Boolean, Collection<Torrent>> banDownloader = banDownloader(downloader);
+                if (banDownloader.getKey()) {
                     needUpdate = true;
                 }
+                needRelaunched.addAll(banDownloader.getValue());
             } catch (Throwable th) {
                 log.warn("在处理 {} ({}) 的 WebAPI 操作时出现了一个非预期的错误", downloader.getName(), downloader.getEndpoint(), th);
             }
@@ -107,6 +111,7 @@ public class PeerBanHelperServer {
                         continue;
                     }
                     downloader.setBanList(BAN_LIST.keySet());
+                    downloader.relaunchTorrentIfNeeded(needRelaunched);
                 } catch (Throwable th) {
                     log.warn("在更新 {} ({}) 的 BanList 时出现了一个非预期的错误", downloader.getName(), downloader.getEndpoint(), th);
                 }
@@ -115,9 +120,10 @@ public class PeerBanHelperServer {
     }
 
 
-    private boolean banDownloader(Downloader downloader) {
+    private Pair<Boolean, Collection<Torrent>> banDownloader(Downloader downloader) {
         boolean needUpdate = false;
         Map<Torrent, List<Peer>> map = new HashMap<>();
+        Set<Torrent> needRelaunched = new HashSet<>();
         int peers = 0;
         for (Torrent torrent : downloader.getTorrents()) {
             map.put(torrent, downloader.getPeers(torrent));
@@ -128,13 +134,14 @@ public class PeerBanHelperServer {
                 BanResult banResult = checkBan(pair.getKey(), peer);
                 if (banResult != null) {
                     needUpdate = true;
+                    needRelaunched.add(pair.getKey());
                     BAN_LIST.put(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, banResult.reason()));
                     log.warn("[封禁] {}, PeerId={}, ClientName={}, Progress={}, Uploaded={}, Downloaded={}, Reason={}", peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), banResult.reason());
                 }
             }
         }
         log.info("[完成] 已检查 {} 的 {} 个活跃 Torrent 和 {} 个对等体", downloader.getName(), map.keySet().size(), peers);
-        return needUpdate;
+        return Pair.of(needUpdate, needRelaunched);
     }
 
     private BanResult checkBan(Torrent torrent, Peer peer) {

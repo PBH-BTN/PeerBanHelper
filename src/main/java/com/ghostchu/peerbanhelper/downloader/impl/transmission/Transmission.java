@@ -8,11 +8,11 @@ import cordelia.client.TrClient;
 import cordelia.client.TypedResponse;
 import cordelia.rpc.*;
 import cordelia.rpc.types.Fields;
+import cordelia.rpc.types.Status;
+import cordelia.rpc.types.TorrentAction;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -51,9 +51,11 @@ public class Transmission implements Downloader {
 
     @Override
     public List<Torrent> getTorrents() {
-        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD);
+        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
-        return rsp.getArgs().getTorrents().stream().map(TRTorrent::new).collect(Collectors.toList());
+        return rsp.getArgs().getTorrents().stream()
+                .filter(t -> t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING)
+                .map(TRTorrent::new).collect(Collectors.toList());
     }
 
     @Override
@@ -65,6 +67,52 @@ public class Transmission implements Downloader {
     @Override
     public List<PeerAddress> getBanList() {
         return Collections.emptyList();
+    }
+
+
+    @Override
+    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+        log.info("[重置] 正在断开 Transmission 上的 {} 个种子连接的对等体，以便应用 IP 屏蔽列表的更改", torrents.size());
+
+        Map<Torrent, Integer> originalLimitMap = new HashMap<>();
+        for (Torrent torrent : torrents) {
+            TRTorrent trTorrent = (TRTorrent) torrent;
+            Integer originalLimit = trTorrent.getPeerLimit();
+            if (trTorrent.getPeers().size() == 1) { // 只有 1 个 Peer 的时候，只能暂停并恢复整个任务
+                RqTorrent stop = new RqTorrent(TorrentAction.STOP);
+                stop.add(Long.parseLong(torrent.getId()));
+                client.execute(stop);
+            } else {
+                RqTorrentSet limit = RqTorrentSet.builder()
+                        .ids(List.of(Long.parseLong(torrent.getId())))
+                        .peerLimit(1)
+                        .build();
+                client.execute(limit);
+                originalLimitMap.put(torrent, originalLimit);
+            }
+        }
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        for (Torrent torrent : torrents) {
+            TRTorrent trTorrent = (TRTorrent) torrent;
+            if (trTorrent.getPeers().size() == 1) {
+                RqTorrent stop = new RqTorrent(TorrentAction.START);
+                stop.add(Long.parseLong(torrent.getId()));
+                client.execute(stop);
+            } else {
+                RqTorrentSet limit = RqTorrentSet.builder()
+                        .ids(List.of(Long.parseLong(torrent.getId())))
+                        .peerLimit(originalLimitMap.get(torrent))
+                        .build();
+                client.execute(limit);
+            }
+        }
+
     }
 
     @Override
@@ -80,7 +128,10 @@ public class Transmission implements Downloader {
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
-            log.warn("请求 Transmission 更新 BanList 时，返回非成功响应：{}。", sessionSetResp.getResult());
+            log.error("请求 Transmission 更新 BanList 时，返回非成功响应。");
+            log.warn("您是否正确映射了 PeerBanHelper 的外部交互端口，以便 Transmission 从 PBH 拉取 IP 黑名单？");
+            log.warn("检查 Transmission 的 设置 -> 隐私 -> 屏蔽列表 中自动填写的 URL 是否正确，如果不正确，请在 PeerBanHelper 的 config.yml 中正确配置 server 部分的配置文件，确保 Transmission 能够正确连接到 IP 黑名单提供端点");
+            log.error("无法应用 IP 黑名单到 Transmission，PBH 没有生效！");
         }
     }
 

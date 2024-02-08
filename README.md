@@ -22,16 +22,16 @@ PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。
 ## 支持的客户端
 
 * qBittorrent
-* 暂不支持 Transmission，缺少 Ban IP 的 API
+* Transmission（部分功能不可用，且可能存在部分性能问题）
 
 ## 功能概述
 
 PeerBanHelper 主要由以下几个功能模块组成：
 
-* PeerID 黑名单
+* PeerID 黑名单（Transmission 不支持）
 * Client Name 黑名单
 * IP 黑名单
-* 虚假进度检查器（提供启发式客户端检测功能）
+* 虚假进度检查器（提供启发式客户端检测功能）（Transmission不支持过量下载检测）
 
 
 ### PeerID 黑名单
@@ -41,6 +41,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 ```yaml
   # PeerId 封禁
+  # 不支持 Transmission
   peer-id-blacklist:
     enabled: true
     # 字符串匹配规则：
@@ -138,6 +139,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
     # 设置为 -1 以禁用此检测
     rewind-maximum-difference: 0.05
     # 禁止那些在同一个种子的累计下载量超过种子本身大小的客户端
+    # 过量下载检测不支持 Transmission
     block-excessive-clients: true
     # 过量下载计算阈值
     # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive-threshold)
@@ -182,14 +184,9 @@ client:
     endpoint: "http://ip:8086" 
     username: "username"
     password: "password"
-  qb3:
-    type: qBittorrent
-    endpoint: "http://ip:8087" 
-    username: "username"
-    password: "password"
-  somuchqb:
-    type: qBittorrent
-    endpoint: "http://ip:8088" 
+  tr1:
+    type: Transmission
+    endpoint: "http://ip:9091"
     username: "username"
     password: "password"
 ```
@@ -315,3 +312,11 @@ goto main
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/20d49093-bf99-41f6-971f-c0c574d493af)
 
+### Transmission 的有限支持
+
+由于 Transmission 有以下问题，因此支持是有限的
+
+* API 无法获取 PeerID，因此 PeerID 黑名单模块不起作用
+* API 无法获取客户端累计上传下载量，因此 ProgressCheatBlocker 的过量下载检测不起作用
+* API 设置黑名单只能让 Transmission 请求 URL 更新，因此 PBH 需要打开一个 API 端点，且您需要保证 Transmission 能够访问到它（可在 config.yml 中配置细节）
+* API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。在对等体数量 > 1 的情况下，PBH 会限制此 Torrent 的最大连接数为 1，以强迫大部分对等体断开（并希望被 Ban 客户端也能断开），然后恢复它，如果被 Ban 客户端没能断开（运气很差），那么只有在下一次黑名单再次更新时重新执行相同操作；如果 对等体数量 = 1 的情况下，PBH 将会短暂暂停此 Torrent 然后恢复它

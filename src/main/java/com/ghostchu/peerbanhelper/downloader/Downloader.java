@@ -41,4 +41,11 @@ public interface Downloader extends AutoCloseable{
      * @param peerAddresses BanList
      */
     void setBanList(Collection<PeerAddress> peerAddresses);
+
+    /**
+     * 如有需要，重启 Torrent 任务
+     * 有些客户端（如 Transmission）需要重启 Torrent 任务才能断开已连接的 Peers 来使屏蔽列表生效
+     * @param torrents Torrent 任务列表
+     */
+    void relaunchTorrentIfNeeded(Collection<Torrent> torrents);
 }
