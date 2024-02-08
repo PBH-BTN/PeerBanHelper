@@ -7,6 +7,13 @@
 
 <img width="1177" alt="Snipaste_2024-02-07_22-20-37" src="https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f0fb97a5-1db8-4517-8dc8-d728b8df8237">
 
+## 小提示
+
+使用右上角的小按钮，快速查看各个章节。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/5615fd92-bd08-4528-b1f9-500db2516d53)
+
+
 ## 环境要求
 
 PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。  
