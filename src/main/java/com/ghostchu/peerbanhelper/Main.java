@@ -17,9 +17,9 @@ import java.util.List;
 @Slf4j
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        log.info("PeerBanHelper - v1.3 - by Ghost_chu");
+        log.info("PeerBanHelper - v1.4 - by Ghost_chu");
         Unirest.config()
-                .setDefaultHeader("User-Agent", "PeerBanHelper/1.3")
+                .setDefaultHeader("User-Agent", "PeerBanHelper/1.4")
                 .enableCookieManagement(true);
         List<Downloader> downloaderList = new ArrayList<>();
         log.info("加载配置文件……");
