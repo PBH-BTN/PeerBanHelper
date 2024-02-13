@@ -4,16 +4,19 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import lombok.Getter;
+import lombok.Setter;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ProgressCheatBlocker extends AbstractFeatureModule {
-    private Cache<PeerAddress, Double> progressRecorder = CacheBuilder.newBuilder()
-            .maximumSize(10240)
+    private Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
+            .maximumSize(2048)
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .build();
 
@@ -58,14 +61,21 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
 
         double rewindAllow = getConfig().getDouble("rewind-maximum-difference");
         if (rewindAllow > 0) {
-            Double lastRecordedProgress = progressRecorder.getIfPresent(peer.getAddress());
-            progressRecorder.put(peer.getAddress(), peer.getProgress());
-            if (lastRecordedProgress != null) {
-                double rewind = lastRecordedProgress - peer.getProgress();
-                boolean ban = rewind > rewindAllow;
-                return new BanResult(ban, "客户端进度：" + formatPercent(clientProgress) + "，实际进度：" + formatPercent(actualProgress) + "，上次记录进度：" + formatPercent(lastRecordedProgress) + "，本次进度：" + formatPercent(rewind) + "，差值：" + formatPercent(rewindAllow));
+            List<ClientTask> lastRecordedProgress = progressRecorder.getIfPresent(peer.getAddress());
+            if (lastRecordedProgress == null) lastRecordedProgress = new ArrayList<>();
+            ClientTask clientTask = new ClientTask(torrent.getId(), 0d);
+            for (ClientTask recordedProgress : lastRecordedProgress) {
+                if (recordedProgress.getTorrentId().equals(torrent.getId())) {
+                    clientTask = recordedProgress;
+                    break;
+                }
             }
-
+            double lastRecord = clientTask.getProgress();
+            clientTask.setProgress(clientProgress);
+            progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
+            double rewind = lastRecord - peer.getProgress();
+            boolean ban = rewind > rewindAllow;
+            return new BanResult(ban, "客户端进度：" + formatPercent(clientProgress) + "，实际进度：" + formatPercent(actualProgress) + "，上次记录进度：" + formatPercent(lastRecord) + "，本次进度：" + formatPercent(rewind) + "，差值：" + formatPercent(rewindAllow));
         }
         return new BanResult(false, "客户端进度：" + formatPercent(clientProgress) + "，实际进度：" + formatPercent(actualProgress) + "，差值：" + formatPercent(difference));
     }
@@ -73,4 +83,19 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
     private String formatPercent(double d) {
         return String.format("%.2f", d * 100) + "%";
     }
+
+    @Setter
+    @Getter
+    static class ClientTask {
+        private String torrentId;
+        private Double progress;
+
+        public ClientTask(String torrentId, Double progress) {
+            this.torrentId = torrentId;
+            this.progress = progress;
+        }
+
+    }
 }
+
+
