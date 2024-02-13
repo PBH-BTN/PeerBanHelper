@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ProgressCheatBlocker extends AbstractFeatureModule {
     private Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
-            .maximumSize(2048)
+            .maximumSize(512)
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .build();
 
