@@ -64,9 +64,10 @@ public class QBittorrent implements Downloader {
         List<Torrent> torrents = new ArrayList<>();
         for (TorrentDetail detail : torrentDetail) {
             // 过滤下，只要有传输的 Torrent，其它的就不查询了
-            if (detail.getState().equals("uploading") || detail.getState().equals("downloading")) {
-                torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getTotalSize()));
+            if (detail.getState().contains("stopped") || detail.getState().contains("pause")) {
+                continue;
             }
+            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getTotalSize()));
         }
         return torrents;
     }
