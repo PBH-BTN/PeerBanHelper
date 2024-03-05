@@ -31,6 +31,7 @@ module:
       #- "startWith@FD6" # Free Download Manager，非标准 PeerId
       - "startsWith@-GT0002" # 无限下载文件分片 https://github.com/anacrolix/torrent/discussions/891
       - "startsWith@-GT0003" # 无限下载文件分片 https://github.com/anacrolix/torrent/discussions/891
+      - "startsWith@-DT0001" # 同源恶意客户端 https://github.com/anacrolix/torrent/discussions/891
       - "contains@cacao"
   # 客户端名称封禁
   client-name-blacklist:
@@ -47,6 +48,8 @@ module:
       - "contains@QQDownload"
       - "contains@github.com/anacrolix/torrent" # https://github.com/anacrolix/torrent/discussions/891
       - "startsWith@qBittorrent/3.3.15" # https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues/432
+      - "startsWith@dt/torrent"
+      - "startsWith@DT"
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
   # 假进度检查
   progress-cheat-blocker:
