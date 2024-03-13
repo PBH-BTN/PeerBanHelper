@@ -335,4 +335,4 @@ sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-dat
 * API 无法获取 PeerID，因此 PeerID 黑名单模块不起作用
 * API 无法获取客户端累计上传下载量，因此 ProgressCheatBlocker 的过量下载检测不起作用
 * API 设置黑名单只能让 Transmission 请求 URL 更新，因此 PBH 需要打开一个 API 端点，且您需要保证 Transmission 能够访问到它（可在 config.yml 中配置细节）
-* API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。在对等体数量 > 1 的情况下，PBH 会限制此 Torrent 的最大连接数为 1，以强迫大部分对等体断开（并希望被 Ban 客户端也能断开），然后恢复它，如果被 Ban 客户端没能断开（运气很差），那么只有在下一次黑名单再次更新时重新执行相同操作；如果 对等体数量 = 1 的情况下，PBH 将会短暂暂停此 Torrent 然后恢复它
+* API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。PBH 会短暂的暂停您的 Torrent 并恢复它。
