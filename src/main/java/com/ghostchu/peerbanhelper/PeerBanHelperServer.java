@@ -97,7 +97,7 @@ public class PeerBanHelperServer {
             }
         }
 
-        removeBan.forEach(BAN_LIST::remove);
+        removeBan.forEach(this::unbanPeer);
         if (!removeBan.isEmpty()) {
             log.info("[解封] 解除了 " + removeBan.size() + " 个过期的对等体封禁");
             needUpdate = true;
@@ -135,7 +135,7 @@ public class PeerBanHelperServer {
                 if (banResult != null) {
                     needUpdate = true;
                     needRelaunched.add(pair.getKey());
-                    BAN_LIST.put(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, banResult.reason()));
+                    banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, banResult.reason()));
                     log.warn("[封禁] {}, PeerId={}, ClientName={}, Progress={}, Uploaded={}, Downloaded={}, Reason={}", peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), banResult.reason());
                 }
             }
