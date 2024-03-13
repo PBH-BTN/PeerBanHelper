@@ -305,7 +305,29 @@ goto main
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/8ee3a716-f192-4392-8362-c7c6a1f6e11f)
 
-在 Container Manager 中，选择项目，新增按钮，来源选择 “创建 docker-compose.yml”
+在 Container Manager 中，选择项目，点击新增按钮，来源选择 “创建 docker-compose.yml”（请务必先选择来源，否则后续操作将覆盖已设置的内容）。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/ba742cc3-583e-4798-8947-f72ccc892164)
+
+
+随后，点击 `设置路径` 按钮，配置 Docker Compose 的位置到我们刚刚创建的好的文件夹：
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/fa0efd6c-182c-43ea-99b1-5116ba55fbc1)
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/642f8d48-69e5-4fa3-b5d6-92750100996d)
+
+从仓库的 `docker-compose.yml` 文件中复制所有内容，并粘贴到编辑框中：**（需要特别注意的是，如果你配置了 Docker 镜像源，则需要手动指定最新版本号，否则你可能拉取到一个史前版本的镜像）**
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/bafd7b87-8c0e-4c65-81f0-b8ce378f5071)
+
+如果询问你是否设置网页门户，请**不要启用**：
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/849ed06a-ddc9-4ac5-bb89-a6062b5fe36d)
+
+一路下一步，启动容器。首次启动完成后，配置文件应该会自动生成，配置好配置文件后再次重启 Docker 容器即可使用。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/758356d6-6cd0-42c4-a011-fbf5a66ebebd)
+
 
 ## 常见问题
 
