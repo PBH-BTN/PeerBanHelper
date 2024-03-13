@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.RuleParseHelper;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -29,9 +30,9 @@ public class ClientNameBlacklist extends AbstractFeatureModule {
         List<String> bannedPeers = getConfig().getStringList("banned-client-name");
         for (String rule : bannedPeers) {
             if(RuleParseHelper.match(peer.getClientName(), rule)){
-                return new BanResult(true, "匹配 ClientName 规则："+rule);
+                return new BanResult(true, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME,rule));
             }
         }
-        return new BanResult(false, "无匹配");
+        return new BanResult(false, "No matches");
     }
 }

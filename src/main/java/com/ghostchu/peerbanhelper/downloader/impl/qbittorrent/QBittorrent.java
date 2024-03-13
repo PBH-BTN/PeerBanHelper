@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
@@ -59,7 +60,7 @@ public class QBittorrent implements Downloader {
                 .field("password", password)
                 .asString();
         if (!resp.isSuccess()) {
-            log.warn("登录到 {} 失败：{} - {}: \n{}", name, resp.getStatus(), resp.getStatusText(), resp.getBody());
+            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, resp.getStatus(), resp.getStatusText(), resp.getBody());
         }
         return resp.isSuccess();
     }
@@ -68,7 +69,7 @@ public class QBittorrent implements Downloader {
     public List<Torrent> getTorrents() {
         HttpResponse<String> resp = unirest.get(endpoint + "/torrents/info").asString();
         if (!resp.isSuccess()) {
-            throw new IllegalStateException("Failed to request torrent list");
+            throw new IllegalStateException(String.format(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, resp.getStatus(), resp.getBody()));
         }
         List<TorrentDetail> torrentDetail = JsonUtil.getGson().fromJson(resp.getBody(), new TypeToken<List<TorrentDetail>>() {
         }.getType());
@@ -92,7 +93,7 @@ public class QBittorrent implements Downloader {
     public List<Peer> getPeers(Torrent torrent) {
         HttpResponse<String> resp = unirest.get(endpoint + "/sync/torrentPeers?hash=" + torrent.getId()).asString();
         if (!resp.isSuccess()) {
-            throw new IllegalStateException("Failed to request peers list for torrent " + torrent.getId());
+            throw new IllegalStateException(String.format(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.getStatus(), resp.getBody()));
         }
         JsonObject object = JsonParser.parseString(resp.getBody()).getAsJsonObject();
         JsonObject peers = object.getAsJsonObject("peers");
@@ -110,7 +111,7 @@ public class QBittorrent implements Downloader {
         HttpResponse<String> json = unirest.get(endpoint + "/app/preferences")
                 .asString();
         if (!json.isSuccess()) {
-            throw new IllegalStateException("qBittorrent preferences API not respond a 200 code");
+            throw new IllegalStateException(String.format(Lang.DOWNLOADER_QB_API_PREFERENCES_ERR, json.getStatus(), json.getBody()));
         }
         Preferences preferences = JsonUtil.getGson().fromJson(json.getBody(), Preferences.class);
         String[] ips = preferences.getBannedIps().split("\n");
@@ -126,7 +127,7 @@ public class QBittorrent implements Downloader {
                 .field("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())))
                 .asString();
         if (!resp.isSuccess()) {
-            log.warn("无法保存 {} ({}) 的 Banlist！{} - {}\n{}", name, endpoint, resp.getStatus(), resp.getStatusText(), resp.getBody());
+            log.warn(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, endpoint, resp.getStatus(), resp.getStatusText(), resp.getBody());
         }
     }
 

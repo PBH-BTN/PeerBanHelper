@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.module.impl.IPBlackList;
 import com.ghostchu.peerbanhelper.module.impl.PeerIdBlacklist;
 import com.ghostchu.peerbanhelper.module.impl.ProgressCheatBlocker;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -46,12 +47,12 @@ public class PeerBanHelperServer {
         try {
             this.blacklistProviderServer = new BlacklistProvider(httpdPort, this);
         } catch (IOException e) {
-            log.warn("无法初始化 API 提供端点", e);
+            log.warn(Lang.ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE, e);
         }
     }
 
     private void registerModules() {
-        log.info("正在启动功能模块……");
+        log.info(Lang.WAIT_FOR_MODULES_STARTUP);
         this.registeredModules.clear();
         List<FeatureModule> modules = new ArrayList<>();
         modules.add(new IPBlackList(profile));
@@ -59,7 +60,7 @@ public class PeerBanHelperServer {
         modules.add(new ClientNameBlacklist(profile));
         modules.add(new ProgressCheatBlocker(profile));
         this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
-        this.registeredModules.forEach(m -> log.info("[注册] {}", m.getName()));
+        this.registeredModules.forEach(m -> log.info(Lang.MODULE_REGISTER, m.getName()));
     }
 
     private void registerTimer() {
@@ -77,7 +78,7 @@ public class PeerBanHelperServer {
         for (Downloader downloader : this.downloaders) {
             try {
                 if (!downloader.login()) {
-                    log.warn("登录到 {} ({}) 失败，跳过……", downloader.getName(), downloader.getEndpoint());
+                    log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
                     continue;
                 }
                 Pair<Boolean, Collection<Torrent>> banDownloader = banDownloader(downloader);
@@ -86,7 +87,7 @@ public class PeerBanHelperServer {
                 }
                 needRelaunched.addAll(banDownloader.getValue());
             } catch (Throwable th) {
-                log.warn("在处理 {} ({}) 的 WebAPI 操作时出现了一个非预期的错误", downloader.getName(), downloader.getEndpoint(), th);
+                log.warn(Lang.ERR_UNEXPECTED_API_ERROR, downloader.getName(), downloader.getEndpoint(), th);
             }
         }
 
@@ -99,7 +100,7 @@ public class PeerBanHelperServer {
 
         removeBan.forEach(this::unbanPeer);
         if (!removeBan.isEmpty()) {
-            log.info("[解封] 解除了 " + removeBan.size() + " 个过期的对等体封禁");
+            log.info(Lang.PEER_UNBAN_WAVE, removeBan.size());
             needUpdate = true;
         }
 
@@ -107,13 +108,13 @@ public class PeerBanHelperServer {
             for (Downloader downloader : this.downloaders) {
                 try {
                     if (!downloader.login()) {
-                        log.warn("登录到 {} ({}) 失败，跳过……", downloader.getName(), downloader.getEndpoint());
+                        log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
                         continue;
                     }
                     downloader.setBanList(BAN_LIST.keySet());
                     downloader.relaunchTorrentIfNeeded(needRelaunched);
                 } catch (Throwable th) {
-                    log.warn("在更新 {} ({}) 的 BanList 时出现了一个非预期的错误", downloader.getName(), downloader.getEndpoint(), th);
+                    log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
                 }
             }
         }
@@ -136,11 +137,11 @@ public class PeerBanHelperServer {
                     needUpdate = true;
                     needRelaunched.add(pair.getKey());
                     banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, banResult.reason()));
-                    log.warn("[封禁] {}, PeerId={}, ClientName={}, Progress={}, Uploaded={}, Downloaded={}, Reason={}", peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), banResult.reason());
+                    log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), banResult.reason());
                 }
             }
         }
-        log.info("[完成] 已检查 {} 的 {} 个活跃 Torrent 和 {} 个对等体", downloader.getName(), map.keySet().size(), peers);
+        log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
         return Pair.of(needUpdate, needRelaunched);
     }
 

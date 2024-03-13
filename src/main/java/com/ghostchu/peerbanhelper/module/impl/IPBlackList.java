@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.AddressStringException;
@@ -33,19 +34,19 @@ public class IPBlackList extends AbstractFeatureModule {
         List<Integer> ports = getConfig().getIntList("ports");
         PeerAddress peerAddress = peer.getAddress();
         if (ports.contains(peerAddress.getPort())) {
-            return new BanResult(true, "在限制的端口范围内");
+            return new BanResult(true, "Restricted ports");
         }
         for (String ip : ips) {
             if (peerAddress.getIp().equals(ip.trim())) {
-                return new BanResult(true, "匹配 IP 规则：" + ip);
+                return new BanResult(true, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
             }
             try {
                 IPAddress address = new IPAddressString(ip).toAddress();
                 if (address.contains(new IPAddressString(peerAddress.getIp()).toAddress())) {
-                    return new BanResult(true, "匹配 IP 规则：" + ip);
+                    return new BanResult(true, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
                 }
             } catch (AddressStringException ignored) {}
         }
-        return new BanResult(false, "无匹配");
+        return new BanResult(false, "No matches");
     }
 }

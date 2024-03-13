@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Locale;
@@ -11,7 +12,7 @@ public class RuleParseHelper {
         ruleString = ruleString.toLowerCase(Locale.ROOT);
         String[] ruleExploded = ruleString.split("@", 2);
         if (ruleExploded.length != 2) {
-            log.warn("Rule " + ruleString + " is invalid!");
+            log.warn(Lang.ERR_INVALID_RULE_SYNTAX, ruleString);
             return false;
         }
         String matchMethod = ruleExploded[0];

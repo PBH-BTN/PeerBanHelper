@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.client.TrClient;
@@ -31,7 +32,7 @@ public class Transmission implements Downloader {
         this.client = new TrClient(endpoint + "/transmission/rpc", username, password);
         this.endpoint = endpoint;
         this.blocklistUrl = blocklistUrl;
-        log.warn("[受限] 由于 Transmission 的 RPC-API 限制，PeerId 黑名单功能和 ProgressCheatBlocker 功能的过量下载模块不可用。");
+        log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class Transmission implements Downloader {
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-        log.info("[重置] 正在断开 Transmission 上的 {} 个种子连接的对等体，以便应用 IP 屏蔽列表的更改", torrents.size());
+        log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size());
 
         Map<Torrent, Integer> originalLimitMap = new HashMap<>();
         for (Torrent torrent : torrents) {
@@ -123,15 +124,12 @@ public class Transmission implements Downloader {
                 .build();
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
         if (!sessionSetResp.isSuccess()) {
-            log.warn("设置 Transmission 的 BanList 地址时，返回非成功响应：{}。", sessionSetResp.getResult());
+            log.warn(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, sessionSetResp.getResult());
         }
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
-            log.error("请求 Transmission 更新 BanList 时，返回非成功响应。");
-            log.warn("您是否正确映射了 PeerBanHelper 的外部交互端口，以便 Transmission 从 PBH 拉取 IP 黑名单？");
-            log.warn("检查 Transmission 的 设置 -> 隐私 -> 屏蔽列表 中自动填写的 URL 是否正确，如果不正确，请在 PeerBanHelper 的 config.yml 中正确配置 server 部分的配置文件，确保 Transmission 能够正确连接到 IP 黑名单提供端点");
-            log.error("无法应用 IP 黑名单到 Transmission，PBH 没有生效！");
+            log.warn(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP);
         }
     }
 

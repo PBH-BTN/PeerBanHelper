@@ -3,33 +3,53 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
+import com.ghostchu.peerbanhelper.text.Lang;
 import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 public class Main {
+
     public static void main(String[] args) throws InterruptedException {
-        log.info("PeerBanHelper - v1.5 - by Ghost_chu");
+        BuildMeta meta = new BuildMeta();
+        try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
+            if (stream == null) {
+                log.error(Lang.ERR_BUILD_NO_INFO_FILE);
+            } else {
+                String str = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+                YamlConfiguration configuration = new YamlConfiguration();
+                configuration.loadFromString(str);
+                meta.loadBuildMeta(configuration);
+            }
+        } catch (IOException | InvalidConfigurationException e) {
+            log.error(Lang.ERR_CANNOT_LOAD_BUILD_INFO, e);
+        }
+
+
+        log.info(Lang.MOTD, meta.getVersion());
         Unirest.config()
-                .setDefaultHeader("User-Agent", "PeerBanHelper/1.5")
+                .setDefaultHeader("User-Agent", "PeerBanHelper/" + meta.getVersion())
                 .enableCookieManagement(true);
         List<Downloader> downloaderList = new ArrayList<>();
-        log.info("加载配置文件……");
+        log.info(Lang.LOADING_CONFIG);
         try {
             if (!initConfiguration()) {
-                log.warn("请配置 config.yml 和 profile.yml 后，重新启动 PeerBanHelper。");
+                log.warn(Lang.CONFIG_PEERBANHELPER);
                 return;
             }
         } catch (IOException e) {
-            log.error("初始化配置文件时出错", e);
+            log.error(Lang.ERR_SETUP_CONFIGURATION, e);
             return;
         }
         YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(new File("config.yml"));
@@ -42,11 +62,11 @@ public class Main {
             switch (downloaderSection.getString("type").toLowerCase()) {
                 case "qbittorrent" -> {
                     downloaderList.add(new QBittorrent(client, endpoint, username, password));
-                    log.info(" + qBittorrent -> {} ({})", client, endpoint);
+                    log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
                 }
                 case "Transmission" -> {
-                    downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http")+"/blocklist/transmission"));
-                    log.info(" + Transmission -> {} ({})", client, endpoint);
+                    downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http") + "/blocklist/transmission"));
+                    log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission",client, endpoint);
                 }
             }
         }
@@ -71,4 +91,5 @@ public class Main {
         }
         return exists;
     }
+
 }
