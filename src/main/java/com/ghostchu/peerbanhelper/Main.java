@@ -71,7 +71,7 @@ public class Main {
                     downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
                 }
-                case "Transmission" -> {
+                case "transmission" -> {
                     downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http") + "/blocklist/transmission"));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission",client, endpoint);
                 }
