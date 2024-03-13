@@ -11,10 +11,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
-import kong.unirest.UnirestInstance;
+import kong.unirest.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -35,13 +34,17 @@ public class QBittorrent implements Downloader {
     private final String password;
     private final UnirestInstance unirest;
     private final String name;
+    private final String baUser;
+    private final String baPass;
 
-    public QBittorrent(String name, String endpoint, String username, String password) {
+    public QBittorrent(String name, String endpoint, String username, String password, String baUser, String baPass) {
         this.name = name;
         this.unirest = Unirest.spawnInstance();
         this.endpoint = endpoint + "/api/v2";
         this.username = username;
         this.password = password;
+        this.baUser = baUser;
+        this.baPass = baPass;
     }
 
     @Override
@@ -55,10 +58,13 @@ public class QBittorrent implements Downloader {
     }
 
     public boolean login() {
-        HttpResponse<String> resp = unirest.post(endpoint + "/auth/login")
+        HttpRequest<?> body = unirest.post(endpoint + "/auth/login")
                 .field("username", username)
-                .field("password", password)
-                .asString();
+                .field("password", password);
+        if(StringUtils.isNotEmpty(baUser) || StringUtils.isNotEmpty(baPass)){
+            body = body.basicAuth(baPass, baPass);
+        }
+        HttpResponse<String> resp = body.asString();
         if (!resp.isSuccess()) {
             log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, resp.getStatus(), resp.getStatusText(), resp.getBody());
         }

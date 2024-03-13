@@ -20,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 public class Main {
-
+    private static final File configDirectory = new File("config");
     public static void main(String[] args) throws InterruptedException {
         BuildMeta meta = new BuildMeta();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
@@ -52,6 +52,7 @@ public class Main {
             log.error(Lang.ERR_SETUP_CONFIGURATION, e);
             return;
         }
+
         YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(new File("config.yml"));
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
         for (String client : clientSection.getKeys(false)) {
@@ -59,9 +60,11 @@ public class Main {
             String endpoint = downloaderSection.getString("endpoint");
             String username = downloaderSection.getString("username");
             String password = downloaderSection.getString("password");
+            String baUser = downloaderSection.getString("basic-auth.user");
+            String baPass = downloaderSection.getString("basic-auth.pass");
             switch (downloaderSection.getString("type").toLowerCase()) {
                 case "qbittorrent" -> {
-                    downloaderList.add(new QBittorrent(client, endpoint, username, password));
+                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
                 }
                 case "Transmission" -> {
@@ -78,9 +81,15 @@ public class Main {
     }
 
     private static boolean initConfiguration() throws IOException {
+        if(!configDirectory.exists()){
+            configDirectory.mkdirs();
+        }
+        if(!configDirectory.isDirectory()){
+            throw new IllegalStateException(Lang.ERR_CONFIG_DIRECTORY_INCORRECT);
+        }
         boolean exists = true;
-        File config = new File("config.yml");
-        File profile = new File("profile.yml");
+        File config = new File(configDirectory, "config.yml");
+        File profile = new File(configDirectory, "profile.yml");
         if (!config.exists()) {
             exists = false;
             Files.copy(Main.class.getResourceAsStream("/config.yml"), config.toPath());

@@ -5,7 +5,8 @@ client:
     # 客户端类型
     # 支持的客户端列表：
     # qBittorrent
-    # 其它也许以后会加，但 Transmission 是没戏了，WebAPI 没办法给 Transmission 加黑 IP
+    # Transmission
+    # 其它也许以后会加
     type: qBittorrent
     # 客户端地址
     endpoint: "http://ip:8085"
@@ -14,6 +15,10 @@ client:
     username: "username"
     # 密码
     password: "password"
+    # Basic Auth - 不知道这是什么的话，请保持默认
+    basic-auth:
+      user: ""
+      pass: ""
   transmission:
     type: Transmission
     endpoint: "http://127.0.0.1:9091"
