@@ -18,6 +18,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class PeerBanHelperServer {
@@ -69,7 +72,7 @@ public class PeerBanHelperServer {
             public void run() {
                 banWave();
             }
-        }, 0, profile.getLong("check-interval",5000));
+        }, 0, profile.getLong("check-interval", 5000));
     }
 
     public void banWave() {
@@ -105,46 +108,46 @@ public class PeerBanHelperServer {
         }
 
         if (needUpdate) {
-            for (Downloader downloader : this.downloaders) {
+            this.downloaders.parallelStream().forEach(downloader -> {
                 try {
                     if (!downloader.login()) {
                         log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
-                        continue;
+                        return;
                     }
                     downloader.setBanList(BAN_LIST.keySet());
                     downloader.relaunchTorrentIfNeeded(needRelaunched);
                 } catch (Throwable th) {
                     log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
                 }
-            }
+            });
         }
     }
 
 
     private Pair<Boolean, Collection<Torrent>> banDownloader(Downloader downloader) {
-        boolean needUpdate = false;
-        Map<Torrent, List<Peer>> map = new HashMap<>();
-        Set<Torrent> needRelaunched = new HashSet<>();
-        int peers = 0;
-        for (Torrent torrent : downloader.getTorrents()) {
-            map.put(torrent, downloader.getPeers(torrent));
-        }
-        for (Map.Entry<Torrent, List<Peer>> pair : map.entrySet()) {
-            peers += pair.getValue().size();
-            for (Peer peer : pair.getValue()) {
+        AtomicBoolean needUpdate = new AtomicBoolean(false);
+        Map<Torrent, List<Peer>> map = new ConcurrentHashMap<>();
+        Set<Torrent> needRelaunched = new CopyOnWriteArraySet<>();
+        AtomicInteger peers = new AtomicInteger(0);
+
+        downloader.getTorrents().parallelStream().forEach(torrent -> map.put(torrent, downloader.getPeers(torrent)));
+
+        map.entrySet().parallelStream().forEach(pair -> {
+            peers.addAndGet(pair.getValue().size());
+            pair.getValue().parallelStream().forEach(peer -> {
                 BanResult banResult = checkBan(pair.getKey(), peer);
                 if (banResult != null) {
-                    needUpdate = true;
+                    needUpdate.set(true);
                     needRelaunched.add(pair.getKey());
                     banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, banResult.reason()));
                     log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), banResult.reason());
                 }
-            }
-        }
-        if(!hideFinishLogs) {
+            });
+        });
+        if (!hideFinishLogs) {
             log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
         }
-        return Pair.of(needUpdate, needRelaunched);
+        return Pair.of(needUpdate.get(), needRelaunched);
     }
 
     private BanResult checkBan(Torrent torrent, Peer peer) {
