@@ -249,5 +249,6 @@
             <artifactId>cordelia</artifactId>
             <version>5.4.0.RELEASE</version>
         </dependency>
+
     </dependencies>
 </project>

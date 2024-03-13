@@ -25,6 +25,13 @@ public class Lang {
     public static String MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP = "客户端进度：%.2f%%，实际进度：%.2f%%，客户端的进度多于本地进度，跳过检测";
     public static String MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS = "客户端进度：%.2f%%，实际进度：%.2f%%，差值：%.2f%%";
     public static String MODULE_PCB_PEER_BAN_REWIND = "客户端进度：%.2f%%，实际进度：%.2f%%，上次记录进度：%.2f%%，本次进度：%.2f%%，差值：%.2f%%";
+    public static String MODULE_AP_PEER_BAN_PING = "Peer 发送了 ICMP 响应包";
+    public static String MODULE_AP_INVALID_RULE = "规则 %s 无效，请检查语法和拼写错误";
+    public static String MODULE_AP_BAN_PEER_CODE = "Peer 的 HTTP(S) 响应返回了预期状态码：%s";
+    public static String MODULE_AP_PEER_CODE = "Peer 的 HTTP(S) 响应返回了状态码：%s";
+    public static String MODULE_AP_INCORRECT_TCP_TEST_PORT = "TCP 探测规则 %s 的端口号无效: %s";
+    public static String MODULE_AP_BAN_PEER_TCP_TEST = "TCP 测试通过: %s";
+    public static String MODULE_AP_TCP_TEST_PORT_FAIL = "TCP 探测目标失败: %s";
     public static String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: \n{}";
     public static String DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST = "请求 Torrents 列表失败 - %d - %s";
     public static String DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";
@@ -40,5 +47,6 @@ public class Lang {
             检查 Transmission 的 设置 -> 隐私 -> 屏蔽列表 中自动填写的 URL 是否正确，如果不正确，请在 PeerBanHelper 的 config.yml 中正确配置 server 部分的配置文件，确保 Transmission 能够正确连接到 IP 黑名单提供端点
             """;
     public static String ERR_CONFIG_DIRECTORY_INCORRECT = "初始化失败：config 不是一个目录。如果您正在使用 Docker，请确保其正确挂载。";
+
 
 }

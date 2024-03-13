@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.text.Lang;
 import kong.unirest.Unirest;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
@@ -21,8 +22,10 @@ import java.util.List;
 @Slf4j
 public class Main {
     private static final File configDirectory = new File("config");
+    @Getter
+    private static BuildMeta meta = new BuildMeta();
     public static void main(String[] args) throws InterruptedException {
-        BuildMeta meta = new BuildMeta();
+        meta = new BuildMeta();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
             if (stream == null) {
                 log.error(Lang.ERR_BUILD_NO_INFO_FILE);
@@ -100,5 +103,6 @@ public class Main {
         }
         return exists;
     }
+
 
 }
