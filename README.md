@@ -211,17 +211,6 @@ PeerBanHelper 主要由以下几个功能模块组成：
     http-probing-user-agent: "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"
 ```
 
-## 如何使用
-
-使用此命令启动 PeerBanHelper：
-
-```shell
-java -Xmx256M -XX:+UseG1GC -XX:+UseStringDeduplication -jar <JAR文件>
-```
-
-运行后，生成 `config` 配置文件夹，且其中包含 `config.yml` 和 `profile.yml`。对相关文件配置后再次使用相同命令启动 PeerBanHelper 即可。  
-注意：如果您修改了配置文件，想让它生效的话，请重启 PeerBanHelper（对于Docker用户来说：重启容器）。
-
 ## 添加下载器
 
 PeerBanHelper 能够连接多个支持的下载器，并共享 IP 黑名单。但每个下载器只能被一个 PeerBanHelper 添加，多个 PBH 会导致操作 IP 黑名单时出现冲突。
@@ -255,20 +244,7 @@ client:
     password: "admin"
 ```
 
-## Docker 支持
-
-Docker 镜像为：`ghostchu/peerbanhelper`。  
-如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
-
-### 使用 Docker CLI 启动
-
-```shell
-sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-data/:/app/data/ ghostchu/peerbanhelper:最新版本号
-```
-
-### 使用 Docker Compose 文件启动
-
-请参见仓库的 docker-compose.yml 文件，使用 `docker-compose up` 快速部署。
+## 手动部署
 
 ### Windows 手动部署
 
@@ -298,6 +274,20 @@ goto main
 
 我相信 Linux 用户可以自己搞定这一切 ;)，如有需要，你还可以配置为系统服务并开机自启。
 
+## Docker 部署
+
+Docker 镜像为：`ghostchu/peerbanhelper`。  
+如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
+
+### 使用 Docker CLI 启动
+
+```shell
+sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-data/:/app/data/ ghostchu/peerbanhelper:最新版本号
+```
+
+### 使用 Docker Compose 文件启动
+
+请参见仓库的 docker-compose.yml 文件，使用 `docker-compose up` 快速部署。
 
 ### 在群晖 DSM 上，使用 Container Manager 启动
 
@@ -308,7 +298,6 @@ goto main
 在 Container Manager 中，选择项目，点击新增按钮，来源选择 “创建 docker-compose.yml”（请务必先选择来源，否则后续操作将覆盖已设置的内容）。
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/ba742cc3-583e-4798-8947-f72ccc892164)
-
 
 随后，点击 `设置路径` 按钮，配置 Docker Compose 的位置到我们刚刚创建的好的文件夹：
 
