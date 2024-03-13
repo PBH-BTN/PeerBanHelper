@@ -1,7 +1,7 @@
 # 客户端设置
 client:
   # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
-  my-really-good-best-ever-bittorrent-downloader:
+  qbittorrent-001:
     # 客户端类型
     # 支持的客户端列表：
     # qBittorrent
@@ -19,7 +19,7 @@ client:
     basic-auth:
       user: ""
       pass: ""
-  transmission:
+  transmission-002:
     type: Transmission
     endpoint: "http://127.0.0.1:9091"
     username: "admin"
