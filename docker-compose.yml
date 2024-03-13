@@ -5,6 +5,6 @@ services:
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
-      - ./config.yml:/app/config.yml
-      - ./profile.yml:/app/profile.yml
-      - ./logs:/app/logs
+      - ./data:/app/data
+    ports:
+      - "9898:9898"

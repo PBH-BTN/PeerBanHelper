@@ -1,6 +1,9 @@
 # PeerBanHelper
 
 > [!WARNING]
+> 当前页面正在施工，请等待编辑完成（2024/03/13）
+
+> [!WARNING]
 > 项目处于早期开发阶段，可能存在错误，请关注新版本更新日志以获取最新信息！
 
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
@@ -41,7 +44,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 ```yaml
   # PeerId 封禁
-  # 不支持 Transmission
+  # 此模块对 Transmission 不起效
   peer-id-blacklist:
     enabled: true
     # 字符串匹配规则：
@@ -65,8 +68,9 @@ PeerBanHelper 主要由以下几个功能模块组成：
       - "startsWith@-NX" # Net Transport
       - "startsWith@-SP" # 比特精灵，默认启用反吸血导致不给其他客户端上传
       #- "startWith@FD6" # Free Download Manager，非标准 PeerId
-      - "startsWith@-GT0002" # 无限下载文件分片 https://github.com/anacrolix/torrent/discussions/891
-      - "startsWith@-GT0003" # 无限下载文件分片 https://github.com/anacrolix/torrent/discussions/891
+      - "startsWith@-GT0002"  # BaiduNetdisk Offline Download
+      - "startsWith@-GT0003"  # BaiduNetdisk Offline Download
+      - "startsWith@-DT" # 恶意客户端 https://github.com/anacrolix/torrent/discussions/891
       - "contains@cacao"
 ```
 
@@ -79,8 +83,21 @@ PeerBanHelper 主要由以下几个功能模块组成：
   client-name-blacklist:
     enabled: true
     banned-client-name:
+      - "startsWith@-XL00"
+      - "contains@Xunlei"
+      - "startsWith@TaiPei-Torrent"
+      - "startsWith@Xfplay"
+      - "startsWith@BitSpirit"
+      - "contains@FlashGet"
+      - "contains@TuDou"
+      - "contains@TorrentStorm"
+      - "contains@QQDownload"
       - "contains@github.com/anacrolix/torrent" # https://github.com/anacrolix/torrent/discussions/891
       - "startsWith@qBittorrent/3.3.15" # https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues/432
+      - "startsWith@dt/torrent"
+      - "startsWith@DT"
+      - "startsWith@go.torrent.dev" # BaiduNetdisk 离线下载
+      - "startsWith@github.com/thank423/trafficConsume" # 完完全全的恶意客户端
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
 ```
 
@@ -146,6 +163,54 @@ PeerBanHelper 主要由以下几个功能模块组成：
     excessive-threshold: 1.5
 ```
 
+### 主动探测
+
+此模块允许 PeerBanHelper 除了被动的从下载器获取数据外主动出击。  
+通常恶意客户端的攻击者会[使用脚本来批量部署攻击服务器并开放一个特定端口用于批量管理](https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8759734)。这给了我们通过特征识别恶意攻击者的机会。  
+主动探测（ActiveProbing）模块能够向连接到您的下载的 Peer 执行 ICMP Ping、TCP 连通性测试以及 HTTP(S) 请求，并根据连通性和 HTTP 状态码封禁 Peer。
+
+```yaml
+  # 主动探测
+  # 一些批量部署的恶意客户端的 WebUI/System Dashboard/或者你发现的其它特征服务 通常被固定在一个特定端口上以便批量管理
+  # 此功能将尝试发送请求到 Peer 的指定端口以主动探测这些特征服务
+  # 如果对端响应了我们的请求状态码，Peer 将被封禁
+  # 注意：这只是一个临时解决方案，通常不建议使用
+  active-probing:
+    # 默认情况下禁用
+    # 启用此功能将导致运行内存 (RAM) 的使用量显著上升
+    enabled: false
+    # 最大允许的缓存条目
+    # 过小的值将影响性能，过大的值将消耗更多 RAM
+    # 最好设置为你的【所有】下载器的最大连接数的 3 倍
+    max-cached-entry: 3000
+    # 当多久没有使用到此缓存条目时，应将其从内存中移出？
+    # 单位：秒，默认值：1小时（28800）
+    expire-after-no-access: 28800
+    # 主动探测超时，最好设置为一个大于 1000 但小于 5000 的值。
+    # 过大的值将影响封禁速度
+    # 过小的值将导致模块完全失效
+    # 检测时将多预留 5 毫秒用于处理返回值
+    # 单位：毫秒
+    timeout: 3000
+    # 支持下面的格式
+    # TCP@12345 - 使用 TCP 方式探测指定的 12345 端口是否开放，若开放则封禁
+    # PING - 使用 PING 探测对端是否响应 ICMP 包，若响应则封禁（不推荐使用，因为有相当多的 Seedbox 和软路由会响应 ICMP。但是这是一个检测是否为家用 IP 的好方法，因为家用网关设备通常不响应 ICMP 包）
+    # HTTP@/subpath/subpath2@12345@200 向 http://peer-ip:12345/subpath/subpath2 发送一个 HTTP 请求，如果对端使用 200 响应了此 HTTP 请求，则封禁；注：请求会跟随30x重定向
+    #       (1) /subpath/subpath2 - 路径参数，用于参与构造 HTTP 请求的 URL，你也可以设置为空格，这样就不会添加到 URL 中
+    #                         (2) 12345 - 端口号，你也可以设为空格 （如：HTTP@/subpath/subpath2@ @200），这样 PBH 就不会在 URL 中添加端口号
+    #                               (3) 200 - HTTP 状态码，只有响应您指定的状态码，此规则才生效。你也可以设置为全大写的 ANY 来匹配所有状态码。有关状态码的更多信息，参见：https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
+    # HTTPS@/subpath/subpath2@12345@200@true - 与 HTTP 的几乎相同，但使用 HTTPS 方式访问
+    #       (1) /subpath/subpath2 - 路径参数，用于参与构造 HTTP 请求的 URL，你也可以设置为空格，这样就不会添加到 URL 中
+    #                         (2) 12345 - 端口号，你也可以设为空格 （如：HTTPS@/subpath/subpath2@ @200），这样 PBH 就不会在 URL 中添加端口号
+    #                               (3) 200 - HTTP 状态码，只有响应您指定的状态码，此规则才生效。你也可以设置为全大写的 ANY 来匹配所有状态码。有关状态码的更多信息，参见：https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
+    #                                    (4) true - 忽略 SSL 证书错误，设置为 false 将在请求时验证 SSL 证书
+    probing:
+      - HTTP@/subpath/subpath2@80@200 # https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8761335
+      - HTTPS@/subpath/subpath2@443@200@true # https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8761335
+    # 对 HTTP(S) 探测请求指定 User-Agent
+    http-probing-user-agent: "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"
+```
+
 ## 如何使用
 
 使用此命令启动 PeerBanHelper：
@@ -154,7 +219,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 java -Xmx256M -XX:+UseG1GC -XX:+UseStringDeduplication -jar <JAR文件>
 ```
 
-运行后，生成 `config.yml` 和 `profile.yml`，配置后再次使用相同命令启动 PeerBanHelper 即可。  
+运行后，生成 `config` 配置文件夹，且其中包含 `config.yml` 和 `profile.yml`。对相关文件配置后再次使用相同命令启动 PeerBanHelper 即可。  
 注意：如果您修改了配置文件，想让它生效的话，请重启 PeerBanHelper（对于Docker用户来说：重启容器）。
 
 ## 添加下载器
@@ -164,143 +229,83 @@ PeerBanHelper 能够连接多个支持的下载器，并共享 IP 黑名单。�
 ```yaml
 # 客户端设置
 client:
-  # 名字，可以自己起，会在日志中显示
-  my-really-good-best-ever-bittorrent-downloader:
+  # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
+  qbittorrent-001:
     # 客户端类型
     # 支持的客户端列表：
     # qBittorrent
-    # 其它也许以后会加，但 Transmission 是没戏了，WebAPI 没办法给 Transmission 加黑 IP
+    # Transmission
+    # 其它也许以后会加
     type: qBittorrent
     # 客户端地址
-    # 如果程序在 docker 内运行，请不要填写 127.0.0.1，连不上的，得填 Docker 网络的网关地址，或者你的设备的 IP 地址（最好绑定静态 IP）
-    endpoint: "http://ip:8085" 
+    endpoint: "http://ip:8085"
     # 登录信息（暂不支持 Basic Auth）
     # 用户名
     username: "username"
     # 密码
     password: "password"
-  qb2:
-    type: qBittorrent
-    endpoint: "http://ip:8086" 
-    username: "username"
-    password: "password"
-  tr1:
+    # Basic Auth - 不知道这是什么的话，请保持默认
+    basic-auth:
+      user: ""
+      pass: ""
+  transmission-002:
     type: Transmission
-    endpoint: "http://ip:9091"
-    username: "username"
-    password: "password"
+    endpoint: "http://127.0.0.1:9091"
+    username: "admin"
+    password: "admin"
 ```
-
 
 ## Docker 支持
 
-Docker 镜像为：`ghostchu/peerbanhelper`，不定期更新。  
+Docker 镜像为：`ghostchu/peerbanhelper`。  
 如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
 
-### 在群晖 DSM 上，使用 Container Manager 启动
+### 使用 Docker CLI 启动
 
-首先，为 PBH 创建文件夹，用于存放 PBH 的配置文件和日志。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/8ee3a716-f192-4392-8362-c7c6a1f6e11f)
-
-将提前准备好的 `config.yml`, `profile.yml` 文件上传到此文件夹中。然后，再新建一个名为 `logs` 的空白文件夹，用于存储日志。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/adecd0fb-9923-4363-903c-c084d0a26f11)
-
-
-在 Container Manager 中，选择项目，新增按钮，来源选择 “创建 docker-compose.yml”
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/3af676e7-3db5-496a-a480-3780a05dba21)
-
-输入项目名称，然后点击路径的 “设置路径” 按钮。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/a3ab5e8c-a65e-46af-b685-b6905321f567)
-
-选择刚刚创建的文件夹
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/19752dbe-90a0-4e83-a7af-7665c80e14d3)
-
-回到编辑框界面，在编辑框复制并粘贴下列内容：
-
-```yaml
-version: "3.9"
-services:
-  peerbanhelper:
-    image: "ghostchu/peerbanhelper:<最新版本号>"
-    restart: unless-stopped
-    container_name: "peerbanhelper"
-    volumes:
-      - ./config.yml:/app/config.yml
-      - ./profile.yml:/app/profile.yml
-      - ./logs:/app/logs
+```shell
+sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-data/:/app/data/ ghostchu/peerbanhelper:最新版本号
 ```
 
-其中，`<最新版本号>` 请填写 [这个页面](https://hub.docker.com/r/ghostchu/peerbanhelper/tags) 上**除 `latest` 以外**的最新的版本的名称。在教程编写时，为 `1.2`。
+### 使用 Docker Compose 文件启动
 
-最后一路下一步，完成，即可创建。
+请参见仓库的 docker-compose.yml 文件，使用 `docker-compose up` 快速部署。
 
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/af63f641-699c-490b-9a7b-040dbfe1fd5e)
+### Windows 手动部署
 
-最后，前往容器日志，确认程序正确运行即可。
+从 [Eclipse Adoptium 网站](https://adoptium.net/zh-CN/temurin/releases/?package=jdk&os=windows)下载 Java JDK，版本必须大于等于 Java 17，下载时请选择 `.msi` 格式的安装包。
 
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f73183c0-a6c8-4a34-af2c-5fb276d5e0af)
-
-## 在 Windows 上安装
-
-### 安装 Java 17
-
-打开 [Temurin OpenJDK 下载页面](https://adoptium.net/zh-CN/temurin/releases/?version=17&os=windows&package=jdk)，下载 msi 安装包，如果下载没反应，则可能需要科学上网。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/14e350e4-9831-41af-b0b6-b87d5b051a4f)
-
-运行 MSI 安装包，遇到图中页面时，点击所有条目前面的磁盘小图标，全部选择 “整个功能将安装在本地硬盘上”，随后一路下一步安装。
+运行 MSI 安装包，遇到图中页面时，点击所有条目前面的磁盘小图标，全部选择 “整个功能将安装在本地硬盘上”，随后一路下一步安装到系统中。
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f0428971-5724-4e84-b34c-52c3ae0d1629)
 
-### 配置 PBH 环境结构
+新建一个文件夹，下载 PeerBanHelper 的最新版本 JAR 问卷，并放入你新创建的文件夹中。  
 
-从 [Releases](https://github.com/Ghost-chu/PeerBanHelper/releases/latest) 下载最新版本的 PeerBanHelper。
+新建一个 `start.bat` 批处理文件，使用记事本打开，并复制下面的内容保存：
 
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/23c2d00d-f42e-454e-a721-8a76045663f5)
-
-在合适新建一个文件夹，我选择在桌面上，并将刚刚下载的 PeerBanHelper 的 JAR 复制到此文件夹中。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f79ab9d6-2086-48cd-a5e1-84b7b95c4507)
-
-在文件夹中创建一个 BAT 批处理文件（先新建一个文本文档，把 .txt 改成 .bat 即可，如果看不见 .txt 扩展名，请先[打开显示扩展名](https://blog.csdn.net/weixin_52799373/article/details/133306908)）
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/a482b200-daa5-4249-99a5-e19090e01d4c)
-
-使用记事本打开并编辑此批处理文件，复制粘贴下面的内容到 BAT 文件中:
-
-```batch
+```bat
 @echo off
 title PeerBanHelper
 :main
-java -Xmx256M -XX:+UseG1GC -XX:+UseStringDeduplication -jar PeerBanHelper.jar
+java -Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -jar PeerBanHelper.jar
 timeout /t 5 /nobreak >nul
 echo Restarting...
 goto main
 ```
 
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/4bdc635a-54de-4e26-914e-9f3e5ad3e209)
+完成后，双击 start.bat 启动 PeerBanHelper 即可。
 
-完成后保存退出，你的文件夹里面现在应该长得像这个样子。
+### Linux 手动部署
 
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/da7dd862-09ef-4290-a0b7-47e6bc2f3c06)
+我相信 Linux 用户可以自己搞定这一切 ;)，如有需要，你还可以配置为系统服务并开机自启。
 
-双击你新建的批处理文件，脚本开始运行，出现提示配置的字样则说明您的环境和结构配置正确。关闭黑色窗口。
 
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/1eba8bf8-0a06-4d58-a7e3-6481e8a86125)
+### 在群晖 DSM 上，使用 Container Manager 启动
 
-此时目录下应该自动生成了 `config.yml` 和 `profile.yml`：
+首先，为 PBH 创建文件夹，用于存放 PBH 的配置文件。
 
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/c326e37b-115e-4db2-a6a9-6a4efe87927d)
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/8ee3a716-f192-4392-8362-c7c6a1f6e11f)
 
-打开并按照教程正确配置它们，保存并退出，再次双击批处理文件启动 PBH，此时 PBH 应能开始工作。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/9dfd5b13-caae-46e2-9e88-ff53478f4b1a)
-
+在 Container Manager 中，选择项目，新增按钮，来源选择 “创建 docker-compose.yml”
 
 ## 常见问题
 

@@ -1,0 +1,26 @@
+maven:
+  version: "${project.version}"
+git:
+  branch: "${git.branch}"
+  dirty: ${git.dirty}
+  remote:
+    origin-url: "${git.remote.origin.url}"
+  commit:
+    id:
+      commit-id: "${git.commit.id}"
+      abbrev: "${git.commit.id.abbrev}"
+      describe: "${git.commit.id.describe}"
+      describe-short: "${git.commit.id.describe-short}"
+    user:
+      name: "${git.commit.user.name}"
+      email: "${git.commit.user.email}"
+    message:
+      short: '${git.commit.message.short}'
+    time: "${git.commit.time}"
+  build:
+    user:
+      name: "${git.build.user.name}"
+      email: "${git.build.user.email}"
+    time: "${git.build.time}"
+    host: "${git.build.host}"
+    version: "${git.build.version}"

@@ -41,3 +41,5 @@ build/
 /profile.yml
 
 /.idea/
+/config/
+/data/
