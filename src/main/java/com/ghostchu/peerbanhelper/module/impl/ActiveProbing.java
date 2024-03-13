@@ -16,6 +16,7 @@ import kong.unirest.UnirestInstance;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -34,7 +35,7 @@ import java.util.function.Function;
 public class ActiveProbing extends AbstractFeatureModule {
     private final int timeout;
     private final List<Function<PeerAddress, BanResult>> rules = new ArrayList<>();
-    private Cache<Object, Object> cache;
+    private Cache<PeerAddress, BanResult> cache;
 
     public ActiveProbing(YamlConfiguration profile) {
         super(profile);
@@ -53,7 +54,7 @@ public class ActiveProbing extends AbstractFeatureModule {
             switch (spilt[0]) {
                 case "TCP" -> rules.add((address) -> tcpTestPeer(address, spilt));
                 case "HTTP", "HTTPS" -> {
-                    if (spilt.length != 4) {
+                    if (spilt.length < 4) {
                         log.warn(Lang.MODULE_AP_INVALID_RULE, rule);
                         continue;
                     }
@@ -78,18 +79,30 @@ public class ActiveProbing extends AbstractFeatureModule {
     @Override
     public BanResult shouldBanPeer(Torrent torrent, Peer peer) {
         PeerAddress peerAddress = peer.getAddress();
-        List<BanResult> finishedQueue = new ArrayList<>();
-        List<CompletableFuture<?>> queue = new ArrayList<>(rules.size());
-
-        for (Function<PeerAddress, BanResult> rule : rules) {
-            queue.add(CompletableFuture.runAsync(() -> finishedQueue.add(rule.apply(peerAddress))));
-        }
-
         try {
-            CompletableFuture.allOf(queue.toArray(new CompletableFuture<?>[0])).get(timeout + 5, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
-        }
+            return cache.get(peerAddress, () -> {
+                List<BanResult> finishedQueue = new ArrayList<>();
+                List<CompletableFuture<?>> queue = new ArrayList<>(rules.size());
 
+                for (Function<PeerAddress, BanResult> rule : rules) {
+                    queue.add(CompletableFuture.runAsync(() -> finishedQueue.add(rule.apply(peerAddress))));
+                }
+
+                try {
+                    CompletableFuture.allOf(queue.toArray(new CompletableFuture<?>[0])).get(timeout + 5, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+                }
+
+                return getBanResult(finishedQueue);
+            });
+        } catch (ExecutionException e) {
+            log.error(Lang.MODULE_AP_EXECUTE_EXCEPTION, e);
+            return new BanResult(false, "[Runtime Exception] " + e.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+
+    @NotNull
+    private BanResult getBanResult(List<BanResult> finishedQueue) {
         BanResult banResult = null;
 
         for (BanResult result : finishedQueue) {

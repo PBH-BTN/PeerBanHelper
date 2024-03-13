@@ -26,12 +26,13 @@ public class Lang {
     public static String MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS = "客户端进度：%.2f%%，实际进度：%.2f%%，差值：%.2f%%";
     public static String MODULE_PCB_PEER_BAN_REWIND = "客户端进度：%.2f%%，实际进度：%.2f%%，上次记录进度：%.2f%%，本次进度：%.2f%%，差值：%.2f%%";
     public static String MODULE_AP_PEER_BAN_PING = "Peer 发送了 ICMP 响应包";
-    public static String MODULE_AP_INVALID_RULE = "规则 %s 无效，请检查语法和拼写错误";
+    public static String MODULE_AP_INVALID_RULE = "规则 {} 无效，请检查语法和拼写错误";
     public static String MODULE_AP_BAN_PEER_CODE = "Peer 的 HTTP(S) 响应返回了预期状态码：%s";
     public static String MODULE_AP_PEER_CODE = "Peer 的 HTTP(S) 响应返回了状态码：%s";
     public static String MODULE_AP_INCORRECT_TCP_TEST_PORT = "TCP 探测规则 %s 的端口号无效: %s";
     public static String MODULE_AP_BAN_PEER_TCP_TEST = "TCP 测试通过: %s";
     public static String MODULE_AP_TCP_TEST_PORT_FAIL = "TCP 探测目标失败: %s";
+    public static String MODULE_AP_EXECUTE_EXCEPTION = "烘焙缓存时出错，请将下面的错误日志发送给开发者以协助修复此错误";
     public static String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: \n{}";
     public static String DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST = "请求 Torrents 列表失败 - %d - %s";
     public static String DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";

@@ -3,10 +3,7 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.ClientNameBlacklist;
-import com.ghostchu.peerbanhelper.module.impl.IPBlackList;
-import com.ghostchu.peerbanhelper.module.impl.PeerIdBlacklist;
-import com.ghostchu.peerbanhelper.module.impl.ProgressCheatBlocker;
+import com.ghostchu.peerbanhelper.module.impl.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -61,6 +58,7 @@ public class PeerBanHelperServer {
         modules.add(new PeerIdBlacklist(profile));
         modules.add(new ClientNameBlacklist(profile));
         modules.add(new ProgressCheatBlocker(profile));
+        modules.add(new ActiveProbing(profile));
         this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
         this.registeredModules.forEach(m -> log.info(Lang.MODULE_REGISTER, m.getName()));
     }
