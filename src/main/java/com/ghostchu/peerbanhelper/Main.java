@@ -22,7 +22,7 @@ import java.util.Locale;
 
 @Slf4j
 public class Main {
-    private static final File configDirectory = new File("config");
+    private static final File configDirectory = new File(new File("data"),"config");
     @Getter
     private static BuildMeta meta = new BuildMeta();
 
