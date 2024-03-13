@@ -79,18 +79,18 @@ public class Transmission implements Downloader {
         for (Torrent torrent : torrents) {
             TRTorrent trTorrent = (TRTorrent) torrent;
             Integer originalLimit = trTorrent.getPeerLimit();
-            if (trTorrent.getPeers().size() == 1) { // 只有 1 个 Peer 的时候，只能暂停并恢复整个任务
+//            if (trTorrent.getPeers().size() == 1) { // 只有 1 个 Peer 的时候，只能暂停并恢复整个任务
                 RqTorrent stop = new RqTorrent(TorrentAction.STOP);
                 stop.add(Long.parseLong(torrent.getId()));
                 client.execute(stop);
-            } else {
-                RqTorrentSet limit = RqTorrentSet.builder()
-                        .ids(List.of(Long.parseLong(torrent.getId())))
-                        .peerLimit(1)
-                        .build();
-                client.execute(limit);
-                originalLimitMap.put(torrent, originalLimit);
-            }
+//            } else {
+//                RqTorrentSet limit = RqTorrentSet.builder()
+//                        .ids(List.of(Long.parseLong(torrent.getId())))
+//                        .peerLimit(1)
+//                        .build();
+//                client.execute(limit);
+//                originalLimitMap.put(torrent, originalLimit);
+//            }
         }
 
         try {
