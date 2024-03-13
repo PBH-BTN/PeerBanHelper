@@ -35,7 +35,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * Client Name 黑名单
 * IP 黑名单
 * 虚假进度检查器（提供启发式客户端检测功能）（Transmission不支持过量下载检测）
-
+* 主动探测
 
 ### PeerID 黑名单
 
@@ -211,17 +211,6 @@ PeerBanHelper 主要由以下几个功能模块组成：
     http-probing-user-agent: "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"
 ```
 
-## 如何使用
-
-使用此命令启动 PeerBanHelper：
-
-```shell
-java -Xmx256M -XX:+UseG1GC -XX:+UseStringDeduplication -jar <JAR文件>
-```
-
-运行后，生成 `config` 配置文件夹，且其中包含 `config.yml` 和 `profile.yml`。对相关文件配置后再次使用相同命令启动 PeerBanHelper 即可。  
-注意：如果您修改了配置文件，想让它生效的话，请重启 PeerBanHelper（对于Docker用户来说：重启容器）。
-
 ## 添加下载器
 
 PeerBanHelper 能够连接多个支持的下载器，并共享 IP 黑名单。但每个下载器只能被一个 PeerBanHelper 添加，多个 PBH 会导致操作 IP 黑名单时出现冲突。
@@ -255,20 +244,7 @@ client:
     password: "admin"
 ```
 
-## Docker 支持
-
-Docker 镜像为：`ghostchu/peerbanhelper`。  
-如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
-
-### 使用 Docker CLI 启动
-
-```shell
-sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-data/:/app/data/ ghostchu/peerbanhelper:最新版本号
-```
-
-### 使用 Docker Compose 文件启动
-
-请参见仓库的 docker-compose.yml 文件，使用 `docker-compose up` 快速部署。
+## 手动部署
 
 ### Windows 手动部署
 
@@ -298,6 +274,20 @@ goto main
 
 我相信 Linux 用户可以自己搞定这一切 ;)，如有需要，你还可以配置为系统服务并开机自启。
 
+## Docker 部署
+
+Docker 镜像为：`ghostchu/peerbanhelper`。  
+如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
+
+### 使用 Docker CLI 启动
+
+```shell
+sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-data/:/app/data/ ghostchu/peerbanhelper:最新版本号
+```
+
+### 使用 Docker Compose 文件启动
+
+请参见仓库的 docker-compose.yml 文件，使用 `docker-compose up` 快速部署。
 
 ### 在群晖 DSM 上，使用 Container Manager 启动
 
@@ -305,7 +295,28 @@ goto main
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/8ee3a716-f192-4392-8362-c7c6a1f6e11f)
 
-在 Container Manager 中，选择项目，新增按钮，来源选择 “创建 docker-compose.yml”
+在 Container Manager 中，选择项目，点击新增按钮，来源选择 “创建 docker-compose.yml”（请务必先选择来源，否则后续操作将覆盖已设置的内容）。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/ba742cc3-583e-4798-8947-f72ccc892164)
+
+随后，点击 `设置路径` 按钮，配置 Docker Compose 的位置到我们刚刚创建的好的文件夹：
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/fa0efd6c-182c-43ea-99b1-5116ba55fbc1)
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/642f8d48-69e5-4fa3-b5d6-92750100996d)
+
+从仓库的 `docker-compose.yml` 文件中复制所有内容，并粘贴到编辑框中：**（需要特别注意的是，如果你配置了 Docker 镜像源，则需要手动指定最新版本号，否则你可能拉取到一个史前版本的镜像）**
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/bafd7b87-8c0e-4c65-81f0-b8ce378f5071)
+
+如果询问你是否设置网页门户，请**不要启用**：
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/849ed06a-ddc9-4ac5-bb89-a6062b5fe36d)
+
+一路下一步，启动容器。首次启动完成后，配置文件应该会自动生成，配置好配置文件后再次重启 Docker 容器即可使用。
+
+![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/758356d6-6cd0-42c4-a011-fbf5a66ebebd)
+
 
 ## 常见问题
 
