@@ -30,14 +30,16 @@ public class PeerBanHelperServer {
     private final List<Downloader> downloaders;
     private final long banDuration;
     private final int httpdPort;
+    private final boolean hideFinishLogs;
     private List<FeatureModule> registeredModules = new ArrayList<>();
     private BlacklistProvider blacklistProviderServer;
 
-    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, int httpdPort) {
+    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, int httpdPort, boolean hideFinishLogs) {
         this.downloaders = downloaders;
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
         this.httpdPort = httpdPort;
+        this.hideFinishLogs = hideFinishLogs;
         registerModules();
         registerTimer();
         registerBlacklistHttpServer();
@@ -69,7 +71,7 @@ public class PeerBanHelperServer {
             public void run() {
                 banWave();
             }
-        }, 0, profile.getLong("check-interval"));
+        }, 0, profile.getLong("check-interval",5000));
     }
 
     public void banWave() {
@@ -141,7 +143,9 @@ public class PeerBanHelperServer {
                 }
             }
         }
-        log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
+        if(!hideFinishLogs) {
+            log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
+        }
         return Pair.of(needUpdate, needRelaunched);
     }
 

@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 public class Main {
@@ -56,7 +57,7 @@ public class Main {
             return;
         }
 
-        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(new File("config.yml"));
+        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(new File(configDirectory,"config.yml"));
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
         for (String client : clientSection.getKeys(false)) {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
@@ -65,7 +66,7 @@ public class Main {
             String password = downloaderSection.getString("password");
             String baUser = downloaderSection.getString("basic-auth.user");
             String baPass = downloaderSection.getString("basic-auth.pass");
-            switch (downloaderSection.getString("type").toLowerCase()) {
+            switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
                 case "qbittorrent" -> {
                     downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
@@ -77,7 +78,7 @@ public class Main {
             }
         }
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
-                YamlConfiguration.loadConfiguration(new File("profile.yml")), mainConfig.getInt("server.http"));
+                YamlConfiguration.loadConfiguration(new File(configDirectory,"profile.yml")), mainConfig.getInt("server.http"), mainConfig.getBoolean("logger.hide-finish-log"));
         while (true) {
             Thread.sleep(30 * 1000);
         }
