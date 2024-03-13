@@ -25,6 +25,7 @@ public class Main {
     private static final File configDirectory = new File("config");
     @Getter
     private static BuildMeta meta = new BuildMeta();
+
     public static void main(String[] args) throws InterruptedException {
         meta = new BuildMeta();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
@@ -57,7 +58,7 @@ public class Main {
             return;
         }
 
-        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(new File(configDirectory,"config.yml"));
+        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(new File(configDirectory, "config.yml"));
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
         for (String client : clientSection.getKeys(false)) {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
@@ -73,22 +74,22 @@ public class Main {
                 }
                 case "transmission" -> {
                     downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http") + "/blocklist/transmission"));
-                    log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission",client, endpoint);
+                    log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission", client, endpoint);
                 }
             }
         }
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
-                YamlConfiguration.loadConfiguration(new File(configDirectory,"profile.yml")), mainConfig.getInt("server.http"), mainConfig.getBoolean("logger.hide-finish-log"));
+                YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")),mainConfig);
         while (true) {
             Thread.sleep(30 * 1000);
         }
     }
 
     private static boolean initConfiguration() throws IOException {
-        if(!configDirectory.exists()){
+        if (!configDirectory.exists()) {
             configDirectory.mkdirs();
         }
-        if(!configDirectory.isDirectory()){
+        if (!configDirectory.isDirectory()) {
             throw new IllegalStateException(Lang.ERR_CONFIG_DIRECTORY_INCORRECT);
         }
         boolean exists = true;

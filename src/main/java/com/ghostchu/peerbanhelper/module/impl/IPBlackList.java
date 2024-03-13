@@ -12,6 +12,7 @@ import inet.ipaddr.IPAddressString;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public class IPBlackList extends AbstractFeatureModule {
     public IPBlackList(YamlConfiguration profile) {
@@ -29,7 +30,7 @@ public class IPBlackList extends AbstractFeatureModule {
     }
 
     @Override
-    public BanResult shouldBanPeer(Torrent torrent, Peer peer) {
+    public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         List<String> ips = getConfig().getStringList("ips");
         List<Integer> ports = getConfig().getIntList("ports");
         PeerAddress peerAddress = peer.getAddress();

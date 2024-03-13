@@ -13,6 +13,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class ProgressCheatBlocker extends AbstractFeatureModule {
@@ -36,7 +37,7 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
     }
 
     @Override
-    public BanResult shouldBanPeer(Torrent torrent, Peer peer) {
+    public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         final long uploaded = peer.getUploaded();
         final long torrentSize = torrent.getSize();
 

@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.util.RuleParseHelper;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public class PeerIdBlacklist extends AbstractFeatureModule {
     public PeerIdBlacklist(YamlConfiguration profile) {
@@ -26,7 +27,7 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
     }
 
     @Override
-    public BanResult shouldBanPeer(Torrent torrent, Peer peer) {
+    public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         List<String> bannedPeers = getConfig().getStringList("banned-peer-id");
         for (String rule : bannedPeers) {
             if(RuleParseHelper.match(peer.getPeerId(), rule)){

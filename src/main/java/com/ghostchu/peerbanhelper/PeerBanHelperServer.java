@@ -17,8 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,15 +30,26 @@ public class PeerBanHelperServer {
     private final long banDuration;
     private final int httpdPort;
     private final boolean hideFinishLogs;
+    private final YamlConfiguration mainConfig;
+    private final ExecutorService ruleExecuteExecutor;
     private List<FeatureModule> registeredModules = new ArrayList<>();
     private BlacklistProvider blacklistProviderServer;
+    private ExecutorService generalExecutor;
+    private ExecutorService checkBanExecutor;
+    private ExecutorService downloaderApiExecutor;
 
-    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, int httpdPort, boolean hideFinishLogs) {
+
+    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) {
         this.downloaders = downloaders;
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
-        this.httpdPort = httpdPort;
-        this.hideFinishLogs = hideFinishLogs;
+        this.mainConfig = mainConfig;
+        this.httpdPort = mainConfig.getInt("server.http");
+        this.generalExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.general-parallelism", 6));
+        this.checkBanExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.check-ban-parallelism", 8));
+        this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
+        this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
+        this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
         registerModules();
         registerTimer();
         registerBlacklistHttpServer();
@@ -77,12 +87,13 @@ public class PeerBanHelperServer {
 
     public void banWave() {
         boolean needUpdate = false;
-        Set<Torrent> needRelaunched = new HashSet<>();
-        for (Downloader downloader : this.downloaders) {
+        Set<Torrent> needRelaunched = new HashSet<>(downloaders.size());
+        // 多线程处理下载器封禁操作
+        for (Downloader downloader : downloaders) {
             try {
                 if (!downloader.login()) {
                     log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
-                    continue;
+                    return;
                 }
                 Pair<Boolean, Collection<Torrent>> banDownloader = banDownloader(downloader);
                 if (banDownloader.getKey()) {
@@ -108,7 +119,7 @@ public class PeerBanHelperServer {
         }
 
         if (needUpdate) {
-            this.downloaders.parallelStream().forEach(downloader -> {
+            for (Downloader downloader : downloaders) {
                 try {
                     if (!downloader.login()) {
                         log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
@@ -119,7 +130,7 @@ public class PeerBanHelperServer {
                 } catch (Throwable th) {
                     log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
                 }
-            });
+            }
         }
     }
 
@@ -129,21 +140,28 @@ public class PeerBanHelperServer {
         Map<Torrent, List<Peer>> map = new ConcurrentHashMap<>();
         Set<Torrent> needRelaunched = new CopyOnWriteArraySet<>();
         AtomicInteger peers = new AtomicInteger(0);
-
-        downloader.getTorrents().parallelStream().forEach(torrent -> map.put(torrent, downloader.getPeers(torrent)));
-
-        map.entrySet().parallelStream().forEach(pair -> {
-            peers.addAndGet(pair.getValue().size());
-            pair.getValue().parallelStream().forEach(peer -> {
-                BanResult banResult = checkBan(pair.getKey(), peer);
-                if (banResult != null) {
-                    needUpdate.set(true);
-                    needRelaunched.add(pair.getKey());
-                    banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, banResult.reason()));
-                    log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), banResult.reason());
-                }
-            });
+        // 多线程获取所有 Torrents 的 Peers
+        List<CompletableFuture<?>> fetchPeerFutures = new ArrayList<>(downloader.getTorrents().size());
+        downloader.getTorrents().forEach(torrent -> fetchPeerFutures.add(CompletableFuture.runAsync(() -> map.put(torrent, downloader.getPeers(torrent)), downloaderApiExecutor)));
+        CompletableFuture.allOf(fetchPeerFutures.toArray(new CompletableFuture[0])).join();
+        // 多线程检查是否应该封禁 Peers （以优化启用了主动探测的环境下的检查性能）
+        List<CompletableFuture<?>> checkPeersBanFutures = new ArrayList<>(map.size());
+        map.forEach((key, value) -> {
+            peers.addAndGet(value.size());
+            for (Peer peer : value) {
+                checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
+                    BanResult banResult = checkBan(key, peer);
+                    if (banResult.ban()) {
+                        needUpdate.set(true);
+                        needRelaunched.add(key);
+                        banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, banResult.reason()));
+                        log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), banResult.reason());
+                    }
+                }, generalExecutor));
+            }
         });
+        CompletableFuture.allOf(checkPeersBanFutures.toArray(new CompletableFuture[0])).join();
+
         if (!hideFinishLogs) {
             log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
         }
@@ -151,15 +169,33 @@ public class PeerBanHelperServer {
     }
 
     private BanResult checkBan(Torrent torrent, Peer peer) {
-        BanResult banResult = null;
+        Object wakeLock = new Object();
+        List<CompletableFuture<Void>> moduleExecutorFutures = new ArrayList<>(registeredModules.size());
+        List<BanResult> results = new CopyOnWriteArrayList<>();
         for (FeatureModule registeredModule : registeredModules) {
-            BanResult result = registeredModule.shouldBanPeer(torrent, peer);
-            if (result.ban()) {
-                banResult = result;
-                break;
+            moduleExecutorFutures.add(CompletableFuture.runAsync(() -> {
+                BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
+                results.add(banResult);
+                synchronized (wakeLock) {
+                    wakeLock.notify();
+                }
+            }, checkBanExecutor));
+        }
+        while (moduleExecutorFutures.stream().anyMatch(future->!future.isDone())) {
+            synchronized (wakeLock) {
+                try {
+                    wakeLock.wait(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        return banResult;
+        for (BanResult result : results) {
+            if(result.ban()){
+                return result;
+            }
+        }
+        return new BanResult(false, "No matches");
     }
 
     @NotNull

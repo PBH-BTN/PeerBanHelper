@@ -25,10 +25,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 @Slf4j
@@ -68,7 +65,7 @@ public class ActiveProbing extends AbstractFeatureModule {
 
     @Override
     public String getName() {
-        return "ActiveProbing";
+        return "Active Probing";
     }
 
     @Override
@@ -77,7 +74,7 @@ public class ActiveProbing extends AbstractFeatureModule {
     }
 
     @Override
-    public BanResult shouldBanPeer(Torrent torrent, Peer peer) {
+    public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         PeerAddress peerAddress = peer.getAddress();
         try {
             return cache.get(peerAddress, () -> {
@@ -85,11 +82,11 @@ public class ActiveProbing extends AbstractFeatureModule {
                 List<CompletableFuture<?>> queue = new ArrayList<>(rules.size());
 
                 for (Function<PeerAddress, BanResult> rule : rules) {
-                    queue.add(CompletableFuture.runAsync(() -> finishedQueue.add(rule.apply(peerAddress))));
+                    queue.add(CompletableFuture.runAsync(() -> finishedQueue.add(rule.apply(peerAddress)), ruleExecuteExecutor));
                 }
 
                 try {
-                    CompletableFuture.allOf(queue.toArray(new CompletableFuture<?>[0])).get(timeout + 5, TimeUnit.MILLISECONDS);
+                    CompletableFuture.allOf(queue.toArray(new CompletableFuture[0])).get(timeout + 5, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
                 }
 

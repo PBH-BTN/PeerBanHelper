@@ -37,3 +37,20 @@ logger:
   # 是否隐藏 [完成] 已检查 XX 的 X 个活跃 Torrent 和 X 个对等体 的日志消息？
   # 在 DSM 的 ContainerManager 上有助于大幅度减少日志数量，并仅记录有价值的封禁等日志条目
   hide-finish-log: false
+# 线程控制
+threads:
+  # 全局检查线程池并发等级
+  # 此线程用于执行通用并发任务：如：Peers 任务提交处理，执行规则集
+  # 提升此值将允许更多任务执行，但过高的值并不会带来显著收益
+  general-parallelism: 6
+  # 封禁检查线程池并发等级
+  # 此线程池用于执行功能模块
+  # 提升此值将允许更多的功能模块实例同时执行
+  check-ban-parallelism: 8
+  # 规则执行线程池并发等级
+  # 此线程池用于执行用户定义的规则检查，如：执行主动探测的耗时规则子项
+  rule-execute-parallelism: 16
+  # 下载器 API 操作线程池并发等级
+  # 此线程池用于调用下载器 API，如：获取 Torrents 或 Peers 列表
+  # 提升此值将允许同时执行更多的 API 请求以提升速度，但可能对下载器产生压力，建议不要设置的过大，以免造成下载器进程卡住或崩溃
+  downloader-api-parallelism: 8
