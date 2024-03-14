@@ -3,6 +3,9 @@
 > [!WARNING]
 > 项目处于早期开发阶段，可能存在错误，请关注新版本更新日志以获取最新信息！
 
+> [!NOTE]
+> PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知
+
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/fc0c7537-b9c4-47c7-8166-6b7d06582b6c)
@@ -13,7 +16,6 @@
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/5615fd92-bd08-4528-b1f9-500db2516d53)
 
-
 ## 环境要求
 
 PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。  
@@ -22,8 +24,8 @@ PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。
 ## 支持的客户端
 
 * qBittorrent
-* Transmission（部分功能不可用，且可能存在部分性能问题）
-
+* Transmission
+  
 ## 功能概述
 
 PeerBanHelper 主要由以下几个功能模块组成：
@@ -38,6 +40,9 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 顾名思义，它根据客户端交换的 Peer ID 来封禁客户端。  
 通过在列表中添加不受欢迎的客户端的 Peer ID，即可封禁对应客户端。
+
+> [!WARNING]
+> Transmission 由于 API 限制，无法使用此功能，请换用 Client Name 黑名单作为替代
 
 ```yaml
   # PeerId 封禁
@@ -132,6 +137,9 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * 虚假进度检查器通过我们上传给此对等体的数据量，计算此对等体的最低真实进度
 * 如果对等体汇报的进度比最低真实进度差别过大，或者给此对等体的总上传量超过了种子本身的体积很多
 * 判定为异常客户端
+
+> [!WARNING]
+> Transmission 由于 API 限制，超量下载检测不起作用，暂时没有解决方案
 
 ```yaml
   # 假进度检查
@@ -276,6 +284,9 @@ goto main
 Docker 镜像为：`ghostchu/peerbanhelper`。  
 如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
 
+> [!IMPORTANT]
+> 如果您设置了 Docker 镜像源，拉取的镜像可能严重过期。需要显式指定明确的版本号，版本号可在 [DockerHub](https://hub.docker.com/r/ghostchu/peerbanhelper/tags) 找到。
+
 ### 使用 Docker CLI 启动
 
 ```shell
@@ -332,4 +343,4 @@ sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-dat
 * API 无法获取 PeerID，因此 PeerID 黑名单模块不起作用
 * API 无法获取客户端累计上传下载量，因此 ProgressCheatBlocker 的过量下载检测不起作用
 * API 设置黑名单只能让 Transmission 请求 URL 更新，因此 PBH 需要打开一个 API 端点，且您需要保证 Transmission 能够访问到它（可在 config.yml 中配置细节）
-* API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。PBH 会短暂的暂停您的 Torrent 并恢复它。
+* API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。PBH 会短暂的暂停您的 Torrent 然后恢复它。
