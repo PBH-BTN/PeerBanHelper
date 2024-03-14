@@ -8,7 +8,7 @@
 
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/fc0c7537-b9c4-47c7-8166-6b7d06582b6c)
+<img width="1082" alt="Snipaste_2024-03-14_12-34-16" src="https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/e30b294e-2509-484d-a510-37c20a63b0c3">
 
 ## 小提示
 
