@@ -15,7 +15,7 @@ public class Lang {
     public static String ERR_UNEXPECTED_API_ERROR = "在处理 {} ({}) 的 API 操作时出现了一个非预期的错误";
     public static String PEER_UNBAN_WAVE = "[解封] 解除了 {} 个过期的对等体封禁";
     public static String ERR_UPDATE_BAN_LIST = "在更新 {} ({}) 的封禁列表时出现了一个非预期的错误";
-    public static String BAN_PEER = "[封禁] {}, PeerId={}, ClientName={}, Progress={}, Uploaded={}, Downloaded={}, Reason={}";
+    public static String BAN_PEER = "[封禁] {}, PeerId={}, ClientName={}, Progress={}, Uploaded={}, Downloaded={}, Torrent={}, Reason={}";
     public static String CHECK_COMPLETED = "[完成] 已检查 {} 的 {} 个活跃 Torrent 和 {} 个对等体";
     public static String ERR_INVALID_RULE_SYNTAX = "规则 {} 的表达式无效，请检查是否存在拼写错误";
     public static String MODULE_CNB_MATCH_CLIENT_NAME = "匹配 ClientName (UserAgent): %s";
