@@ -7,12 +7,6 @@
 
 <img width="1082" alt="Snipaste_2024-03-14_12-34-16" src="https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/e30b294e-2509-484d-a510-37c20a63b0c3">
 
-## 小提示
-
-使用右上角的小按钮，快速查看各个章节。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/5615fd92-bd08-4528-b1f9-500db2516d53)
-
 ## 安装&环境要求
 
 [Windows(新支持懒人包!)](https://github.com/Ghost-chu/PeerBanHelper/edit/master/README.md#windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)  
