@@ -13,7 +13,9 @@ import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -70,52 +72,6 @@ public class Transmission implements Downloader {
         return Collections.emptyList();
     }
 
-
-    @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-        log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size());
-
-        Map<Torrent, Integer> originalLimitMap = new HashMap<>();
-        for (Torrent torrent : torrents) {
-            TRTorrent trTorrent = (TRTorrent) torrent;
-            Integer originalLimit = trTorrent.getPeerLimit();
-//            if (trTorrent.getPeers().size() == 1) { // 只有 1 个 Peer 的时候，只能暂停并恢复整个任务
-                RqTorrent stop = new RqTorrent(TorrentAction.STOP);
-                stop.add(Long.parseLong(torrent.getId()));
-                client.execute(stop);
-//            } else {
-//                RqTorrentSet limit = RqTorrentSet.builder()
-//                        .ids(List.of(Long.parseLong(torrent.getId())))
-//                        .peerLimit(1)
-//                        .build();
-//                client.execute(limit);
-//                originalLimitMap.put(torrent, originalLimit);
-//            }
-        }
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        for (Torrent torrent : torrents) {
-            TRTorrent trTorrent = (TRTorrent) torrent;
-            if (trTorrent.getPeers().size() == 1) {
-                RqTorrent stop = new RqTorrent(TorrentAction.START);
-                stop.add(Long.parseLong(torrent.getId()));
-                client.execute(stop);
-            } else {
-                RqTorrentSet limit = RqTorrentSet.builder()
-                        .ids(List.of(Long.parseLong(torrent.getId())))
-                        .peerLimit(originalLimitMap.get(torrent))
-                        .build();
-                client.execute(limit);
-            }
-        }
-
-    }
-
     @Override
     public void setBanList(Collection<PeerAddress> peerAddresses) {
         RqSessionSet set = RqSessionSet.builder()
@@ -131,6 +87,31 @@ public class Transmission implements Downloader {
         if (!updateBlockListResp.isSuccess()) {
             log.warn(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP);
         }
+    }
+
+    @Override
+    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+        log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size());
+
+        for (Torrent torrent : torrents) {
+            RqTorrent stop = new RqTorrent(TorrentAction.STOP);
+            stop.add(Long.parseLong(torrent.getId()));
+            client.execute(stop);
+        }
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+        }
+
+        for (Torrent torrent : torrents) {
+            RqTorrent stop = new RqTorrent(TorrentAction.START);
+            stop.add(Long.parseLong(torrent.getId()));
+            client.execute(stop);
+        }
+
     }
 
     @Override
