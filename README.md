@@ -1,8 +1,5 @@
 # PeerBanHelper
 
-> [!WARNING]
-> 项目处于早期开发阶段，可能存在错误，请关注新版本更新日志以获取最新信息！
-
 > [!NOTE]
 > PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知
 
@@ -16,10 +13,12 @@
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/5615fd92-bd08-4528-b1f9-500db2516d53)
 
-## 环境要求
+## 安装&环境要求
 
-PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。  
-配置文件在所有平台上需要统一使用 UTF-8 编码编辑和保存。如果您的 Windows 版本较旧，不支持 UTF-8 保存，请使用第三方文本编辑器如 Visual Studio Code 或者 Notepad++。
+[Windows(新支持懒人包!)](https://github.com/Ghost-chu/PeerBanHelper/edit/master/README.md#windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)  
+[Linux/Docker](https://github.com/Ghost-chu/PeerBanHelper/edit/master/README.md#docker-%E9%83%A8%E7%BD%B2)
+
+配置文件在所有平台上需要统一使用 UTF-8 编码编辑和保存，建议使用第三方文本编辑器如 Visual Studio Code 或者 Notepad++。
 
 ## 支持的客户端
 
@@ -43,6 +42,10 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 > [!WARNING]
 > Transmission 由于 API 限制，无法使用此功能，请换用 Client Name 黑名单作为替代
+
+<details>
+
+<summary>查看示例配置文件</summary>
 
 ```yaml
   # PeerId 封禁
@@ -75,10 +78,16 @@ PeerBanHelper 主要由以下几个功能模块组成：
       - "startsWith@-DT" # 恶意客户端 https://github.com/anacrolix/torrent/discussions/891
       - "contains@cacao"
 ```
+</details>
+
 
 ### Client Name 黑名单
 
 部分客户端（如 Aria 2）会使用其它 BT 客户端（如：Transmission）的 Peer ID 伪装自己，但客户端名称仍然是自己的真实名称，这种情况可通过 Client Name 黑名单进行封禁。
+
+<details>
+
+<summary>查看示例配置文件</summary>
 
 ```yaml
   # 客户端名称封禁
@@ -103,12 +112,18 @@ PeerBanHelper 主要由以下几个功能模块组成：
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
 ```
 
+</details>
+
 ### IP 黑名单
 
 有的客户端（如迅雷离线下载服务器）会使用匿名模式连接，使用通用客户端名称（libtorrent）和通用 Peer ID（-LTXXXX-）来连接您，但封禁通用名称/Peer ID 会误伤不少正常客户端。  
 对于这种情况，您可以直接封禁这些离线下载服务器的 IP 地址或 IP 段，或者使用的端口。
 
 与 qBittorrent 等客户端内置的 IP 黑名单不同，PeerBanHelper 的 IP 黑名单允许您使用 CIDR 来表示一组 IP 地址，同时支持 IPV4 和 IPV6 的 CIDR 表示法，有效提升了 IP 封禁效率。
+
+<details>
+
+<summary>查看示例配置文件</summary>
 
 ```yaml
   # IP 地址/端口 封禁
@@ -128,6 +143,9 @@ PeerBanHelper 主要由以下几个功能模块组成：
     #- 2003
 ```
 
+</details>
+
+
 ### 虚假进度检查器
 
 此模块可谓是 PeerBanHelper 的灵魂，有助于您在不更新规则的情况下，发现那些伪装过的异常客户端。  
@@ -140,6 +158,10 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 > [!WARNING]
 > Transmission 由于 API 限制，超量下载检测不起作用，暂时没有解决方案
+
+<details>
+
+<summary>查看示例配置文件</summary>
 
 ```yaml
   # 假进度检查
@@ -168,11 +190,17 @@ PeerBanHelper 主要由以下几个功能模块组成：
     excessive-threshold: 1.5
 ```
 
+</details>
+
 ### 主动探测
 
 此模块允许 PeerBanHelper 除了被动的从下载器获取数据外主动出击。  
 通常恶意客户端的攻击者会[使用脚本来批量部署攻击服务器并开放一个特定端口用于批量管理](https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8759734)。这给了我们通过特征识别恶意攻击者的机会。  
 主动探测（ActiveProbing）模块能够向连接到您的下载的 Peer 执行 ICMP Ping、TCP 连通性测试以及 HTTP(S) 请求，并根据连通性和 HTTP 状态码封禁 Peer。
+
+<details>
+
+<summary>查看示例配置文件</summary>
 
 ```yaml
   # 主动探测
@@ -216,9 +244,15 @@ PeerBanHelper 主要由以下几个功能模块组成：
     http-probing-user-agent: "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"
 ```
 
+</details>
+
 ## 添加下载器
 
 PeerBanHelper 能够连接多个支持的下载器，并共享 IP 黑名单。但每个下载器只能被一个 PeerBanHelper 添加，多个 PBH 会导致操作 IP 黑名单时出现冲突。
+
+<details>
+
+<summary>查看示例配置文件</summary>
 
 ```yaml
 # 客户端设置
@@ -249,9 +283,20 @@ client:
     password: "admin"
 ```
 
+</details>
+
 ## 手动部署
 
+PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。  
+
 ### Windows 手动部署
+
+> [!TIP]
+> 自 2.1 起，Windows 用户现在有懒人包了，内置 JDK 环境和启动程序，可以从 [Releases](https://github.com/Ghost-chu/PeerBanHelper/releases/latest) 下载 `Windows-Lazy-Pack.zip`。
+
+<details>
+
+<summary>展开手动部署步骤</summary>
 
 从 [Eclipse Adoptium 网站](https://adoptium.net/zh-CN/temurin/releases/?package=jdk&os=windows)下载 Java JDK，版本必须大于等于 Java 17，下载时请选择 `.msi` 格式的安装包。
 
@@ -274,6 +319,8 @@ goto main
 ```
 
 完成后，双击 start.bat 启动 PeerBanHelper 即可。
+</details>
+
 
 ### Linux 手动部署
 
@@ -298,6 +345,10 @@ sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-dat
 请参见仓库的 docker-compose.yml 文件，使用 `docker-compose up` 快速部署。
 
 ### 在群晖 DSM 上，使用 Container Manager 启动
+
+<details>
+
+<summary>查看手把手DSM配置步骤</summary>
 
 首先，为 PBH 创建文件夹，用于存放 PBH 的配置文件。
 
@@ -325,6 +376,7 @@ sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-dat
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/758356d6-6cd0-42c4-a011-fbf5a66ebebd)
 
+</details>
 
 ## 常见问题
 
