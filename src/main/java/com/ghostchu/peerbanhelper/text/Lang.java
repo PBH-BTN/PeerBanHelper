@@ -5,7 +5,7 @@ public class Lang {
     public static String ERR_CANNOT_LOAD_BUILD_INFO = "错误：无法加载构建信息文件";
     public static String MOTD = "PeerBanHelper v{} - by Ghost_chu";
     public static String LOADING_CONFIG = "正在加载配置文件……";
-    public static String CONFIG_PEERBANHELPER = "已初始化目录结构，请配置相关文件后，重新启动 PeerBanHelper";
+    public static String CONFIG_PEERBANHELPER = "已初始化目录结构，相关文件已放置在运行目录的 data 文件夹下，请配置相关文件后，再重新启动 PeerBanHelper";
     public static String ERR_SETUP_CONFIGURATION = "错误：无法初始化配置文件结构";
     public static String DISCOVER_NEW_CLIENT = " + {} -> {} ({})";
     public static String ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE = "错误：无法初始化 API 提供端点，Transmission 模块的封禁功能将不起作用";
