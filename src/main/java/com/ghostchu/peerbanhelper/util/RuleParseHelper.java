@@ -1,12 +1,13 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 
 import java.util.Locale;
 
-@Slf4j
 public class RuleParseHelper {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(RuleParseHelper.class);
+
     public static boolean match(String origin, String ruleString) {
         origin = origin.toLowerCase(Locale.ROOT);
         ruleString = ruleString.toLowerCase(Locale.ROOT);
@@ -20,9 +21,9 @@ public class RuleParseHelper {
         return switch (matchMethod) {
             case "contains" -> origin.contains(ruleBody);
             case "startswith" -> origin.startsWith(ruleBody);
-            case "endswith"->origin.endsWith(ruleBody);
-            case "length"->origin.length() == Integer.parseInt(ruleBody);
-            case "equals"->origin.equals(ruleBody);
+            case "endswith" -> origin.endsWith(ruleBody);
+            case "length" -> origin.length() == Integer.parseInt(ruleBody);
+            case "equals" -> origin.equals(ruleBody);
             case "regex" -> origin.matches(ruleBody);
             default -> false;
         };

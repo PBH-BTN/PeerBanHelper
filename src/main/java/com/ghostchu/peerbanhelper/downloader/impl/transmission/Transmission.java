@@ -11,16 +11,16 @@ import cordelia.rpc.*;
 import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class Transmission implements Downloader {
 
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(Transmission.class);
     private final String name;
     private final String endpoint;
     private final TrClient client;

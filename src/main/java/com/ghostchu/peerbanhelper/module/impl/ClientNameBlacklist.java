@@ -30,8 +30,8 @@ public class ClientNameBlacklist extends AbstractFeatureModule {
     public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         List<String> bannedPeers = getConfig().getStringList("banned-client-name");
         for (String rule : bannedPeers) {
-            if(RuleParseHelper.match(peer.getClientName(), rule)){
-                return new BanResult(true, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME,rule));
+            if (RuleParseHelper.match(peer.getClientName(), rule)) {
+                return new BanResult(true, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, rule));
             }
         }
         return new BanResult(false, "No matches");

@@ -46,7 +46,8 @@ public class IPBlackList extends AbstractFeatureModule {
                 if (address.contains(new IPAddressString(peerAddress.getIp()).toAddress())) {
                     return new BanResult(true, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
                 }
-            } catch (AddressStringException ignored) {}
+            } catch (AddressStringException ignored) {
+            }
         }
         return new BanResult(false, "No matches");
     }

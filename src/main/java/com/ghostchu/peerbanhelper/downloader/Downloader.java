@@ -7,8 +7,9 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import java.util.Collection;
 import java.util.List;
 
-public interface Downloader extends AutoCloseable{
+public interface Downloader extends AutoCloseable {
     String getEndpoint();
+
     String getName();
 
     /**

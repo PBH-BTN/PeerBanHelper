@@ -8,9 +8,10 @@ public class TRPeer implements Peer {
 
     private final Peers backend;
 
-    public TRPeer(Peers backend){
+    public TRPeer(Peers backend) {
         this.backend = backend;
     }
+
     @Override
     public PeerAddress getAddress() {
         return new PeerAddress(backend.getAddress(), backend.getPort());

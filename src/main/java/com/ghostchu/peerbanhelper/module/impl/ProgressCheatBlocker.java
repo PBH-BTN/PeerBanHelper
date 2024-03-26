@@ -7,8 +7,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import lombok.Getter;
-import lombok.Setter;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.util.ArrayList;
@@ -58,7 +56,7 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
 
         double difference = Math.abs(actualProgress - clientProgress);
         if (difference > getConfig().getDouble("maximum-difference")) {
-            return new BanResult(true, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress,actualProgress,difference));
+            return new BanResult(true, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress, actualProgress, difference));
         }
 
         double rewindAllow = getConfig().getDouble("rewind-maximum-difference");
@@ -77,13 +75,11 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
             double rewind = lastRecord - peer.getProgress();
             boolean ban = rewind > rewindAllow;
-            return new BanResult(ban, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, clientProgress, actualProgress,lastRecord,rewind,rewindAllow));
+            return new BanResult(ban, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, clientProgress, actualProgress, lastRecord, rewind, rewindAllow));
         }
-        return new BanResult(false, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress,actualProgress,difference));
+        return new BanResult(false, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress, actualProgress, difference));
     }
 
-    @Setter
-    @Getter
     static class ClientTask {
         private String torrentId;
         private Double progress;
@@ -93,6 +89,21 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             this.progress = progress;
         }
 
+        public String getTorrentId() {
+            return this.torrentId;
+        }
+
+        public Double getProgress() {
+            return this.progress;
+        }
+
+        public void setTorrentId(String torrentId) {
+            this.torrentId = torrentId;
+        }
+
+        public void setProgress(Double progress) {
+            this.progress = progress;
+        }
     }
 }
 

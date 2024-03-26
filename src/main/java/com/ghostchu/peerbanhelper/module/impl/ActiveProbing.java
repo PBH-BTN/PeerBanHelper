@@ -13,10 +13,10 @@ import kong.unirest.Empty;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestInstance;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -28,8 +28,8 @@ import java.util.Locale;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
-@Slf4j
 public class ActiveProbing extends AbstractFeatureModule {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ActiveProbing.class);
     private final int timeout;
     private final List<Function<PeerAddress, BanResult>> rules = new ArrayList<>();
     private Cache<PeerAddress, BanResult> cache;

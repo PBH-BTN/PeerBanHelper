@@ -11,13 +11,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import kong.unirest.*;
-import lombok.extern.slf4j.Slf4j;
+import kong.unirest.HttpRequest;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestInstance;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 import java.util.*;
 
-@Slf4j
 public class QBittorrent implements Downloader {
     // dynamicTable.js -> applyFilter -> active
     private static final List<String> ACTIVE_STATE_LIST = ImmutableList.of(
@@ -29,6 +31,7 @@ public class QBittorrent implements Downloader {
             "uploading",
             "forcedUP"
     );
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(QBittorrent.class);
     private final String endpoint;
     private final String username;
     private final String password;
@@ -61,7 +64,7 @@ public class QBittorrent implements Downloader {
         HttpRequest<?> body = unirest.post(endpoint + "/auth/login")
                 .field("username", username)
                 .field("password", password);
-        if(StringUtils.isNotEmpty(baUser) || StringUtils.isNotEmpty(baPass)){
+        if (StringUtils.isNotEmpty(baUser) || StringUtils.isNotEmpty(baPass)) {
             body = body.basicAuth(baPass, baPass);
         }
         HttpResponse<String> resp = body.asString();

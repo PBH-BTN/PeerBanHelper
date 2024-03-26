@@ -30,8 +30,8 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
     public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         List<String> bannedPeers = getConfig().getStringList("banned-peer-id");
         for (String rule : bannedPeers) {
-            if(RuleParseHelper.match(peer.getPeerId(), rule)){
-                return new BanResult(true, String.format(Lang.MODULE_PID_MATCH_PEER_ID,rule));
+            if (RuleParseHelper.match(peer.getPeerId(), rule)) {
+                return new BanResult(true, String.format(Lang.MODULE_PID_MATCH_PEER_ID, rule));
             }
         }
         return new BanResult(false, "No matches");

@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.peer;
 
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 
-public interface Peer extends Comparable<Peer>{
+public interface Peer extends Comparable<Peer> {
     /**
      * 获取此对等体的 IP:端口 组
      * @return 地址包装器
@@ -53,8 +53,9 @@ public interface Peer extends Comparable<Peer>{
      * @return 对等体当前文件的下载速度
      */
     double getProgress();
+
     @Override
-    default int compareTo(Peer o){
-      return this.getAddress().compareTo(o.getAddress());
+    default int compareTo(Peer o) {
+        return this.getAddress().compareTo(o.getAddress());
     }
 }

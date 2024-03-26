@@ -1,8 +1,5 @@
 package com.ghostchu.peerbanhelper.torrent;
 
-import lombok.Setter;
-
-@Setter
 public class TorrentImpl implements Torrent {
     private String id;
     private String name;
@@ -31,4 +28,19 @@ public class TorrentImpl implements Torrent {
     }
 
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public void setDownloaded(long downloaded) {
+        this.downloaded = downloaded;
+    }
 }

@@ -8,8 +8,12 @@ import java.util.concurrent.ExecutorService;
 
 public interface FeatureModule {
     String getName();
+
     String getConfigName();
+
     boolean isModuleEnabled();
+
     BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor);
+
     ConfigurationSection getConfig();
 }

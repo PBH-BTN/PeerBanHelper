@@ -6,7 +6,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 public abstract class AbstractFeatureModule implements FeatureModule {
     private final YamlConfiguration profile;
 
-    public AbstractFeatureModule(YamlConfiguration profile){
+    public AbstractFeatureModule(YamlConfiguration profile) {
         this.profile = profile;
     }
 
@@ -14,8 +14,9 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     public boolean isModuleEnabled() {
         return getConfig().getBoolean("enabled");
     }
+
     @Override
-    public ConfigurationSection getConfig(){
+    public ConfigurationSection getConfig() {
         return profile.getConfigurationSection("module").getConfigurationSection(getConfigName());
     }
 }

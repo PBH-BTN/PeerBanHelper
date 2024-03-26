@@ -19,10 +19,10 @@ public class BlacklistProvider extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        if(session.getMethod() != Method.GET){
+        if (session.getMethod() != Method.GET) {
             return newFixedLengthResponse("error method");
         }
-        if(session.getUri().equals("/blocklist/transmission")){
+        if (session.getUri().equals("/blocklist/transmission")) {
             return newFixedLengthResponse(bakeTransmissionBlockList());
         }
         return newFixedLengthResponse("wrong endpoint");
