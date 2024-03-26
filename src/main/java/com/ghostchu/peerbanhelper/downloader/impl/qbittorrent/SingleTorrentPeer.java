@@ -107,4 +107,68 @@ public class SingleTorrentPeer implements Peer {
                 ", uploaded=" + uploaded +
                 '}';
     }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    public void setConnection(String connection) {
+        this.connection = connection;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public void setDlSpeed(Long dlSpeed) {
+        this.dlSpeed = dlSpeed;
+    }
+
+    public void setDownloaded(Long downloaded) {
+        this.downloaded = downloaded;
+    }
+
+    public void setFiles(String files) {
+        this.files = files;
+    }
+
+    public void setFlags(String flags) {
+        this.flags = flags;
+    }
+
+    public void setFlagsDesc(String flagsDesc) {
+        this.flagsDesc = flagsDesc;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public void setPeerIdClient(String peerIdClient) {
+        this.peerIdClient = peerIdClient;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public void setProgress(Double progress) {
+        this.progress = progress;
+    }
+
+    public void setRelevance(Double relevance) {
+        this.relevance = relevance;
+    }
+
+    public void setUpSpeed(Long upSpeed) {
+        this.upSpeed = upSpeed;
+    }
+
+    public void setUploaded(Long uploaded) {
+        this.uploaded = uploaded;
+    }
 }
