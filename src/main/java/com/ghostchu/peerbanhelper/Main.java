@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.LogManager;
 
 @Slf4j
 public class Main {
@@ -26,7 +27,8 @@ public class Main {
     @Getter
     private static BuildMeta meta = new BuildMeta();
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
+        LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
             if (stream == null) {
