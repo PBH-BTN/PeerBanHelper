@@ -110,6 +110,8 @@ public class QBittorrent implements Downloader {
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
             SingleTorrentPeer singleTorrentPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), SingleTorrentPeer.class);
+            System.out.println(resp.getBody());
+            System.out.println(singleTorrentPeer.toString());
             peersList.add(singleTorrentPeer);
         }
         return peersList;

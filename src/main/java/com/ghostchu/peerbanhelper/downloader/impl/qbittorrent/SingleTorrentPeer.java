@@ -85,4 +85,26 @@ public class SingleTorrentPeer implements Peer {
     public double getProgress() {
         return progress;
     }
+
+    @Override
+    public String toString() {
+        return "SingleTorrentPeer{" +
+                "client='" + client + '\'' +
+                ", connection='" + connection + '\'' +
+                ", country='" + country + '\'' +
+                ", countryCode='" + countryCode + '\'' +
+                ", dlSpeed=" + dlSpeed +
+                ", downloaded=" + downloaded +
+                ", files='" + files + '\'' +
+                ", flags='" + flags + '\'' +
+                ", flagsDesc='" + flagsDesc + '\'' +
+                ", ip='" + ip + '\'' +
+                ", peerIdClient='" + peerIdClient + '\'' +
+                ", port=" + port +
+                ", progress=" + progress +
+                ", relevance=" + relevance +
+                ", upSpeed=" + upSpeed +
+                ", uploaded=" + uploaded +
+                '}';
+    }
 }
