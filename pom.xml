@@ -234,6 +234,12 @@
                                 <buildArg>--trace-object-instantiation=ch.qos.logback.core.AsyncAppenderBase$Worker</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.LoggerFactory,ch.qos.logback</buildArg>
                                 <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>
+                                <buildArg>--report-unsupported-elements-at-runtime</buildArg>
+                                <buildArg>--allow-incomplete-classpath</buildArg>
+                                <buildArg>--enable-url-protocols=http</buildArg>
+                                <buildArg>-H:EnableURLProtocols=http</buildArg>
+                                <buildArg>-H:EnableURLProtocols=https</buildArg>
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
