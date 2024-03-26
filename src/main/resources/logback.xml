@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <appender name="SysOut" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>data/logs/latest.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="com.example" level="INFO">
+        <appender-ref ref="SysOut" />
+        <appender-ref ref="File" />
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="SysOut" />
+        <appender-ref ref="File" />
+    </root>
+    <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
+        <Marker>NETWORK_PACKETS</Marker>
+        <OnMatch>DENY</OnMatch>
+        <OnMismatch>NEUTRAL</OnMismatch>
+    </turboFilter>
+</configuration>
