@@ -236,10 +236,13 @@
                                 <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
-                                <buildArg>--enable-url-protocols=http</buildArg>
+                                <buildArg>--enable-url-protocols=http,https</buildArg>
                                 <buildArg>-H:EnableURLProtocols=http</buildArg>
                                 <buildArg>-H:EnableURLProtocols=https</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider</buildArg>
+                                <buildArg></buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
