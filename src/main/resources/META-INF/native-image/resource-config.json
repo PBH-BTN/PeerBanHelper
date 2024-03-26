@@ -1,0 +1,36 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.commons.logging.LogFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\Qbuild-info.yml\\E"
+  }, {
+    "pattern":"\\Qcommons-logging.properties\\E"
+  }, {
+    "pattern":"\\Qlogging.properties\\E"
+  }, {
+    "pattern":"\\Qmozilla/public-suffix-list.txt\\E"
+  }, {
+    "pattern":"\\Qorg/apache/http/client/version.properties\\E"
+  }, {
+    "pattern":"java.logging:\\Qsun/util/logging/resources/logging_zh.properties\\E"
+  }, {
+    "pattern":"java.logging:\\Qsun/util/logging/resources/logging_zh_Hans.properties\\E"
+  }, {
+    "pattern":"java.logging:\\Qsun/util/logging/resources/logging_zh_Hans_CN.properties\\E"
+  }]},
+  "bundles":[{
+    "name":"sun.text.resources.cldr.FormatData",
+    "locales":["und", "zh", "zh-CN", "zh-Hans", "zh-Hans-CN"]
+  }]
+}
