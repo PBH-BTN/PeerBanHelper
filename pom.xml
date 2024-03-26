@@ -222,6 +222,14 @@
                             <fallback>false</fallback>
                             <buildArgs>
                                 <buildArg>-H:NativeLinkerOption=/SUBSYSTEM:CONSOLE</buildArg>
+                                <buildArg>--verbose</buildArg>
+                                <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
+                                <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
+                                <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
+                                <buildArg>--trace-class-initialization=ch.qos.logback.classic.Logger</buildArg>
+                                <buildArg>--trace-object-instantiation=ch.qos.logback.core.AsyncAppenderBase$Worker</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.LoggerFactory,ch.qos.logback</buildArg>
+                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
