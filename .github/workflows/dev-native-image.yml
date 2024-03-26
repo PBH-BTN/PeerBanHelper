@@ -43,5 +43,5 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: build-artifacts
+          name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
           path: target/
