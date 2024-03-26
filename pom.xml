@@ -192,6 +192,10 @@
                             <skip>false</skip>
                             <imageName>${imageName}</imageName>
                             <fallback>false</fallback>
+                            <buildArgs>
+                                <buildArg>-H:NativeLinkerOption=/SUBSYSTEM:WINDOWS</buildArg>
+                                <buildArg>-H:NativeLinkerOption=/ENTRY:mainCRTStartup</buildArg>
+                            </buildArgs>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -277,6 +281,5 @@
             <artifactId>cordelia</artifactId>
             <version>5.4.0.RELEASE</version>
         </dependency>
-
     </dependencies>
 </project>
