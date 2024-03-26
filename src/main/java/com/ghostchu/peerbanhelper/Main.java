@@ -28,6 +28,12 @@ public class Main {
     private static BuildMeta meta = new BuildMeta();
 
     public static void main(String[] args) throws InterruptedException, IOException {
+        if(System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")){
+            ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
+            Process p = pb.start();
+            p.waitFor();
+        }
+
         LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
