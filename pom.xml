@@ -14,20 +14,10 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <native.maven.plugin.version>0.10.1</native.maven.plugin.version>
+        <imageName>peerbanhelper-binary</imageName>
+        <mainClass>com.ghostchu.peerbanhelper.Main</mainClass>
     </properties>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>graalvm-native-build-tools-snapshots</id>
-            <name>GraalVM native-build-tools Snapshots</name>
-            <url>https://raw.githubusercontent.com/graalvm/native-build-tools/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
     <build>
         <pluginManagement>
             <plugins>
@@ -57,7 +47,7 @@
                                 <transformers>
                                     <transformer
                                             implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <mainClass>com.ghostchu.peerbanhelper.Main</mainClass>
+                                        <mainClass>${mainClass}</mainClass>
                                     </transformer>
                                 </transformers>
                                 <filters>
@@ -197,18 +187,11 @@
                                 </goals>
                                 <phase>package</phase>
                             </execution>
-                            <execution>
-                                <id>test-native</id>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                                <phase>test</phase>
-                            </execution>
                         </executions>
                         <configuration>
-                            <agent>
-                                <enabled>true</enabled>
-                            </agent>
+                            <skip>false</skip>
+                            <imageName>${imageName}</imageName>
+                            <fallback>false</fallback>
                         </configuration>
                     </plugin>
                 </plugins>
