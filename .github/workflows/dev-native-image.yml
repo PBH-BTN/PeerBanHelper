@@ -15,7 +15,7 @@ on:
     branches: [ "master", "test" ]
 
 jobs:
-  build:
+  build-unix-like:
     name: ${{ matrix.version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -37,7 +37,37 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
-        run: mvn -B -ntp package -Pnative
+        run: mvn -B -ntp package -Pnative-unix-like
+        env:
+          NO_DOCKER: ${{ runner.os != 'Linux' }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
+          path: target/
+  build-windows:
+    name: ${{ matrix.version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        version: [ latest ]
+        os: [ windows-latest ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm-community'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build with Maven
+        run: mvn -B -ntp package -Pnative-windows
         env:
           NO_DOCKER: ${{ runner.os != 'Linux' }}
       - name: Upload build artifacts
