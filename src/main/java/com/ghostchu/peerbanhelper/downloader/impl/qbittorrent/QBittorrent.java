@@ -104,13 +104,13 @@ public class QBittorrent implements Downloader {
         if (!resp.isSuccess()) {
             throw new IllegalStateException(String.format(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.getStatus(), resp.getBody()));
         }
+        System.out.println(resp.getBody());
         JsonObject object = JsonParser.parseString(resp.getBody()).getAsJsonObject();
         JsonObject peers = object.getAsJsonObject("peers");
         List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
             SingleTorrentPeer singleTorrentPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), SingleTorrentPeer.class);
-            System.out.println(resp.getBody());
             System.out.println(singleTorrentPeer.toString());
             peersList.add(singleTorrentPeer);
         }
