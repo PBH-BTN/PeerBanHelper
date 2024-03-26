@@ -102,6 +102,7 @@ public class PeerBanHelperServer {
                 needRelaunched.addAll(banDownloader.getValue());
             } catch (Throwable th) {
                 log.warn(Lang.ERR_UNEXPECTED_API_ERROR, downloader.getName(), downloader.getEndpoint(), th);
+                th.printStackTrace();
             }
         }
 
