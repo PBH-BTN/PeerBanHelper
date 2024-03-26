@@ -222,6 +222,7 @@
                             <fallback>false</fallback>
                             <buildArgs>
                                 <buildArg>-H:NativeLinkerOption=/SUBSYSTEM:CONSOLE</buildArg>
+                                <buildArg>-J-Dfile.encoding=UTF-8</buildArg>
                                 <buildArg>--verbose</buildArg>
                                 <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
