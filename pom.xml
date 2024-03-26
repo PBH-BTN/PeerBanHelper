@@ -209,8 +209,11 @@
                                 <buildArg>-H:EnableURLProtocols=http</buildArg>
                                 <buildArg>-H:EnableURLProtocols=https</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
@@ -258,8 +261,11 @@
                                 <buildArg>-H:EnableURLProtocols=http</buildArg>
                                 <buildArg>-H:EnableURLProtocols=https</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
