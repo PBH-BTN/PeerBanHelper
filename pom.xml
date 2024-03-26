@@ -221,8 +221,7 @@
                             <imageName>${imageName}</imageName>
                             <fallback>false</fallback>
                             <buildArgs>
-                                <buildArg>-H:NativeLinkerOption=/SUBSYSTEM:WINDOWS</buildArg>
-                                <buildArg>-H:NativeLinkerOption=/ENTRY:mainCRTStartup</buildArg>
+                                <buildArg>-H:NativeLinkerOption=/SUBSYSTEM:CONSOLE</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
