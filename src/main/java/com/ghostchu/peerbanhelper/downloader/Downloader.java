@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface Downloader extends AutoCloseable {
      * 登录到此下载器
      * @return 登陆是否成功
      */
-    boolean login();
+    boolean login() throws URISyntaxException;
 
     /**
      * 获取此下载器的所有目前正在活动的 Torrent 列表

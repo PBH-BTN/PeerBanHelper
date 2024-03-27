@@ -23,12 +23,12 @@ import java.util.logging.LogManager;
 
 @Slf4j
 public class Main {
-    private static final File configDirectory = new File(new File("data"),"config");
+    private static final File configDirectory = new File(new File("data"), "config");
     @Getter
     private static BuildMeta meta = new BuildMeta();
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        if(System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")){
+        if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
             ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
             Process p = pb.start();
             p.waitFor();
@@ -87,7 +87,7 @@ public class Main {
             }
         }
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
-                YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")),mainConfig);
+                YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
         while (true) {
             Thread.sleep(30 * 1000);
         }
@@ -114,5 +114,8 @@ public class Main {
         return exists;
     }
 
+    public static String getUserAgent() {
+        return "PeerBanHelper/" + meta.getVersion();
+    }
 
 }
