@@ -28,14 +28,17 @@ public class Main {
     private static BuildMeta meta = new BuildMeta();
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
-            ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
-            Process p = pb.start();
-            p.waitFor();
-        }
-
         LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
+        if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
+            if(meta.isNativeImage() && !Boolean.parseBoolean(System.getProperty("disableChcpAutoDetect"))) {
+                System.out.println("Detected GraalVM native image running under Windows, switching chcp to 65001 (UTF-8).");
+                ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
+                Process p = pb.start();
+                p.waitFor();
+                System.out.println("代码页已切换到 UTF-8 (65001)");
+            }
+        }
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
             if (stream == null) {
                 log.error(Lang.ERR_BUILD_NO_INFO_FILE);

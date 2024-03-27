@@ -4,12 +4,14 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 public class BuildMeta {
     private String version = "unknown";
+    private boolean isNativeImage;
 
     public BuildMeta() {
     }
 
     public void loadBuildMeta(YamlConfiguration configuration) {
         this.version = configuration.getString("maven.version");
+        this.isNativeImage = configuration.getString("env.native-image","false").equalsIgnoreCase("true");
     }
 
     public String getVersion() {
@@ -18,6 +20,10 @@ public class BuildMeta {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public boolean isNativeImage() {
+        return isNativeImage;
     }
 
     public boolean equals(final Object o) {

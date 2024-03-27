@@ -172,6 +172,9 @@
     <profiles>
         <profile>
             <id>native-unix-like</id>
+            <properties>
+                <is-native-image>true</is-native-image>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -224,6 +227,9 @@
 
         <profile>
             <id>native-windows</id>
+            <properties>
+                <is-native-image>true</is-native-image>
+            </properties>
             <build>
                 <plugins>
                     <plugin>

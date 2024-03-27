@@ -38,7 +38,6 @@ public class PeerBanHelperServer {
     private ExecutorService checkBanExecutor;
     private ExecutorService downloaderApiExecutor;
 
-
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) {
         this.downloaders = downloaders;
         this.profile = profile;
