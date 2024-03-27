@@ -85,52 +85,56 @@ public class PeerBanHelperServer {
     }
 
     public void banWave() {
-        boolean needUpdate = false;
-        Set<Torrent> needRelaunched = new HashSet<>(downloaders.size());
-        // 多线程处理下载器封禁操作
-        for (Downloader downloader : downloaders) {
-            try {
-                if (!downloader.login()) {
-                    log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
-                    return;
-                }
-                Pair<Boolean, Collection<Torrent>> banDownloader = banDownloader(downloader);
-                if (banDownloader.getKey()) {
-                    needUpdate = true;
-                }
-                needRelaunched.addAll(banDownloader.getValue());
-            } catch (Throwable th) {
-                log.warn(Lang.ERR_UNEXPECTED_API_ERROR, downloader.getName(), downloader.getEndpoint(), th);
-                th.printStackTrace();
-            }
-        }
-
-        List<PeerAddress> removeBan = new ArrayList<>();
-        for (Map.Entry<PeerAddress, BanMetadata> pair : BAN_LIST.entrySet()) {
-            if (System.currentTimeMillis() >= pair.getValue().getUnbanAt()) {
-                removeBan.add(pair.getKey());
-            }
-        }
-
-        removeBan.forEach(this::unbanPeer);
-        if (!removeBan.isEmpty()) {
-            log.info(Lang.PEER_UNBAN_WAVE, removeBan.size());
-            needUpdate = true;
-        }
-
-        if (needUpdate) {
+        try {
+            boolean needUpdate = false;
+            Set<Torrent> needRelaunched = new HashSet<>(downloaders.size());
+            // 多线程处理下载器封禁操作
             for (Downloader downloader : downloaders) {
                 try {
                     if (!downloader.login()) {
                         log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
                         return;
                     }
-                    downloader.setBanList(BAN_LIST.keySet());
-                    downloader.relaunchTorrentIfNeeded(needRelaunched);
+                    Pair<Boolean, Collection<Torrent>> banDownloader = banDownloader(downloader);
+                    if (banDownloader.getKey()) {
+                        needUpdate = true;
+                    }
+                    needRelaunched.addAll(banDownloader.getValue());
                 } catch (Throwable th) {
-                    log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
+                    log.warn(Lang.ERR_UNEXPECTED_API_ERROR, downloader.getName(), downloader.getEndpoint(), th);
+                    th.printStackTrace();
                 }
             }
+
+            List<PeerAddress> removeBan = new ArrayList<>();
+            for (Map.Entry<PeerAddress, BanMetadata> pair : BAN_LIST.entrySet()) {
+                if (System.currentTimeMillis() >= pair.getValue().getUnbanAt()) {
+                    removeBan.add(pair.getKey());
+                }
+            }
+
+            removeBan.forEach(this::unbanPeer);
+            if (!removeBan.isEmpty()) {
+                log.info(Lang.PEER_UNBAN_WAVE, removeBan.size());
+                needUpdate = true;
+            }
+
+            if (needUpdate) {
+                for (Downloader downloader : downloaders) {
+                    try {
+                        if (!downloader.login()) {
+                            log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+                            return;
+                        }
+                        downloader.setBanList(BAN_LIST.keySet());
+                        downloader.relaunchTorrentIfNeeded(needRelaunched);
+                    } catch (Throwable th) {
+                        log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
+                    }
+                }
+            }
+        }finally {
+            System.gc(); // Trigger serial GC on GraalVM NativeImage to avoid took too much memory, we build NativeImage because it took less memory than JVM and faster startup speed
         }
     }
 
