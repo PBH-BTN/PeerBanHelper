@@ -9,19 +9,25 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import kong.unirest.Empty;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
-import kong.unirest.UnirestInstance;
 import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +38,8 @@ public class ActiveProbing extends AbstractFeatureModule {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ActiveProbing.class);
     private final int timeout;
     private final List<Function<PeerAddress, BanResult>> rules = new ArrayList<>();
-    private Cache<PeerAddress, BanResult> cache;
+    private final Cache<PeerAddress, BanResult> cache;
+    private SSLContext ignoreSslContext;
 
     public ActiveProbing(YamlConfiguration profile) {
         super(profile);
@@ -41,6 +48,44 @@ public class ActiveProbing extends AbstractFeatureModule {
                 .maximumSize(getConfig().getLong("max-cached-entry", 3000))
                 .expireAfterAccess(getConfig().getLong("expire-after-no-access", 28800), TimeUnit.SECONDS)
                 .build();
+        TrustManager trustManager = new X509ExtendedTrustManager() {
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[]{};
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
+            }
+        };
+        try {
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
+            this.ignoreSslContext = sslContext;
+        } catch (Exception e) {
+            log.warn(Lang.MODULE_AP_SSL_CONTEXT_FAILURE, e);
+        }
+
 
         for (String rule : getConfig().getStringList("probing")) {
             if (rule.equals("PING")) {
@@ -147,24 +192,29 @@ public class ActiveProbing extends AbstractFeatureModule {
                 url += "/" + subpath;
             }
         }
-        UnirestInstance unirest = Unirest.spawnInstance();
-        try (unirest) {
-            unirest.config()
-                    .connectTimeout(timeout)
-                    .socketTimeout(timeout)
-                    .automaticRetries(false)
-                    .setDefaultHeader("User-Agent", String.format(getConfig().getString("http-probing-user-agent", "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"), Main.getMeta().getVersion()));
-            if (scheme.equals("https") && spilt.length == 5) {
-                unirest.config()
-                        .verifySsl(Boolean.parseBoolean(spilt[4]));
-            }
-            HttpResponse<Empty> emptyHttpResponse = unirest.get(url).asEmpty();
-            String code = String.valueOf(emptyHttpResponse.getStatus());
+        CookieManager cm = new CookieManager();
+        cm.setCookiePolicy(CookiePolicy.ACCEPT_NONE);
+        HttpClient.Builder builder = HttpClient
+                .newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .connectTimeout(Duration.of(timeout, ChronoUnit.MILLIS))
+                .cookieHandler(cm);
+        if (scheme.equals("https") && spilt.length == 5 && ignoreSslContext != null) {
+            builder = builder.sslContext(ignoreSslContext);
+        }
+        HttpClient client = builder.build();
+        try {
+            HttpResponse<String> resp = client.send(HttpRequest.newBuilder(new URI(url))
+                    .GET()
+                    .header("User-Agent", String.format(getConfig().getString("http-probing-user-agent", "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"), Main.getMeta().getVersion()))
+                    .build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+            );
+            String code = String.valueOf(resp.statusCode());
             if (code.equals(exceptedCode)) {
                 return new BanResult(true, String.format(Lang.MODULE_AP_BAN_PEER_CODE, code));
             }
             return new BanResult(false, String.format(Lang.MODULE_AP_PEER_CODE, code));
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException | URISyntaxException e) {
             return new BanResult(false, "HTTP Exception: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }

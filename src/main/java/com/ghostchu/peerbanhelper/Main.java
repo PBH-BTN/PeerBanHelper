@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.text.Lang;
-import kong.unirest.Unirest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -51,12 +50,7 @@ public class Main {
         } catch (IOException | InvalidConfigurationException e) {
             log.error(Lang.ERR_CANNOT_LOAD_BUILD_INFO, e);
         }
-
-
         log.info(Lang.MOTD, meta.getVersion());
-        Unirest.config()
-                .setDefaultHeader("User-Agent", "PeerBanHelper/" + meta.getVersion())
-                .enableCookieManagement(true);
         List<Downloader> downloaderList = new ArrayList<>();
         log.info(Lang.LOADING_CONFIG);
         try {

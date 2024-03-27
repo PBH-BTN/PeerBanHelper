@@ -33,6 +33,7 @@ public class Lang {
     public static String MODULE_AP_BAN_PEER_TCP_TEST = "TCP 测试通过: %s";
     public static String MODULE_AP_TCP_TEST_PORT_FAIL = "TCP 探测目标失败: %s";
     public static String MODULE_AP_EXECUTE_EXCEPTION = "烘焙缓存时出错，请将下面的错误日志发送给开发者以协助修复此错误";
+    public static String MODULE_AP_SSL_CONTEXT_FAILURE = "初始化 SSLContext 时出错";
     public static String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: \n{}";
     public static String DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST = "请求 Torrents 列表失败 - %d - %s";
     public static String DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";
