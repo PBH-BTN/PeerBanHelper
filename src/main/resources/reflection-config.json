@@ -1,6 +1,6 @@
 [
   {
-    "name": "ch.qos.logback.classic.AsyncAppender",
+    "name": "java.util.logging.FileHandler",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -8,7 +8,20 @@
     "allDeclaredFields": true,
     "allPublicFields": true,
     "allDeclaredClasses": true,
-    "allPublicClasses": true
+    "allPublicClasses": true,
+    "unsafeAllocated": true
+  },
+  {
+    "name": "java.util.logging.ConsoleHandler",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true,
+    "allPublicClasses": true,
+    "unsafeAllocated": true
   },
   {
     "name": "boolean[]",
