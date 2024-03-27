@@ -3,14 +3,19 @@
 > [!NOTE]
 > PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知
 
+> [!NOTE]
+> QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题。
+
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
 <img width="1082" alt="Snipaste_2024-03-14_12-34-16" src="https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/e30b294e-2509-484d-a510-37c20a63b0c3">
 
 ## 安装&环境要求
 
-[Windows(新支持懒人包!)](https://github.com/Ghost-chu/PeerBanHelper#windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)  
-[Linux/Docker](https://github.com/Ghost-chu/PeerBanHelper#docker-%E9%83%A8%E7%BD%B2)
+推荐：[Windows(新支持懒人包!)](https://github.com/Ghost-chu/PeerBanHelper#windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)  
+推荐：[Linux/Docker](https://github.com/Ghost-chu/PeerBanHelper#docker-%E9%83%A8%E7%BD%B2)
+
+实验性：[Native Image 原生二进制可执行文件](https://github.com/Ghost-chu/PeerBanHelper/issues/1)
 
 配置文件在所有平台上需要统一使用 UTF-8 编码编辑和保存，建议使用第三方文本编辑器如 Visual Studio Code 或者 Notepad++。
 
