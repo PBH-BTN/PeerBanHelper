@@ -62,7 +62,18 @@ public class QBittorrent implements Downloader {
         return name;
     }
 
+    public boolean isLoggedIn() {
+        java.net.http.HttpResponse resp;
+        try {
+            resp = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/app/preferences")).GET().header("User-Agent", Main.getUserAgent()).timeout(Duration.of(30, ChronoUnit.SECONDS)).build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            return false;
+        }
+        return resp.statusCode() == 200;
+    }
+
     public boolean login() {
+        if(isLoggedIn()) return true;
         try {
             java.net.http.HttpResponse request = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/auth/login"))
                     .POST(new MultiPartBodyPublisher()
