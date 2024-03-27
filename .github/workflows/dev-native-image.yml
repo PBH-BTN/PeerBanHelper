@@ -46,8 +46,9 @@ jobs:
         with:
           name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
           path: |
-            target/*.jar
+            target/PeerBanHelper.jar
             target/peerbanhelper-binary
+            target/*.exe
   build-windows:
     name: ${{ matrix.version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -79,5 +80,6 @@ jobs:
         with:
           name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
           path: |
-            target/*.jar
+            target/PeerBanHelper.jar
             target/peerbanhelper-binary
+            target/*.exe
