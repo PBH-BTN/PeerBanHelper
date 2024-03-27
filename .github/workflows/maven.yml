@@ -29,7 +29,9 @@ jobs:
     - name: Build with Maven
       run: mvn -B package install --file pom.xml
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
-        name: build-artifacts
-        path: target/
+        name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
+        path: |
+          target/*.jar
+          target/peerbanhelper-binary

@@ -42,10 +42,12 @@ jobs:
         env:
           NO_DOCKER: ${{ runner.os != 'Linux' }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
-          path: target/
+          path: |
+            target/*.jar
+            target/peerbanhelper-binary
   build-windows:
     name: ${{ matrix.version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -73,7 +75,9 @@ jobs:
         env:
           NO_DOCKER: ${{ runner.os != 'Linux' }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
-          path: target/
+          path: |
+            target/*.jar
+            target/peerbanhelper-binary
