@@ -72,12 +72,38 @@
   "methods":[{"name":"getArguments","parameterTypes":[] }, {"name":"getMethod","parameterTypes":[] }, {"name":"getTag","parameterTypes":[] }]
 },
 {
+  "name":"cordelia.rpc.RqBlockList",
+  "allDeclaredFields":true
+},
+{
+  "name":"cordelia.rpc.RqSessionSet",
+  "allDeclaredFields":true
+},
+{
+  "name":"cordelia.rpc.RqTorrent",
+  "allDeclaredFields":true
+},
+{
   "name":"cordelia.rpc.RqTorrentGet",
   "allDeclaredFields":true
 },
 {
   "name":"cordelia.rpc.RsArguments",
   "queryAllDeclaredMethods":true
+},
+{
+  "name":"cordelia.rpc.RsBlockList",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setBlockListSize","parameterTypes":["java.lang.Integer"] }]
+},
+{
+  "name":"cordelia.rpc.RsEmpty",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"cordelia.rpc.RsTorrentGet",
@@ -116,6 +142,11 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "methods":[{"name":"toValue","parameterTypes":[] }]
+},
+{
+  "name":"cordelia.rpc.types.TorrentAction",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
 },
 {
   "name":"cordelia.rpc.types.Torrents",

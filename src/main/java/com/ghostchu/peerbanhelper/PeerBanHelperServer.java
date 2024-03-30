@@ -130,6 +130,7 @@ public class PeerBanHelperServer {
                         downloader.relaunchTorrentIfNeeded(needRelaunched);
                     } catch (Throwable th) {
                         log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
+                        th.printStackTrace();
                     }
                 }
             }

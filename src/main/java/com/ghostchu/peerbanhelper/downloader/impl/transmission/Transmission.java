@@ -13,6 +13,7 @@ import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -91,26 +92,24 @@ public class Transmission implements Downloader {
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+        if (torrents.isEmpty()) return;
         log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size());
-
+        RqTorrent stop = new RqTorrent(TorrentAction.STOP, new ArrayList<>());
         for (Torrent torrent : torrents) {
-            RqTorrent stop = new RqTorrent(TorrentAction.STOP);
             stop.add(Long.parseLong(torrent.getId()));
-            client.execute(stop);
         }
-
+        client.execute(stop);
         try {
-            Thread.sleep(3000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
             Thread.currentThread().interrupt();
         }
-
+        RqTorrent resume = new RqTorrent(TorrentAction.START, new ArrayList<>());
         for (Torrent torrent : torrents) {
-            RqTorrent stop = new RqTorrent(TorrentAction.START);
-            stop.add(Long.parseLong(torrent.getId()));
-            client.execute(stop);
+            resume.add(torrent.getId());
         }
+        client.execute(resume);
 
     }
 
