@@ -1,5 +1,21 @@
 [
 {
+  "name":"[Lcom.fasterxml.jackson.databind.deser.Deserializers;"
+},
+{
+  "name":"[Lcom.fasterxml.jackson.databind.deser.KeyDeserializers;"
+},
+{
+  "name":"[Lcom.fasterxml.jackson.databind.deser.ValueInstantiators;"
+},
+{
+  "name":"[Lcom.fasterxml.jackson.databind.ser.Serializers;"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.SingleTorrentPeer",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
@@ -42,12 +58,118 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"cordelia.client.RawResponse",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setArguments","parameterTypes":["java.util.Map"] }, {"name":"setResult","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"cordelia.client.TypedRequest",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"getArguments","parameterTypes":[] }, {"name":"getMethod","parameterTypes":[] }, {"name":"getTag","parameterTypes":[] }]
+},
+{
+  "name":"cordelia.rpc.RqTorrentGet",
+  "allDeclaredFields":true
+},
+{
+  "name":"cordelia.rpc.RsArguments",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"cordelia.rpc.RsTorrentGet",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setTorrents","parameterTypes":["java.util.List"] }]
+},
+{
+  "name":"cordelia.rpc.types.FileStats",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"cordelia.rpc.types.Files",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"cordelia.rpc.types.Peers",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setAddress","parameterTypes":["java.lang.String"] }, {"name":"setClientIsInterested","parameterTypes":["java.lang.Boolean"] }, {"name":"setClientName","parameterTypes":["java.lang.String"] }, {"name":"setFlagStr","parameterTypes":["java.lang.String"] }, {"name":"setIsDownloadingFrom","parameterTypes":["java.lang.Boolean"] }, {"name":"setIsEncrypted","parameterTypes":["java.lang.Boolean"] }, {"name":"setIsIncoming","parameterTypes":["java.lang.Boolean"] }, {"name":"setIsUTP","parameterTypes":["java.lang.Boolean"] }, {"name":"setIsUploadingTo","parameterTypes":["java.lang.Boolean"] }, {"name":"setPeerIsInterested","parameterTypes":["java.lang.Boolean"] }, {"name":"setPort","parameterTypes":["java.lang.Integer"] }, {"name":"setProgress","parameterTypes":["java.lang.Double"] }, {"name":"setRateToClient","parameterTypes":["java.lang.Long"] }, {"name":"setRateToPeer","parameterTypes":["java.lang.Long"] }]
+},
+{
+  "name":"cordelia.rpc.types.PeersFrom",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"cordelia.rpc.types.Status",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"toValue","parameterTypes":[] }]
+},
+{
+  "name":"cordelia.rpc.types.Torrents",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setHashString","parameterTypes":["java.lang.String"] }, {"name":"setId","parameterTypes":["java.lang.Long"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setPeerLimit","parameterTypes":["java.lang.Integer"] }, {"name":"setPeers","parameterTypes":["java.util.List"] }, {"name":"setPeersConnected","parameterTypes":["java.lang.Integer"] }, {"name":"setRateDownload","parameterTypes":["java.lang.Long"] }, {"name":"setRateUpload","parameterTypes":["java.lang.Long"] }, {"name":"setStatus","parameterTypes":["cordelia.rpc.types.Status"] }, {"name":"setTotalSize","parameterTypes":["java.lang.Long"] }]
+},
+{
+  "name":"cordelia.rpc.types.TrackerStats",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"cordelia.rpc.types.Trackers",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"java.io.Serializable",
+  "queryAllDeclaredMethods":true
+},
+{
   "name":"java.lang.Class",
   "methods":[{"name":"getRecordComponents","parameterTypes":[] }, {"name":"isRecord","parameterTypes":[] }]
 },
 {
+  "name":"java.lang.Comparable",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.Double",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"java.lang.Number",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
   "name":"java.lang.Thread",
   "fields":[{"name":"threadLocalRandomProbe"}]
+},
+{
+  "name":"java.lang.constant.Constable",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.constant.ConstantDesc",
+  "queryAllDeclaredMethods":true
 },
 {
   "name":"java.lang.reflect.RecordComponent",

@@ -22,11 +22,16 @@ import java.util.logging.LogManager;
 
 @Slf4j
 public class Main {
-    private static final File configDirectory = new File(new File("data"), "config");
+    private static final File dataDirectory = new File("data");
+    private static final File logsDirectory = new File(dataDirectory, "logs");
+    private static final File configDirectory = new File(dataDirectory, "config");
     @Getter
     private static BuildMeta meta = new BuildMeta();
 
     public static void main(String[] args) throws InterruptedException, IOException {
+        if (!logsDirectory.exists()) {
+            logsDirectory.mkdirs();
+        }
         LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
         if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {

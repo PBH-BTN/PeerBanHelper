@@ -30,5 +30,8 @@
   "bundles":[{
     "name":"sun.text.resources.cldr.FormatData",
     "locales":["en", "en-US", "und", "zh", "zh-CN", "zh-Hans", "zh-Hans-CN"]
+  }, {
+    "name":"sun.util.resources.cldr.CalendarData",
+    "locales":["und"]
   }]
 }
