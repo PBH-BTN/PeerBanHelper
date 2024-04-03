@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableList;
@@ -33,11 +34,11 @@ public class QBittorrent implements Downloader {
     private final String name;
     private final HttpClient httpClient;
 
-    public QBittorrent(String name, String endpoint, String username, String password, String baUser, String baPass) {
+    public QBittorrent(String name, String endpoint, String username, String password, String baUser, String baPass, boolean verifySSL) {
         this.name = name;
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        this.httpClient = HttpClient
+        HttpClient.Builder builder = HttpClient
                 .newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
@@ -47,7 +48,11 @@ public class QBittorrent implements Downloader {
                         return new PasswordAuthentication(baUser, baPass.toCharArray());
                     }
                 })
-                .cookieHandler(cm).build();
+                .cookieHandler(cm);
+        if(!verifySSL && HTTPUtil.getIgnoreSslContext() != null){
+           builder = builder.sslContext(HTTPUtil.getIgnoreSslContext()) ;
+        }
+        this.httpClient = builder.build();
         this.endpoint = endpoint + "/api/v2";
         this.username = username;
         this.password = password;
@@ -174,7 +179,6 @@ public class QBittorrent implements Downloader {
     public void setBanList(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
-
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())));

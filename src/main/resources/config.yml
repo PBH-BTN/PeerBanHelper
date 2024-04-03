@@ -19,6 +19,8 @@ client:
     basic-auth:
       user: ""
       pass: ""
+    # 验证 SSL 证书有效性
+    verify-ssl: true
   transmission-002:
     type: Transmission
     endpoint: "http://127.0.0.1:9091"

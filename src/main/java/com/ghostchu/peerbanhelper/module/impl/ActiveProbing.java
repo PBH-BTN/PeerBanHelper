@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -14,18 +15,12 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedTrustManager;
 import java.io.IOException;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -39,7 +34,6 @@ public class ActiveProbing extends AbstractFeatureModule {
     private final int timeout;
     private final List<Function<PeerAddress, BanResult>> rules = new ArrayList<>();
     private final Cache<PeerAddress, BanResult> cache;
-    private SSLContext ignoreSslContext;
 
     public ActiveProbing(YamlConfiguration profile) {
         super(profile);
@@ -48,44 +42,6 @@ public class ActiveProbing extends AbstractFeatureModule {
                 .maximumSize(getConfig().getLong("max-cached-entry", 3000))
                 .expireAfterAccess(getConfig().getLong("expire-after-no-access", 28800), TimeUnit.SECONDS)
                 .build();
-        TrustManager trustManager = new X509ExtendedTrustManager() {
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[]{};
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
-            }
-        };
-        try {
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
-            this.ignoreSslContext = sslContext;
-        } catch (Exception e) {
-            log.warn(Lang.MODULE_AP_SSL_CONTEXT_FAILURE, e);
-        }
-
 
         for (String rule : getConfig().getStringList("probing")) {
             if (rule.equals("PING")) {
@@ -199,8 +155,8 @@ public class ActiveProbing extends AbstractFeatureModule {
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(timeout, ChronoUnit.MILLIS))
                 .cookieHandler(cm);
-        if (scheme.equals("https") && spilt.length == 5 && ignoreSslContext != null) {
-            builder = builder.sslContext(ignoreSslContext);
+        if (scheme.equals("https") && spilt.length == 5 && HTTPUtil.getIgnoreSslContext() != null) {
+            builder = builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         HttpClient client = builder.build();
         try {

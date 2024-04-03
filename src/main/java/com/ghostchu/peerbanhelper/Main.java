@@ -35,12 +35,10 @@ public class Main {
         LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
         if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
-            //if(meta.isNativeImage() && !Boolean.parseBoolean(System.getProperty("disableChcpAutoDetect"))) {
                 ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
                 Process p = pb.start();
                 p.waitFor();
                 System.out.println("代码页已切换到 UTF-8 (65001)");
-            //}
         }
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
             if (stream == null) {
@@ -76,9 +74,10 @@ public class Main {
             String password = downloaderSection.getString("password");
             String baUser = downloaderSection.getString("basic-auth.user");
             String baPass = downloaderSection.getString("basic-auth.pass");
+            boolean verifySSL = downloaderSection.getBoolean("verify-ssl", true);
             switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
                 case "qbittorrent" -> {
-                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass));
+                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass,verifySSL));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
                 }
                 case "transmission" -> {
