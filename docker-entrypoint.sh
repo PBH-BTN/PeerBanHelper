@@ -1,27 +1,24 @@
 #!/bin/sh
 
-if [ -z $NATIVE_SUPPORT ]
-then
-  echo "The environment variable NATIVE_SUPPORT must be set."
-  exit 1
-fi
-
-if [ -z $USE_NATIVE_IMAGE ]
+if [ -z "$USE_NATIVE_IMAGE" ]
 then
   echo "The environment variable USE_NATIVE_IMAGE must be set."
   exit 1
 fi
-
-if [ $USE_NATIVE_IMAGE -eq 1 ]
+BIN_FILE=/app/peerbanhelper-binary
+if [ "$USE_NATIVE_IMAGE" -eq 1 ]
 then
-  if [ $NATIVE_SUPPORT -eq 1 ]
+  if [ -f "$BIN_FILE" ]
   then
-    chmod +x peerbanhelper-binary
-    ./peerbanhelper-binary
+      echo "$BIN_FILE exist"
   else
-    echo "This PeerBanHelper image aren't included the native image."
+    echo "PeerBanHelper binary file not exists but USE_NATIVE_IMAGE=1, please disable native image option or use native-image included image"
     exit 1
   fi
+  echo "Launching PeerBanHelper via Native-Image binary file..."
+  chmod +x $BIN_FILE
+  BIN_FILE
 else
+   echo "Launching PeerBanHelper via universal JAR..."
   java -Xmx256M -XX:+UseSerialGC -jar PeerBanHelper.jar
 fi
