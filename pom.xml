@@ -215,6 +215,7 @@
                                 <buildArg>-H:EnableURLProtocols=http</buildArg>
                                 <buildArg>-H:EnableURLProtocols=https</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <buildArg>-march=compatibility</buildArg>
                                 <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
@@ -276,6 +277,7 @@
                                 <buildArg>-H:EnableURLProtocols=https</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                                 <buildArg>--gc=serial</buildArg>
+                                <buildArg>-march=compatibility</buildArg>
                                 <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
