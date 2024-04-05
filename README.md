@@ -291,7 +291,7 @@ PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。
 ### Windows 手动部署
 
 > [!TIP]
-> 自 2.1 起，Windows 用户现在有懒人包了，内置 JDK 环境和启动程序，可以从 [Releases](https://github.com/Ghost-chu/PeerBanHelper/releases/latest) 下载 `Windows-Lazy-Pack.zip`。
+> 自 2.3 起，Windows 懒人包现在默认使用二进制文件，不再需要配置 JDK 环境和启动脚本
 
 <details>
 
@@ -311,7 +311,7 @@ PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。
 @echo off
 title PeerBanHelper
 :main
-java -Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -jar PeerBanHelper.jar
+java -Xmx256M -XX:+UseSerialGC -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -Dconsole.encoding=UTF-8 -Duser.language=en -Duser.region=US -jar PeerBanHelper.jar
 timeout /t 5 /nobreak >nul
 echo Restarting...
 goto main
