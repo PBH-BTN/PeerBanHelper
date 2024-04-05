@@ -11,8 +11,8 @@ then
   fi
   echo "Launching PeerBanHelper via Native-Image binary file..."
   chmod +x $BIN_FILE
-  BIN_FILE
+  ./peerbanhelper-binary
 else
-   echo "Launching PeerBanHelper via universal JAR..."
+  echo "Launching PeerBanHelper via universal JAR..."
   java -Xmx256M -XX:+UseSerialGC -jar PeerBanHelper.jar
 fi
