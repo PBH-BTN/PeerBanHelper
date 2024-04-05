@@ -1,10 +1,4 @@
 #!/bin/sh
-
-if [ -z "$USE_NATIVE_IMAGE" ]
-then
-  echo "The environment variable USE_NATIVE_IMAGE must be set."
-  exit 1
-fi
 BIN_FILE=/app/peerbanhelper-binary
 if [ "$USE_NATIVE_IMAGE" -eq 1 ]
 then
