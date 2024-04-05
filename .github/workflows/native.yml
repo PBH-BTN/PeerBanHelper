@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         version: [ latest ]
-        os: [ macos-latest, ubuntu-latest ]
+        os: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v2
       - uses: graalvm/setup-graalvm@v1
@@ -41,9 +41,6 @@ jobs:
           path: |
             target/PeerBanHelper.jar
             target/peerbanhelper-binary
-      - name: Extract Maven project version
-        run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-        id: project
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
@@ -97,9 +94,6 @@ jobs:
           path: |
             target/PeerBanHelper.jar
             target/peerbanhelper-binary.exe
-      - name: Extract Maven project version
-        run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-        id: project
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
@@ -114,7 +108,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=ref,event=pr
-            type=semver,pattern={{version}}
+            type=semver,pattern=${{ steps.actions_project_version_check.outputs.version }}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,latest-native-windows
             type=sha
