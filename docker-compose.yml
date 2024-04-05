@@ -1,10 +1,13 @@
 version: "3.9"
 services:
   peerbanhelper:
-    image: "ghostchu/peerbanhelper:latest"
+    image: "ghostchu/peerbanhelper:latest-native-linux"
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
       - ./:/app/data
     ports:
       - "9898:9898"
+    environment:
+# 取消注释以使用 Native Image 本地二进制文件，占用资源更少，但可能有 BUG
+#      USE_NATIVE_IMAGE: 1
