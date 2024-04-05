@@ -11,8 +11,6 @@ name: Java CI
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   build:
@@ -27,7 +25,7 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         cache: maven
     - name: Build with Maven
-      run: mvn -B package install --file pom.xml
+      run: mvn -B clean package --file pom.xml
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
