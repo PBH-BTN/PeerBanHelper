@@ -38,7 +38,9 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
     public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         final long uploaded = peer.getUploaded();
         final long torrentSize = torrent.getSize();
-
+        if (torrentSize <= 0) {
+            return new BanResult(false, Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
+        }
         final double actualProgress = (double) uploaded / torrentSize;
         final double clientProgress = peer.getProgress();
         // uploaded = -1 代表客户端不支持统计此 Peer 总上传量
@@ -93,12 +95,12 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             return this.torrentId;
         }
 
-        public Double getProgress() {
-            return this.progress;
-        }
-
         public void setTorrentId(String torrentId) {
             this.torrentId = torrentId;
+        }
+
+        public Double getProgress() {
+            return this.progress;
         }
 
         public void setProgress(Double progress) {
