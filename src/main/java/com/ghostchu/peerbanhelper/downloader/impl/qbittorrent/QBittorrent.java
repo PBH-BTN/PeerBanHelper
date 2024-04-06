@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -33,6 +34,7 @@ public class QBittorrent implements Downloader {
     private final String password;
     private final String name;
     private final HttpClient httpClient;
+    private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
 
     public QBittorrent(String name, String endpoint, String username, String password, String baUser, String baPass, boolean verifySSL) {
         this.name = name;
@@ -49,8 +51,8 @@ public class QBittorrent implements Downloader {
                     }
                 })
                 .cookieHandler(cm);
-        if(!verifySSL && HTTPUtil.getIgnoreSslContext() != null){
-           builder = builder.sslContext(HTTPUtil.getIgnoreSslContext()) ;
+        if (!verifySSL && HTTPUtil.getIgnoreSslContext() != null) {
+            builder = builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
         this.endpoint = endpoint + "/api/v2";
@@ -101,7 +103,7 @@ public class QBittorrent implements Downloader {
             }
             return request.statusCode() == 200;
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage());
+            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage(),e);
             return false;
         }
     }
@@ -196,10 +198,22 @@ public class QBittorrent implements Downloader {
                             , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
                 log.warn(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, endpoint, request.statusCode(), "HTTP ERROR", request.body());
+                throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, endpoint, "N/A", e.getClass().getName(), e.getMessage());
+            log.warn(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, endpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+            throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    public DownloaderLastStatus getLastStatus() {
+        return lastStatus;
+    }
+
+    @Override
+    public void setLastStatus(DownloaderLastStatus lastStatus) {
+        this.lastStatus = lastStatus;
     }
 
     @Override

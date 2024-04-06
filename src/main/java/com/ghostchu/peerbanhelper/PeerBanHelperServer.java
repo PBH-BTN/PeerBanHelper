@@ -1,15 +1,20 @@
 package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.metric.Metrics;
+import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.web.WebEndpointProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -26,17 +31,26 @@ public class PeerBanHelperServer {
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final Timer PEER_CHECK_TIMER = new Timer("Peer check");
     private final YamlConfiguration profile;
+    @Getter
     private final List<Downloader> downloaders;
+    @Getter
     private final long banDuration;
+    @Getter
     private final int httpdPort;
+    @Getter
     private final boolean hideFinishLogs;
+    @Getter
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
+    @Getter
     private List<FeatureModule> registeredModules = new ArrayList<>();
-    private BlacklistProvider blacklistProviderServer;
+    @Getter
+    private WebEndpointProvider webEndpointProviderServer;
     private ExecutorService generalExecutor;
     private ExecutorService checkBanExecutor;
     private ExecutorService downloaderApiExecutor;
+    @Getter
+    private Metrics metrics;
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) {
         this.downloaders = downloaders;
@@ -49,14 +63,19 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
         this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
+        registerMetrics();
         registerModules();
         registerTimer();
         registerBlacklistHttpServer();
     }
 
+    private void registerMetrics() {
+        this.metrics = new InMemoryMetrics();
+    }
+
     private void registerBlacklistHttpServer() {
         try {
-            this.blacklistProviderServer = new BlacklistProvider(httpdPort, this);
+            this.webEndpointProviderServer = new WebEndpointProvider(httpdPort, this);
         } catch (IOException e) {
             log.warn(Lang.ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE, e);
         }
@@ -86,6 +105,7 @@ public class PeerBanHelperServer {
 
     public void banWave() {
         try {
+            downloaders.forEach(downloader-> downloader.setLastStatus(DownloaderLastStatus.HEALTHY));
             boolean needUpdate = false;
             Set<Torrent> needRelaunched = new HashSet<>(downloaders.size());
             // 多线程处理下载器封禁操作
@@ -93,6 +113,7 @@ public class PeerBanHelperServer {
                 try {
                     if (!downloader.login()) {
                         log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+                        downloader.setLastStatus(DownloaderLastStatus.ERROR);
                         return;
                     }
                     Pair<Boolean, Collection<Torrent>> banDownloader = banDownloader(downloader);
@@ -102,7 +123,7 @@ public class PeerBanHelperServer {
                     needRelaunched.addAll(banDownloader.getValue());
                 } catch (Throwable th) {
                     log.warn(Lang.ERR_UNEXPECTED_API_ERROR, downloader.getName(), downloader.getEndpoint(), th);
-                    th.printStackTrace();
+                    downloader.setLastStatus(DownloaderLastStatus.ERROR);
                 }
             }
 
@@ -124,17 +145,19 @@ public class PeerBanHelperServer {
                     try {
                         if (!downloader.login()) {
                             log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+                            downloader.setLastStatus(DownloaderLastStatus.ERROR);
                             return;
                         }
                         downloader.setBanList(BAN_LIST.keySet());
                         downloader.relaunchTorrentIfNeeded(needRelaunched);
                     } catch (Throwable th) {
                         log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
-                        th.printStackTrace();
+                        downloader.setLastStatus(DownloaderLastStatus.ERROR);
                     }
                 }
             }
-        }finally {
+        } finally {
+            metrics.recordCheck();
             System.gc(); // Trigger serial GC on GraalVM NativeImage to avoid took too much memory, we build NativeImage because it took less memory than JVM and faster startup speed
         }
     }
@@ -186,7 +209,7 @@ public class PeerBanHelperServer {
                 }
             }, checkBanExecutor));
         }
-        while (moduleExecutorFutures.stream().anyMatch(future->!future.isDone())) {
+        while (moduleExecutorFutures.stream().anyMatch(future -> !future.isDone())) {
             synchronized (wakeLock) {
                 try {
                     wakeLock.wait(1000);
@@ -197,7 +220,7 @@ public class PeerBanHelperServer {
             }
         }
         for (BanResult result : results) {
-            if(result.ban()){
+            if (result.ban()) {
                 return result;
             }
         }
@@ -211,10 +234,13 @@ public class PeerBanHelperServer {
 
     public void banPeer(@NotNull PeerAddress peer, @NotNull BanMetadata banMetadata) {
         BAN_LIST.put(peer, banMetadata);
+        metrics.recordPeerBan(peer, banMetadata);
     }
 
 
     public void unbanPeer(@NotNull PeerAddress address) {
-        BAN_LIST.remove(address);
+        BanMetadata metadata = BAN_LIST.remove(address);
+        metrics.recordPeerUnban(address, metadata);
     }
+
 }

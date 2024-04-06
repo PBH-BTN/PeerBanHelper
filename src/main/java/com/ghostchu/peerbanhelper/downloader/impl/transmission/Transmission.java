@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -26,6 +27,7 @@ public class Transmission implements Downloader {
     private final String endpoint;
     private final TrClient client;
     private final String blocklistUrl;
+    private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
 
     /*
         API 受限，实际实现起来意义不大
@@ -111,6 +113,16 @@ public class Transmission implements Downloader {
         }
         client.execute(resume);
 
+    }
+
+    @Override
+    public DownloaderLastStatus getLastStatus() {
+        return lastStatus;
+    }
+
+    @Override
+    public void setLastStatus(DownloaderLastStatus lastStatus) {
+        this.lastStatus = lastStatus;
     }
 
     @Override

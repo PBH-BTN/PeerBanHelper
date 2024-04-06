@@ -1,6 +1,10 @@
 {
   "resources":{
   "includes":[{
+    "pattern":"\\QMETA-INF/nanohttpd/default-mimetypes.properties\\E"
+  }, {
+    "pattern":"\\QMETA-INF/nanohttpd/mimetypes.properties\\E"
+  }, {
     "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
   }, {
     "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
@@ -15,7 +19,15 @@
   }, {
     "pattern":"\\Qbuild-info.yml\\E"
   }, {
+    "pattern":"\\Qconfig.yml\\E"
+  }, {
     "pattern":"\\Qlogging.properties\\E"
+  }, {
+    "pattern":"\\Qprofile.yml\\E"
+  }, {
+    "pattern":"\\Qstatic/index.html\\E"
+  }, {
+    "pattern":"\\Qstatic/js/main.js\\E"
   }, {
     "pattern":"java.logging:\\Qsun/util/logging/resources/logging_en.properties\\E"
   }, {

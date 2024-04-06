@@ -51,5 +51,5 @@ public class Lang {
             """;
     public static String ERR_CONFIG_DIRECTORY_INCORRECT = "初始化失败：config 不是一个目录。如果您正在使用 Docker，请确保其正确挂载。";
 
-
+    public static String WEB_ENDPOINT_REGISTERED = "[注册] WebAPI 端点已注册：{}";
 }

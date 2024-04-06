@@ -1,0 +1,44 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PeerBanHelper 状态页</title>
+    <script src="js/main.js"></script>
+    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.min.js"
+            type="application/javascript"></script>
+</head>
+<body>
+<h1>PeerBanHelper - 状态页</h1>
+<p>此页面展示 PeerBanHelper 自启动以来的基本数据。请注意，此功能仍在施工中，目前记录和展示的数据较为有限。</p>
+<p id="view-data-summary">
+    <i>正在请求 PeerBanHelper WebAPI 以更新数据……</i>
+</p>
+<div>
+    <input type="checkbox" id="auto-refresh" checked><label for="auto-refresh">自动刷新</label>
+</div>
+<hr>
+<h2>下载器状态</h2>
+<div id="view-clientstatus">
+    等待数据加载……
+</div>
+<h2>封禁名单</h2>
+<div id="view-bancounter">
+    等待数据加载……
+</div>
+<div id="view-banlist">
+    等待数据加载……
+</div>
+<script>
+    function executeUpdate() {
+        updateViews();
+        document.getElementById("view-data-summary").innerHTML = `最后更新于：${stdTime(new Date())}`
+    }
+
+    setInterval(() => {
+        if(document.getElementById("auto-refresh").checked){
+            executeUpdate();
+        }
+    }, 3000);
+    executeUpdate();
+</script>
+</body>
+</html>

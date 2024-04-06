@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 import java.util.logging.LogManager;
 
 @Slf4j
@@ -58,6 +59,8 @@ public class Main {
         try {
             if (!initConfiguration()) {
                 log.warn(Lang.CONFIG_PEERBANHELPER);
+                Scanner scanner = new Scanner(System.in);
+                scanner.nextLine();
                 return;
             }
         } catch (IOException e) {

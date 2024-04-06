@@ -50,4 +50,16 @@ public interface Downloader extends AutoCloseable {
      * @param torrents Torrent 任务列表
      */
     void relaunchTorrentIfNeeded(Collection<Torrent> torrents);
+
+    /**
+     * 获取客户端最后一次请求的状态
+     * @return 最后请求状态
+     */
+    DownloaderLastStatus getLastStatus();
+
+    /**
+     * 获取客户端最后一次请求的状态
+     * @param lastStatus 最后请求状态
+     */
+    void setLastStatus(DownloaderLastStatus lastStatus);
 }
