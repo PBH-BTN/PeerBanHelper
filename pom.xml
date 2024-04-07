@@ -237,9 +237,6 @@
                                 <buildArg>--initialize-at-build-time=java.util.logging.ConsoleHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.FileHandler</buildArg>
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
-                                <buildArg>-H:IncludeResources=".*/static/*"</buildArg>
-                                <buildArg>-H:IncludeResources=".*/*.yml"</buildArg>
-                                <buildArg>-H:IncludeResources=".*/*.properties"</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
@@ -301,9 +298,6 @@
                                 <buildArg>--initialize-at-build-time=java.util.logging.ConsoleHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.FileHandler</buildArg>
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
-                                <buildArg>-H:IncludeResources=".*/static/*"</buildArg>
-                                <buildArg>-H:IncludeResources=".*/*.yml"</buildArg>
-                                <buildArg>-H:IncludeResources=".*/*.properties"</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>

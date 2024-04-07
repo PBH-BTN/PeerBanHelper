@@ -29,6 +29,10 @@
   }, {
     "pattern":"\\Qstatic/js/main.js\\E"
   }, {
+    "pattern":"\\Qstatic/js/bootstrap.bundle.min.js\\E"
+  }, {
+    "pattern":"\\Qstatic/css/bootstrap.min.css\\E"
+  }, {
     "pattern":"java.logging:\\Qsun/util/logging/resources/logging_en.properties\\E"
   }, {
     "pattern":"java.logging:\\Qsun/util/logging/resources/logging_en_US.properties\\E"
