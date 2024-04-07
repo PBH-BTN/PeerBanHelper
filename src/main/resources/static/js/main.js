@@ -116,11 +116,11 @@ function formatTorrent(torrent){
 function formatPeer(peer){
     const peerTag = document.createElement("span");
     if(peer.clientName === undefined || peer.clientName === null){
-        peerTag.innerText = peer.id;
+        peerTag.innerText = peer.id.replace(/[\r\n]/gm, '\\n');
     }else{
         peerTag.innerText = peer.clientName;
     }
-    peerTag.setAttribute("title", `PeerID=${peer.id}\nPeerUA=${peer.clientName}`)
+    peerTag.setAttribute("title", `PeerID=${peer.id.replace(/[\r\n]/gm, '\\n')}\nPeerUA=${peer.clientName}`)
     return peerTag;
 }
 
