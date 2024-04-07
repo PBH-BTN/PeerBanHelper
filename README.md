@@ -10,6 +10,8 @@
 
 <img width="1082" alt="Snipaste_2024-03-14_12-34-16" src="https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/e30b294e-2509-484d-a510-37c20a63b0c3">
 
+![demo](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f59f3ef2-98bc-441e-8a38-50388f51d84c)
+
 ## 安装&环境要求
 
 推荐：[Windows(新支持懒人包!)](https://github.com/Ghost-chu/PeerBanHelper#windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)  
