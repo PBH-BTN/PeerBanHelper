@@ -1,10 +1,12 @@
 package cordelia.client;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -83,6 +85,7 @@ public final class TrClient {
 
     @SneakyThrows(URISyntaxException.class)
     public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req, Long tag) {
+        String jsonBuffer = null;
         try {
             HttpResponse<String> resp = httpClient.send(HttpRequest.newBuilder(new URI(url))
                             .header("User-Agent", Main.getUserAgent())
@@ -92,10 +95,14 @@ public final class TrClient {
                             .timeout(Duration.of(30, ChronoUnit.SECONDS)).build()
                     , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
+            jsonBuffer = resp.body();
             RawResponse raw = om.fromJson(resp.body(), RawResponse.class);
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
-        } catch (IOException | InterruptedException e) {
+        }catch (JsonSyntaxException jsonSyntaxException){
+            log.warn(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException);
+            throw new IllegalStateException(jsonSyntaxException);
+        } catch (IOException  | InterruptedException e) {
             log.warn("Request Transmission JsonRPC failure", e);
             throw new IllegalStateException(e);
         }
