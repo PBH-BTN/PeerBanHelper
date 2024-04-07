@@ -19,7 +19,7 @@ public class TRPeer implements Peer {
 
     @Override
     public String getPeerId() {
-        return "<Unsupported>";
+        return backend.getClientName();
     }
 
     @Override

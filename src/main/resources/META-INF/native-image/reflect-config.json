@@ -1,21 +1,5 @@
 [
 {
-  "name":"[Lcom.fasterxml.jackson.databind.deser.Deserializers;"
-},
-{
-  "name":"[Lcom.fasterxml.jackson.databind.deser.KeyDeserializers;"
-},
-{
-  "name":"[Lcom.fasterxml.jackson.databind.deser.ValueInstantiators;"
-},
-{
-  "name":"[Lcom.fasterxml.jackson.databind.ser.Serializers;"
-},
-{
-  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus",
   "allDeclaredFields":true
 },
@@ -27,6 +11,35 @@
 {
   "name":"com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.TorrentDetail",
   "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.web.api.PBHBanList$BanResponse",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.wrapper.BanMetadata",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.wrapper.BanMetadata$PeerWrapper",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.wrapper.BanMetadata$TorrentWrapper",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.wrapper.PeerAddress",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.google.gson.internal.LinkedTreeMap",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -73,7 +86,7 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"getArguments","parameterTypes":[] }, {"name":"getMethod","parameterTypes":[] }, {"name":"getTag","parameterTypes":[] }]
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"getArguments","parameterTypes":[] }, {"name":"getMethod","parameterTypes":[] }, {"name":"getTag","parameterTypes":[] }]
 },
 {
   "name":"cordelia.rpc.RqBlockList",
@@ -120,13 +133,15 @@
   "name":"cordelia.rpc.types.FileStats",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"cordelia.rpc.types.Files",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"cordelia.rpc.types.Peers",
@@ -139,7 +154,8 @@
   "name":"cordelia.rpc.types.PeersFrom",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"cordelia.rpc.types.Status",
@@ -163,13 +179,15 @@
   "name":"cordelia.rpc.types.TrackerStats",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"cordelia.rpc.types.Trackers",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"java.io.Serializable",
@@ -235,6 +253,10 @@
 },
 {
   "name":"java.util.ImmutableCollections$ListN",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.util.ImmutableCollections$Map1",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {

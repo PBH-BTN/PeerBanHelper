@@ -31,9 +31,9 @@ public class Transmission implements Downloader {
     /*
         API 受限，实际实现起来意义不大
     */
-    public Transmission(String name, String endpoint, String username, String password, String blocklistUrl) {
+    public Transmission(String name, String endpoint, String username, String password, String blocklistUrl, boolean verifySSL) {
         this.name = name;
-        this.client = new TrClient(endpoint + "/transmission/rpc", username, password);
+        this.client = new TrClient(endpoint + "/transmission/rpc", username, password, verifySSL);
         this.endpoint = endpoint;
         this.blocklistUrl = blocklistUrl;
         log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);
@@ -108,7 +108,7 @@ public class Transmission implements Downloader {
         }
         RqTorrent resume = new RqTorrent(TorrentAction.START, new ArrayList<>());
         for (Torrent torrent : torrents) {
-            resume.add(torrent.getId());
+            resume.add(Long.parseLong(torrent.getId()));
         }
         client.execute(resume);
 

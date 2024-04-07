@@ -395,3 +395,14 @@ sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-dat
 * API 无法获取客户端累计上传下载量，因此 ProgressCheatBlocker 的过量下载检测不起作用
 * API 设置黑名单只能让 Transmission 请求 URL 更新，因此 PBH 需要打开一个 API 端点，且您需要保证 Transmission 能够访问到它（可在 config.yml 中配置细节）
 * API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。PBH 会短暂的暂停您的 Torrent 然后恢复它。
+
+## Credit
+
+* [Cordelia](https://github.com/bochkov/cordelia)
+* [IPAddress](https://github.com/seancfoley/IPAddress)
+* [YamlConfiguration](https://github.com/bspfsystems/YamlConfiguration)
+* [Guava](https://github.com/google/guava)
+* [Gson](https://github.com/google/gson)
+* [NanoHttpd](https://github.com/NanoHttpd/nanohttpd)
+* [Apache Commons Lang3](https://commons.apache.org/proper/commons-lang/)
+* [Slf4j](https://github.com/qos-ch/slf4j)

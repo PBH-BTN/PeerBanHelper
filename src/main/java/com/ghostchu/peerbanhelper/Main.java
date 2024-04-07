@@ -84,16 +84,23 @@ public class Main {
                     log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
                 }
                 case "transmission" -> {
-                    downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http") + "/blocklist/transmission"));
+                    downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http") + "/blocklist/transmission",verifySSL));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission", client, endpoint);
                 }
             }
         }
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
                 YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
+
+        Scanner scanner = new Scanner(System.in);
         while (true) {
-            Thread.sleep(30 * 1000);
+            String input = scanner.nextLine();
+            handleCommand(input);
         }
+    }
+
+    private static void handleCommand(String input) {
+
     }
 
     private static boolean initConfiguration() throws IOException {

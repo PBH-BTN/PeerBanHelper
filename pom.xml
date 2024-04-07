@@ -220,8 +220,7 @@
                                 <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.LoggerFactory,ch.qos.logback</buildArg>
-                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>
+<!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
                                 <buildArg>--enable-url-protocols=http,https</buildArg>
@@ -282,8 +281,7 @@
                                 <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.LoggerFactory,ch.qos.logback</buildArg>
-                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>
+<!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
                                 <buildArg>--enable-url-protocols=http,https</buildArg>
@@ -369,11 +367,6 @@
             <groupId>org.nanohttpd</groupId>
             <artifactId>nanohttpd</artifactId>
             <version>2.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>cordelia</groupId>
-            <artifactId>cordelia</artifactId>
-            <version>5.4.0.RELEASE</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-jdk14 -->
         <dependency>

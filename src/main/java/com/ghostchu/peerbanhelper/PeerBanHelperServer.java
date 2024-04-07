@@ -108,7 +108,7 @@ public class PeerBanHelperServer {
         try {
             downloaders.forEach(downloader-> downloader.setLastStatus(DownloaderLastStatus.HEALTHY));
             boolean needUpdate = false;
-            Set<Torrent> needRelaunched = new HashSet<>(downloaders.size());
+            Map<Downloader, Collection<Torrent>> needRelaunched = new HashMap<>();
             // 多线程处理下载器封禁操作
             for (Downloader downloader : downloaders) {
                 try {
@@ -121,7 +121,7 @@ public class PeerBanHelperServer {
                     if (banDownloader.getKey()) {
                         needUpdate = true;
                     }
-                    needRelaunched.addAll(banDownloader.getValue());
+                    needRelaunched.put(downloader, banDownloader.getValue());
                 } catch (Throwable th) {
                     log.warn(Lang.ERR_UNEXPECTED_API_ERROR, downloader.getName(), downloader.getEndpoint(), th);
                     downloader.setLastStatus(DownloaderLastStatus.ERROR);
@@ -150,7 +150,7 @@ public class PeerBanHelperServer {
                             return;
                         }
                         downloader.setBanList(BAN_LIST.keySet());
-                        downloader.relaunchTorrentIfNeeded(needRelaunched);
+                        downloader.relaunchTorrentIfNeeded(needRelaunched.getOrDefault(downloader, new ArrayList<>(0)));
                     } catch (Throwable th) {
                         log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
                         downloader.setLastStatus(DownloaderLastStatus.ERROR);
