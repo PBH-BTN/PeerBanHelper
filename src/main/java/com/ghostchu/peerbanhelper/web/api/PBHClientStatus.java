@@ -35,7 +35,7 @@ public class PBHClientStatus implements PBHAPI {
             try {
                 map.put("status", downloader.getLastStatus().name());
                 List<Torrent> torrents = downloader.getTorrents();
-                long peers = torrents.stream().mapToLong(t -> downloader.getPeers(t).size()).count();
+                long peers = torrents.stream().mapToLong(t -> downloader.getPeers(t).size()).sum();
                 map.put("torrents", torrents.size());
                 map.put("peers", peers);
             } catch (Throwable th) {
