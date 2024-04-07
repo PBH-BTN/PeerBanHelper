@@ -41,6 +41,7 @@ public class Main {
                 p.waitFor();
                 System.out.println("代码页已切换到 UTF-8 (65001)");
         }
+        workaroundGraalVM();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
             if (stream == null) {
                 log.error(Lang.ERR_BUILD_NO_INFO_FILE);
@@ -96,6 +97,14 @@ public class Main {
         while (true) {
             String input = scanner.nextLine();
             handleCommand(input);
+        }
+    }
+
+    private static void workaroundGraalVM() {
+        // 此方法允许 Native Image Agent 在生成本地二进制文件时正确识别缺少的类
+        try {
+            Class.forName("java.util.logging.FileHandler");
+        } catch (ClassNotFoundException ignored) {
         }
     }
 
