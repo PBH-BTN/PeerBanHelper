@@ -79,7 +79,7 @@ function updateBanListView(node) {
                 count++;
                 const meta = ban.banMetadata;
                 const title = document.createElement('li');
-                title.innerHTML = `<b>${ban.address.ip + ":" + ban.address.port}</b> ${formatPeer(meta.peer).outerHTML}`;
+                title.innerHTML = `<div style="display: inline-flex; column-gap: 5px"><b>${ban.address.ip + ":" + ban.address.port}</b><span class="badge text-bg-secondary" style="margin-top: auto; margin-bottom: auto">${formatPeer(meta.peer).outerHTML}</span></div>`;
                 // li.style.fontSize = '22px';
                 const subUl = document.createElement('ul');
                 const banAt = document.createElement('li');
@@ -108,13 +108,13 @@ function updateBanListView(node) {
         });
 }
 function formatTorrent(torrent){
-    const torrentTag = document.createElement("abbr");
+    const torrentTag = document.createElement("span");
     torrentTag.innerText = torrent.name;
     torrentTag.setAttribute("title", torrent.hash);
     return torrentTag;
 }
 function formatPeer(peer){
-    const peerTag = document.createElement("abbr");
+    const peerTag = document.createElement("span");
     if(peer.clientName === undefined || peer.clientName === null){
         peerTag.innerText = peer.id;
     }else{
