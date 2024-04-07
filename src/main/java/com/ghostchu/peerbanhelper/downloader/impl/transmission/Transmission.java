@@ -88,6 +88,8 @@ public class Transmission implements Downloader {
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
             log.warn(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP);
+        }else{
+            log.info(Lang.DOWNLOADER_TR_UPDATED_BLOCKLIST, updateBlockListResp.getArgs().getBlockListSize());
         }
     }
 
