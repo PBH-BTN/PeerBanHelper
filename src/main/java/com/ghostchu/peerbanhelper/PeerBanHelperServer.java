@@ -183,7 +183,7 @@ public class PeerBanHelperServer {
                     if (banResult.action() == PeerAction.BAN) {
                         needUpdate.set(true);
                         needRelaunched.add(key);
-                        banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key.getId(), key.getName(), key.getHash(), banResult.reason()));
+                        banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.reason()));
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }
                 }, generalExecutor));

@@ -73,35 +73,81 @@ function updateBanListView(node) {
     fetch("/api/banlist")
         .then(response => response.json())
         .then(json => {
-            const ol = document.createElement('ul');
+            const ul = document.createElement('ul');
             let count = 0;
             json.forEach(ban => {
                 count++;
-                const li = document.createElement('li');
-                li.innerHTML = `<b>${ban.address.ip + ":" + ban.address.port}</b>`;
+                const meta = ban.banMetadata;
+                const title = document.createElement('li');
+                title.innerHTML = `<b>${ban.address.ip + ":" + ban.address.port}</b> ${formatPeer(meta.peer).outerHTML}`;
                 // li.style.fontSize = '22px';
-                const ul = document.createElement('ul');
+                const subUl = document.createElement('ul');
                 const banAt = document.createElement('li');
-                banAt.innerHTML = `封禁时间: ${stdTime(new Date(ban.banMetadata.banAt))}`;
+                banAt.innerHTML = `封禁时间: ${stdTime(new Date(meta.banAt))}`;
                 const unbanAt = document.createElement('li');
-                unbanAt.innerHTML = `解封时间: ${stdTime(new Date(ban.banMetadata.unbanAt))}`;
+                unbanAt.innerHTML = `解封时间: ${stdTime(new Date(meta.unbanAt))}`;
+                const bannedOn = document.createElement("li");
+                bannedOn.innerHTML = `发现位置: ${formatTorrent(meta.torrent).outerHTML}`;
+                const banSnapshot = document.createElement("li");
+                banSnapshot.innerHTML = `封禁快照: <b>↑</b>${formatFileSize(meta.peer.uploaded)} <b>↓</b>${formatFileSize(meta.peer.downloaded)} - ${toPercent(meta.peer.progress)}`
                 const description = document.createElement('li');
-                description.innerHTML = `描述: ${ban.banMetadata.description}`;
-                ul.append(...[banAt, unbanAt, description]);
-                li.appendChild(ul);
-                ol.appendChild(li);
+                description.innerHTML = `描述: ${meta.description}`;
+                subUl.append(...[banAt, unbanAt, bannedOn, banSnapshot, description]);
+                title.appendChild(subUl);
+                ul.appendChild(title);
             });
             node.innerHTML = "";
             const summary = document.createElement('p');
             summary.innerHTML = `当前共有 ${count} 个 Peer 处于封禁状态。`
             node.appendChild(summary);
-            node.appendChild(ol);
+            node.appendChild(ul);
         })
         .catch(err => {
             node.innerHTML = `<i>请求错误：${err}</i>`
+            console.log(err);
         });
+}
+function formatTorrent(torrent){
+    const torrentTag = document.createElement("abbr");
+    torrentTag.innerText = torrent.name;
+    torrentTag.setAttribute("title", torrent.hash);
+    return torrentTag;
+}
+function formatPeer(peer){
+    const peerTag = document.createElement("abbr");
+    if(peer.clientName === undefined || peer.clientName === null){
+        peerTag.innerText = peer.id;
+    }else{
+        peerTag.innerText = peer.clientName;
+    }
+    peerTag.setAttribute("title", `PeerId=${peer.id}\nPeerUA=${peer.clientName}`)
+    return peerTag;
 }
 
 function stdTime(dateObj){
     return dateObj.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+}
+
+function formatFileSize(fileSize) {
+    let temp;
+    if (fileSize < 1024) {
+        return fileSize + 'B';
+    } else if (fileSize < (1024*1024)) {
+        temp = fileSize / 1024;
+        temp = temp.toFixed(2);
+        return temp + 'KB';
+    } else if (fileSize < (1024*1024*1024)) {
+        temp = fileSize / (1024*1024);
+        temp = temp.toFixed(2);
+        return temp + 'MB';
+    } else {
+        temp = fileSize / (1024*1024*1024);
+        temp = temp.toFixed(2);
+        return temp + 'GB';
+    }
+}
+function toPercent(point){
+    let str = Number(point * 100).toFixed(1);
+    str+="%";
+    return str;
 }

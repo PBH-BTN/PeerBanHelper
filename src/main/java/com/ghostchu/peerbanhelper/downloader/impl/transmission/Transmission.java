@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Transmission implements Downloader {
-
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Transmission.class);
     private final String name;
     private final String endpoint;
