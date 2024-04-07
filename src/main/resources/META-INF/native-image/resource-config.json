@@ -25,13 +25,15 @@
   }, {
     "pattern":"\\Qprofile.yml\\E"
   }, {
-    "pattern":"\\Qstatic/index.html\\E"
+    "pattern":"\\Qstatic/css/bootstrap.min.css\\E"
   }, {
-    "pattern":"\\Qstatic/js/main.js\\E"
+    "pattern":"\\Qstatic/favicon.ico\\E"
+  }, {
+    "pattern":"\\Qstatic/index.html\\E"
   }, {
     "pattern":"\\Qstatic/js/bootstrap.bundle.min.js\\E"
   }, {
-    "pattern":"\\Qstatic/css/bootstrap.min.css\\E"
+    "pattern":"\\Qstatic/js/main.js\\E"
   }, {
     "pattern":"java.logging:\\Qsun/util/logging/resources/logging_en.properties\\E"
   }, {
