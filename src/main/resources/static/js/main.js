@@ -120,7 +120,7 @@ function formatPeer(peer){
     }else{
         peerTag.innerText = peer.clientName;
     }
-    peerTag.setAttribute("title", `PeerId=${peer.id}\nPeerUA=${peer.clientName}`)
+    peerTag.setAttribute("title", `PeerID=${peer.id}\nPeerUA=${peer.clientName}`)
     return peerTag;
 }
 
