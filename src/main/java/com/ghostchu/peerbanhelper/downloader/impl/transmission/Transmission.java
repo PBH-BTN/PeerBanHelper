@@ -77,7 +77,7 @@ public class Transmission implements Downloader {
     @Override
     public void setBanList(Collection<PeerAddress> peerAddresses) {
         RqSessionSet set = RqSessionSet.builder()
-                .blocklistUrl(blocklistUrl)
+                .blocklistUrl(blocklistUrl+"?t="+System.currentTimeMillis()) // 更改 URL 来确保更改生效
                 .blocklistEnabled(true)
                 .build();
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
