@@ -12,6 +12,7 @@ import cordelia.rpc.*;
 import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ public class Transmission implements Downloader {
         return Collections.emptyList();
     }
 
+    @SneakyThrows(InterruptedException.class)
     @Override
     public void setBanList(Collection<PeerAddress> peerAddresses) {
         RqSessionSet set = RqSessionSet.builder()
@@ -84,6 +86,7 @@ public class Transmission implements Downloader {
         if (!sessionSetResp.isSuccess()) {
             log.warn(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, sessionSetResp.getResult());
         }
+        Thread.sleep(3000); // Transmission 在这里疑似有崩溃问题？
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {

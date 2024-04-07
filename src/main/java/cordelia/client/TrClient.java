@@ -90,11 +90,15 @@ public final class TrClient {
             HttpResponse<String> resp = httpClient.send(HttpRequest.newBuilder(new URI(url))
                             .header("User-Agent", Main.getUserAgent())
                             .header("Content-Type", "application/json")
-                            .header(Session.SESSION_ID, session().id())
+                            .header(Session.SESSION_ID, session(false).id())
                             .POST(HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(req.toReq(tag))))
                             .timeout(Duration.of(30, ChronoUnit.SECONDS)).build()
                     , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
+            if(resp.statusCode() == 409){
+                session(true); // force renew
+                throw new IllegalStateException("Session invalid, re-created, please try again.");
+            }
             jsonBuffer = resp.body();
             RawResponse raw = om.fromJson(resp.body(), RawResponse.class);
             String json = om.toJson(raw.getArguments());
@@ -113,8 +117,8 @@ public final class TrClient {
     }
 
     @SneakyThrows(URISyntaxException.class)
-    private Session session() {
-        if (sessionStore.isEmpty()) {
+    private Session session(boolean forceUpdate) {
+        if (sessionStore.isEmpty() || forceUpdate) {
             try {
                 HttpResponse<Void> resp = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(url)).GET().build(), java.net.http.HttpResponse.BodyHandlers.discarding());
                 String sessionId = resp.headers().firstValue(Session.SESSION_ID).orElseThrow();
