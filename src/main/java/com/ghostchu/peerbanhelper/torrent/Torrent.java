@@ -14,6 +14,12 @@ public interface Torrent {
     String getName();
 
     /**
+     * 获取首选哈希值
+     * @return 首选哈希值
+     */
+    String getHash();
+
+    /**
      * 获取目前该 Torrent 的共计大小
      * @return 共计大小
      */

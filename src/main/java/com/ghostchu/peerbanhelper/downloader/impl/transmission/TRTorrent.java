@@ -26,6 +26,11 @@ public class TRTorrent implements Torrent {
     }
 
     @Override
+    public String getHash() {
+        return backend.getHashString();
+    }
+
+    @Override
     public long getSize() {
         return backend.getTotalSize();
     }

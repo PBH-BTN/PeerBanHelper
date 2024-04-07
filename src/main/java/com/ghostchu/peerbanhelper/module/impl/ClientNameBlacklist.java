@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -31,9 +32,9 @@ public class ClientNameBlacklist extends AbstractFeatureModule {
         List<String> bannedPeers = getConfig().getStringList("banned-client-name");
         for (String rule : bannedPeers) {
             if (RuleParseHelper.match(peer.getClientName(), rule)) {
-                return new BanResult(true, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, rule));
+                return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, rule));
             }
         }
-        return new BanResult(false, "No matches");
+        return new BanResult(PeerAction.NO_ACTION, "No matches");
     }
 }

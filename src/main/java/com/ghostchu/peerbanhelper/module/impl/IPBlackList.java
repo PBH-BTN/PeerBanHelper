@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -35,20 +36,20 @@ public class IPBlackList extends AbstractFeatureModule {
         List<Integer> ports = getConfig().getIntList("ports");
         PeerAddress peerAddress = peer.getAddress();
         if (ports.contains(peerAddress.getPort())) {
-            return new BanResult(true, "Restricted ports");
+            return new BanResult(PeerAction.BAN, "Restricted ports");
         }
         for (String ip : ips) {
             if (peerAddress.getIp().equals(ip.trim())) {
-                return new BanResult(true, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
+                return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
             }
             try {
                 IPAddress address = new IPAddressString(ip).toAddress();
                 if (address.contains(new IPAddressString(peerAddress.getIp()).toAddress())) {
-                    return new BanResult(true, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
+                    return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
                 }
             } catch (AddressStringException ignored) {
             }
         }
-        return new BanResult(false, "No matches");
+        return new BanResult(PeerAction.NO_ACTION, "No matches");
     }
 }

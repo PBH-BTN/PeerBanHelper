@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.metric.Metrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.module.impl.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -179,10 +180,10 @@ public class PeerBanHelperServer {
             for (Peer peer : value) {
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
                     BanResult banResult = checkBan(key, peer);
-                    if (banResult.ban()) {
+                    if (banResult.action() == PeerAction.BAN) {
                         needUpdate.set(true);
                         needRelaunched.add(key);
-                        banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, banResult.reason()));
+                        banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key.getId(), key.getName(), key.getHash(), banResult.reason()));
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }
                 }, generalExecutor));
@@ -220,11 +221,11 @@ public class PeerBanHelperServer {
             }
         }
         for (BanResult result : results) {
-            if (result.ban()) {
+            if (result.action() == PeerAction.SKIP || result.action() == PeerAction.BAN) {
                 return result;
             }
         }
-        return new BanResult(false, "No matches");
+        return new BanResult(PeerAction.NO_ACTION, "No matches");
     }
 
     @NotNull

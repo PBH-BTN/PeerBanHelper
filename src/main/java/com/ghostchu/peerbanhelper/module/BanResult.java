@@ -1,4 +1,4 @@
 package com.ghostchu.peerbanhelper.module;
 
-public record BanResult(boolean ban, String reason) {
+public record BanResult(PeerAction action, String reason) {
 }

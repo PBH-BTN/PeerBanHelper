@@ -119,7 +119,7 @@ public class QBittorrent implements Downloader {
         if (request.statusCode() != 200) {
             throw new IllegalStateException(String.format(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
         }
-        List<TorrentDetail> torrentDetail = JsonUtil.getGson().fromJson((String) request.body(), new TypeToken<List<TorrentDetail>>() {
+        List<TorrentDetail> torrentDetail = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<TorrentDetail>>() {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (TorrentDetail detail : torrentDetail) {
@@ -127,7 +127,7 @@ public class QBittorrent implements Downloader {
             if (!ACTIVE_STATE_LIST.contains(detail.getState())) {
                 continue;
             }
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getTotalSize()));
+            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize()));
         }
         return torrents;
     }

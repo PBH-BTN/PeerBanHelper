@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -39,7 +40,7 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
         final long uploaded = peer.getUploaded();
         final long torrentSize = torrent.getSize();
         if (torrentSize <= 0) {
-            return new BanResult(false, Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
+            return new BanResult(PeerAction.NO_ACTION, Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
         }
         final double actualProgress = (double) uploaded / torrentSize;
         final double clientProgress = peer.getProgress();
@@ -48,17 +49,17 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             // 下载过量，检查
             long maxAllowedExcessiveThreshold = (long) (torrentSize * getConfig().getDouble("excessive-threshold"));
             if (uploaded > maxAllowedExcessiveThreshold) {
-                return new BanResult(true, String.format(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, torrentSize, uploaded, maxAllowedExcessiveThreshold));
+                return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, torrentSize, uploaded, maxAllowedExcessiveThreshold));
             }
         }
 
         if (actualProgress - clientProgress <= 0) {
-            return new BanResult(false, String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, clientProgress, actualProgress));
+            return new BanResult(PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, clientProgress, actualProgress));
         }
 
         double difference = Math.abs(actualProgress - clientProgress);
         if (difference > getConfig().getDouble("maximum-difference")) {
-            return new BanResult(true, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress, actualProgress, difference));
+            return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress, actualProgress, difference));
         }
 
         double rewindAllow = getConfig().getDouble("rewind-maximum-difference");
@@ -77,9 +78,9 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
             double rewind = lastRecord - peer.getProgress();
             boolean ban = rewind > rewindAllow;
-            return new BanResult(ban, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, clientProgress, actualProgress, lastRecord, rewind, rewindAllow));
+            return new BanResult(ban ? PeerAction.BAN : PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, clientProgress, actualProgress, lastRecord, rewind, rewindAllow));
         }
-        return new BanResult(false, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress, actualProgress, difference));
+        return new BanResult(PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress, actualProgress, difference));
     }
 
     static class ClientTask {
