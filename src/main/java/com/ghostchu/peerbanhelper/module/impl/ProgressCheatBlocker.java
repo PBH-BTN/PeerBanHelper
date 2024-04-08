@@ -42,6 +42,9 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
         if (torrentSize <= 0) {
             return new BanResult(PeerAction.NO_ACTION, Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
         }
+        if (torrentSize < getConfig().getLong("minimum-size")) {
+            return new BanResult(PeerAction.NO_ACTION, "Skip due the torrent size");
+        }
         final double actualProgress = (double) uploaded / torrentSize;
         final double clientProgress = peer.getProgress();
         // uploaded = -1 代表客户端不支持统计此 Peer 总上传量
