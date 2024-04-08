@@ -39,11 +39,11 @@ public class Main {
         LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
         if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
-            if(System.getProperty("console.encoding").equalsIgnoreCase("UTF-8")) {
+            if(System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
                 ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
                 Process p = pb.start();
                 p.waitFor();
-                System.out.println("代码页已切换到 UTF-8 (65001)");
+                System.out.println("Chcp switched to UTF-8 (65001) - GraalVM Native Image");
             }
         }
         workaroundGraalVM();
@@ -106,15 +106,12 @@ public class Main {
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
                 YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(){
-            @Override
-            public void run() {
-                synchronized (shutdown){
-                    log.info(Lang.PBH_SHUTTING_DOWN);
-                    shutdown.notifyAll();
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            synchronized (shutdown){
+                log.info(Lang.PBH_SHUTTING_DOWN);
+                shutdown.notifyAll();
             }
-        });
+        }));
         while (!shutdown.get()) {
            synchronized (shutdown){
                shutdown.wait(1000*3);
