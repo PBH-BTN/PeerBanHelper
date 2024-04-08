@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.LogManager;
 
 @Slf4j
@@ -29,6 +30,7 @@ public class Main {
     private static final File configDirectory = new File(dataDirectory, "config");
     @Getter
     private static BuildMeta meta = new BuildMeta();
+    private final static AtomicBoolean shutdown = new AtomicBoolean(false);
 
     public static void main(String[] args) throws InterruptedException, IOException {
         if (!logsDirectory.exists()) {
@@ -102,10 +104,19 @@ public class Main {
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
                 YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
 
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            String input = scanner.nextLine();
-            handleCommand(input);
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run() {
+                synchronized (shutdown){
+                    log.info(Lang.PBH_SHUTTING_DOWN);
+                    shutdown.notifyAll();
+                }
+            }
+        });
+        while (!shutdown.get()) {
+           synchronized (shutdown){
+               shutdown.wait(1000*3);
+           }
         }
     }
 
