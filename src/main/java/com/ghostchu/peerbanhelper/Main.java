@@ -13,6 +13,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -36,10 +37,10 @@ public class Main {
         LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
         if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
-                ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
-                Process p = pb.start();
-                p.waitFor();
-                System.out.println("代码页已切换到 UTF-8 (65001)");
+            ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
+            Process p = pb.start();
+            p.waitFor();
+            System.out.println("代码页已切换到 UTF-8 (65001)");
         }
         workaroundGraalVM();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
@@ -78,14 +79,21 @@ public class Main {
             String password = downloaderSection.getString("password");
             String baUser = downloaderSection.getString("basic-auth.user");
             String baPass = downloaderSection.getString("basic-auth.pass");
+            String httpVersion = downloaderSection.getString("http-version", "HTTP_1_1");
+            HttpClient.Version httpVersionEnum;
+            try {
+                httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
+            } catch (IllegalArgumentException e) {
+                httpVersionEnum = HttpClient.Version.HTTP_1_1;
+            }
             boolean verifySSL = downloaderSection.getBoolean("verify-ssl", true);
             switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
                 case "qbittorrent" -> {
-                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass,verifySSL));
+                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
                 }
                 case "transmission" -> {
-                    downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http") + "/blocklist/transmission",verifySSL));
+                    downloaderList.add(new Transmission(client, endpoint, username, password, "http://" + mainConfig.getString("server.address") + ":" + mainConfig.getInt("server.http") + "/blocklist/transmission", verifySSL, httpVersionEnum));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission", client, endpoint);
                 }
             }

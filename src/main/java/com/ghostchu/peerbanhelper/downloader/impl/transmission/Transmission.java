@@ -15,6 +15,7 @@ import cordelia.rpc.types.TorrentAction;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 
+import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,9 +33,9 @@ public class Transmission implements Downloader {
     /*
         API 受限，实际实现起来意义不大
     */
-    public Transmission(String name, String endpoint, String username, String password, String blocklistUrl, boolean verifySSL) {
+    public Transmission(String name, String endpoint, String username, String password, String blocklistUrl, boolean verifySSL, HttpClient.Version httpVersion) {
         this.name = name;
-        this.client = new TrClient(endpoint + "/transmission/rpc", username, password, verifySSL);
+        this.client = new TrClient(endpoint + "/transmission/rpc", username, password, verifySSL, httpVersion);
         this.endpoint = endpoint;
         this.blocklistUrl = blocklistUrl;
         log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);

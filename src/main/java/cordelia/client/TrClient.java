@@ -54,17 +54,13 @@ public final class TrClient {
             .create();
     private final HttpClient httpClient;
 
-    public TrClient(String url) {
-        this(url, null, null, true);
-    }
-
-    public TrClient(String url, String user, String password, boolean verifySSL) {
+    public TrClient(String url, String user, String password, boolean verifySSL, HttpClient.Version httpVersion) {
         this.url = url;
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         HttpClient.Builder builder = HttpClient
                 .newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
+                .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {

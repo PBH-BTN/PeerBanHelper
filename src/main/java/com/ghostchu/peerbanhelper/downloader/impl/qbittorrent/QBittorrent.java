@@ -36,13 +36,13 @@ public class QBittorrent implements Downloader {
     private final HttpClient httpClient;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
 
-    public QBittorrent(String name, String endpoint, String username, String password, String baUser, String baPass, boolean verifySSL) {
+    public QBittorrent(String name, String endpoint, String username, String password, String baUser, String baPass, boolean verifySSL, HttpClient.Version httpVersion) {
         this.name = name;
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         HttpClient.Builder builder = HttpClient
                 .newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
+                .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {

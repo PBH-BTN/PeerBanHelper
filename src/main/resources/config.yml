@@ -21,12 +21,15 @@ client:
       pass: ""
     # 验证 SSL 证书有效性
     verify-ssl: true
+    # Http 协议版本
+    http-version: "HTTP_1_1"
   transmission-002:
     type: Transmission
     endpoint: "http://127.0.0.1:9091"
     username: "admin"
     password: "admin"
     verify-ssl: true
+    http-version: "HTTP_1_1"
 # Http 服务器设置
 server:
   # 监听端口
