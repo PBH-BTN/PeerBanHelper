@@ -153,6 +153,7 @@ public class ActiveProbing extends AbstractFeatureModule {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_NONE);
         HttpClient.Builder builder = HttpClient
                 .newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(timeout, ChronoUnit.MILLIS))
                 .cookieHandler(cm);
