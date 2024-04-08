@@ -42,6 +42,7 @@ public class QBittorrent implements Downloader {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         HttpClient.Builder builder = HttpClient
                 .newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
