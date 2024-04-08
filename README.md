@@ -24,7 +24,7 @@
 ## 支持的客户端
 
 * qBittorrent
-* Transmission (3.00-20 或更高版本)
+* Transmission **(3.00-20 或更高版本)**
   
 ## 功能概述
 
