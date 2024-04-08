@@ -52,6 +52,10 @@ public class Transmission implements Downloader {
 
     @Override
     public boolean login() {
+        RqSessionGet get = new RqSessionGet(List.of("version"));
+        try {
+            client.execute(get); // 执行任意 RPC 操作以刷新 session
+        }catch (Exception ignored){}
         return true;
     }
 
