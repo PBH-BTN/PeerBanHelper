@@ -13,6 +13,7 @@ import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.net.http.HttpClient;
@@ -53,10 +54,12 @@ public class Transmission implements Downloader {
 
     @Override
     public boolean login() {
-        RqSessionGet get = new RqSessionGet(List.of("version"));
-        try {
-            client.execute(get); // 执行任意 RPC 操作以刷新 session
-        }catch (Exception ignored){}
+        RqSessionGet get = new RqSessionGet();
+        TypedResponse<RsSessionGet> resp = client.execute(get); // 执行任意 RPC 操作以刷新 session
+        String version = resp.getArgs().getVersion();
+        if (StringUtils.startsWithAny(version, "0.", "1.", "2.")) {
+            throw new IllegalStateException(String.format(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, Lang.DOWNLOADER_TR_INCOMPATIBILITY_BANAPI));
+        }
         return true;
     }
 
@@ -84,7 +87,7 @@ public class Transmission implements Downloader {
     @Override
     public void setBanList(Collection<PeerAddress> peerAddresses) {
         RqSessionSet set = RqSessionSet.builder()
-                .blocklistUrl(blocklistUrl+"?t="+System.currentTimeMillis()) // 更改 URL 来确保更改生效
+                .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
                 .blocklistEnabled(true)
                 .build();
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
@@ -96,7 +99,7 @@ public class Transmission implements Downloader {
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
             log.warn(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP);
-        }else{
+        } else {
             log.info(Lang.DOWNLOADER_TR_UPDATED_BLOCKLIST, updateBlockListResp.getArgs().getBlockListSize());
         }
     }

@@ -68,7 +68,9 @@ public final class RsSessionGet implements RsArguments {
     private Encryption encryption;
 
     @SerializedName("idle-seeding-limit")
-    private Boolean idleSeedingLimit;
+    private Integer idleSeedingLimit;
+    @SerializedName("idle-seeding-limit-enabled")
+    private Boolean idleSeedingLimitEnabled;
 
     @SerializedName("incomplete-dir-enabled")
     private Boolean incompleteDirEnabled;
