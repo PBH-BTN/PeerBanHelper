@@ -13,7 +13,7 @@ function safeRun(fun){
 }
 
 function updateClientStatus(node){
-    fetch("/api/clientStatus")
+    fetch("api/clientStatus")
         .then(response => response.json())
         .then(json => {
             const ol = document.createElement('ul');
@@ -59,7 +59,7 @@ function updateClientStatus(node){
 }
 
 function updateBanCounterView(node) {
-    fetch("/api/statistic")
+    fetch("api/statistic")
         .then(response => response.json())
         .then(json => {
             node.innerHTML = `共检查 ${json.checkCounter} 次，封禁 ${json.peerBanCounter} 次 Peers，解除已到期的封禁 ${json.peerUnbanCounter} 次。`;
@@ -70,7 +70,7 @@ function updateBanCounterView(node) {
 }
 
 function updateBanListView(node) {
-    fetch("/api/banlist")
+    fetch("api/banlist")
         .then(response => response.json())
         .then(json => {
             const ul = document.createElement('ul');

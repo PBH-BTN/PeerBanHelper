@@ -106,7 +106,7 @@ public class PeerBanHelperServer {
 
     public void banWave() {
         try {
-            downloaders.forEach(downloader-> downloader.setLastStatus(DownloaderLastStatus.HEALTHY));
+            downloaders.forEach(downloader -> downloader.setLastStatus(DownloaderLastStatus.HEALTHY));
             boolean needUpdate = false;
             Map<Downloader, Collection<Torrent>> needRelaunched = new HashMap<>();
             // 多线程处理下载器封禁操作
