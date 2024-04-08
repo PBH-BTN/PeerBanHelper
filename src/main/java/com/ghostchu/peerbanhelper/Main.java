@@ -39,10 +39,12 @@ public class Main {
         LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
         if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
-            ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
-            Process p = pb.start();
-            p.waitFor();
-            System.out.println("代码页已切换到 UTF-8 (65001)");
+            if(System.getProperty("console.encoding").equalsIgnoreCase("UTF-8")) {
+                ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
+                Process p = pb.start();
+                p.waitFor();
+                System.out.println("代码页已切换到 UTF-8 (65001)");
+            }
         }
         workaroundGraalVM();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
