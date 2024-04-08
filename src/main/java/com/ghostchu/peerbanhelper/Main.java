@@ -118,6 +118,7 @@ public class Main {
                shutdown.wait(1000*3);
            }
         }
+        System.exit(0);
     }
 
     private static void workaroundGraalVM() {
