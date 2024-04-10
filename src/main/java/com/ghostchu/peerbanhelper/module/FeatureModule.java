@@ -16,4 +16,8 @@ public interface FeatureModule {
     BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor);
 
     ConfigurationSection getConfig();
+
+    void Stop();
+
+    void Register();
 }

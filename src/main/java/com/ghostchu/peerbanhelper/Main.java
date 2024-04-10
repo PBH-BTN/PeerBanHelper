@@ -118,6 +118,7 @@ public class Main {
                shutdown.wait(1000*3);
            }
         }
+        log.wait(); // make all log printed
         System.exit(0);
     }
 

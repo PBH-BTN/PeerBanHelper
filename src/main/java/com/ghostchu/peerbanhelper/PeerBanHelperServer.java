@@ -59,6 +59,7 @@ public class PeerBanHelperServer {
         this.checkBanExecutor.shutdown();
         this.ruleExecuteExecutor.shutdown();
         this.downloaderApiExecutor.shutdown();
+        this.registeredModules.forEach(FeatureModule::Stop);
         this.webEndpointProviderServer.stop();
 
     }
@@ -102,7 +103,7 @@ public class PeerBanHelperServer {
         modules.add(new ProgressCheatBlocker(profile));
         modules.add(new ActiveProbing(profile));
         this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
-        this.registeredModules.forEach(m -> log.info(Lang.MODULE_REGISTER, m.getName()));
+        this.registeredModules.forEach(FeatureModule::Register);
     }
 
     private void registerTimer() {
