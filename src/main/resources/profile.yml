@@ -1,7 +1,7 @@
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 封禁持续时间（单位：毫秒）
-ban-duration: 3600000
+ban-duration: 259200000
 ban-behavior: "/32"
 # 功能模块
 module:
