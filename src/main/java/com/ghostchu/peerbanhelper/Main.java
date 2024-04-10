@@ -22,7 +22,6 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.LogManager;
-import sun.misc.Signal;
 
 @Slf4j
 public class Main {
@@ -107,13 +106,6 @@ public class Main {
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
                 YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
 
-        Signal.handle(new Signal("TERM"), sig -> {
-              synchronized (shutdown){
-                log.info(Lang.PBH_SHUTTING_DOWN);
-                server.Shutdown();
-                shutdown.notifyAll();
-            }
-        });
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronized (shutdown){
                 log.info(Lang.PBH_SHUTTING_DOWN);
