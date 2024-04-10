@@ -62,3 +62,7 @@ threads:
   # 此线程池用于调用下载器 API，如：获取 Torrents 或 Peers 列表
   # 提升此值将允许同时执行更多的 API 请求以提升速度，但可能对下载器产生压力，建议不要设置的过大，以免造成下载器进程卡住或崩溃
   downloader-api-parallelism: 8
+# 数据持久化
+persist:
+  # 封禁日志保留天数
+  ban-logs-keep-days: 30

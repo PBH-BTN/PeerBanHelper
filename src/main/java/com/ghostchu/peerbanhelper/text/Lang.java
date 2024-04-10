@@ -58,4 +58,5 @@ public class Lang {
     public static String PBH_SHUTTING_DOWN = "[退出] 正在退出，请等待我们完成剩余的工作……";
     public static String ARB_ERROR_TO_CONVERTING_IP = "IP 地址 %s 既不是 IPV4 地址也不是 IPV6 地址。";
     public static String ARB_BANNED = "IP 地址 %s 与另一个已封禁的 IP 地址 %s 处于同一封禁区间 %s 内，执行连锁封禁操作。";
+    public static String DATABASE_SETUP_FAILED = "[错误] 数据库初始化失败";
 }
