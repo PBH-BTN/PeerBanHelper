@@ -23,6 +23,30 @@ public class DatabaseHelper {
         }
     }
 
+    public int setMetadata(String key, String value) throws SQLException {
+        try (Connection connection = manager.getConnection()) {
+            @Cleanup
+            PreparedStatement ps = connection.prepareStatement("REPLACE INTO metadata (key, value) VALUES (?,?)");
+            ps.setString(1, key);
+            ps.setString(2, value);
+            return ps.executeUpdate();
+        }
+    }
+
+    public String getMetadata(String key) throws SQLException {
+        try (Connection connection = manager.getConnection()) {
+            @Cleanup
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM metadata WHERE `key` = ? LIMIT 1");
+            @Cleanup
+            ResultSet set = ps.executeQuery();
+            if (set.next()) {
+                return set.getString("key");
+            } else {
+                return null;
+            }
+        }
+    }
+
     public List<BanLog> queryBanLogs(Date from, Date to, int pageIndex, int pageSize) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
@@ -134,7 +158,7 @@ public class DatabaseHelper {
             if (!hasTable("metadata")) {
                 @Cleanup
                 PreparedStatement ps = connection.prepareStatement("""
-                                            CREATE TABLE ban_logs (
+                                            CREATE TABLE metadata (
                                               "key" TEXT NOT NULL PRIMARY KEY,
                                               "value" TEXT
                                             );
