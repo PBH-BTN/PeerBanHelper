@@ -15,6 +15,9 @@ public class DatabaseManager {
 
     public DatabaseManager(PeerBanHelperServer server) {
         databaseDirectory = new File(Main.getDataDirectory(), "persist");
+        if(!databaseDirectory.exists()){
+            databaseDirectory.mkdirs();
+        }
         File sqliteDb = new File(databaseDirectory, "persist-data.db");
         setupDatabase(sqliteDb);
     }

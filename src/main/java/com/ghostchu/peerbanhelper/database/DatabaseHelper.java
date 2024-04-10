@@ -24,7 +24,16 @@ public class DatabaseHelper {
 
     public List<BanLog> queryBanLogs(Date from, Date to, int pageIndex, int pageSize) throws SQLException {
         try (Connection connection = manager.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM ban_log WHERE ban_at >= ? AND ban_at <= ? LIMIT ?, ?");
+            PreparedStatement ps;
+            if (from == null && to == null) {
+                ps = connection.prepareStatement("SELECT * FROM ban_log LIMIT ?, ?");
+            } else {
+                if (from == null || to == null) {
+                    throw new IllegalArgumentException("from or null cannot be null if any provided");
+                } else {
+                    ps = connection.prepareStatement("SELECT * FROM ban_log WHERE ban_at >= ? AND ban_at <= ? LIMIT ?, ?");
+                }
+            }
             ps.setDate(1, from);
             ps.setDate(2, to);
             ps.setInt(3, pageIndex * pageSize);
@@ -86,7 +95,7 @@ public class DatabaseHelper {
             if (!hasTable("ban_logs")) {
                 connection.prepareStatement("""
                                             CREATE TABLE ban_log (
-                                              "id" INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                                              "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                               "ban_at" integer NOT NULL,
                                               "unban_at" integer NOT NULL,
                                               "peer_ip" TEXT NOT NULL,
@@ -107,7 +116,7 @@ public class DatabaseHelper {
             if (!hasTable("statistic")) {
                 connection.prepareStatement("""
                                             CREATE TABLE ban_log (
-                                              "id" INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                                              "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                               "ban_at" integer NOT NULL,
                                               "unban_at" integer NOT NULL,
                                               "peer_ip" TEXT NOT NULL,

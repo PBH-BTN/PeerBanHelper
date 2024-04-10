@@ -1,9 +1,11 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.database.DatabaseHelper;
+import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.metric.Metrics;
-import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
+import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -22,6 +24,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,8 +55,11 @@ public class PeerBanHelperServer {
     private ExecutorService downloaderApiExecutor;
     @Getter
     private Metrics metrics;
+    private DatabaseManager databaseManager;
+    @Getter
+    private DatabaseHelper databaseHelper;
 
-    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) {
+    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
@@ -64,14 +70,25 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
         this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
+        try {
+            prepareDatabase();
+        } catch (Exception e) {
+            log.error(Lang.DATABASE_FAILURE, e);
+            throw e;
+        }
         registerMetrics();
         registerModules();
         registerTimer();
         registerBlacklistHttpServer();
     }
 
+    private void prepareDatabase() throws SQLException {
+        this.databaseManager = new DatabaseManager(this);
+        this.databaseHelper = new DatabaseHelper(databaseManager);
+    }
+
     private void registerMetrics() {
-        this.metrics = new InMemoryMetrics();
+        this.metrics = new PersistMetrics(databaseHelper);
     }
 
     private void registerBlacklistHttpServer() {
@@ -226,7 +243,7 @@ public class PeerBanHelperServer {
                 return result;
             }
         }
-        return new BanResult(null,PeerAction.NO_ACTION, "No matches");
+        return new BanResult(null, PeerAction.NO_ACTION, "No matches");
     }
 
     @NotNull

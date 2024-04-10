@@ -169,11 +169,11 @@ public class ActiveProbing extends AbstractFeatureModule {
             );
             String code = String.valueOf(resp.statusCode());
             if (code.equals(exceptedCode)) {
-                return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_AP_BAN_PEER_CODE, code));
+                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_AP_BAN_PEER_CODE, code));
             }
-            return new BanResult(PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_PEER_CODE, code));
+            return new BanResult(this,PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_PEER_CODE, code));
         } catch (IOException | InterruptedException | URISyntaxException e) {
-            return new BanResult(PeerAction.NO_ACTION, "HTTP Exception: " + e.getClass().getName() + ": " + e.getMessage());
+            return new BanResult(this,PeerAction.NO_ACTION, "HTTP Exception: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
 
@@ -182,14 +182,14 @@ public class ActiveProbing extends AbstractFeatureModule {
             int port = Integer.parseInt(spilt[1]);
             socket.connect(new InetSocketAddress(address.getIp(), port));
             if (socket.isConnected()) {
-                return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_AP_BAN_PEER_TCP_TEST, address.getIp() + " - " + port));
+                return new BanResult(this,PeerAction.BAN, String.format(Lang.MODULE_AP_BAN_PEER_TCP_TEST, address.getIp() + " - " + port));
             }
-            return new BanResult(PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_TCP_TEST_PORT_FAIL, "Not connected"));
+            return new BanResult(this,PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_TCP_TEST_PORT_FAIL, "Not connected"));
         } catch (IOException e) {
-            return new BanResult(PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_TCP_TEST_PORT_FAIL, e.getClass().getName() + ": " + e.getMessage()));
+            return new BanResult(this,PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_TCP_TEST_PORT_FAIL, e.getClass().getName() + ": " + e.getMessage()));
         } catch (NumberFormatException e) {
             log.warn(Lang.MODULE_AP_INCORRECT_TCP_TEST_PORT, spilt[1], e.getClass().getName() + ": " + e.getMessage());
-            return new BanResult(PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_TCP_TEST_PORT_FAIL, e.getClass().getName() + ": " + e.getMessage()));
+            return new BanResult(this,PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_TCP_TEST_PORT_FAIL, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 }

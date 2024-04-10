@@ -103,8 +103,13 @@ public class Main {
                 }
             }
         }
-        PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
-                YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
+        try {
+            PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
+                    YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
+        } catch (Exception e) {
+            log.error(Lang.BOOTSTRAP_FAILED, e);
+            throw new RuntimeException(e);
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronized (shutdown){
