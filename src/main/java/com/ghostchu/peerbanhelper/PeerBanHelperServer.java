@@ -53,6 +53,10 @@ public class PeerBanHelperServer {
     @Getter
     private Metrics metrics;
 
+    public void Shutdown(){
+        // place some clean code here
+    }
+
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) {
         this.downloaders = downloaders;
         this.profile = profile;
