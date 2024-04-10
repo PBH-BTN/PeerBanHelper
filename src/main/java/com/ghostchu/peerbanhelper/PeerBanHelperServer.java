@@ -21,7 +21,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,6 +55,25 @@ public class PeerBanHelperServer {
     private ExecutorService downloaderApiExecutor;
     @Getter
     private Metrics metrics;
+    private final Map<Class<?>, Object> dynamicModules = new HashMap<>();
+
+    public void shutdown() {
+        // place some clean code here
+        this.generalExecutor.shutdown();
+        this.checkBanExecutor.shutdown();
+        this.ruleExecuteExecutor.shutdown();
+        this.downloaderApiExecutor.shutdown();
+        this.registeredModules.forEach(FeatureModule::stop);
+        this.webEndpointProviderServer.stop();
+        dynamicModules.forEach((clazz, obj) -> {
+            try {
+                clazz.getMethod("stop").invoke(obj);
+            } catch (Exception e) {
+                log.error("Failed to stop plugin", e);
+            }
+        });
+
+    }
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) {
         this.downloaders = downloaders;
@@ -82,18 +104,7 @@ public class PeerBanHelperServer {
         }
     }
 
-    private void registerModules() {
-        log.info(Lang.WAIT_FOR_MODULES_STARTUP);
-        this.registeredModules.clear();
-        List<FeatureModule> modules = new ArrayList<>();
-        modules.add(new IPBlackList(profile));
-        modules.add(new PeerIdBlacklist(profile));
-        modules.add(new ClientNameBlacklist(profile));
-        modules.add(new ProgressCheatBlocker(profile));
-        modules.add(new ActiveProbing(profile));
-        this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
-        this.registeredModules.forEach(m -> log.info(Lang.MODULE_REGISTER, m.getName()));
-    }
+    protected static final String PLUGIN_CLASS_NAME = "com.ghostchu.peerbanhelper.module.Plugin";
 
     private void registerTimer() {
         PEER_CHECK_TIMER.schedule(new TimerTask() {
@@ -163,6 +174,45 @@ public class PeerBanHelperServer {
         }
     }
 
+    private void registerModules() {
+        log.info(Lang.WAIT_FOR_MODULES_STARTUP);
+        this.registeredModules.clear();
+        List<FeatureModule> modules = new ArrayList<>();
+        modules.add(new IPBlackList(profile));
+        modules.add(new PeerIdBlacklist(profile));
+        modules.add(new ClientNameBlacklist(profile));
+        modules.add(new ProgressCheatBlocker(profile));
+        modules.add(new ActiveProbing(profile));
+        this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
+        // load embed plugin
+        this.registeredModules.forEach(FeatureModule::register);
+
+        // load external plugin
+        this.loadPlugin();
+    }
+    private void loadPlugin() {
+        if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
+            log.info("Native image, skip");
+            return;
+        }
+        try {
+            // list file in the plugin folder
+            var plugins = new File("data/plugins").listFiles();
+            if (plugins != null) {
+                for (File plugin : plugins) {
+                    if (plugin.getName().endsWith(".jar")) {
+                        var loader = new URLClassLoader(new URL[]{plugin.toURI().toURL()});
+                        var clazz = loader.loadClass(PLUGIN_CLASS_NAME);
+                        var instance = clazz.getDeclaredConstructor().newInstance();
+                        clazz.getMethod("register").invoke(instance);
+                        dynamicModules.put(clazz, instance);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to load plugin", e);
+        }
+    }
 
     private Pair<Boolean, Collection<Torrent>> banDownloader(Downloader downloader) {
         AtomicBoolean needUpdate = new AtomicBoolean(false);

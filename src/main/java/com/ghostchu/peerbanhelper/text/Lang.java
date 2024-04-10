@@ -11,6 +11,7 @@ public class Lang {
     public static String ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE = "错误：无法初始化 API 提供端点，Transmission 模块的封禁功能将不起作用";
     public static String WAIT_FOR_MODULES_STARTUP = "请等待功能模块初始化……";
     public static String MODULE_REGISTER = "[注册] {}";
+    public static String MODULE_UNREGISTER = "[解注册] {}";
     public static String ERR_CLIENT_LOGIN_FAILURE_SKIP = "登录到 {} ({}) 失败，跳过……";
     public static String ERR_UNEXPECTED_API_ERROR = "在处理 {} ({}) 的 API 操作时出现了一个非预期的错误";
     public static String PEER_UNBAN_WAVE = "[解封] 解除了 {} 个过期的对等体封禁";
