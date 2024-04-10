@@ -55,6 +55,7 @@ public class PeerBanHelperServer {
     private ExecutorService downloaderApiExecutor;
     @Getter
     private Metrics metrics;
+    private final Map<Class<?>, Object> dynamicModules = new HashMap<>();
 
     public void shutdown() {
         // place some clean code here
@@ -64,6 +65,13 @@ public class PeerBanHelperServer {
         this.downloaderApiExecutor.shutdown();
         this.registeredModules.forEach(FeatureModule::stop);
         this.webEndpointProviderServer.stop();
+        dynamicModules.forEach((clazz, obj) -> {
+            try {
+                clazz.getMethod("stop").invoke(obj);
+            } catch (Exception e) {
+                log.error("Failed to stop plugin", e);
+            }
+        });
 
     }
 
@@ -195,7 +203,9 @@ public class PeerBanHelperServer {
                     if (plugin.getName().endsWith(".jar")) {
                         var loader = new URLClassLoader(new URL[]{plugin.toURI().toURL()});
                         var clazz = loader.loadClass(PLUGIN_CLASS_NAME);
-                        clazz.getMethod("register").invoke(clazz.getDeclaredConstructor().newInstance());
+                        var instance = clazz.getDeclaredConstructor().newInstance();
+                        clazz.getMethod("register").invoke(instance);
+                        dynamicModules.put(clazz, instance);
                     }
                 }
             }
