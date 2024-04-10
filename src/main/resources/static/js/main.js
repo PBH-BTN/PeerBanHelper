@@ -159,3 +159,79 @@ function toPercent(point) {
     str += "%";
     return str;
 }
+function updateBanLogsView(node, page) {
+    fetch("api/banlogs?pageIndex="+page)
+        .then(response => response.json())
+        .then(json => {
+            const thead = ['封禁于', 'IP地址', 'Peer ID', 'Peer UA', '↑', '↓', '%', '大小', '描述'];
+            const content = [];
+            json.forEach(ban => {
+                const dat = [];
+                dat.push(stdTime(new Date(ban.banAt))); // Convert timestamp to human-readable format
+                dat.push(ban.peerIp); // Updated to match the JSON response
+                dat.push(ban.peerId); // Updated to match the JSON response
+                dat.push(ban.peerClientName); // Updated to match the JSON response
+                dat.push(formatFileSize(ban.peerUploaded)); // Updated to match the JSON response
+                dat.push(formatFileSize(ban.peerDownloaded)); // Updated to match the JSON response
+                dat.push(toPercent(ban.peerProgress)); // Updated to match the JSON response
+                dat.push(formatFileSize(ban.torrentSize)); // Updated to match the JSON response
+                dat.push(ban.description); // Updated to match the JSON response
+                content.push(dat);
+            });
+            node.innerHTML = "";
+            node.appendChild(generateTable(thead, content));
+        })
+        .catch(err => {
+            node.innerHTML = `<i>请求错误：${err}</i>`;
+            console.log(err);
+        });
+}
+function generateTable(theadList, content) {
+    const table = document.createElement("table");
+    table.setAttribute("class", "table table-responsive table-bordered table-striped table-sm")
+    const thead = document.createElement("thead");
+    theadList.forEach(headTitle => {
+        const th = document.createElement("th");
+        th.setAttribute("scope", "col");
+        th.innerText = headTitle;
+        thead.appendChild(th);
+    });
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    content.forEach(bodyRow => {
+        const tr = document.createElement("tr");
+        bodyRow.forEach(cellData => {
+            const td = document.createElement("td");
+            td.innerHTML = cellData;
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    return table;
+}
+
+function updateMaxBansView(node, n){
+    fetch("api/maxbans?num="+n)
+        .then(response => response.json())
+        .then(json => {
+            const thead = ['IP地址','历史封禁次数'];
+            const content = [];
+            json.forEach(ban => {
+                const dat = [];
+                dat.push(ban.address); // Updated to match the JSON response
+                dat.push(ban.count)
+                content.push(dat);
+            });
+            node.innerHTML = "";
+            node.appendChild(generateTable(thead, content));
+        })
+        .catch(err => {
+            node.innerHTML = `<i>请求错误：${err}</i>`;
+            console.log(err);
+        });
+
+}

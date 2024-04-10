@@ -25,10 +25,11 @@ public class WebEndpointProvider extends NanoHTTPD {
 
     private void registerEndpoints() {
         apiEndpoints.add(new TransmissionBlockList(peerBanHelperServer));
-        apiEndpoints.add(new PBHBanList(peerBanHelperServer));
+        apiEndpoints.add(PBHBanList.createPBHBanList(peerBanHelperServer));
         apiEndpoints.add(new PBHMetrics(peerBanHelperServer));
         apiEndpoints.add(new PBHClientStatus(peerBanHelperServer));
         apiEndpoints.add(new PBHBanLogs(peerBanHelperServer, peerBanHelperServer.getDatabaseHelper()));
+        apiEndpoints.add(new PBHMaxBans(peerBanHelperServer, peerBanHelperServer.getDatabaseHelper()));
         apiEndpoints.forEach(apiEndpoint-> log.info(Lang.WEB_ENDPOINT_REGISTERED, apiEndpoint.getClass().getName()));
     }
 

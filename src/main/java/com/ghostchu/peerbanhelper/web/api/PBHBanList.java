@@ -14,8 +14,12 @@ import java.util.List;
 public class PBHBanList implements PBHAPI {
     private final PeerBanHelperServer server;
 
-    public PBHBanList(PeerBanHelperServer server) {
+    private PBHBanList(PeerBanHelperServer server) {
         this.server = server;
+    }
+
+    public static PBHBanList createPBHBanList(PeerBanHelperServer server) {
+        return new PBHBanList(server);
     }
 
     @Override

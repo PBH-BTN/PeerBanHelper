@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class DatabaseHelper {
@@ -51,24 +53,24 @@ public class DatabaseHelper {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
             if (from == null && to == null) {
-                ps = connection.prepareStatement("SELECT * FROM ban_logs LIMIT ?, ?");
+                ps = connection.prepareStatement("SELECT * FROM ban_logs ORDER BY id DESC LIMIT " + (pageIndex * pageSize) + ", " + pageSize);
             } else {
                 if (from == null || to == null) {
                     throw new IllegalArgumentException("from or null cannot be null if any provided");
                 } else {
-                    ps = connection.prepareStatement("SELECT * FROM ban_logs WHERE ban_at >= ? AND ban_at <= ? LIMIT ?, ?");
+                    ps = connection.prepareStatement("SELECT * FROM ban_logs WHERE ban_at >= ? AND ban_at <= ? ORDER BY id DESC LIMIT " + (pageIndex * pageSize) + ", " + pageSize);
                 }
             }
             try (ps) {
-                ps.setDate(1, from);
-                ps.setDate(2, to);
-                ps.setInt(3, pageIndex * pageSize);
-                ps.setInt(4, pageSize);
+                if(from != null){
+                    ps.setDate(1, from);
+                    ps.setDate(2, to);
+                }
                 try (ResultSet set = ps.executeQuery()) {
                     List<BanLog> logs = new LinkedList<>(); // 尽可能节约内存，不使用 ArrayList
                     while (set.next()) {
                         BanLog banLog = new BanLog(
-                                set.getLong("banAt"),
+                                set.getLong("ban_at"),
                                 set.getLong("unban_at"),
                                 set.getString("peer_ip"),
                                 set.getInt("peer_port"),
@@ -91,7 +93,27 @@ public class DatabaseHelper {
         }
     }
 
+    public Map<String, Long> findMaxBans(int n) throws SQLException {
+        try(Connection connection = manager.getConnection()){
+            @Cleanup
+            PreparedStatement ps = connection.prepareStatement("SELECT peer_ip, COUNT(*) AS count " +
+                    "FROM ban_logs " +
+                    "GROUP BY peer_ip " +
+                    "ORDER BY count DESC LIMIT "+n);
+            @Cleanup
+            ResultSet set  = ps.executeQuery();
+            Map<String, Long> map = new LinkedHashMap<>();
+            while (set.next()){
+                map.put(set.getString("peer_ip"), set.getLong("count"));
+            }
+            return map;
+        }
+    }
+
     public int insertBanLogs(List<BanLog> banLogList) throws SQLException {
+        if(banLogList.isEmpty()){
+            return 0;
+        }
         try (Connection connection = manager.getConnection()) {
             @Cleanup
             PreparedStatement ps = connection.prepareStatement("INSERT INTO ban_logs (ban_at, unban_at, peer_ip, peer_port, peer_id, peer_clientname," +
