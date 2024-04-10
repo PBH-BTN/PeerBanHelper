@@ -107,6 +107,13 @@ public class Main {
         PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
                 YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
 
+        Signal.handle(new Signal("TERM"), sig -> {
+              synchronized (shutdown){
+                log.info(Lang.PBH_SHUTTING_DOWN);
+                server.Shutdown();
+                shutdown.notifyAll();
+            }
+        });
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronized (shutdown){
                 log.info(Lang.PBH_SHUTTING_DOWN);
