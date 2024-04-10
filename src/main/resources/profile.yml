@@ -56,8 +56,8 @@ module:
       - "startsWith@go.torrent.dev" # BaiduNetdisk 离线下载
       - "startsWith@github.com/thank423/trafficConsume" # 完完全全的恶意客户端
       - "startsWith@Taipei-Torrent" # https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues/530#issuecomment-2017681942
-      ˉ "startsWith@hp/torrent"
-      ˉ "startsWith@HP"
+      - "startsWith@hp/torrent"
+      - "startsWith@HP"
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
   # 假进度检查
   progress-cheat-blocker:
