@@ -91,6 +91,7 @@ public class PeerBanHelperServer {
         modules.add(new ClientNameBlacklist(profile));
         modules.add(new ProgressCheatBlocker(profile));
         modules.add(new ActiveProbing(profile));
+        modules.add(new AutoRangeBan(this, profile));
         this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
         this.registeredModules.forEach(m -> log.info(Lang.MODULE_REGISTER, m.getName()));
     }

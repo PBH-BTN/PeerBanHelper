@@ -55,6 +55,7 @@ public class Lang {
     public static String DOWNLOADER_TR_INCOMPATIBILITY_BANAPI= "当前版本存在封禁 API 的已知问题，请升级至 3.0-20 或更高版本";
     public static String ERR_CONFIG_DIRECTORY_INCORRECT = "初始化失败：config 不是一个目录。如果您正在使用 Docker，请确保其正确挂载。";
     public static String WEB_ENDPOINT_REGISTERED = "[注册] WebAPI 端点已注册：{}";
-
     public static String PBH_SHUTTING_DOWN = "[退出] 正在退出，请等待我们完成剩余的工作……";
+    public static String ARB_ERROR_TO_CONVERTING_IP = "IP 地址 %s 既不是 IPV4 地址也不是 IPV6 地址。";
+    public static String ARB_BANNED = "IP 地址 %s 与另一个已封禁的 IP 地址 %s 处于同一封禁区间 %s 内，执行连锁封禁操作。";
 }
