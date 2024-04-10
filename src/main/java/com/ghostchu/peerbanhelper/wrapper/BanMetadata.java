@@ -8,15 +8,17 @@ import java.util.UUID;
 
 @Data
 public class BanMetadata implements Comparable<BanMetadata> {
-    private UUID randomId = UUID.randomUUID();
+    private String context;
+    private UUID randomId ;
     private long banAt;
     private long unbanAt;
     private TorrentWrapper torrent;
     private PeerWrapper peer;
     private String description;
 
-    public BanMetadata(UUID randomId, long banAt, long unbanAt, Torrent torrent, Peer peer, String description) {
-        this.randomId = randomId;
+    public BanMetadata(String context, long banAt, long unbanAt, Torrent torrent, Peer peer, String description) {
+        this.randomId = UUID.randomUUID();
+        this.context = context;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
         this.torrent = new TorrentWrapper(torrent);

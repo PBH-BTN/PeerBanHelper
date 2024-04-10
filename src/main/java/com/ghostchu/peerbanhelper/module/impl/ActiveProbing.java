@@ -96,7 +96,7 @@ public class ActiveProbing extends AbstractFeatureModule {
             });
         } catch (ExecutionException e) {
             log.error(Lang.MODULE_AP_EXECUTE_EXCEPTION, e);
-            return new BanResult(PeerAction.NO_ACTION, "[Runtime Exception] " + e.getClass().getName() + ": " + e.getMessage());
+            return new BanResult(this, PeerAction.NO_ACTION, "[Runtime Exception] " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ public class ActiveProbing extends AbstractFeatureModule {
         }
 
         if (banResult == null) {
-            banResult = new BanResult(PeerAction.NO_ACTION, "No result provided");
+            banResult = new BanResult(this,PeerAction.NO_ACTION, "No result provided");
         }
         return banResult;
     }
@@ -124,12 +124,12 @@ public class ActiveProbing extends AbstractFeatureModule {
         try {
             InetAddress add = InetAddress.getByName(address.getIp());
             if (add.isReachable(timeout)) {
-                return new BanResult(PeerAction.BAN, Lang.MODULE_AP_PEER_BAN_PING);
+                return new BanResult(this,PeerAction.BAN, Lang.MODULE_AP_PEER_BAN_PING);
             }
         } catch (IOException e) {
-            return new BanResult(PeerAction.NO_ACTION, "Exception: " + e.getClass().getName() + e.getMessage());
+            return new BanResult(this,PeerAction.NO_ACTION, "Exception: " + e.getClass().getName() + e.getMessage());
         }
-        return new BanResult(PeerAction.NO_ACTION, "No response");
+        return new BanResult(this,PeerAction.NO_ACTION, "No response");
     }
 
     private BanResult httpTestPeer(PeerAddress address, String[] spilt) {

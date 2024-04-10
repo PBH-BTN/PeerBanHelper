@@ -36,20 +36,20 @@ public class IPBlackList extends AbstractFeatureModule {
         List<Integer> ports = getConfig().getIntList("ports");
         PeerAddress peerAddress = peer.getAddress();
         if (ports.contains(peerAddress.getPort())) {
-            return new BanResult(PeerAction.BAN, "Restricted ports");
+            return new BanResult(this,PeerAction.BAN, "Restricted ports");
         }
         for (String ip : ips) {
             if (peerAddress.getIp().equals(ip.trim())) {
-                return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
+                return new BanResult(this,PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
             }
             try {
                 IPAddress address = new IPAddressString(ip).toAddress();
                 if (address.contains(new IPAddressString(peerAddress.getIp()).toAddress())) {
-                    return new BanResult(PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
+                    return new BanResult(this,PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
                 }
             } catch (AddressStringException ignored) {
             }
         }
-        return new BanResult(PeerAction.NO_ACTION, "No matches");
+        return new BanResult(this,PeerAction.NO_ACTION, "No matches");
     }
 }

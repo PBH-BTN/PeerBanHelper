@@ -153,6 +153,18 @@ public class Main {
         return exists;
     }
 
+    public static File getDataDirectory() {
+        return dataDirectory;
+    }
+
+    public static File getConfigDirectory() {
+        return configDirectory;
+    }
+
+    public static File getLogsDirectory() {
+        return logsDirectory;
+    }
+
     public static String getUserAgent() {
         return "PeerBanHelper/" + meta.getVersion();
     }
