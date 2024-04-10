@@ -182,7 +182,6 @@ public class PeerBanHelperServer {
         // load external plugin
         this.loadPlugin();
     }
-
     private void loadPlugin() {
         if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
             log.info("Native image, skip");
@@ -190,7 +189,7 @@ public class PeerBanHelperServer {
         }
         try {
             // list file in the plugin folder
-            var plugins = new File("plugins").listFiles();
+            var plugins = new File("data/plugins").listFiles();
             if (plugins != null) {
                 for (File plugin : plugins) {
                     if (plugin.getName().endsWith(".jar")) {
