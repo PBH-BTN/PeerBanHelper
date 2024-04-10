@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.LogManager;
+import sun.misc.Signal;
 
 @Slf4j
 public class Main {
@@ -109,6 +110,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronized (shutdown){
                 log.info(Lang.PBH_SHUTTING_DOWN);
+                server.Shutdown();
                 shutdown.notifyAll();
             }
         }));
