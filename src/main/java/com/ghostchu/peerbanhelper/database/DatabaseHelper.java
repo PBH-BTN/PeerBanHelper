@@ -118,6 +118,28 @@ public class DatabaseHelper {
                                             );
                         """);
                 ps.executeUpdate();
+                ps = connection.prepareStatement("""
+                                        CREATE INDEX ban_logs_idx
+                                        ON ban_logs (
+                                          "id",
+                                          "ban_at",
+                                          "peer_ip",
+                                          "torrent_name",
+                                          "torrent_infohash",
+                                          "module"
+                                        );
+                        """);
+                ps.executeUpdate();
+            }
+            if (!hasTable("metadata")) {
+                @Cleanup
+                PreparedStatement ps = connection.prepareStatement("""
+                                            CREATE TABLE ban_logs (
+                                              "key" TEXT NOT NULL PRIMARY KEY,
+                                              "value" TEXT
+                                            );
+                        """);
+                ps.executeUpdate();
             }
         }
     }
