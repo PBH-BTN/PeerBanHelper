@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.LogManager;
 
 @Slf4j
@@ -31,7 +31,7 @@ public class Main {
     private static final File pluginDirectory = new File(dataDirectory, "plugins");
     @Getter
     private static BuildMeta meta = new BuildMeta();
-    private final static AtomicBoolean shutdown = new AtomicBoolean(false);
+    private static final AtomicInteger shutdown = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException, IOException {
         if (!logsDirectory.exists()) {
@@ -40,7 +40,7 @@ public class Main {
         LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
         meta = new BuildMeta();
         if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
-            if(System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
+            if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
                 ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
                 Process p = pb.start();
                 p.waitFor();
@@ -104,8 +104,9 @@ public class Main {
                 }
             }
         }
+        PeerBanHelperServer server;
         try {
-            PeerBanHelperServer server = new PeerBanHelperServer(downloaderList,
+            server = new PeerBanHelperServer(downloaderList,
                     YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
         } catch (Exception e) {
             log.error(Lang.BOOTSTRAP_FAILED, e);
@@ -113,19 +114,22 @@ public class Main {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            synchronized (shutdown){
+            synchronized (shutdown) {
+                shutdown.set(1); // We're going to shutdown!
+                shutdown.notifyAll();
                 log.info(Lang.PBH_SHUTTING_DOWN);
                 server.shutdown();
+                shutdown.set(2); // We're completed shutdown!
                 shutdown.notifyAll();
             }
         }));
-        while (!shutdown.get()) {
-           synchronized (shutdown){
-               shutdown.wait(1000*3);
-           }
+        while (shutdown.get() != 2) {
+            synchronized (shutdown) {
+                shutdown.wait(1000 * 5);
+            }
         }
-        log.wait(); // make all log printed
-        System.exit(0);
+        shutdown.set(3);
+        shutdown.notifyAll(); // App exit
     }
 
     private static void workaroundGraalVM() {

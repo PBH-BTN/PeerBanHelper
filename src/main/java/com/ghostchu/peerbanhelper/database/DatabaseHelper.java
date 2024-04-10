@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,47 +27,50 @@ public class DatabaseHelper {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
             if (from == null && to == null) {
-                ps = connection.prepareStatement("SELECT * FROM ban_log LIMIT ?, ?");
+                ps = connection.prepareStatement("SELECT * FROM ban_logs LIMIT ?, ?");
             } else {
                 if (from == null || to == null) {
                     throw new IllegalArgumentException("from or null cannot be null if any provided");
                 } else {
-                    ps = connection.prepareStatement("SELECT * FROM ban_log WHERE ban_at >= ? AND ban_at <= ? LIMIT ?, ?");
+                    ps = connection.prepareStatement("SELECT * FROM ban_logs WHERE ban_at >= ? AND ban_at <= ? LIMIT ?, ?");
                 }
             }
-            ps.setDate(1, from);
-            ps.setDate(2, to);
-            ps.setInt(3, pageIndex * pageSize);
-            ps.setInt(4, pageSize);
-            try (ResultSet set = ps.executeQuery()) {
-                List<BanLog> logs = new LinkedList<>(); // 尽可能节约内存，不使用 ArrayList
-                while (set.next()) {
-                    BanLog banLog = new BanLog(
-                            set.getLong("banAt"),
-                            set.getLong("unban_at"),
-                            set.getString("peer_ip"),
-                            set.getInt("peer_port"),
-                            set.getString("peer_id"),
-                            set.getString("peer_clientname"),
-                            set.getLong("peer_uploaded"),
-                            set.getLong("peer_downloaded"),
-                            set.getDouble("peer_progress"),
-                            set.getString("torrent_infohash"),
-                            set.getString("torrent_name"),
-                            set.getLong("torrent_size"),
-                            set.getString("module"),
-                            set.getString("description")
-                    );
-                    logs.add(banLog);
+            try (ps) {
+                ps.setDate(1, from);
+                ps.setDate(2, to);
+                ps.setInt(3, pageIndex * pageSize);
+                ps.setInt(4, pageSize);
+                try (ResultSet set = ps.executeQuery()) {
+                    List<BanLog> logs = new LinkedList<>(); // 尽可能节约内存，不使用 ArrayList
+                    while (set.next()) {
+                        BanLog banLog = new BanLog(
+                                set.getLong("banAt"),
+                                set.getLong("unban_at"),
+                                set.getString("peer_ip"),
+                                set.getInt("peer_port"),
+                                set.getString("peer_id"),
+                                set.getString("peer_clientname"),
+                                set.getLong("peer_uploaded"),
+                                set.getLong("peer_downloaded"),
+                                set.getDouble("peer_progress"),
+                                set.getString("torrent_infohash"),
+                                set.getString("torrent_name"),
+                                set.getLong("torrent_size"),
+                                set.getString("module"),
+                                set.getString("description")
+                        );
+                        logs.add(banLog);
+                    }
+                    return logs;
                 }
-                return logs;
             }
         }
     }
 
     public int insertBanLogs(List<BanLog> banLogList) throws SQLException {
         try (Connection connection = manager.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO ban_log (ban_at, unban_at, peer_ip, peer_port, peer_id, peer_clientname," +
+            @Cleanup
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO ban_logs (ban_at, unban_at, peer_ip, peer_port, peer_id, peer_clientname," +
                     " peer_downloaded, peer_uploaded, peer_progress, torrent_infohash, torrent_name, torrent_size, module, description)" +
                     "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             for (BanLog banLog : banLogList) {
@@ -93,8 +97,9 @@ public class DatabaseHelper {
     public void createTables() throws SQLException {
         try (Connection connection = manager.getConnection()) {
             if (!hasTable("ban_logs")) {
-                connection.prepareStatement("""
-                                            CREATE TABLE ban_log (
+                @Cleanup
+                PreparedStatement ps = connection.prepareStatement("""
+                                            CREATE TABLE ban_logs (
                                               "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                               "ban_at" integer NOT NULL,
                                               "unban_at" integer NOT NULL,
@@ -112,27 +117,7 @@ public class DatabaseHelper {
                                               "description" TEXT NOT NULL
                                             );
                         """);
-            }
-            if (!hasTable("statistic")) {
-                connection.prepareStatement("""
-                                            CREATE TABLE ban_log (
-                                              "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                                              "ban_at" integer NOT NULL,
-                                              "unban_at" integer NOT NULL,
-                                              "peer_ip" TEXT NOT NULL,
-                                              "peer_port" integer NOT NULL,
-                                              "peer_id" text NOT NULL,
-                                              "peer_clientname" TEXT NOT NULL,
-                                              "peer_downloaded" integer NOT NULL,
-                                              "peer_uploaded" integer NOT NULL,
-                                              "peer_progress" real NOT NULL,
-                                              "torrent_infohash" TEXT NOT NULL,
-                                              "torrent_name" TEXT NOT NULL,
-                                              "torrent_size" integer NOT NULL,
-                                              "module" TEXT,
-                                              "description" TEXT NOT NULL
-                                            );
-                        """);
+                ps.executeUpdate();
             }
         }
     }

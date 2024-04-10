@@ -88,12 +88,6 @@ public class PeerBanHelperServer {
 
     public void shutdown() {
         // place some clean code here
-        this.generalExecutor.shutdown();
-        this.checkBanExecutor.shutdown();
-        this.ruleExecuteExecutor.shutdown();
-        this.downloaderApiExecutor.shutdown();
-        this.registeredModules.forEach(FeatureModule::stop);
-        this.webEndpointProviderServer.stop();
         dynamicModules.forEach((clazz, obj) -> {
             try {
                 clazz.getMethod("stop").invoke(obj);
@@ -101,7 +95,21 @@ public class PeerBanHelperServer {
                 log.error("Failed to stop plugin", e);
             }
         });
-
+        this.metrics.close();
+        this.registeredModules.forEach(FeatureModule::stop);
+        this.databaseManager.close();
+        this.webEndpointProviderServer.stop();
+        this.checkBanExecutor.shutdown();
+        this.ruleExecuteExecutor.shutdown();
+        this.downloaderApiExecutor.shutdown();
+        this.generalExecutor.shutdown();
+        this.downloaders.forEach(d-> {
+            try {
+                d.close();
+            } catch (Exception e) {
+                log.error("Failed to close download {}", d.getName(), e);
+            }
+        });
     }
 
     private void prepareDatabase() throws SQLException {
