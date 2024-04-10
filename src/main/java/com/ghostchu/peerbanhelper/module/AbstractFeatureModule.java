@@ -26,14 +26,14 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     private boolean register;
 
     @Override
-    public void Stop() {
+    public void stop() {
         if (register) {
             log.info(Lang.MODULE_UNREGISTER, getName());
         }
     }
 
     @Override
-    public void Register() {
+    public void register() {
         register = true;
         log.info(Lang.MODULE_REGISTER, getName());
     }

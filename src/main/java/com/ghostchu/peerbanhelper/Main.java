@@ -110,7 +110,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronized (shutdown){
                 log.info(Lang.PBH_SHUTTING_DOWN);
-                server.Shutdown();
+                server.shutdown();
                 shutdown.notifyAll();
             }
         }));

@@ -56,13 +56,13 @@ public class PeerBanHelperServer {
     @Getter
     private Metrics metrics;
 
-    public void Shutdown() {
+    public void shutdown() {
         // place some clean code here
         this.generalExecutor.shutdown();
         this.checkBanExecutor.shutdown();
         this.ruleExecuteExecutor.shutdown();
         this.downloaderApiExecutor.shutdown();
-        this.registeredModules.forEach(FeatureModule::Stop);
+        this.registeredModules.forEach(FeatureModule::stop);
         this.webEndpointProviderServer.stop();
 
     }
@@ -177,7 +177,7 @@ public class PeerBanHelperServer {
         modules.add(new ActiveProbing(profile));
         this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
         // load embed plugin
-        this.registeredModules.forEach(FeatureModule::Register);
+        this.registeredModules.forEach(FeatureModule::register);
 
         // load external plugin
         this.loadPlugin();
@@ -195,7 +195,7 @@ public class PeerBanHelperServer {
                     if (plugin.getName().endsWith(".jar")) {
                         var loader = new URLClassLoader(new URL[]{plugin.toURI().toURL()});
                         var clazz = loader.loadClass(PLUGIN_CLASS_NAME);
-                        clazz.getMethod("Register").invoke(clazz.getDeclaredConstructor().newInstance());
+                        clazz.getMethod("register").invoke(clazz.getDeclaredConstructor().newInstance());
                     }
                 }
             }

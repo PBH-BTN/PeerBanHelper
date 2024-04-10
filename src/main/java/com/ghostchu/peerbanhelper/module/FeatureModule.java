@@ -17,7 +17,7 @@ public interface FeatureModule {
 
     ConfigurationSection getConfig();
 
-    void Stop();
+    void stop();
 
-    void Register();
+    void register();
 }
