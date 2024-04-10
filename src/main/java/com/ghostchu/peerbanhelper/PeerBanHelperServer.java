@@ -25,9 +25,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class PeerBanHelperServer {
+    protected static final String PLUGIN_CLASS_NAME = "com.ghostchu.peerbanhelper.module.Plugin";
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final Timer PEER_CHECK_TIMER = new Timer("Peer check");
     private final YamlConfiguration profile;
@@ -49,6 +50,7 @@ public class PeerBanHelperServer {
     @Getter
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
+    private final Map<Class<?>, Object> dynamicModules = new HashMap<>();
     @Getter
     private List<FeatureModule> registeredModules = new ArrayList<>();
     @Getter
@@ -58,29 +60,9 @@ public class PeerBanHelperServer {
     private ExecutorService downloaderApiExecutor;
     @Getter
     private Metrics metrics;
-    private final Map<Class<?>, Object> dynamicModules = new HashMap<>();
-
-    public void shutdown() {
-        // place some clean code here
-        this.generalExecutor.shutdown();
-        this.checkBanExecutor.shutdown();
-        this.ruleExecuteExecutor.shutdown();
-        this.downloaderApiExecutor.shutdown();
-        this.registeredModules.forEach(FeatureModule::stop);
-        this.webEndpointProviderServer.stop();
-        dynamicModules.forEach((clazz, obj) -> {
-            try {
-                clazz.getMethod("stop").invoke(obj);
-            } catch (Exception e) {
-                log.error("Failed to stop plugin", e);
-            }
-        });
-
-    }
     private DatabaseManager databaseManager;
     @Getter
     private DatabaseHelper databaseHelper;
-
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
         this.profile = profile;
@@ -104,6 +86,24 @@ public class PeerBanHelperServer {
         registerBlacklistHttpServer();
     }
 
+    public void shutdown() {
+        // place some clean code here
+        this.generalExecutor.shutdown();
+        this.checkBanExecutor.shutdown();
+        this.ruleExecuteExecutor.shutdown();
+        this.downloaderApiExecutor.shutdown();
+        this.registeredModules.forEach(FeatureModule::stop);
+        this.webEndpointProviderServer.stop();
+        dynamicModules.forEach((clazz, obj) -> {
+            try {
+                clazz.getMethod("stop").invoke(obj);
+            } catch (Exception e) {
+                log.error("Failed to stop plugin", e);
+            }
+        });
+
+    }
+
     private void prepareDatabase() throws SQLException {
         this.databaseManager = new DatabaseManager(this);
         this.databaseHelper = new DatabaseHelper(databaseManager);
@@ -119,21 +119,6 @@ public class PeerBanHelperServer {
         } catch (IOException e) {
             log.warn(Lang.ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE, e);
         }
-    }
-
-    protected static final String PLUGIN_CLASS_NAME = "com.ghostchu.peerbanhelper.module.Plugin";
-    private void registerModules() {
-        log.info(Lang.WAIT_FOR_MODULES_STARTUP);
-        this.registeredModules.clear();
-        List<FeatureModule> modules = new ArrayList<>();
-        modules.add(new IPBlackList(profile));
-        modules.add(new PeerIdBlacklist(profile));
-        modules.add(new ClientNameBlacklist(profile));
-        modules.add(new ProgressCheatBlocker(profile));
-        modules.add(new ActiveProbing(profile));
-        modules.add(new AutoRangeBan(this, profile));
-        this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
-        this.registeredModules.forEach(m -> log.info(Lang.MODULE_REGISTER, m.getName()));
     }
 
     private void registerTimer() {
@@ -213,6 +198,7 @@ public class PeerBanHelperServer {
         modules.add(new ClientNameBlacklist(profile));
         modules.add(new ProgressCheatBlocker(profile));
         modules.add(new ActiveProbing(profile));
+        modules.add(new AutoRangeBan(this, profile));
         this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
         // load embed plugin
         this.registeredModules.forEach(FeatureModule::register);
@@ -220,6 +206,7 @@ public class PeerBanHelperServer {
         // load external plugin
         this.loadPlugin();
     }
+
     private void loadPlugin() {
         if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
             log.info("Native image, skip");
