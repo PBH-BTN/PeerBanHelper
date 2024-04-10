@@ -28,6 +28,7 @@ public class Main {
     private static final File dataDirectory = new File("data");
     private static final File logsDirectory = new File(dataDirectory, "logs");
     private static final File configDirectory = new File(dataDirectory, "config");
+    private static final File pluginDirectory = new File(dataDirectory, "plugins");
     @Getter
     private static BuildMeta meta = new BuildMeta();
     private final static AtomicBoolean shutdown = new AtomicBoolean(false);
@@ -114,6 +115,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronized (shutdown){
                 log.info(Lang.PBH_SHUTTING_DOWN);
+                server.shutdown();
                 shutdown.notifyAll();
             }
         }));
@@ -122,6 +124,7 @@ public class Main {
                shutdown.wait(1000*3);
            }
         }
+        log.wait(); // make all log printed
         System.exit(0);
     }
 
@@ -143,6 +146,9 @@ public class Main {
         }
         if (!configDirectory.isDirectory()) {
             throw new IllegalStateException(Lang.ERR_CONFIG_DIRECTORY_INCORRECT);
+        }
+        if (!pluginDirectory.exists()) {
+            pluginDirectory.mkdirs();
         }
         boolean exists = true;
         File config = new File(configDirectory, "config.yml");

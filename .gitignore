@@ -44,3 +44,5 @@ build/
 /.idea/
 /config/
 /data/
+
+dependency-reduced-pom.xml
