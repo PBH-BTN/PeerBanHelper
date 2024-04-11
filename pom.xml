@@ -236,6 +236,7 @@
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.ConsoleHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.FileHandler</buildArg>
+                                <buildArg>--initialize-at-build-time=org.sqlite.util.ProcessRunner</buildArg>
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
                             </buildArgs>
                         </configuration>
@@ -297,6 +298,7 @@
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.ConsoleHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.FileHandler</buildArg>
+                                <buildArg>--initialize-at-build-time=org.sqlite.util.ProcessRunner</buildArg>
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
                             </buildArgs>
                         </configuration>
