@@ -38,4 +38,14 @@ public class InMemoryMetrics implements Metrics {
     public void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
         unbans++;
     }
+
+    @Override
+    public void flush() {
+        // do nothing for in-memory
+    }
+
+    @Override
+    public void close() {
+        // do nothing for in-memory
+    }
 }

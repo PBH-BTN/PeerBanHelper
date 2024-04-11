@@ -1,8 +1,8 @@
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 封禁持续时间（单位：毫秒）
-ban-duration: 3600000
-ban-behavior: "/32"
+ban-duration: 259200000
+
 # 功能模块
 module:
   # PeerId 封禁
@@ -138,3 +138,12 @@ module:
       - HTTPS@/subpath/subpath2@443@200@true # https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8761335
     # 对 HTTP(S) 探测请求指定 User-Agent
     http-probing-user-agent: "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"
+  # 范围 IP 段封禁
+  # 在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁
+  auto-range-ban:
+    # 是否启用
+    enabled: true
+    # IPV4 前缀长度
+    ipv4: 30 # /32 = 单个 IP，/24 = 整个 ?.?.?.x 段
+    # IPV6 前缀长度
+    ipv6: 64 # /64 = ISP 通常分配给家宽用户的前缀长度

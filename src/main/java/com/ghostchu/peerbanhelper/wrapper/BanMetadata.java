@@ -8,15 +8,17 @@ import java.util.UUID;
 
 @Data
 public class BanMetadata implements Comparable<BanMetadata> {
-    private UUID randomId = UUID.randomUUID();
+    private String context;
+    private UUID randomId ;
     private long banAt;
     private long unbanAt;
     private TorrentWrapper torrent;
     private PeerWrapper peer;
     private String description;
 
-    public BanMetadata(UUID randomId, long banAt, long unbanAt, Torrent torrent, Peer peer, String description) {
-        this.randomId = randomId;
+    public BanMetadata(String context, long banAt, long unbanAt, Torrent torrent, Peer peer, String description) {
+        this.randomId = UUID.randomUUID();
+        this.context = context;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
         this.torrent = new TorrentWrapper(torrent);
@@ -31,6 +33,7 @@ public class BanMetadata implements Comparable<BanMetadata> {
     public int compareTo(BanMetadata o) {
         return this.randomId.compareTo(o.randomId);
     }
+
     @Data
     public static class TorrentWrapper {
         private final String id;
@@ -45,22 +48,34 @@ public class BanMetadata implements Comparable<BanMetadata> {
             this.hash = torrent.getHash();
         }
     }
+
     @Data
     public static class PeerWrapper {
-        private final PeerAddress address;
+        private final PeerAddressWrapper address;
         private final String id;
         private final String clientName;
         private final long downloaded;
         private final long uploaded;
         private final double progress;
 
-        public PeerWrapper(Peer peer){
+        public PeerWrapper(Peer peer) {
             this.id = peer.getPeerId();
-            this.address = peer.getAddress();
+            this.address = new PeerAddressWrapper(peer.getAddress());
             this.clientName = peer.getClientName();
             this.downloaded = peer.getDownloaded();
             this.uploaded = peer.getUploaded();
             this.progress = peer.getProgress();
+        }
+    }
+
+    @Data
+    public static class PeerAddressWrapper {
+        private final int port;
+        private final String ip;
+
+        public PeerAddressWrapper(PeerAddress address) {
+            this.ip = address.getIp();
+            this.port = address.getPort();
         }
     }
 }

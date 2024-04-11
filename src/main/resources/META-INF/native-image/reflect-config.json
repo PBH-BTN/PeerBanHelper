@@ -1,5 +1,22 @@
 [
 {
+  "name":"[Lcom.zaxxer.hikari.util.ConcurrentBag$IConcurrentBagEntry;"
+},
+{
+  "name":"[Linet.ipaddr.ipv4.IPv4Address;"
+},
+{
+  "name":"[Linet.ipaddr.ipv6.IPv6Address;"
+},
+{
+  "name":"[Ljava.sql.Statement;"
+},
+{
+  "name":"com.ghostchu.peerbanhelper.database.BanLog",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":["long","long","java.lang.String","int","java.lang.String","java.lang.String","long","long","double","java.lang.String","java.lang.String","long","java.lang.String","java.lang.String"] }, {"name":"banAt","parameterTypes":[] }, {"name":"description","parameterTypes":[] }, {"name":"module","parameterTypes":[] }, {"name":"peerClientName","parameterTypes":[] }, {"name":"peerDownloaded","parameterTypes":[] }, {"name":"peerId","parameterTypes":[] }, {"name":"peerIp","parameterTypes":[] }, {"name":"peerPort","parameterTypes":[] }, {"name":"peerProgress","parameterTypes":[] }, {"name":"peerUploaded","parameterTypes":[] }, {"name":"torrentInfoHash","parameterTypes":[] }, {"name":"torrentName","parameterTypes":[] }, {"name":"torrentSize","parameterTypes":[] }, {"name":"unbanAt","parameterTypes":[] }]
+},
+{
   "name":"com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus",
   "allDeclaredFields":true
 },
@@ -20,6 +37,11 @@
 },
 {
   "name":"com.ghostchu.peerbanhelper.wrapper.BanMetadata",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.wrapper.BanMetadata$PeerAddressWrapper",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -75,6 +97,33 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"com.zaxxer.hikari.HikariConfig",
+  "allDeclaredFields":true
+},
+{
+  "name":"com.zaxxer.hikari.pool.PoolBase",
+  "fields":[{"name":"catalog"}]
+},
+{
+  "name":"com.zaxxer.hikari.pool.PoolEntry",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true,
+  "allPublicConstructors":true,
+  "allDeclaredClasses":true,
+  "allPublicClasses":true,
+  "fields":[{"name":"state"}]
+},
+{
+  "name":"com.zaxxer.hikari.util.ConcurrentBag",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true,
+  "allPublicConstructors":true,
+  "allDeclaredClasses":true,
+  "allPublicClasses":true
+},
+{
   "name":"cordelia.client.RawResponse",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -90,6 +139,10 @@
 },
 {
   "name":"cordelia.rpc.RqBlockList",
+  "allDeclaredFields":true
+},
+{
+  "name":"cordelia.rpc.RqSessionGet",
   "allDeclaredFields":true
 },
 {
@@ -123,11 +176,20 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"cordelia.rpc.RsSessionGet",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"cordelia.rpc.RsTorrentGet",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setTorrents","parameterTypes":["java.util.List"] }]
+},
+{
+  "name":"cordelia.rpc.types.Encryption",
+  "allDeclaredFields":true
 },
 {
   "name":"cordelia.rpc.types.FileStats",
@@ -190,6 +252,11 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"cordelia.rpc.types.Units",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"java.io.Serializable",
   "queryAllDeclaredMethods":true
 },
@@ -211,6 +278,10 @@
   "name":"java.lang.Number",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.Record",
+  "allDeclaredFields":true
 },
 {
   "name":"java.lang.Thread",
@@ -257,6 +328,10 @@
 },
 {
   "name":"java.util.ImmutableCollections$Map1",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.util.LinkedList",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -313,6 +388,10 @@
 },
 {
   "name":"org.slf4j.jul.JULServiceProvider"
+},
+{
+  "name":"org.sqlite.JDBC",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sun.security.pkcs12.PKCS12KeyStore",

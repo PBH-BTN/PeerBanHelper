@@ -1,9 +1,11 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.database.DatabaseHelper;
+import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.metric.Metrics;
-import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
+import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -17,6 +19,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class PeerBanHelperServer {
+    protected static final String PLUGIN_CLASS_NAME = "com.ghostchu.peerbanhelper.module.Plugin";
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final Timer PEER_CHECK_TIMER = new Timer("Peer check");
     private final YamlConfiguration profile;
@@ -46,6 +51,7 @@ public class PeerBanHelperServer {
     @Getter
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
+    private final Map<Class<?>, Object> dynamicModules = new HashMap<>();
     @Getter
     private List<FeatureModule> registeredModules = new ArrayList<>();
     @Getter
@@ -55,27 +61,10 @@ public class PeerBanHelperServer {
     private ExecutorService downloaderApiExecutor;
     @Getter
     private Metrics metrics;
-    private final Map<Class<?>, Object> dynamicModules = new HashMap<>();
-
-    public void shutdown() {
-        // place some clean code here
-        this.generalExecutor.shutdown();
-        this.checkBanExecutor.shutdown();
-        this.ruleExecuteExecutor.shutdown();
-        this.downloaderApiExecutor.shutdown();
-        this.registeredModules.forEach(FeatureModule::stop);
-        this.webEndpointProviderServer.stop();
-        dynamicModules.forEach((clazz, obj) -> {
-            try {
-                clazz.getMethod("stop").invoke(obj);
-            } catch (Exception e) {
-                log.error(Lang.ERR_CANNOT_UNLOAD_PLUGIN, e);
-            }
-        });
-
-    }
-
-    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) {
+    private DatabaseManager databaseManager;
+    @Getter
+    private DatabaseHelper databaseHelper;
+    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
@@ -86,14 +75,51 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
         this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
+        try {
+            prepareDatabase();
+        } catch (Exception e) {
+            log.error(Lang.DATABASE_FAILURE, e);
+            throw e;
+        }
         registerMetrics();
         registerModules();
         registerTimer();
         registerBlacklistHttpServer();
     }
 
+    public void shutdown() {
+        // place some clean code here
+        dynamicModules.forEach((clazz, obj) -> {
+            try {
+                clazz.getMethod("stop").invoke(obj);
+            } catch (Exception e) {
+                log.error("Failed to stop plugin", e);
+            }
+        });
+        this.metrics.close();
+        this.registeredModules.forEach(FeatureModule::stop);
+        this.databaseManager.close();
+        this.webEndpointProviderServer.stop();
+        this.checkBanExecutor.shutdown();
+        this.ruleExecuteExecutor.shutdown();
+        this.downloaderApiExecutor.shutdown();
+        this.generalExecutor.shutdown();
+        this.downloaders.forEach(d-> {
+            try {
+                d.close();
+            } catch (Exception e) {
+                log.error("Failed to close download {}", d.getName(), e);
+            }
+        });
+    }
+
+    private void prepareDatabase() throws SQLException {
+        this.databaseManager = new DatabaseManager(this);
+        this.databaseHelper = new DatabaseHelper(databaseManager);
+    }
+
     private void registerMetrics() {
-        this.metrics = new InMemoryMetrics();
+        this.metrics = new PersistMetrics(databaseHelper);
     }
 
     private void registerBlacklistHttpServer() {
@@ -103,8 +129,6 @@ public class PeerBanHelperServer {
             log.warn(Lang.ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE, e);
         }
     }
-
-    protected static final String PLUGIN_CLASS_NAME = "com.ghostchu.peerbanhelper.module.Plugin";
 
     private void registerTimer() {
         PEER_CHECK_TIMER.schedule(new TimerTask() {
@@ -183,6 +207,7 @@ public class PeerBanHelperServer {
         modules.add(new ClientNameBlacklist(profile));
         modules.add(new ProgressCheatBlocker(profile));
         modules.add(new ActiveProbing(profile));
+        modules.add(new AutoRangeBan(this, profile));
         this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
         // load embed plugin
         this.registeredModules.forEach(FeatureModule::register);
@@ -190,6 +215,7 @@ public class PeerBanHelperServer {
         // load external plugin
         this.loadPlugin();
     }
+
     private void loadPlugin() {
         if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
             log.info(Lang.SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE);
@@ -228,12 +254,16 @@ public class PeerBanHelperServer {
         map.forEach((key, value) -> {
             peers.addAndGet(value.size());
             for (Peer peer : value) {
+                if(StringUtils.isEmpty(peer.getPeerId())){
+                    // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
+                    continue;
+                }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
                     BanResult banResult = checkBan(key, peer);
                     if (banResult.action() == PeerAction.BAN) {
                         needUpdate.set(true);
                         needRelaunched.add(key);
-                        banPeer(peer.getAddress(), new BanMetadata(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.reason()));
+                        banPeer(peer.getAddress(), new BanMetadata(banResult.moduleContext().getClass().getName(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.reason()));
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }
                 }, generalExecutor));
@@ -275,7 +305,7 @@ public class PeerBanHelperServer {
                 return result;
             }
         }
-        return new BanResult(PeerAction.NO_ACTION, "No matches");
+        return new BanResult(null, PeerAction.NO_ACTION, "No matches");
     }
 
     @NotNull

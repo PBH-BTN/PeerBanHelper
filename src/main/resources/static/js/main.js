@@ -1,23 +1,24 @@
 function updateViews() {
-    safeRun(()=>updateBanCounterView(document.getElementById("view-bancounter")));
-    safeRun(()=>updateBanListView(document.getElementById("view-banlist")));
-    safeRun(()=>updateClientStatus(document.getElementById("view-clientstatus")));
+    safeRun(() => updateBanCounterView(document.getElementById("view-bancounter")));
+    safeRun(() => updateBanListView(document.getElementById("view-banlist")));
+    safeRun(() => updateClientStatus(document.getElementById("view-clientstatus")));
 }
 
-function safeRun(fun){
-    try{
+function safeRun(fun) {
+    try {
         fun();
-    }catch (e){
-       console.log(e);
+    } catch (e) {
+        console.log(e);
     }
 }
 
-function updateClientStatus(node){
+function updateClientStatus(node) {
     fetch("api/clientStatus")
         .then(response => response.json())
         .then(json => {
             const ol = document.createElement('ul');
-            json.forEach(client => {document.getElementById("view-bancounter")
+            json.forEach(client => {
+                document.getElementById("view-bancounter")
                 const li = document.createElement('li');
                 li.innerHTML = `<b>${client.name}</b> (${client.endpoint})`;
                 // li.style.fontSize = '22px';
@@ -34,15 +35,15 @@ function updateClientStatus(node){
                 }
                 // Torrents
                 let torrentsCount = "未知";
-                if(client.torrents !== undefined){
-                    torrentsCount= `${client.torrents}`
+                if (client.torrents !== undefined) {
+                    torrentsCount = `${client.torrents}`
                 }
                 const torrents = document.createElement("li");
                 torrents.innerHTML = `活动种子数: ${torrentsCount}`;
                 // Peers
                 let peersCount = "未知";
-                if(client.peers !== undefined){
-                    peersCount= `${client.peers}`
+                if (client.peers !== undefined) {
+                    peersCount = `${client.peers}`
                 }
                 const peers = document.createElement("li");
                 peers.innerHTML = `已连接的对等体: ${peersCount}`;
@@ -79,7 +80,7 @@ function updateBanListView(node) {
                 count++;
                 const meta = ban.banMetadata;
                 const title = document.createElement('li');
-                title.innerHTML = `<div style="display: inline-flex; column-gap: 5px"><b>${ban.address.ip + ":" + ban.address.port}</b><span class="badge text-bg-secondary" style="margin-top: auto; margin-bottom: auto">${formatPeer(meta.peer).outerHTML}</span></div>`;
+                title.innerHTML = `<div style="display: inline-flex; column-gap: 5px"><b>${meta.peer.address.ip + ":" + meta.peer.address.port}</b><span class="badge text-bg-secondary" style="margin-top: auto; margin-bottom: auto">${formatPeer(meta.peer).outerHTML}</span></div>`;
                 // li.style.fontSize = '22px';
                 const subUl = document.createElement('ul');
                 const banAt = document.createElement('li');
@@ -107,47 +108,130 @@ function updateBanListView(node) {
             console.log(err);
         });
 }
-function formatTorrent(torrent){
+
+function formatTorrent(torrent) {
     const torrentTag = document.createElement("span");
     torrentTag.innerText = torrent.name;
     torrentTag.setAttribute("title", torrent.hash);
     return torrentTag;
 }
-function formatPeer(peer){
+
+function formatPeer(peer) {
     const peerTag = document.createElement("span");
-    if(peer.clientName === undefined || peer.clientName === null){
+    if (peer.clientName === undefined || peer.clientName === null) {
         peerTag.innerText = peer.id.replace(/[\r\n]/gm, '\\n');
-    }else{
-        peerTag.innerText = peer.clientName;
+    } else {
+        peerTag.innerText = peer.clientName.replace(/[\r\n]/gm, '\\n');
     }
+    if (peerTag.innerText.length === 0) {
+        peerTag.innerText = "无数据";
+    }
+
     peerTag.setAttribute("title", `PeerID=${peer.id.replace(/[\r\n]/gm, '\\n')}\nPeerUA=${peer.clientName}`)
     return peerTag;
 }
 
-function stdTime(dateObj){
-    return dateObj.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+function stdTime(dateObj) {
+    return dateObj.toLocaleString('zh-CN', {timeZone: 'Asia/Shanghai'})
 }
 
 function formatFileSize(fileSize) {
     let temp;
     if (fileSize < 1024) {
         return fileSize + 'B';
-    } else if (fileSize < (1024*1024)) {
+    } else if (fileSize < (1024 * 1024)) {
         temp = fileSize / 1024;
         temp = temp.toFixed(2);
         return temp + 'KB';
-    } else if (fileSize < (1024*1024*1024)) {
-        temp = fileSize / (1024*1024);
+    } else if (fileSize < (1024 * 1024 * 1024)) {
+        temp = fileSize / (1024 * 1024);
         temp = temp.toFixed(2);
         return temp + 'MB';
     } else {
-        temp = fileSize / (1024*1024*1024);
+        temp = fileSize / (1024 * 1024 * 1024);
         temp = temp.toFixed(2);
         return temp + 'GB';
     }
 }
-function toPercent(point){
+
+function toPercent(point) {
     let str = Number(point * 100).toFixed(1);
-    str+="%";
+    str += "%";
     return str;
+}
+function updateBanLogsView(node, page) {
+    fetch("api/banlogs?pageIndex="+page)
+        .then(response => response.json())
+        .then(json => {
+            const thead = ['封禁于', 'IP地址', 'Peer ID', 'Peer UA', '↑', '↓', '%', '大小', '描述'];
+            const content = [];
+            json.forEach(ban => {
+                const dat = [];
+                dat.push(stdTime(new Date(ban.banAt))); // Convert timestamp to human-readable format
+                dat.push(ban.peerIp); // Updated to match the JSON response
+                dat.push(ban.peerId); // Updated to match the JSON response
+                dat.push(ban.peerClientName); // Updated to match the JSON response
+                dat.push(formatFileSize(ban.peerUploaded)); // Updated to match the JSON response
+                dat.push(formatFileSize(ban.peerDownloaded)); // Updated to match the JSON response
+                dat.push(toPercent(ban.peerProgress)); // Updated to match the JSON response
+                dat.push(formatFileSize(ban.torrentSize)); // Updated to match the JSON response
+                dat.push(ban.description); // Updated to match the JSON response
+                content.push(dat);
+            });
+            node.innerHTML = "";
+            node.appendChild(generateTable(thead, content));
+        })
+        .catch(err => {
+            node.innerHTML = `<i>请求错误：${err}</i>`;
+            console.log(err);
+        });
+}
+function generateTable(theadList, content) {
+    const table = document.createElement("table");
+    table.setAttribute("class", "table table-responsive table-bordered table-striped table-sm")
+    const thead = document.createElement("thead");
+    theadList.forEach(headTitle => {
+        const th = document.createElement("th");
+        th.setAttribute("scope", "col");
+        th.innerText = headTitle;
+        thead.appendChild(th);
+    });
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    content.forEach(bodyRow => {
+        const tr = document.createElement("tr");
+        bodyRow.forEach(cellData => {
+            const td = document.createElement("td");
+            td.innerHTML = cellData;
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    return table;
+}
+
+function updateMaxBansView(node, n){
+    fetch("api/maxbans?num="+n)
+        .then(response => response.json())
+        .then(json => {
+            const thead = ['IP地址','历史封禁次数'];
+            const content = [];
+            json.forEach(ban => {
+                const dat = [];
+                dat.push(ban.address); // Updated to match the JSON response
+                dat.push(ban.count)
+                content.push(dat);
+            });
+            node.innerHTML = "";
+            node.appendChild(generateTable(thead, content));
+        })
+        .catch(err => {
+            node.innerHTML = `<i>请求错误：${err}</i>`;
+            console.log(err);
+        });
+
 }

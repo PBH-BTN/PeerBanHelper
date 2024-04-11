@@ -2,10 +2,7 @@ package com.ghostchu.peerbanhelper.web;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.web.api.PBHBanList;
-import com.ghostchu.peerbanhelper.web.api.PBHClientStatus;
-import com.ghostchu.peerbanhelper.web.api.PBHMetrics;
-import com.ghostchu.peerbanhelper.web.api.TransmissionBlockList;
+import com.ghostchu.peerbanhelper.web.api.*;
 import fi.iki.elonen.NanoHTTPD;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,9 +25,11 @@ public class WebEndpointProvider extends NanoHTTPD {
 
     private void registerEndpoints() {
         apiEndpoints.add(new TransmissionBlockList(peerBanHelperServer));
-        apiEndpoints.add(new PBHBanList(peerBanHelperServer));
+        apiEndpoints.add(PBHBanList.createPBHBanList(peerBanHelperServer));
         apiEndpoints.add(new PBHMetrics(peerBanHelperServer));
         apiEndpoints.add(new PBHClientStatus(peerBanHelperServer));
+        apiEndpoints.add(new PBHBanLogs(peerBanHelperServer, peerBanHelperServer.getDatabaseHelper()));
+        apiEndpoints.add(new PBHMaxBans(peerBanHelperServer, peerBanHelperServer.getDatabaseHelper()));
         apiEndpoints.forEach(apiEndpoint-> log.info(Lang.WEB_ENDPOINT_REGISTERED, apiEndpoint.getClass().getName()));
     }
 

@@ -11,4 +11,6 @@ public interface Metrics {
     void recordCheck();
     void recordPeerBan(PeerAddress address, BanMetadata metadata);
     void recordPeerUnban(PeerAddress address, BanMetadata metadata);
+    void flush();
+    void close();
 }
