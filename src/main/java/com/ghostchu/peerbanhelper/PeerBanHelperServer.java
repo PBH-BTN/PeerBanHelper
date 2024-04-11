@@ -19,6 +19,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -253,6 +254,10 @@ public class PeerBanHelperServer {
         map.forEach((key, value) -> {
             peers.addAndGet(value.size());
             for (Peer peer : value) {
+                if(StringUtils.isEmpty(peer.getPeerId())){
+                    // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
+                    continue;
+                }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
                     BanResult banResult = checkBan(key, peer);
                     if (banResult.action() == PeerAction.BAN) {
