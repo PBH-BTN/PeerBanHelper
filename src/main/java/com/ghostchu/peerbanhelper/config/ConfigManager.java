@@ -58,6 +58,11 @@ public class ConfigManager {
         sections.values().forEach(BaseConfigSection::load);
     }
 
+    public static void reloadConfig() {
+        configs.values().forEach(ConfigPair::loadYamlConfig);
+        sections.values().forEach(BaseConfigSection::load);
+    }
+
     public static class Sections {
         private Sections() {
         }
