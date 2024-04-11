@@ -56,6 +56,10 @@ public class Lang {
     public static String DOWNLOADER_TR_INCOMPATIBILITY_BANAPI= "当前版本存在封禁 API 的已知问题，请升级至 3.0-20 或更高版本";
     public static String ERR_CONFIG_DIRECTORY_INCORRECT = "初始化失败：config 不是一个目录。如果您正在使用 Docker，请确保其正确挂载。";
     public static String WEB_ENDPOINT_REGISTERED = "[注册] WebAPI 端点已注册：{}";
+    public static String SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE = "检测到Native Images，跳过加载插件";
 
     public static String PBH_SHUTTING_DOWN = "[退出] 正在退出，请等待我们完成剩余的工作……";
+
+    public static String ERR_CANNOT_LOAD_PLUGIN = "[注册] 无法加载插件：{}";
+    public static String ERR_CANNOT_UNLOAD_PLUGIN = "[退出] 无法卸载插件：{}";
 }
