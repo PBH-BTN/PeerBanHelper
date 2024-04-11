@@ -11,17 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+@Getter
 @Slf4j
 public class DownloaderManager {
 
-    @Getter
     private final List<Downloader> downloaders = new ArrayList<>();
 
     public void loadDownloaders() {
         if (!downloaders.isEmpty())
             throw new RuntimeException("Downloaders has already loaded!");
 
-        String pbhServerAddress = ConfigManager.Sections.server().getPrefix();
+        String serverAddress = ConfigManager.Sections.server().getPrefix();
 
         ConfigManager.Sections.client().getClients().forEach((name, item) -> {
             switch (item.type().toLowerCase(Locale.ROOT)) {
@@ -44,7 +44,7 @@ public class DownloaderManager {
                             item.endpoint(),
                             item.username(),
                             item.password(),
-                            pbhServerAddress + "/blocklist/transmission",
+                            serverAddress + "/blocklist/transmission",
                             item.verifySSL(),
                             item.httpVersion()
                     ));
@@ -62,6 +62,12 @@ public class DownloaderManager {
                 log.error("Failed to close download {}", d.getName(), e);
             }
         });
+    }
+
+    public void reloadDownloaders() {
+        stopAll();
+        downloaders.clear();
+        loadDownloaders();
     }
 
 }

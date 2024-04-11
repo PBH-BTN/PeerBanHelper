@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.config.section;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.config.BaseConfigSection;
 import com.ghostchu.peerbanhelper.config.ConfigPair;
 import lombok.Getter;
@@ -32,4 +33,9 @@ public class ProfileMainConfigSection extends BaseConfigSection {
         super.callSave();
     }
 
+    @Override
+    public void reload() {
+        super.reload();
+        Main.getServer().registerTimer();
+    }
 }

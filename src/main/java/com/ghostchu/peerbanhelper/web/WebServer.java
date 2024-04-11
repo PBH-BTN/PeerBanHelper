@@ -34,4 +34,9 @@ public class WebServer {
         this.webEndpointProviderServer.stop();
     }
 
+    public void restart() {
+        stop();
+        start();
+    }
+
 }

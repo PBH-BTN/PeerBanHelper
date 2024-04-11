@@ -1,11 +1,9 @@
 package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.config.ConfigManager;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
@@ -63,7 +61,7 @@ public class Main {
 
         // Start server
         try {
-            server = new PeerBanHelperServer(YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")));
+            server = new PeerBanHelperServer();
         } catch (Exception e) {
             log.error(Lang.BOOTSTRAP_FAILED, e);
             throw new RuntimeException(e);

@@ -48,12 +48,15 @@ public class PeerBanHelperServer {
 
     @Getter
     private Metrics metrics;
+    @Getter
     private DatabaseManager databaseManager;
     @Getter
     private DatabaseHelper databaseHelper;
 
+    @Getter
     private final ModuleManager moduleManager;
 
+    @Getter
     private WebServer webServer;
 
     public PeerBanHelperServer() throws SQLException {
@@ -108,7 +111,7 @@ public class PeerBanHelperServer {
         this.metrics = new PersistMetrics(databaseHelper);
     }
 
-    private void registerTimer() {
+    public void registerTimer() {
         if (banWaveTimerTask != null)
             banWaveTimerTask.cancel();
 

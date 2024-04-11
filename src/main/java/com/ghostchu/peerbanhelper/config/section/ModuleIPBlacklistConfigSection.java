@@ -1,7 +1,10 @@
 package com.ghostchu.peerbanhelper.config.section;
 
+import com.ghostchu.peerbanhelper.config.ConfigManager;
 import com.ghostchu.peerbanhelper.config.ConfigPair;
 import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
+import com.ghostchu.peerbanhelper.module.impl.IPBlackList;
+import com.ghostchu.peerbanhelper.module.impl.ProgressCheatBlocker;
 import lombok.Getter;
 import lombok.Setter;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -34,6 +37,13 @@ public class ModuleIPBlacklistConfigSection extends ModuleBaseConfigSection {
         section.set("ips", ips);
         section.set("ports", ports);
         super.callSave();
+    }
+
+    @Override
+    public void reload() {
+        super.reload();
+        moduleManager().getModulesByClass(IPBlackList.class).forEach(module -> moduleManager().unregisterModule(module));
+        moduleManager().registerModule(new IPBlackList(ConfigManager.Sections.moduleIPBlacklist()));
     }
 
 }

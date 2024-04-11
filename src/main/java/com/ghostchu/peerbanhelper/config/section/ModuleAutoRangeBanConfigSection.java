@@ -1,7 +1,10 @@
 package com.ghostchu.peerbanhelper.config.section;
 
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.config.ConfigManager;
 import com.ghostchu.peerbanhelper.config.ConfigPair;
 import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
+import com.ghostchu.peerbanhelper.module.impl.AutoRangeBan;
 import lombok.Getter;
 import lombok.Setter;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -34,4 +37,10 @@ public class ModuleAutoRangeBanConfigSection extends ModuleBaseConfigSection {
         super.callSave();
     }
 
+    @Override
+    public void reload() {
+        super.reload();
+        moduleManager().getModulesByClass(AutoRangeBan.class).forEach(module -> moduleManager().unregisterModule(module));
+        moduleManager().registerModule(new AutoRangeBan(Main.getServer(), ConfigManager.Sections.moduleAutoRangeBan()));
+    }
 }

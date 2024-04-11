@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.config.section;
 
+import com.ghostchu.peerbanhelper.config.ConfigManager;
 import com.ghostchu.peerbanhelper.config.ConfigPair;
 import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
+import com.ghostchu.peerbanhelper.module.impl.ActiveProbing;
 import lombok.Getter;
 import lombok.Setter;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -45,4 +47,10 @@ public class ModuleActiveProbingConfigSection extends ModuleBaseConfigSection {
         super.callSave();
     }
 
+    @Override
+    public void reload() {
+        super.reload();
+        moduleManager().getModulesByClass(ActiveProbing.class).forEach(module -> moduleManager().unregisterModule(module));
+        moduleManager().registerModule(new ActiveProbing(ConfigManager.Sections.moduleActiveProbing()));
+    }
 }

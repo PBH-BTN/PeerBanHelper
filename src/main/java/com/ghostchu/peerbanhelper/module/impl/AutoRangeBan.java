@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
 import com.ghostchu.peerbanhelper.config.section.ModuleAutoRangeBanConfigSection;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
@@ -15,12 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.ExecutorService;
+
 @Slf4j
 public class AutoRangeBan extends AbstractFeatureModule<ModuleAutoRangeBanConfigSection> {
 
     private final PeerBanHelperServer server;
 
-    public AutoRangeBan(PeerBanHelperServer server, ModuleBaseConfigSection section) {
+    public AutoRangeBan(PeerBanHelperServer server, ModuleAutoRangeBanConfigSection section) {
         super(section);
         this.server = server;
     }

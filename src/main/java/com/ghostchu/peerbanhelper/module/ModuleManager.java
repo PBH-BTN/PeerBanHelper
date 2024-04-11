@@ -10,10 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ModuleManager {
@@ -60,6 +58,26 @@ public class ModuleManager {
         });
 
         this.registeredModules.forEach(FeatureModule::stop);
+    }
+
+    public void registerModule(FeatureModule module) {
+        if (!module.isModuleEnabled())
+            return;
+        module.register();
+        this.registeredModules.add(module);
+    }
+
+    public void unregisterModule(FeatureModule module) {
+        if (!this.registeredModules.contains(module))
+            return;
+        module.stop();
+        this.registeredModules.remove(module);
+    }
+
+    public Set<FeatureModule> getModulesByClass(Class<? extends FeatureModule> clazz) {
+        return registeredModules.stream()
+                .filter(module -> module.getClass() == clazz)
+                .collect(Collectors.toSet());
     }
 
     private void loadPlugin() {

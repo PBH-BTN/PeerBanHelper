@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.config.section;
 
+import com.ghostchu.peerbanhelper.config.ConfigManager;
 import com.ghostchu.peerbanhelper.config.ConfigPair;
 import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
+import com.ghostchu.peerbanhelper.module.impl.PeerIdBlacklist;
 import lombok.Getter;
 import lombok.Setter;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -32,5 +34,12 @@ public class ModulePeerIdBlacklistConfigSection extends ModuleBaseConfigSection 
         section.set("banned-peer-id", bannedPeerId);
         super.callSave();
     }
-    
+
+    @Override
+    public void reload() {
+        super.reload();
+        moduleManager().getModulesByClass(PeerIdBlacklist.class).forEach(module -> moduleManager().unregisterModule(module));
+        moduleManager().registerModule(new PeerIdBlacklist(ConfigManager.Sections.modulePeerIdBlacklist()));
+    }
+
 }

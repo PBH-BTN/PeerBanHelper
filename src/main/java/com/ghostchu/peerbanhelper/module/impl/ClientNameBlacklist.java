@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl;
 
-import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
 import com.ghostchu.peerbanhelper.config.section.ModuleClientNameBlacklistConfigSection;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
@@ -14,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 
 public class ClientNameBlacklist extends AbstractFeatureModule<ModuleClientNameBlacklistConfigSection> {
 
-    public ClientNameBlacklist(ModuleBaseConfigSection section) {
+    public ClientNameBlacklist(ModuleClientNameBlacklistConfigSection section) {
         super(section);
     }
 

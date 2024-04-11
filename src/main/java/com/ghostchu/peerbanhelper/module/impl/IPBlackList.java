@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 
 public class IPBlackList extends AbstractFeatureModule<ModuleIPBlacklistConfigSection> {
 
-    public IPBlackList(ModuleBaseConfigSection section) {
+    public IPBlackList(ModuleIPBlacklistConfigSection section) {
         super(section);
     }
 

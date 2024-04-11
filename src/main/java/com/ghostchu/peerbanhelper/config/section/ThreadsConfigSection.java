@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.config.section;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.config.BaseConfigSection;
 import com.ghostchu.peerbanhelper.config.ConfigPair;
 import lombok.Getter;
@@ -36,5 +37,12 @@ public class ThreadsConfigSection extends BaseConfigSection {
         section.set("rule-execute-parallelism", ruleExecuteParallelism);
         section.set("downloader-api-parallelism", downloaderApiParallelism);
         super.callSave();
+    }
+
+    @Override
+    public void reload() {
+        super.reload();
+        Main.getServer().shutdownExecutors(); //todo maybe dangerous!
+        Main.getServer().loadExecutors();
     }
 }

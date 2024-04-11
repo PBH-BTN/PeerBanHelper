@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl;
 
-import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
 import com.ghostchu.peerbanhelper.config.section.ModuleProgressCheatBlockerConfigSection;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
@@ -18,12 +17,12 @@ import java.util.concurrent.TimeUnit;
 
 public class ProgressCheatBlocker extends AbstractFeatureModule<ModuleProgressCheatBlockerConfigSection> {
 
-    private Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
+    private final Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
             .maximumSize(512)
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .build();
 
-    public ProgressCheatBlocker(ModuleBaseConfigSection section) {
+    public ProgressCheatBlocker(ModuleProgressCheatBlockerConfigSection section) {
         super(section);
     }
 

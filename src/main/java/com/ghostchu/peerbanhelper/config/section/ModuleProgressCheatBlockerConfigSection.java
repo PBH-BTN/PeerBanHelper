@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.config.section;
 
+import com.ghostchu.peerbanhelper.config.ConfigManager;
 import com.ghostchu.peerbanhelper.config.ConfigPair;
 import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
+import com.ghostchu.peerbanhelper.module.impl.ProgressCheatBlocker;
 import lombok.Getter;
 import lombok.Setter;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -15,7 +17,6 @@ public class ModuleProgressCheatBlockerConfigSection extends ModuleBaseConfigSec
     private double rewindMaximumDifference;
     private boolean blockExcessiveClients;
     private double excessiveThreshold;
-
 
     public ModuleProgressCheatBlockerConfigSection(ConfigPair configPair) {
         super(configPair, "progress-cheat-blocker");
@@ -42,6 +43,13 @@ public class ModuleProgressCheatBlockerConfigSection extends ModuleBaseConfigSec
         section.set("block-excessive-clients", blockExcessiveClients);
         section.set("excessive-threshold", excessiveThreshold);
         super.callSave();
+    }
+
+    @Override
+    public void reload() {
+        super.reload();
+        moduleManager().getModulesByClass(ProgressCheatBlocker.class).forEach(module -> moduleManager().unregisterModule(module));
+        moduleManager().registerModule(new ProgressCheatBlocker(ConfigManager.Sections.moduleProgressCheatBlocker()));
     }
 
 }

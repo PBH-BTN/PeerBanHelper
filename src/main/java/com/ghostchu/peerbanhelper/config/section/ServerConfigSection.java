@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.config.section;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.config.BaseConfigSection;
 import com.ghostchu.peerbanhelper.config.ConfigPair;
 import lombok.Getter;
@@ -34,4 +35,12 @@ public class ServerConfigSection extends BaseConfigSection {
         section.set("prefix", prefix);
         super.callSave();
     }
+
+    @Override
+    public void reload() {
+        super.reload();
+        Main.getServer().getWebServer().start();
+        Main.getServer().getDownloaderManager().reloadDownloaders(); //maybe some downloader use prefix property here
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.config;
 
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.module.ModuleManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -25,6 +27,10 @@ public class ModuleBaseConfigSection extends BaseConfigSection {
         ConfigurationSection section = getConfigSection();
         section.set("enabled", enabled);
         super.callSave();
+    }
+
+    protected ModuleManager moduleManager() {
+        return Main.getServer().getModuleManager();
     }
 
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 
 public class PeerIdBlacklist extends AbstractFeatureModule<ModulePeerIdBlacklistConfigSection> {
 
-    public PeerIdBlacklist(ModuleBaseConfigSection section) {
+    public PeerIdBlacklist(ModulePeerIdBlacklistConfigSection section) {
         super(section);
     }
 
