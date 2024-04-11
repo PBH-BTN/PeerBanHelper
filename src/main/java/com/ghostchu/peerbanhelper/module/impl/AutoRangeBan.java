@@ -25,8 +25,6 @@ public class AutoRangeBan extends AbstractFeatureModule {
         this.server = server;
         this.ipv4Prefix = getConfig().getInt("ipv4");
         this.ipv6Prefix = getConfig().getInt("ipv6");
-        System.out.println(ipv4Prefix);
-        System.out.println(ipv6Prefix);
     }
 
     @Override
