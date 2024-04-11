@@ -69,7 +69,7 @@ public class PeerBanHelperServer {
             try {
                 clazz.getMethod("stop").invoke(obj);
             } catch (Exception e) {
-                log.error("Failed to stop plugin", e);
+                log.error(Lang.ERR_CANNOT_UNLOAD_PLUGIN, e);
             }
         });
 
@@ -192,7 +192,7 @@ public class PeerBanHelperServer {
     }
     private void loadPlugin() {
         if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
-            log.info("Native image, skip");
+            log.info(Lang.SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE);
             return;
         }
         try {
@@ -210,7 +210,7 @@ public class PeerBanHelperServer {
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to load plugin", e);
+            log.error(Lang.ERR_CANNOT_LOAD_PLUGIN, e);
         }
     }
 
