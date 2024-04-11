@@ -17,10 +17,16 @@
         <native.maven.plugin.version>0.10.1</native.maven.plugin.version>
         <imageName>peerbanhelper-binary</imageName>
         <mainClass>com.ghostchu.peerbanhelper.Main</mainClass>
+        <kotlin.version>1.9.23</kotlin.version>
     </properties>
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <artifactId>kotlin-maven-plugin</artifactId>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <version>1.9.23</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -121,10 +127,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -174,6 +176,26 @@
                     </gitDescribe>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <source>src/main/java</source>
+                                <source>target/generated-sources/annotations</source>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -220,7 +242,7 @@
                                 <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
-<!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
+                                <!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
                                 <buildArg>--enable-url-protocols=http,https</buildArg>
@@ -229,11 +251,15 @@
                                 <buildArg>-H:EnableURLProtocols=https</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                                 <buildArg>-march=compatibility</buildArg>
-                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image</buildArg>
+                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image
+                                </buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider
+                                </buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider
+                                </buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory
+                                </buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.ConsoleHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.FileHandler</buildArg>
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
@@ -281,7 +307,7 @@
                                 <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
-<!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
+                                <!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
                                 <buildArg>--enable-url-protocols=http,https</buildArg>
@@ -290,11 +316,15 @@
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                                 <buildArg>--gc=serial</buildArg>
                                 <buildArg>-march=compatibility</buildArg>
-                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image</buildArg>
+                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image
+                                </buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider
+                                </buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider
+                                </buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory
+                                </buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.ConsoleHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.FileHandler</buildArg>
                                 <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
@@ -345,6 +375,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>33.0.0-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
