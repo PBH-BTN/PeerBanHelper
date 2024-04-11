@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
+import com.ghostchu.peerbanhelper.config.section.ModuleAutoRangeBanConfigSection;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -11,22 +13,16 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.util.concurrent.ExecutorService;
 @Slf4j
-public class AutoRangeBan extends AbstractFeatureModule {
-    private final PeerBanHelperServer server;
-    private final int ipv4Prefix;
-    private final int ipv6Prefix;
+public class AutoRangeBan extends AbstractFeatureModule<ModuleAutoRangeBanConfigSection> {
 
-    public AutoRangeBan(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(profile);
+    private final PeerBanHelperServer server;
+
+    public AutoRangeBan(PeerBanHelperServer server, ModuleBaseConfigSection section) {
+        super(section);
         this.server = server;
-        this.ipv4Prefix = getConfig().getInt("ipv4");
-        this.ipv6Prefix = getConfig().getInt("ipv6");
-        System.out.println(ipv4Prefix);
-        System.out.println(ipv6Prefix);
     }
 
     @Override
@@ -35,16 +31,15 @@ public class AutoRangeBan extends AbstractFeatureModule {
     }
 
     @Override
-    public String getConfigName() {
-        return "auto-range-ban";
-    }
-
-    @Override
     public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         if(StringUtils.isEmpty(peer.getPeerId())){
             return new BanResult(this,PeerAction.NO_ACTION, "Waiting for Bittorrent handshaking.");
         }
         IPAddress peerAddress = peer.getAddress().getAddress().withoutPrefixLength();
+
+        int ipv4Prefix = getConfig().getIpv4();
+        int ipv6Prefix = getConfig().getIpv4();
+
         for (PeerAddress bannedPeer : server.getBannedPeers().keySet()) {
             IPAddress bannedAddress = bannedPeer.getAddress().toIPAddress().withoutPrefixLength();
 

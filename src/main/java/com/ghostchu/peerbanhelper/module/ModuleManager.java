@@ -1,11 +1,11 @@
 package com.ghostchu.peerbanhelper.module;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.config.ConfigManager;
 import com.ghostchu.peerbanhelper.module.impl.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
 import java.net.URL;
@@ -21,28 +21,26 @@ public class ModuleManager {
     public static final String PLUGIN_CLASS_NAME = "com.ghostchu.peerbanhelper.module.Plugin";
 
     private final PeerBanHelperServer server;
-    private final YamlConfiguration profile;
 
     @Getter
     private List<FeatureModule> registeredModules = new ArrayList<>();
 
     private final Map<Class<?>, Object> dynamicModules = new HashMap<>();
 
-    public ModuleManager(PeerBanHelperServer server, YamlConfiguration profile) {
+    public ModuleManager(PeerBanHelperServer server) {
         this.server = server;
-        this.profile = profile;
     }
 
     public void registerModules() {
         log.info(Lang.WAIT_FOR_MODULES_STARTUP);
         this.registeredModules.clear();
         List<FeatureModule> modules = new ArrayList<>();
-        modules.add(new IPBlackList(profile));
-        modules.add(new PeerIdBlacklist(profile));
-        modules.add(new ClientNameBlacklist(profile));
-        modules.add(new ProgressCheatBlocker(profile));
-        modules.add(new ActiveProbing(profile));
-        modules.add(new AutoRangeBan(server, profile));
+        modules.add(new PeerIdBlacklist(ConfigManager.Sections.modulePeerIdBlacklist()));
+        modules.add(new ClientNameBlacklist(ConfigManager.Sections.moduleClientNameBlacklist()));
+        modules.add(new IPBlackList(ConfigManager.Sections.moduleIPBlacklist()));
+        modules.add(new ProgressCheatBlocker(ConfigManager.Sections.moduleProgressCheatBlocker()));
+        modules.add(new ActiveProbing(ConfigManager.Sections.moduleActiveProbing()));
+        modules.add(new AutoRangeBan(server, ConfigManager.Sections.moduleAutoRangeBan()));
         this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
         // load embed plugin
         this.registeredModules.forEach(FeatureModule::register);

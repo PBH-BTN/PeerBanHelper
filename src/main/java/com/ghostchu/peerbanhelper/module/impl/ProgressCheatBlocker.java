@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl;
 
+import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
+import com.ghostchu.peerbanhelper.config.section.ModuleProgressCheatBlockerConfigSection;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -8,31 +10,26 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class ProgressCheatBlocker extends AbstractFeatureModule {
+public class ProgressCheatBlocker extends AbstractFeatureModule<ModuleProgressCheatBlockerConfigSection> {
+
     private Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
             .maximumSize(512)
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .build();
 
-    public ProgressCheatBlocker(YamlConfiguration profile) {
-        super(profile);
+    public ProgressCheatBlocker(ModuleBaseConfigSection section) {
+        super(section);
     }
 
     @Override
     public String getName() {
         return "Progress Cheat Blocker";
-    }
-
-    @Override
-    public String getConfigName() {
-        return "progress-cheat-blocker";
     }
 
     @Override
@@ -42,15 +39,15 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
         if (torrentSize <= 0) {
             return new BanResult(this,PeerAction.NO_ACTION, Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
         }
-        if (torrentSize < getConfig().getLong("minimum-size")) {
+        if (torrentSize < getConfig().getMinimumSize()) {
             return new BanResult(this,PeerAction.NO_ACTION, "Skip due the torrent size");
         }
         final double actualProgress = (double) uploaded / torrentSize;
         final double clientProgress = peer.getProgress();
         // uploaded = -1 代表客户端不支持统计此 Peer 总上传量
-        if (uploaded != -1 && getConfig().getBoolean("block-excessive-clients") && (uploaded > torrentSize)) {
+        if (uploaded != -1 && getConfig().isBlockExcessiveClients() && (uploaded > torrentSize)) {
             // 下载过量，检查
-            long maxAllowedExcessiveThreshold = (long) (torrentSize * getConfig().getDouble("excessive-threshold"));
+            long maxAllowedExcessiveThreshold = (long) (torrentSize * getConfig().getExcessiveThreshold());
             if (uploaded > maxAllowedExcessiveThreshold) {
                 return new BanResult(this,PeerAction.BAN, String.format(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, torrentSize, uploaded, maxAllowedExcessiveThreshold));
             }
@@ -61,11 +58,11 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
         }
 
         double difference = Math.abs(actualProgress - clientProgress);
-        if (difference > getConfig().getDouble("maximum-difference")) {
+        if (difference > getConfig().getMaximumDifference()) {
             return new BanResult(this,PeerAction.BAN, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress, actualProgress, difference));
         }
 
-        double rewindAllow = getConfig().getDouble("rewind-maximum-difference");
+        double rewindAllow = getConfig().getRewindMaximumDifference();
         if (rewindAllow > 0) {
             List<ClientTask> lastRecordedProgress = progressRecorder.getIfPresent(peer.getAddress());
             if (lastRecordedProgress == null) lastRecordedProgress = new ArrayList<>();
@@ -112,5 +109,3 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
         }
     }
 }
-
-

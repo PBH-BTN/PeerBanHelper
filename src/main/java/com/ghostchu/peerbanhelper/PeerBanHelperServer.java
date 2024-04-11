@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -54,18 +53,12 @@ public class PeerBanHelperServer {
     private DatabaseHelper databaseHelper;
 
     private final ModuleManager moduleManager;
-    
-    private final YamlConfiguration profile;
-    @Getter
-    private final long banDuration;
 
     private WebServer webServer;
 
-    public PeerBanHelperServer(YamlConfiguration profile) throws SQLException {
+    public PeerBanHelperServer() throws SQLException {
         this.downloaderManager = new DownloaderManager();
-        this.profile = profile;
-        this.banDuration = profile.getLong("ban-duration");
-        this.moduleManager = new ModuleManager(this, profile);
+        this.moduleManager = new ModuleManager(this);
         this.webServer = new WebServer(this);
 
         loadExecutors();
@@ -126,7 +119,7 @@ public class PeerBanHelperServer {
             }
         };
 
-        peerCheckTimer.schedule(banWaveTimerTask, 0, profile.getLong("check-interval", 5000));
+        peerCheckTimer.schedule(banWaveTimerTask, 0, ConfigManager.Sections.profileMain().getCheckInterval());
     }
 
     public void banWave() {
@@ -208,7 +201,17 @@ public class PeerBanHelperServer {
                     if (banResult.action() == PeerAction.BAN) {
                         needUpdate.set(true);
                         needRelaunched.add(key);
-                        banPeer(peer.getAddress(), new BanMetadata(banResult.moduleContext().getClass().getName(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.reason()));
+                        banPeer(
+                                peer.getAddress(),
+                                new BanMetadata(
+                                        banResult.moduleContext().getClass().getName(),
+                                        System.currentTimeMillis(),
+                                        System.currentTimeMillis() + ConfigManager.Sections.profileMain().getBanDuration(),
+                                        key,
+                                        peer,
+                                        banResult.reason()
+                                )
+                        );
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }
                 }, generalExecutor));

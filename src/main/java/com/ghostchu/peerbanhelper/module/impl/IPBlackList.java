@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl;
 
+import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
+import com.ghostchu.peerbanhelper.config.section.ModuleIPBlacklistConfigSection;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -10,14 +12,14 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public class IPBlackList extends AbstractFeatureModule {
-    public IPBlackList(YamlConfiguration profile) {
-        super(profile);
+public class IPBlackList extends AbstractFeatureModule<ModuleIPBlacklistConfigSection> {
+
+    public IPBlackList(ModuleBaseConfigSection section) {
+        super(section);
     }
 
     @Override
@@ -26,15 +28,12 @@ public class IPBlackList extends AbstractFeatureModule {
     }
 
     @Override
-    public String getConfigName() {
-        return "ip-address-blocker";
-    }
-
-    @Override
     public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
-        List<String> ips = getConfig().getStringList("ips");
-        List<Integer> ports = getConfig().getIntList("ports");
+        List<String> ips = getConfig().getIps();
+        List<Integer> ports = getConfig().getPorts();
+
         PeerAddress peerAddress = peer.getAddress();
+
         if (ports.contains(peerAddress.getPort())) {
             return new BanResult(this,PeerAction.BAN, "Restricted ports");
         }

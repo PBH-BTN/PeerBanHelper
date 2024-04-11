@@ -1,26 +1,20 @@
 package com.ghostchu.peerbanhelper.module;
 
+import com.ghostchu.peerbanhelper.config.ModuleBaseConfigSection;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 @Slf4j
-public abstract class AbstractFeatureModule implements FeatureModule {
-    private final YamlConfiguration profile;
+public abstract class AbstractFeatureModule<T extends ModuleBaseConfigSection> implements FeatureModule, ModuleConfigurable<T> {
+    private final ModuleBaseConfigSection section;
 
-    public AbstractFeatureModule(YamlConfiguration profile) {
-        this.profile = profile;
+    public AbstractFeatureModule(ModuleBaseConfigSection section) {
+        this.section = section;
     }
 
     @Override
     public boolean isModuleEnabled() {
-        return getConfig().getBoolean("enabled");
-    }
-
-    @Override
-    public ConfigurationSection getConfig() {
-        return profile.getConfigurationSection("module").getConfigurationSection(getConfigName());
+        return getConfig().isEnabled();
     }
 
     private boolean register;
@@ -37,4 +31,10 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         register = true;
         log.info(Lang.MODULE_REGISTER, getName());
     }
+
+    @Override
+    public T getConfig() {
+        return (T) section;
+    }
+
 }

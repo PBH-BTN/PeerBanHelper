@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.config.section.ModuleActiveProbingConfigSection;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -12,7 +13,6 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -30,21 +30,31 @@ import java.util.Locale;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
-public class ActiveProbing extends AbstractFeatureModule {
+public class ActiveProbing extends AbstractFeatureModule<ModuleActiveProbingConfigSection> {
+
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ActiveProbing.class);
-    private final int timeout;
+
     private final List<Function<PeerAddress, BanResult>> rules = new ArrayList<>();
     private final Cache<PeerAddress, BanResult> cache;
 
-    public ActiveProbing(YamlConfiguration profile) {
-        super(profile);
-        this.timeout = getConfig().getInt("timeout", 3000);
+    private int timeout;
+    private String userAgent;
+
+    public ActiveProbing(ModuleActiveProbingConfigSection section) {
+        super(section);
+
+        this.timeout = getConfig().getTimeout();
+        this.userAgent = getConfig().getHttpProbingUserAgent();
+        if (userAgent == null)
+            userAgent = "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)";
+
+
         this.cache = CacheBuilder.newBuilder()
-                .maximumSize(getConfig().getLong("max-cached-entry", 3000))
-                .expireAfterAccess(getConfig().getLong("expire-after-no-access", 28800), TimeUnit.SECONDS)
+                .maximumSize(getConfig().getMaxCachedEntry())
+                .expireAfterAccess(getConfig().getExpireAfterNoAccess(), TimeUnit.SECONDS)
                 .build();
 
-        for (String rule : getConfig().getStringList("probing")) {
+        for (String rule : getConfig().getProbing()) {
             if (rule.equals("PING")) {
                 rules.add(this::pingPeer);
                 continue;
@@ -57,7 +67,7 @@ public class ActiveProbing extends AbstractFeatureModule {
                         log.warn(Lang.MODULE_AP_INVALID_RULE, rule);
                         continue;
                     }
-                    rules.add((address) -> httpTestPeer(address, spilt));
+                    rules.add(address -> httpTestPeer(address, spilt));
                 }
                 default -> log.warn(Lang.MODULE_AP_INVALID_RULE, rule);
             }
@@ -68,11 +78,6 @@ public class ActiveProbing extends AbstractFeatureModule {
     @Override
     public String getName() {
         return "Active Probing";
-    }
-
-    @Override
-    public String getConfigName() {
-        return "active-probing";
     }
 
     @Override
@@ -164,7 +169,7 @@ public class ActiveProbing extends AbstractFeatureModule {
         try {
             HttpResponse<String> resp = client.send(HttpRequest.newBuilder(new URI(url))
                     .GET()
-                    .header("User-Agent", String.format(getConfig().getString("http-probing-user-agent", "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"), Main.getMeta().getVersion()))
+                    .header("User-Agent", String.format(userAgent, Main.getMeta().getVersion()))
                     .build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
             String code = String.valueOf(resp.statusCode());
