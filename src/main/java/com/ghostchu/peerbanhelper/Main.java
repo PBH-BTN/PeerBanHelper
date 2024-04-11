@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.config.ConfigManager;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
@@ -12,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.LogManager;
@@ -49,7 +49,7 @@ public class Main {
         // Load Configurations
         log.info(Lang.LOADING_CONFIG);
         try {
-            if (!initConfiguration()) {
+            if (!ConfigManager.initConfiguration()) {
                 log.warn(Lang.CONFIG_PEERBANHELPER);
                 Scanner scanner = new Scanner(System.in);
                 scanner.nextLine();
@@ -59,17 +59,11 @@ public class Main {
             log.error(Lang.ERR_SETUP_CONFIGURATION, e);
             return;
         }
+        ConfigManager.loadConfig();
 
         // Start server
-        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(new File(configDirectory, "config.yml"));
-        String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-        ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
-
-        DownloaderManager downloaderManager = new DownloaderManager();
-        downloaderManager.loadDownloaders(clientSection, pbhServerAddress);
-
         try {
-            server = new PeerBanHelperServer(downloaderManager, YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
+            server = new PeerBanHelperServer(YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")));
         } catch (Exception e) {
             log.error(Lang.BOOTSTRAP_FAILED, e);
             throw new RuntimeException(e);
@@ -88,7 +82,7 @@ public class Main {
         }));
         while (shutdown.get() != 2) {
             synchronized (shutdown) {
-                shutdown.wait(1000 * 5);
+                shutdown.wait(1000 * 5L);
             }
         }
 
@@ -141,30 +135,6 @@ public class Main {
 
     private static void handleCommand(String input) {
 
-    }
-
-    private static boolean initConfiguration() throws IOException {
-        if (!configDirectory.exists()) {
-            configDirectory.mkdirs();
-        }
-        if (!configDirectory.isDirectory()) {
-            throw new IllegalStateException(Lang.ERR_CONFIG_DIRECTORY_INCORRECT);
-        }
-        if (!pluginDirectory.exists()) {
-            pluginDirectory.mkdirs();
-        }
-        boolean exists = true;
-        File config = new File(configDirectory, "config.yml");
-        File profile = new File(configDirectory, "profile.yml");
-        if (!config.exists()) {
-            exists = false;
-            Files.copy(Main.class.getResourceAsStream("/config.yml"), config.toPath());
-        }
-        if (!profile.exists()) {
-            exists = false;
-            Files.copy(Main.class.getResourceAsStream("/profile.yml"), profile.toPath());
-        }
-        return exists;
     }
 
     public static String getUserAgent() {

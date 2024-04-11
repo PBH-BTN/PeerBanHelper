@@ -28,7 +28,7 @@ public class PBHClientStatus implements PBHAPI {
     @Override
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
         List<Map<String, Object>> list = new ArrayList<>();
-        for (Downloader downloader : server.getDownloaders()) {
+        for (Downloader downloader : server.getDownloaderManager().getDownloaders()) {
             Map<String, Object> map = new HashMap<>(2);
             map.put("name", downloader.getName());
             map.put("endpoint", downloader.getEndpoint());

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.config.ConfigManager;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -14,7 +15,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.web.WebEndpointProvider;
+import com.ghostchu.peerbanhelper.web.WebServer;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
@@ -24,7 +25,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -58,35 +58,29 @@ public class PeerBanHelperServer {
     private final YamlConfiguration profile;
     @Getter
     private final long banDuration;
-    @Getter
-    private final int httpdPort;
-    @Getter
-    private final boolean hideFinishLogs;
-    @Getter
-    private final YamlConfiguration mainConfig;
 
-    @Getter
-    private WebEndpointProvider webEndpointProviderServer;
+    private WebServer webServer;
 
-    public PeerBanHelperServer(DownloaderManager downloaderManager, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
-        this.downloaderManager = downloaderManager;
+    public PeerBanHelperServer(YamlConfiguration profile) throws SQLException {
+        this.downloaderManager = new DownloaderManager();
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
-        this.mainConfig = mainConfig;
-        this.httpdPort = mainConfig.getInt("server.http");
         this.moduleManager = new ModuleManager(this, profile);
-        this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
+        this.webServer = new WebServer(this);
+
         loadExecutors();
+
         try {
             prepareDatabase();
         } catch (Exception e) {
             log.error(Lang.DATABASE_FAILURE, e);
             throw e;
         }
+
         registerMetrics();
         moduleManager.registerModules();
         registerTimer();
-        registerBlacklistHttpServer();
+        webServer.start();
     }
 
     public void shutdown() {
@@ -95,14 +89,14 @@ public class PeerBanHelperServer {
         this.databaseManager.close();
         this.downloaderManager.stopAll();
         shutdownExecutors();
-        this.webEndpointProviderServer.stop();
+        webServer.stop();
     }
 
     public void loadExecutors() {
-        this.generalExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.general-parallelism", 6));
-        this.checkBanExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.check-ban-parallelism", 8));
-        this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
-        this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
+        this.generalExecutor = Executors.newWorkStealingPool(ConfigManager.Sections.threads().getGeneralParallelism());
+        this.checkBanExecutor = Executors.newWorkStealingPool(ConfigManager.Sections.threads().getCheckBanParallelism());
+        this.ruleExecuteExecutor = Executors.newWorkStealingPool(ConfigManager.Sections.threads().getRuleExecuteParallelism());
+        this.downloaderApiExecutor = Executors.newWorkStealingPool(ConfigManager.Sections.threads().getDownloaderApiParallelism());
     }
 
     public void shutdownExecutors() {
@@ -119,14 +113,6 @@ public class PeerBanHelperServer {
 
     private void registerMetrics() {
         this.metrics = new PersistMetrics(databaseHelper);
-    }
-
-    private void registerBlacklistHttpServer() {
-        try {
-            this.webEndpointProviderServer = new WebEndpointProvider(httpdPort, this);
-        } catch (IOException e) {
-            log.warn(Lang.ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE, e);
-        }
     }
 
     private void registerTimer() {
@@ -230,7 +216,7 @@ public class PeerBanHelperServer {
         });
         CompletableFuture.allOf(checkPeersBanFutures.toArray(new CompletableFuture[0])).join();
 
-        if (!hideFinishLogs) {
+        if (!ConfigManager.Sections.logger().isHideFinishLog()) {
             log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
         }
         return Pair.of(needUpdate.get(), needRelaunched);
