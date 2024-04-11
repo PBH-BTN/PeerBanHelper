@@ -76,7 +76,7 @@ public class PersistMetrics implements Metrics {
                         e.getValue().getPeer().getDownloaded(),
                         e.getValue().getPeer().getProgress(),
                         e.getValue().getTorrent().getHash(),
-                        e.getValue().getTorrent().getHash(),
+                        e.getValue().getTorrent().getName(),
                         e.getValue().getTorrent().getSize(),
                         e.getValue().getContext(),
                         e.getValue().getDescription()
