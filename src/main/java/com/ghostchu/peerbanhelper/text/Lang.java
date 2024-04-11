@@ -66,4 +66,5 @@ public class Lang {
     public static String PERSIST_DISABLED = "[禁用] Persist 持久化数据存储已在此服务器上被禁用";
     public static String BOOTSTRAP_FAILED = "[错误] PeerBanHelper 启动失败，遇到致命错误，请检查控制台日志";
     public static String DATABASE_FAILURE = "[错误] 无法连接到持久化数据存储数据库，请检查是否同时启动了多个 PBH 示例？（如果 SQLite 数据库损坏，请删除它，PBH 将会重新生成新的数据库文件）";
+    public static String CONFIGURATION_OUTDATED_MODULE_DISABLED = "[警告] 无法确认功能模块 {} 的配置状态。配置文件似乎已过期，因此无法读取此模块的模块配置文件";
 }

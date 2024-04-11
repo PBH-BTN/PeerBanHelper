@@ -8,6 +8,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 @Slf4j
 public abstract class AbstractFeatureModule implements FeatureModule {
     private final YamlConfiguration profile;
+    private boolean register;
 
     public AbstractFeatureModule(YamlConfiguration profile) {
         this.profile = profile;
@@ -20,10 +21,15 @@ public abstract class AbstractFeatureModule implements FeatureModule {
 
     @Override
     public ConfigurationSection getConfig() {
-        return profile.getConfigurationSection("module").getConfigurationSection(getConfigName());
+        ConfigurationSection section = profile.getConfigurationSection("module").getConfigurationSection(getConfigName());
+        if (section == null) {
+            log.warn(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName());
+            YamlConfiguration configuration = new YamlConfiguration();
+            configuration.set("enabled", false);
+            return configuration;
+        }
+        return section;
     }
-
-    private boolean register;
 
     @Override
     public void stop() {
