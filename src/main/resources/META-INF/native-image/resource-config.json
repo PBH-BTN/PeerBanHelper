@@ -1,6 +1,10 @@
 {
   "resources":{
   "includes":[{
+    "pattern":".*/static/*"
+  }, {
+    "pattern":"\\QMETA-INF/maven/org.xerial/sqlite-jdbc/pom.properties\\E"
+  }, {
     "pattern":"\\QMETA-INF/nanohttpd/default-mimetypes.properties\\E"
   }, {
     "pattern":"\\QMETA-INF/nanohttpd/mimetypes.properties\\E"
@@ -13,7 +17,11 @@
   }, {
     "pattern":"\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
   }, {
+    "pattern":"\\QMETA-INF/services/java.sql.Driver\\E"
+  }, {
     "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.util.spi.ResourceBundleControlProvider\\E"
   }, {
     "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
   }, {
@@ -21,9 +29,29 @@
   }, {
     "pattern":"\\Qconfig.yml\\E"
   }, {
+    "pattern":"\\Qinet/ipaddr/IPAddressResources.properties\\E"
+  }, {
+    "pattern":"\\Qinet/ipaddr/IPAddressResources_zh.properties\\E"
+  }, {
+    "pattern":"\\Qinet/ipaddr/IPAddressResources_zh_CN.properties\\E"
+  }, {
+    "pattern":"\\Qinet/ipaddr/IPAddressResources_zh_Hans.properties\\E"
+  }, {
+    "pattern":"\\Qinet/ipaddr/IPAddressResources_zh_Hans_CN.properties\\E"
+  }, {
     "pattern":"\\Qlogging.properties\\E"
   }, {
+    "pattern":"\\Qorg/sqlite/native/Windows/x86_64/sqlitejdbc.dll\\E"
+  }, {
     "pattern":"\\Qprofile.yml\\E"
+  }, {
+    "pattern":"\\Qsqlite-jdbc.properties\\E"
+  }, {
+    "pattern":"\\Qstatic/.*\\E"
+  }, {
+    "pattern":"\\Qstatic/banlogs.html\\E"
+  }, {
+    "pattern":"\\Qstatic/css/*\\E"
   }, {
     "pattern":"\\Qstatic/css/bootstrap.min.css\\E"
   }, {
@@ -31,19 +59,11 @@
   }, {
     "pattern":"\\Qstatic/index.html\\E"
   }, {
+    "pattern":"\\Qstatic/js/*\\E"
+  }, {
     "pattern":"\\Qstatic/js/bootstrap.bundle.min.js\\E"
   }, {
     "pattern":"\\Qstatic/js/main.js\\E"
-  }, {
-    "pattern":"\\Qstatic/js/*\\E"
-  }, {
-    "pattern":"\\Qstatic/css/*\\E"
-  }, {
-    "pattern":".*/static/*"
-  }, {
-    "pattern":"static/.*"
-  }, {
-    "pattern":"\\Qstatic/.*\\E"
   }, {
     "pattern":"java.logging:\\Qsun/util/logging/resources/logging_en.properties\\E"
   }, {
@@ -54,15 +74,17 @@
     "pattern":"java.logging:\\Qsun/util/logging/resources/logging_zh_Hans.properties\\E"
   }, {
     "pattern":"java.logging:\\Qsun/util/logging/resources/logging_zh_Hans_CN.properties\\E"
+  }, {
+    "pattern":"static/.*"
   }]},
   "bundles":[{
+    "name":"inet.ipaddr.IPAddressResources",
+    "locales":["en", "en-US", "und", "zh", "zh-CN", "zh-Hans", "zh-Hans-CN"]
+  }, {
     "name":"sun.text.resources.cldr.FormatData",
     "locales":["en", "en-US", "und", "zh", "zh-CN", "zh-Hans", "zh-Hans-CN"]
   }, {
     "name":"sun.util.resources.cldr.CalendarData",
     "locales":["und"]
-  }, {
-      "name":"inet.ipaddr.IPAddressResources",
-      "locales":["en", "en-US", "und", "zh", "zh-CN", "zh-Hans", "zh-Hans-CN"]
   }]
 }

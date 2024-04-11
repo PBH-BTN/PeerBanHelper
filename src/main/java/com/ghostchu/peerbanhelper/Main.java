@@ -128,8 +128,6 @@ public class Main {
                 shutdown.wait(1000 * 5);
             }
         }
-        shutdown.set(3);
-        shutdown.notifyAll(); // App exit
     }
 
     private static void workaroundGraalVM() {

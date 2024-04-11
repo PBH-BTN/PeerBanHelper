@@ -1,6 +1,51 @@
 [
 {
+  "name":"[Z"
+},
+{
   "name":"java.lang.Boolean",
   "methods":[{"name":"getBoolean","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.lang.Throwable",
+  "methods":[{"name":"toString","parameterTypes":[] }]
+},
+{
+  "name":"org.sqlite.BusyHandler",
+  "methods":[{"name":"callback","parameterTypes":["int"] }]
+},
+{
+  "name":"org.sqlite.Collation",
+  "methods":[{"name":"xCompare","parameterTypes":["java.lang.String","java.lang.String"] }]
+},
+{
+  "name":"org.sqlite.Function",
+  "fields":[{"name":"args"}, {"name":"context"}, {"name":"value"}],
+  "methods":[{"name":"xFunc","parameterTypes":[] }]
+},
+{
+  "name":"org.sqlite.Function$Aggregate",
+  "methods":[{"name":"clone","parameterTypes":[] }, {"name":"xFinal","parameterTypes":[] }, {"name":"xStep","parameterTypes":[] }]
+},
+{
+  "name":"org.sqlite.Function$Window",
+  "methods":[{"name":"xInverse","parameterTypes":[] }, {"name":"xValue","parameterTypes":[] }]
+},
+{
+  "name":"org.sqlite.ProgressHandler",
+  "methods":[{"name":"progress","parameterTypes":[] }]
+},
+{
+  "name":"org.sqlite.core.DB",
+  "methods":[{"name":"onCommit","parameterTypes":["boolean"] }, {"name":"onUpdate","parameterTypes":["int","java.lang.String","java.lang.String","long"] }, {"name":"throwex","parameterTypes":[] }, {"name":"throwex","parameterTypes":["int"] }]
+},
+{
+  "name":"org.sqlite.core.DB$ProgressObserver",
+  "methods":[{"name":"progress","parameterTypes":["int","int"] }]
+},
+{
+  "name":"org.sqlite.core.NativeDB",
+  "fields":[{"name":"busyHandler"}, {"name":"commitListener"}, {"name":"pointer"}, {"name":"progressHandler"}, {"name":"updateListener"}],
+  "methods":[{"name":"stringToUtf8ByteArray","parameterTypes":["java.lang.String"] }, {"name":"throwex","parameterTypes":["java.lang.String"] }]
 }
 ]

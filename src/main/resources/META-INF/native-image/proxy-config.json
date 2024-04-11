@@ -1,2 +1,5 @@
 [
+  {
+    "interfaces":["java.sql.Connection"]
+  }
 ]
