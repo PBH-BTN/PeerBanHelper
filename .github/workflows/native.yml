@@ -11,7 +11,10 @@ name: GraalVM Native Image
 on:
   push:
     branches: [ "master", "test" ]
-
+  workflow_dispatch:
+  release:
+    types:
+      - published
 jobs:
   build-unix-like:
     name: ${{ matrix.version }} on ${{ matrix.os }}

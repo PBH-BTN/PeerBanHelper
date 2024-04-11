@@ -11,7 +11,10 @@ name: Java CI
 on:
   push:
     branches: [ "master" ]
-
+  workflow_dispatch:
+  release:
+    types:
+      - published
 jobs:
   build:
     runs-on: ubuntu-latest
