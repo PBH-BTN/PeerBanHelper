@@ -69,6 +69,11 @@ public class QBittorrent implements Downloader {
         return name;
     }
 
+    @Override
+    public String getDownloaderName() {
+        return "qBittorrent";
+    }
+
     public boolean isLoggedIn() {
         java.net.http.HttpResponse<Void> resp;
         try {

@@ -53,6 +53,11 @@ public class Transmission implements Downloader {
     }
 
     @Override
+    public String getDownloaderName() {
+        return "Transmission";
+    }
+
+    @Override
     public boolean login() {
         RqSessionGet get = new RqSessionGet();
         TypedResponse<RsSessionGet> resp = client.execute(get); // 执行任意 RPC 操作以刷新 session
