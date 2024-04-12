@@ -8,12 +8,14 @@ import com.ghostchu.peerbanhelper.metric.Metrics;
 import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
+import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.module.impl.*;
+import com.ghostchu.peerbanhelper.module.impl.rule.*;
+import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.web.WebEndpointProvider;
+import com.ghostchu.peerbanhelper.web.WebManager;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
@@ -24,10 +26,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -36,7 +34,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class PeerBanHelperServer {
-    protected static final String PLUGIN_CLASS_NAME = "com.ghostchu.peerbanhelper.module.Plugin";
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final Timer PEER_CHECK_TIMER = new Timer("Peer check");
     private final YamlConfiguration profile;
@@ -51,11 +48,9 @@ public class PeerBanHelperServer {
     @Getter
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
-    private final Map<Class<?>, Object> dynamicModules = new HashMap<>();
+
     @Getter
-    private List<FeatureModule> registeredModules = new ArrayList<>();
-    @Getter
-    private WebEndpointProvider webEndpointProviderServer;
+    private WebManager webManagerServer;
     private ExecutorService generalExecutor;
     private ExecutorService checkBanExecutor;
     private ExecutorService downloaderApiExecutor;
@@ -64,6 +59,8 @@ public class PeerBanHelperServer {
     private DatabaseManager databaseManager;
     @Getter
     private DatabaseHelper databaseHelper;
+    @Getter
+    private ModuleManager moduleManager;
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
@@ -76,6 +73,8 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
         this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
+        registerHttpServer();
+        this.moduleManager = new ModuleManager();
         try {
             prepareDatabase();
         } catch (Exception e) {
@@ -85,22 +84,14 @@ public class PeerBanHelperServer {
         registerMetrics();
         registerModules();
         registerTimer();
-        registerBlacklistHttpServer();
     }
 
     public void shutdown() {
         // place some clean code here
-        dynamicModules.forEach((clazz, obj) -> {
-            try {
-                clazz.getMethod("stop").invoke(obj);
-            } catch (Exception e) {
-                log.error("Failed to stop plugin", e);
-            }
-        });
         this.metrics.close();
-        this.registeredModules.forEach(FeatureModule::stop);
+        this.moduleManager.unregisterAll();
         this.databaseManager.close();
-        this.webEndpointProviderServer.stop();
+        this.webManagerServer.stop();
         this.checkBanExecutor.shutdown();
         this.ruleExecuteExecutor.shutdown();
         this.downloaderApiExecutor.shutdown();
@@ -123,12 +114,8 @@ public class PeerBanHelperServer {
         this.metrics = new PersistMetrics(databaseHelper);
     }
 
-    private void registerBlacklistHttpServer() {
-        try {
-            this.webEndpointProviderServer = new WebEndpointProvider(httpdPort, this);
-        } catch (IOException e) {
-            log.warn(Lang.ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE, e);
-        }
+    private void registerHttpServer() {
+        this.webManagerServer = new WebManager(httpdPort, this);
     }
 
     private void registerTimer() {
@@ -244,48 +231,20 @@ public class PeerBanHelperServer {
      */
     private void registerModules() {
         log.info(Lang.WAIT_FOR_MODULES_STARTUP);
-        this.registeredModules.clear();
-        List<FeatureModule> modules = new ArrayList<>();
-        modules.add(new IPBlackList(profile));
-        modules.add(new PeerIdBlacklist(profile));
-        modules.add(new ClientNameBlacklist(profile));
-        modules.add(new ProgressCheatBlocker(profile));
-        modules.add(new ActiveProbing(profile));
-        modules.add(new AutoRangeBan(this, profile));
-        this.registeredModules.addAll(modules.stream().filter(FeatureModule::isModuleEnabled).toList());
-        // load embed plugin
-        this.registeredModules.forEach(FeatureModule::register);
-
-        // load external plugin
-        this.loadPlugin();
+        moduleManager.register(new IPBlackList(this, profile));
+        moduleManager.register(new PeerIdBlacklist(this, profile));
+        moduleManager.register(new ClientNameBlacklist(this, profile));
+        moduleManager.register(new ProgressCheatBlocker(this, profile));
+        moduleManager.register(new ActiveProbing(this, profile));
+        moduleManager.register(new AutoRangeBan(this, profile));
+        moduleManager.register(new DownloaderCIDRBlockList(this, profile));
+        moduleManager.register(new PBHBanList(this, profile));
+        moduleManager.register(new PBHBanLogs(this, profile, databaseHelper));
+        moduleManager.register(new PBHClientStatus(this, profile));
+        moduleManager.register(new PBHMaxBans(this, profile, databaseHelper));
+        moduleManager.register(new PBHMetrics(this, profile));
     }
 
-    /**
-     * 从插件目录加载 JVM 插件
-     */
-    private void loadPlugin() {
-        if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
-            log.info(Lang.SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE);
-            return;
-        }
-        try {
-            // list file in the plugin folder
-            var plugins = new File("data/plugins").listFiles();
-            if (plugins != null) {
-                for (File plugin : plugins) {
-                    if (plugin.getName().endsWith(".jar")) {
-                        var loader = new URLClassLoader(new URL[]{plugin.toURI().toURL()});
-                        var clazz = loader.loadClass(PLUGIN_CLASS_NAME);
-                        var instance = clazz.getDeclaredConstructor().newInstance();
-                        clazz.getMethod("register").invoke(instance);
-                        dynamicModules.put(clazz, instance);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error(Lang.ERR_CANNOT_LOAD_PLUGIN, e);
-        }
-    }
 
     /**
      * 检查并封禁指定下载器上的对等体
@@ -342,9 +301,9 @@ public class PeerBanHelperServer {
     @NotNull
     public BanResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
         Object wakeLock = new Object();
-        List<CompletableFuture<Void>> moduleExecutorFutures = new ArrayList<>(registeredModules.size());
+        List<CompletableFuture<Void>> moduleExecutorFutures = new ArrayList<>();
         List<BanResult> results = new CopyOnWriteArrayList<>();
-        for (FeatureModule registeredModule : registeredModules) {
+        for (FeatureModule registeredModule : moduleManager.getModules()) {
             moduleExecutorFutures.add(CompletableFuture.runAsync(() -> {
                 BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
                 results.add(banResult);
@@ -369,7 +328,7 @@ public class PeerBanHelperServer {
                 result = r;
                 break; // SKIP 是最高的不可覆盖优先级，提前退出循环
             }
-            if(result.action() == PeerAction.BAN){
+            if (result.action() == PeerAction.BAN) {
                 result = r;
                 // 不要提前退出循环，BAN 结果可被后面到来的 SKIP 覆盖
             }
@@ -404,7 +363,7 @@ public class PeerBanHelperServer {
     @Nullable
     public BanMetadata unbanPeer(@NotNull PeerAddress address) {
         BanMetadata metadata = BAN_LIST.remove(address);
-        if(metadata != null) {
+        if (metadata != null) {
             metrics.recordPeerUnban(address, metadata);
         }
         return metadata;

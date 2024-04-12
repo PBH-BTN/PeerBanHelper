@@ -1,5 +1,6 @@
-package com.ghostchu.peerbanhelper.module.impl;
+package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -11,29 +12,51 @@ import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class IPBlackList extends AbstractFeatureModule {
-    public IPBlackList(YamlConfiguration profile) {
-        super(profile);
+    private List<String> ips;
+    private List<Integer> ports;
+
+    public IPBlackList(PeerBanHelperServer server, YamlConfiguration profile) {
+        super(server, profile);
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "IP Blacklist";
     }
 
     @Override
-    public String getConfigName() {
+    public @NotNull String getConfigName() {
         return "ip-address-blocker";
     }
 
     @Override
-    public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
-        List<String> ips = getConfig().getStringList("ips");
-        List<Integer> ports = getConfig().getIntList("ports");
+    public boolean isConfigurable() {
+        return true;
+    }
+
+    @Override
+    public void onEnable() {
+        reloadConfig();
+    }
+
+    @Override
+    public void onDisable() {
+
+    }
+
+    private void reloadConfig() {
+       this.ips = getConfig().getStringList("ips");
+       this.ports = getConfig().getIntList("ports");
+    }
+
+    @Override
+    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         PeerAddress peerAddress = peer.getAddress();
         if (ports.contains(peerAddress.getPort())) {
             return new BanResult(this,PeerAction.BAN, "Restricted ports");
@@ -52,4 +75,6 @@ public class IPBlackList extends AbstractFeatureModule {
         }
         return new BanResult(this,PeerAction.NO_ACTION, "No matches");
     }
+
+
 }

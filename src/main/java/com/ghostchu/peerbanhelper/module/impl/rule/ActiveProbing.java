@@ -1,6 +1,7 @@
-package com.ghostchu.peerbanhelper.module.impl;
+package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -32,18 +33,45 @@ import java.util.function.Function;
 
 public class ActiveProbing extends AbstractFeatureModule {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ActiveProbing.class);
-    private final int timeout;
+    private int timeout;
     private final List<Function<PeerAddress, BanResult>> rules = new ArrayList<>();
-    private final Cache<PeerAddress, BanResult> cache;
+    private Cache<PeerAddress, BanResult> cache;
 
-    public ActiveProbing(YamlConfiguration profile) {
-        super(profile);
+    public ActiveProbing(PeerBanHelperServer server, YamlConfiguration profile) {
+        super(server, profile);
+    }
+
+    @Override
+    public boolean isConfigurable() {
+        return true;
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return "Active Probing";
+    }
+
+    @Override
+    public @NotNull String getConfigName() {
+        return "active-probing";
+    }
+
+    @Override
+    public void onEnable() {
+        reloadConfig();
+    }
+    @Override
+    public void onDisable() {
+
+    }
+
+    private void reloadConfig() {
         this.timeout = getConfig().getInt("timeout", 3000);
         this.cache = CacheBuilder.newBuilder()
                 .maximumSize(getConfig().getLong("max-cached-entry", 3000))
                 .expireAfterAccess(getConfig().getLong("expire-after-no-access", 28800), TimeUnit.SECONDS)
                 .build();
-
+        this.rules.clear();
         for (String rule : getConfig().getStringList("probing")) {
             if (rule.equals("PING")) {
                 rules.add(this::pingPeer);
@@ -66,17 +94,7 @@ public class ActiveProbing extends AbstractFeatureModule {
 
 
     @Override
-    public String getName() {
-        return "Active Probing";
-    }
-
-    @Override
-    public String getConfigName() {
-        return "active-probing";
-    }
-
-    @Override
-    public BanResult shouldBanPeer(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         PeerAddress peerAddress = peer.getAddress();
         try {
             return cache.get(peerAddress, () -> {
