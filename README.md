@@ -35,6 +35,8 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * IP 黑名单
 * 虚假进度检查器（提供启发式客户端检测功能）（Transmission不支持过量下载检测）
 * 主动探测
+* 自动 IP 段封禁
+* WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP）
 
 ### PeerID 黑名单
 
@@ -243,6 +245,28 @@ PeerBanHelper 主要由以下几个功能模块组成：
       - HTTPS@/subpath/subpath2@443@200@true # https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8761335
     # 对 HTTP(S) 探测请求指定 User-Agent
     http-probing-user-agent: "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"
+```
+
+</details>
+
+### 自动 IP 段封禁
+
+批量部署的恶意客户端通常在同一个 IP 段下，PBH 现在允许用户分别为 IPv4 和 IPv6 设置一个前缀长度。在封禁发现的吸血客户端时，会将其所处 IP 地址的指定范围的其余 IP 地址均加入屏蔽列表，实现链式封禁。
+
+<details>
+
+<summary>查看示例配置文件</summary>
+
+```yaml
+  # 范围 IP 段封禁
+  # 在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁
+  auto-range-ban:
+    # 是否启用
+    enabled: true
+    # IPV4 前缀长度
+    ipv4: 30 # /32 = 单个 IP，/24 = 整个 ?.?.?.x 段
+    # IPV6 前缀长度
+    ipv6: 64 # /64 = ISP 通常分配给家宽用户的前缀长度
 ```
 
 </details>
