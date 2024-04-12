@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -19,6 +18,7 @@ import org.slf4j.Logger;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -69,18 +69,22 @@ public class QBittorrent implements Downloader {
         return name;
     }
 
-//    public boolean isLoggedIn() {
-//        java.net.http.HttpResponse resp;
-//        try {
-//            resp = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/app/preferences")).GET().header("User-Agent", Main.getUserAgent()).timeout(Duration.of(30, ChronoUnit.SECONDS)).build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-//        } catch (Exception e) {
-//            return false;
-//        }
-//        return resp.statusCode() == 200;
-//    }
+    public boolean isLoggedIn() {
+        java.net.http.HttpResponse<Void> resp;
+        try {
+            resp = httpClient.send(HttpRequest.newBuilder(new URI(endpoint + "/app/version"))
+                    .GET()
+                    .header("User-Agent", Main.getUserAgent())
+                    .timeout(Duration.of(30, ChronoUnit.SECONDS))
+                    .build(), HttpResponse.BodyHandlers.discarding());
+        } catch (Exception e) {
+            return false;
+        }
+        return resp.statusCode() == 200;
+    }
 
     public boolean login() {
-        //if(isLoggedIn()) return true; // Request preferences will increase qb load
+        if(isLoggedIn()) return true; // 重用 Session 会话
         try {
             Map<String, String> parameters = new HashMap<>();
             parameters.put("username", username);
