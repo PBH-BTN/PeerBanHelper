@@ -53,7 +53,7 @@ public class ModuleManager {
      * 解注册所有的功能模块
      */
     public void unregisterAll() {
-        this.modules.forEach(this::unregister);
+        ImmutableList.copyOf(this.modules).forEach(this::unregister);
     }
 
     /**
