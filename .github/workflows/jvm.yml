@@ -10,7 +10,7 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "v3" ]
   workflow_dispatch:
   release:
     types:
