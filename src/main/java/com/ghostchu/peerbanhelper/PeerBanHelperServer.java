@@ -20,9 +20,9 @@ import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +64,7 @@ public class PeerBanHelperServer {
     private DatabaseManager databaseManager;
     @Getter
     private DatabaseHelper databaseHelper;
+
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
         this.profile = profile;
@@ -104,7 +105,7 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor.shutdown();
         this.downloaderApiExecutor.shutdown();
         this.generalExecutor.shutdown();
-        this.downloaders.forEach(d-> {
+        this.downloaders.forEach(d -> {
             try {
                 d.close();
             } catch (Exception e) {
@@ -139,65 +140,108 @@ public class PeerBanHelperServer {
         }, 0, profile.getLong("check-interval", 5000));
     }
 
+    /**
+     * 启动新的一轮封禁序列
+     */
     public void banWave() {
         try {
+            // 重置所有下载器状态为健康，这样后面失败就会对其降级
             downloaders.forEach(downloader -> downloader.setLastStatus(DownloaderLastStatus.HEALTHY));
-            boolean needUpdate = false;
-            Map<Downloader, Collection<Torrent>> needRelaunched = new HashMap<>();
-            // 多线程处理下载器封禁操作
-            for (Downloader downloader : downloaders) {
-                try {
-                    if (!downloader.login()) {
-                        log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
-                        downloader.setLastStatus(DownloaderLastStatus.ERROR);
-                        return;
-                    }
-                    Pair<Boolean, Collection<Torrent>> banDownloader = banDownloader(downloader);
-                    if (banDownloader.getKey()) {
-                        needUpdate = true;
-                    }
-                    needRelaunched.put(downloader, banDownloader.getValue());
-                } catch (Throwable th) {
-                    log.warn(Lang.ERR_UNEXPECTED_API_ERROR, downloader.getName(), downloader.getEndpoint(), th);
-                    downloader.setLastStatus(DownloaderLastStatus.ERROR);
-                }
-            }
-
-            List<PeerAddress> removeBan = new ArrayList<>();
-            for (Map.Entry<PeerAddress, BanMetadata> pair : BAN_LIST.entrySet()) {
-                if (System.currentTimeMillis() >= pair.getValue().getUnbanAt()) {
-                    removeBan.add(pair.getKey());
-                }
-            }
-
-            removeBan.forEach(this::unbanPeer);
-            if (!removeBan.isEmpty()) {
-                log.info(Lang.PEER_UNBAN_WAVE, removeBan.size());
-                needUpdate = true;
-            }
-
-            if (needUpdate) {
-                for (Downloader downloader : downloaders) {
-                    try {
-                        if (!downloader.login()) {
-                            log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
-                            downloader.setLastStatus(DownloaderLastStatus.ERROR);
-                            return;
+            final AtomicBoolean needUpdateBanList = new AtomicBoolean(false);
+            Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
+            // 并发处理下载器检查
+            List<CompletableFuture<BanDownloaderResult>> futures = downloaders.stream().map(this::handleDownloader).toList();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            futures.stream().map(future -> future.getNow(null))
+                    .filter(Objects::nonNull)
+                    .forEach(r -> {
+                        if (r.needUpdateBanList()) {
+                            needUpdateBanList.set(true);
                         }
-                        downloader.setBanList(BAN_LIST.keySet());
-                        downloader.relaunchTorrentIfNeeded(needRelaunched.getOrDefault(downloader, new ArrayList<>(0)));
-                    } catch (Throwable th) {
-                        log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
-                        downloader.setLastStatus(DownloaderLastStatus.ERROR);
-                    }
-                }
+                        if (!r.torrentsAffected().isEmpty()) {
+                            needUpdateBanList.set(true);
+                            needRelaunched.put(r.downloader(), r.torrentsAffected());
+                        }
+                    });
+            // 移除可能的过期封禁对等体
+            if (removeExpiredBans()) {
+                needUpdateBanList.set(true);
             }
+            // 如果需要，则应用更改
+            downloaders.forEach(downloader -> updateDownloader(downloader, needUpdateBanList.get(), needRelaunched.getOrDefault(downloader, Collections.emptyList())));
         } finally {
             metrics.recordCheck();
-            System.gc(); // Trigger serial GC on GraalVM NativeImage to avoid took too much memory, we build NativeImage because it took less memory than JVM and faster startup speed
+            System.gc(); // 要求 GraalVM 的 Native Image 立刻回收内存并释放给本机系统；对 JVM 版本没什么太大的意义
         }
     }
 
+    /**
+     * 如果需要，则更新下载器的封禁列表
+     * 对于 Transmission 等下载器来说，传递 needToRelaunch 会重启对应 Torrent
+     * @param downloader 要操作的下载器
+     * @param updateBanList 是否需要从 BAN_LIST 常量更新封禁列表到下载器
+     * @param needToRelaunch 传递一个集合，包含需要重启的种子；并非每个下载器都遵守此行为；对于 qbittorrent 等 banlist 可被实时应用的下载器来说，不会重启 Torrent
+     */
+    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch) {
+        if (!updateBanList && needToRelaunch.isEmpty()) return;
+        try {
+            if (!downloader.login()) {
+                log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+                downloader.setLastStatus(DownloaderLastStatus.ERROR);
+                return;
+            }
+            downloader.setBanList(BAN_LIST.keySet());
+            downloader.relaunchTorrentIfNeeded(needToRelaunch);
+        } catch (Throwable th) {
+            log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
+            downloader.setLastStatus(DownloaderLastStatus.ERROR);
+        }
+    }
+
+    /**
+     * 准备下载器并启动检查任务
+     * @param downloader 要登录和检查的下载器实例
+     * @return 异步任务，返回 (1) 是否需要更新 Banlist (2) 受到影响的 Torrent 列表
+     */
+    public CompletableFuture<BanDownloaderResult> handleDownloader(Downloader downloader) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                if (!downloader.login()) {
+                    log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+                    downloader.setLastStatus(DownloaderLastStatus.ERROR);
+                    return null;
+                }
+                return banDownloader(downloader);
+            } catch (Throwable th) {
+                log.warn(Lang.ERR_UNEXPECTED_API_ERROR, downloader.getName(), downloader.getEndpoint(), th);
+                downloader.setLastStatus(DownloaderLastStatus.ERROR);
+                return null;
+            }
+        }, checkBanExecutor);
+    }
+
+    /**
+     * 移除过期的封禁
+     * @return 当封禁条目过期时，移除它们（解封禁）
+     */
+    public boolean removeExpiredBans() {
+        List<PeerAddress> removeBan = new ArrayList<>();
+        for (Map.Entry<PeerAddress, BanMetadata> pair : BAN_LIST.entrySet()) {
+            if (System.currentTimeMillis() >= pair.getValue().getUnbanAt()) {
+                removeBan.add(pair.getKey());
+            }
+        }
+        removeBan.forEach(this::unbanPeer);
+        if (!removeBan.isEmpty()) {
+            log.info(Lang.PEER_UNBAN_WAVE, removeBan.size());
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 注册 Modules
+     */
     private void registerModules() {
         log.info(Lang.WAIT_FOR_MODULES_STARTUP);
         this.registeredModules.clear();
@@ -216,6 +260,9 @@ public class PeerBanHelperServer {
         this.loadPlugin();
     }
 
+    /**
+     * 从插件目录加载 JVM 插件
+     */
     private void loadPlugin() {
         if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
             log.info(Lang.SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE);
@@ -240,7 +287,13 @@ public class PeerBanHelperServer {
         }
     }
 
-    private Pair<Boolean, Collection<Torrent>> banDownloader(Downloader downloader) {
+    /**
+     * 检查并封禁指定下载器上的对等体
+     * @param downloader 要检查的下载器实例
+     * @return 是否需要更新 Banlist，以及一个包含受到影响的 Torrent 的集合
+     */
+    @NotNull
+    public BanDownloaderResult banDownloader(@NotNull Downloader downloader) {
         AtomicBoolean needUpdate = new AtomicBoolean(false);
         Map<Torrent, List<Peer>> map = new ConcurrentHashMap<>();
         Set<Torrent> needRelaunched = new CopyOnWriteArraySet<>();
@@ -254,12 +307,16 @@ public class PeerBanHelperServer {
         map.forEach((key, value) -> {
             peers.addAndGet(value.size());
             for (Peer peer : value) {
-                if(StringUtils.isEmpty(peer.getPeerId())){
+                if (StringUtils.isEmpty(peer.getPeerId())) {
                     // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
                     continue;
                 }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
                     BanResult banResult = checkBan(key, peer);
+                    // 跳过优先级最高
+                    if (banResult.action() == PeerAction.SKIP) {
+                        return;
+                    }
                     if (banResult.action() == PeerAction.BAN) {
                         needUpdate.set(true);
                         needRelaunched.add(key);
@@ -270,14 +327,20 @@ public class PeerBanHelperServer {
             }
         });
         CompletableFuture.allOf(checkPeersBanFutures.toArray(new CompletableFuture[0])).join();
-
         if (!hideFinishLogs) {
             log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
         }
-        return Pair.of(needUpdate.get(), needRelaunched);
+        return new BanDownloaderResult(downloader, needUpdate.get(), needRelaunched);
     }
 
-    private BanResult checkBan(Torrent torrent, Peer peer) {
+    /**
+     * 检查一个在给定 Torrent 上的对等体是否需要被封禁
+     * @param torrent Torrent
+     * @param peer 对等体
+     * @return 封禁规则检查结果
+     */
+    @NotNull
+    public BanResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
         Object wakeLock = new Object();
         List<CompletableFuture<Void>> moduleExecutorFutures = new ArrayList<>(registeredModules.size());
         List<BanResult> results = new CopyOnWriteArrayList<>();
@@ -286,7 +349,7 @@ public class PeerBanHelperServer {
                 BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
                 results.add(banResult);
                 synchronized (wakeLock) {
-                    wakeLock.notify();
+                    wakeLock.notifyAll();
                 }
             }, checkBanExecutor));
         }
@@ -300,28 +363,58 @@ public class PeerBanHelperServer {
                 }
             }
         }
-        for (BanResult result : results) {
-            if (result.action() == PeerAction.SKIP || result.action() == PeerAction.BAN) {
-                return result;
+        BanResult result = new BanResult(null, PeerAction.NO_ACTION, "No matches");
+        for (BanResult r : results) {
+            if (r.action() == PeerAction.SKIP) {
+                result = r;
+                break; // SKIP 是最高的不可覆盖优先级，提前退出循环
+            }
+            if(result.action() == PeerAction.BAN){
+                result = r;
+                // 不要提前退出循环，BAN 结果可被后面到来的 SKIP 覆盖
             }
         }
-        return new BanResult(null, PeerAction.NO_ACTION, "No matches");
+        return result;
     }
 
+    /**
+     * 获取目前所有被封禁的对等体的集合的拷贝
+     * @return 不可修改的集合拷贝
+     */
     @NotNull
     public Map<PeerAddress, BanMetadata> getBannedPeers() {
         return ImmutableMap.copyOf(BAN_LIST);
     }
 
+    /**
+     * 以指定元数据封禁一个特定的对等体
+     * @param peer 对等体 IP 地址
+     * @param banMetadata 封禁元数据
+     */
     public void banPeer(@NotNull PeerAddress peer, @NotNull BanMetadata banMetadata) {
         BAN_LIST.put(peer, banMetadata);
         metrics.recordPeerBan(peer, banMetadata);
     }
 
-
-    public void unbanPeer(@NotNull PeerAddress address) {
+    /**
+     * 解除一个指定对等体
+     * @param address 对等体 IP 地址
+     * @return 此对等体的封禁元数据；返回 null 代表此对等体没有被封禁
+     */
+    @Nullable
+    public BanMetadata unbanPeer(@NotNull PeerAddress address) {
         BanMetadata metadata = BAN_LIST.remove(address);
-        metrics.recordPeerUnban(address, metadata);
+        if(metadata != null) {
+            metrics.recordPeerUnban(address, metadata);
+        }
+        return metadata;
+    }
+
+    public record BanDownloaderResult(
+            Downloader downloader, // 目标下载器
+            boolean needUpdateBanList, // 是否需要向下载器更新 banlist
+            Collection<Torrent> torrentsAffected // 受影响的 Torrent 列表
+    ) {
     }
 
 }
