@@ -26,8 +26,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class QBittorrent implements Downloader {
-    // dynamicTable.js -> applyFilter -> active
-    private static final List<String> ACTIVE_STATE_LIST = ImmutableList.of("stalledDL", "metaDL", "forcedMetaDL", "downloading", "forcedDL", "uploading", "forcedUP");
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(QBittorrent.class);
     private final String endpoint;
     private final String username;
@@ -113,7 +111,7 @@ public class QBittorrent implements Downloader {
     public List<Torrent> getTorrents() {
         java.net.http.HttpResponse<String> request;
         try {
-            request = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/torrents/info")).GET().header("User-Agent", Main.getUserAgent()).timeout(Duration.of(30, ChronoUnit.SECONDS)).build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            request = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/torrents/info?filter=active")).GET().header("User-Agent", Main.getUserAgent()).timeout(Duration.of(30, ChronoUnit.SECONDS)).build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -124,10 +122,6 @@ public class QBittorrent implements Downloader {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (TorrentDetail detail : torrentDetail) {
-            // 过滤下，只要有传输的 Torrent，其它的就不查询了
-            if (!ACTIVE_STATE_LIST.contains(detail.getState())) {
-                continue;
-            }
             torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize()));
         }
         return torrents;
