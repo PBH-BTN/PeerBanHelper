@@ -23,8 +23,8 @@ public class Lang {
     public static String MODULE_IBL_MATCH_IP = "匹配 IP 规则: %s";
     public static String MODULE_PID_MATCH_PEER_ID = "匹配 PeerId 规则: %s";
     public static String MODULE_PCB_EXCESSIVE_DOWNLOAD = "客户端下载过量：种子大小：%d，上传给此对等体的总量：%d，最大允许的过量下载总量：%d";
-    public static String MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP = "客户端进度：%.2f%%，实际进度：%.2f%%，客户端的进度多于本地进度，跳过检测";
-    public static String MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS = "客户端进度：%.2f%%，实际进度：%.2f%%，差值：%.2f%%";
+    public static String MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP = "客户端进度：%s%%，实际进度：%s%%，客户端的进度多于本地进度，跳过检测";
+    public static String MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS = "客户端进度：%s%%，实际进度：%s%%，差值：%s%%";
     public static String MODULE_PCB_PEER_BAN_REWIND = "客户端进度：%s%%，实际进度：%s%%，上次记录进度：%s%%，本次进度：%s%%，差值：%s%%";
     public static String MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT = "种子大小未知";
     public static String MODULE_AP_PEER_BAN_PING = "Peer 发送了 ICMP 响应包";
