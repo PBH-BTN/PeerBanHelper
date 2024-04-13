@@ -5,7 +5,8 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
-import lombok.*;
+import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
@@ -26,11 +27,14 @@ import java.util.concurrent.TimeUnit;
 public class BtnManager {
     @Getter
     private final PeerBanHelperServer server;
-    private final String pingUrl;
+    private final String configUrl;
     @Getter
     private final BtnNetwork network;
     private final boolean submit;
+    private final String appId;
+    private final String appSecret;
     private ScheduledExecutorService executeService = Executors.newScheduledThreadPool(1);
+    @Getter
     private BtnConfig btnConfig;
 
     @SneakyThrows(IOException.class)
@@ -39,12 +43,14 @@ public class BtnManager {
         if (!section.getBoolean("enabled")) {
             throw new IllegalStateException("BTN has been disabled");
         }
-        this.pingUrl = section.getString("url");
+        this.configUrl = section.getString("config-url");
         this.submit = section.getBoolean("submit");
-        this.network = new BtnNetwork(this, section.getString("url"), section.getString("app-id"), section.getString("app-secret"), submit);
+        this.appId = section.getString("app-id");
+        this.appSecret = section.getString("app-secret");
+        this.network = new BtnNetwork(this, appId, appSecret, submit);
         File file = new File(Main.getDataDirectory(), "btn.cache");
         if (!file.exists()) {
-            if(!file.getParentFile().exists()){
+            if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
             file.createNewFile();
@@ -60,10 +66,12 @@ public class BtnManager {
     private void reconfigureExecutor() {
         try {
             HttpResponse<String> resp = HTTPUtil.getHttpClient(false, null)
-                    .send(HttpRequest.newBuilder(new URI(pingUrl + "/config"))
+                    .send(HttpRequest.newBuilder(new URI(configUrl))
                             .GET()
                             .header("User-Agent", Main.getUserAgent())
                             .header("Content-Type", "application/json")
+                            .header("BTN-AppID", appId)
+                            .header("BTN-AppSecret", appSecret)
                             .timeout(Duration.of(30, ChronoUnit.SECONDS))
                             .build(), HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() != 200) {
@@ -74,11 +82,15 @@ public class BtnManager {
             if (btnConfig.equals(this.btnConfig)) {
                 return;
             }
-            executeService.shutdownNow();
+            if (!executeService.isShutdown()) {
+                executeService.shutdownNow();
+            }
             executeService = Executors.newScheduledThreadPool(2);
             Random random = new Random();
-            executeService.schedule(network::update, random.nextLong(btnConfig.getDelayRandomRange()), TimeUnit.MILLISECONDS);
-            executeService.schedule(network::ping, random.nextLong(btnConfig.getDelayRandomRange()), TimeUnit.MILLISECONDS);
+            long ruleUpdateOffset = random.nextLong(btnConfig.getThreshold().getDelayRandomRange());
+            long pingOffset = random.nextLong(btnConfig.getThreshold().getDelayRandomRange());
+            executeService.scheduleAtFixedRate(network::updateRule, ruleUpdateOffset, btnConfig.getThreshold().getRuleUpdatePeriod(), TimeUnit.MILLISECONDS);
+            executeService.scheduleAtFixedRate(network::ping, pingOffset, btnConfig.getThreshold().getSubmitPeriod(), TimeUnit.MILLISECONDS);
             log.info(Lang.BTN_NETWORK_RECONFIGURED, btnConfig);
             this.btnConfig = btnConfig;
         } catch (Throwable e) {
@@ -90,12 +102,5 @@ public class BtnManager {
         executeService.shutdownNow();
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    static class BtnConfig {
-        private long delayRandomRange;
-        private long submitPeriod;
-        private long batchPeriod;
-    }
+
 }

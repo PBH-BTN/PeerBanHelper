@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,10 +25,10 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class BtnNetwork {
-    private final String pingUrl;
     private final BtnManager btnManager;
     private final String appId;
     private final String appSecret;
@@ -36,15 +37,17 @@ public class BtnNetwork {
     @Getter
     private BtnRule rule;
 
-    public BtnNetwork(BtnManager btnManager, String pingUrl, String appId, String appSecret, boolean submit) {
-        this.pingUrl = pingUrl;
+    public BtnNetwork(BtnManager btnManager, String appId, String appSecret, boolean submit) {
         this.btnManager = btnManager;
         this.appId = appId;
         this.appSecret = appSecret;
         this.submit = submit;
     }
 
-    public void update() {
+    public void updateRule() {
+        if(!btnManager.getBtnConfig().getAbility().isRule()){
+            return;
+        }
         try {
             String version;
             if (rule == null || rule.getVersion() == null) {
@@ -53,10 +56,12 @@ public class BtnNetwork {
                 version = rule.getVersion();
             }
             HttpResponse<String> resp = HTTPUtil.getHttpClient(false, null)
-                    .send(HttpRequest.newBuilder(new URI(pingUrl + "/rule?rev=" + version))
+                    .send(HttpRequest.newBuilder(new URI(URLUtil.appendUrl(btnManager.getBtnConfig().getEndpoint().getRule(), Map.of("rev", version))))
                             .GET()
                             .header("User-Agent", Main.getUserAgent())
                             .header("Content-Type", "application/json")
+                            .header("BTN-AppID", appId)
+                            .header("BTN-AppSecret", appSecret)
                             .timeout(Duration.of(30, ChronoUnit.SECONDS))
                             .build(), HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() == 204) {
@@ -77,9 +82,12 @@ public class BtnNetwork {
         if (!submit) {
             return;
         }
+        if(!btnManager.getBtnConfig().getAbility().isSubmit()){
+            return;
+        }
         List<ClientPing> pings = generatePings(appId, appSecret);
-        List<List<ClientPing>> batch = Lists.partition(pings, 300);
-        log.info(Lang.BTN_PREPARE_TO_SUBMIT, pings.stream().mapToLong(p -> p.getPeers().size()).count(), batch.size());
+        List<List<ClientPing>> batch = Lists.partition(pings, btnManager.getBtnConfig().getThreshold().getPerBatchSize());
+        log.info(Lang.BTN_PREPARE_TO_SUBMIT, pings.stream().mapToLong(p -> p.getPeers().size()).sum(), batch.size());
         for (int i = 0; i < batch.size(); i++) {
             List<ClientPing> clientPing = batch.get(i);
             submitPings(clientPing, i, batch.size());
@@ -88,9 +96,6 @@ public class BtnNetwork {
 
 
     private void submitPings(List<ClientPing> clientPings, int batchIndex, int batchSize) {
-        if (!submit) {
-            return;
-        }
         clientPings.forEach(ping -> {
             ping.setBatchIndex(batchIndex);
             ping.setBatchSize(batchSize);
@@ -101,12 +106,15 @@ public class BtnNetwork {
                     .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
                     .build();
             try {
-                client.send(HttpRequest.newBuilder(new URI(pingUrl + "/submit"))
+                client.send(HttpRequest.newBuilder(new URI(btnManager.getBtnConfig().getEndpoint().getPing()))
                         .POST(HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(ping)))
                         .header("User-Agent", Main.getUserAgent())
                         .header("Content-Type", "application/json")
+                        .header("BTN-AppID", appId)
+                        .header("BTN-AppSecret", appSecret)
                         .timeout(Duration.of(30, ChronoUnit.SECONDS))
                         .build(), HttpResponse.BodyHandlers.discarding());
+                Thread.sleep(btnManager.getBtnConfig().getThreshold().getBatchPeriod());
             } catch (IOException | InterruptedException | URISyntaxException e) {
                 log.warn(Lang.BTN_REQUEST_FAILS, e);
             }

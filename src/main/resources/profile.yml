@@ -27,7 +27,7 @@ btn:
     app-id: "xxxxxxxxxxxxxxxxxxxx"
     app-secret: "xxxxxxxxxxxxxxxxxxx"
   # 填写实例 URL
-  url: "http://127.0.0.1:9988/ping"
+  config-url: "http://127.0.0.1:9988/ping"
 # 功能模块
 module:
   # PeerId 封禁

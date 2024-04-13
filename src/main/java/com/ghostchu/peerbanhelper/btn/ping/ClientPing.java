@@ -9,8 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClientPing {
-    private String appId;
-    private String appSecret;
     private String downloader;
     private long populateAt;
     private int batchIndex;
