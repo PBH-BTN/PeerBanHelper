@@ -3,8 +3,9 @@ package com.ghostchu.peerbanhelper.btn;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MutableRequest;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +13,9 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpRequest;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -36,6 +38,8 @@ public class BtnManager {
     private ScheduledExecutorService executeService = Executors.newScheduledThreadPool(1);
     @Getter
     private BtnConfig btnConfig;
+    @Getter
+    private Methanol httpClient;
 
     @SneakyThrows(IOException.class)
     public BtnManager(PeerBanHelperServer server, ConfigurationSection section) {
@@ -60,20 +64,30 @@ public class BtnManager {
             } catch (Throwable ignored) {
             }
         }
+        setupHttpClient();
         reconfigureExecutor();
+    }
+
+    private void setupHttpClient() {
+        CookieManager cm = new CookieManager();
+        cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        this.httpClient = Methanol
+                .newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .userAgent(Main.getUserAgent())
+                .defaultHeader("User-Agent", Main.getUserAgent())
+                .defaultHeader("Content-Type", "application/json")
+                .defaultHeader("BTN-AppID", appId)
+                .defaultHeader("BTN-AppSecret", appSecret)
+                .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(60, ChronoUnit.SECONDS))
+                .cookieHandler(cm).build();
     }
 
     private void reconfigureExecutor() {
         try {
-            HttpResponse<String> resp = HTTPUtil.getHttpClient(false, null)
-                    .send(HttpRequest.newBuilder(new URI(configUrl))
-                            .GET()
-                            .header("User-Agent", Main.getUserAgent())
-                            .header("Content-Type", "application/json")
-                            .header("BTN-AppID", appId)
-                            .header("BTN-AppSecret", appSecret)
-                            .timeout(Duration.of(30, ChronoUnit.SECONDS))
-                            .build(), HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> resp = httpClient.send(MutableRequest.GET(configUrl),HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() != 200) {
                 log.warn(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body());
                 return;

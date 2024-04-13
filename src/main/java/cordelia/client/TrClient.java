@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -58,11 +60,14 @@ public final class TrClient {
         this.url = url;
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        HttpClient.Builder builder = HttpClient
+        HttpClient.Builder builder = Methanol
                 .newBuilder()
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .userAgent(Main.getUserAgent())
+                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
@@ -84,15 +89,13 @@ public final class TrClient {
     public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req, Long tag) {
         String jsonBuffer = null;
         try {
-            HttpResponse<String> resp = httpClient.send(HttpRequest.newBuilder(new URI(url))
-                            .header("User-Agent", Main.getUserAgent())
+            HttpResponse<String> resp = httpClient.send(
+                    MutableRequest.POST(url, HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(req.toReq(tag))))
                             .header("Content-Type", "application/json")
                             .header(Session.SESSION_ID, session(false).id())
-                            .POST(HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(req.toReq(tag))))
-                            .timeout(Duration.of(30, ChronoUnit.SECONDS)).build()
                     , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
-            if(resp.statusCode() == 409){
+            if (resp.statusCode() == 409) {
                 session(true); // force renew
                 throw new IllegalStateException("Session invalid, re-created, please try again.");
             }
@@ -100,10 +103,10 @@ public final class TrClient {
             RawResponse raw = om.fromJson(resp.body(), RawResponse.class);
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
-        }catch (JsonSyntaxException jsonSyntaxException){
+        } catch (JsonSyntaxException jsonSyntaxException) {
             log.warn(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException);
             throw new IllegalStateException(jsonSyntaxException);
-        } catch (IOException  | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             log.warn("Request Transmission JsonRPC failure", e);
             throw new IllegalStateException(e);
         }

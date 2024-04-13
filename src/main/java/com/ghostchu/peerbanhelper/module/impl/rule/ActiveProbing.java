@@ -10,6 +10,8 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +22,6 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.*;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -169,10 +170,11 @@ public class ActiveProbing extends AbstractFeatureModule {
         }
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_NONE);
-        HttpClient.Builder builder = HttpClient
+        HttpClient.Builder builder = Methanol
                 .newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
+                .userAgent(String.format(getConfig().getString("http-probing-user-agent", "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"), Main.getMeta().getVersion()))
                 .connectTimeout(Duration.of(timeout, ChronoUnit.MILLIS))
                 .cookieHandler(cm);
         if (scheme.equals("https") && spilt.length == 5 && HTTPUtil.getIgnoreSslContext() != null) {
@@ -180,17 +182,14 @@ public class ActiveProbing extends AbstractFeatureModule {
         }
         HttpClient client = builder.build();
         try {
-            HttpResponse<String> resp = client.send(HttpRequest.newBuilder(new URI(url))
-                    .GET()
-                    .header("User-Agent", String.format(getConfig().getString("http-probing-user-agent", "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"), Main.getMeta().getVersion()))
-                    .build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+            HttpResponse<String> resp = client.send(MutableRequest.GET(url),HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
             String code = String.valueOf(resp.statusCode());
             if (code.equals(exceptedCode)) {
                 return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_AP_BAN_PEER_CODE, code));
             }
             return new BanResult(this,PeerAction.NO_ACTION, String.format(Lang.MODULE_AP_PEER_CODE, code));
-        } catch (IOException | InterruptedException | URISyntaxException e) {
+        } catch (IOException | InterruptedException e) {
             return new BanResult(this,PeerAction.NO_ACTION, "HTTP Exception: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }

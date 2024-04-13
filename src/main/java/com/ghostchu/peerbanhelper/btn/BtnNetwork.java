@@ -1,14 +1,13 @@
 package com.ghostchu.peerbanhelper.btn;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.ping.*;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
+import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import lombok.Getter;
@@ -17,14 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +38,7 @@ public class BtnNetwork {
         this.appId = appId;
         this.appSecret = appSecret;
         this.submit = submit;
+
     }
 
     public void updateRule() {
@@ -57,15 +52,8 @@ public class BtnNetwork {
             } else {
                 version = rule.getVersion();
             }
-            HttpResponse<String> resp = HTTPUtil.getHttpClient(false, null)
-                    .send(HttpRequest.newBuilder(new URI(URLUtil.appendUrl(btnManager.getBtnConfig().getEndpoint().getRule(), Map.of("rev", version))))
-                            .GET()
-                            .header("User-Agent", Main.getUserAgent())
-                            .header("Content-Type", "application/json")
-                            .header("BTN-AppID", appId)
-                            .header("BTN-AppSecret", appSecret)
-                            .timeout(Duration.of(30, ChronoUnit.SECONDS))
-                            .build(), HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> resp = btnManager.getHttpClient()
+                    .send(MutableRequest.GET(URLUtil.appendUrl(btnManager.getBtnConfig().getEndpoint().getRule(), Map.of("rev", version))), HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() == 204) {
                 return;
             }
@@ -75,7 +63,7 @@ public class BtnNetwork {
                 this.rule = JsonUtil.getGson().fromJson(resp.body(), BtnRule.class);
                 log.info(Lang.BTN_UPDATE_RULES_SUCCESSES, this.rule.getVersion());
             }
-        } catch (IOException | InterruptedException | URISyntaxException e) {
+        } catch (IOException | InterruptedException e) {
             log.warn(Lang.BTN_REQUEST_FAILS, e);
         }
     }
@@ -101,23 +89,10 @@ public class BtnNetwork {
         clientPings.forEach(ping -> {
             ping.setBatchIndex(batchIndex);
             ping.setBatchSize(batchSize);
-            HttpClient client = HttpClient
-                    .newBuilder()
-                    .version(HttpClient.Version.HTTP_1_1)
-                    .followRedirects(HttpClient.Redirect.ALWAYS)
-                    .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                    .build();
             try {
-                client.send(HttpRequest.newBuilder(new URI(btnManager.getBtnConfig().getEndpoint().getPing()))
-                        .POST(HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(ping)))
-                        .header("User-Agent", Main.getUserAgent())
-                        .header("Content-Type", "application/json")
-                        .header("BTN-AppID", appId)
-                        .header("BTN-AppSecret", appSecret)
-                        .timeout(Duration.of(30, ChronoUnit.SECONDS))
-                        .build(), HttpResponse.BodyHandlers.discarding());
+                btnManager.getHttpClient().send(MutableRequest.POST(btnManager.getBtnConfig().getEndpoint().getPing(), HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(ping))), HttpResponse.BodyHandlers.discarding());
                 Thread.sleep(btnManager.getBtnConfig().getThreshold().getBatchPeriod());
-            } catch (IOException | InterruptedException | URISyntaxException e) {
+            } catch (IOException | InterruptedException e) {
                 log.warn(Lang.BTN_REQUEST_FAILS, e);
             }
         });

@@ -10,6 +10,9 @@ import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.github.mizosoft.methanol.FormBodyPublisher;
+import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -17,13 +20,11 @@ import org.slf4j.Logger;
 
 import java.net.*;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class QBittorrent implements Downloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(QBittorrent.class);
@@ -36,13 +37,18 @@ public class QBittorrent implements Downloader {
 
     public QBittorrent(String name, String endpoint, String username, String password, String baUser, String baPass, boolean verifySSL, HttpClient.Version httpVersion) {
         this.name = name;
+        this.endpoint = endpoint;
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        HttpClient.Builder builder = HttpClient
+        Methanol.Builder builder = Methanol
                 .newBuilder()
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .userAgent(Main.getUserAgent())
+                .baseUri(endpoint)
+                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
@@ -54,7 +60,6 @@ public class QBittorrent implements Downloader {
             builder = builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
-        this.endpoint = endpoint + "/api/v2";
         this.username = username;
         this.password = password;
     }
@@ -75,13 +80,9 @@ public class QBittorrent implements Downloader {
     }
 
     public boolean isLoggedIn() {
-        java.net.http.HttpResponse<Void> resp;
+        HttpResponse<Void> resp;
         try {
-            resp = httpClient.send(HttpRequest.newBuilder(new URI(endpoint + "/app/version"))
-                    .GET()
-                    .header("User-Agent", Main.getUserAgent())
-                    .timeout(Duration.of(30, ChronoUnit.SECONDS))
-                    .build(), HttpResponse.BodyHandlers.discarding());
+            resp = httpClient.send(MutableRequest.GET("/api/v2/app/version"), HttpResponse.BodyHandlers.discarding());
         } catch (Exception e) {
             return false;
         }
@@ -89,38 +90,31 @@ public class QBittorrent implements Downloader {
     }
 
     public boolean login() {
-        if(isLoggedIn()) return true; // 重用 Session 会话
+        if (isLoggedIn()) return true; // 重用 Session 会话
         try {
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put("username", username);
-            parameters.put("password", password);
-            String form = parameters.entrySet()
-                    .stream()
-                    .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
-                    .collect(Collectors.joining("&"));
-            java.net.http.HttpResponse<String> request = httpClient
-                    .send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/auth/login"))
-                                    .header("User-Agent", Main.getUserAgent())
-                                    .header("Content-Type", "application/x-www-form-urlencoded")
-                                    .POST(HttpRequest.BodyPublishers.ofString(form))
-                                    .timeout(Duration.of(30, ChronoUnit.SECONDS)).build()
-                            , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            HttpResponse<String> request = httpClient
+                    .send(MutableRequest.POST("/api/v2/auth/login",
+                                    FormBodyPublisher.newBuilder()
+                                            .query("username", username)
+                                            .query("password", password).build())
+                            .header("Content-Type", "application/x-www-form-urlencoded")
+                            , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
             if (request.statusCode() != 200) {
                 log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, request.statusCode(), "HTTP ERROR", request.body());
             }
             return request.statusCode() == 200;
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage(),e);
+            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage(), e);
             return false;
         }
     }
 
     @Override
     public List<Torrent> getTorrents() {
-        java.net.http.HttpResponse<String> request;
+        HttpResponse<String> request;
         try {
-            request = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/torrents/info?filter=active")).GET().header("User-Agent", Main.getUserAgent()).timeout(Duration.of(30, ChronoUnit.SECONDS)).build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            request = httpClient.send(MutableRequest.GET("/api/v2/torrents/info?filter=active"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -143,9 +137,10 @@ public class QBittorrent implements Downloader {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        java.net.http.HttpResponse<String> resp;
+        HttpResponse<String> resp;
         try {
-            resp = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/sync/torrentPeers?hash=" + torrent.getId())).GET().header("User-Agent", Main.getUserAgent()).timeout(Duration.of(30, ChronoUnit.SECONDS)).build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            resp = httpClient.send(MutableRequest.GET("/api/v2/sync/torrentPeers?hash=" + torrent.getId()),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -166,9 +161,10 @@ public class QBittorrent implements Downloader {
 
     @Override
     public List<PeerAddress> getBanList() {
-        java.net.http.HttpResponse<String> resp;
+        HttpResponse<String> resp;
         try {
-            resp = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/app/preferences")).GET().header("User-Agent", Main.getUserAgent()).timeout(Duration.of(30, ChronoUnit.SECONDS)).build(), java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            resp = httpClient.send(MutableRequest.GET("/api/v2/app/preferences"),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -185,21 +181,12 @@ public class QBittorrent implements Downloader {
     public void setBanList(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
-
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())));
-        String form = parameters.entrySet()
-                .stream()
-                .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
-                .collect(Collectors.joining("&"));
         try {
-            java.net.http.HttpResponse<String> request = httpClient
-                    .send(java.net.http.HttpRequest.newBuilder(new URI(endpoint + "/app/setPreferences"))
-                                    .header("User-Agent", Main.getUserAgent())
-                                    .header("Content-Type", "application/x-www-form-urlencoded")
-                                    .POST(HttpRequest.BodyPublishers.ofString(form))
-                                    .timeout(Duration.of(30, ChronoUnit.SECONDS)).build()
-                            , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            HttpResponse<String> request = httpClient.send(MutableRequest
+                    .POST("/api/v2/app/setPreferences", FormBodyPublisher.newBuilder()
+                            .query("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString()))).build())
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+               , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
                 log.warn(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, endpoint, request.statusCode(), "HTTP ERROR", request.body());
                 throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());

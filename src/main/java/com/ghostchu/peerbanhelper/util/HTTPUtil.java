@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.github.mizosoft.methanol.Methanol;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,14 +12,11 @@ import javax.net.ssl.X509ExtendedTrustManager;
 import java.net.CookieManager;
 import java.net.ProxySelector;
 import java.net.Socket;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 @Slf4j
 public class HTTPUtil {
     @Getter
@@ -65,32 +63,19 @@ public class HTTPUtil {
     }
 
     public static HttpClient getHttpClient(boolean ignoreSSL, ProxySelector proxySelector){
-        HttpClient.Builder builder = HttpClient
+        Methanol.Builder builder = Methanol
                 .newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .cookieHandler(cookieManager);
         if(ignoreSSL){
-            builder = builder.sslContext(ignoreSslContext);
+            builder.sslContext(ignoreSslContext);
         }
         if(proxySelector != null){
-            builder = builder.proxy(proxySelector);
+            builder.proxy(proxySelector);
         }
         return builder.build();
     }
-
-    public static String getFormDataAsString(Map<String, String> formData) {
-        StringBuilder formBodyBuilder = new StringBuilder();
-        for (Map.Entry<String, String> singleEntry : formData.entrySet()) {
-            if (formBodyBuilder.length() > 0) {
-                formBodyBuilder.append("&");
-            }
-            formBodyBuilder.append(URLEncoder.encode(singleEntry.getKey(), StandardCharsets.UTF_8));
-            formBodyBuilder.append("=");
-            formBodyBuilder.append(URLEncoder.encode(singleEntry.getValue(), StandardCharsets.UTF_8));
-        }
-        return formBodyBuilder.toString();
-    }
-
-
 }
