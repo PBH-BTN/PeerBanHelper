@@ -8,17 +8,22 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
+import java.net.CookieManager;
+import java.net.ProxySelector;
 import java.net.Socket;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 @Slf4j
 public class HTTPUtil {
     @Getter
     private static SSLContext ignoreSslContext;
-
+    private static final CookieManager cookieManager = new CookieManager();
     static {
         TrustManager trustManager = new X509ExtendedTrustManager() {
             @Override
@@ -59,6 +64,21 @@ public class HTTPUtil {
         }
     }
 
+    public static HttpClient getHttpClient(boolean ignoreSSL, ProxySelector proxySelector){
+        HttpClient.Builder builder = HttpClient
+                .newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .cookieHandler(cookieManager);
+        if(ignoreSSL){
+            builder = builder.sslContext(ignoreSslContext);
+        }
+        if(proxySelector != null){
+            builder = builder.proxy(proxySelector);
+        }
+        return builder.build();
+    }
+
     public static String getFormDataAsString(Map<String, String> formData) {
         StringBuilder formBodyBuilder = new StringBuilder();
         for (Map.Entry<String, String> singleEntry : formData.entrySet()) {
@@ -71,4 +91,6 @@ public class HTTPUtil {
         }
         return formBodyBuilder.toString();
     }
+
+
 }
