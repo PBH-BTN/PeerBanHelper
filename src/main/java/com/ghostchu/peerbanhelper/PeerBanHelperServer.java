@@ -294,7 +294,6 @@ public class PeerBanHelperServer {
                 }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
                     BanResult banResult = checkBan(key, peer);
-                    log.info("Check {}", banResult);
                     // 跳过优先级最高
                     if (banResult.action() == PeerAction.SKIP) {
                         return;
