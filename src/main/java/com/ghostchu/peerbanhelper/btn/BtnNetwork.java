@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.google.common.collect.Lists;
+import com.google.common.hash.Hashing;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -45,7 +47,7 @@ public class BtnNetwork {
     }
 
     public void updateRule() {
-        if(!btnManager.getBtnConfig().getAbility().isRule()){
+        if(!btnManager.getBtnConfig().getAbility().contains("rule")){
             return;
         }
         try {
@@ -78,14 +80,14 @@ public class BtnNetwork {
         }
     }
 
-    public void ping() {
+    public void submit() {
         if (!submit) {
             return;
         }
-        if(!btnManager.getBtnConfig().getAbility().isSubmit()){
+        if(!btnManager.getBtnConfig().getAbility().contains("submit")){
             return;
         }
-        List<ClientPing> pings = generatePings(appId, appSecret);
+        List<ClientPing> pings = generatePings();
         List<List<ClientPing>> batch = Lists.partition(pings, btnManager.getBtnConfig().getThreshold().getPerBatchSize());
         log.info(Lang.BTN_PREPARE_TO_SUBMIT, pings.stream().mapToLong(p -> p.getPeers().size()).sum(), batch.size());
         for (int i = 0; i < batch.size(); i++) {
@@ -121,7 +123,7 @@ public class BtnNetwork {
         });
     }
 
-    private List<ClientPing> generatePings(String appId, String appSecret) {
+    private List<ClientPing> generatePings() {
         List<ClientPing> clientPings = new ArrayList<>();
         for (Downloader downloader : btnManager.getServer().getDownloaders()) {
             List<PeerConnection> peerConnections = new ArrayList<>();
@@ -129,7 +131,9 @@ public class BtnNetwork {
                 downloader.login();
                 for (Torrent torrent : downloader.getTorrents()) {
                     try {
-                        TorrentInfo torrentInfo = new TorrentInfo(torrent.getHash(), torrent.getSize());
+                        String salt = Hashing.crc32().hashString(torrent.getHash(), StandardCharsets.UTF_8).toString();
+                        String torrentHash = Hashing.sha256().hashString(torrent.getHash()+salt, StandardCharsets.UTF_8).toString();
+                        TorrentInfo torrentInfo = new TorrentInfo(torrentHash, torrent.getSize());
                         for (Peer peer : downloader.getPeers(torrent)) {
                             PeerInfo peerInfo = generatePeerInfo(peer);
                             peerConnections.add(new PeerConnection(torrentInfo, peerInfo));
@@ -138,8 +142,6 @@ public class BtnNetwork {
                     }
                 }
                 ClientPing ping = new ClientPing();
-                ping.setAppId(appId);
-                ping.setAppSecret(appSecret);
                 ping.setPopulateAt(System.currentTimeMillis());
                 ping.setDownloader(downloader.getDownloaderName());
                 ping.setPeers(peerConnections);

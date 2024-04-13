@@ -4,20 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class BtnConfig {
-    private Ability ability;
+    private List<String> ability;
     private Threshold threshold;
     private Endpoint endpoint;
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Ability{
-        private boolean submit;
-        private boolean rule;
-    }
 
     @Data
     @AllArgsConstructor

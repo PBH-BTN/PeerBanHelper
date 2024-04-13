@@ -90,7 +90,7 @@ public class BtnManager {
             long ruleUpdateOffset = random.nextLong(btnConfig.getThreshold().getDelayRandomRange());
             long pingOffset = random.nextLong(btnConfig.getThreshold().getDelayRandomRange());
             executeService.scheduleAtFixedRate(network::updateRule, ruleUpdateOffset, btnConfig.getThreshold().getRuleUpdatePeriod(), TimeUnit.MILLISECONDS);
-            executeService.scheduleAtFixedRate(network::ping, pingOffset, btnConfig.getThreshold().getSubmitPeriod(), TimeUnit.MILLISECONDS);
+            executeService.scheduleAtFixedRate(network::submit, pingOffset, btnConfig.getThreshold().getSubmitPeriod(), TimeUnit.MILLISECONDS);
             log.info(Lang.BTN_NETWORK_RECONFIGURED, btnConfig);
             this.btnConfig = btnConfig;
         } catch (Throwable e) {
