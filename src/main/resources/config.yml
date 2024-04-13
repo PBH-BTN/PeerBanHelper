@@ -110,8 +110,8 @@ banlist-invoker:
   command-exec:
     enabled: false
     reset:
-      - ""
+      - "cmd.exe /c echo reset!"
     ban:
-      - ""
+      - "cmd.exe /c echo ban!"
     unban:
-      - ""
+      - "cmd.exe /c echo unban!"

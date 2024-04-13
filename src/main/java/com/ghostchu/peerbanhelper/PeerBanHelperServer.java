@@ -67,7 +67,7 @@ public class PeerBanHelperServer {
     @Getter
     private ModuleManager moduleManager;
     @Getter
-    private List<BanListInvoker> banListInvoker;
+    private List<BanListInvoker> banListInvoker = new ArrayList<>();
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
@@ -142,7 +142,7 @@ public class PeerBanHelperServer {
     }
 
     private void registerTimer() {
-        BAN_WAVE_SERVICE.scheduleAtFixedRate(this::banWave, 3000, profile.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
+        BAN_WAVE_SERVICE.scheduleAtFixedRate(this::banWave, 1, profile.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
 //        cleanupService.scheduleAtFixedRate(()->{
 //            int changes = databaseHelper.cleanOutdatedBanLogs(getMainConfig().getInt("persist.ban-logs-keep-days", 30));
 //            log.info(Lang.PERSIST_CLEAN_LOGS, changes);
@@ -294,6 +294,7 @@ public class PeerBanHelperServer {
                 }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
                     BanResult banResult = checkBan(key, peer);
+                    log.info("Check {}", banResult);
                     // 跳过优先级最高
                     if (banResult.action() == PeerAction.SKIP) {
                         return;
@@ -363,7 +364,7 @@ public class PeerBanHelperServer {
                 result = r;
                 break; // SKIP 是最高的不可覆盖优先级，提前退出循环
             }
-            if (result.action() == PeerAction.BAN) {
+            if (r.action() == PeerAction.BAN) {
                 result = r;
                 // 不要提前退出循环，BAN 结果可被后面到来的 SKIP 覆盖
             }
