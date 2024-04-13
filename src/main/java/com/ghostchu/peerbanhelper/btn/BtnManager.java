@@ -80,6 +80,7 @@ public class BtnManager {
             executeService.schedule(network::update, random.nextLong(btnConfig.getDelayRandomRange()), TimeUnit.MILLISECONDS);
             executeService.schedule(network::ping, random.nextLong(btnConfig.getDelayRandomRange()), TimeUnit.MILLISECONDS);
             log.info(Lang.BTN_NETWORK_RECONFIGURED, btnConfig);
+            this.btnConfig = btnConfig;
         } catch (Throwable e) {
             log.warn(Lang.BTN_CONFIG_FAILS, e);
         }
