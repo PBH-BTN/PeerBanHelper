@@ -85,7 +85,6 @@ public final class TrClient {
         return execute(req, null);
     }
 
-    @SneakyThrows(URISyntaxException.class)
     public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req, Long tag) {
         String jsonBuffer = null;
         try {
