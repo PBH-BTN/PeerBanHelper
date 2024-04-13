@@ -64,6 +64,7 @@ public class PeerBanHelperServer {
     private DatabaseManager databaseManager;
     @Getter
     private DatabaseHelper databaseHelper;
+
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
         this.profile = profile;
@@ -104,7 +105,7 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor.shutdown();
         this.downloaderApiExecutor.shutdown();
         this.generalExecutor.shutdown();
-        this.downloaders.forEach(d-> {
+        this.downloaders.forEach(d -> {
             try {
                 d.close();
             } catch (Exception e) {
@@ -254,8 +255,12 @@ public class PeerBanHelperServer {
         map.forEach((key, value) -> {
             peers.addAndGet(value.size());
             for (Peer peer : value) {
-                if(StringUtils.isEmpty(peer.getPeerId())){
+                if (StringUtils.isEmpty(peer.getPeerId())) {
                     // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
+                    continue;
+                }
+                if (peer.getDownloadSpeed() <= 0 && peer.getUploadedSpeed() <= 0) {
+                    // 跳过此 Peer，速度都是0，可能是没有完成握手
                     continue;
                 }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
