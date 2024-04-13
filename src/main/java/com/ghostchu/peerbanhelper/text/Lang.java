@@ -72,4 +72,11 @@ public class Lang {
     public static String BOOTSTRAP_FAILED = "[错误] PeerBanHelper 启动失败，遇到致命错误，请检查控制台日志";
     public static String DATABASE_FAILURE = "[错误] 无法连接到持久化数据存储数据库，请检查是否同时启动了多个 PBH 示例？（如果 SQLite 数据库损坏，请删除它，PBH 将会重新生成新的数据库文件）";
     public static String CONFIGURATION_OUTDATED_MODULE_DISABLED = "[警告] 无法确认功能模块 {} 的配置状态。配置文件似乎已过期，因此无法读取此模块的模块配置文件";
+    public static String BTN_DOWNLOADER_GENERAL_FAILURE = "[BTN 网络] 从下载器 {} 获取当前 Torrent 任务信息失败，跳过……";
+    public static String BTN_PREPARE_TO_SUBMIT = "[BTN 网络] 已收集了 {} 个 Peer 信息，将分为 {} 次提交到 BTN 网络，感谢您对 BTN 网络做出的贡献";
+    public static String BTN_UPDATE_RULES = "[BTN 网络] 正在连接到 BTN 网络服务器并更新规则数据，本地数据版本：{}";
+    public static String BTN_UPDATE_RULES_SUCCESSES = "[BTN 网络] 规则数据更新成功，当前数据版本：{}";
+    public static String BTN_REQUEST_FAILS = "[BTN 网络] 请求时出现错误，操作已取消 {}";
+    public static String BTN_CONFIG_FAILS= "[BTN 网络] 所连接的 BTN 网络实例未返回有效配置响应，BTN 网络功能可能不会正常工作 {}";
+    public static String MODULE_BTN_BAN = "匹配 %s 规则：（分类：%s）%s";
 }

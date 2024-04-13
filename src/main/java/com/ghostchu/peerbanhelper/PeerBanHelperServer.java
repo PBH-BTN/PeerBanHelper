@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
-import com.ghostchu.peerbanhelper.btn.task.PingTask;
+import com.ghostchu.peerbanhelper.btn.BtnManager;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -50,7 +50,8 @@ public class PeerBanHelperServer {
     @Getter
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
-
+    @Getter
+    private final BtnManager btnManager;
     @Getter
     private WebManager webManagerServer;
     private ExecutorService generalExecutor;
@@ -77,6 +78,7 @@ public class PeerBanHelperServer {
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
         registerHttpServer();
         this.moduleManager = new ModuleManager();
+        this.btnManager = new BtnManager(this, mainConfig.getConfigurationSection("btn"));
         try {
             prepareDatabase();
         } catch (Exception e) {
@@ -121,14 +123,12 @@ public class PeerBanHelperServer {
     }
 
     private void registerTimer() {
-        PingTask task = new PingTask(this);
         PEER_CHECK_TIMER.schedule(new TimerTask() {
             @Override
             public void run() {
                 banWave();
             }
         }, 0, profile.getLong("check-interval", 5000));
-        BTN_SUBMIT_TIMER.schedule(task,0, 5000);
     }
 
     /**
@@ -270,12 +270,7 @@ public class PeerBanHelperServer {
         map.forEach((key, value) -> {
             peers.addAndGet(value.size());
             for (Peer peer : value) {
-                if (StringUtils.isEmpty(peer.getPeerId())) {
-                    // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
-                    continue;
-                }
-                if (peer.getDownloadSpeed() <= 0 && peer.getUploadedSpeed() <= 0) {
-                    // 跳过此 Peer，速度都是0，可能是没有完成握手
+                if(isHandshaking(peer)){
                     continue;
                 }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
@@ -298,6 +293,19 @@ public class PeerBanHelperServer {
             log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
         }
         return new BanDownloaderResult(downloader, needUpdate.get(), needRelaunched);
+    }
+
+    private boolean isHandshaking(Peer peer) {
+        if (StringUtils.isEmpty(peer.getPeerId())) {
+            // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
+            return true;
+        }
+        //noinspection RedundantIfStatement
+        if (peer.getDownloadSpeed() <= 0 && peer.getUploadedSpeed() <= 0) {
+            // 跳过此 Peer，速度都是0，可能是没有完成握手
+            return true;
+        }
+        return false;
     }
 
     /**

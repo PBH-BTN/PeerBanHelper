@@ -24,7 +24,7 @@ btn:
     app-id: "xxxxxxxxxxxxxxxxxxxx"
     app-secret: "xxxxxxxxxxxxxxxxxxx"
   # 填写实例发现 URL
-  url: "http://127.0.0.1:9988/btn-discover"
+  url: "http://127.0.0.1:9988/btn/ping"
 # 功能模块
 module:
   # PeerId 封禁
@@ -169,7 +169,6 @@ module:
     ipv4: 30 # /32 = 单个 IP，/24 = 整个 ?.?.?.x 段
     # IPV6 前缀长度
     ipv6: 64 # /64 = ISP 通常分配给家宽用户的前缀长度
-  rule-subscription:
+  # 启用来自 BTN 网络的规则
+  btn:
     enabled: true
-    subscriptions:
-      - "https://example.com/rule.yml"

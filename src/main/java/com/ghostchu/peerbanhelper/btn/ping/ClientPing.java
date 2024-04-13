@@ -13,5 +13,7 @@ public class ClientPing {
     private String appSecret;
     private String downloader;
     private long populateAt;
+    private int batchIndex;
+    private int batchSize;
     private List<PeerConnection> peers;
 }
