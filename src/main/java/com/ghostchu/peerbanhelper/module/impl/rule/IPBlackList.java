@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -61,20 +60,18 @@ public class IPBlackList extends AbstractFeatureModule {
         if (ports.contains(peerAddress.getPort())) {
             return new BanResult(this, PeerAction.BAN, "Restricted ports");
         }
+        IPAddress pa = new IPAddressString(peerAddress.getIp()).getAddress();
+        if (pa == null) {
+            return new BanResult(this, PeerAction.NO_ACTION, "Peer Address is null");
+        }
+        if (pa.isIPv4Convertible()) {
+            pa = pa.toIPv4();
+        }
         for (String ip : ips) {
-            if (peerAddress.getIp().equals(ip.trim())) {
+            IPAddress ra = new IPAddressString(ip).getAddress();
+            if (ra == null) continue;
+            if (ra.equals(pa) || ra.contains(pa)) {
                 return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
-            }
-            try {
-                IPAddress ra = new IPAddressString(ip).toAddress();
-                IPAddress pa = new IPAddressString(peerAddress.getIp()).toAddress();
-                if (pa.isIPv4Convertible()) {
-                    pa = pa.toIPv4();
-                }
-                if (ra.contains(pa)) {
-                    return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
-                }
-            } catch (AddressStringException ignored) {
             }
         }
         return new BanResult(this, PeerAction.NO_ACTION, "No matches");
