@@ -82,4 +82,5 @@ public class Lang {
     public static String BTN_NETWORK_NOT_ENABLED = "[BTN 网络] 未启用 BTN 功能：此 PeerBanHelper 客户端未加入 BTN 网络";
     public static String BTN_NETWORK_ENABLED = "[BTN 网络] 功能已启用";
     public static String BTN_NETWORK_RECONFIGURED = "[BTN 网络] 服务器配置信息下发成功，已连接至 BTN 网络：{}";
+    public static String PERSIST_CLEAN_LOGS = "[清理] 已成功清理 {} 条封禁日志";
 }

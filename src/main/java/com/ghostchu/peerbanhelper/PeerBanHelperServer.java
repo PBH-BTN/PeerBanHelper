@@ -53,9 +53,9 @@ public class PeerBanHelperServer {
     private final BtnManager btnManager;
     @Getter
     private WebManager webManagerServer;
-    private ExecutorService generalExecutor;
-    private ExecutorService checkBanExecutor;
-    private ExecutorService downloaderApiExecutor;
+    private final ExecutorService generalExecutor;
+    private final ExecutorService checkBanExecutor;
+    private final ExecutorService downloaderApiExecutor;
     @Getter
     private Metrics metrics;
     private DatabaseManager databaseManager;
@@ -131,6 +131,10 @@ public class PeerBanHelperServer {
 
     private void registerTimer() {
         BAN_WAVE_SERVICE.scheduleAtFixedRate(this::banWave, 3000, profile.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
+//        cleanupService.scheduleAtFixedRate(()->{
+//            int changes = databaseHelper.cleanOutdatedBanLogs(getMainConfig().getInt("persist.ban-logs-keep-days", 30));
+//            log.info(Lang.PERSIST_CLEAN_LOGS, changes);
+//        }, 0, 1, TimeUnit.DAYS);
     }
 
     /**
@@ -243,6 +247,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new ProgressCheatBlocker(this, profile));
         moduleManager.register(new ActiveProbing(this, profile));
         moduleManager.register(new AutoRangeBan(this, profile));
+        moduleManager.register(new BtnNetworkOnline(this, profile));
         moduleManager.register(new DownloaderCIDRBlockList(this, profile));
         moduleManager.register(new PBHBanList(this, profile));
         moduleManager.register(new PBHBanLogs(this, profile, databaseHelper));

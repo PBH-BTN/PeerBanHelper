@@ -110,6 +110,16 @@ public class DatabaseHelper {
         }
     }
 
+    public int cleanOutdatedBanLogs(int days) {
+        try (Connection connection = manager.getConnection()) {
+            @Cleanup
+            PreparedStatement ps = connection.prepareStatement("DELETE FROM ban_logs where DATE(ban_at) <= DATE(DATE_SUB(NOW(),INTERVAL 30 day))");
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public int insertBanLogs(BanLog banLog) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             @Cleanup

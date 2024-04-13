@@ -2,25 +2,6 @@
 check-interval: 5000
 # 封禁持续时间（单位：毫秒）
 ban-duration: 86400000
-# BitTorrent Threat Network 威胁防护网络
-btn:
-  # 启用 BTN 模块
-  enabled: true
-  # 使用来自 BTN 网络的云端规则
-  cloud-rule: true
-  # 启用数据提交（匿名）
-  # BTN 网络基于所有启用此功能的用户提交的数据，对 Peers 进行可信度验证
-  # 通过启用此选项，您也会加入 BTN 网络并提交您的 Torrent 上的活动
-  # 以下信息将被发送到 BTN 实例；
-  # 您的 Torrent 列表（包括：Torrent 种子摘要的二次不可逆哈希和 Torrent 大小）
-  # 连接到您的 Torrent 任务的所有 Peers （包括：IP地址、端口号、PeerID、UserAgent（ClientName），Peer协议，Peer总下载量，Peer总上传量，Peer瞬时上传速度，Peer瞬时下载速度，Peer下载进度，以及您的下载器名称）
-  submit: false
-  # 可选：服务器鉴权
-  # 部分 BTN 网络可能要求您进行登录，在这里可以填写登陆平局
-  app-id: "xxxxxxxxxxxxxxxxxxxx"
-  app-secret: "xxxxxxxxxxxxxxxxxxx"
-  # 填写实例 URL
-  config-url: "http://127.0.0.1:9988/ping"
 # 功能模块
 module:
   # PeerId 封禁
