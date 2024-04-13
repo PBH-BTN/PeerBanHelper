@@ -116,7 +116,11 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             boolean ban = rewind > rewindAllow;
             return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, clientProgress, actualProgress, lastRecord, rewind, rewindAllow));
         }
-        return new BanResult(this, PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, clientProgress, actualProgress, difference));
+        return new BanResult(this, PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
+    }
+
+    private String percent(double d){
+        return (d*100)+"%";
     }
 
 
