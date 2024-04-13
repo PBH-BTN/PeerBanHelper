@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,26 +31,37 @@ public class BtnNetwork {
     private final BtnManager btnManager;
     private final String appId;
     private final String appSecret;
+    private final boolean submit;
     @Setter
     @Getter
     private BtnRule rule;
 
-    public BtnNetwork(BtnManager btnManager, String pingUrl, String appId, String appSecret) {
+    public BtnNetwork(BtnManager btnManager, String pingUrl, String appId, String appSecret, boolean submit) {
         this.pingUrl = pingUrl;
         this.btnManager = btnManager;
         this.appId = appId;
         this.appSecret = appSecret;
+        this.submit = submit;
     }
 
     public void update() {
         try {
+            String version;
+            if (rule == null || rule.getVersion() == null) {
+                version = "0";
+            } else {
+                version = rule.getVersion();
+            }
             HttpResponse<String> resp = HTTPUtil.getHttpClient(false, null)
-                    .send(HttpRequest.newBuilder(new URI(pingUrl + "/rule"))
+                    .send(HttpRequest.newBuilder(new URI(pingUrl + "/rule?rev=" + version))
                             .GET()
                             .header("User-Agent", Main.getUserAgent())
                             .header("Content-Type", "application/json")
                             .timeout(Duration.of(30, ChronoUnit.SECONDS))
                             .build(), HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() == 204) {
+                return;
+            }
             if (resp.statusCode() != 200) {
                 log.warn(Lang.BTN_REQUEST_FAILS, resp.statusCode() + " - " + resp.body());
             } else {
@@ -64,6 +74,9 @@ public class BtnNetwork {
     }
 
     public void ping() {
+        if (!submit) {
+            return;
+        }
         List<ClientPing> pings = generatePings(appId, appSecret);
         List<List<ClientPing>> batch = Lists.partition(pings, 300);
         log.info(Lang.BTN_PREPARE_TO_SUBMIT, pings.stream().mapToLong(p -> p.getPeers().size()).count(), batch.size());
@@ -75,7 +88,9 @@ public class BtnNetwork {
 
 
     private void submitPings(List<ClientPing> clientPings, int batchIndex, int batchSize) {
-        Gson gson = new Gson();
+        if (!submit) {
+            return;
+        }
         clientPings.forEach(ping -> {
             ping.setBatchIndex(batchIndex);
             ping.setBatchSize(batchSize);
@@ -86,8 +101,8 @@ public class BtnNetwork {
                     .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
                     .build();
             try {
-                HttpResponse<Void> resp = client.send(HttpRequest.newBuilder(new URI(pingUrl + "/submit"))
-                        .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(ping)))
+                client.send(HttpRequest.newBuilder(new URI(pingUrl + "/submit"))
+                        .POST(HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(ping)))
                         .header("User-Agent", Main.getUserAgent())
                         .header("Content-Type", "application/json")
                         .timeout(Duration.of(30, ChronoUnit.SECONDS))
@@ -106,7 +121,7 @@ public class BtnNetwork {
                 downloader.login();
                 for (Torrent torrent : downloader.getTorrents()) {
                     try {
-                        TorrentInfo torrentInfo = new TorrentInfo(torrent.getHash(),torrent.getSize() );
+                        TorrentInfo torrentInfo = new TorrentInfo(torrent.getHash(), torrent.getSize());
                         for (Peer peer : downloader.getPeers(torrent)) {
                             PeerInfo peerInfo = generatePeerInfo(peer);
                             peerConnections.add(new PeerConnection(torrentInfo, peerInfo));

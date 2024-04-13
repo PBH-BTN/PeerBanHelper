@@ -30,6 +30,7 @@ public class BtnManager {
     private final String pingUrl;
     @Getter
     private final BtnNetwork network;
+    private final boolean submit;
     private ConfigurationSection config;
     private ScheduledExecutorService executeService = Executors.newScheduledThreadPool(1);
     private TimerTask pingTask;
@@ -43,7 +44,8 @@ public class BtnManager {
             throw new IllegalStateException("BTN has been disabled");
         }
         this.pingUrl = section.getString("url");
-        this.network = new BtnNetwork(this, section.getString("url"), section.getString("app-id"), section.getString("app-secret"));
+        this.submit = section.getBoolean("submit");
+        this.network = new BtnNetwork(this, section.getString("url"), section.getString("app-id"), section.getString("app-secret"), submit);
         File file = new File(Main.getDataDirectory(), "btn.cache");
         if (!file.exists()) {
             file.createNewFile();

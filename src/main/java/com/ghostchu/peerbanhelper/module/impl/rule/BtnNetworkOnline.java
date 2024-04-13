@@ -61,6 +61,9 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         BtnManager manager = getServer().getBtnManager();
+        if(manager == null){
+            return new BanResult(this, PeerAction.NO_ACTION, "BtnManager not initialized");
+        }
         BtnNetwork network = manager.getNetwork();
         BtnRule rule = network.getRule();
         if (rule == null) {

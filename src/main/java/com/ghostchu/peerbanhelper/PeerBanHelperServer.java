@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class PeerBanHelperServer {
-    private static final Timer BTN_SUBMIT_TIMER = new Timer("BTN Task");
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final ScheduledExecutorService BAN_WAVE_SERVICE = Executors.newScheduledThreadPool(1);
     private final YamlConfiguration profile;
@@ -78,7 +77,14 @@ public class PeerBanHelperServer {
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
         registerHttpServer();
         this.moduleManager = new ModuleManager();
-        this.btnManager = new BtnManager(this, mainConfig.getConfigurationSection("btn"));
+        BtnManager btnm;
+        try {
+            btnm = new BtnManager(this, mainConfig.getConfigurationSection("btn"));
+        }catch (IllegalStateException e){
+            btnm = null;
+            log.info("");
+        }
+        this.btnManager = btnm;
         try {
             prepareDatabase();
         } catch (Exception e) {
