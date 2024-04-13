@@ -90,7 +90,7 @@ public class BtnNetwork {
             ping.setBatchIndex(batchIndex);
             ping.setBatchSize(batchSize);
             try {
-                MutableRequest request = MutableRequest.POST(btnManager.getBtnConfig().getEndpoint().getPing()
+                MutableRequest request = MutableRequest.POST(btnManager.getBtnConfig().getEndpoint().getSubmit()
                         , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
                 ).header("Content-Encoding", "gzip");
                 btnManager.getHttpClient().send(request
