@@ -51,29 +51,33 @@ public class IPBlackList extends AbstractFeatureModule {
     }
 
     private void reloadConfig() {
-       this.ips = getConfig().getStringList("ips");
-       this.ports = getConfig().getIntList("ports");
+        this.ips = getConfig().getStringList("ips");
+        this.ports = getConfig().getIntList("ports");
     }
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         PeerAddress peerAddress = peer.getAddress();
         if (ports.contains(peerAddress.getPort())) {
-            return new BanResult(this,PeerAction.BAN, "Restricted ports");
+            return new BanResult(this, PeerAction.BAN, "Restricted ports");
         }
         for (String ip : ips) {
             if (peerAddress.getIp().equals(ip.trim())) {
-                return new BanResult(this,PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
+                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
             }
             try {
-                IPAddress address = new IPAddressString(ip).toAddress();
-                if (address.contains(new IPAddressString(peerAddress.getIp()).toAddress())) {
-                    return new BanResult(this,PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
+                IPAddress ra = new IPAddressString(ip).toAddress();
+                IPAddress pa = new IPAddressString(peerAddress.getIp()).toAddress();
+                if (pa.isIPv4Convertible()) {
+                    pa = pa.toIPv4();
+                }
+                if (ra.contains(pa)) {
+                    return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
                 }
             } catch (AddressStringException ignored) {
             }
         }
-        return new BanResult(this,PeerAction.NO_ACTION, "No matches");
+        return new BanResult(this, PeerAction.NO_ACTION, "No matches");
     }
 
 
