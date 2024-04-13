@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PeerBanHelperServer {
     private static final Timer BTN_SUBMIT_TIMER = new Timer("BTN Task");
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
-    private final Timer PEER_CHECK_TIMER = new Timer("Peer check");
+    private final ScheduledExecutorService BAN_WAVE_SERVICE = Executors.newScheduledThreadPool(1);
     private final YamlConfiguration profile;
     @Getter
     private final List<Downloader> downloaders;
@@ -123,12 +123,7 @@ public class PeerBanHelperServer {
     }
 
     private void registerTimer() {
-        PEER_CHECK_TIMER.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                banWave();
-            }
-        }, 0, profile.getLong("check-interval", 5000));
+        BAN_WAVE_SERVICE.scheduleAtFixedRate(this::banWave, 3000, profile.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
     }
 
     /**
