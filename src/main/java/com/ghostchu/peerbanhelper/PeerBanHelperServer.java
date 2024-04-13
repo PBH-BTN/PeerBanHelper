@@ -80,9 +80,10 @@ public class PeerBanHelperServer {
         BtnManager btnm;
         try {
             btnm = new BtnManager(this, mainConfig.getConfigurationSection("btn"));
+            log.info(Lang.BTN_NETWORK_ENABLED);
         }catch (IllegalStateException e){
             btnm = null;
-            log.info("");
+            log.info(Lang.BTN_NETWORK_NOT_ENABLED);
         }
         this.btnManager = btnm;
         try {

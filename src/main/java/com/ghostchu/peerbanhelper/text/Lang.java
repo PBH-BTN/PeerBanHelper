@@ -80,4 +80,6 @@ public class Lang {
     public static String BTN_CONFIG_FAILS= "[BTN 网络] 所连接的 BTN 网络实例未返回有效配置响应，BTN 网络功能可能不会正常工作 {}";
     public static String MODULE_BTN_BAN = "匹配 %s 规则：（分类：%s）%s";
     public static String BTN_NETWORK_NOT_ENABLED = "[BTN 网络] 未启用 BTN 功能：此 PeerBanHelper 客户端未加入 BTN 网络";
+    public static String BTN_NETWORK_ENABLED = "[BTN 网络] 功能已启用";
+    public static String BTN_NETWORK_RECONFIGURED = "[BTN 网络] 服务器配置信息下发并成功，已连接至 BTN 网络：{}";
 }

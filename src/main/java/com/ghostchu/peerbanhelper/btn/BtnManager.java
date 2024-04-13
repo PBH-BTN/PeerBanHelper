@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,15 +30,12 @@ public class BtnManager {
     @Getter
     private final BtnNetwork network;
     private final boolean submit;
-    private ConfigurationSection config;
     private ScheduledExecutorService executeService = Executors.newScheduledThreadPool(1);
-    private TimerTask pingTask;
     private BtnConfig btnConfig;
 
     @SneakyThrows(IOException.class)
     public BtnManager(PeerBanHelperServer server, ConfigurationSection section) {
         this.server = server;
-        this.config = section;
         if (!section.getBoolean("enabled")) {
             throw new IllegalStateException("BTN has been disabled");
         }
@@ -48,6 +44,9 @@ public class BtnManager {
         this.network = new BtnNetwork(this, section.getString("url"), section.getString("app-id"), section.getString("app-secret"), submit);
         File file = new File(Main.getDataDirectory(), "btn.cache");
         if (!file.exists()) {
+            if(!file.getParentFile().exists()){
+                file.getParentFile().mkdirs();
+            }
             file.createNewFile();
         } else {
             try {
@@ -71,19 +70,23 @@ public class BtnManager {
                 log.warn(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body());
                 return;
             }
-            this.btnConfig = JsonUtil.getGson().fromJson(resp.body(), BtnConfig.class);
+            BtnConfig btnConfig = JsonUtil.getGson().fromJson(resp.body(), BtnConfig.class);
+            if (btnConfig.equals(this.btnConfig)) {
+                return;
+            }
             executeService.shutdownNow();
-            Random random = new Random();
             executeService = Executors.newScheduledThreadPool(2);
+            Random random = new Random();
             executeService.schedule(network::update, random.nextLong(btnConfig.getDelayRandomRange()), TimeUnit.MILLISECONDS);
             executeService.schedule(network::ping, random.nextLong(btnConfig.getDelayRandomRange()), TimeUnit.MILLISECONDS);
+            log.info(Lang.BTN_NETWORK_RECONFIGURED, btnConfig);
         } catch (Throwable e) {
             log.warn(Lang.BTN_CONFIG_FAILS, e);
         }
     }
 
     public void close() {
-        config = null;
+        executeService.shutdownNow();
     }
 
     @Data
