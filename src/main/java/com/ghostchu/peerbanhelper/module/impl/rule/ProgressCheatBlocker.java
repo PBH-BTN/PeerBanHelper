@@ -114,7 +114,7 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
             double rewind = lastRecord - peer.getProgress();
             boolean ban = rewind > rewindAllow;
-            return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindAllow)));
+            return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND,percent( clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindAllow)));
         }
         return new BanResult(this, PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
     }

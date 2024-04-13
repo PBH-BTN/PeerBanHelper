@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.btn.task.PingTask;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class PeerBanHelperServer {
+    private static final Timer BTN_SUBMIT_TIMER = new Timer("BTN Task");
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final Timer PEER_CHECK_TIMER = new Timer("Peer check");
     private final YamlConfiguration profile;
@@ -119,12 +121,14 @@ public class PeerBanHelperServer {
     }
 
     private void registerTimer() {
+        PingTask task = new PingTask(this);
         PEER_CHECK_TIMER.schedule(new TimerTask() {
             @Override
             public void run() {
                 banWave();
             }
         }, 0, profile.getLong("check-interval", 5000));
+        BTN_SUBMIT_TIMER.schedule(task,0, 5000);
     }
 
     /**
