@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -16,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class BtnNetwork {
     }
 
     public void updateRule() {
-        if(!btnManager.getBtnConfig().getAbility().contains("rule")){
+        if (!btnManager.getBtnConfig().getAbility().contains("rule")) {
             return;
         }
         try {
@@ -72,7 +72,7 @@ public class BtnNetwork {
         if (!submit) {
             return;
         }
-        if(!btnManager.getBtnConfig().getAbility().contains("submit")){
+        if (!btnManager.getBtnConfig().getAbility().contains("submit")) {
             return;
         }
         List<ClientPing> pings = generatePings();
@@ -90,7 +90,11 @@ public class BtnNetwork {
             ping.setBatchIndex(batchIndex);
             ping.setBatchSize(batchSize);
             try {
-                btnManager.getHttpClient().send(MutableRequest.POST(btnManager.getBtnConfig().getEndpoint().getPing(), HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(ping))), HttpResponse.BodyHandlers.discarding());
+                MutableRequest request = MutableRequest.POST(btnManager.getBtnConfig().getEndpoint().getPing()
+                        , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
+                ).header("Content-Encoding", "gzip");
+                btnManager.getHttpClient().send(request
+                        , HttpResponse.BodyHandlers.discarding());
                 Thread.sleep(btnManager.getBtnConfig().getThreshold().getBatchPeriod());
             } catch (IOException | InterruptedException e) {
                 log.warn(Lang.BTN_REQUEST_FAILS, e);
@@ -107,7 +111,7 @@ public class BtnNetwork {
                 for (Torrent torrent : downloader.getTorrents()) {
                     try {
                         String salt = Hashing.crc32().hashString(torrent.getHash(), StandardCharsets.UTF_8).toString();
-                        String torrentHash = Hashing.sha256().hashString(torrent.getHash()+salt, StandardCharsets.UTF_8).toString();
+                        String torrentHash = Hashing.sha256().hashString(torrent.getHash() + salt, StandardCharsets.UTF_8).toString();
                         TorrentInfo torrentInfo = new TorrentInfo(torrentHash, torrent.getSize());
                         for (Peer peer : downloader.getPeers(torrent)) {
                             PeerInfo peerInfo = generatePeerInfo(peer);

@@ -2,6 +2,8 @@ package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.WritableBodyPublisher;
+import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,6 +11,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.CookieManager;
 import java.net.ProxySelector;
 import java.net.Socket;
@@ -17,6 +22,8 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.zip.GZIPOutputStream;
+
 @Slf4j
 public class HTTPUtil {
     @Getter
@@ -77,5 +84,27 @@ public class HTTPUtil {
             builder.proxy(proxySelector);
         }
         return builder.build();
+    }
+
+    public static WritableBodyPublisher gzipBody(byte[] bytes){
+        WritableBodyPublisher requestBody = WritableBodyPublisher.create();
+        try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream());
+             InputStream in = new ByteArrayInputStream(bytes)) {
+            ByteStreams.copy(in, gzipOut);
+        } catch (IOException ioe) {
+            requestBody.closeExceptionally(ioe);
+            log.error("Failed to compress request body",ioe);
+        }
+        return requestBody;
+    }
+    public static WritableBodyPublisher gzipBody(InputStream is){
+        WritableBodyPublisher requestBody = WritableBodyPublisher.create();
+        try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream())) {
+            ByteStreams.copy(is, gzipOut);
+        } catch (IOException ioe) {
+            requestBody.closeExceptionally(ioe);
+            log.error("Failed to compress request body",ioe);
+        }
+        return requestBody;
     }
 }
