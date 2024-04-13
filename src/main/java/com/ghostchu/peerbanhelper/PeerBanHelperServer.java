@@ -270,6 +270,10 @@ public class PeerBanHelperServer {
                     // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
                     continue;
                 }
+                if (peer.getDownloadSpeed() <= 0 && peer.getUploadedSpeed() <= 0) {
+                    // 跳过此 Peer，速度都是0，可能是没有完成握手
+                    continue;
+                }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
                     BanResult banResult = checkBan(key, peer);
                     // 跳过优先级最高
