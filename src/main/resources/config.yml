@@ -82,3 +82,36 @@ btn:
   app-secret: "example-app-secret"
   # 填写实例 URL
   config-url: "http://127.0.0.1:9988/ping/config"
+# 封禁列表处理
+# PBH 能够除了调用 BT 客户端的封禁 API 外，还能够进行如下操作，以便适配更多其它客户端
+banlist-invoker:
+  # 生成 ipfilter.dat 文件
+  ipfilter-dat:
+    enabled: false
+  # 执行指定的系统命令
+  # 所有的可用占位符都会被注册到执行的命令的进程环境变量中
+  #如果您的命令没有读取环境变量的能力，则也可以使用 {%占位符名%}，这样 PBH 会在执行前替换命令中的占位符，但请注意转义问题
+  # 可用占位符列表：
+  #peer.ip - 对等体 IP 地址
+  #peer.port - 对等体端口
+  #meta.context - 封禁模块上下文
+  #meta.description - 封禁描述
+  #meta.banAt - 封禁时间
+  #meta.unbanAt - 解封时间
+  #meta.peer.id - PeerID
+  #meta.peer.clientName - UserAgent 客户端名称字符串
+  #meta.peer.uploaded - 总上传量
+  #meta.peer.downloaded - 总下载量
+  #meta.peer.progress - 客户端进度
+  #meta.torrent.id - Torrent ID
+  #meta.torrent.name - Torrent 名称
+  #meta.torrent.hash - Torrent 的 Info Hash
+  #meta.torrent.size - Torrent 大小
+  command-exec:
+    enabled: false
+    reset:
+      - ""
+    ban:
+      - ""
+    unban:
+      - ""

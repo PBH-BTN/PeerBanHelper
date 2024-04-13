@@ -5,6 +5,9 @@ import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
+import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
+import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
 import com.ghostchu.peerbanhelper.metric.Metrics;
 import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
 import com.ghostchu.peerbanhelper.module.BanResult;
@@ -63,6 +66,8 @@ public class PeerBanHelperServer {
     private DatabaseHelper databaseHelper;
     @Getter
     private ModuleManager moduleManager;
+    @Getter
+    private List<BanListInvoker> banListInvoker;
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
@@ -95,6 +100,13 @@ public class PeerBanHelperServer {
         registerMetrics();
         registerModules();
         registerTimer();
+        registerBanListInvokers();
+        banListInvoker.forEach(BanListInvoker::reset);
+    }
+
+    private void registerBanListInvokers() {
+        banListInvoker.add(new IPFilterInvoker(this));
+        banListInvoker.add(new CommandExec(this));
     }
 
     public void shutdown() {

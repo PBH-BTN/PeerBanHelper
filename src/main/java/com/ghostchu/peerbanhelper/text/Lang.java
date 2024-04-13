@@ -83,4 +83,8 @@ public class Lang {
     public static String BTN_NETWORK_ENABLED = "[BTN 网络] 功能已启用";
     public static String BTN_NETWORK_RECONFIGURED = "[BTN 网络] 服务器配置信息下发成功，已连接至 BTN 网络：{}";
     public static String PERSIST_CLEAN_LOGS = "[清理] 已成功清理 {} 条封禁日志";
+    public static String BANLIST_INVOKER_REGISTERED = "[BanListInvoker] 已注册：{}";
+    public static String BANLIST_INVOKER_IPFILTER_FAIL = "[BanListInvoker] 清空 ipfilter.dat 文件失败，出现 I/O 错误";
+    public static String BANLIST_INVOKER_COMMAND_EXEC_TIMEOUT = "[BanListInvoker] 执行命令 {} 时超时，PBH 不再继续等待进程";
+    public static String BANLIST_INVOKER_COMMAND_EXEC_FAILED = "[BanListInvoker] 执行命令 {} 时，进程返回非零状态码（{}），这可能意味着命令未被成功执行，请查看";
 }
