@@ -10,17 +10,12 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.LinkedBlockingDeque;
 
 @Slf4j
 public class PersistMetrics implements Metrics {
     private final DatabaseHelper db;
     private final Metrics inMemory = new InMemoryMetrics();
-    private final Deque<Map.Entry<PeerAddress, BanMetadata>> memoryBuffer = new LinkedBlockingDeque<>();
 
     public PersistMetrics(DatabaseHelper db) {
         this.db = db;
@@ -49,7 +44,26 @@ public class PersistMetrics implements Metrics {
     @Override
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
         inMemory.recordPeerBan(address, metadata);
-        memoryBuffer.offer(Map.entry(address, metadata));
+        try {
+            db.insertBanLogs(List.of(new BanLog(
+                    metadata.getBanAt(),
+                    metadata.getUnbanAt(),
+                    address.getIp(),
+                    address.getPort(),
+                    metadata.getPeer().getId(),
+                    metadata.getPeer().getClientName(),
+                    metadata.getPeer().getUploaded(),
+                    metadata.getPeer().getDownloaded(),
+                    metadata.getPeer().getProgress(),
+                    metadata.getTorrent().getHash(),
+                    metadata.getTorrent().getName(),
+                    metadata.getTorrent().getSize(),
+                    metadata.getContext(),
+                    metadata.getDescription()
+            )));
+        } catch (SQLException e) {
+            log.warn(Lang.DATABASE_SAVE_BUFFER_FAILED, e);
+        }
     }
 
     @Override
@@ -60,33 +74,18 @@ public class PersistMetrics implements Metrics {
 
     @Override
     public void flush() {
-        long startAt = System.currentTimeMillis();
-        try {
-            List<BanLog> logs = new LinkedList<>();
-            while (!memoryBuffer.isEmpty()) {
-                Map.Entry<PeerAddress, BanMetadata> e = memoryBuffer.poll();
-                logs.add(new BanLog(
-                        e.getValue().getBanAt(),
-                        e.getValue().getUnbanAt(),
-                        e.getKey().getIp(),
-                        e.getKey().getPort(),
-                        e.getValue().getPeer().getId(),
-                        e.getValue().getPeer().getClientName(),
-                        e.getValue().getPeer().getUploaded(),
-                        e.getValue().getPeer().getDownloaded(),
-                        e.getValue().getPeer().getProgress(),
-                        e.getValue().getTorrent().getHash(),
-                        e.getValue().getTorrent().getName(),
-                        e.getValue().getTorrent().getSize(),
-                        e.getValue().getContext(),
-                        e.getValue().getDescription()
-                ));
-            }
-            long lines = db.insertBanLogs(logs);
-            log.info(Lang.DATABASE_BUFFER_SAVED, lines, System.currentTimeMillis() - startAt);
-        } catch (SQLException e) {
-            log.warn(Lang.DATABASE_SAVE_BUFFER_FAILED, System.currentTimeMillis() - startAt, e);
-        }
+//        long startAt = System.currentTimeMillis();
+//        try {
+//            List<BanLog> logs = new LinkedList<>();
+//            while (!memoryBuffer.isEmpty()) {
+//                Map.Entry<PeerAddress, BanMetadata> e = memoryBuffer.poll();
+//                logs.add();
+//            }
+//            long lines = db.insertBanLogs(logs);
+//            log.info(Lang.DATABASE_BUFFER_SAVED, lines, System.currentTimeMillis() - startAt);
+//        } catch (SQLException e) {
+//
+//        }
     }
 
     @Override
