@@ -52,4 +52,9 @@ public class TRPeer implements Peer {
         return backend.getProgress();
     }
 
+    @Override
+    public String getFlags() {
+        return backend.getFlagStr();
+    }
+
 }
