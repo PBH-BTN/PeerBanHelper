@@ -17,12 +17,8 @@ on:
       - published
 jobs:
   build-unix-like:
-    name: ${{ matrix.version }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        version: [ latest ]
-        os: [ ubuntu-latest ]
+    name: build unix like
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: graalvm/setup-graalvm@v1
@@ -38,7 +34,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
+          name: Linux-${{ github.sha }}
           path: |
             target/PeerBanHelper.jar
             target/peerbanhelper-binary
@@ -69,12 +65,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-native-linux
   build-windows:
-    name: ${{ matrix.version }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        version: [ latest ]
-        os: [ windows-latest ]
+    name: build windows
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: graalvm/setup-graalvm@v1
@@ -91,7 +83,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
+          name: Windows-${{ github.sha }}
           path: |
             target/PeerBanHelper.jar
             target/peerbanhelper-binary.exe
