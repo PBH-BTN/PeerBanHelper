@@ -29,7 +29,7 @@ public class BtnConfig {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Endpoint {
-        private String ping;
+        private String submit;
         private String rule;
     }
 }
