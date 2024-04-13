@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,7 +57,7 @@ public class AutoRangeBan extends AbstractFeatureModule {
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        if(StringUtils.isEmpty(peer.getPeerId())){
+        if(peer.getPeerId() == null || peer.getPeerId().isEmpty()){
             return new BanResult(this,PeerAction.NO_ACTION, "Waiting for Bittorrent handshaking.");
         }
         IPAddress peerAddress = peer.getAddress().getAddress().withoutPrefixLength();

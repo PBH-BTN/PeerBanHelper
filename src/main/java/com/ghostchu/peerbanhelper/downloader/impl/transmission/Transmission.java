@@ -13,7 +13,6 @@ import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.net.http.HttpClient;
@@ -62,7 +61,7 @@ public class Transmission implements Downloader {
         RqSessionGet get = new RqSessionGet();
         TypedResponse<RsSessionGet> resp = client.execute(get); // 执行任意 RPC 操作以刷新 session
         String version = resp.getArgs().getVersion();
-        if (StringUtils.startsWithAny(version, "0.", "1.", "2.")) {
+        if (version.startsWith("0.") || version.startsWith("1.") || version.startsWith("2.")) {
             throw new IllegalStateException(String.format(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, Lang.DOWNLOADER_TR_INCOMPATIBILITY_BANAPI));
         }
         return true;

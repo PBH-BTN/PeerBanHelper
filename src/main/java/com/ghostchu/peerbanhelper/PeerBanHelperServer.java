@@ -25,7 +25,6 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -315,7 +314,7 @@ public class PeerBanHelperServer {
     }
 
     private boolean isHandshaking(Peer peer) {
-        if (StringUtils.isEmpty(peer.getPeerId())) {
+        if (peer.getPeerId() == null || peer.getPeerId().isEmpty()) {
             // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
             return true;
         }

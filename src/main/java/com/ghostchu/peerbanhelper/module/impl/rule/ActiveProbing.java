@@ -14,7 +14,6 @@ import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -158,10 +157,10 @@ public class ActiveProbing extends AbstractFeatureModule {
         String subpath = spilt[1];
         String exceptedCode = spilt[3];
         String url = scheme + "://" + host;
-        if (StringUtils.isNotEmpty(port)) {
+        if (port != null && !port.isEmpty()) {
             url += ":" + port;
         }
-        if (StringUtils.isNotEmpty(subpath)) {
+        if (subpath != null && !subpath.isEmpty()) {
             if (subpath.startsWith("/")) {
                 url += subpath;
             } else {

@@ -337,11 +337,6 @@
             <version>2.10.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.14.0</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -387,16 +382,9 @@
             <version>5.1.0</version>
         </dependency>
         <dependency>
-            <groupId>com.ghostchu</groupId>
-            <artifactId>simplereloadlib</artifactId>
-            <version>1.1.2</version>
-        </dependency>
-        <dependency>
             <groupId>com.github.mizosoft.methanol</groupId>
             <artifactId>methanol</artifactId>
             <version>1.7.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-
     </dependencies>
 </project>
