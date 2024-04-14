@@ -25,6 +25,12 @@ public interface FeatureModule {
     boolean isModuleEnabled();
 
     /**
+     * 模块是否需要首先进行握手检查
+     * @return 是否先进行握手检查
+     */
+    boolean needCheckHandshake();
+
+    /**
      * 检查一个特定的 Torrent 和 Peer 是否应该封禁
      * @param torrent Torrent
      * @param peer Peer

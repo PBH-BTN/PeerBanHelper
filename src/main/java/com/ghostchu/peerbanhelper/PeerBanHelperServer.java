@@ -291,9 +291,6 @@ public class PeerBanHelperServer {
         map.forEach((key, value) -> {
             peers.addAndGet(value.size());
             for (Peer peer : value) {
-                if(isHandshaking(peer)){
-                    continue;
-                }
                 checkPeersBanFutures.add(CompletableFuture.runAsync(() -> {
                     BanResult banResult = checkBan(key, peer);
                     // 跳过优先级最高
@@ -342,6 +339,9 @@ public class PeerBanHelperServer {
         List<BanResult> results = new CopyOnWriteArrayList<>();
         for (FeatureModule registeredModule : moduleManager.getModules()) {
             moduleExecutorFutures.add(CompletableFuture.runAsync(() -> {
+                if(registeredModule.needCheckHandshake() && isHandshaking(peer)){
+                   return; // 如果模块需要握手检查且peer正在握手 则跳过检查
+                }
                 BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
                 results.add(banResult);
                 synchronized (wakeLock) {

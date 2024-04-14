@@ -32,6 +32,11 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
     }
 
     @Override
+    public boolean needCheckHandshake() {
+        return false;
+    }
+
+    @Override
     public boolean isConfigurable() {
         return true;
     }

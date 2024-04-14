@@ -57,6 +57,11 @@ public class ActiveProbing extends AbstractFeatureModule {
     }
 
     @Override
+    public boolean needCheckHandshake() {
+        return true;
+    }
+
+    @Override
     public void onEnable() {
         reloadConfig();
     }

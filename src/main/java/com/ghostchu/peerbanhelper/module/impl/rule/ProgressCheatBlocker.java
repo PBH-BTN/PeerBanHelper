@@ -42,6 +42,11 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
     }
 
     @Override
+    public boolean needCheckHandshake() {
+        return true;
+    }
+
+    @Override
     public boolean isConfigurable() {
         return true;
     }

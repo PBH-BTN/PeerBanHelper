@@ -62,6 +62,11 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
     }
 
     @Override
+    public boolean needCheckHandshake() {
+        return false;
+    }
+
+    @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         return teapot();
     }
