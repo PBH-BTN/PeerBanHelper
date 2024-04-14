@@ -14,4 +14,5 @@ public class BtnRule {
     private Map<String, List<String>> peerIdRules;
     private Map<String, List<String>> clientNameRules;
     private Map<String, List<String>> ipRules;
+    private Map<String, List<Integer>> portRules;
 }

@@ -84,11 +84,27 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
         if (rule.getIpRules() != null) {
             result = NullUtil.anyNotNull(result, checkIpRule(rule, torrent, peer, ruleExecuteExecutor));
         }
+        if (rule.getPortRules() != null) {
+            result = NullUtil.anyNotNull(result, checkPortRule(rule, torrent, peer, ruleExecuteExecutor));
+        }
         if (result == null) {
             return new BanResult(this, PeerAction.NO_ACTION, "OK!");
         }
         return result;
     }
+
+    private BanResult checkPortRule(BtnRule rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+        for (String category : rule.getPortRules().keySet()) {
+            List<Integer> rules = rule.getPortRules().get(category);
+            for (Integer ruleContent : rules) {
+                if(peer.getAddress().getPort() == ruleContent){
+                    return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_BTN_BAN, "Port", category, ruleContent));
+                }
+            }
+        }
+        return null;
+    }
+
     @Nullable
     private BanResult checkClientNameRule(BtnRule rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         for (String category : rule.getClientNameRules().keySet()) {
