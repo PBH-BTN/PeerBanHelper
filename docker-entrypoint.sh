@@ -6,7 +6,7 @@ then
   then
       echo "Launching PeerBanHelper via Native-Image binary file..."
       chmod +x $BIN_FILE
-      ./peerbanhelper-binary
+      exec peerbanhelper-binary
   else
     echo "PeerBanHelper binary file not exists but USE_NATIVE_IMAGE=1, please disable native image option or use native-image included image"
     exit 1
@@ -17,5 +17,5 @@ else
   then
     echo "This image supports native-image, add USE_NATIVE_IMAGE=1 to use it (maybe buggy but saved a lots of system resources)"
   fi
-  java -Xmx256M -XX:+UseSerialGC -jar PeerBanHelper.jar
+  exec java -Xmx256M -XX:+UseSerialGC -jar PeerBanHelper.jar
 fi
