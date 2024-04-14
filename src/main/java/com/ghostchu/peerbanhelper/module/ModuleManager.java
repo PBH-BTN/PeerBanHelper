@@ -17,9 +17,9 @@ public class ModuleManager {
      * @param module 功能模块
      */
     public void register(@NotNull FeatureModule module) {
-        synchronized (modules) {
-            this.modules.add(module);
-            if (module.isModuleEnabled()) {
+        if (module.isModuleEnabled()) {
+            synchronized (modules) {
+                this.modules.add(module);
                 module.enable();
             }
         }
