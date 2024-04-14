@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BtnConfig {
+    private int protocol;
     private List<String> ability;
     private Threshold threshold;
     private Endpoint endpoint;

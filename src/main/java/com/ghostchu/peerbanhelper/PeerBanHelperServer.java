@@ -387,6 +387,7 @@ public class PeerBanHelperServer {
     public void banPeer(@NotNull PeerAddress peer, @NotNull BanMetadata banMetadata) {
         BAN_LIST.put(peer, banMetadata);
         metrics.recordPeerBan(peer, banMetadata);
+        banListInvoker.forEach(i->i.add(peer,banMetadata));
     }
 
     /**
@@ -399,6 +400,7 @@ public class PeerBanHelperServer {
         BanMetadata metadata = BAN_LIST.remove(address);
         if (metadata != null) {
             metrics.recordPeerUnban(address, metadata);
+            banListInvoker.forEach(i->i.add(address,metadata));
         }
         return metadata;
     }
