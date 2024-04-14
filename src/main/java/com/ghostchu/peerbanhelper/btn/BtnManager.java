@@ -40,6 +40,8 @@ public class BtnManager {
     private BtnConfig btnConfig;
     @Getter
     private Methanol httpClient;
+    @Getter
+    private File btnCacheFile = new File(Main.getDataDirectory(), "btn.cache");
 
     @SneakyThrows(IOException.class)
     public BtnManager(PeerBanHelperServer server, ConfigurationSection section) {
@@ -52,15 +54,14 @@ public class BtnManager {
         this.appId = section.getString("app-id");
         this.appSecret = section.getString("app-secret");
         this.network = new BtnNetwork(this, appId, appSecret, submit);
-        File file = new File(Main.getDataDirectory(), "btn.cache");
-        if (!file.exists()) {
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
+        if (!btnCacheFile.exists()) {
+            if (!btnCacheFile.getParentFile().exists()) {
+                btnCacheFile.getParentFile().mkdirs();
             }
-            file.createNewFile();
+            btnCacheFile.createNewFile();
         } else {
             try {
-                this.network.setRule(JsonUtil.getGson().fromJson(Files.readString(file.toPath()), BtnRule.class));
+                this.network.setRule(JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRule.class));
             } catch (Throwable ignored) {
             }
         }
@@ -85,7 +86,7 @@ public class BtnManager {
 
     private void reconfigureExecutor() {
         try {
-            HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl),HttpResponse.BodyHandlers.ofString()).join();
+            HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
                 log.warn(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body());
                 return;

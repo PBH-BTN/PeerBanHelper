@@ -16,8 +16,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +63,10 @@ public class BtnNetwork {
                         log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
                     } else {
                         this.rule = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
+                        try {
+                            Files.writeString(btnManager.getBtnCacheFile().toPath(), r.body(), StandardCharsets.UTF_8);
+                        } catch (IOException ignored) {
+                        }
                         log.info(Lang.BTN_UPDATE_RULES_SUCCESSES, this.rule.getVersion());
                     }
                 })
