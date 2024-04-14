@@ -133,6 +133,31 @@
   "fields":[{"name":"subscription"}]
 },
 {
+  "name": "com.google.common.util.concurrent.AbstractFuture",
+  "fields": [
+    {
+      "name": "listeners"
+    },
+    {
+      "name": "value"
+    },
+    {
+      "name": "waiters"
+    }
+  ]
+},
+  {
+    "name": "com.google.common.util.concurrent.AbstractFuture$Waiter",
+    "fields": [
+      {
+        "name": "next"
+      },
+      {
+        "name": "thread"
+      }
+    ]
+  },
+  {
   "name":"com.google.gson.internal.LinkedTreeMap",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -167,6 +192,15 @@
 {
   "name":"com.sun.crypto.provider.GaloisCounterMode$AESGCM",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+  {
+    "name": "com.sun.crypto.provider.HmacCore$HmacSHA384",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
 },
 {
   "name":"com.sun.crypto.provider.TlsMasterSecretGenerator",
@@ -385,6 +419,18 @@
   "name":"java.security.SecureRandomParameters"
 },
 {
+  "name": "java.security.interfaces.ECPrivateKey"
+},
+  {
+    "name": "java.security.interfaces.ECPublicKey"
+  },
+  {
+    "name": "java.security.interfaces.RSAPrivateKey"
+  },
+  {
+    "name": "java.security.interfaces.RSAPublicKey"
+  },
+  {
   "name":"java.sql.Date"
 },
 {
@@ -468,6 +514,10 @@
 {
   "name":"org.sqlite.JDBC",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+  {
+    "name": "sun.misc.Unsafe",
+    "allDeclaredFields": true
 },
 {
   "name":"sun.security.pkcs12.PKCS12KeyStore",
