@@ -124,7 +124,7 @@ public class BtnNetwork {
                     try {
                         String salt = Hashing.crc32().hashString(torrent.getHash(), StandardCharsets.UTF_8).toString();
                         String torrentHash = Hashing.sha256().hashString(torrent.getHash() + salt, StandardCharsets.UTF_8).toString();
-                        TorrentInfo torrentInfo = new TorrentInfo(torrentHash, torrent.getSize());
+                        TorrentInfo torrentInfo = new TorrentInfo(torrentHash, torrent.getSize(),torrent.getProgress());
                         for (Peer peer : downloader.getPeers(torrent)) {
                             PeerInfo peerInfo = generatePeerInfo(peer);
                             peerConnections.add(new PeerConnection(torrentInfo, peerInfo));

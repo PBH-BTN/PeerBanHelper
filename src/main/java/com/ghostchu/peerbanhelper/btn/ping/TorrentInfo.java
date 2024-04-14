@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class TorrentInfo {
     private String identifier;
     private long size;
+    private double progress;
 }
