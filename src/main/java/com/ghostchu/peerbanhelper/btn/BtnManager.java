@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.btn;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -19,7 +20,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -79,15 +79,13 @@ public class BtnManager {
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("BTN-AppID", appId)
                 .defaultHeader("BTN-AppSecret", appSecret)
-                .connectTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(60, ChronoUnit.SECONDS))
+                .requestTimeout(Duration.ofMinutes(1))
                 .cookieHandler(cm).build();
     }
 
     private void reconfigureExecutor() {
         try {
-            HttpResponse<String> resp = httpClient.send(MutableRequest.GET(configUrl),HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl),HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
                 log.warn(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body());
                 return;
@@ -101,10 +99,10 @@ public class BtnManager {
             }
             executeService = Executors.newScheduledThreadPool(2);
             Random random = new Random();
-            long ruleUpdateOffset = random.nextLong(btnConfig.getThreshold().getDelayRandomRange());
-            long pingOffset = random.nextLong(btnConfig.getThreshold().getDelayRandomRange());
-            executeService.scheduleAtFixedRate(network::updateRule, ruleUpdateOffset, btnConfig.getThreshold().getRuleUpdatePeriod(), TimeUnit.MILLISECONDS);
-            executeService.scheduleAtFixedRate(network::submit, pingOffset, btnConfig.getThreshold().getSubmitPeriod(), TimeUnit.MILLISECONDS);
+            long ruleUpdateOffset = random.nextLong(btnConfig.getDelayRandomRange());
+            long pingOffset = random.nextLong(btnConfig.getDelayRandomRange());
+            executeService.scheduleAtFixedRate(network::updateRule, ruleUpdateOffset, btnConfig.getAbilityRule().getPeriod(), TimeUnit.MILLISECONDS);
+            executeService.scheduleAtFixedRate(network::submit, pingOffset, btnConfig.getAbilitySubmit().getPeriod(), TimeUnit.MILLISECONDS);
             log.info(Lang.BTN_NETWORK_RECONFIGURED, btnConfig);
             this.btnConfig = btnConfig;
         } catch (Throwable e) {

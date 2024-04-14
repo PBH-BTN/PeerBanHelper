@@ -16,7 +16,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -38,34 +37,38 @@ public class BtnNetwork {
         this.appId = appId;
         this.appSecret = appSecret;
         this.submit = submit;
-
     }
 
     public void updateRule() {
         if (!btnManager.getBtnConfig().getAbility().contains("rule")) {
             return;
         }
-        try {
-            String version;
-            if (rule == null || rule.getVersion() == null) {
-                version = "0";
-            } else {
-                version = rule.getVersion();
-            }
-            HttpResponse<String> resp = btnManager.getHttpClient()
-                    .send(MutableRequest.GET(URLUtil.appendUrl(btnManager.getBtnConfig().getEndpoint().getRule(), Map.of("rev", version))), HttpResponse.BodyHandlers.ofString());
-            if (resp.statusCode() == 204) {
-                return;
-            }
-            if (resp.statusCode() != 200) {
-                log.warn(Lang.BTN_REQUEST_FAILS, resp.statusCode() + " - " + resp.body());
-            } else {
-                this.rule = JsonUtil.getGson().fromJson(resp.body(), BtnRule.class);
-                log.info(Lang.BTN_UPDATE_RULES_SUCCESSES, this.rule.getVersion());
-            }
-        } catch (IOException | InterruptedException e) {
-            log.warn(Lang.BTN_REQUEST_FAILS, e);
+        String version;
+        if (rule == null || rule.getVersion() == null) {
+            version = "0";
+        } else {
+            version = rule.getVersion();
         }
+        HTTPUtil.retryableSend(
+                        btnManager.getHttpClient(),
+                        MutableRequest.GET(URLUtil.appendUrl(btnManager.getBtnConfig().getAbilityRule().getEndpoint(), Map.of("rev", version))),
+                        HttpResponse.BodyHandlers.ofString())
+                .thenAccept(r -> {
+                    if (r.statusCode() == 204) {
+                        return;
+                    }
+                    if (r.statusCode() != 200) {
+                        log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                    } else {
+                        this.rule = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
+                        log.info(Lang.BTN_UPDATE_RULES_SUCCESSES, this.rule.getVersion());
+                    }
+                })
+                .exceptionally((e) -> {
+                    log.warn(Lang.BTN_REQUEST_FAILS, e);
+                    return null;
+                });
+
     }
 
     public void submit() {
@@ -76,7 +79,7 @@ public class BtnNetwork {
             return;
         }
         List<ClientPing> pings = generatePings();
-        List<List<ClientPing>> batch = Lists.partition(pings, btnManager.getBtnConfig().getThreshold().getPerBatchSize());
+        List<List<ClientPing>> batch = Lists.partition(pings, btnManager.getBtnConfig().getAbilitySubmit().getPerBatchSize());
         log.info(Lang.BTN_PREPARE_TO_SUBMIT, pings.stream().mapToLong(p -> p.getPeers().size()).sum(), batch.size());
         for (int i = 0; i < batch.size(); i++) {
             List<ClientPing> clientPing = batch.get(i);
@@ -89,15 +92,18 @@ public class BtnNetwork {
         clientPings.forEach(ping -> {
             ping.setBatchIndex(batchIndex);
             ping.setBatchSize(batchSize);
+            MutableRequest request = MutableRequest.POST(btnManager.getBtnConfig().getAbilitySubmit().getEndpoint()
+                    , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
+            ).header("Content-Encoding", "gzip");
+            HTTPUtil.retryableSend(btnManager.getHttpClient(), request, HttpResponse.BodyHandlers.discarding())
+                    .exceptionally(e -> {
+                        log.warn(Lang.BTN_REQUEST_FAILS, e);
+                        return null;
+                    });
             try {
-                MutableRequest request = MutableRequest.POST(btnManager.getBtnConfig().getEndpoint().getSubmit()
-                        , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
-                ).header("Content-Encoding", "gzip");
-                btnManager.getHttpClient().send(request
-                        , HttpResponse.BodyHandlers.discarding());
-                Thread.sleep(btnManager.getBtnConfig().getThreshold().getBatchPeriod());
-            } catch (IOException | InterruptedException e) {
-                log.warn(Lang.BTN_REQUEST_FAILS, e);
+                Thread.sleep(btnManager.getBtnConfig().getAbilitySubmit().getBatchPeriod());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
     }

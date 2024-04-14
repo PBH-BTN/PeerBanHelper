@@ -78,7 +78,8 @@ public class Lang {
     public static String BTN_UPDATE_RULES_SUCCESSES = "[BTN 网络] 规则数据更新成功，当前数据版本：{}";
     public static String BTN_REQUEST_FAILS = "[BTN 网络] 请求时出现错误，操作已取消 {}";
     public static String BTN_CONFIG_FAILS= "[BTN 网络] 所连接的 BTN 网络实例未返回有效配置响应，BTN 网络功能可能不会正常工作 {}";
-    public static String MODULE_BTN_BAN = "匹配 %s 规则：（分类：%s）%s";
+    public static String MODULE_BTN_BAN = "[BTN 封禁] 匹配 %s 规则集（%s）：%s";
+    public static String BTN_NETWORK_CONNECTING = "[BTN 网络] 请等待我们连接到 BTN 网络……";
     public static String BTN_NETWORK_NOT_ENABLED = "[BTN 网络] 未启用 BTN 功能：此 PeerBanHelper 客户端未加入 BTN 网络";
     public static String BTN_NETWORK_ENABLED = "[BTN 网络] 功能已启用";
     public static String BTN_NETWORK_RECONFIGURED = "[BTN 网络] 服务器配置信息下发成功，已连接至 BTN 网络：{}";
@@ -87,4 +88,5 @@ public class Lang {
     public static String BANLIST_INVOKER_IPFILTER_FAIL = "[BanListInvoker] 清空 ipfilter.dat 文件失败，出现 I/O 错误";
     public static String BANLIST_INVOKER_COMMAND_EXEC_TIMEOUT = "[BanListInvoker] 执行命令 {} 时超时，PBH 不再继续等待进程";
     public static String BANLIST_INVOKER_COMMAND_EXEC_FAILED = "[BanListInvoker] 执行命令 {} 时，进程返回非零状态码（{}），这可能意味着命令未被成功执行，请查看";
+    public static String BAN_PEER_REVERSE_LOOKUP = "[DNS反向查找] IP 地址 {} 反向 DNS 记录为：{}";
 }

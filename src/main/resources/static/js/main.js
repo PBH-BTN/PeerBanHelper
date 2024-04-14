@@ -83,6 +83,8 @@ function updateBanListView(node) {
                 title.innerHTML = `<div style="display: inline-flex; column-gap: 5px"><b>${meta.peer.address.ip + ":" + meta.peer.address.port}</b><span class="badge text-bg-secondary" style="margin-top: auto; margin-bottom: auto">${formatPeer(meta.peer).outerHTML}</span></div>`;
                 // li.style.fontSize = '22px';
                 const subUl = document.createElement('ul');
+                const reverseLookup = document.createElement('li');
+                reverseLookup.innerHTML = `反向 DNS 解析：${meta.reverseLookup}`
                 const banAt = document.createElement('li');
                 banAt.innerHTML = `封禁时间: ${stdTime(new Date(meta.banAt))}`;
                 const unbanAt = document.createElement('li');
@@ -93,7 +95,7 @@ function updateBanListView(node) {
                 banSnapshot.innerHTML = `封禁快照: <b>↑</b>${formatFileSize(meta.peer.uploaded)} <b>↓</b>${formatFileSize(meta.peer.downloaded)} - ${toPercent(meta.peer.progress)}`
                 const description = document.createElement('li');
                 description.innerHTML = `描述: ${meta.description}`;
-                subUl.append(...[banAt, unbanAt, bannedOn, banSnapshot, description]);
+                subUl.append(...[reverseLookup, banAt, unbanAt, bannedOn, banSnapshot, description]);
                 title.appendChild(subUl);
                 ul.appendChild(title);
             });

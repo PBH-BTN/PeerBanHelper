@@ -29,6 +29,8 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -83,6 +85,7 @@ public class PeerBanHelperServer {
         this.moduleManager = new ModuleManager();
         BtnManager btnm;
         try {
+            log.info(Lang.BTN_NETWORK_CONNECTING);
             btnm = new BtnManager(this, mainConfig.getConfigurationSection("btn"));
             log.info(Lang.BTN_NETWORK_ENABLED);
         }catch (IllegalStateException e){
@@ -388,6 +391,18 @@ public class PeerBanHelperServer {
         BAN_LIST.put(peer, banMetadata);
         metrics.recordPeerBan(peer, banMetadata);
         banListInvoker.forEach(i->i.add(peer,banMetadata));
+        CompletableFuture.runAsync(()->{
+            try {
+               InetAddress address = InetAddress.getByName(peer.getAddress().toString());
+               if(!address.getCanonicalHostName().equals(peer.getIp())){
+                   banMetadata.setReverseLookup(address.getCanonicalHostName());
+               }else{
+                   banMetadata.setReverseLookup("N/A");
+               }
+            } catch (UnknownHostException ignored) {
+                banMetadata.setReverseLookup("N/A");
+            }
+        }, generalExecutor);
     }
 
     /**
