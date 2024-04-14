@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 public class BtnNetwork {
@@ -117,6 +118,7 @@ public class BtnNetwork {
     }
 
     private List<ClientPing> generatePings() {
+        UUID submitId = UUID.randomUUID();
         List<ClientPing> clientPings = new ArrayList<>();
         for (Downloader downloader : btnManager.getServer().getDownloaders()) {
             List<PeerConnection> peerConnections = new ArrayList<>();
@@ -135,6 +137,7 @@ public class BtnNetwork {
                     }
                 }
                 ClientPing ping = new ClientPing();
+                ping.setSubmitId(submitId);
                 ping.setPopulateAt(System.currentTimeMillis());
                 ping.setDownloader(downloader.getDownloaderName());
                 ping.setPeers(peerConnections);
