@@ -17,5 +17,5 @@ else
   then
     echo "This image supports native-image, add USE_NATIVE_IMAGE=1 to use it (maybe buggy but saved a lots of system resources)"
   fi
-  exe java -Xmx256M -XX:+UseSerialGC -jar PeerBanHelper.jar
+  exec java -Xmx256M -XX:+UseSerialGC -jar PeerBanHelper.jar
 fi
