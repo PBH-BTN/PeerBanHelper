@@ -9,6 +9,8 @@
   }, {
     "pattern":"\\QMETA-INF/nanohttpd/mimetypes.properties\\E"
   }, {
+    "pattern":"\\QMETA-INF/services/com.github.mizosoft.methanol.BodyDecoder$Factory\\E"
+  }, {
     "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
   }, {
     "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
@@ -87,7 +89,7 @@
     "name":"sun.util.resources.cldr.CalendarData",
     "locales":["und"]
   }, {
-      "name":"inet.ipaddr.IPAddressResources",
-      "locales":["en", "en-US", "und", "zh", "zh-CN", "zh-Hans", "zh-Hans-CN"]
+    "name":"sun.util.resources.cldr.TimeZoneNames",
+    "locales":["en", "en-US", "und"]
   }]
 }

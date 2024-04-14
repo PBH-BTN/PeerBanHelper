@@ -87,6 +87,8 @@ public class BtnNetwork {
         List<ClientPing> pings = generatePings();
         List<List<ClientPing>> batch = Lists.partition(pings, btnManager.getBtnConfig().getAbilitySubmit().getPerBatchSize());
         log.info(Lang.BTN_PREPARE_TO_SUBMIT, pings.stream().mapToLong(p -> p.getPeers().size()).sum(), batch.size());
+
+
         for (int i = 0; i < batch.size(); i++) {
             List<ClientPing> clientPing = batch.get(i);
             submitPings(clientPing, i, batch.size());
