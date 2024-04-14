@@ -137,7 +137,7 @@ public class BtnNetwork {
                     }
                 }
                 ClientPing ping = new ClientPing();
-                ping.setSubmitId(submitId);
+                ping.setSubmitId(submitId.toString());
                 ping.setPopulateAt(System.currentTimeMillis());
                 ping.setDownloader(downloader.getDownloaderName());
                 ping.setPeers(peerConnections);
