@@ -110,8 +110,11 @@ banlist-invoker:
   command-exec:
     enabled: false
     reset:
-      - "cmd.exe /c echo reset!"
+      - "/bin/sh -c 'ipset destroy peerbanhelper-blocklist'"
+      - "/bin/sh -c 'ipset create peerbanhelper-blocklist hash:ip'"
+      - "/bin/sh -c 'iptables -I INPUT -m set --match-set peerbanhelper-blocklist src -j DROP'"
+      - "/bin/sh -c 'iptables -A OUTPUT -m set --match-set peerbanhelper-blocklist dst -j DROP'"
     ban:
-      - "cmd.exe /c echo ban!"
+      - "/bin/sh -c 'ipset add peerbanhelper-blocklist ${peer.ip}'"
     unban:
-      - "cmd.exe /c echo unban!"
+      - "/bin/sh -c 'ipset remove peerbanhelper-blocklist ${peer.ip}'"
