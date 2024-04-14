@@ -153,7 +153,7 @@ public class BtnNetwork {
         peerInfo.setAddress(new PeerAddress(peer.getAddress().getIp(), peer.getAddress().getPort()));
         peerInfo.setClientName(peer.getClientName());
         peerInfo.setPeerId(peer.getPeerId());
-        peerInfo.setFlag("N/A");
+        peerInfo.setFlag(peer.getFlags());
         peerInfo.setProgress(peer.getProgress());
         peerInfo.setDownloaded(peer.getDownloaded());
         peerInfo.setRtDownloadSpeed(peer.getDownloadSpeed());
