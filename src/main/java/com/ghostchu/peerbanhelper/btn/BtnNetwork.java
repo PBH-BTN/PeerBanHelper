@@ -102,7 +102,7 @@ public class BtnNetwork {
             MutableRequest request = MutableRequest.POST(btnManager.getBtnConfig().getAbilitySubmit().getEndpoint()
                     , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
             ).header("Content-Encoding", "gzip");
-            HTTPUtil.retryableSend(btnManager.getHttpClient(), request, HttpResponse.BodyHandlers.discarding())
+            HTTPUtil.retryableSend(btnManager.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                     .thenAccept(r->{
                         if (r.statusCode() != 200) {
                             log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());

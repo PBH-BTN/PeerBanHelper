@@ -76,6 +76,11 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"com.ghostchu.peerbanhelper.module.impl.webapi.PBHBanList$BanResponse",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"com.ghostchu.peerbanhelper.module.impl.webapi.PBHMaxBans$HistoryEntry",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
