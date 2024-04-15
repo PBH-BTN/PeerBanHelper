@@ -6,7 +6,7 @@ then
   then
       echo "Launching PeerBanHelper via Native-Image binary file..."
       chmod +x $BIN_FILE
-      exec peerbanhelper-binary
+      exec $BIN_FILE
   else
     echo "PeerBanHelper binary file not exists but USE_NATIVE_IMAGE=1, please disable native image option or use native-image included image"
     exit 1
