@@ -17,10 +17,14 @@ on:
       - published
 jobs:
   build-unix-like:
-    name: build unix like
-    runs-on: ubuntu-latest
+    name: ${{ matrix.version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        version: [ latest ]
+        os: [ ubuntu-latest ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
       - uses: graalvm/setup-graalvm@v1
         with:
           java-version: '22'
@@ -34,7 +38,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Linux-${{ github.sha }}
+          name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
           path: |
             target/PeerBanHelper.jar
             target/peerbanhelper-binary
@@ -65,10 +69,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-native-linux
   build-windows:
-    name: build windows
-    runs-on: windows-latest
+    name: ${{ matrix.version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        version: [ latest ]
+        os: [ windows-latest ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
       - uses: graalvm/setup-graalvm@v1
         with:
           java-version: '22'
@@ -83,40 +91,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-${{ github.sha }}
+          name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
           path: |
             target/PeerBanHelper.jar
             target/peerbanhelper-binary.exe
-
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    needs: [build-unix-like,build-windows]
-    if: startsWith(github.ref, 'refs/tags/')
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-      - name: Zip
-        working-directory: ./artifacts
-        run: |
-            for dir in ./*; do
-                  if [ -d $dir ]; then
-                        os="$(echo ${dir##*/} |cut -d- -f1)"
-                        zip -rj "PeerBanHelper.${{ github.event.release.tag_name }}.$os.zip" $dir/*
-                        rm -rf $dir
-                  fi
-            done
-      - name: Create release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "artifacts/*.zip"
-          name: ${{ github.event.release.tag_name }}
-          omitNameDuringUpdate: true
-          tag: ${{ github.event.release.tag_name }}
-          allowUpdates: true
-          artifactErrorsFailBuild: true

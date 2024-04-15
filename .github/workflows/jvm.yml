@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - uses: graalvm/setup-graalvm@v1
       name: Setup GraalVM
       with:
@@ -31,7 +31,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Linux-${{ github.sha }}
+        name: build-artifacts ${{ matrix.version }} on ${{ matrix.os }}
         path: |
           target/*.jar
           target/peerbanhelper-binary
