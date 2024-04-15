@@ -88,8 +88,6 @@ public class BtnNetwork {
         List<ClientPing> pings = generatePings();
         List<List<ClientPing>> batch = Lists.partition(pings, btnManager.getBtnConfig().getAbilitySubmit().getPerBatchSize());
         log.info(Lang.BTN_PREPARE_TO_SUBMIT, pings.stream().mapToLong(p -> p.getPeers().size()).sum(), batch.size());
-
-
         for (int i = 0; i < batch.size(); i++) {
             List<ClientPing> clientPing = batch.get(i);
             submitPings(clientPing, i, batch.size());
@@ -105,6 +103,11 @@ public class BtnNetwork {
                     , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
             ).header("Content-Encoding", "gzip");
             HTTPUtil.retryableSend(btnManager.getHttpClient(), request, HttpResponse.BodyHandlers.discarding())
+                    .thenAccept(r->{
+                        if (r.statusCode() != 200) {
+                            log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                        }
+                    })
                     .exceptionally(e -> {
                         log.warn(Lang.BTN_REQUEST_FAILS, e);
                         return null;
