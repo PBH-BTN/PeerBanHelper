@@ -37,7 +37,7 @@ public class QBittorrent implements Downloader {
 
     public QBittorrent(String name, String endpoint, String username, String password, String baUser, String baPass, boolean verifySSL, HttpClient.Version httpVersion) {
         this.name = name;
-        this.endpoint = endpoint;
+        this.endpoint = endpoint+"/api/v2";
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         Methanol.Builder builder = Methanol
@@ -45,7 +45,6 @@ public class QBittorrent implements Downloader {
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(Main.getUserAgent())
-                .baseUri(endpoint)
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
@@ -82,7 +81,7 @@ public class QBittorrent implements Downloader {
     public boolean isLoggedIn() {
         HttpResponse<Void> resp;
         try {
-            resp = httpClient.send(MutableRequest.GET("/api/v2/app/version"), HttpResponse.BodyHandlers.discarding());
+            resp = httpClient.send(MutableRequest.GET(endpoint+"/app/version"), HttpResponse.BodyHandlers.discarding());
         } catch (Exception e) {
             return false;
         }
@@ -93,7 +92,7 @@ public class QBittorrent implements Downloader {
         if (isLoggedIn()) return true; // 重用 Session 会话
         try {
             HttpResponse<String> request = httpClient
-                    .send(MutableRequest.POST("/api/v2/auth/login",
+                    .send(MutableRequest.POST(endpoint+"/auth/login",
                                     FormBodyPublisher.newBuilder()
                                             .query("username", username)
                                             .query("password", password).build())
@@ -114,7 +113,7 @@ public class QBittorrent implements Downloader {
     public List<Torrent> getTorrents() {
         HttpResponse<String> request;
         try {
-            request = httpClient.send(MutableRequest.GET("/api/v2/torrents/info?filter=active"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            request = httpClient.send(MutableRequest.GET(endpoint+"/torrents/info?filter=active"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -139,7 +138,7 @@ public class QBittorrent implements Downloader {
     public List<Peer> getPeers(Torrent torrent) {
         HttpResponse<String> resp;
         try {
-            resp = httpClient.send(MutableRequest.GET("/api/v2/sync/torrentPeers?hash=" + torrent.getId()),
+            resp = httpClient.send(MutableRequest.GET(endpoint+"/sync/torrentPeers?hash=" + torrent.getId()),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -163,7 +162,7 @@ public class QBittorrent implements Downloader {
     public List<PeerAddress> getBanList() {
         HttpResponse<String> resp;
         try {
-            resp = httpClient.send(MutableRequest.GET("/api/v2/app/preferences"),
+            resp = httpClient.send(MutableRequest.GET(endpoint+"/app/preferences"),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -183,7 +182,7 @@ public class QBittorrent implements Downloader {
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
-                    .POST("/api/v2/app/setPreferences", FormBodyPublisher.newBuilder()
+                    .POST(endpoint+"/app/setPreferences", FormBodyPublisher.newBuilder()
                             .query("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString()))).build())
                     .header("Content-Type", "application/x-www-form-urlencoded")
                , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
