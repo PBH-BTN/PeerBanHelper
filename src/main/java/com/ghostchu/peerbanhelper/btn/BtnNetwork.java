@@ -35,6 +35,8 @@ public class BtnNetwork {
     @Getter
     private BtnRule rule;
 
+    private long lastRecordedBans =0;
+
     public BtnNetwork(BtnManager btnManager, String appId, String appSecret, boolean submit) {
         this.btnManager = btnManager;
         this.appId = appId;
@@ -121,6 +123,8 @@ public class BtnNetwork {
     }
 
     private List<ClientPing> generatePings() {
+        long bans = btnManager.getServer().getMetrics().getPeerBanCounter() - lastRecordedBans;
+        this.lastRecordedBans = bans;
         UUID submitId = UUID.randomUUID();
         List<ClientPing> clientPings = new ArrayList<>();
         for (Downloader downloader : btnManager.getServer().getDownloaders()) {
@@ -144,6 +148,7 @@ public class BtnNetwork {
                 ping.setPopulateAt(System.currentTimeMillis());
                 ping.setDownloader(downloader.getDownloaderName());
                 ping.setPeers(peerConnections);
+                ping.setBans(bans);
                 clientPings.add(ping);
             } catch (Exception e) {
                 log.warn(Lang.BTN_DOWNLOADER_GENERAL_FAILURE, downloader.getName(), e);

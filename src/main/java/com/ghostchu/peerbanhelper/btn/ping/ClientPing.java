@@ -15,5 +15,6 @@ public class ClientPing {
     private long populateAt;
     private int batchIndex;
     private int batchSize;
+    private long bans;
     private List<PeerConnection> peers;
 }
