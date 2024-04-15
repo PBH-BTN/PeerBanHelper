@@ -20,6 +20,12 @@ public interface Torrent {
     String getHash();
 
     /**
+     * 获取下载器任务进度
+     * @return 下载器任务进度
+     */
+    double getProgress();
+
+    /**
      * 获取目前该 Torrent 的共计大小
      * @return 共计大小
      */

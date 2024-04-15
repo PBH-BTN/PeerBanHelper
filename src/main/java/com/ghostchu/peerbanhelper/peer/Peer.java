@@ -54,6 +54,12 @@ public interface Peer extends Comparable<Peer> {
      */
     double getProgress();
 
+    /**
+     * 对等体的 Flag 信息
+     * @return Flag
+     */
+    String getFlags();
+
     @Override
     default int compareTo(Peer o) {
         return this.getAddress().compareTo(o.getAddress());

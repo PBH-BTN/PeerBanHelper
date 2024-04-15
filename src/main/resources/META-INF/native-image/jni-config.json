@@ -7,6 +7,10 @@
   "methods":[{"name":"getBoolean","parameterTypes":["java.lang.String"] }]
 },
 {
+  "name":"java.lang.InternalError",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String"] }]
+},
+{
   "name":"java.lang.Throwable",
   "methods":[{"name":"toString","parameterTypes":[] }]
 },
@@ -47,5 +51,9 @@
   "name":"org.sqlite.core.NativeDB",
   "fields":[{"name":"busyHandler"}, {"name":"commitListener"}, {"name":"pointer"}, {"name":"progressHandler"}, {"name":"updateListener"}],
   "methods":[{"name":"stringToUtf8ByteArray","parameterTypes":["java.lang.String"] }, {"name":"throwex","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sun.instrument.InstrumentationImpl",
+  "methods":[{"name":"<init>","parameterTypes":["long","boolean","boolean","boolean"] }, {"name":"loadClassAndCallAgentmain","parameterTypes":["java.lang.String","java.lang.String"] }, {"name":"loadClassAndCallPremain","parameterTypes":["java.lang.String","java.lang.String"] }, {"name":"transform","parameterTypes":["java.lang.Module","java.lang.ClassLoader","java.lang.String","java.lang.Class","java.security.ProtectionDomain","byte[]","boolean"] }]
 }
 ]

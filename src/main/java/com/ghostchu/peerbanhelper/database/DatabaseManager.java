@@ -8,10 +8,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class DatabaseManager {
     private File databaseDirectory;
     private HikariDataSource ds;
+    private ScheduledExecutorService cleanupService = Executors.newScheduledThreadPool(1);
 
     public DatabaseManager(PeerBanHelperServer server) {
         databaseDirectory = new File(Main.getDataDirectory(), "persist");

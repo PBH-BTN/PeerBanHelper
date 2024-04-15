@@ -2,38 +2,57 @@ package com.ghostchu.peerbanhelper.web;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.web.api.*;
 import fi.iki.elonen.NanoHTTPD;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.ApiStatus;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
 @Slf4j
-public class WebEndpointProvider extends NanoHTTPD {
+public class WebManager extends NanoHTTPD {
 
     private final PeerBanHelperServer peerBanHelperServer;
-    private final List<PBHAPI> apiEndpoints = new ArrayList<>();
+    private final Set<PBHAPI> apiEndpoints = new HashSet<>();
 
-    public WebEndpointProvider(int port, PeerBanHelperServer peerBanHelperServer) throws IOException {
+    public WebManager(int port, PeerBanHelperServer peerBanHelperServer) {
         super(port);
         this.peerBanHelperServer = peerBanHelperServer;
-        start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        registerEndpoints();
+        try {
+            start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
+        }catch (Exception e){
+            log.warn(Lang.ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE, e);
+        }
     }
 
-    private void registerEndpoints() {
-        apiEndpoints.add(new TransmissionBlockList(peerBanHelperServer));
-        apiEndpoints.add(PBHBanList.createPBHBanList(peerBanHelperServer));
-        apiEndpoints.add(new PBHMetrics(peerBanHelperServer));
-        apiEndpoints.add(new PBHClientStatus(peerBanHelperServer));
-        apiEndpoints.add(new PBHBanLogs(peerBanHelperServer, peerBanHelperServer.getDatabaseHelper()));
-        apiEndpoints.add(new PBHMaxBans(peerBanHelperServer, peerBanHelperServer.getDatabaseHelper()));
-        apiEndpoints.forEach(apiEndpoint-> log.info(Lang.WEB_ENDPOINT_REGISTERED, apiEndpoint.getClass().getName()));
+    public void register(PBHAPI pbhapi) {
+        synchronized (apiEndpoints) {
+            apiEndpoints.add(pbhapi);
+        }
+    }
+
+
+    public boolean unregister(PBHAPI pbhapi) {
+        synchronized (apiEndpoints) {
+            return apiEndpoints.remove(pbhapi);
+        }
+    }
+
+    public boolean unregister(Class<PBHAPI> pbhapiClass) {
+        synchronized (apiEndpoints) {
+            return apiEndpoints.removeIf(c -> c.getClass().equals(pbhapiClass));
+        }
+    }
+
+    public void unregisterAll() {
+        synchronized (apiEndpoints) {
+            apiEndpoints.forEach(this::unregister);
+        }
     }
 
     @Override
+    @ApiStatus.Internal
     public Response serve(IHTTPSession session) {
         if (session.getMethod() != Method.GET) {
             return newFixedLengthResponse(Response.Status.METHOD_NOT_ALLOWED, "text/plain", "error method");
@@ -48,17 +67,19 @@ public class WebEndpointProvider extends NanoHTTPD {
                 return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Failed to handle api request: " + e.getClass().getName() + ": " + e.getMessage());
             }
         }
+        return serveStaticResources(session);
+    }
+
+    private Response serveStaticResources(IHTTPSession session) {
         // 尝试处理静态资源
         String uri = session.getUri();
-        if(uri.isBlank() || uri.equals("/")){
+        if (uri.isBlank() || uri.equals("/")) {
             uri = "/index.html";
         }
-        InputStream is = getClass().getResourceAsStream("/static" +uri);
-        if(is == null){
+        InputStream is = getClass().getResourceAsStream("/static" + uri);
+        if (is == null) {
             return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Error: Resources not found");
         }
         return newChunkedResponse(Response.Status.OK, NanoHTTPD.getMimeTypeForFile(uri), is);
     }
-
-
 }

@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
-import java.util.List;
 
 @Slf4j
 public class PersistMetrics implements Metrics {
@@ -45,7 +44,7 @@ public class PersistMetrics implements Metrics {
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
         inMemory.recordPeerBan(address, metadata);
         try {
-            db.insertBanLogs(List.of(new BanLog(
+            db.insertBanLogs(new BanLog(
                     metadata.getBanAt(),
                     metadata.getUnbanAt(),
                     address.getIp(),
@@ -60,7 +59,7 @@ public class PersistMetrics implements Metrics {
                     metadata.getTorrent().getSize(),
                     metadata.getContext(),
                     metadata.getDescription()
-            )));
+            ));
         } catch (SQLException e) {
             log.warn(Lang.DATABASE_SAVE_BUFFER_FAILED, e);
         }

@@ -12,6 +12,51 @@
   "name":"[Ljava.sql.Statement;"
 },
 {
+  "name":"com.ghostchu.peerbanhelper.btn.BtnConfig",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.btn.BtnConfig$AbilityRule",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.btn.BtnConfig$AbilitySubmit",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.btn.BtnRule",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.btn.ping.ClientPing",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.btn.ping.PeerAddress",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.btn.ping.PeerConnection",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.btn.ping.PeerInfo",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.btn.ping.TorrentInfo",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"com.ghostchu.peerbanhelper.database.BanLog",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":["long","long","java.lang.String","int","java.lang.String","java.lang.String","long","long","double","java.lang.String","java.lang.String","long","java.lang.String","java.lang.String"] }, {"name":"banAt","parameterTypes":[] }, {"name":"description","parameterTypes":[] }, {"name":"module","parameterTypes":[] }, {"name":"peerClientName","parameterTypes":[] }, {"name":"peerDownloaded","parameterTypes":[] }, {"name":"peerId","parameterTypes":[] }, {"name":"peerIp","parameterTypes":[] }, {"name":"peerPort","parameterTypes":[] }, {"name":"peerProgress","parameterTypes":[] }, {"name":"peerUploaded","parameterTypes":[] }, {"name":"torrentInfoHash","parameterTypes":[] }, {"name":"torrentName","parameterTypes":[] }, {"name":"torrentSize","parameterTypes":[] }, {"name":"unbanAt","parameterTypes":[] }]
@@ -27,6 +72,11 @@
 },
 {
   "name":"com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.TorrentDetail",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ghostchu.peerbanhelper.module.impl.webapi.PBHMaxBans$HistoryEntry",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -61,8 +111,42 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"com.github.mizosoft.methanol.internal.concurrent.SerialExecutor",
+  "fields":[{"name":"sync"}]
+},
+{
+  "name":"com.github.mizosoft.methanol.internal.decoder.DeflateBodyDecoderFactory"
+},
+{
+  "name":"com.github.mizosoft.methanol.internal.decoder.GzipBodyDecoderFactory"
+},
+{
+  "name":"com.github.mizosoft.methanol.internal.flow.AbstractSubscription",
+  "fields":[{"name":"demand"}, {"name":"pendingError"}, {"name":"state"}]
+},
+{
+  "name":"com.github.mizosoft.methanol.internal.flow.TimeoutSubscriber",
+  "fields":[{"name":"demand"}, {"name":"index"}, {"name":"timeoutFuture"}]
+},
+{
+  "name":"com.github.mizosoft.methanol.internal.flow.Upstream",
+  "fields":[{"name":"subscription"}]
+},
+{
+  "name":"com.google.common.util.concurrent.AbstractFuture",
+  "fields":[{"name":"listeners"}, {"name":"value"}, {"name":"waiters"}]
+},
+{
+  "name":"com.google.common.util.concurrent.AbstractFuture$Waiter",
+  "fields":[{"name":"next"}, {"name":"thread"}]
+},
+{
   "name":"com.google.gson.internal.LinkedTreeMap",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.intellij.rt.execution.application.AppMainV2$Agent",
+  "methods":[{"name":"premain","parameterTypes":["java.lang.String","java.lang.instrument.Instrumentation"] }]
 },
 {
   "name":"com.sun.crypto.provider.AESCipher$General",
@@ -90,6 +174,10 @@
 },
 {
   "name":"com.sun.crypto.provider.GaloisCounterMode$AESGCM",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.HmacCore$HmacSHA384",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -309,6 +397,18 @@
   "name":"java.security.SecureRandomParameters"
 },
 {
+  "name":"java.security.interfaces.ECPrivateKey"
+},
+{
+  "name":"java.security.interfaces.ECPublicKey"
+},
+{
+  "name":"java.security.interfaces.RSAPrivateKey"
+},
+{
+  "name":"java.security.interfaces.RSAPublicKey"
+},
+{
   "name":"java.sql.Date"
 },
 {
@@ -392,6 +492,10 @@
 {
   "name":"org.sqlite.JDBC",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.misc.Unsafe",
+  "allDeclaredFields":true
 },
 {
   "name":"sun.security.pkcs12.PKCS12KeyStore",

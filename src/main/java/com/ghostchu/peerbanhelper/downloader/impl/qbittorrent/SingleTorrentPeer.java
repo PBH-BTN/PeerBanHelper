@@ -87,6 +87,11 @@ public class SingleTorrentPeer implements Peer {
     }
 
     @Override
+    public String getFlags() {
+        return flags;
+    }
+
+    @Override
     public String toString() {
         return "SingleTorrentPeer{" +
                 "client='" + client + '\'' +

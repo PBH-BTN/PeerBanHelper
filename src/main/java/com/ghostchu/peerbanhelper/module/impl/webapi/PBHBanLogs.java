@@ -1,26 +1,31 @@
-package com.ghostchu.peerbanhelper.web.api;
+package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
+import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
 import fi.iki.elonen.NanoHTTPD;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 @Slf4j
-public class PBHBanLogs implements PBHAPI {
-    private final PeerBanHelperServer server;
+public class PBHBanLogs extends AbstractFeatureModule implements PBHAPI {
     private final DatabaseHelper db;
 
-    public PBHBanLogs(PeerBanHelperServer server, @Nullable DatabaseHelper db) {
-        this.server = server;
-        this.db = db;
+    public PBHBanLogs(PeerBanHelperServer server, YamlConfiguration profile, @NotNull DatabaseHelper db) {
+      super(server,profile);
+      this.db = db;
     }
 
     @Override
@@ -33,7 +38,7 @@ public class PBHBanLogs implements PBHAPI {
         if (db == null) {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT, "text/plain", "Database persist not enabled on this PBH server");
         }
-        if (server.getMetrics() instanceof PersistMetrics persistMetrics) {
+        if (getServer().getMetrics() instanceof PersistMetrics persistMetrics) {
             persistMetrics.flush();
         }
         int pageIndex = Integer.parseInt(session.getParameters().getOrDefault("pageIndex", List.of("0")).get(0));
@@ -45,4 +50,40 @@ public class PBHBanLogs implements PBHAPI {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", "Internal server error, please check the console");
         }
     }
+
+    @Override
+    public boolean isConfigurable() {
+        return false;
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return "WebAPI - PBH BanLogs";
+    }
+
+    @Override
+    public @NotNull String getConfigName() {
+        return "webapi-banlogs";
+    }
+
+    @Override
+    public boolean needCheckHandshake() {
+        return false;
+    }
+
+    @Override
+    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+        return teapot();
+    }
+
+    @Override
+    public void onEnable() {
+        getServer().getWebManagerServer().register(this);
+    }
+
+    @Override
+    public void onDisable() {
+        getServer().getWebManagerServer().unregister(this);
+    }
+
 }

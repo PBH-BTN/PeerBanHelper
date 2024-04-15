@@ -23,8 +23,8 @@ public class Lang {
     public static String MODULE_IBL_MATCH_IP = "匹配 IP 规则: %s";
     public static String MODULE_PID_MATCH_PEER_ID = "匹配 PeerId 规则: %s";
     public static String MODULE_PCB_EXCESSIVE_DOWNLOAD = "客户端下载过量：种子大小：%d，上传给此对等体的总量：%d，最大允许的过量下载总量：%d";
-    public static String MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP = "客户端进度：%s%%，实际进度：%s%%，客户端的进度多于本地进度，跳过检测";
-    public static String MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS = "客户端进度：%s%%，实际进度：%s%%，差值：%s%%";
+    public static String MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP = "客户端进度：%.2f%%，实际进度：%.2f%%，客户端的进度多于本地进度，跳过检测";
+    public static String MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS = "客户端进度：%.2f%%，实际进度：%.2f%%，差值：%.2f%%";
     public static String MODULE_PCB_PEER_BAN_REWIND = "客户端进度：%s%%，实际进度：%s%%，上次记录进度：%s%%，本次进度：%s%%，差值：%s%%";
     public static String MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT = "种子大小未知";
     public static String MODULE_AP_PEER_BAN_PING = "Peer 发送了 ICMP 响应包";
@@ -72,4 +72,21 @@ public class Lang {
     public static String BOOTSTRAP_FAILED = "[错误] PeerBanHelper 启动失败，遇到致命错误，请检查控制台日志";
     public static String DATABASE_FAILURE = "[错误] 无法连接到持久化数据存储数据库，请检查是否同时启动了多个 PBH 示例？（如果 SQLite 数据库损坏，请删除它，PBH 将会重新生成新的数据库文件）";
     public static String CONFIGURATION_OUTDATED_MODULE_DISABLED = "[警告] 无法确认功能模块 {} 的配置状态。配置文件似乎已过期，因此无法读取此模块的模块配置文件";
+    public static String BTN_DOWNLOADER_GENERAL_FAILURE = "[BTN 网络] 从下载器 {} 获取当前 Torrent 任务信息失败，跳过……";
+    public static String BTN_PREPARE_TO_SUBMIT = "[BTN 网络] 已收集了 {} 个 Peer 信息，将分为 {} 次提交到 BTN 网络，感谢您对 BTN 网络做出的贡献";
+    public static String BTN_UPDATE_RULES = "[BTN 网络] 正在连接到 BTN 网络服务器并更新规则数据，本地数据版本：{}";
+    public static String BTN_UPDATE_RULES_SUCCESSES = "[BTN 网络] 规则数据更新成功，当前数据版本：{}";
+    public static String BTN_REQUEST_FAILS = "[BTN 网络] 请求时出现错误，操作已取消 {}";
+    public static String BTN_CONFIG_FAILS= "[BTN 网络] 所连接的 BTN 网络实例未返回有效配置响应，BTN 网络功能可能不会正常工作 {}";
+    public static String MODULE_BTN_BAN = "[BTN 封禁] 匹配 %s 规则集（%s）：%s";
+    public static String BTN_NETWORK_CONNECTING = "[BTN 网络] 请等待我们连接到 BTN 网络……";
+    public static String BTN_NETWORK_NOT_ENABLED = "[BTN 网络] 未启用 BTN 功能：此 PeerBanHelper 客户端未加入 BTN 网络";
+    public static String BTN_NETWORK_ENABLED = "[BTN 网络] 功能已启用";
+    public static String BTN_NETWORK_RECONFIGURED = "[BTN 网络] 服务器配置信息下发成功，已连接至 BTN 网络：{}";
+    public static String PERSIST_CLEAN_LOGS = "[清理] 已成功清理 {} 条封禁日志";
+    public static String BANLIST_INVOKER_REGISTERED = "[BanListInvoker] 已注册：{}";
+    public static String BANLIST_INVOKER_IPFILTER_FAIL = "[BanListInvoker] 清空 ipfilter.dat 文件失败，出现 I/O 错误";
+    public static String BANLIST_INVOKER_COMMAND_EXEC_TIMEOUT = "[BanListInvoker] 执行命令 {} 时超时，PBH 不再继续等待进程";
+    public static String BANLIST_INVOKER_COMMAND_EXEC_FAILED = "[BanListInvoker] 执行命令 {} 时，进程返回非零状态码（{}），这可能意味着命令未被成功执行，请查看";
+    public static String BAN_PEER_REVERSE_LOOKUP = "[DNS反向查找] IP 地址 {} 反向 DNS 记录为：{}";
 }

@@ -1,6 +1,9 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.WritableBodyPublisher;
+import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,14 +11,27 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.CookieManager;
+import java.net.ProxySelector;
 import java.net.Socket;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Map;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.zip.GZIPOutputStream;
+
 @Slf4j
 public class HTTPUtil {
+    private static final int MAX_RESEND = 5;
+    private static final CookieManager cookieManager = new CookieManager();
     @Getter
     private static SSLContext ignoreSslContext;
 
@@ -59,16 +75,84 @@ public class HTTPUtil {
         }
     }
 
-    public static String getFormDataAsString(Map<String, String> formData) {
-        StringBuilder formBodyBuilder = new StringBuilder();
-        for (Map.Entry<String, String> singleEntry : formData.entrySet()) {
-            if (formBodyBuilder.length() > 0) {
-                formBodyBuilder.append("&");
-            }
-            formBodyBuilder.append(URLEncoder.encode(singleEntry.getKey(), StandardCharsets.UTF_8));
-            formBodyBuilder.append("=");
-            formBodyBuilder.append(URLEncoder.encode(singleEntry.getValue(), StandardCharsets.UTF_8));
+    public static HttpClient getHttpClient(boolean ignoreSSL, ProxySelector proxySelector) {
+        Methanol.Builder builder = Methanol
+                .newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .cookieHandler(cookieManager);
+        if (ignoreSSL) {
+            builder.sslContext(ignoreSslContext);
         }
-        return formBodyBuilder.toString();
+        if (proxySelector != null) {
+            builder.proxy(proxySelector);
+        }
+        return builder.build();
+    }
+
+    public static WritableBodyPublisher gzipBody(byte[] bytes) {
+        WritableBodyPublisher requestBody = WritableBodyPublisher.create();
+        try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream());
+             InputStream in = new ByteArrayInputStream(bytes)) {
+            ByteStreams.copy(in, gzipOut);
+        } catch (IOException ioe) {
+            requestBody.closeExceptionally(ioe);
+            log.error("Failed to compress request body", ioe);
+        }
+        return requestBody;
+    }
+
+    public static WritableBodyPublisher gzipBody(InputStream is) {
+        WritableBodyPublisher requestBody = WritableBodyPublisher.create();
+        try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream())) {
+            ByteStreams.copy(is, gzipOut);
+        } catch (IOException ioe) {
+            requestBody.closeExceptionally(ioe);
+            log.error("Failed to compress request body", ioe);
+        }
+        return requestBody;
+    }
+
+
+    public static <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler <T> bodyHandler){
+       return client.sendAsync(request, bodyHandler)
+                        .handleAsync((r, t) -> tryResend(client, request, bodyHandler, 1, r, t))
+                        .thenCompose(Function.identity());
+
+    }
+
+
+    public static boolean shouldRetry(HttpResponse<?> r, Throwable t, int count) {
+        if (count >= MAX_RESEND) {
+            return false;
+        }
+        if (r != null) {
+            return r.statusCode() == 500
+                    || r.statusCode() == 502
+                    || r.statusCode() == 503
+                    || r.statusCode() == 504;
+        }
+        return false;
+    }
+
+    public static <T> CompletableFuture<HttpResponse<T>> tryResend(HttpClient client, HttpRequest request,
+                                                                   HttpResponse.BodyHandler<T> handler, int count,
+                                                                   HttpResponse<T> resp, Throwable t) {
+        if (shouldRetry(resp, t, count)) {
+            if(resp == null){
+                log.warn("Request to {} failed, retry {}/{}: {}", request.uri().toString(), count, MAX_RESEND, t.getClass().getName()+": "+t.getMessage());
+            }else{
+                log.warn("Request to {} failed, retry {}/{}: {} ", request.uri().toString(), count, MAX_RESEND,resp.statusCode()+" - "+resp.body());
+            }
+            return client.sendAsync(request, handler)
+                    .handleAsync((r, x) -> tryResend(client, request, handler, count + 1, r, x))
+                    .thenCompose(Function.identity());
+        } else if (t != null) {
+            return CompletableFuture.failedFuture(t);
+        } else {
+            return CompletableFuture.completedFuture(resp);
+        }
     }
 }

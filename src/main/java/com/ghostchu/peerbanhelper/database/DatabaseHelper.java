@@ -62,7 +62,7 @@ public class DatabaseHelper {
                 }
             }
             try (ps) {
-                if(from != null){
+                if (from != null) {
                     ps.setDate(1, from);
                     ps.setDate(2, to);
                 }
@@ -94,48 +94,52 @@ public class DatabaseHelper {
     }
 
     public Map<String, Long> findMaxBans(int n) throws SQLException {
-        try(Connection connection = manager.getConnection()){
+        try (Connection connection = manager.getConnection()) {
             @Cleanup
             PreparedStatement ps = connection.prepareStatement("SELECT peer_ip, COUNT(*) AS count " +
                     "FROM ban_logs " +
                     "GROUP BY peer_ip " +
-                    "ORDER BY count DESC LIMIT "+n);
+                    "ORDER BY count DESC LIMIT " + n);
             @Cleanup
-            ResultSet set  = ps.executeQuery();
+            ResultSet set = ps.executeQuery();
             Map<String, Long> map = new LinkedHashMap<>();
-            while (set.next()){
+            while (set.next()) {
                 map.put(set.getString("peer_ip"), set.getLong("count"));
             }
             return map;
         }
     }
 
-    public int insertBanLogs(List<BanLog> banLogList) throws SQLException {
-        if(banLogList.isEmpty()){
-            return 0;
+    public int cleanOutdatedBanLogs(int days) {
+        try (Connection connection = manager.getConnection()) {
+            @Cleanup
+            PreparedStatement ps = connection.prepareStatement("DELETE FROM ban_logs where DATE(ban_at) <= DATE(DATE_SUB(NOW(),INTERVAL 30 day))");
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    public int insertBanLogs(BanLog banLog) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             @Cleanup
             PreparedStatement ps = connection.prepareStatement("INSERT INTO ban_logs (ban_at, unban_at, peer_ip, peer_port, peer_id, peer_clientname," +
                     " peer_downloaded, peer_uploaded, peer_progress, torrent_infohash, torrent_name, torrent_size, module, description)" +
                     "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            for (BanLog banLog : banLogList) {
-                ps.setLong(1, banLog.banAt());
-                ps.setLong(2, banLog.unbanAt());
-                ps.setString(3, banLog.peerIp());
-                ps.setInt(4, banLog.peerPort());
-                ps.setString(5, banLog.peerId());
-                ps.setString(6, banLog.peerClientName());
-                ps.setLong(7, banLog.peerDownloaded());
-                ps.setLong(8, banLog.peerUploaded());
-                ps.setDouble(9, banLog.peerProgress());
-                ps.setString(10, banLog.torrentInfoHash());
-                ps.setString(11, banLog.torrentName());
-                ps.setLong(12, banLog.torrentSize());
-                ps.setString(13, banLog.module());
-                ps.setString(14, banLog.description());
-                ps.addBatch();
-            }
+            ps.setLong(1, banLog.banAt());
+            ps.setLong(2, banLog.unbanAt());
+            ps.setString(3, banLog.peerIp());
+            ps.setInt(4, banLog.peerPort());
+            ps.setString(5, banLog.peerId());
+            ps.setString(6, banLog.peerClientName());
+            ps.setLong(7, banLog.peerDownloaded());
+            ps.setLong(8, banLog.peerUploaded());
+            ps.setDouble(9, banLog.peerProgress());
+            ps.setString(10, banLog.torrentInfoHash());
+            ps.setString(11, banLog.torrentName());
+            ps.setLong(12, banLog.torrentSize());
+            ps.setString(13, banLog.module());
+            ps.setString(14, banLog.description());
             return ps.executeUpdate();
         }
     }
@@ -170,7 +174,6 @@ public class DatabaseHelper {
                                           "id",
                                           "ban_at",
                                           "peer_ip",
-                                          "torrent_name",
                                           "torrent_infohash",
                                           "module"
                                         );

@@ -15,6 +15,7 @@ public class BanMetadata implements Comparable<BanMetadata> {
     private TorrentWrapper torrent;
     private PeerWrapper peer;
     private String description;
+    private String reverseLookup = "N/A";
 
     public BanMetadata(String context, long banAt, long unbanAt, Torrent torrent, Peer peer, String description) {
         this.randomId = UUID.randomUUID();

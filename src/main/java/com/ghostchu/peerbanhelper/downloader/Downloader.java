@@ -13,6 +13,8 @@ public interface Downloader extends AutoCloseable {
 
     String getName();
 
+    String getDownloaderName();
+
     /**
      * 登录到此下载器
      * @return 登陆是否成功

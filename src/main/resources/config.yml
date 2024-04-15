@@ -64,5 +64,59 @@ threads:
   downloader-api-parallelism: 8
 # 数据持久化
 persist:
-  # 封禁日志保留天数
+  # 封禁日志保留天数（开发中）
   ban-logs-keep-days: 30
+# BitTorrent Threat Network 威胁防护网络（测试版）
+btn:
+  # 启用 BTN 模块
+  # 启用后，才可以使用由 BTN 提供的云规则功能
+  enabled: false
+  # 启用数据提交（匿名）
+  # BTN 网络基于所有启用此功能的用户提交的数据，对 Peers 进行可信度验证
+  # 通过启用此选项，您也会加入 BTN 网络并提交您的 Torrent 上的活动
+  # 以下信息将被发送到 BTN 实例；
+  # 您的 Torrent 列表（包括：Torrent 种子摘要的二次不可逆哈希和 Torrent 大小）
+  # 连接到您的 Torrent 的所有 Peers （包括：IP地址、端口号、PeerID、UserAgent（ClientName），Peer协议，Peer总下载量，Peer总上传量，Peer瞬时上传速度，Peer瞬时下载速度，Peer下载进度，以及您的下载器名称）
+  submit: true
+  # 部分 BTN 实例可能要求您登录验证以确认您的身份或下发不同的配置文件。如果是这样的话，您需要在下面输入凭据信息
+  # 如果 BTN 实例未要求您登录验证，则通常不需要填写
+  app-id: "example-app-id"
+  app-secret: "example-app-secret"
+  # 填写实例 URL，您需要自行寻找一个 BTN 实例服务器
+  config-url: "http://127.0.0.1:9988/ping/config"
+# 封禁列表处理
+# PBH 能够除了调用 BT 客户端的封禁 API 外，还能够进行如下操作，以便适配更多其它客户端
+banlist-invoker:
+  # 生成 ipfilter.dat 文件
+  ipfilter-dat:
+    enabled: false
+  # 执行指定的系统命令
+  # 所有的可用占位符都会被注册到执行的命令的进程环境变量中
+  #如果您的命令没有读取环境变量的能力，则也可以使用 {%占位符名%}，这样 PBH 会在执行前替换命令中的占位符，但请注意转义问题
+  # 可用占位符列表：
+  #peer.ip - 对等体 IP 地址
+  #peer.port - 对等体端口
+  #meta.context - 封禁模块上下文
+  #meta.description - 封禁描述
+  #meta.banAt - 封禁时间
+  #meta.unbanAt - 解封时间
+  #meta.peer.id - PeerID
+  #meta.peer.clientName - UserAgent 客户端名称字符串
+  #meta.peer.uploaded - 总上传量
+  #meta.peer.downloaded - 总下载量
+  #meta.peer.progress - 客户端进度
+  #meta.torrent.id - Torrent ID
+  #meta.torrent.name - Torrent 名称
+  #meta.torrent.hash - Torrent 的 Info Hash
+  #meta.torrent.size - Torrent 大小
+  command-exec:
+    enabled: false
+    reset:
+      - "/bin/sh -c 'ipset destroy peerbanhelper-blocklist'"
+      - "/bin/sh -c 'ipset create peerbanhelper-blocklist hash:ip'"
+      - "/bin/sh -c 'iptables -I INPUT -m set --match-set peerbanhelper-blocklist src -j DROP'"
+      - "/bin/sh -c 'iptables -A OUTPUT -m set --match-set peerbanhelper-blocklist dst -j DROP'"
+    ban:
+      - "/bin/sh -c 'ipset add peerbanhelper-blocklist ${peer.ip}'"
+    unban:
+      - "/bin/sh -c 'ipset remove peerbanhelper-blocklist ${peer.ip}'"

@@ -1,16 +1,18 @@
 package com.ghostchu.peerbanhelper.torrent;
 
 public class TorrentImpl implements Torrent {
+    private final double progress;
     private String hash;
     private String id;
     private String name;
     private long size;
 
-    public TorrentImpl(String id, String name, String hash, long size) {
+    public TorrentImpl(String id, String name, String hash, long size,double progress) {
         this.id = id;
         this.name = name;
         this.hash = hash;
         this.size = size;
+        this.progress = progress;
     }
 
     @Override
@@ -26,6 +28,11 @@ public class TorrentImpl implements Torrent {
     @Override
     public String getHash() {
         return hash;
+    }
+
+    @Override
+    public double getProgress() {
+        return progress;
     }
 
     @Override
