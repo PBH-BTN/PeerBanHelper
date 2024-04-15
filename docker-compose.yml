@@ -1,15 +1,15 @@
 version: "3.9"
 services:
   peerbanhelper:
-    image: "ghostchu/peerbanhelper:latest-native-linux"
+    image: "ghostchu/peerbanhelper:latest-native-linux" # latest-native-linux 请替换为 releases 中的最新版本号
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
       - ./:/app/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     ports:
       - "9898:9898"
     environment:
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
 # 取消注释以使用 Native Image 本地二进制文件，占用资源更少，但可能有 BUG
 #      USE_NATIVE_IMAGE: 1

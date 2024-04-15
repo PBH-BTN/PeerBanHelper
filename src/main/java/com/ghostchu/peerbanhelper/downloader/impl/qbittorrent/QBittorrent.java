@@ -140,6 +140,11 @@ public class QBittorrent implements Downloader {
         try {
             resp = httpClient.send(MutableRequest.GET(endpoint+"/sync/torrentPeers?hash=" + torrent.getId()),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+
+            String r = httpClient.send(MutableRequest.GET(endpoint+"/torrents/properties?hash=" + torrent.getId()),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)).body();
+            System.out.println(r);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
