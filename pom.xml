@@ -17,6 +17,7 @@
         <native.maven.plugin.version>0.10.1</native.maven.plugin.version>
         <imageName>peerbanhelper-binary</imageName>
         <mainClass>com.ghostchu.peerbanhelper.Main</mainClass>
+        <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
     </properties>
     <build>
         <pluginManagement>
@@ -185,6 +186,28 @@
 
     <profiles>
         <profile>
+            <id>local-snapshot</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <finalName>${name}-SNAPSHOT-${maven.build.timestamp}-${git.commit.id.abbrev}</finalName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>native-unix-like</id>
             <properties>
                 <is-native-image>true</is-native-image>
@@ -220,7 +243,7 @@
                                 <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
-<!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
+                                <!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
                                 <buildArg>--enable-url-protocols=http,https</buildArg>
@@ -229,11 +252,15 @@
                                 <buildArg>-H:EnableURLProtocols=https</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                                 <buildArg>-march=compatibility</buildArg>
-                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image</buildArg>
+                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image
+                                </buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider
+                                </buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider
+                                </buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory
+                                </buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.ConsoleHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.FileHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=org.sqlite.util.ProcessRunner</buildArg>
@@ -282,7 +309,7 @@
                                 <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
-<!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
+                                <!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
                                 <buildArg>--enable-url-protocols=http,https</buildArg>
@@ -291,11 +318,15 @@
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                                 <buildArg>--gc=serial</buildArg>
                                 <buildArg>-march=compatibility</buildArg>
-                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image</buildArg>
+                                <buildArg>-H:ConfigurationFileDirectories=./src/main/resources/META-INF/native-image
+                                </buildArg>
                                 <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOPLoggerFactory</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider</buildArg>
-                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory</buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.NOP_FallbackServiceProvider
+                                </buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteServiceProvider
+                                </buildArg>
+                                <buildArg>--initialize-at-build-time=org.slf4j.helpers.SubstituteLoggerFactory
+                                </buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.ConsoleHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=java.util.logging.FileHandler</buildArg>
                                 <buildArg>--initialize-at-build-time=org.sqlite.util.ProcessRunner</buildArg>
