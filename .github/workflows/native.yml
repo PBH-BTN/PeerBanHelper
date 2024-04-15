@@ -10,7 +10,7 @@ name: GraalVM Native Image
 
 on:
   push:
-    branches: [ "master", "test" ]
+    branches: [ "master" ]
   workflow_dispatch:
   release:
     types:
