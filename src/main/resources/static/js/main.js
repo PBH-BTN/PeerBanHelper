@@ -101,7 +101,7 @@ function updateBanListView(node) {
             });
             node.innerHTML = "";
             const summary = document.createElement('p');
-            summary.innerHTML = `当前共有 ${count} 个 Peer 处于封禁状态。`
+            summary.innerHTML = `当前共有 ${count} 个 Peer 处于封禁状态。以下是封禁列表（按时间倒序排列）`
             node.appendChild(summary);
             node.appendChild(ul);
         })
