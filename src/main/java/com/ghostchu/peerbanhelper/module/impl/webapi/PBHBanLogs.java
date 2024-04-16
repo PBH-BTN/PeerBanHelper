@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
 import fi.iki.elonen.NanoHTTPD;
@@ -44,10 +45,10 @@ public class PBHBanLogs extends AbstractFeatureModule implements PBHAPI {
         int pageIndex = Integer.parseInt(session.getParameters().getOrDefault("pageIndex", List.of("0")).get(0));
         int pageSize = Integer.parseInt(session.getParameters().getOrDefault("pageSize", List.of("100")).get(0));
         try {
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(db.queryBanLogs(null, null, pageIndex, pageSize)));
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(db.queryBanLogs(null, null, pageIndex, pageSize))));
         } catch (SQLException e) {
             log.error(Lang.WEB_BANLOGS_INTERNAL_ERROR, e);
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", "Internal server error, please check the console");
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", "Internal server error, please check the console"));
         }
     }
 

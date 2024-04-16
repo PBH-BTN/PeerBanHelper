@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -40,7 +41,7 @@ public class DownloaderCIDRBlockList extends AbstractFeatureModule implements PB
         for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
             builder.append(new IPAddressString(pair.getKey().getIp()).getAddress().assignPrefixForSingleBlock().toString()).append("\n");
         }
-        return NanoHTTPD.newFixedLengthResponse(builder.toString());
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(builder.toString()));
     }
 
     @Override
