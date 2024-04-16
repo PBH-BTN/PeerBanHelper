@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,9 +99,10 @@ public class DatabaseHelper {
         try (Connection connection = manager.getConnection()) {
             @Cleanup
             PreparedStatement ps = connection.prepareStatement("SELECT peer_ip, COUNT(*) AS count " +
-                    "FROM ban_logs " +
+                    "FROM ban_logs WHERE ban_at >= ?" +
                     "GROUP BY peer_ip " +
                     "ORDER BY count DESC LIMIT " + n);
+            ps.setTimestamp(1, new Timestamp(Instant.now().minus(14, ChronoUnit.DAYS).toEpochMilli()));
             @Cleanup
             ResultSet set = ps.executeQuery();
             Map<String, Long> map = new LinkedHashMap<>();
