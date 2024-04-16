@@ -1,6 +1,5 @@
 FROM debian:12-slim
 LABEL MAINTAINER="https://github.com/Ghost-chu/PeerBanHelper"
-RUN mkdir /app
 WORKDIR /app
 COPY ./docker-entrypoint-native.sh /app/docker-entrypoint.sh
 COPY ./target/peerbanhelper-binary /app/
