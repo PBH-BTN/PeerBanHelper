@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
 import fi.iki.elonen.NanoHTTPD;
@@ -16,7 +17,9 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
@@ -41,13 +44,19 @@ public class PBHBanLogs extends AbstractFeatureModule implements PBHAPI {
         if (getServer().getMetrics() instanceof PersistMetrics persistMetrics) {
             persistMetrics.flush();
         }
+
         int pageIndex = Integer.parseInt(session.getParameters().getOrDefault("pageIndex", List.of("0")).get(0));
         int pageSize = Integer.parseInt(session.getParameters().getOrDefault("pageSize", List.of("100")).get(0));
         try {
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(db.queryBanLogs(null, null, pageIndex, pageSize)));
+            Map<String, Object> map = new HashMap<>();
+            map.put("pageIndex", pageIndex);
+            map.put("pageSize", pageSize);
+            map.put("results", db.queryBanLogs(null, null, pageIndex, pageSize));
+            map.put("total", db.queryBanLogsCount(null,null));
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(map)));
         } catch (SQLException e) {
             log.error(Lang.WEB_BANLOGS_INTERNAL_ERROR, e);
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", "Internal server error, please check the console");
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", "Internal server error, please check the console"));
         }
     }
 

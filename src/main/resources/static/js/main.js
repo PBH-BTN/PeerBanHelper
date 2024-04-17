@@ -167,7 +167,7 @@ function updateBanLogsView(node, page) {
         .then(json => {
             const thead = ['封禁于', 'IP地址', 'Peer ID', 'Peer UA', '↑', '↓', '%', '大小', '描述'];
             const content = [];
-            json.forEach(ban => {
+            json.results.forEach(ban => {
                 const dat = [];
                 dat.push(stdTime(new Date(ban.banAt))); // Convert timestamp to human-readable format
                 dat.push(ban.peerIp); // Updated to match the JSON response

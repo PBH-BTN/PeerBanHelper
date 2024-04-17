@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
 import fi.iki.elonen.NanoHTTPD;
@@ -50,7 +51,7 @@ public class PBHClientStatus extends AbstractFeatureModule implements PBHAPI {
             }
             list.add(map);
         }
-        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(list));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(list)));
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -44,7 +45,7 @@ public class PBHMetrics extends AbstractFeatureModule implements PBHAPI {
         map.put("checkCounter", metrics.getCheckCounter());
         map.put("peerBanCounter", metrics.getPeerBanCounter());
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
-        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(map));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(map)));
     }
 
     @Override
