@@ -1,7 +1,5 @@
 package com.ghostchu.peerbanhelper.util;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,9 +21,9 @@ public class URLUtil {
         String paramStr = param.toString();
         paramStr = paramStr.substring(0, paramStr.length() - 1);
         if (newUrl.contains("?")) {
-            newUrl += "&" + URLEncoder.encode(paramStr, StandardCharsets.UTF_8);
+            newUrl += "&" +paramStr;
         } else {
-            newUrl += "?" + URLEncoder.encode(paramStr, StandardCharsets.UTF_8);
+            newUrl += "?" + paramStr;
         }
         return newUrl;
     }

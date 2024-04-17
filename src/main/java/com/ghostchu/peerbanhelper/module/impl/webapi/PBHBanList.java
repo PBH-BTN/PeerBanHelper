@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -49,7 +50,7 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
                 })
                 .toList();
         String JSON = JsonUtil.prettyPrinting().toJson(banResponseList);
-        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JSON);
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JSON));
     }
 
     @Override

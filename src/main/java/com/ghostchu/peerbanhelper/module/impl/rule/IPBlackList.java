@@ -63,7 +63,7 @@ public class IPBlackList extends AbstractFeatureModule {
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         PeerAddress peerAddress = peer.getAddress();
         if (ports.contains(peerAddress.getPort())) {
-            return new BanResult(this, PeerAction.BAN, "Restricted ports");
+            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
         }
         IPAddress pa = new IPAddressString(peerAddress.getIp()).getAddress();
         if (pa == null) {
