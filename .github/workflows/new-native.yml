@@ -85,9 +85,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup muslc
         run: |
-          apt-get update
-          apt-get upgrade
-          apt-get install gcc build-essential autoconf libtool make
+          sudo apt-get update
+          sudo apt-get upgrade
+          sudo apt-get install gcc build-essential autoconf libtool make
           current_path=$(pwd)
           wget -q https://more.musl.cc/10/x86_64-linux-musl/x86_64-linux-musl-native.tgz
           tar xf x86_64-linux-musl-native.tgz --directory /tmp
