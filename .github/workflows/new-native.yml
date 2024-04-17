@@ -88,8 +88,8 @@ jobs:
           current_path=$(pwd)
           wget -q https://more.musl.cc/10/x86_64-linux-musl/x86_64-linux-musl-native.tgz
           tar xf x86_64-linux-musl-native.tgz --directory /tmp
-          TOOLCHAIN_DIR=/tmp/x86_64-linux-musl-native
-          CC=$TOOLCHAIN_DIR/bin/gcc
+          export TOOLCHAIN_DIR=/tmp/x86_64-linux-musl-native
+          export CC=$TOOLCHAIN_DIR/bin/gcc
           wget -q https://zlib.net/zlib-1.3.1.tar.gz
           tar xf zlib-1.3.1.tar.gz --directory /tmp
           cd /tmp/zlib-1.3.1
@@ -97,7 +97,7 @@ jobs:
           make
           make install
           cd $current_path
-          PATH=$PATH:$TOOLCHAIN_DIR/bin
+          export PATH=$PATH:$TOOLCHAIN_DIR/bin
       - name: Build with Maven
         run: mvn -B -ntp clean package -Pnative-unix-like-muslc
         env:
