@@ -155,8 +155,16 @@ public class DatabaseHelper {
             ps.setLong(2, banLog.unbanAt());
             ps.setString(3, banLog.peerIp());
             ps.setInt(4, banLog.peerPort());
-            ps.setString(5, banLog.peerId());
-            ps.setString(6, banLog.peerClientName());
+            String peerId = banLog.peerId();
+            if(banLog.peerId() == null || banLog.peerId().isBlank()){
+                peerId = "N/A (bad client?)";
+            }
+            ps.setString(5, peerId);
+            String clientName = banLog.peerClientName();
+            if(banLog.peerClientName() == null || banLog.peerClientName().isBlank()){
+                clientName = "N/A (bad client?)";
+            }
+            ps.setString(6, clientName);
             ps.setLong(7, banLog.peerDownloaded());
             ps.setLong(8, banLog.peerUploaded());
             ps.setDouble(9, banLog.peerProgress());

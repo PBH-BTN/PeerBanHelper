@@ -47,6 +47,8 @@ public class RuleParseHelper {
             case "length" -> origin.length() == Integer.parseInt(ruleBody);
             case "equals" -> origin.equals(ruleBody);
             case "regex" -> origin.matches(ruleBody);
+            case "isEmpty" -> origin.isEmpty();
+            case "isBlank" -> origin.isBlank();
             default -> false;
         };
         if (reserve) {
