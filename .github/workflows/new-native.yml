@@ -34,7 +34,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Linux-${{ github.sha }}
+          name: LinuxGCC-${{ github.sha }}
           path: |
             target/PeerBanHelper.jar
             target/peerbanhelper-binary
@@ -64,14 +64,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-native-linux
-      - name: Build and push Docker image (Alpine)
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: .
-          file: ./Dockerfile-NativeImage-alpine
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}-native-linux-alpine
+#      - name: Build and push Docker image (Alpine)
+#        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+#        with:
+#          context: .
+#          file: ./Dockerfile-NativeImage-alpine
+#          push: true
+#          tags: ${{ steps.meta.outputs.tags }}
+#          labels: ${{ steps.meta.outputs.labels }}-native-linux-alpine
   build-unix-like-muslc:
     name: build unix like (muslc)
     runs-on: ubuntu-latest
@@ -104,7 +104,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Linux-${{ github.sha }}-muslc
+          name: LinuxMuslc-${{ github.sha }}
           path: |
             target/PeerBanHelper.jar
             target/peerbanhelper-binary
