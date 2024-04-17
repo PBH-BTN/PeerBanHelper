@@ -58,8 +58,6 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}-native-linux
             type=semver,pattern={{major}}.{{minor}}-native-linux
-            type=semver,pattern={{version}}-native-linux-alpine
-            type=semver,pattern={{major}}.{{minor}}-native-linux-alpine
             type=raw,latest-native-linux
             type=sha
       - name: Build and push Docker image
