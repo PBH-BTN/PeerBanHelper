@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class ClientNameBlacklist extends AbstractFeatureModule {
-    private List<String> bannedClientNames;
+    private List<String> bannedPeers;
 
     public ClientNameBlacklist(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -52,14 +52,15 @@ public class ClientNameBlacklist extends AbstractFeatureModule {
     }
 
     private void reloadConfig() {
-        this.bannedClientNames = getConfig().getStringList("banned-client-name");
+        this.bannedPeers = getConfig().getStringList("banned-client-name");
     }
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        RuleParseHelper.MatchResult r = RuleParseHelper.matchMultiple(peer.getPeerId(), bannedClientNames);
-        if (r.result()) {
-            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, r.hitRule()));
+        for (String rule : bannedPeers) {
+            if (RuleParseHelper.match(peer.getClientName(), rule)) {
+                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, rule));
+            }
         }
         return new BanResult(this, PeerAction.NO_ACTION, "No matches");
     }
