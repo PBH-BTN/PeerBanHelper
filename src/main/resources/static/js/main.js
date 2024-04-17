@@ -206,7 +206,7 @@ function generateTable(theadList, content) {
         const tr = document.createElement("tr");
         bodyRow.forEach(cellData => {
             const td = document.createElement("td");
-            td.innerHTML = cellData;
+            td.innerText = cellData;
             tr.appendChild(td);
         });
         tbody.appendChild(tr);

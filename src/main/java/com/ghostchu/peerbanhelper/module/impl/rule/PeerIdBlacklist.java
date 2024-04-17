@@ -12,10 +12,11 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class PeerIdBlacklist extends AbstractFeatureModule {
-    private List<String> bannedPeers;
+    private List<String> bannedPeerId;
 
     public PeerIdBlacklist(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -52,16 +53,15 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
     }
 
     public void reloadConfig() {
-        this.bannedPeers = getConfig().getStringList("banned-peer-id");
+        this.bannedPeerId = getConfig().getStringList("banned-peer-id");
     }
 
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        for (String rule : bannedPeers) {
-            if (RuleParseHelper.match(peer.getPeerId(), rule)) {
-                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_PID_MATCH_PEER_ID, rule));
-            }
+        Map.Entry<Boolean, String> map = RuleParseHelper.matchMultiple(peer.getPeerId(),  bannedPeerId);
+        if (map.getKey()) {
+            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_PID_MATCH_PEER_ID, map.getValue()));
         }
         return new BanResult(this, PeerAction.NO_ACTION, "No matches");
     }
