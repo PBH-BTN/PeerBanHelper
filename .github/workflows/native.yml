@@ -68,6 +68,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-native-linux
+      - name: Build and push Docker image(Alpine)
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./Dockerfile-NativeImage-alpine
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}-native-linux-alpine
   build-windows:
     name: ${{ matrix.version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

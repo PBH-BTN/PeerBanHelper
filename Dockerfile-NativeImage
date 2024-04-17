@@ -1,12 +1,9 @@
-FROM eclipse-temurin:17.0.10_7-jre
+FROM debian:12-slim
 LABEL MAINTAINER="https://github.com/Ghost-chu/PeerBanHelper"
-ENV USE_NATIVE_IMAGE=0
-RUN mkdir /app
 WORKDIR /app
-COPY ./docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
-
-COPY ./target/PeerBanHelper.jar /app/
+COPY ./docker-entrypoint-native.sh /app/docker-entrypoint.sh
 COPY ./target/peerbanhelper-binary /app/
+
+RUN chmod +x /app/docker-entrypoint.sh && chmod +x /app/peerbanhelper-binary
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
