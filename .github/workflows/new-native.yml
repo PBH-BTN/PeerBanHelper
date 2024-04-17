@@ -83,7 +83,7 @@ jobs:
           distribution: 'graalvm-community'
           version: '23.0.2'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup muslc
+      - name: Setup muslc and Build with maven
         run: |
           current_path=$(pwd)
           wget -q https://more.musl.cc/10/x86_64-linux-musl/x86_64-linux-musl-native.tgz
@@ -98,8 +98,7 @@ jobs:
           make install
           cd $current_path
           export PATH=$PATH:$TOOLCHAIN_DIR/bin
-      - name: Build with Maven
-        run: mvn -B -ntp clean package -Pnative-unix-like-muslc
+          mvn -B -ntp clean package -Pnative-unix-like-muslc
         env:
           NO_DOCKER: ${{ runner.os != 'Linux' }}
       - name: Upload build artifacts
