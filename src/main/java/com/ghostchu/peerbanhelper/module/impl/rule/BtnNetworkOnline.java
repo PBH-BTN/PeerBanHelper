@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class BtnNetworkOnline extends AbstractFeatureModule {
@@ -110,9 +109,9 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
     private BanResult checkClientNameRule(BtnRule rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         for (String category : rule.getClientNameRules().keySet()) {
             List<String> rules = rule.getClientNameRules().get(category);
-            Map.Entry<Boolean,String> r = RuleParseHelper.matchMultiple(peer.getPeerId(), rules);
-            if(r.getKey()) {
-                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_BTN_BAN, "ClientName", category, r.getValue()));
+            RuleParseHelper.MatchResult r = RuleParseHelper.matchMultiple(peer.getPeerId(), rules);
+            if(r.result()) {
+                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_BTN_BAN, "ClientName", category, r.hitRule()));
             }
         }
         return null;
@@ -122,9 +121,9 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
     private BanResult checkPeerIdRule(BtnRule rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         for (String category : rule.getPeerIdRules().keySet()) {
             List<String> rules = rule.getPeerIdRules().get(category);
-            Map.Entry<Boolean,String> r = RuleParseHelper.matchMultiple(peer.getPeerId(), rules);
-            if(r.getKey()) {
-                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_BTN_BAN, "PeerId", category, r.getValue()));
+            RuleParseHelper.MatchResult r = RuleParseHelper.matchMultiple(peer.getPeerId(), rules);
+            if(r.result()) {
+                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_BTN_BAN, "PeerId", category, r.hitRule()));
             }
         }
         return null;

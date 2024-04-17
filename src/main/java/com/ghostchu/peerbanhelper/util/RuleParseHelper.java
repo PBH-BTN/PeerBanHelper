@@ -6,13 +6,12 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RuleParseHelper {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(RuleParseHelper.class);
 
-    public static Map.Entry<Boolean, String> matchMultiple(String origin, List<String> ruleString) {
+    public static MatchResult matchMultiple(String origin, List<String> ruleString) {
         boolean result = false;
         String hitRule = null;
         for (String rs : ruleString) {
@@ -22,7 +21,7 @@ public class RuleParseHelper {
                 hitRule = rs;
             }
         }
-        return Map.entry(result, hitRule);
+        return new MatchResult(result,hitRule);
     }
 
     @Nullable
@@ -55,10 +54,12 @@ public class RuleParseHelper {
             return new AtomicBoolean(!r);
         } else {
             if (r) {
-                return new AtomicBoolean(r);
+                return new AtomicBoolean(true);
             } else {
                 return null;
             }
         }
     }
+
+    public record MatchResult(boolean result, String hitRule){ }
 }

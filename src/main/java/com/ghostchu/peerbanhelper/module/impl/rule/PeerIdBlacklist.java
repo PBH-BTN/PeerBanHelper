@@ -12,7 +12,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class PeerIdBlacklist extends AbstractFeatureModule {
@@ -59,9 +58,9 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        Map.Entry<Boolean, String> map = RuleParseHelper.matchMultiple(peer.getPeerId(),  bannedPeerId);
-        if (map.getKey()) {
-            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_PID_MATCH_PEER_ID, map.getValue()));
+        RuleParseHelper.MatchResult map = RuleParseHelper.matchMultiple(peer.getPeerId(),  bannedPeerId);
+        if (map.result()) {
+            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_PID_MATCH_PEER_ID, map.hitRule()));
         }
         return new BanResult(this, PeerAction.NO_ACTION, "No matches");
     }
