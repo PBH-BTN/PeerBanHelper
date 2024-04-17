@@ -16,6 +16,9 @@ module:
     # equals - 完全匹配
     # regex - 正则匹配
     # length - 长度匹配，规则内容填写整数形式的长度
+    # 如果要取反，请在最前面添加 !
+    # 如：!<匹配方式>@<规则内容>
+    # 规则从上到下执行
     banned-peer-id:
       - "startsWith@-XL" # Xunlei 万恶之源
       - "startsWith@-SD"
