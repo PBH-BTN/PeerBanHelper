@@ -19,7 +19,7 @@ public class BuildMeta {
     public void loadBuildMeta(YamlConfiguration configuration) {
         this.version = configuration.getString("maven.version");
         this.branch = configuration.getString("git.branch");
-        this.commit = configuration.getString("git.commit.id.commit");
+        this.commit = configuration.getString("git.commit.id.commit-id");
         this.abbrev = configuration.getString("git.commit.id.abbrev");
         this.nativeImage = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
         this.os = System.getProperty("os.name");
