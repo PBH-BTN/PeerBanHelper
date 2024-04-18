@@ -268,6 +268,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new PBHClientStatus(this, profile));
         moduleManager.register(new PBHMaxBans(this, profile, databaseHelper));
         moduleManager.register(new PBHMetrics(this, profile));
+        moduleManager.register(new PBHMetadata(this, profile));
     }
 
 

@@ -24,5 +24,3 @@ git:
     time: "${git.build.time}"
     host: "${git.build.host}"
     version: "${git.build.version}"
-env:
-  native-image: "${is-native-image}"
