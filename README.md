@@ -329,7 +329,8 @@ PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f0428971-5724-4e84-b34c-52c3ae0d1629)
 
-新建一个文件夹，下载 PeerBanHelper 的最新版本 JAR 问卷，并放入你新创建的文件夹中。  
+新建一个文件夹，下载 PeerBanHelper 的最新版本 JAR 文件，并放入你新创建的文件夹中。(从 Release 中，任选一个系统版本，压缩包内包含通用
+JAR 文件)
 
 新建一个 `start.bat` 批处理文件，使用记事本打开，并复制下面的内容保存：
 
