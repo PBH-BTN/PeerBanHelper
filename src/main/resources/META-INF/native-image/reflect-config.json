@@ -393,6 +393,18 @@
   "methods":[{"name":"getName","parameterTypes":[] }, {"name":"getType","parameterTypes":[] }]
 },
 {
+  "name": "java.net.ConnectException",
+  "queryAllPublicConstructors": true,
+  "methods": [
+    {
+      "name": "<init>",
+      "parameterTypes": [
+        "java.lang.String"
+      ]
+    }
+  ]
+},
+  {
   "name":"java.security.AlgorithmParametersSpi"
 },
 {
