@@ -12,6 +12,16 @@
   "name":"[Ljava.sql.Statement;"
 },
 {
+  "name": "com.ghostchu.peerbanhelper.BuildMeta",
+  "allDeclaredFields": true,
+  "methods": [
+    {
+      "name": "<init>",
+      "parameterTypes": []
+    }
+  ]
+},
+  {
   "name":"com.ghostchu.peerbanhelper.btn.BtnConfig",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]

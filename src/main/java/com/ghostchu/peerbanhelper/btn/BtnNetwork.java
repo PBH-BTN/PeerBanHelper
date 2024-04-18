@@ -54,7 +54,6 @@ public class BtnNetwork {
         } else {
             version = rule.getVersion();
         }
-        System.out.println(URLUtil.appendUrl(btnManager.getBtnConfig().getAbilityRule().getEndpoint(), Map.of("rev", version)));
         HTTPUtil.retryableSend(
                         btnManager.getHttpClient(),
                         MutableRequest.GET(URLUtil.appendUrl(btnManager.getBtnConfig().getAbilityRule().getEndpoint(), Map.of("rev", version))),
