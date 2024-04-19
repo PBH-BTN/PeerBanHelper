@@ -35,7 +35,7 @@ public class PBHMetadata extends AbstractFeatureModule implements PBHAPI {
 
     @Override
     public boolean shouldHandle(String uri) {
-        return uri.equals("/api/metadata");
+        return uri.equals("/api/version");
     }
 
     @Override
