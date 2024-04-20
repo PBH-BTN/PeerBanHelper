@@ -1,5 +1,9 @@
 package com.ghostchu.peerbanhelper.torrent;
 
+import com.google.common.hash.Hashing;
+
+import java.nio.charset.StandardCharsets;
+
 public interface Torrent {
     /**
      * 获取该 Torrent 的唯一标识符
@@ -30,5 +34,15 @@ public interface Torrent {
      * @return 共计大小
      */
     long getSize();
+
+    /**
+     * 获取种子不可逆匿名识别符
+     *
+     * @return 不可逆匿名识别符
+     */
+    default String getHashedIdentifier() {
+        String salt = Hashing.crc32().hashString(getHash(), StandardCharsets.UTF_8).toString();
+        return Hashing.sha256().hashString(getHash() + salt, StandardCharsets.UTF_8).toString();
+    }
 
 }

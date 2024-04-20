@@ -90,4 +90,9 @@ public class Lang {
     public static String BANLIST_INVOKER_COMMAND_EXEC_TIMEOUT = "[BanListInvoker] 执行命令 {} 时超时，PBH 不再继续等待进程";
     public static String BANLIST_INVOKER_COMMAND_EXEC_FAILED = "[BanListInvoker] 执行命令 {} 时，进程返回非零状态码（{}），这可能意味着命令未被成功执行，请查看";
     public static String BAN_PEER_REVERSE_LOOKUP = "[DNS反向查找] IP 地址 {} 反向 DNS 记录为：{}";
+    public static String BTN_INCOMPATIBLE_SERVER = "[BTN 网络] 您所连接的 BTN 实例与当前 BTN 客户端不兼容";
+    public static String BTN_SUBMITTING_PEERS = "[BTN 网络] 计划任务正在向 BTN 网络提交目前下载的 Peers 列表，请稍等……";
+    public static String BTN_SUBMITTED_PEERS = "[BTN 网络] 已向 BTN 网络提交 {} 个 Peers，感谢您对 BTN 网络的支持！";
+    public static String BTN_SUBMITTING_BANS = "[BTN 网络] 计划任务正在向 BTN 网络提交自上次汇报以来新增的封禁条目，请稍等……";
+    public static String BTN_SUBMITTED_BANS = "[BTN 网络] 已向 BTN 网络提交 {} 个封禁记录，感谢您对 BTN 网络的支持！";
 }

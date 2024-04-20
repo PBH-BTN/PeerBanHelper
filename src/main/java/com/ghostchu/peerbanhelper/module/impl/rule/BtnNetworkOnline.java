@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.btn.BtnManager;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRule;
+import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityRules;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -65,12 +65,15 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        BtnManager manager = getServer().getBtnManager();
+        BtnNetwork manager = getServer().getBtnNetwork();
         if(manager == null){
             return new BanResult(this, PeerAction.NO_ACTION, "BtnManager not initialized");
         }
-        BtnNetwork network = manager.getNetwork();
-        BtnRule rule = network.getRule();
+        BtnAbilityRules ruleAbility = (BtnAbilityRules) manager.getAbilities().get(BtnAbilityRules.class);
+        if (ruleAbility == null) {
+            return new BanResult(this, PeerAction.NO_ACTION, "BtnRulesAbility not get ready yet");
+        }
+        BtnRule rule = ruleAbility.getBtnRule();
         if (rule == null) {
             return new BanResult(this, PeerAction.NO_ACTION, "BtnRules not get ready yet");
         }

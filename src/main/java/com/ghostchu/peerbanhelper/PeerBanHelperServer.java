@@ -1,10 +1,12 @@
 package com.ghostchu.peerbanhelper;
 
-import com.ghostchu.peerbanhelper.btn.BtnManager;
+import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.event.PeerBanEvent;
+import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
@@ -23,6 +25,7 @@ import com.ghostchu.peerbanhelper.web.WebManager;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.eventbus.EventBus;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -54,7 +57,7 @@ public class PeerBanHelperServer {
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
     @Getter
-    private final BtnManager btnManager;
+    private final BtnNetwork btnNetwork;
     @Getter
     private WebManager webManagerServer;
     private final ExecutorService generalExecutor;
@@ -69,6 +72,8 @@ public class PeerBanHelperServer {
     private ModuleManager moduleManager;
     @Getter
     private List<BanListInvoker> banListInvoker = new ArrayList<>();
+    @Getter
+    private EventBus eventBus = new EventBus();
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
@@ -83,16 +88,16 @@ public class PeerBanHelperServer {
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
         registerHttpServer();
         this.moduleManager = new ModuleManager();
-        BtnManager btnm;
+        BtnNetwork btnm;
         try {
             log.info(Lang.BTN_NETWORK_CONNECTING);
-            btnm = new BtnManager(this, mainConfig.getConfigurationSection("btn"));
+            btnm = new BtnNetwork(this, mainConfig.getConfigurationSection("btn"));
             log.info(Lang.BTN_NETWORK_ENABLED);
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             btnm = null;
             log.info(Lang.BTN_NETWORK_NOT_ENABLED);
         }
-        this.btnManager = btnm;
+        this.btnNetwork = btnm;
         try {
             prepareDatabase();
         } catch (Exception e) {
@@ -189,8 +194,9 @@ public class PeerBanHelperServer {
     /**
      * 如果需要，则更新下载器的封禁列表
      * 对于 Transmission 等下载器来说，传递 needToRelaunch 会重启对应 Torrent
-     * @param downloader 要操作的下载器
-     * @param updateBanList 是否需要从 BAN_LIST 常量更新封禁列表到下载器
+     *
+     * @param downloader     要操作的下载器
+     * @param updateBanList  是否需要从 BAN_LIST 常量更新封禁列表到下载器
      * @param needToRelaunch 传递一个集合，包含需要重启的种子；并非每个下载器都遵守此行为；对于 qbittorrent 等 banlist 可被实时应用的下载器来说，不会重启 Torrent
      */
     public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch) {
@@ -211,6 +217,7 @@ public class PeerBanHelperServer {
 
     /**
      * 准备下载器并启动检查任务
+     *
      * @param downloader 要登录和检查的下载器实例
      * @return 异步任务，返回 (1) 是否需要更新 Banlist (2) 受到影响的 Torrent 列表
      */
@@ -233,6 +240,7 @@ public class PeerBanHelperServer {
 
     /**
      * 移除过期的封禁
+     *
      * @return 当封禁条目过期时，移除它们（解封禁）
      */
     public boolean removeExpiredBans() {
@@ -274,6 +282,7 @@ public class PeerBanHelperServer {
 
     /**
      * 检查并封禁指定下载器上的对等体
+     *
      * @param downloader 要检查的下载器实例
      * @return 是否需要更新 Banlist，以及一个包含受到影响的 Torrent 的集合
      */
@@ -301,7 +310,7 @@ public class PeerBanHelperServer {
                     if (banResult.action() == PeerAction.BAN) {
                         needUpdate.set(true);
                         needRelaunched.add(key);
-                        banPeer(peer.getAddress(), new BanMetadata(banResult.moduleContext().getClass().getName(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.reason()));
+                        banPeer(peer.getAddress(), new BanMetadata(banResult.moduleContext().getClass().getName(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.reason()), key, peer);
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }
                 }, generalExecutor));
@@ -329,8 +338,9 @@ public class PeerBanHelperServer {
 
     /**
      * 检查一个在给定 Torrent 上的对等体是否需要被封禁
+     *
      * @param torrent Torrent
-     * @param peer 对等体
+     * @param peer    对等体
      * @return 封禁规则检查结果
      */
     @NotNull
@@ -340,8 +350,8 @@ public class PeerBanHelperServer {
         List<BanResult> results = new CopyOnWriteArrayList<>();
         for (FeatureModule registeredModule : moduleManager.getModules()) {
             moduleExecutorFutures.add(CompletableFuture.runAsync(() -> {
-                if(registeredModule.needCheckHandshake() && isHandshaking(peer)){
-                   return; // 如果模块需要握手检查且peer正在握手 则跳过检查
+                if (registeredModule.needCheckHandshake() && isHandshaking(peer)) {
+                    return; // 如果模块需要握手检查且peer正在握手 则跳过检查
                 }
                 BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
                 results.add(banResult);
@@ -376,6 +386,7 @@ public class PeerBanHelperServer {
 
     /**
      * 获取目前所有被封禁的对等体的集合的拷贝
+     *
      * @return 不可修改的集合拷贝
      */
     @NotNull
@@ -385,29 +396,32 @@ public class PeerBanHelperServer {
 
     /**
      * 以指定元数据封禁一个特定的对等体
-     * @param peer 对等体 IP 地址
+     *
+     * @param peer        对等体 IP 地址
      * @param banMetadata 封禁元数据
      */
-    public void banPeer(@NotNull PeerAddress peer, @NotNull BanMetadata banMetadata) {
+    public void banPeer(@NotNull PeerAddress peer, @NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peerObj) {
         BAN_LIST.put(peer, banMetadata);
         metrics.recordPeerBan(peer, banMetadata);
-        banListInvoker.forEach(i->i.add(peer,banMetadata));
-        CompletableFuture.runAsync(()->{
+        banListInvoker.forEach(i -> i.add(peer, banMetadata));
+        CompletableFuture.runAsync(() -> {
             try {
-               InetAddress address = InetAddress.getByName(peer.getAddress().toString());
-               if(!address.getCanonicalHostName().equals(peer.getIp())){
-                   banMetadata.setReverseLookup(address.getCanonicalHostName());
-               }else{
-                   banMetadata.setReverseLookup("N/A");
-               }
+                InetAddress address = InetAddress.getByName(peer.getAddress().toString());
+                if (!address.getCanonicalHostName().equals(peer.getIp())) {
+                    banMetadata.setReverseLookup(address.getCanonicalHostName());
+                } else {
+                    banMetadata.setReverseLookup("N/A");
+                }
             } catch (UnknownHostException ignored) {
                 banMetadata.setReverseLookup("N/A");
             }
         }, generalExecutor);
+        eventBus.post(new PeerBanEvent(peer, banMetadata, torrentObj, peerObj));
     }
 
     /**
      * 解除一个指定对等体
+     *
      * @param address 对等体 IP 地址
      * @return 此对等体的封禁元数据；返回 null 代表此对等体没有被封禁
      */
@@ -416,8 +430,9 @@ public class PeerBanHelperServer {
         BanMetadata metadata = BAN_LIST.remove(address);
         if (metadata != null) {
             metrics.recordPeerUnban(address, metadata);
-            banListInvoker.forEach(i->i.add(address,metadata));
+            banListInvoker.forEach(i -> i.add(address, metadata));
         }
+        eventBus.post(new PeerUnbanEvent(address, metadata));
         return metadata;
     }
 

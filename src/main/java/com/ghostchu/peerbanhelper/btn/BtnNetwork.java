@@ -1,175 +1,124 @@
 package com.ghostchu.peerbanhelper.btn;
 
-import com.ghostchu.peerbanhelper.btn.ping.*;
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
+import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityRules;
+import com.ghostchu.peerbanhelper.btn.ability.BtnAbilitySubmitBans;
+import com.ghostchu.peerbanhelper.btn.ability.BtnAbilitySubmitPeers;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
-import com.ghostchu.peerbanhelper.util.URLUtil;
+import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
-import com.google.common.collect.Lists;
-import com.google.common.hash.Hashing;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
+import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
 import java.io.IOException;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 public class BtnNetwork {
-    private final BtnManager btnManager;
+    private static final int BTN_PROTOCOL_VERSION = 2;
+    @Getter
+    private final PeerBanHelperServer server;
+    private final String configUrl;
+    private final boolean submit;
     private final String appId;
     private final String appSecret;
-    private final boolean submit;
-    @Setter
     @Getter
-    private BtnRule rule;
+    private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
+    @Getter
+    private ScheduledExecutorService executeService = Executors.newScheduledThreadPool(2);
+    @Getter
+    private Methanol httpClient;
 
-    private long lastRecordedBans =0;
-
-    public BtnNetwork(BtnManager btnManager, String appId, String appSecret, boolean submit) {
-        this.btnManager = btnManager;
-        this.appId = appId;
-        this.appSecret = appSecret;
-        this.submit = submit;
+    @SneakyThrows(IOException.class)
+    public BtnNetwork(PeerBanHelperServer server, ConfigurationSection section) {
+        this.server = server;
+        if (!section.getBoolean("enabled")) {
+            throw new IllegalStateException("BTN has been disabled");
+        }
+        this.configUrl = section.getString("config-url");
+        this.submit = section.getBoolean("submit");
+        this.appId = section.getString("app-id");
+        this.appSecret = section.getString("app-secret");
+        setupHttpClient();
+        configBtnNetwork();
     }
 
-    public void updateRule() {
-        if (!btnManager.getBtnConfig().getAbility().contains("rule")) {
-            return;
-        }
-        String version;
-        if (rule == null || rule.getVersion() == null) {
-            version = "0";
-        } else {
-            version = rule.getVersion();
-        }
-        HTTPUtil.retryableSend(
-                        btnManager.getHttpClient(),
-                        MutableRequest.GET(URLUtil.appendUrl(btnManager.getBtnConfig().getAbilityRule().getEndpoint(), Map.of("rev", version))),
-                        HttpResponse.BodyHandlers.ofString())
-                .thenAccept(r -> {
-                    if (r.statusCode() == 204) {
-                        return;
-                    }
-                    if (r.statusCode() != 200) {
-                        log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
-                    } else {
-                        this.rule = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
-                        try {
-                            Files.writeString(btnManager.getBtnCacheFile().toPath(), r.body(), StandardCharsets.UTF_8);
-                        } catch (IOException ignored) {
-                        }
-                        log.info(Lang.BTN_UPDATE_RULES_SUCCESSES, this.rule.getVersion());
-                    }
-                })
-                .exceptionally((e) -> {
-                    log.warn(Lang.BTN_REQUEST_FAILS, e);
-                    return null;
-                });
-
-    }
-
-    public void submit() {
-        if (!submit) {
-            return;
-        }
-        if (!btnManager.getBtnConfig().getAbility().contains("submit")) {
-            return;
-        }
-        List<ClientPing> pings = generatePings();
-        List<List<ClientPing>> batch = Lists.partition(pings, btnManager.getBtnConfig().getAbilitySubmit().getPerBatchSize());
-        log.info(Lang.BTN_PREPARE_TO_SUBMIT, pings.stream().mapToLong(p -> p.getPeers().size()).sum(), batch.size());
-        for (int i = 0; i < batch.size(); i++) {
-            List<ClientPing> clientPing = batch.get(i);
-            submitPings(clientPing, i, batch.size());
-        }
-    }
-
-
-    private void submitPings(List<ClientPing> clientPings, int batchIndex, int batchSize) {
-        clientPings.forEach(ping -> {
-            ping.setBatchIndex(batchIndex);
-            ping.setBatchSize(batchSize);
-            MutableRequest request = MutableRequest.POST(btnManager.getBtnConfig().getAbilitySubmit().getEndpoint()
-                    , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
-            ).header("Content-Encoding", "gzip");
-            HTTPUtil.retryableSend(btnManager.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
-                    .thenAccept(r->{
-                        if (r.statusCode() != 200) {
-                            log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
-                        }
-                    })
-                    .exceptionally(e -> {
-                        log.warn(Lang.BTN_REQUEST_FAILS, e);
-                        return null;
-                    });
-            try {
-                Thread.sleep(btnManager.getBtnConfig().getAbilitySubmit().getBatchPeriod());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+    private void configBtnNetwork() {
+        abilities.values().forEach(BtnAbility::unload);
+        abilities.clear();
+        try {
+            HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
+            if (resp.statusCode() != 200) {
+                log.warn(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body());
+                return;
             }
-        });
-    }
-
-    private List<ClientPing> generatePings() {
-        long bans = btnManager.getServer().getMetrics().getPeerBanCounter() - lastRecordedBans;
-        this.lastRecordedBans = bans;
-        UUID submitId = UUID.randomUUID();
-        List<ClientPing> clientPings = new ArrayList<>();
-        for (Downloader downloader : btnManager.getServer().getDownloaders()) {
-            List<PeerConnection> peerConnections = new ArrayList<>();
-            try {
-                downloader.login();
-                for (Torrent torrent : downloader.getTorrents()) {
-                    try {
-                        String salt = Hashing.crc32().hashString(torrent.getHash(), StandardCharsets.UTF_8).toString();
-                        String torrentHash = Hashing.sha256().hashString(torrent.getHash() + salt, StandardCharsets.UTF_8).toString();
-                        TorrentInfo torrentInfo = new TorrentInfo(torrentHash, torrent.getSize(),torrent.getProgress());
-                        for (Peer peer : downloader.getPeers(torrent)) {
-                            PeerInfo peerInfo = generatePeerInfo(peer);
-                            peerConnections.add(new PeerConnection(torrentInfo, peerInfo));
-                        }
-                    } catch (Exception ignored) {
-                    }
+            JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
+            if (!json.has("min_protocol_version")) {
+                throw new IllegalStateException("Server config response missing min_protocol_version field");
+            }
+            int min_protocol_version = json.get("min_protocol_version").getAsInt();
+            if (min_protocol_version > BTN_PROTOCOL_VERSION) {
+                throw new IllegalStateException(String.format(Lang.BTN_INCOMPATIBLE_SERVER));
+            }
+            int max_protocol_version = json.get("max_protocol_version").getAsInt();
+            if (max_protocol_version > BTN_PROTOCOL_VERSION) {
+                throw new IllegalStateException(String.format(Lang.BTN_INCOMPATIBLE_SERVER));
+            }
+            JsonObject ability = json.get("ability").getAsJsonObject();
+            if (ability.has("submit_peers") && submit) {
+                abilities.put(BtnAbilitySubmitPeers.class, new BtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));
+            }
+            if (ability.has("submit_bans") && submit) {
+                abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
+            }
+            if (ability.has("rules")) {
+                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, ability.get("rules").getAsJsonObject()));
+            }
+            abilities.values().forEach(a -> {
+                try {
+                    a.load();
+                } catch (Exception e) {
+                    log.error("Failed to load BTN ability", e);
                 }
-                ClientPing ping = new ClientPing();
-                ping.setSubmitId(submitId.toString());
-                ping.setPopulateAt(System.currentTimeMillis());
-                ping.setDownloader(downloader.getDownloaderName());
-                ping.setPeers(peerConnections);
-                ping.setBans(bans);
-                clientPings.add(ping);
-            } catch (Exception e) {
-                log.warn(Lang.BTN_DOWNLOADER_GENERAL_FAILURE, downloader.getName(), e);
-            }
+            });
+        } catch (Throwable e) {
+            log.warn(Lang.BTN_CONFIG_FAILS, e);
         }
-        return clientPings;
+    }
+
+    private void setupHttpClient() {
+        CookieManager cm = new CookieManager();
+        cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        this.httpClient = Methanol
+                .newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .userAgent(Main.getUserAgent())
+                .defaultHeader("User-Agent", Main.getUserAgent())
+                .defaultHeader("Content-Type", "application/json")
+                .defaultHeader("BTN-AppID", appId)
+                .defaultHeader("BTN-AppSecret", appSecret)
+                .requestTimeout(Duration.ofMinutes(1))
+                .cookieHandler(cm).build();
+    }
+
+    public void close() {
+        executeService.shutdownNow();
     }
 
 
-    @NotNull
-    private PeerInfo generatePeerInfo(Peer peer) {
-        PeerInfo peerInfo = new PeerInfo();
-        peerInfo.setAddress(new PeerAddress(peer.getAddress().getIp(), peer.getAddress().getPort()));
-        peerInfo.setClientName(peer.getClientName());
-        peerInfo.setPeerId(peer.getPeerId());
-        peerInfo.setFlag(peer.getFlags());
-        peerInfo.setProgress(peer.getProgress());
-        peerInfo.setDownloaded(peer.getDownloaded());
-        peerInfo.setRtDownloadSpeed(peer.getDownloadSpeed());
-        peerInfo.setUploaded(peer.getUploaded());
-        peerInfo.setRtUploadSpeed(peer.getUploadedSpeed());
-        return peerInfo;
-    }
 }
