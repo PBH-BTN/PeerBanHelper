@@ -13,8 +13,6 @@ import java.util.List;
 public class BtnPeerPing {
     @SerializedName("populate_time")
     private long populateTime;
-    @SerializedName("submit_id")
-    private String submitId;
     @SerializedName("peers")
     private List<BtnPeer> peers;
 
