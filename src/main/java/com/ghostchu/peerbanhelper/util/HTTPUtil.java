@@ -116,6 +116,12 @@ public class HTTPUtil {
         return requestBody;
     }
 
+    public static <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+        return client.sendAsync(request, bodyHandler)
+                .handleAsync((r, t) -> tryResend(client, request, bodyHandler, MAX_RESEND, r, t))
+                .thenCompose(Function.identity());
+
+    }
 
     public static <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler <T> bodyHandler){
        return client.sendAsync(request, bodyHandler)

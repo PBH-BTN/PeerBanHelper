@@ -13,11 +13,9 @@ import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
-import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.http.HttpClient;
@@ -44,7 +42,6 @@ public class BtnNetwork {
     @Getter
     private Methanol httpClient;
 
-    @SneakyThrows(IOException.class)
     public BtnNetwork(PeerBanHelperServer server, ConfigurationSection section) {
         this.server = server;
         if (!section.getBoolean("enabled")) {

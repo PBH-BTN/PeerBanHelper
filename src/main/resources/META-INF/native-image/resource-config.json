@@ -81,7 +81,16 @@
   }]},
   "bundles":[{
     "name":"inet.ipaddr.IPAddressResources",
-    "locales":["en", "en-US", "und", "zh", "zh-CN", "zh-Hans", "zh-Hans-CN"]
+    "locales": [
+      "",
+      "en",
+      "en-US",
+      "und",
+      "zh",
+      "zh-CN",
+      "zh-Hans",
+      "zh-Hans-CN"
+    ]
   }, {
     "name":"sun.text.resources.cldr.FormatData",
     "locales":["en", "en-US", "und", "zh", "zh-CN", "zh-Hans", "zh-Hans-CN"]

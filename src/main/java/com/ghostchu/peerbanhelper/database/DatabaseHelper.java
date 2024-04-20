@@ -156,14 +156,8 @@ public class DatabaseHelper {
             ps.setString(3, banLog.peerIp());
             ps.setInt(4, banLog.peerPort());
             String peerId = banLog.peerId();
-            if(banLog.peerId() == null || banLog.peerId().isBlank()){
-                peerId = "N/A (bad client?)";
-            }
             ps.setString(5, peerId);
             String clientName = banLog.peerClientName();
-            if(banLog.peerClientName() == null || banLog.peerClientName().isBlank()){
-                clientName = "N/A (bad client?)";
-            }
             ps.setString(6, clientName);
             ps.setLong(7, banLog.peerDownloaded());
             ps.setLong(8, banLog.peerUploaded());
@@ -188,8 +182,8 @@ public class DatabaseHelper {
                                               "unban_at" integer NOT NULL,
                                               "peer_ip" TEXT NOT NULL,
                                               "peer_port" integer NOT NULL,
-                                              "peer_id" text NOT NULL,
-                                              "peer_clientname" TEXT NOT NULL,
+                                              "peer_id" TEXT NULL,
+                                              "peer_clientname" TEXT NULL,
                                               "peer_downloaded" integer NOT NULL,
                                               "peer_uploaded" integer NOT NULL,
                                               "peer_progress" real NOT NULL,

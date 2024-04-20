@@ -41,6 +41,62 @@
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
+  {
+    "name": "com.ghostchu.peerbanhelper.btn.ability.BtnAbility",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "com.ghostchu.peerbanhelper.btn.ability.BtnAbilitySubmitBans",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "onPeerBanEvent",
+        "parameterTypes": [
+          "com.ghostchu.peerbanhelper.event.PeerBanEvent"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.ghostchu.peerbanhelper.btn.ping.BtnBan",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.ghostchu.peerbanhelper.btn.ping.BtnBanPing",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.ghostchu.peerbanhelper.btn.ping.BtnPeer",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.ghostchu.peerbanhelper.btn.ping.BtnPeerPing",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+},
 {
   "name":"com.ghostchu.peerbanhelper.btn.ping.ClientPing",
   "allDeclaredFields":true,
@@ -383,6 +439,10 @@
   "queryAllDeclaredMethods":true
 },
 {
+  "name": "java.lang.Object",
+  "queryAllDeclaredMethods": true
+},
+  {
   "name":"java.lang.Record",
   "allDeclaredFields":true
 },

@@ -13,12 +13,12 @@ import java.util.Map;
 public class BtnRule {
     @SerializedName("version")
     private String version;
-    @SerializedName("peer_id_rules")
+    @SerializedName("peer_id")
     private Map<String, List<String>> peerIdRules;
-    @SerializedName("client_name_rules")
+    @SerializedName("client_name")
     private Map<String, List<String>> clientNameRules;
-    @SerializedName("ip_rules")
+    @SerializedName("ip")
     private Map<String, List<String>> ipRules;
-    @SerializedName("port_rules")
+    @SerializedName("port")
     private Map<String, List<Integer>> portRules;
 }
