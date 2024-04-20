@@ -17,7 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -57,13 +60,12 @@ public class BtnAbilitySubmitBans implements BtnAbility {
         List<BtnBan> btnPeers = generateBans();
         BtnBanPing ping = new BtnBanPing(
                 System.currentTimeMillis(),
-                UUID.randomUUID().toString(),
                 btnPeers
         );
         MutableRequest request = MutableRequest.POST(endpoint
                 , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
         ).header("Content-Encoding", "gzip");
-        HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
+        HTTPUtil.retryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
                         log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());

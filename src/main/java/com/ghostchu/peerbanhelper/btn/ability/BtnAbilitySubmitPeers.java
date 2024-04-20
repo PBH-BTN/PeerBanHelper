@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -46,13 +45,12 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
         List<BtnPeer> btnPeers = generatePing();
         BtnPeerPing ping = new BtnPeerPing(
                 System.currentTimeMillis(),
-                UUID.randomUUID().toString(),
                 btnPeers
         );
         MutableRequest request = MutableRequest.POST(endpoint
                 , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
         ).header("Content-Encoding", "gzip");
-        HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
+        HTTPUtil.retryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
                         log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
