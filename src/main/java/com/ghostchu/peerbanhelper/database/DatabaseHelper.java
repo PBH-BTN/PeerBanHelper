@@ -21,10 +21,30 @@ public class DatabaseHelper {
         this.manager = manager;
         try {
             createTables();
+            performUpgrade();
         } catch (SQLException e) {
             log.warn(Lang.DATABASE_SETUP_FAILED, e);
             throw e;
         }
+    }
+
+    private void performUpgrade() throws SQLException {
+        try (Connection connection = manager.getConnection()) {
+            int v = 0;
+            String version = getMetadata("version");
+            if (version != null) {
+                v = Integer.parseInt(version);
+            }
+            if (v == 0) {
+                // 升级 peer_id / peer_clientname 段可空
+                connection.prepareStatement("ALTER TABLE ban_logs RENAME TO ban_logs_v1_old_backup").execute();
+                connection.prepareStatement("DROP INDEX ban_logs_idx").execute();
+                createTables();
+                v++;
+            }
+            setMetadata("version", String.valueOf(v));
+        }
+
     }
 
     public int setMetadata(String key, String value) throws SQLException {
@@ -52,7 +72,7 @@ public class DatabaseHelper {
     }
 
     public long queryBanLogsCount(Date from, Date to) throws SQLException {
-        try(Connection connection = manager.getConnection()) {
+        try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
             if (from == null && to == null) {
                 ps = connection.prepareStatement("SELECT COUNT(*) AS count FROM ban_logs");
@@ -63,15 +83,15 @@ public class DatabaseHelper {
                     ps = connection.prepareStatement("SELECT COUNT(*) AS count FROM ban_logs");
                 }
             }
-                if (from != null) {
-                    ps.setDate(1, from);
-                    ps.setDate(2, to);
-                }
-                @Cleanup
-                ResultSet set = ps.executeQuery();
-                return set.getLong("count");
+            if (from != null) {
+                ps.setDate(1, from);
+                ps.setDate(2, to);
             }
+            @Cleanup
+            ResultSet set = ps.executeQuery();
+            return set.getLong("count");
         }
+    }
 
     public List<BanLog> queryBanLogs(Date from, Date to, int pageIndex, int pageSize) throws SQLException {
         try (Connection connection = manager.getConnection()) {
