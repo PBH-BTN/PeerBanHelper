@@ -36,10 +36,13 @@ public class DatabaseHelper {
                 v = Integer.parseInt(version);
             }
             if (v == 0) {
-                // 升级 peer_id / peer_clientname 段可空
-                connection.prepareStatement("ALTER TABLE ban_logs RENAME TO ban_logs_v1_old_backup").execute();
-                connection.prepareStatement("DROP INDEX ban_logs_idx").execute();
-                createTables();
+                try {
+                    // 升级 peer_id / peer_clientname 段可空
+                    connection.prepareStatement("ALTER TABLE ban_logs RENAME TO ban_logs_v1_old_backup").execute();
+                    connection.prepareStatement("DROP INDEX ban_logs_idx").execute();
+                    createTables();
+                } catch (Exception ignored) {
+                }
                 v++;
             }
             setMetadata("version", String.valueOf(v));
