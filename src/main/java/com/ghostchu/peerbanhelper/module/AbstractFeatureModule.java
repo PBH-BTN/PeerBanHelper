@@ -24,7 +24,12 @@ public abstract class AbstractFeatureModule implements FeatureModule {
 
     @Override
     public boolean isModuleEnabled() {
-        return !isConfigurable() || getConfig().getBoolean("enabled");
+        try {
+            return !isConfigurable() || getConfig().getBoolean("enabled");
+        } catch (Exception e) {
+            log.warn(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName());
+            return false;
+        }
     }
 
     /**

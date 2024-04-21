@@ -15,8 +15,12 @@ public class BtnRule {
     private String version;
     @SerializedName("peer_id")
     private Map<String, List<String>> peerIdRules;
+    @SerializedName("peer_id_exclude")
+    private Map<String, List<String>> excludePeerIdRules;
     @SerializedName("client_name")
     private Map<String, List<String>> clientNameRules;
+    @SerializedName("client_name_exclude")
+    private Map<String, List<String>> excludeClientNameRules;
     @SerializedName("ip")
     private Map<String, List<String>> ipRules;
     @SerializedName("port")

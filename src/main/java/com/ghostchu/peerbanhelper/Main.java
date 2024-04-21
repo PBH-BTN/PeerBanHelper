@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
+import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
+import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
@@ -54,7 +57,13 @@ public class Main {
             return;
         }
 
-        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(new File(configDirectory, "config.yml"));
+        File mainConfigFile = new File(configDirectory, "config.yml");
+        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(mainConfigFile);
+        new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfigFile, mainConfig));
+        File profileConfigFile = new File(configDirectory, "profile.yml");
+        YamlConfiguration profileConfig = YamlConfiguration.loadConfiguration(profileConfigFile);
+        new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfigFile, profileConfig));
+
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
         for (String client : clientSection.getKeys(false)) {

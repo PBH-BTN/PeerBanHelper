@@ -39,6 +39,9 @@ module:
       - "startsWith@-tt"
       - "contains@cacao"
       - "startsWith@-HP" # dt 变种
+    # 排除列表
+    # 这些规则优先级更高，一旦匹配到任何一条，则直接跳过其他所有规则检查，并放行此 Peer
+    exclude-peer-id: [ ]
   # 客户端名称封禁
   client-name-blacklist:
     enabled: true
@@ -62,6 +65,9 @@ module:
       - "startsWith@hp/torrent"
       - "startsWith@HP"
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
+    # 排除列表
+    # 这些规则优先级更高，一旦匹配到任何一条，则直接跳过其他所有规则检查，并放行此 Peer
+    exclude-peer-id: [ ]
   # 假进度检查
   progress-cheat-blocker:
     enabled: true

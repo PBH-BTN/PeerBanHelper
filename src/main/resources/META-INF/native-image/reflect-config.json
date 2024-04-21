@@ -123,6 +123,14 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name": "com.ghostchu.peerbanhelper.config.MainConfigUpdateScript",
+  "queryAllDeclaredMethods": true
+},
+  {
+    "name": "com.ghostchu.peerbanhelper.config.ProfileUpdateScript",
+    "queryAllDeclaredMethods": true
+  },
+  {
   "name":"com.ghostchu.peerbanhelper.database.BanLog",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":["long","long","java.lang.String","int","java.lang.String","java.lang.String","long","long","double","java.lang.String","java.lang.String","long","java.lang.String","java.lang.String"] }, {"name":"banAt","parameterTypes":[] }, {"name":"description","parameterTypes":[] }, {"name":"module","parameterTypes":[] }, {"name":"peerClientName","parameterTypes":[] }, {"name":"peerDownloaded","parameterTypes":[] }, {"name":"peerId","parameterTypes":[] }, {"name":"peerIp","parameterTypes":[] }, {"name":"peerPort","parameterTypes":[] }, {"name":"peerProgress","parameterTypes":[] }, {"name":"peerUploaded","parameterTypes":[] }, {"name":"torrentInfoHash","parameterTypes":[] }, {"name":"torrentName","parameterTypes":[] }, {"name":"torrentSize","parameterTypes":[] }, {"name":"unbanAt","parameterTypes":[] }]
@@ -499,6 +507,14 @@
   "name":"java.sql.Date"
 },
 {
+  "name": "java.sql.SQLException",
+  "fields": [
+    {
+      "name": "next"
+    }
+  ]
+},
+  {
   "name":"java.sql.Timestamp"
 },
 {

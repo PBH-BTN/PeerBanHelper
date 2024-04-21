@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 
 public class PeerIdBlacklist extends AbstractFeatureModule {
     private List<String> bannedPeers;
+    private List<String> excludePeers;
 
     public PeerIdBlacklist(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -53,11 +54,17 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
 
     public void reloadConfig() {
         this.bannedPeers = getConfig().getStringList("banned-peer-id");
+        this.excludePeers = getConfig().getStringList("exclude-peer-id");
     }
 
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+        for (String rule : excludePeers) {
+            if (RuleParseHelper.match(peer.getClientName(), rule)) {
+                return new BanResult(this, PeerAction.SKIP, "skip: " + rule);
+            }
+        }
         for (String rule : bannedPeers) {
             if (RuleParseHelper.match(peer.getPeerId(), rule)) {
                 return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_PID_MATCH_PEER_ID, rule));

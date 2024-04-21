@@ -58,8 +58,6 @@ public class AutoRangeBan extends AbstractFeatureModule {
         this.ipv6Prefix = getConfig().getInt("ipv6");
     }
 
-
-
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         if(peer.getPeerId() == null || peer.getPeerId().isEmpty()){

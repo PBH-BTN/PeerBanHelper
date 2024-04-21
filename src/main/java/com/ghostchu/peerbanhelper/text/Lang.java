@@ -95,4 +95,11 @@ public class Lang {
     public static String BTN_SUBMITTED_PEERS = "[BTN 网络] 已向 BTN 网络提交 {} 个 Peers，感谢您对 BTN 网络的支持！";
     public static String BTN_SUBMITTING_BANS = "[BTN 网络] 计划任务正在向 BTN 网络提交自上次汇报以来新增的封禁条目，请稍等……";
     public static String BTN_SUBMITTED_BANS = "[BTN 网络] 已向 BTN 网络提交 {} 个封禁记录，感谢您对 BTN 网络的支持！";
+    public static String CONFIG_CHECKING = "[配置升级实用工具] 请等待检查配置文件更新……";
+    public static String CONFIG_MIGRATING = "[配置升级实用工具] 迁移配置文件：从 {} 至 {} ……";
+    public static String CONFIG_EXECUTE_MIGRATE = "[配置升级实用工具] 执行配置文件升级脚本：{}";
+    public static String CONFIG_MIGRATE_FAILED = "[配置升级实用工具] 执行配置文件升级脚本 {}（升级到版本 {}）时出现了错误，PeerBanHelper 可能无法正常运行：{}";
+    public static String CONFIG_UPGRADED = "[配置升级实用工具] 成功升级配置文件到版本 {}";
+    public static String CONFIG_SAVE_CHANGES = "[配置升级实用工具] 正在保存更改……";
+    public static String CONFIG_SAVE_ERROR = "[配置升级实用工具] 更改保存到磁盘失败";
 }

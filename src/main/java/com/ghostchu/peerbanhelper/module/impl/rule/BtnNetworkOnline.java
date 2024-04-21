@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class BtnNetworkOnline extends AbstractFeatureModule {
-    private List<String> bannedPeers;
 
     public BtnNetworkOnline(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -110,10 +109,19 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
 
     @Nullable
     private BanResult checkClientNameRule(BtnRule rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+        for (String category : rule.getExcludeClientNameRules().keySet()) {
+            List<String> rules = rule.getExcludeClientNameRules().get(category);
+            for (String ruleContent : rules) {
+                if (RuleParseHelper.match(peer.getClientName(), ruleContent)) {
+                    return new BanResult(this, PeerAction.SKIP, "skip: " + rule);
+                }
+            }
+        }
+
         for (String category : rule.getClientNameRules().keySet()) {
             List<String> rules = rule.getClientNameRules().get(category);
             for (String ruleContent : rules) {
-                if (RuleParseHelper.match(peer.getPeerId(), ruleContent)) {
+                if (RuleParseHelper.match(peer.getClientName(), ruleContent)) {
                     return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_BTN_BAN, "PeerId", category, ruleContent));
                 }
             }
@@ -123,6 +131,15 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
 
     @Nullable
     private BanResult checkPeerIdRule(BtnRule rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+        for (String category : rule.getExcludePeerIdRules().keySet()) {
+            List<String> rules = rule.getExcludePeerIdRules().get(category);
+            for (String ruleContent : rules) {
+                if (RuleParseHelper.match(peer.getPeerId(), ruleContent)) {
+                    return new BanResult(this, PeerAction.SKIP, "skip: " + rule);
+                }
+            }
+        }
+
         for (String category : rule.getPeerIdRules().keySet()) {
             List<String> rules = rule.getPeerIdRules().get(category);
             for (String ruleContent : rules) {

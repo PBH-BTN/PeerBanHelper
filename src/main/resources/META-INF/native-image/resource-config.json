@@ -82,7 +82,6 @@
   "bundles":[{
     "name":"inet.ipaddr.IPAddressResources",
     "locales": [
-      "",
       "en",
       "en-US",
       "und",
