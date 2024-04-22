@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -38,17 +37,20 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
 
     @Override
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
+        long count = Long.parseLong(session.getParameters().getOrDefault("count", List.of("-1")).get(0));
+        long since = Long.parseLong(session.getParameters().getOrDefault("since", List.of("-1")).get(0));
         List<BanResponse> banResponseList = getServer().getBannedPeers()
                 .entrySet()
                 .stream()
                 .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), entry.getValue()))
-                .sorted(new Comparator<>() {
-                    @Override
-                    public int compare(BanResponse o1, BanResponse o2) {
-                        return Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt());
-                    }
-                })
+                .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()))
                 .toList();
+        if (since > 0) {
+            banResponseList = banResponseList.stream().filter(resp -> resp.getBanMetadata().getBanAt() >= since).toList();
+        }
+        if (count > 0) {
+            banResponseList = banResponseList.stream().limit(count).toList();
+        }
         String JSON = JsonUtil.prettyPrinting().toJson(banResponseList);
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JSON));
     }
