@@ -38,7 +38,7 @@ public class BtnNetwork {
     @Getter
     private ScheduledExecutorService executeService = Executors.newScheduledThreadPool(2);
     @Getter
-    private Methanol httpClient;
+    private HttpClient httpClient;
 
     public BtnNetwork(PeerBanHelperServer server, ConfigurationSection section) {
         this.server = server;
@@ -119,10 +119,5 @@ public class BtnNetwork {
         executeService.shutdown();
         abilities.values().forEach(BtnAbility::unload);
         abilities.clear();
-        try {
-            httpClient.awaitTermination(Duration.ZERO);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

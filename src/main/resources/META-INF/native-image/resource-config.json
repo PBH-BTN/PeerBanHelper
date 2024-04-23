@@ -43,7 +43,7 @@
   }, {
     "pattern":"\\Qlogging.properties\\E"
   }, {
-    "pattern":"\\Qorg/sqlite/native/Windows/x86_64/sqlitejdbc.dll\\E"
+    "pattern": ".*/sqlitejdbc.dll"
   }, {
     "pattern":"\\Qprofile.yml\\E"
   }, {
