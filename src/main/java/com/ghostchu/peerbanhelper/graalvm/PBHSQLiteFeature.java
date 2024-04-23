@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.graalvm;
 
+import com.ghostchu.peerbanhelper.Main;
 import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeResourceAccess;
 import org.sqlite.SQLiteJDBCLoader;
@@ -27,6 +28,7 @@ public class PBHSQLiteFeature implements Feature {
     }
 
     private void nativeDbReachable(Feature.DuringAnalysisAccess a) {
+        handleBuildInfo();
         handleLibraryResources(getNativeLibResourcePath("Linux/aarch64"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux/armv7"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux/x86"), "libsqlitejdbc.so");
@@ -34,6 +36,10 @@ public class PBHSQLiteFeature implements Feature {
         handleLibraryResources(getNativeLibResourcePath("Linux-Musl/aarch64"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux-Musl/x86"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux-Musl/x86_64"), "libsqlitejdbc.so");
+    }
+
+    private void handleBuildInfo() {
+        RuntimeResourceAccess.addResource(Main.class.getModule(), "/build-info.yml");
     }
 
     private void handleLibraryResources(String libraryPath, String libraryName) {
