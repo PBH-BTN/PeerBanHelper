@@ -1,6 +1,12 @@
 {
   "resources":{
   "includes":[{
+    "pattern": ".*/sqlitejdbc.dll"
+  },
+    {
+      "pattern": ".*/sqlitejdbc.so"
+    },
+    {
     "pattern":".*/static/*"
   }, {
     "pattern":"\\QMETA-INF/maven/org.xerial/sqlite-jdbc/pom.properties\\E"
@@ -43,11 +49,8 @@
   }, {
     "pattern":"\\Qlogging.properties\\E"
   }, {
-    "pattern": ".*/sqlitejdbc.dll"
+      "pattern": "\\Qorg/sqlite/native/Windows/x86_64/sqlitejdbc.dll\\E"
   }, {
-    "pattern": ".*/sqlitejdbc.so"
-  },
-    {
     "pattern":"\\Qprofile.yml\\E"
   }, {
     "pattern":"\\Qsqlite-jdbc.properties\\E"

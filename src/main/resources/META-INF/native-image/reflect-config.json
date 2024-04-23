@@ -128,7 +128,15 @@
 },
   {
     "name": "com.ghostchu.peerbanhelper.config.ProfileUpdateScript",
-    "queryAllDeclaredMethods": true
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "addExcludeLists",
+        "parameterTypes": []
+      }
+    ]
   },
   {
   "name":"com.ghostchu.peerbanhelper.database.BanLog",
