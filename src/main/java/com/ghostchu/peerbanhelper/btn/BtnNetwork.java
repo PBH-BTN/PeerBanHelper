@@ -118,7 +118,11 @@ public class BtnNetwork {
         log.info(Lang.BTN_SHUTTING_DOWN);
         executeService.shutdown();
         abilities.values().forEach(BtnAbility::unload);
-        this.httpClient.close();
         abilities.clear();
+        try {
+            httpClient.awaitTermination(Duration.ZERO);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
