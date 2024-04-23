@@ -37,19 +37,19 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
 
     @Override
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
-        long count = Long.parseLong(session.getParameters().getOrDefault("count", List.of("-1")).get(0));
-        long since = Long.parseLong(session.getParameters().getOrDefault("since", List.of("-1")).get(0));
+        long limit = Long.parseLong(session.getParameters().getOrDefault("limit", List.of("-1")).get(0));
+        long lastBanTime = Long.parseLong(session.getParameters().getOrDefault("lastBanTime", List.of("-1")).get(0));
         List<BanResponse> banResponseList = getServer().getBannedPeers()
                 .entrySet()
                 .stream()
                 .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), entry.getValue()))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()))
                 .toList();
-        if (since > 0) {
-            banResponseList = banResponseList.stream().filter(resp -> resp.getBanMetadata().getBanAt() >= since).toList();
+        if (lastBanTime > 0) {
+            banResponseList = banResponseList.stream().filter(resp -> resp.getBanMetadata().getBanAt() >= lastBanTime).toList();
         }
-        if (count > 0) {
-            banResponseList = banResponseList.stream().limit(count).toList();
+        if (limit > 0) {
+            banResponseList = banResponseList.stream().limit(limit).toList();
         }
         String JSON = JsonUtil.prettyPrinting().toJson(banResponseList);
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JSON));
