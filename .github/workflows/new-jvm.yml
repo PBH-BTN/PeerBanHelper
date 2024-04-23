@@ -23,7 +23,7 @@ jobs:
       - name: Get WebUI Files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd src/main/resources/static && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" && cd ../../../..
+        run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
       - uses: graalvm/setup-graalvm@v1
         name: Setup GraalVM
         with:
