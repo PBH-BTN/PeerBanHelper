@@ -102,4 +102,7 @@ public class Lang {
     public static String CONFIG_UPGRADED = "[配置升级实用工具] 成功升级配置文件到版本 {}";
     public static String CONFIG_SAVE_CHANGES = "[配置升级实用工具] 正在保存更改……";
     public static String CONFIG_SAVE_ERROR = "[配置升级实用工具] 更改保存到磁盘失败";
+    public static String BTN_RECONFIGURE_CHECK_FAILED = "[BTN 网络] 检查重配置状态失败：{}";
+    public static String BTN_SHUTTING_DOWN = "[BTN 网络] 正在关闭 BTN 模块……";
+    public static String BTN_RECONFIGURING = "[BTN 网络] 发现服务器基本配置更新，正在重新配置 BTN 网络模块……";
 }

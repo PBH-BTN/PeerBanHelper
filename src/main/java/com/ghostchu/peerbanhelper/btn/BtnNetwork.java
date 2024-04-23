@@ -2,10 +2,7 @@ package com.ghostchu.peerbanhelper.btn;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
-import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityRules;
-import com.ghostchu.peerbanhelper.btn.ability.BtnAbilitySubmitBans;
-import com.ghostchu.peerbanhelper.btn.ability.BtnAbilitySubmitPeers;
+import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
@@ -31,6 +28,7 @@ public class BtnNetwork {
     private static final int BTN_PROTOCOL_VERSION = 2;
     @Getter
     private final PeerBanHelperServer server;
+    @Getter
     private final String configUrl;
     private final boolean submit;
     private final String appId;
@@ -86,6 +84,9 @@ public class BtnNetwork {
             if (ability.has("rules")) {
                 abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, ability.get("rules").getAsJsonObject()));
             }
+            if (ability.has("reconfigure")) {
+                abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));
+            }
             abilities.values().forEach(a -> {
                 try {
                     a.load();
@@ -114,8 +115,10 @@ public class BtnNetwork {
     }
 
     public void close() {
-        executeService.shutdownNow();
+        log.info(Lang.BTN_SHUTTING_DOWN);
+        executeService.shutdown();
+        abilities.values().forEach(BtnAbility::unload);
+        this.httpClient.close();
+        abilities.clear();
     }
-
-
 }

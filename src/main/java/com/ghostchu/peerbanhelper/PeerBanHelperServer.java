@@ -57,7 +57,7 @@ public class PeerBanHelperServer {
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
     @Getter
-    private final BtnNetwork btnNetwork;
+    private BtnNetwork btnNetwork;
     @Getter
     private WebManager webManagerServer;
     private final ExecutorService generalExecutor;
@@ -88,16 +88,7 @@ public class PeerBanHelperServer {
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
         registerHttpServer();
         this.moduleManager = new ModuleManager();
-        BtnNetwork btnm;
-        try {
-            log.info(Lang.BTN_NETWORK_CONNECTING);
-            btnm = new BtnNetwork(this, mainConfig.getConfigurationSection("btn"));
-            log.info(Lang.BTN_NETWORK_ENABLED);
-        } catch (IllegalStateException e) {
-            btnm = null;
-            log.info(Lang.BTN_NETWORK_NOT_ENABLED);
-        }
-        this.btnNetwork = btnm;
+        setupBtn();
         try {
             prepareDatabase();
         } catch (Exception e) {
@@ -109,6 +100,22 @@ public class PeerBanHelperServer {
         registerTimer();
         registerBanListInvokers();
         banListInvoker.forEach(BanListInvoker::reset);
+    }
+
+    public void setupBtn() {
+        if (this.btnNetwork != null) {
+            this.btnNetwork.close();
+        }
+        BtnNetwork btnm;
+        try {
+            log.info(Lang.BTN_NETWORK_CONNECTING);
+            btnm = new BtnNetwork(this, mainConfig.getConfigurationSection("btn"));
+            log.info(Lang.BTN_NETWORK_ENABLED);
+        } catch (IllegalStateException e) {
+            btnm = null;
+            log.info(Lang.BTN_NETWORK_NOT_ENABLED);
+        }
+        this.btnNetwork = btnm;
     }
 
     private void registerBanListInvokers() {
