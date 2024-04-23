@@ -45,6 +45,9 @@
   }, {
     "pattern": ".*/sqlitejdbc.dll"
   }, {
+    "pattern": ".*/sqlitejdbc.so"
+  },
+    {
     "pattern":"\\Qprofile.yml\\E"
   }, {
     "pattern":"\\Qsqlite-jdbc.properties\\E"
