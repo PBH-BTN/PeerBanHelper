@@ -20,12 +20,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install bsdtar
+        run: sudo apt-get install -y bsdtar
       - name: Get WebUI Files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           rm -rf src/main/resources/static/* && cd src/main/resources/static && curl --location 'https://api.github.com/repos/Gaojianli/pbh-fe/actions/artifacts?page=1&per_page=1&name=dist-miao'\
-          --header "Authorization: Bearer $GH_TOKEN" |jq '.artifacts[0].archive_download_url'|xargs curl --header "Authorization: Bearer $GH_TOKEN" -L|bsdtar -x
+          --header "Authorization: Bearer $GH_TOKEN" |jq '.artifacts[0].archive_download_url'|xargs curl --header "Authorization: Bearer $GH_TOKEN" -L|bsdtar -x &&cd ../../../..
       - uses: graalvm/setup-graalvm@v1
         name: Setup GraalVM
         with:
