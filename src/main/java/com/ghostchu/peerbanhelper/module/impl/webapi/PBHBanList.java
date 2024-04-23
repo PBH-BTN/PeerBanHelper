@@ -16,13 +16,14 @@ import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
 
     public PBHBanList(PeerBanHelperServer server, YamlConfiguration profile) {
-       super(server, profile);
+        super(server, profile);
     }
 
     @Override
@@ -37,19 +38,38 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
 
     @Override
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
-        long count = Long.parseLong(session.getParameters().getOrDefault("count", List.of("-1")).get(0));
-        long since = Long.parseLong(session.getParameters().getOrDefault("since", List.of("-1")).get(0));
+        long limit = Long.parseLong(session.getParameters().getOrDefault("limit", List.of("-1")).get(0));
+        long lastBanTime = Long.parseLong(session.getParameters().getOrDefault("lastBanTime", List.of("-1")).get(0));
         List<BanResponse> banResponseList = getServer().getBannedPeers()
                 .entrySet()
                 .stream()
                 .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), entry.getValue()))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()))
                 .toList();
-        if (since > 0) {
-            banResponseList = banResponseList.stream().filter(resp -> resp.getBanMetadata().getBanAt() >= since).toList();
+        if (lastBanTime > 0) { // 这里已经排序了，所以不需要遍历所有
+            var pick = new BanResponse[limit > 0 ? (int) limit : banResponseList.size()];
+            int startIndex = -1;
+            for (int i = 0; i < banResponseList.size(); i++) {
+                if (banResponseList.get(i).getBanMetadata().getBanAt() < lastBanTime) { //找到第一个小于lastBanTime的
+                    startIndex = i;
+                    break;
+                }
+            }
+            if (startIndex == -1) {// not found
+                return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", "[]"));
+            } else {
+                for (int i = 0; i < pick.length; i++) { // 从第一个小于lastBanTime的开始取，往后去count个就行
+                    if (startIndex + i >= banResponseList.size()) { // 数量不够了，直接返回
+                        pick = Arrays.copyOfRange(pick, 0, i);
+                        break;
+                    }
+                    pick[i] = banResponseList.get(startIndex + i);
+                }
+                banResponseList = List.of(pick);
+            }
         }
-        if (count > 0) {
-            banResponseList = banResponseList.stream().limit(count).toList();
+        if (limit > 0) {
+            banResponseList = banResponseList.stream().limit(limit).toList();
         }
         String JSON = JsonUtil.prettyPrinting().toJson(banResponseList);
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JSON));
