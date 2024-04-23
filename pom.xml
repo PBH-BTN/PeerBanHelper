@@ -243,6 +243,7 @@
                                 <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
                                 <!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
+                                <buildArgs>--features=com.ghostchu.peerbanhelper.graalvm.PBHSQLiteFeature</buildArgs>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
                                 <buildArg>--enable-url-protocols=http,https</buildArg>
                                 <buildArg>--gc=serial</buildArg>
@@ -306,6 +307,7 @@
                                 <buildArg>--add-opens=java.base/java.nio=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED</buildArg>
                                 <buildArg>--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED</buildArg>
+                                <buildArgs>--features=com.ghostchu.peerbanhelper.graalvm.PBHSQLiteFeature</buildArgs>
                                 <!--                                <buildArg>-H:ReflectionConfigurationFiles=./src/main/resources/reflection-config.json</buildArg>-->
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
@@ -377,6 +379,7 @@
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
                                 <buildArg>--enable-url-protocols=http,https</buildArg>
+                                <buildArgs>--features=com.ghostchu.peerbanhelper.graalvm.PBHSQLiteFeature</buildArgs>
                                 <buildArg>-H:EnableURLProtocols=http</buildArg>
                                 <buildArg>-H:EnableURLProtocols=https</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>
@@ -481,6 +484,12 @@
             <groupId>com.github.mizosoft.methanol</groupId>
             <artifactId>methanol</artifactId>
             <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.sdk</groupId>
+            <artifactId>nativeimage</artifactId>
+            <version>24.0.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

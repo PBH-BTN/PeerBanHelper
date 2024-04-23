@@ -1,12 +1,6 @@
 {
   "resources":{
   "includes":[{
-    "pattern": ".*/sqlitejdbc.dll"
-  },
-    {
-      "pattern": ".*/sqlitejdbc.so"
-    },
-    {
     "pattern":".*/static/*"
   }, {
     "pattern":"\\QMETA-INF/maven/org.xerial/sqlite-jdbc/pom.properties\\E"
@@ -48,8 +42,6 @@
     "pattern":"\\Qinet/ipaddr/IPAddressResources_zh_Hans_CN.properties\\E"
   }, {
     "pattern":"\\Qlogging.properties\\E"
-  }, {
-      "pattern": ".*/org/sqlite/.*"
   }, {
     "pattern":"\\Qprofile.yml\\E"
   }, {
