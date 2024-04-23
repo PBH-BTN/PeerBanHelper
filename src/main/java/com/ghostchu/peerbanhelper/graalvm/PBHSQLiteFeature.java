@@ -30,6 +30,7 @@ public class PBHSQLiteFeature implements Feature {
         handleLibraryResources(getNativeLibResourcePath("Linux/aarch64"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux/armv7"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux/x86"), "libsqlitejdbc.so");
+        handleLibraryResources(getNativeLibResourcePath("Linux/x86_64"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux-Musl/aarch64"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux-Musl/x86"), "libsqlitejdbc.so");
         handleLibraryResources(getNativeLibResourcePath("Linux-Musl/x86_64"), "libsqlitejdbc.so");

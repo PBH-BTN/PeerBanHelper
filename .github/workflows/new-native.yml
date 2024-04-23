@@ -73,6 +73,7 @@ jobs:
   build-unix-like-muslc:
     name: build unix like (muslc)
     runs-on: ubuntu-latest
+    if: false
     steps:
       - uses: actions/checkout@v4
       - uses: graalvm/setup-graalvm@v1
