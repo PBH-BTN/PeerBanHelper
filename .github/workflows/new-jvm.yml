@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install bsdtar
-        run: sudo apt-get install -y bsdtar
+        run: sudo apt-get install -y libarchive-tools
       - name: Get WebUI Files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
