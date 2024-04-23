@@ -55,5 +55,12 @@
 {
   "name":"sun.instrument.InstrumentationImpl",
   "methods":[{"name":"<init>","parameterTypes":["long","boolean","boolean","boolean"] }, {"name":"loadClassAndCallAgentmain","parameterTypes":["java.lang.String","java.lang.String"] }, {"name":"loadClassAndCallPremain","parameterTypes":["java.lang.String","java.lang.String"] }, {"name":"transform","parameterTypes":["java.lang.Module","java.lang.ClassLoader","java.lang.String","java.lang.Class","java.security.ProtectionDomain","byte[]","boolean"] }]
+},
+  {
+    "name": "java.lang.ClassLoader",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true,
+    "allPublicConstructors": true
 }
 ]
