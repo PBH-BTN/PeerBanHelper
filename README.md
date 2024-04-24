@@ -64,7 +64,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
     # regex - 正则匹配
     # length - 长度匹配，规则内容填写整数形式的长度
     banned-peer-id:
-      - '{"method":"CONTAINS","content":"-xl0019","success":"NEGATIVE"}' # 排除迅雷 0019
+      - '{"method":"CONTAINS","content":"-xl0019","hit":"FALSE"}' # 排除迅雷 0019
       - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"-sd"}'
       - '{"method":"STARTS_WITH","content":"-xf"}'
@@ -266,9 +266,6 @@ client:
 PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。  
 
 ### Windows 手动部署
-
-> [!TIP]
-> 自 2.3 起，Windows 懒人包现在默认使用二进制文件，不再需要配置 JDK 环境和启动脚本
 
 <details>
 
