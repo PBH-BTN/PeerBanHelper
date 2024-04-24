@@ -157,10 +157,6 @@ public class PeerBanHelperServer {
 
     private void registerTimer() {
         BAN_WAVE_SERVICE.scheduleAtFixedRate(this::banWave, 1, profile.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
-//        cleanupService.scheduleAtFixedRate(()->{
-//            int changes = databaseHelper.cleanOutdatedBanLogs(getMainConfig().getInt("persist.ban-logs-keep-days", 30));
-//            log.info(Lang.PERSIST_CLEAN_LOGS, changes);
-//        }, 0, 1, TimeUnit.DAYS);
     }
 
     /**

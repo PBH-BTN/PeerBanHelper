@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.LogManager;
 
 @Slf4j
 public class Main {
@@ -40,8 +39,6 @@ public class Main {
     private static final AtomicInteger shutdown = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        initLogger();
-        workaroundGraalVM();
         initBuildMeta();
         List<Downloader> downloaderList = new ArrayList<>();
         log.info(Lang.LOADING_CONFIG);
@@ -118,12 +115,12 @@ public class Main {
         }
     }
 
-    private static void initLogger() throws IOException {
-        if (!logsDirectory.exists()) {
-            logsDirectory.mkdirs();
-        }
-        LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
-    }
+//    private static void initLogger() throws IOException {
+//        if (!logsDirectory.exists()) {
+//            logsDirectory.mkdirs();
+//        }
+//        LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
+//    }
 
     private static void initBuildMeta() {
         meta = new BuildMeta();
@@ -140,22 +137,6 @@ public class Main {
             log.error(Lang.ERR_CANNOT_LOAD_BUILD_INFO, e);
         }
         log.info(Lang.MOTD, meta.getVersion());
-    }
-
-    private static void workaroundGraalVM() throws InterruptedException, IOException {
-        if (System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS")) {
-            if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
-                ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "chcp", "65001").inheritIO();
-                Process p = pb.start();
-                p.waitFor();
-                System.out.println("Chcp switched to UTF-8 (65001) - GraalVM Native Image");
-            }
-        }
-        // 此方法允许 Native Image Agent 在生成本地二进制文件时正确识别缺少的类
-        try {
-            Class.forName("java.util.logging.FileHandler");
-        } catch (ClassNotFoundException ignored) {
-        }
     }
 
     private static void handleCommand(String input) {
