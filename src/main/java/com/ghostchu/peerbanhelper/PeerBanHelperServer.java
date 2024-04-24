@@ -274,7 +274,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new PeerIdBlacklist(this, profile));
         moduleManager.register(new ClientNameBlacklist(this, profile));
         moduleManager.register(new ProgressCheatBlocker(this, profile));
-        moduleManager.register(new ActiveProbing(this, profile));
+        //moduleManager.register(new ActiveProbing(this, profile));
         moduleManager.register(new AutoRangeBan(this, profile));
         moduleManager.register(new BtnNetworkOnline(this, profile));
         moduleManager.register(new DownloaderCIDRBlockList(this, profile));

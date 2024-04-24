@@ -195,60 +195,6 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 </details>
 
-### 主动探测
-
-此模块允许 PeerBanHelper 除了被动的从下载器获取数据外主动出击。  
-通常恶意客户端的攻击者会[使用脚本来批量部署攻击服务器并开放一个特定端口用于批量管理](https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8759734)。这给了我们通过特征识别恶意攻击者的机会。  
-主动探测（ActiveProbing）模块能够向连接到您的下载的 Peer 执行 ICMP Ping、TCP 连通性测试以及 HTTP(S) 请求，并根据连通性和 HTTP 状态码封禁 Peer。
-
-<details>
-
-<summary>查看示例配置文件</summary>
-
-```yaml
-  # 主动探测
-  # 一些批量部署的恶意客户端的 WebUI/System Dashboard/或者你发现的其它特征服务 通常被固定在一个特定端口上以便批量管理
-  # 此功能将尝试发送请求到 Peer 的指定端口以主动探测这些特征服务
-  # 如果对端响应了我们的请求状态码，Peer 将被封禁
-  # 注意：这只是一个临时解决方案，通常不建议使用
-  active-probing:
-    # 默认情况下禁用
-    # 启用此功能将导致运行内存 (RAM) 的使用量显著上升
-    enabled: false
-    # 最大允许的缓存条目
-    # 过小的值将影响性能，过大的值将消耗更多 RAM
-    # 最好设置为你的【所有】下载器的最大连接数的 3 倍
-    max-cached-entry: 3000
-    # 当多久没有使用到此缓存条目时，应将其从内存中移出？
-    # 单位：秒，默认值：1小时（28800）
-    expire-after-no-access: 28800
-    # 主动探测超时，最好设置为一个大于 1000 但小于 5000 的值。
-    # 过大的值将影响封禁速度
-    # 过小的值将导致模块完全失效
-    # 检测时将多预留 5 毫秒用于处理返回值
-    # 单位：毫秒
-    timeout: 3000
-    # 支持下面的格式
-    # TCP@12345 - 使用 TCP 方式探测指定的 12345 端口是否开放，若开放则封禁
-    # PING - 使用 PING 探测对端是否响应 ICMP 包，若响应则封禁（不推荐使用，因为有相当多的 Seedbox 和软路由会响应 ICMP。但是这是一个检测是否为家用 IP 的好方法，因为家用网关设备通常不响应 ICMP 包）
-    # HTTP@/subpath/subpath2@12345@200 向 http://peer-ip:12345/subpath/subpath2 发送一个 HTTP 请求，如果对端使用 200 响应了此 HTTP 请求，则封禁；注：请求会跟随30x重定向
-    #       (1) /subpath/subpath2 - 路径参数，用于参与构造 HTTP 请求的 URL，你也可以设置为空格，这样就不会添加到 URL 中
-    #                         (2) 12345 - 端口号，你也可以设为空格 （如：HTTP@/subpath/subpath2@ @200），这样 PBH 就不会在 URL 中添加端口号
-    #                               (3) 200 - HTTP 状态码，只有响应您指定的状态码，此规则才生效。你也可以设置为全大写的 ANY 来匹配所有状态码。有关状态码的更多信息，参见：https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
-    # HTTPS@/subpath/subpath2@12345@200@true - 与 HTTP 的几乎相同，但使用 HTTPS 方式访问
-    #       (1) /subpath/subpath2 - 路径参数，用于参与构造 HTTP 请求的 URL，你也可以设置为空格，这样就不会添加到 URL 中
-    #                         (2) 12345 - 端口号，你也可以设为空格 （如：HTTPS@/subpath/subpath2@ @200），这样 PBH 就不会在 URL 中添加端口号
-    #                               (3) 200 - HTTP 状态码，只有响应您指定的状态码，此规则才生效。你也可以设置为全大写的 ANY 来匹配所有状态码。有关状态码的更多信息，参见：https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
-    #                                    (4) true - 忽略 SSL 证书错误，设置为 false 将在请求时验证 SSL 证书
-    probing:
-      - HTTP@/subpath/subpath2@80@200 # https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8761335
-      - HTTPS@/subpath/subpath2@443@200@true # https://github.com/anacrolix/torrent/discussions/891#discussioncomment-8761335
-    # 对 HTTP(S) 探测请求指定 User-Agent
-    http-probing-user-agent: "PeerBanHelper-PeerActiveProbing/%s (github.com/Ghost-chu/PeerBanHelper)"
-```
-
-</details>
-
 ### 自动 IP 段封禁
 
 批量部署的恶意客户端通常在同一个 IP 段下，PBH 现在允许用户分别为 IPv4 和 IPv6 设置一个前缀长度。在封禁发现的吸血客户端时，会将其所处 IP 地址的指定范围的其余 IP 地址均加入屏蔽列表，实现链式封禁。
