@@ -13,11 +13,12 @@ import inet.ipaddr.IPAddressString;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class IPBlackList extends AbstractFeatureModule {
-    private List<String> ips;
+    private List<IPAddress> ips;
     private List<Integer> ports;
 
     public IPBlackList(PeerBanHelperServer server, YamlConfiguration profile) {
@@ -55,7 +56,13 @@ public class IPBlackList extends AbstractFeatureModule {
     }
 
     private void reloadConfig() {
-        this.ips = getConfig().getStringList("ips");
+        this.ips = new ArrayList<>();
+        for (String s : getConfig().getStringList("ips")) {
+            IPAddress ipAddress = new IPAddressString(s).getAddress();
+            if (ipAddress != null) {
+                this.ips.add(ipAddress);
+            }
+        }
         this.ports = getConfig().getIntList("ports");
     }
 
@@ -72,9 +79,7 @@ public class IPBlackList extends AbstractFeatureModule {
         if (pa.isIPv4Convertible()) {
             pa = pa.toIPv4();
         }
-        for (String ip : ips) {
-            IPAddress ra = new IPAddressString(ip).getAddress();
-            if (ra == null) continue;
+        for (IPAddress ra : ips) {
             if (ra.equals(pa) || ra.contains(pa)) {
                 return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
             }
