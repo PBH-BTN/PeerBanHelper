@@ -105,4 +105,7 @@ public class Lang {
     public static String BTN_RECONFIGURE_CHECK_FAILED = "[BTN 网络] 检查重配置状态失败：{}";
     public static String BTN_SHUTTING_DOWN = "[BTN 网络] 正在关闭 BTN 模块……";
     public static String BTN_RECONFIGURING = "[BTN 网络] 发现服务器基本配置更新，正在重新配置 BTN 网络模块……";
+    public static String RULE_ENGINE_PARSE_FAILED = "[规则引擎] 规则 {} 解析失败，解析过程中出现错误";
+    public static String RULE_ENGINE_INVALID_RULE = "规则 {} 的参数 {} 无效，仅接受以下值：{}";
+    public static String RULE_ENGINE_NOT_A_RULE = "[规则引擎] 表达式 {} 不是一个有效规则";
 }

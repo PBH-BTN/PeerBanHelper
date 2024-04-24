@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.btn.ability;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRule;
+import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
@@ -29,7 +30,7 @@ public class BtnAbilityRules implements BtnAbility {
     private final long randomInitialDelay;
     private final File btnCacheFile = new File(Main.getDataDirectory(), "btn.cache");
     @Getter
-    private BtnRule btnRule;
+    private BtnRuleParsed btnRule;
 
     public BtnAbilityRules(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
@@ -46,7 +47,8 @@ public class BtnAbilityRules implements BtnAbility {
             btnCacheFile.createNewFile();
         } else {
             try {
-                this.btnRule = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRule.class);
+                BtnRule btnRule = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRule.class);
+                this.btnRule = new BtnRuleParsed(btnRule);
             } catch (Throwable ignored) {
             }
         }
@@ -80,7 +82,8 @@ public class BtnAbilityRules implements BtnAbility {
                     if (r.statusCode() != 200) {
                         log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
                     } else {
-                        this.btnRule = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
+                        BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
+                        this.btnRule = new BtnRuleParsed(btr);
                         try {
                             Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
                         } catch (IOException ignored) {

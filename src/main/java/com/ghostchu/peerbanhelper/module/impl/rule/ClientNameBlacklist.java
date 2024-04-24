@@ -7,7 +7,9 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.RuleParseHelper;
+import com.ghostchu.peerbanhelper.util.rule.Rule;
+import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
+import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,8 +17,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class ClientNameBlacklist extends AbstractFeatureModule {
-    private List<String> bannedPeers;
-    private List<String> excludePeers;
+    private List<Rule> bannedPeers;
 
     public ClientNameBlacklist(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -53,21 +54,14 @@ public class ClientNameBlacklist extends AbstractFeatureModule {
     }
 
     private void reloadConfig() {
-        this.bannedPeers = getConfig().getStringList("banned-client-name");
-        this.bannedPeers = getConfig().getStringList("exclude-client-name");
+        this.bannedPeers = RuleParser.parse(getConfig().getStringList("banned-client-name"));
     }
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        for (String rule : excludePeers) {
-            if (RuleParseHelper.match(peer.getClientName(), rule)) {
-                return new BanResult(this, PeerAction.SKIP, "skip: " + rule);
-            }
-        }
-        for (String rule : bannedPeers) {
-            if (RuleParseHelper.match(peer.getClientName(), rule)) {
-                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, rule));
-            }
+        RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
+        if (matchResult.hit()) {
+            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.rule()));
         }
         return new BanResult(this, PeerAction.NO_ACTION, "No matches");
     }

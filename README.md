@@ -64,22 +64,25 @@ PeerBanHelper 主要由以下几个功能模块组成：
     # regex - 正则匹配
     # length - 长度匹配，规则内容填写整数形式的长度
     banned-peer-id:
-      - "startsWith@-XL" # Xunlei 万恶之源
-      - "startsWith@-SD"
-      - "startsWith@-XF"
-      - "startsWith@-QD" # QQDownload QQ旋风，假进度
-      - "startsWith@-BN"
-      - "startsWith@-DL"
-      - "startsWith@-TS" # Torrentstorm
-      - "startsWith@-FG" # FlashGet 快车
-      - "startsWith@-TT" # 土豆，流媒体播放器
-      - "startsWith@-NX" # Net Transport
-      - "startsWith@-SP" # 比特精灵，默认启用反吸血导致不给其他客户端上传
-      #- "startWith@FD6" # Free Download Manager，非标准 PeerId
-      - "startsWith@-GT0002"  # BaiduNetdisk Offline Download
-      - "startsWith@-GT0003"  # BaiduNetdisk Offline Download
-      - "startsWith@-DT" # 恶意客户端 https://github.com/anacrolix/torrent/discussions/891
-      - "contains@cacao"
+      - '{"method":"CONTAINS","content":"-xl0019","success":"NEGATIVE"}' # 排除迅雷 0019
+      - '{"method":"STARTS_WITH","content":"-xl"}'
+      - '{"method":"STARTS_WITH","content":"-sd"}'
+      - '{"method":"STARTS_WITH","content":"-xf"}'
+      - '{"method":"STARTS_WITH","content":"-qd"}'
+      - '{"method":"STARTS_WITH","content":"-bn"}'
+      - '{"method":"STARTS_WITH","content":"-dl"}'
+      - '{"method":"STARTS_WITH","content":"-ts"}'
+      - '{"method":"STARTS_WITH","content":"-fg"}'
+      - '{"method":"STARTS_WITH","content":"-tt"}'
+      - '{"method":"STARTS_WITH","content":"-nx"}'
+      - '{"method":"STARTS_WITH","content":"-sp"}'
+      - '{"method":"STARTS_WITH","content":"-gt0002"}'
+      - '{"method":"STARTS_WITH","content":"-gt0003"}'
+      - '{"method":"STARTS_WITH","content":"-dt"}'
+      - '{"method":"STARTS_WITH","content":"-tt"}'
+      - '{"method":"STARTS_WITH","content":"-tt"}'
+      - '{"method":"CONTAINS","content":"cacao"}'
+      - '{"method":"STARTS_WITH","content":"-hp"}'
 ```
 </details>
 
@@ -97,22 +100,24 @@ PeerBanHelper 主要由以下几个功能模块组成：
   client-name-blacklist:
     enabled: true
     banned-client-name:
-      - "startsWith@-XL00"
-      - "contains@Xunlei"
-      - "startsWith@TaiPei-Torrent"
-      - "startsWith@Xfplay"
-      - "startsWith@BitSpirit"
-      - "contains@FlashGet"
-      - "contains@TuDou"
-      - "contains@TorrentStorm"
-      - "contains@QQDownload"
-      - "contains@github.com/anacrolix/torrent" # https://github.com/anacrolix/torrent/discussions/891
-      - "startsWith@qBittorrent/3.3.15" # https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues/432
-      - "startsWith@dt/torrent"
-      - "startsWith@DT"
-      - "startsWith@go.torrent.dev" # BaiduNetdisk 离线下载
-      - "startsWith@github.com/thank423/trafficConsume" # 完完全全的恶意客户端
-      #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
+      - '{"method":"STARTS_WITH","content":"-xl00"}'
+      - '{"method":"CONTAINS","content":"xunlei"}'
+      - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
+      - '{"method":"STARTS_WITH","content":"xfplay"}'
+      - '{"method":"STARTS_WITH","content":"bitspirit"}'
+      - '{"method":"CONTAINS","content":"flashget"}'
+      - '{"method":"CONTAINS","content":"tudou"}'
+      - '{"method":"CONTAINS","content":"torrentstorm"}'
+      - '{"method":"CONTAINS","content":"qqdownload"}'
+      - '{"method":"CONTAINS","content":"github.com/anacrolix/torrent"}'
+      - '{"method":"STARTS_WITH","content":"qbittorrent/3.3.15"}'
+      - '{"method":"STARTS_WITH","content":"dt/torrent"}'
+      - '{"method":"STARTS_WITH","content":"dt"}'
+      - '{"method":"STARTS_WITH","content":"go.torrent.dev"}'
+      - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
+      - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
+      - '{"method":"STARTS_WITH","content":"hp/torrent"}'
+      - '{"method":"STARTS_WITH","content":"hp"}'
 ```
 
 </details>

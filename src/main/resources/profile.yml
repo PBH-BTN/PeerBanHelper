@@ -1,3 +1,4 @@
+config-version: 2
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 封禁持续时间（单位：毫秒）
@@ -8,37 +9,40 @@ module:
   # 此模块对 Transmission 不起效
   peer-id-blacklist:
     enabled: true
-    # 字符串匹配规则：
-    # <匹配方式>@<规则内容> 不区分大小写
-    # startsWith - 匹配开头
-    # endsWith - 匹配结尾
-    # contains - 包含子串
-    # equals - 完全匹配
-    # regex - 正则匹配
-    # length - 长度匹配，规则内容填写整数形式的长度
-    # 如果要取反，请在最前面添加 !
-    # 如：!<匹配方式>@<规则内容>
+    # method = 匹配方式
+    #  + STARTS_WITH = 匹配开头
+    #  + ENDS_WITH = 匹配结尾
+    #  + CONTAINS = 匹配包含
+    #  + EQUALS = 匹配相同
+    #  + REGEX = 批评日正则表达式
+    # content = 匹配的内容（忽略大小写）
+    # if = 表达式控制其，当 if 的表达式为 true 时，则检查此规则；否则此规则被忽略。
+    #  + if 表达式可以为 true/false, 1/0 或者一个嵌套的规则
+    # success = 匹配成功返回的行为代码
+    #  + POSITIVE = 在 if 中代表 true，在规则中代表 BAN（封禁）
+    #  + NEGATIVE = 在 if 中代表 false，在规则中代表 SKIP（排除）
+    #  + NEUTRAL = 在 if 中代表 true，在规则中代表 NO_ACTION（默认行为）
+    # failure = 匹配失败返回的行为代码（与上相同）
     # 规则从上到下执行
     banned-peer-id:
-      - "startsWith@-XL" # Xunlei 万恶之源
-      - "startsWith@-SD"
-      - "startsWith@-XF"
-      - "startsWith@-QD" # QQDownload QQ旋风，假进度
-      - "startsWith@-BN"
-      - "startsWith@-DL"
-      - "startsWith@-TS" # Torrentstorm
-      - "startsWith@-FG" # FlashGet 快车
-      - "startsWith@-TT" # 土豆，流媒体播放器
-      - "startsWith@-NX" # Net Transport
-      - "startsWith@-SP" # 比特精灵，默认启用反吸血导致不给其他客户端上传
-      #- "startWith@FD6" # Free Download Manager，非标准 PeerId
-      - "startsWith@-GT0002"  # BaiduNetdisk Offline Download
-      - "startsWith@-GT0003"  # BaiduNetdisk Offline Download
-      - "startsWith@-DT" # 恶意客户端 https://github.com/anacrolix/torrent/discussions/891
-      - "startsWith@-TT"
-      - "startsWith@-tt"
-      - "contains@cacao"
-      - "startsWith@-HP" # dt 变种
+      - '{"method":"STARTS_WITH","content":"-xl"}'
+      - '{"method":"STARTS_WITH","content":"-sd"}'
+      - '{"method":"STARTS_WITH","content":"-xf"}'
+      - '{"method":"STARTS_WITH","content":"-qd"}'
+      - '{"method":"STARTS_WITH","content":"-bn"}'
+      - '{"method":"STARTS_WITH","content":"-dl"}'
+      - '{"method":"STARTS_WITH","content":"-ts"}'
+      - '{"method":"STARTS_WITH","content":"-fg"}'
+      - '{"method":"STARTS_WITH","content":"-tt"}'
+      - '{"method":"STARTS_WITH","content":"-nx"}'
+      - '{"method":"STARTS_WITH","content":"-sp"}'
+      - '{"method":"STARTS_WITH","content":"-gt0002"}'
+      - '{"method":"STARTS_WITH","content":"-gt0003"}'
+      - '{"method":"STARTS_WITH","content":"-dt"}'
+      - '{"method":"STARTS_WITH","content":"-tt"}'
+      - '{"method":"STARTS_WITH","content":"-tt"}'
+      - '{"method":"CONTAINS","content":"cacao"}'
+      - '{"method":"STARTS_WITH","content":"-hp"}'
     # 排除列表
     # 这些规则优先级更高，一旦匹配到任何一条，则直接跳过其他所有规则检查，并放行此 Peer
     exclude-peer-id: [ ]
@@ -46,24 +50,24 @@ module:
   client-name-blacklist:
     enabled: true
     banned-client-name:
-      - "startsWith@-XL00"
-      - "contains@Xunlei"
-      - "startsWith@TaiPei-Torrent"
-      - "startsWith@Xfplay"
-      - "startsWith@BitSpirit"
-      - "contains@FlashGet"
-      - "contains@TuDou"
-      - "contains@TorrentStorm"
-      - "contains@QQDownload"
-      - "contains@github.com/anacrolix/torrent" # https://github.com/anacrolix/torrent/discussions/891
-      - "startsWith@qBittorrent/3.3.15" # https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues/432
-      - "startsWith@dt/torrent"
-      - "startsWith@DT"
-      - "startsWith@go.torrent.dev" # BaiduNetdisk 离线下载
-      - "startsWith@github.com/thank423/trafficConsume" # 完完全全的恶意客户端
-      - "startsWith@Taipei-Torrent" # https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues/530#issuecomment-2017681942
-      - "startsWith@hp/torrent"
-      - "startsWith@HP"
+      - '{"method":"STARTS_WITH","content":"-xl00"}'
+      - '{"method":"CONTAINS","content":"xunlei"}'
+      - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
+      - '{"method":"STARTS_WITH","content":"xfplay"}'
+      - '{"method":"STARTS_WITH","content":"bitspirit"}'
+      - '{"method":"CONTAINS","content":"flashget"}'
+      - '{"method":"CONTAINS","content":"tudou"}'
+      - '{"method":"CONTAINS","content":"torrentstorm"}'
+      - '{"method":"CONTAINS","content":"qqdownload"}'
+      - '{"method":"CONTAINS","content":"github.com/anacrolix/torrent"}'
+      - '{"method":"STARTS_WITH","content":"qbittorrent/3.3.15"}'
+      - '{"method":"STARTS_WITH","content":"dt/torrent"}'
+      - '{"method":"STARTS_WITH","content":"dt"}'
+      - '{"method":"STARTS_WITH","content":"go.torrent.dev"}'
+      - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
+      - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
+      - '{"method":"STARTS_WITH","content":"hp/torrent"}'
+      - '{"method":"STARTS_WITH","content":"hp"}'
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
     # 排除列表
     # 这些规则优先级更高，一旦匹配到任何一条，则直接跳过其他所有规则检查，并放行此 Peer
