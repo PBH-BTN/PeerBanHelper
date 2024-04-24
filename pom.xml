@@ -485,11 +485,5 @@
             <artifactId>methanol</artifactId>
             <version>1.7.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.graalvm.sdk</groupId>
-            <artifactId>nativeimage</artifactId>
-            <version>24.0.1</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 </project>

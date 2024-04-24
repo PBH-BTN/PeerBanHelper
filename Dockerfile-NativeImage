@@ -1,9 +1,0 @@
-FROM debian:12-slim
-LABEL MAINTAINER="https://github.com/Ghost-chu/PeerBanHelper"
-WORKDIR /app
-COPY ./docker-entrypoint-native.sh /app/docker-entrypoint.sh
-COPY ./target/peerbanhelper-binary /app/
-
-RUN chmod +x /app/docker-entrypoint.sh && chmod +x /app/peerbanhelper-binary
-
-ENTRYPOINT ["/app/docker-entrypoint.sh"]

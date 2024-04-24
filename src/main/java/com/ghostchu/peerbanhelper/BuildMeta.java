@@ -10,7 +10,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 @AllArgsConstructor
 public class BuildMeta {
     private String version = "unknown";
-    private boolean nativeImage;
     private String os;
     private String branch;
     private String commit;
@@ -21,7 +20,6 @@ public class BuildMeta {
         this.branch = configuration.getString("git.branch");
         this.commit = configuration.getString("git.commit.id.commit-id");
         this.abbrev = configuration.getString("git.commit.id.abbrev");
-        this.nativeImage = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
         this.os = System.getProperty("os.name");
     }
 
