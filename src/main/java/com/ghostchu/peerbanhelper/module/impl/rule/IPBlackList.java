@@ -81,7 +81,7 @@ public class IPBlackList extends AbstractFeatureModule {
         }
         for (IPAddress ra : ips) {
             if (ra.equals(pa) || ra.contains(pa)) {
-                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ip));
+                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ra));
             }
         }
         return new BanResult(this, PeerAction.NO_ACTION, "No matches");
