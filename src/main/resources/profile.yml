@@ -12,11 +12,15 @@ module:
     # method = 匹配方式
     #  + STARTS_WITH = 匹配开头
     #  + ENDS_WITH = 匹配结尾
+    #  + LENGTH = 匹配字符串长度
+    #     + 支持的额外字段
+    #       * min = 最小长度
+    #       * max = 最大长度
     #  + CONTAINS = 匹配包含
     #  + EQUALS = 匹配相同
     #  + REGEX = 批评日正则表达式
     # content = 匹配的内容（忽略大小写）
-    # if = 表达式控制其，当 if 的表达式为 true 时，则检查此规则；否则此规则被忽略。
+    # if = 表达式控制器，当 if 的表达式为 true 时，则检查此规则；否则此规则被忽略。
     #  + if 表达式可以为 true/false, 1/0 或者一个嵌套的规则
     # success = 匹配成功返回的行为代码
     #  + POSITIVE = 在 if 中代表 true，在规则中代表 BAN（封禁）
