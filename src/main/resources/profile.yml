@@ -18,7 +18,7 @@ module:
     #       * max = 最大长度
     #  + CONTAINS = 匹配包含
     #  + EQUALS = 匹配相同
-    #  + REGEX = 批评日正则表达式
+    #  + REGEX = 匹配正则表达式
     # content = 匹配的内容（忽略大小写）
     # if = 表达式控制器，当 if 的表达式为 true 时，则检查此规则；否则此规则被忽略。
     #  + if 表达式可以为 true/false, 1/0 或者一个嵌套的规则
