@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.btn;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
@@ -61,13 +62,18 @@ public class BtnRuleParsed {
 
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
+                        Main.getServer().getHitRateMetric().addQuery(this);
                         IPAddress contentAddr = IPAddressUtil.getIPAddress(content);
-                        return (ipAddress.contains(contentAddr) || ipAddress.equals(contentAddr)) ? MatchResult.TRUE : MatchResult.DEFAULT;
+                        MatchResult result = (ipAddress.contains(contentAddr) || ipAddress.equals(contentAddr)) ? MatchResult.TRUE : MatchResult.DEFAULT;
+                        if (result != MatchResult.DEFAULT) {
+                            Main.getServer().getHitRateMetric().addHit(this);
+                        }
+                        return result;
                     }
 
                     @Override
                     public Map<String, Object> metadata() {
-                        return Map.of("rule", ipAddress);
+                        return Map.of("rule", ipAddress.toString());
                     }
                 });
             }
