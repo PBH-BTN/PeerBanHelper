@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.metric;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 
-public interface Metrics {
+public interface BasicMetrics {
     long getCheckCounter();
     long getPeerBanCounter();
     long getPeerUnbanCounter();

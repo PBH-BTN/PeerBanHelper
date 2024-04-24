@@ -62,7 +62,6 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
 
     }
 
-
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         BtnNetwork manager = getServer().getBtnNetwork();
@@ -98,11 +97,9 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
 
     private BanResult checkPortRule(BtnRuleParsed rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         for (String category : rule.getPortRules().keySet()) {
-            List<Integer> rules = rule.getPortRules().get(category);
-            for (Integer ruleContent : rules) {
-                if (peer.getAddress().getPort() == ruleContent) {
-                    return new BanResult(this, PeerAction.BAN, category + "-" + ruleContent, String.format(Lang.MODULE_BTN_BAN, "Port", category, ruleContent));
-                }
+            RuleMatchResult matchResult = RuleParser.matchRule(rule.getPortRules().get(category), peer.getPeerId());
+            if (matchResult.hit()) {
+                return new BanResult(this, PeerAction.BAN, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule()));
             }
         }
         return null;
@@ -114,7 +111,7 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
             List<Rule> rules = rule.getClientNameRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
             if (matchResult.hit()) {
-                return new BanResult(this, PeerAction.BAN, category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule()));
+                return new BanResult(this, PeerAction.BAN, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule()));
             }
         }
         return null;
@@ -126,7 +123,7 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
             List<Rule> rules = rule.getPeerIdRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
             if (matchResult.hit()) {
-                return new BanResult(this, PeerAction.BAN, category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule()));
+                return new BanResult(this, PeerAction.BAN, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule()));
             }
         }
         return null;
@@ -140,15 +137,11 @@ public class BtnNetworkOnline extends AbstractFeatureModule {
             pa = pa.toIPv4();
         }
         for (String category : rule.getIpRules().keySet()) {
-            List<IPAddress> rules = rule.getIpRules().get(category);
-            for (IPAddress ra : rules) {
-                if (ra.equals(pa) || ra.contains(pa)) {
-                    return new BanResult(this, PeerAction.BAN, category + "-" + ra, String.format(Lang.MODULE_BTN_BAN, "IP", category, ra));
-                }
+            RuleMatchResult matchResult = RuleParser.matchRule(rule.getIpRules().get(category), pa.toString());
+            if (matchResult.hit()) {
+                return new BanResult(this, PeerAction.BAN, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "IP", category, pa));
             }
         }
         return null;
     }
-
-
 }

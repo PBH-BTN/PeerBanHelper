@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.metric.Metrics;
+import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutorService;
 
 public class PBHMetrics extends AbstractFeatureModule implements PBHAPI {
 
-    private Metrics metrics;
+    private BasicMetrics metrics;
 
     public PBHMetrics(PeerBanHelperServer server, YamlConfiguration profile) {
        super(server, profile);

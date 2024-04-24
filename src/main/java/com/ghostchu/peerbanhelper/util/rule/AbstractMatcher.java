@@ -3,10 +3,8 @@ package com.ghostchu.peerbanhelper.util.rule;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
-public class AbstractMatcher implements Rule {
+public abstract class AbstractMatcher extends BasicRule {
     private Rule condition;
-    private long queryCounter;
-    private long hitCounter;
 
     public AbstractMatcher(JsonObject rule) {
         if (rule.has("if")) {
@@ -16,31 +14,19 @@ public class AbstractMatcher implements Rule {
 
     @Override
     public @NotNull MatchResult match(@NotNull String content) {
+        recordQuery();
         if (condition != null) {
             if (condition.match(content) == MatchResult.NEGATIVE) {
+                recordHit();
                 return MatchResult.NEGATIVE;
             }
         }
-        return MatchResult.NEUTRAL;
+        MatchResult r = match0(content);
+        if (r != MatchResult.NEUTRAL) {
+            recordHit();
+        }
+        return r;
     }
 
-    @Override
-    public long getQueryCounter() {
-        return queryCounter;
-    }
-
-    @Override
-    public void addQueryCount() {
-        queryCounter++;
-    }
-
-    @Override
-    public long getHitCounter() {
-        return hitCounter;
-    }
-
-    @Override
-    public void addHitCount() {
-        hitCounter++;
-    }
+    public abstract @NotNull MatchResult match0(@NotNull String content);
 }

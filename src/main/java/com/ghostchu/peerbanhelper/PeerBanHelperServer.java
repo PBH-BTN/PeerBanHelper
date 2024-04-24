@@ -10,7 +10,8 @@ import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
-import com.ghostchu.peerbanhelper.metric.Metrics;
+import com.ghostchu.peerbanhelper.metric.BasicMetrics;
+import com.ghostchu.peerbanhelper.metric.HitRateMetric;
 import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
@@ -64,7 +65,9 @@ public class PeerBanHelperServer {
     private final ExecutorService checkBanExecutor;
     private final ExecutorService downloaderApiExecutor;
     @Getter
-    private Metrics metrics;
+    private BasicMetrics metrics;
+    @Getter
+    private HitRateMetric hitRateMetric = new HitRateMetric();
     private DatabaseManager databaseManager;
     @Getter
     private DatabaseHelper databaseHelper;

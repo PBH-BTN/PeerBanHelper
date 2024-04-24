@@ -1,11 +1,11 @@
 package com.ghostchu.peerbanhelper.metric.impl.inmemory;
 
-import com.ghostchu.peerbanhelper.metric.Metrics;
+import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 
 // 简易记录，后续看情况添加 SQLite 数据库记录更详细的信息
-public class InMemoryMetrics implements Metrics {
+public class InMemoryMetrics implements BasicMetrics {
     private long checks = 0;
     private long bans = 0;
     private long unbans = 0;

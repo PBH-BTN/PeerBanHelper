@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.metric.impl.persist;
 
 import com.ghostchu.peerbanhelper.database.BanLog;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
-import com.ghostchu.peerbanhelper.metric.Metrics;
+import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -12,9 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.SQLException;
 
 @Slf4j
-public class PersistMetrics implements Metrics {
+public class PersistMetrics implements BasicMetrics {
     private final DatabaseHelper db;
-    private final Metrics inMemory = new InMemoryMetrics();
+    private final BasicMetrics inMemory = new InMemoryMetrics();
 
     public PersistMetrics(DatabaseHelper db) {
         this.db = db;

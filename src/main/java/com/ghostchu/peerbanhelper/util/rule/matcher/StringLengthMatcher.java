@@ -24,10 +24,7 @@ public class StringLengthMatcher extends AbstractMatcher {
     }
 
     @Override
-    public @NotNull MatchResult match(@NotNull String content) {
-        if (super.match(content) == MatchResult.NEGATIVE) {
-            return MatchResult.NEUTRAL;
-        }
+    public @NotNull MatchResult match0(@NotNull String content) {
         int length = content.length();
         return (length >= min && length <= max) ? this.success : this.failure;
     }

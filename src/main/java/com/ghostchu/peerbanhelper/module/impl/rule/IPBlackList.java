@@ -10,16 +10,22 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
+import lombok.Getter;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
+@Getter
 public class IPBlackList extends AbstractFeatureModule {
     private List<IPAddress> ips;
     private List<Integer> ports;
+    private Map<Object, Map<String, AtomicLong>> counter;
 
     public IPBlackList(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -64,6 +70,7 @@ public class IPBlackList extends AbstractFeatureModule {
             }
         }
         this.ports = getConfig().getIntList("ports");
+        this.counter = new LinkedHashMap<>(ips.size() + ports.size());
     }
 
     @Override
@@ -86,6 +93,5 @@ public class IPBlackList extends AbstractFeatureModule {
         }
         return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No matches");
     }
-
 
 }
