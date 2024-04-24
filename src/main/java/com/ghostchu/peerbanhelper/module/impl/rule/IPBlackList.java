@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
@@ -79,7 +80,7 @@ public class IPBlackList extends AbstractFeatureModule {
         if (ports.contains(peerAddress.getPort())) {
             return new BanResult(this, PeerAction.BAN, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
         }
-        IPAddress pa = new IPAddressString(peerAddress.getIp()).getAddress();
+        IPAddress pa = IPAddressUtil.getIPAddress(peerAddress.getIp());
         if (pa == null) {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Peer Address is null");
         }

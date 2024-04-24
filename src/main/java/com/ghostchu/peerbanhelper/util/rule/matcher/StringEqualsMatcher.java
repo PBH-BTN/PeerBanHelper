@@ -5,28 +5,30 @@ import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public class StringEqualsMatcher extends AbstractMatcher {
     private final String rule;
-    private MatchResult success = MatchResult.POSITIVE;
-    private MatchResult failure = MatchResult.NEUTRAL;
+    private MatchResult hit = MatchResult.TRUE;
+    private MatchResult miss = MatchResult.DEFAULT;
 
     public StringEqualsMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString();
-        if (syntax.has("success")) {
-            this.success = MatchResult.valueOf(syntax.get("success").getAsString());
+        if (syntax.has("hit")) {
+            this.hit = MatchResult.valueOf(syntax.get("hit").getAsString());
         }
-        if (syntax.has("failure")) {
-            this.failure = MatchResult.valueOf(syntax.get("failure").getAsString());
+        if (syntax.has("miss")) {
+            this.miss = MatchResult.valueOf(syntax.get("miss").getAsString());
         }
     }
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         if (content.equalsIgnoreCase(rule)) {
-            return success;
+            return hit;
         } else {
-            return failure;
+            return miss;
         }
     }
 
@@ -34,8 +36,13 @@ public class StringEqualsMatcher extends AbstractMatcher {
     public String toString() {
         return "StringEqualsMatcher{" +
                 "rule='" + rule + '\'' +
-                ", success=" + success +
-                ", failure=" + failure +
+                ", hit=" + hit +
+                ", miss=" + miss +
                 '}';
+    }
+
+    @Override
+    public Map<String, Object> metadata() {
+        return Map.of("rule", rule);
     }
 }

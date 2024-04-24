@@ -37,6 +37,8 @@ public class Main {
     @Getter
     private static BuildMeta meta = new BuildMeta();
     private static final AtomicInteger shutdown = new AtomicInteger(0);
+    @Getter
+    private static PeerBanHelperServer server;
 
     public static void main(String[] args) throws InterruptedException, IOException {
         initBuildMeta();
@@ -89,7 +91,6 @@ public class Main {
                 }
             }
         }
-        PeerBanHelperServer server;
         try {
             server = new PeerBanHelperServer(downloaderList,
                     YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);

@@ -1,9 +1,10 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class AbstractMatcher extends BasicRule {
+public abstract class AbstractMatcher implements Rule {
     private Rule condition;
 
     public AbstractMatcher(JsonObject rule) {
@@ -14,16 +15,16 @@ public abstract class AbstractMatcher extends BasicRule {
 
     @Override
     public @NotNull MatchResult match(@NotNull String content) {
-        recordQuery();
+        Main.getServer().getHitRateMetric().addQuery(this);
         if (condition != null) {
-            if (condition.match(content) == MatchResult.NEGATIVE) {
-                recordHit();
-                return MatchResult.NEGATIVE;
+            if (condition.match(content) == MatchResult.FALSE) {
+                Main.getServer().getHitRateMetric().addHit(this);
+                return MatchResult.FALSE;
             }
         }
         MatchResult r = match0(content);
-        if (r != MatchResult.NEUTRAL) {
-            recordHit();
+        if (r != MatchResult.DEFAULT) {
+            Main.getServer().getHitRateMetric().addHit(this);
         }
         return r;
     }

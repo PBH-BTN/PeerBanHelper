@@ -1,11 +1,10 @@
 package com.ghostchu.peerbanhelper.btn;
 
-import com.ghostchu.peerbanhelper.util.rule.BasicRule;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import inet.ipaddr.IPAddress;
-import inet.ipaddr.IPAddressString;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,10 +34,15 @@ public class BtnRuleParsed {
         portRules.forEach((k, v) -> {
             List<Rule> addresses = new ArrayList<>();
             for (int s : v) {
-                addresses.add(new BasicRule() {
+                addresses.add(new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return Integer.parseInt(content) == s ? MatchResult.POSITIVE : MatchResult.NEUTRAL;
+                        return Integer.parseInt(content) == s ? MatchResult.TRUE : MatchResult.DEFAULT;
+                    }
+
+                    @Override
+                    public Map<String, Object> metadata() {
+                        return Map.of("port", s);
                     }
                 });
             }
@@ -52,13 +56,18 @@ public class BtnRuleParsed {
         raw.forEach((k, v) -> {
             List<Rule> addresses = new ArrayList<>();
             for (String s : v) {
-                addresses.add(new BasicRule() {
-                    final IPAddress ipAddress = new IPAddressString(s).getAddress();
+                addresses.add(new Rule() {
+                    final IPAddress ipAddress = IPAddressUtil.getIPAddress(s);
 
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        IPAddress contentAddr = new IPAddressString(content).getAddress();
-                        return (ipAddress.contains(contentAddr) || ipAddress.equals(contentAddr)) ? MatchResult.POSITIVE : MatchResult.NEUTRAL;
+                        IPAddress contentAddr = IPAddressUtil.getIPAddress(content);
+                        return (ipAddress.contains(contentAddr) || ipAddress.equals(contentAddr)) ? MatchResult.TRUE : MatchResult.DEFAULT;
+                    }
+
+                    @Override
+                    public Map<String, Object> metadata() {
+                        return Map.of("rule", ipAddress);
                     }
                 });
             }

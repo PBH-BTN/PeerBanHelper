@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class RuleParser {
@@ -23,10 +24,10 @@ public class RuleParser {
         RuleMatchResult matchResult = new RuleMatchResult(false, null);
         for (Rule rule : rules) {
             MatchResult result = rule.match(content);
-            if (result == MatchResult.NEGATIVE) { // 规则的优先级最高
+            if (result == MatchResult.FALSE) { // 规则的优先级最高
                 return new RuleMatchResult(false, rule);
             }
-            if (result == MatchResult.POSITIVE) { // 其次，可被覆盖
+            if (result == MatchResult.TRUE) { // 其次，可被覆盖
                 matchResult = new RuleMatchResult(true, rule);
             }
         }
@@ -39,7 +40,12 @@ public class RuleParser {
             return new Rule() {
                 @Override
                 public @NotNull MatchResult match(@NotNull String content) {
-                    return MatchResult.POSITIVE;
+                    return MatchResult.TRUE;
+                }
+
+                @Override
+                public Map<String, Object> metadata() {
+                    return Map.of();
                 }
             };
         }
@@ -47,7 +53,12 @@ public class RuleParser {
             return new Rule() {
                 @Override
                 public @NotNull MatchResult match(@NotNull String content) {
-                    return MatchResult.NEUTRAL;
+                    return MatchResult.DEFAULT;
+                }
+
+                @Override
+                public Map<String, Object> metadata() {
+                    return Map.of();
                 }
             };
         }
@@ -57,16 +68,25 @@ public class RuleParser {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsBoolean() ? MatchResult.POSITIVE : MatchResult.NEGATIVE;
+                        return primitive.getAsBoolean() ? MatchResult.TRUE : MatchResult.FALSE;
                     }
 
+                    @Override
+                    public Map<String, Object> metadata() {
+                        return Map.of();
+                    }
                 };
             }
             if (primitive.isNumber()) {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsInt() != 0 ? MatchResult.POSITIVE : MatchResult.NEGATIVE;
+                        return primitive.getAsInt() != 0 ? MatchResult.TRUE : MatchResult.FALSE;
+                    }
+
+                    @Override
+                    public Map<String, Object> metadata() {
+                        return Map.of();
                     }
                 };
             }
@@ -75,7 +95,12 @@ public class RuleParser {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
                         String str = primitive.getAsString();
-                        return str.equalsIgnoreCase("true") ? MatchResult.POSITIVE : MatchResult.NEGATIVE;
+                        return str.equalsIgnoreCase("true") ? MatchResult.TRUE : MatchResult.FALSE;
+                    }
+
+                    @Override
+                    public Map<String, Object> metadata() {
+                        return Map.of();
                     }
                 };
             }

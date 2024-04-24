@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.metric;
 
+import com.ghostchu.peerbanhelper.util.rule.Rule;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -7,9 +8,9 @@ import java.util.Map;
 
 public class HitRateMetric {
     @Getter
-    private final Map<Object, HitRateMetricRecorder> hitRateMetric = new HashMap<>();
+    private final Map<Rule, HitRateMetricRecorder> hitRateMetric = new HashMap<>();
 
-    public void addQuery(Object object) {
+    public void addQuery(Rule object) {
         HitRateMetricRecorder recorder = hitRateMetric.get(object);
         if (recorder == null) {
             recorder = new HitRateMetricRecorder();
@@ -18,7 +19,7 @@ public class HitRateMetric {
         hitRateMetric.put(object, recorder);
     }
 
-    public void addHit(Object object) {
+    public void addHit(Rule object) {
         HitRateMetricRecorder recorder = hitRateMetric.get(object);
         if (recorder == null) {
             recorder = new HitRateMetricRecorder();
@@ -26,6 +27,5 @@ public class HitRateMetric {
         recorder.addHitCounter();
         hitRateMetric.put(object, recorder);
     }
-
 
 }

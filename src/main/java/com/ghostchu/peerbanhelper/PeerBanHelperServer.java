@@ -283,6 +283,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new PBHMaxBans(this, profile, databaseHelper));
         moduleManager.register(new PBHMetrics(this, profile));
         moduleManager.register(new PBHMetadata(this, profile));
+        moduleManager.register(new PBHRuleMetrics(this, profile));
     }
 
 
@@ -351,44 +352,75 @@ public class PeerBanHelperServer {
      */
     @NotNull
     public BanResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
-        Object wakeLock = new Object();
-        List<CompletableFuture<Void>> moduleExecutorFutures = new ArrayList<>();
-        List<BanResult> results = new CopyOnWriteArrayList<>();
+        List<BanResult> results = new ArrayList<>();
         for (FeatureModule registeredModule : moduleManager.getModules()) {
-            moduleExecutorFutures.add(CompletableFuture.runAsync(() -> {
-                if (registeredModule.needCheckHandshake() && isHandshaking(peer)) {
-                    return; // 如果模块需要握手检查且peer正在握手 则跳过检查
-                }
-                BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
-                results.add(banResult);
-                synchronized (wakeLock) {
-                    wakeLock.notifyAll();
-                }
-            }, checkBanExecutor));
-        }
-        while (moduleExecutorFutures.stream().anyMatch(future -> !future.isDone())) {
-            synchronized (wakeLock) {
-                try {
-                    wakeLock.wait(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt();
-                }
+            if (registeredModule.needCheckHandshake() && isHandshaking(peer)) {
+                continue; // 如果模块需要握手检查且peer正在握手 则跳过检查
             }
+            BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
+            if (banResult.action() == PeerAction.SKIP) {
+                return banResult;
+            }
+            results.add(banResult);
         }
         BanResult result = new BanResult(null, PeerAction.NO_ACTION, "No matches", "No matches");
         for (BanResult r : results) {
-            if (r.action() == PeerAction.SKIP) {
-                result = r;
-                break; // SKIP 是最高的不可覆盖优先级，提前退出循环
-            }
             if (r.action() == PeerAction.BAN) {
                 result = r;
-                // 不要提前退出循环，BAN 结果可被后面到来的 SKIP 覆盖
+                break;
             }
         }
         return result;
     }
+
+//
+//    /**
+//     * 检查一个在给定 Torrent 上的对等体是否需要被封禁
+//     *
+//     * @param torrent Torrent
+//     * @param peer    对等体
+//     * @return 封禁规则检查结果
+//     */
+//    @NotNull
+//    public BanResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
+//        Object wakeLock = new Object();
+//        List<CompletableFuture<Void>> moduleExecutorFutures = new ArrayList<>();
+//        List<BanResult> results = new CopyOnWriteArrayList<>();
+//        for (FeatureModule registeredModule : moduleManager.getModules()) {
+//            moduleExecutorFutures.add(CompletableFuture.runAsync(() -> {
+//                if (registeredModule.needCheckHandshake() && isHandshaking(peer)) {
+//                    return; // 如果模块需要握手检查且peer正在握手 则跳过检查
+//                }
+//                BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
+//                results.add(banResult);
+//                synchronized (wakeLock) {
+//                    wakeLock.notifyAll();
+//                }
+//            }, checkBanExecutor));
+//        }
+//        while (moduleExecutorFutures.stream().anyMatch(future -> !future.isDone())) {
+//            synchronized (wakeLock) {
+//                try {
+//                    wakeLock.wait(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                    Thread.currentThread().interrupt();
+//                }
+//            }
+//        }
+//        BanResult result = new BanResult(null, PeerAction.NO_ACTION, "No matches", "No matches");
+//        for (BanResult r : results) {
+//            if (r.action() == PeerAction.SKIP) {
+//                result = r;
+//                break; // SKIP 是最高的不可覆盖优先级，提前退出循环
+//            }
+//            if (r.action() == PeerAction.BAN) {
+//                result = r;
+//                // 不要提前退出循环，BAN 结果可被后面到来的 SKIP 覆盖
+//            }
+//        }
+//        return result;
+//    }
 
     /**
      * 获取目前所有被封禁的对等体的集合的拷贝

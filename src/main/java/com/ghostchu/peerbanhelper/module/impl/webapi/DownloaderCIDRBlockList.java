@@ -6,11 +6,11 @@ import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import fi.iki.elonen.NanoHTTPD;
-import inet.ipaddr.IPAddressString;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,7 +39,7 @@ public class DownloaderCIDRBlockList extends AbstractFeatureModule implements PB
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
-            builder.append(new IPAddressString(pair.getKey().getIp()).getAddress().assignPrefixForSingleBlock().toString()).append("\n");
+            builder.append(IPAddressUtil.getIPAddress(pair.getKey().getIp()).assignPrefixForSingleBlock().toString()).append("\n");
         }
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(builder.toString()));
     }

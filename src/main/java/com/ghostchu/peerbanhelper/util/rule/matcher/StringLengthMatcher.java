@@ -5,28 +5,30 @@ import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public class StringLengthMatcher extends AbstractMatcher {
     private final int min;
     private final int max;
-    private MatchResult success = MatchResult.POSITIVE;
-    private MatchResult failure = MatchResult.NEUTRAL;
+    private MatchResult hit = MatchResult.TRUE;
+    private MatchResult miss = MatchResult.DEFAULT;
 
     public StringLengthMatcher(JsonObject syntax) {
         super(syntax);
         this.min = syntax.get("min").getAsInt();
         this.max = syntax.get("max").getAsInt();
-        if (syntax.has("success")) {
-            this.success = MatchResult.valueOf(syntax.get("success").getAsString());
+        if (syntax.has("hit")) {
+            this.hit = MatchResult.valueOf(syntax.get("hit").getAsString());
         }
-        if (syntax.has("failure")) {
-            this.failure = MatchResult.valueOf(syntax.get("failure").getAsString());
+        if (syntax.has("miss")) {
+            this.miss = MatchResult.valueOf(syntax.get("miss").getAsString());
         }
     }
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         int length = content.length();
-        return (length >= min && length <= max) ? this.success : this.failure;
+        return (length >= min && length <= max) ? this.hit : this.miss;
     }
 
     @Override
@@ -34,8 +36,13 @@ public class StringLengthMatcher extends AbstractMatcher {
         return "StringLengthMatcher{" +
                 "min=" + min +
                 ", max=" + max +
-                ", success=" + success +
-                ", failure=" + failure +
+                ", hit=" + hit +
+                ", miss=" + miss +
                 '}';
+    }
+
+    @Override
+    public Map<String, Object> metadata() {
+        return Map.of("min", min, "max", max);
     }
 }
