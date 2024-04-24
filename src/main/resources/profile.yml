@@ -25,7 +25,7 @@ module:
     # hit = 匹配成功返回的行为代码
     #  + TRUE = 在 if 中代表 true，在规则中代表 BAN（封禁）
     #  + FALSE = 在 if 中代表 false，在规则中代表 SKIP（排除）
-    #  + DO_NOTHING = 在 if 中代表 true，在规则中代表 NO_ACTION（默认行为）
+    #  + DEFAULT = 在 if 中代表 true，在规则中代表 NO_ACTION（默认行为）
     # miss = 匹配失败返回的行为代码（与上相同）
     # 规则从上到下执行
     banned-peer-id:
