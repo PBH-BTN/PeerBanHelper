@@ -81,6 +81,9 @@ public class BtnNetwork {
             if (ability.has("submit_bans") && submit) {
                 abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
             }
+            if (ability.has("submit_hitrate") && submit) {
+                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));
+            }
             if (ability.has("rules")) {
                 abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, ability.get("rules").getAsJsonObject()));
             }

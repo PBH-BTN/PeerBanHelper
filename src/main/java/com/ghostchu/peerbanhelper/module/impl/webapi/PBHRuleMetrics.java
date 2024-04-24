@@ -11,7 +11,6 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import fi.iki.elonen.NanoHTTPD;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -45,20 +44,10 @@ public class PBHRuleMetrics extends AbstractFeatureModule implements PBHAPI {
     @Override
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
         Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(metrics.getHitRateMetric());
-        // int pageIndex = Integer.parseInt(session.getParameters().getOrDefault("pageIndex", List.of("0")).get(0));
-        // int pageSize = Integer.parseInt(session.getParameters().getOrDefault("pageSize", List.of("100")).get(0));
         List<RuleData> dat = metric.entrySet().stream()
                 .map(obj -> new RuleData(obj.getKey().getClass().getSimpleName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
-                // .skip(Math.max((((long) pageIndex * pageSize) - 1), 0))
-                // .limit(pageSize)
                 .toList();
-        ;
-//        Map<String, Object> resp = new HashMap<>();
-//        resp.put("size", metric.size());
-////        resp.put("pageIndex", pageIndex);
-////        resp.put("pageSize", pageSize);
-//        resp.put("data", dat);
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.getGson().toJson(dat)));
     }
 
@@ -104,11 +93,4 @@ public class PBHRuleMetrics extends AbstractFeatureModule implements PBHAPI {
         private Map<String, Object> metadata;
     }
 
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    static class BanResponse {
-        private String address;
-        private BanMetadata banMetadata;
-    }
 }
