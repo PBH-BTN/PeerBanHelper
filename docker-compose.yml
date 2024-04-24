@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   peerbanhelper:
-    image: "ghostchu/peerbanhelper:latest-native-linux" # latest-native-linux 请替换为 releases 中的最新版本号
+    image: "ghostchu/peerbanhelper:最新版本号"
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
