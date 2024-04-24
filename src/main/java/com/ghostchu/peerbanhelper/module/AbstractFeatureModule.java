@@ -79,6 +79,6 @@ public abstract class AbstractFeatureModule implements FeatureModule {
      */
     @NotNull
     protected BanResult teapot(){
-        return new BanResult(this, PeerAction.NO_ACTION,"I'm a teapot");
+        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "I'm a teapot");
     }
 }

@@ -35,10 +35,31 @@ public class RuleParser {
 
     public static Rule parse(JsonElement element) {
         if (element == null) {
+            // 虚拟规则不记录数据
             return new Rule() {
                 @Override
                 public @NotNull MatchResult match(@NotNull String content) {
                     return MatchResult.POSITIVE;
+                }
+
+                @Override
+                public long getQueryCounter() {
+                    return 0;
+                }
+
+                @Override
+                public void addQueryCount() {
+
+                }
+
+                @Override
+                public long getHitCounter() {
+                    return 0;
+                }
+
+                @Override
+                public void addHitCount() {
+
                 }
             };
         }
@@ -47,6 +68,26 @@ public class RuleParser {
                 @Override
                 public @NotNull MatchResult match(@NotNull String content) {
                     return MatchResult.NEUTRAL;
+                }
+
+                @Override
+                public long getQueryCounter() {
+                    return 0;
+                }
+
+                @Override
+                public void addQueryCount() {
+
+                }
+
+                @Override
+                public long getHitCounter() {
+                    return 0;
+                }
+
+                @Override
+                public void addHitCount() {
+
                 }
             };
         }
@@ -58,6 +99,26 @@ public class RuleParser {
                     public @NotNull MatchResult match(@NotNull String content) {
                         return primitive.getAsBoolean() ? MatchResult.POSITIVE : MatchResult.NEGATIVE;
                     }
+
+                    @Override
+                    public long getQueryCounter() {
+                        return 0;
+                    }
+
+                    @Override
+                    public void addQueryCount() {
+
+                    }
+
+                    @Override
+                    public long getHitCounter() {
+                        return 0;
+                    }
+
+                    @Override
+                    public void addHitCount() {
+
+                    }
                 };
             }
             if (primitive.isNumber()) {
@@ -65,6 +126,26 @@ public class RuleParser {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
                         return primitive.getAsInt() != 0 ? MatchResult.POSITIVE : MatchResult.NEGATIVE;
+                    }
+
+                    @Override
+                    public long getQueryCounter() {
+                        return 0;
+                    }
+
+                    @Override
+                    public void addQueryCount() {
+
+                    }
+
+                    @Override
+                    public long getHitCounter() {
+                        return 0;
+                    }
+
+                    @Override
+                    public void addHitCount() {
+
                     }
                 };
             }
@@ -74,6 +155,26 @@ public class RuleParser {
                     public @NotNull MatchResult match(@NotNull String content) {
                         String str = primitive.getAsString();
                         return str.equalsIgnoreCase("true") ? MatchResult.POSITIVE : MatchResult.NEGATIVE;
+                    }
+
+                    @Override
+                    public long getQueryCounter() {
+                        return 0;
+                    }
+
+                    @Override
+                    public void addQueryCount() {
+
+                    }
+
+                    @Override
+                    public long getHitCounter() {
+                        return 0;
+                    }
+
+                    @Override
+                    public void addHitCount() {
+
                     }
                 };
             }

@@ -61,7 +61,7 @@ public class AutoRangeBan extends AbstractFeatureModule {
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         if(peer.getPeerId() == null || peer.getPeerId().isEmpty()){
-            return new BanResult(this,PeerAction.NO_ACTION, "Waiting for Bittorrent handshaking.");
+            return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Waiting for Bittorrent handshaking.");
         }
         IPAddress peerAddress = peer.getAddress().getAddress().withoutPrefixLength();
         for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
@@ -77,10 +77,10 @@ public class AutoRangeBan extends AbstractFeatureModule {
                 bannedAddress = bannedAddress.toPrefixBlock(ipv6Prefix);
             }
             if (bannedAddress.contains(peerAddress)) {
-                return new BanResult(this,PeerAction.BAN, String.format(Lang.ARB_BANNED, peerAddress, bannedPeer.getAddress(), addressType));
+                return new BanResult(this, PeerAction.BAN, addressType + " - " + bannedAddress, String.format(Lang.ARB_BANNED, peerAddress, bannedPeer.getAddress(), addressType));
             }
         }
-        return new BanResult(this,PeerAction.NO_ACTION, "All ok!");
+        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "All ok!");
     }
 
 

@@ -78,10 +78,10 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
         final long uploaded = peer.getUploaded();
         final long torrentSize = torrent.getSize();
         if (torrentSize <= 0) {
-            return new BanResult(this, PeerAction.NO_ACTION, Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
+            return new BanResult(this, PeerAction.NO_ACTION, "N/A", Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
         }
         if (torrentSize < torrentMinimumSize) {
-            return new BanResult(this, PeerAction.NO_ACTION, "Skip due the torrent size");
+            return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Skip due the torrent size");
         }
         final double actualProgress = (double) uploaded / torrentSize;
         final double clientProgress = peer.getProgress();
@@ -90,17 +90,17 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             // 下载过量，检查
             long maxAllowedExcessiveThreshold = (long) (torrentSize * excessiveThreshold);
             if (uploaded > maxAllowedExcessiveThreshold) {
-                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, torrentSize, uploaded, maxAllowedExcessiveThreshold));
+                return new BanResult(this, PeerAction.BAN, "Max allowed excessive threshold: " + maxAllowedExcessiveThreshold, String.format(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, torrentSize, uploaded, maxAllowedExcessiveThreshold));
             }
         }
 
         if (actualProgress - clientProgress <= 0) {
-            return new BanResult(this, PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, percent(clientProgress), percent(actualProgress)));
+            return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, percent(clientProgress), percent(actualProgress)));
         }
 
         double difference = Math.abs(actualProgress - clientProgress);
         if (difference > maximumDifference) {
-            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
+            return new BanResult(this, PeerAction.BAN, "Over max Difference: " + difference, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
         }
 
         double rewindAllow = rewindMaximumDifference;
@@ -119,9 +119,9 @@ public class ProgressCheatBlocker extends AbstractFeatureModule {
             progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
             double rewind = lastRecord - peer.getProgress();
             boolean ban = rewind > rewindAllow;
-            return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND,percent( clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindAllow)));
+            return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, "RewindAllow: " + rewindAllow, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindAllow)));
         }
-        return new BanResult(this, PeerAction.NO_ACTION, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
+        return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
     }
 
     private String percent(double d){

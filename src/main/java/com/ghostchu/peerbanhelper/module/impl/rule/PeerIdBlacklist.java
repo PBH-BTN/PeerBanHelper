@@ -62,9 +62,9 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getPeerId());
         if (matchResult.hit()) {
-            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_PID_MATCH_PEER_ID, matchResult.rule()));
+            return new BanResult(this, PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_PID_MATCH_PEER_ID, matchResult.rule()));
         }
-        return new BanResult(this, PeerAction.NO_ACTION, "No matches");
+        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No matches");
     }
 
 

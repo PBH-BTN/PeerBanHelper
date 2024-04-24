@@ -313,7 +313,7 @@ public class PeerBanHelperServer {
                     if (banResult.action() == PeerAction.BAN) {
                         needUpdate.set(true);
                         needRelaunched.add(key);
-                        banPeer(peer.getAddress(), new BanMetadata(banResult.moduleContext().getClass().getName(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.reason()), key, peer);
+                        banPeer(peer.getAddress(), new BanMetadata(banResult.moduleContext().getClass().getName(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.rule(), banResult.reason()), key, peer);
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }
                 }, generalExecutor));
@@ -373,7 +373,7 @@ public class PeerBanHelperServer {
                 }
             }
         }
-        BanResult result = new BanResult(null, PeerAction.NO_ACTION, "No matches");
+        BanResult result = new BanResult(null, PeerAction.NO_ACTION, "No matches", "No matches");
         for (BanResult r : results) {
             if (r.action() == PeerAction.SKIP) {
                 result = r;

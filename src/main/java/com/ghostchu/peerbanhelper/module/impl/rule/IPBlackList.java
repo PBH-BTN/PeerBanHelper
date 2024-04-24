@@ -70,21 +70,21 @@ public class IPBlackList extends AbstractFeatureModule {
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         PeerAddress peerAddress = peer.getAddress();
         if (ports.contains(peerAddress.getPort())) {
-            return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
+            return new BanResult(this, PeerAction.BAN, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
         }
         IPAddress pa = new IPAddressString(peerAddress.getIp()).getAddress();
         if (pa == null) {
-            return new BanResult(this, PeerAction.NO_ACTION, "Peer Address is null");
+            return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Peer Address is null");
         }
         if (pa.isIPv4Convertible()) {
             pa = pa.toIPv4();
         }
         for (IPAddress ra : ips) {
             if (ra.equals(pa) || ra.contains(pa)) {
-                return new BanResult(this, PeerAction.BAN, String.format(Lang.MODULE_IBL_MATCH_IP, ra));
+                return new BanResult(this, PeerAction.BAN, ra.toString(), String.format(Lang.MODULE_IBL_MATCH_IP, ra));
             }
         }
-        return new BanResult(this, PeerAction.NO_ACTION, "No matches");
+        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No matches");
     }
 
 
