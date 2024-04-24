@@ -37,7 +37,7 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
 
     @Override
     public void load() {
-        btnNetwork.getExecuteService().scheduleAtFixedRate(this::submit, new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getExecuteService().scheduleAtFixedRate(this::submit, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void submit() {

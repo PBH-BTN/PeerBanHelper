@@ -42,7 +42,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
     @Override
     public void load() {
         btnNetwork.getServer().getEventBus().register(this);
-        btnNetwork.getExecuteService().scheduleAtFixedRate(this::submit, new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getExecuteService().scheduleAtFixedRate(this::submit, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     @Override
