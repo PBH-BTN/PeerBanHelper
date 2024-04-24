@@ -45,4 +45,5 @@ build/
 /config/
 /data/
 
+src/main/resources/static
 dependency-reduced-pom.xml
