@@ -284,6 +284,7 @@ JAR 文件)
 
 ```bat
 @echo off
+chcp 65001
 title PeerBanHelper
 :main
 java -Xmx256M -XX:+UseSerialGC -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -Dconsole.encoding=UTF-8 -Duser.language=en -Duser.region=US -jar PeerBanHelper.jar
