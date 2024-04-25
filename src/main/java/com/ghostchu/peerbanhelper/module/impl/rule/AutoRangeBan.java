@@ -68,9 +68,12 @@ public class AutoRangeBan extends AbstractFeatureModule {
             peerAddress = peerAddress.toIPv4();
         }
         for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
-            IPAddress bannedAddress = bannedPeer.getAddress().toIPAddress().withoutPrefixLength();
+            IPAddress bannedAddress = bannedPeer.getAddress().withoutPrefixLength();
             if (bannedAddress.isIPv4Convertible()) {
                 bannedAddress = bannedAddress.toIPv4();
+            }
+            if (peerAddress.isIPv4() != bannedAddress.isIPv4()) {
+                continue;
             }
             String addressType = "UNKNOWN";
             if (bannedAddress.isIPv4()) {

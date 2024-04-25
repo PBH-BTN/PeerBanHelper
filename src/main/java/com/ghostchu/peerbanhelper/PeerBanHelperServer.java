@@ -256,7 +256,7 @@ public class PeerBanHelperServer {
                 downloader.setLastStatus(DownloaderLastStatus.ERROR);
                 return null;
             }
-        }, checkBanExecutor);
+        }, downloaderApiExecutor);
     }
 
     /**
@@ -319,7 +319,7 @@ public class PeerBanHelperServer {
         CompletableFuture.allOf(fetchPeerFutures.toArray(new CompletableFuture[0])).join();
         // 多线程检查是否应该封禁 Peers （以优化启用了主动探测的环境下的检查性能）
         List<CompletableFuture<?>> checkPeersBanFutures = new ArrayList<>(map.size());
-        List<PeerAddress> bannedPeers = new ArrayList<>();
+        List<PeerAddress> bannedPeers = new CopyOnWriteArrayList<>();
         map.forEach((key, value) -> {
             peers.addAndGet(value.size());
             for (Peer peer : value) {
@@ -336,10 +336,12 @@ public class PeerBanHelperServer {
                         bannedPeers.add(peer.getAddress());
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }
-                }, generalExecutor));
+                }, checkBanExecutor));
             }
         });
+        long startAt = System.currentTimeMillis();
         CompletableFuture.allOf(checkPeersBanFutures.toArray(new CompletableFuture[0])).join();
+        log.info("[Timing] {}ms", System.currentTimeMillis() - startAt);
         if (!hideFinishLogs) {
             log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
         }
