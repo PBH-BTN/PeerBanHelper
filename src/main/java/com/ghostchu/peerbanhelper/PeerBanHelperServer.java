@@ -339,9 +339,7 @@ public class PeerBanHelperServer {
                 }, checkBanExecutor));
             }
         });
-        long startAt = System.currentTimeMillis();
         CompletableFuture.allOf(checkPeersBanFutures.toArray(new CompletableFuture[0])).join();
-        log.info("[Timing] {}ms", System.currentTimeMillis() - startAt);
         if (!hideFinishLogs) {
             log.info(Lang.CHECK_COMPLETED, downloader.getName(), map.keySet().size(), peers);
         }

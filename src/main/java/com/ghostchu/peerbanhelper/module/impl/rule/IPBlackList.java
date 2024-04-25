@@ -67,6 +67,9 @@ public class IPBlackList extends AbstractFeatureModule {
         for (String s : getConfig().getStringList("ips")) {
             IPAddress ipAddress = new IPAddressString(s).getAddress();
             if (ipAddress != null) {
+                if (ipAddress.isIPv4Convertible()) {
+                    ipAddress = ipAddress.toIPv4();
+                }
                 this.ips.add(ipAddress);
             }
         }
@@ -85,10 +88,7 @@ public class IPBlackList extends AbstractFeatureModule {
             pa = pa.toIPv4();
         }
         for (IPAddress ra : ips) {
-            if (ra.isIPv4Convertible()) {
-                ra = ra.toIPv4();
-            }
-            if (ra.isIPv4() != pa.isIPv4()) {
+            if (ra.isIPv4() != pa.isIPv4()) { // 在上面的规则处统一进行过转换，此处可直接进行检查
                 continue;
             }
             if (ra.equals(pa) || ra.contains(pa)) {

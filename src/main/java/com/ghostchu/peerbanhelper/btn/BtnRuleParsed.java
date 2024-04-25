@@ -38,7 +38,12 @@ public class BtnRuleParsed {
                 addresses.add(new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return Integer.parseInt(content) == s ? MatchResult.TRUE : MatchResult.DEFAULT;
+                        Main.getServer().getHitRateMetric().addQuery(this);
+                        boolean hit = Integer.parseInt(content) == s;
+                        if (hit) {
+                            Main.getServer().getHitRateMetric().addHit(this);
+                        }
+                        return hit ? MatchResult.TRUE : MatchResult.DEFAULT;
                     }
 
                     @Override
@@ -62,30 +67,7 @@ public class BtnRuleParsed {
         raw.forEach((k, v) -> {
             List<Rule> addresses = new ArrayList<>();
             for (String s : v) {
-                addresses.add(new Rule() {
-                    final IPAddress ipAddress = IPAddressUtil.getIPAddress(s);
-
-                    @Override
-                    public @NotNull MatchResult match(@NotNull String content) {
-                        Main.getServer().getHitRateMetric().addQuery(this);
-                        IPAddress contentAddr = IPAddressUtil.getIPAddress(content);
-                        MatchResult result = (ipAddress.contains(contentAddr) || ipAddress.equals(contentAddr)) ? MatchResult.TRUE : MatchResult.DEFAULT;
-                        if (result != MatchResult.DEFAULT) {
-                            Main.getServer().getHitRateMetric().addHit(this);
-                        }
-                        return result;
-                    }
-
-                    @Override
-                    public Map<String, Object> metadata() {
-                        return Map.of("rule", ipAddress.toString());
-                    }
-
-                    @Override
-                    public String matcherName() {
-                        return "BTN-IP";
-                    }
-                });
+                addresses.add(new BtnRuleIpMatcher(IPAddressUtil.getIPAddress(s)));
             }
             rules.put(k, addresses);
         });
@@ -96,5 +78,40 @@ public class BtnRuleParsed {
         Map<String, List<Rule>> rules = new HashMap<>();
         raw.forEach((k, v) -> rules.put(k, RuleParser.parse(v)));
         return rules;
+    }
+
+    public static class BtnRuleIpMatcher implements Rule {
+        private IPAddress ipAddress;
+
+        public BtnRuleIpMatcher(IPAddress ipAddress) {
+            this.ipAddress = ipAddress;
+            if (this.ipAddress.isIPv4Convertible()) {
+                this.ipAddress = this.ipAddress.toIPv4();
+            }
+        }
+
+        @Override
+        public @NotNull MatchResult match(@NotNull String content) {
+            Main.getServer().getHitRateMetric().addQuery(this);
+            IPAddress contentAddr = IPAddressUtil.getIPAddress(content);
+            if (contentAddr.isIPv4Convertible()) {
+                contentAddr = contentAddr.toIPv4();
+            }
+            MatchResult result = (ipAddress.contains(contentAddr) || ipAddress.equals(contentAddr)) ? MatchResult.TRUE : MatchResult.DEFAULT;
+            if (result != MatchResult.DEFAULT) {
+                Main.getServer().getHitRateMetric().addHit(this);
+            }
+            return result;
+        }
+
+        @Override
+        public Map<String, Object> metadata() {
+            return Map.of("ipaddr", this.ipAddress.toString());
+        }
+
+        @Override
+        public String matcherName() {
+            return "BTN-IP";
+        }
     }
 }
