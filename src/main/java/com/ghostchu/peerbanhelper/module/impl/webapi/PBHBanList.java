@@ -46,9 +46,7 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
         if (limit > 0) {
             banResponseList = banResponseList.limit(limit);
         }
-
         String JSON = JsonUtil.prettyPrinting().toJson(banResponseList.toList());
-        System.out.println(JSON);
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JSON));
     }
 
