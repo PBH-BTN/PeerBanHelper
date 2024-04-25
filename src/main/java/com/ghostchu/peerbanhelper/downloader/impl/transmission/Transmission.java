@@ -34,9 +34,9 @@ public class Transmission implements Downloader {
     /*
         API 受限，实际实现起来意义不大
     */
-    public Transmission(String name, String endpoint, String username, String password, String blocklistUrl, boolean verifySSL, HttpClient.Version httpVersion) {
+    public Transmission(String name, String endpoint, String username, String password, String blocklistUrl, boolean verifySSL, HttpClient.Version httpVersion, String rpcUrl) {
         this.name = name;
-        this.client = new TrClient(endpoint + "/transmission/rpc", username, password, verifySSL, httpVersion);
+        this.client = new TrClient(endpoint + rpcUrl, username, password, verifySSL, httpVersion);
         this.endpoint = endpoint;
         this.blocklistUrl = blocklistUrl;
         log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);

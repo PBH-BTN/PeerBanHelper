@@ -1,4 +1,4 @@
-config-version: 2
+config-version: 3
 # 客户端设置
 client:
   # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
@@ -33,6 +33,7 @@ client:
     password: "admin"
     verify-ssl: true
     http-version: "HTTP_1_1"
+    rpc-url: "/transmission/rpc"
 # Http 服务器设置
 server:
   # 监听端口

@@ -14,6 +14,23 @@ public class MainConfigUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 3)
+    public void transmissionCustomRPCUrl() {
+        ConfigurationSection section = conf.getConfigurationSection("client");
+        if (section == null) {
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection downloader = section.getConfigurationSection(key);
+            if (downloader != null) {
+                if (downloader.getString("type", "").equalsIgnoreCase("Transmission")) {
+                    downloader.set("rpc-url", "/transmission/rpc");
+                }
+            }
+        }
+
+    }
+
     @UpdateScript(version = 2)
     public void addPersistBanlist() {
         conf.set("persist.banlist", true);

@@ -74,6 +74,7 @@ public class Main {
             String baPass = downloaderSection.getString("basic-auth.pass");
             String httpVersion = downloaderSection.getString("http-version", "HTTP_1_1");
             boolean incrementBan = downloaderSection.getBoolean("increment-ban");
+            String rpcUrl = downloaderSection.getString("rpc-url");
             HttpClient.Version httpVersionEnum;
             try {
                 httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
@@ -87,7 +88,7 @@ public class Main {
                     log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
                 }
                 case "transmission" -> {
-                    downloaderList.add(new Transmission(client, endpoint, username, password, pbhServerAddress + "/blocklist/transmission", verifySSL, httpVersionEnum));
+                    downloaderList.add(new Transmission(client, endpoint, username, password, pbhServerAddress + "/blocklist/transmission", verifySSL, httpVersionEnum, rpcUrl));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission", client, endpoint);
                 }
             }
