@@ -81,13 +81,16 @@ public class IPBlackList extends AbstractFeatureModule {
             return new BanResult(this, PeerAction.BAN, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
         }
         IPAddress pa = IPAddressUtil.getIPAddress(peerAddress.getIp());
-        if (pa == null) {
-            return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Peer Address is null");
-        }
         if (pa.isIPv4Convertible()) {
             pa = pa.toIPv4();
         }
         for (IPAddress ra : ips) {
+            if (ra.isIPv4Convertible()) {
+                ra = ra.toIPv4();
+            }
+            if (ra.isIPv4() != pa.isIPv4()) {
+                continue;
+            }
             if (ra.equals(pa) || ra.contains(pa)) {
                 return new BanResult(this, PeerAction.BAN, ra.toString(), String.format(Lang.MODULE_IBL_MATCH_IP, ra));
             }
