@@ -56,6 +56,10 @@ public class BtnRuleParsed {
                         return "BTN-Port";
                     }
 
+                    @Override
+                    public String matcherIdentifier() {
+                        return "btn:port";
+                    }
                 });
             }
             rules.put(k, addresses);
@@ -113,6 +117,11 @@ public class BtnRuleParsed {
         @Override
         public String matcherName() {
             return "BTN-IP";
+        }
+
+        @Override
+        public String matcherIdentifier() {
+            return "btn:ip";
         }
     }
 }

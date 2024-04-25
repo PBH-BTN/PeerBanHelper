@@ -47,6 +47,11 @@ public class RuleParser {
                 public Map<String, Object> metadata() {
                     return Map.of();
                 }
+
+                @Override
+                public String matcherIdentifier() {
+                    return "dumb:null";
+                }
             };
         }
         if (element.isJsonNull()) {
@@ -59,6 +64,11 @@ public class RuleParser {
                 @Override
                 public Map<String, Object> metadata() {
                     return Map.of();
+                }
+
+                @Override
+                public String matcherIdentifier() {
+                    return "dumb:jsonnull";
                 }
             };
         }
@@ -75,6 +85,11 @@ public class RuleParser {
                     public Map<String, Object> metadata() {
                         return Map.of();
                     }
+
+                    @Override
+                    public String matcherIdentifier() {
+                        return "dumb:boolean";
+                    }
                 };
             }
             if (primitive.isNumber()) {
@@ -87,6 +102,11 @@ public class RuleParser {
                     @Override
                     public Map<String, Object> metadata() {
                         return Map.of();
+                    }
+
+                    @Override
+                    public String matcherIdentifier() {
+                        return "dumb:number";
                     }
                 };
             }
@@ -101,6 +121,11 @@ public class RuleParser {
                     @Override
                     public Map<String, Object> metadata() {
                         return Map.of();
+                    }
+
+                    @Override
+                    public String matcherIdentifier() {
+                        return "dumb:boolstring";
                     }
                 };
             }

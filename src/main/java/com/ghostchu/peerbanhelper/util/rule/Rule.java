@@ -13,4 +13,6 @@ public interface Rule {
     default String matcherName() {
         return null;
     }
+
+    String matcherIdentifier();
 }

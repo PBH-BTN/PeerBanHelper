@@ -41,6 +41,11 @@ public class StringContainsMatcher extends AbstractMatcher {
     }
 
     @Override
+    public String matcherIdentifier() {
+        return "peerbanhelper:stringcontainsmatcher";
+    }
+
+    @Override
     public String toString() {
         return "StringContainsMatcher{" +
                 "rule='" + rule + '\'' +

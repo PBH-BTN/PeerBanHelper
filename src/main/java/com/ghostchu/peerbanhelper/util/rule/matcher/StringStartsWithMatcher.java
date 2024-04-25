@@ -45,6 +45,11 @@ public class StringStartsWithMatcher extends AbstractMatcher {
     }
 
     @Override
+    public String matcherIdentifier() {
+        return "peerbanhelper:stringstartswithmatcher";
+    }
+
+    @Override
     public @NotNull String matcherName() {
         return Lang.RULE_MATCHER_STRING_STARTS_WITH;
     }

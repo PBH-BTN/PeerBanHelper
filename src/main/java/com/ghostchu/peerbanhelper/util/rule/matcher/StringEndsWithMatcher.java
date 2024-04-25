@@ -50,6 +50,11 @@ public class StringEndsWithMatcher extends AbstractMatcher {
     }
 
     @Override
+    public String matcherIdentifier() {
+        return "peerbanhelper:stringendswithmatcher";
+    }
+
+    @Override
     public Map<String, Object> metadata() {
         return Map.of("rule", rule);
     }

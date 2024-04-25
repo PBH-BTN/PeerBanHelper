@@ -44,6 +44,11 @@ public class StringRegexMatcher extends AbstractMatcher {
     }
 
     @Override
+    public String matcherIdentifier() {
+        return "peerbanhelper:stringregexmatcher";
+    }
+
+    @Override
     public @NotNull String matcherName() {
         return Lang.RULE_MATCHER_STRING_REGEX;
     }

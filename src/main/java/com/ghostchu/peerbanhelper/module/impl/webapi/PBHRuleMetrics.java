@@ -40,17 +40,25 @@ public class PBHRuleMetrics extends AbstractFeatureModule implements PBHAPI {
     @Override
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
         Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(metrics.getHitRateMetric());
+        Map<String, String> dict = new HashMap<>();
         List<RuleData> dat = metric.entrySet().stream()
                 .map(obj -> {
                     String ruleType = obj.getKey().getClass().getName();
                     if (obj.getKey().matcherName() != null) {
                         ruleType = obj.getKey().matcherName();
                     }
-                    return new RuleData(ruleType, obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata());
+                    dict.put(obj.getKey().matcherIdentifier(), ruleType);
+                    return new RuleData(obj.getKey().matcherIdentifier(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata());
                 })
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
                 .toList();
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.getGson().toJson(dat)));
+
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("dict", dict);
+        resp.put("data", dat);
+
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.getGson().toJson(resp)));
     }
 
     @Override

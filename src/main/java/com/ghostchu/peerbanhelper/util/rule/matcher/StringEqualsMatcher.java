@@ -48,6 +48,11 @@ public class StringEqualsMatcher extends AbstractMatcher {
     }
 
     @Override
+    public String matcherIdentifier() {
+        return "peerbanhelper:stringequalsmatcher";
+    }
+
+    @Override
     public Map<String, Object> metadata() {
         return Map.of("rule", rule);
     }

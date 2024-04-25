@@ -48,6 +48,11 @@ public class StringLengthMatcher extends AbstractMatcher {
     }
 
     @Override
+    public String matcherIdentifier() {
+        return "peerbanhelper:stringlengthmatcher";
+    }
+
+    @Override
     public Map<String, Object> metadata() {
         return Map.of("min", min, "max", max);
     }
