@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.FormBodyPublisher;
 import com.github.mizosoft.methanol.Methanol;
@@ -135,6 +136,11 @@ public class QBittorrent implements Downloader {
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+        // QB 很棒，什么都不需要做
+    }
+
+    @Override
+    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<BanMetadata.TorrentWrapper> torrents) {
         // QB 很棒，什么都不需要做
     }
 

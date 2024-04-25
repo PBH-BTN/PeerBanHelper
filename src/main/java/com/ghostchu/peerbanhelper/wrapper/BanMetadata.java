@@ -2,11 +2,15 @@ package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class BanMetadata implements Comparable<BanMetadata> {
     private String context;
     private UUID randomId;
@@ -29,20 +33,19 @@ public class BanMetadata implements Comparable<BanMetadata> {
         this.description = description;
     }
 
-    public BanMetadata() {
-    }
-
     @Override
     public int compareTo(BanMetadata o) {
         return this.randomId.compareTo(o.randomId);
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class TorrentWrapper {
-        private final String id;
-        private final long size;
-        private final String name;
-        private final String hash;
+        private String id;
+        private long size;
+        private String name;
+        private String hash;
 
         public TorrentWrapper(Torrent torrent) {
             this.id = torrent.getId();
@@ -53,13 +56,15 @@ public class BanMetadata implements Comparable<BanMetadata> {
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class PeerWrapper {
-        private final PeerAddressWrapper address;
-        private final String id;
-        private final String clientName;
-        private final long downloaded;
-        private final long uploaded;
-        private final double progress;
+        private PeerAddressWrapper address;
+        private String id;
+        private String clientName;
+        private long downloaded;
+        private long uploaded;
+        private double progress;
 
         public PeerWrapper(Peer peer) {
             this.id = peer.getPeerId();
@@ -72,9 +77,11 @@ public class BanMetadata implements Comparable<BanMetadata> {
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class PeerAddressWrapper {
-        private final int port;
-        private final String ip;
+        private int port;
+        private String ip;
 
         public PeerAddressWrapper(PeerAddress address) {
             this.ip = address.getIp();

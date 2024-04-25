@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,6 +56,14 @@ public interface Downloader extends AutoCloseable {
      * @param torrents Torrent 任务列表
      */
     void relaunchTorrentIfNeeded(Collection<Torrent> torrents);
+
+    /**
+     * 如有需要，重启 Torrent 任务
+     * 有些客户端（如 Transmission）需要重启 Torrent 任务才能断开已连接的 Peers 来使屏蔽列表生效
+     *
+     * @param torrents Torrent 任务列表
+     */
+    void relaunchTorrentIfNeededByTorrentWrapper(Collection<BanMetadata.TorrentWrapper> torrents);
 
     /**
      * 获取客户端最后一次请求的状态

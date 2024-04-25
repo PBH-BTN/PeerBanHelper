@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.client.TrClient;
 import cordelia.client.TypedResponse;
@@ -110,11 +111,15 @@ public class Transmission implements Downloader {
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-        if (torrents.isEmpty()) return;
-        log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size());
+        relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
+    }
+
+    private void relaunchTorrents(Collection<Long> ids) {
+        if (ids.isEmpty()) return;
+        log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, ids.size());
         RqTorrent stop = new RqTorrent(TorrentAction.STOP, new ArrayList<>());
-        for (Torrent torrent : torrents) {
-            stop.add(Long.parseLong(torrent.getId()));
+        for (long torrent : ids) {
+            stop.add(torrent);
         }
         client.execute(stop);
         try {
@@ -124,11 +129,15 @@ public class Transmission implements Downloader {
             Thread.currentThread().interrupt();
         }
         RqTorrent resume = new RqTorrent(TorrentAction.START, new ArrayList<>());
-        for (Torrent torrent : torrents) {
-            resume.add(Long.parseLong(torrent.getId()));
+        for (long torrent : ids) {
+            resume.add(torrent);
         }
         client.execute(resume);
+    }
 
+    @Override
+    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<BanMetadata.TorrentWrapper> torrents) {
+        relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
     }
 
     @Override

@@ -19,20 +19,26 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.WebManager;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.EventBus;
+import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -56,6 +62,7 @@ public class PeerBanHelperServer {
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
     private final ModuleMatchCache moduleMatchCache;
+    private final File banListFile;
     @Getter
     private BtnNetwork btnNetwork;
     @Getter
@@ -89,6 +96,7 @@ public class PeerBanHelperServer {
         this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
         this.moduleMatchCache = new ModuleMatchCache(this, banDuration);
+        this.banListFile = new File(Main.getDataDirectory(), "banlist.dump");
         registerHttpServer();
         this.moduleManager = new ModuleManager();
         setupBtn();
@@ -101,6 +109,7 @@ public class PeerBanHelperServer {
         registerMetrics();
         registerModules();
         resetKnownDownloaders();
+        loadBanListToMemory();
         registerTimer();
         registerBanListInvokers();
 
@@ -140,6 +149,8 @@ public class PeerBanHelperServer {
 
     public void shutdown() {
         // place some clean code here
+        log.info(Lang.SHUTDOWN_SAVE_BANLIST);
+        dumpBanListToFile();
         log.info(Lang.SHUTDOWN_CLOSE_METRICS);
         this.metrics.close();
         log.info(Lang.SHUTDOWN_UNREGISTER_MODULES);
@@ -161,6 +172,37 @@ public class PeerBanHelperServer {
             }
         });
         log.info(Lang.SHUTDOWN_DONE);
+    }
+
+    private void loadBanListToMemory() {
+        try {
+            if (!banListFile.exists()) {
+                return;
+            }
+            String json = Files.readString(banListFile.toPath(), StandardCharsets.UTF_8);
+            Map<PeerAddress, BanMetadata> data = JsonUtil.getGson().fromJson(json, new TypeToken<Map<PeerAddress, BanMetadata>>() {
+            }.getType());
+            this.BAN_LIST.putAll(data);
+            log.info(Lang.LOAD_BANLIST_FROM_FILE, data.size());
+            downloaders.forEach(downloader -> downloader.setBanList(BAN_LIST.keySet(), null, null));
+            Collection<BanMetadata.TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
+            downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
+        } catch (Exception e) {
+            log.error(Lang.LOAD_BANLIST_FAIL, e);
+        } finally {
+            banListFile.delete();
+        }
+    }
+
+    private void dumpBanListToFile() {
+        try {
+            if (!banListFile.exists()) {
+                banListFile.createNewFile();
+            }
+            Files.writeString(banListFile.toPath(), JsonUtil.prettyPrinting().toJson(BAN_LIST));
+        } catch (IOException e) {
+            log.error(Lang.SHUTDOWN_SAVE_BANLIST_FAILED);
+        }
     }
 
     private void prepareDatabase() throws SQLException {

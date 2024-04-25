@@ -2,17 +2,19 @@ package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import inet.ipaddr.IPAddress;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Slf4j
 public class PeerAddress implements Comparable<PeerAddress> {
 
     private String ip;
-    @Getter
-    private IPAddress address;
+    private transient IPAddress address;
     /**
      * 端口可能为 0 （代表未设置）
      */
@@ -24,8 +26,13 @@ public class PeerAddress implements Comparable<PeerAddress> {
         this.address = IPAddressUtil.getIPAddress(ip);
     }
 
-    public PeerAddress() {
+    public IPAddress getAddress() {
+        if (address == null) { // 可能由 Gson 反序列化时导致此值为空
+            address = IPAddressUtil.getIPAddress(ip);
+        }
+        return address;
     }
+
 
     @Override
     public int compareTo(PeerAddress o) {
