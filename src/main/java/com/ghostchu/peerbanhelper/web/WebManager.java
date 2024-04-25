@@ -76,9 +76,16 @@ public class WebManager extends NanoHTTPD {
         if (uri.isBlank() || uri.equals("/")) {
             uri = "/index.html";
         }
+        return tryServeResources(session, uri);
+    }
+
+    private Response tryServeResources(IHTTPSession session, String uri) {
         InputStream is = getClass().getResourceAsStream("/static" + uri);
         if (is == null) {
-            return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Error: Resources not found");
+            if (uri.equals("/index.html")) {
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Error: Resources not found");
+            }
+            return tryServeResources(session, "/index.html");
         }
         return newChunkedResponse(Response.Status.OK, NanoHTTPD.getMimeTypeForFile(uri), is);
     }
