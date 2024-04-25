@@ -89,7 +89,7 @@ public class Transmission implements Downloader {
 
     @SneakyThrows(InterruptedException.class)
     @Override
-    public void setBanList(Collection<PeerAddress> peerAddresses) {
+    public void setBanList(Collection<PeerAddress> peerAddresses, Collection<PeerAddress> added, Collection<PeerAddress> removed) {
         RqSessionSet set = RqSessionSet.builder()
                 .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
                 .blocklistEnabled(true)

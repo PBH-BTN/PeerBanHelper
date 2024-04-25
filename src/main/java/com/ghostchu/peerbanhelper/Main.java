@@ -73,6 +73,7 @@ public class Main {
             String baUser = downloaderSection.getString("basic-auth.user");
             String baPass = downloaderSection.getString("basic-auth.pass");
             String httpVersion = downloaderSection.getString("http-version", "HTTP_1_1");
+            boolean incrementBan = downloaderSection.getBoolean("increment-ban");
             HttpClient.Version httpVersionEnum;
             try {
                 httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
@@ -82,7 +83,7 @@ public class Main {
             boolean verifySSL = downloaderSection.getBoolean("verify-ssl", true);
             switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
                 case "qbittorrent" -> {
-                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum));
+                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum, incrementBan));
                     log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
                 }
                 case "transmission" -> {

@@ -116,4 +116,6 @@ public class Lang {
     public static String RULE_MATCHER_STRING_EQUALS = "匹配相同";
     public static String RULE_MATCHER_STRING_LENGTH = "匹配长度";
     public static String RULE_MATCHER_STRING_REGEX = "匹配正则";
+    public static String RESET_DOWNLOADER_FAILED = "[警告] 重置下载器封禁列表到初始状态时出现错误";
+    public static String DOWNLOADER_QB_INCREAMENT_BAN_FAILED = "[错误] 向下载器请求增量封禁对等体时出现错误，请在配置文件中关闭增量封禁配置项";
 }

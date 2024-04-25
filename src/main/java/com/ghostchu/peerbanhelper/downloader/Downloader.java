@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.downloader;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -42,9 +43,11 @@ public interface Downloader extends AutoCloseable {
 
     /**
      * 设置并使新的 BanList 生效
-     * @param peerAddresses BanList
+     * @param fullList 全量列表
+     * @param added 新增列表
+     * @param removed 移除列表
      */
-    void setBanList(Collection<PeerAddress> peerAddresses);
+    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<PeerAddress> added, @Nullable Collection<PeerAddress> removed);
 
     /**
      * 如有需要，重启 Torrent 任务

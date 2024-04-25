@@ -23,6 +23,8 @@ client:
     verify-ssl: true
     # Http 协议版本
     http-version: "HTTP_1_1"
+    # 增量封禁（有助于缓解保存封禁列表时的下载器压力，但可能不稳定）
+    increment-ban: false
   transmission-002:
     type: Transmission
     endpoint: "http://127.0.0.1:9091"
