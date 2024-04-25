@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRule;
 import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
+import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
@@ -84,6 +85,7 @@ public class BtnAbilityRules implements BtnAbility {
                     } else {
                         BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
                         this.btnRule = new BtnRuleParsed(btr);
+                        btnNetwork.getServer().getEventBus().post(new BtnRuleUpdateEvent());
                         try {
                             Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
                         } catch (IOException ignored) {

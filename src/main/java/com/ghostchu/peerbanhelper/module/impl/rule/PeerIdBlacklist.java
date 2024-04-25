@@ -69,5 +69,9 @@ public class PeerIdBlacklist extends AbstractFeatureModule {
         return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No matches");
     }
 
+    @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
 
 }

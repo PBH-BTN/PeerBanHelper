@@ -25,6 +25,13 @@ public interface FeatureModule {
     boolean isModuleEnabled();
 
     /**
+     * 模块检查结果是否可被缓存
+     *
+     * @return 可否被缓存
+     */
+    boolean isCheckCacheable();
+
+    /**
      * 模块是否需要首先进行握手检查
      * @return 是否先进行握手检查
      */

@@ -74,6 +74,11 @@ public class DownloaderCIDRBlockList extends AbstractFeatureModule implements PB
         return teapot();
     }
 
+    @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
+
     @AllArgsConstructor
     @NoArgsConstructor
     @Data

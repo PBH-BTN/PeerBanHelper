@@ -80,6 +80,11 @@ public class PBHClientStatus extends AbstractFeatureModule implements PBHAPI {
     }
 
     @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
+
+    @Override
     public void onEnable() {
         getServer().getWebManagerServer().register(this);
     }

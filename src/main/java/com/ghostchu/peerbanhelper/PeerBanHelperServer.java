@@ -22,6 +22,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.WebManager;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -57,6 +58,7 @@ public class PeerBanHelperServer {
     @Getter
     private final YamlConfiguration mainConfig;
     private final ExecutorService ruleExecuteExecutor;
+    private final ModuleMatchCache moduleMatchCache;
     @Getter
     private BtnNetwork btnNetwork;
     @Getter
@@ -89,6 +91,7 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
         this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
+        this.moduleMatchCache = new ModuleMatchCache(this, banDuration);
         registerHttpServer();
         this.moduleManager = new ModuleManager();
         setupBtn();
@@ -372,6 +375,11 @@ public class PeerBanHelperServer {
         for (FeatureModule registeredModule : moduleManager.getModules()) {
             if (registeredModule.needCheckHandshake() && isHandshaking(peer)) {
                 continue; // 如果模块需要握手检查且peer正在握手 则跳过检查
+            }
+            if (registeredModule.isCheckCacheable()) {
+                if (moduleMatchCache.shouldSkipCheck(registeredModule, torrent, peer.getAddress(), true)) {
+                    return new BanResult(null, PeerAction.NO_ACTION, "check cache", "Hit cache");
+                }
             }
             BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
             if (banResult.action() == PeerAction.SKIP) {

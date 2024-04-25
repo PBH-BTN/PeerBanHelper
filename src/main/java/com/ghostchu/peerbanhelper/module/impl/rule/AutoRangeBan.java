@@ -59,6 +59,11 @@ public class AutoRangeBan extends AbstractFeatureModule {
     }
 
     @Override
+    public boolean isCheckCacheable() {
+        return false;
+    }
+
+    @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         if(peer.getPeerId() == null || peer.getPeerId().isEmpty()){
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Waiting for Bittorrent handshaking.");

@@ -80,6 +80,11 @@ public class PBHRuleMetrics extends AbstractFeatureModule implements PBHAPI {
     }
 
     @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
+
+    @Override
     public boolean needCheckHandshake() {
         return false;
     }

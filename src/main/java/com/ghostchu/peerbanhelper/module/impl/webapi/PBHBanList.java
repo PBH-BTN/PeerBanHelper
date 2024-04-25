@@ -105,6 +105,11 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
         return teapot();
     }
 
+    @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
+
     @AllArgsConstructor
     @NoArgsConstructor
     @Data

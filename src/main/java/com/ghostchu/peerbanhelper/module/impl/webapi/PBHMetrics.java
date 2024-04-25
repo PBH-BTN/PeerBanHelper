@@ -80,6 +80,11 @@ public class PBHMetrics extends AbstractFeatureModule implements PBHAPI {
         return teapot();
     }
 
+    @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
+
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
@@ -87,4 +92,5 @@ public class PBHMetrics extends AbstractFeatureModule implements PBHAPI {
         private String address;
         private BanMetadata banMetadata;
     }
+
 }

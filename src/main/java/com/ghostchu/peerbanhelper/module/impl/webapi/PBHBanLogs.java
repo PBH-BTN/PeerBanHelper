@@ -86,6 +86,10 @@ public class PBHBanLogs extends AbstractFeatureModule implements PBHAPI {
     }
 
     @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
+    @Override
     public void onEnable() {
         getServer().getWebManagerServer().register(this);
     }

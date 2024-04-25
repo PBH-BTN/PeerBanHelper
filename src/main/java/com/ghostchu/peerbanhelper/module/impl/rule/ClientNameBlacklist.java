@@ -36,6 +36,11 @@ public class ClientNameBlacklist extends AbstractFeatureModule {
     }
 
     @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
+
+    @Override
     public boolean needCheckHandshake() {
         return false;
     }
