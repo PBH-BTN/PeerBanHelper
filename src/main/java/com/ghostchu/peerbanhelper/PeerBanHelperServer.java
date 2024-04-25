@@ -377,7 +377,7 @@ public class PeerBanHelperServer {
         List<BanResult> results = new ArrayList<>();
         for (FeatureModule registeredModule : moduleManager.getModules()) {
             if (!(registeredModule instanceof RuleFeatureModule module)) {
-                return new BanResult(null, PeerAction.NO_ACTION, "Pre-check", "Not a rule module");
+                continue;
             }
             if (module.needCheckHandshake() && isHandshaking(peer)) {
                 continue; // 如果模块需要握手检查且peer正在握手 则跳过检查
