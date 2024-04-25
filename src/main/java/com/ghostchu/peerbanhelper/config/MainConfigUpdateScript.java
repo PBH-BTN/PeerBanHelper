@@ -24,7 +24,7 @@ public class MainConfigUpdateScript {
             ConfigurationSection downloader = section.getConfigurationSection(key);
             if (downloader != null) {
                 if (downloader.getString("type", "").equalsIgnoreCase("qBittorrent")) {
-                    downloader.set("increment-ban", false);
+                    downloader.set("increment-ban", true);
                 }
             }
         }
