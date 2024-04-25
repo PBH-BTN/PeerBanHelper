@@ -60,21 +60,21 @@ public class ProfileUpdateScript {
                     JsonObject object = new JsonObject();
                     object.addProperty("method", "CONTAINS");
                     object.addProperty("content", ruleBody);
-                    object.addProperty("success", "NEGATIVE");
+                    object.addProperty("hit", "FALSE");
                     yield object;
                 }
                 case "startswith" -> {
                     JsonObject object = new JsonObject();
                     object.addProperty("method", "STARTS_WITH");
                     object.addProperty("content", ruleBody);
-                    object.addProperty("success", "NEGATIVE");
+                    object.addProperty("hit", "FALSE");
                     yield object;
                 }
                 case "endswith" -> {
                     JsonObject object = new JsonObject();
                     object.addProperty("method", "ENDS_WITH");
                     object.addProperty("content", ruleBody);
-                    object.addProperty("success", "NEGATIVE");
+                    object.addProperty("hit", "FALSE");
                     yield object;
                 }
                 case "length" -> {
@@ -82,14 +82,14 @@ public class ProfileUpdateScript {
                     object.addProperty("method", "LENGTH");
                     object.addProperty("min", Integer.parseInt(ruleBody));
                     object.addProperty("max", Integer.parseInt(ruleBody));
-                    object.addProperty("success", "NEGATIVE");
+                    object.addProperty("hit", "FALSE");
                     yield object;
                 }
                 case "equals" -> {
                     JsonObject object = new JsonObject();
                     object.addProperty("method", "EQUALS");
                     object.addProperty("content", ruleBody);
-                    object.addProperty("success", "NEGATIVE");
+                    object.addProperty("success", "FALSE");
                     yield object;
                 }
                 case "regex" -> {
