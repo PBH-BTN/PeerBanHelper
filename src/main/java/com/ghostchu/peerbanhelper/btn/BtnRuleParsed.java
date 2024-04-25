@@ -107,7 +107,7 @@ public class BtnRuleParsed {
 
         @Override
         public Map<String, Object> metadata() {
-            return Map.of("ipaddr", this.ipAddress.toString());
+            return Map.of("ip", this.ipAddress.toString());
         }
 
         @Override
