@@ -114,6 +114,7 @@ public class BtnNetwork {
                 .defaultHeader("BTN-AppID", appId)
                 .defaultHeader("BTN-AppSecret", appSecret)
                 .requestTimeout(Duration.ofMinutes(1))
+                .connectTimeout(Duration.ofSeconds(10))
                 .cookieHandler(cm).build();
     }
 

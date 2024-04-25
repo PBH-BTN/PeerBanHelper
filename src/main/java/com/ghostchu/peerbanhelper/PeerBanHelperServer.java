@@ -13,10 +13,7 @@ import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetric;
 import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
-import com.ghostchu.peerbanhelper.module.BanResult;
-import com.ghostchu.peerbanhelper.module.FeatureModule;
-import com.ghostchu.peerbanhelper.module.ModuleManager;
-import com.ghostchu.peerbanhelper.module.PeerAction;
+import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
@@ -143,14 +140,19 @@ public class PeerBanHelperServer {
 
     public void shutdown() {
         // place some clean code here
+        log.info(Lang.SHUTDOWN_CLOSE_METRICS);
         this.metrics.close();
+        log.info(Lang.SHUTDOWN_UNREGISTER_MODULES);
         this.moduleManager.unregisterAll();
+        log.info(Lang.SHUTDOWN_CLOSE_DATABASE);
         this.databaseManager.close();
+        log.info(Lang.SHUTDOWN_CLEANUP_RESOURCES);
         this.webManagerServer.stop();
         this.checkBanExecutor.shutdown();
         this.ruleExecuteExecutor.shutdown();
         this.downloaderApiExecutor.shutdown();
         this.generalExecutor.shutdown();
+        this.moduleMatchCache.close();
         this.downloaders.forEach(d -> {
             try {
                 d.close();
@@ -158,6 +160,7 @@ public class PeerBanHelperServer {
                 log.error("Failed to close download {}", d.getName(), e);
             }
         });
+        log.info(Lang.SHUTDOWN_DONE);
     }
 
     private void prepareDatabase() throws SQLException {
@@ -373,15 +376,18 @@ public class PeerBanHelperServer {
     public BanResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
         List<BanResult> results = new ArrayList<>();
         for (FeatureModule registeredModule : moduleManager.getModules()) {
-            if (registeredModule.needCheckHandshake() && isHandshaking(peer)) {
+            if (!(registeredModule instanceof RuleFeatureModule module)) {
+                return new BanResult(null, PeerAction.NO_ACTION, "Pre-check", "Not a rule module");
+            }
+            if (module.needCheckHandshake() && isHandshaking(peer)) {
                 continue; // 如果模块需要握手检查且peer正在握手 则跳过检查
             }
-            if (registeredModule.isCheckCacheable()) {
-                if (moduleMatchCache.shouldSkipCheck(registeredModule, torrent, peer.getAddress(), true)) {
+            if (module.isCheckCacheable()) {
+                if (moduleMatchCache.shouldSkipCheck(module, torrent, peer.getAddress(), true)) {
                     return new BanResult(null, PeerAction.NO_ACTION, "check cache", "Hit cache");
                 }
             }
-            BanResult banResult = registeredModule.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
+            BanResult banResult = module.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
             if (banResult.action() == PeerAction.SKIP) {
                 return banResult;
             }

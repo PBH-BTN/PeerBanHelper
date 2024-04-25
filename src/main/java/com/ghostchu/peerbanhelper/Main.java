@@ -99,17 +99,22 @@ public class Main {
             log.error(Lang.BOOTSTRAP_FAILED, e);
             throw new RuntimeException(e);
         }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        Thread shutdownThread = new Thread(() -> {
             synchronized (shutdown) {
-                shutdown.set(1); // We're going to shutdown!
-                shutdown.notifyAll();
-                log.info(Lang.PBH_SHUTTING_DOWN);
-                server.shutdown();
-                shutdown.set(2); // We're completed shutdown!
-                shutdown.notifyAll();
+                try {
+                    log.info(Lang.PBH_SHUTTING_DOWN);
+                    server.shutdown();
+                    shutdown.set(2); // We're completed shutdown!
+                    shutdown.notifyAll();
+                } catch (Throwable th) {
+                    th.printStackTrace();
+                }
             }
-        }));
+        });
+        shutdownThread.setDaemon(false);
+        shutdownThread.setName("ShutdownThread");
+
+        Runtime.getRuntime().addShutdownHook(shutdownThread);
         while (shutdown.get() != 2) {
             synchronized (shutdown) {
                 shutdown.wait(1000 * 5);

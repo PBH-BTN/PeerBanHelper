@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
-import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public abstract class AbstractFeatureModule implements FeatureModule {
@@ -71,14 +70,5 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         register = true;
         onEnable();
         log.info(Lang.MODULE_REGISTER, getName());
-    }
-
-    /**
-     * 标记此模块不处理 Peer 封禁
-     * @return 占位 BanResult
-     */
-    @NotNull
-    protected BanResult teapot(){
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "I'm a teapot");
     }
 }

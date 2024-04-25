@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util.rule;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
+import com.ghostchu.peerbanhelper.module.RuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.BtnNetworkOnline;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class ModuleMatchCache {
-    public final Map<FeatureModule, Cache<Wrapper, Boolean>> CACHE_POOL = new ConcurrentHashMap<>();
+    public final Map<RuleFeatureModule, Cache<Wrapper, Boolean>> CACHE_POOL = new ConcurrentHashMap<>();
     private final long banDuration;
     private final PeerBanHelperServer server;
 
@@ -25,7 +26,7 @@ public class ModuleMatchCache {
         this.server.getEventBus().register(this);
     }
 
-    public boolean shouldSkipCheck(FeatureModule module, Torrent torrent, PeerAddress peerAddress, boolean writeCache) {
+    public boolean shouldSkipCheck(RuleFeatureModule module, Torrent torrent, PeerAddress peerAddress, boolean writeCache) {
         Wrapper wrapper = new Wrapper(torrent.getId(), peerAddress);
         Cache<Wrapper, Boolean> ruleCacheZone = CACHE_POOL.get(module);
         if (ruleCacheZone == null) {

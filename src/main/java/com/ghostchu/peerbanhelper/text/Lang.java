@@ -118,4 +118,9 @@ public class Lang {
     public static String RULE_MATCHER_STRING_REGEX = "匹配正则";
     public static String RESET_DOWNLOADER_FAILED = "[警告] 重置下载器封禁列表到初始状态时出现错误";
     public static String DOWNLOADER_QB_INCREAMENT_BAN_FAILED = "[错误] 向下载器请求增量封禁对等体时出现错误，请在配置文件中关闭增量封禁(increment-ban)配置项";
+    public static String SHUTDOWN_CLOSE_METRICS = "[退出] 正在保存封禁日志和统计数据……";
+    public static String SHUTDOWN_UNREGISTER_MODULES = "[退出] 正在注销功能模块……";
+    public static String SHUTDOWN_CLOSE_DATABASE = "[退出] 正在安全关闭并保存持久化数据库……";
+    public static String SHUTDOWN_CLEANUP_RESOURCES = "[退出] 清理资源……";
+    public static String SHUTDOWN_DONE = "[退出] 全部完成！";
 }

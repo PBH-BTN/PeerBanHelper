@@ -4,8 +4,6 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.BanResult;
-import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
@@ -19,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 @Slf4j
 public class PBHClientStatus extends AbstractFeatureModule implements PBHAPI {
@@ -67,21 +64,6 @@ public class PBHClientStatus extends AbstractFeatureModule implements PBHAPI {
     @Override
     public @NotNull String getConfigName() {
         return "webapi-clientstatus";
-    }
-
-    @Override
-    public boolean needCheckHandshake() {
-        return false;
-    }
-
-    @Override
-    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        return teapot();
-    }
-
-    @Override
-    public boolean isCheckCacheable() {
-        return true;
     }
 
     @Override

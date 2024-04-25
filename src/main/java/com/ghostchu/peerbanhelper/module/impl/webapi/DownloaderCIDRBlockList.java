@@ -2,9 +2,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.BanResult;
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
@@ -18,7 +15,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 public class DownloaderCIDRBlockList extends AbstractFeatureModule implements PBHAPI {
     public DownloaderCIDRBlockList(PeerBanHelperServer server, YamlConfiguration profile) {
@@ -62,21 +58,6 @@ public class DownloaderCIDRBlockList extends AbstractFeatureModule implements PB
     @Override
     public @NotNull String getConfigName() {
         return "webapi-downloader-cidr-blocklist";
-    }
-
-    @Override
-    public boolean needCheckHandshake() {
-        return false;
-    }
-
-    @Override
-    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        return teapot();
-    }
-
-    @Override
-    public boolean isCheckCacheable() {
-        return true;
     }
 
     @AllArgsConstructor
