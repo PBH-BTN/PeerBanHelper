@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.rule.matcher;
 
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
@@ -41,6 +42,11 @@ public class StringStartsWithMatcher extends AbstractMatcher {
                 ", hit=" + hit +
                 ", miss=" + miss +
                 '}';
+    }
+
+    @Override
+    public @NotNull String matcherName() {
+        return Lang.RULE_MATCHER_STRING_STARTS_WITH;
     }
 
     @Override

@@ -110,4 +110,10 @@ public class Lang {
     public static String RULE_ENGINE_PARSE_FAILED = "[规则引擎] 规则 {} 解析失败，解析过程中出现错误";
     public static String RULE_ENGINE_INVALID_RULE = "规则 {} 的参数 {} 无效，仅接受以下值：{}";
     public static String RULE_ENGINE_NOT_A_RULE = "[规则引擎] 表达式 {} 不是一个有效规则";
+    public static String RULE_MATCHER_STRING_CONTAINS = "子串匹配";
+    public static String RULE_MATCHER_STRING_ENDS_WITH = "匹配结尾";
+    public static String RULE_MATCHER_STRING_STARTS_WITH = "匹配开头";
+    public static String RULE_MATCHER_STRING_EQUALS = "匹配相同";
+    public static String RULE_MATCHER_STRING_LENGTH = "匹配长度";
+    public static String RULE_MATCHER_STRING_REGEX = "匹配正则";
 }

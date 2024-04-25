@@ -45,6 +45,11 @@ public class BtnRuleParsed {
                     public Map<String, Object> metadata() {
                         return Map.of("port", s);
                     }
+
+                    @Override
+                    public String matcherName() {
+                        return "BTN-Port";
+                    }
                 });
             }
             rules.put(k, addresses);
@@ -75,6 +80,11 @@ public class BtnRuleParsed {
                     public Map<String, Object> metadata() {
                         return Map.of("rule", ipAddress.toString());
                     }
+
+                    @Override
+                    public String matcherName() {
+                        return "BTN-IP";
+                    }
                 });
             }
             rules.put(k, addresses);
@@ -84,9 +94,7 @@ public class BtnRuleParsed {
 
     public Map<String, List<Rule>> parseRule(Map<String, List<String>> raw) {
         Map<String, List<Rule>> rules = new HashMap<>();
-        raw.forEach((k, v) -> {
-            rules.put(k, RuleParser.parse(v));
-        });
+        raw.forEach((k, v) -> rules.put(k, RuleParser.parse(v)));
         return rules;
     }
 }

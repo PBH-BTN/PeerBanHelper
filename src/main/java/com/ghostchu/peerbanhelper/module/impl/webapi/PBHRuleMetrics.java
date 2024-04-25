@@ -45,7 +45,13 @@ public class PBHRuleMetrics extends AbstractFeatureModule implements PBHAPI {
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
         Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(metrics.getHitRateMetric());
         List<RuleData> dat = metric.entrySet().stream()
-                .map(obj -> new RuleData(obj.getKey().getClass().getName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
+                .map(obj -> {
+                    String ruleType = obj.getKey().getClass().getName();
+                    if (obj.getKey().matcherName() != null) {
+                        ruleType = obj.getKey().matcherName();
+                    }
+                    return new RuleData(ruleType, obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata());
+                })
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
                 .toList();
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.getGson().toJson(dat)));

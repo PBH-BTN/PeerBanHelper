@@ -9,4 +9,8 @@ public interface Rule {
     MatchResult match(@NotNull String content);
 
     Map<String, Object> metadata();
+
+    default String matcherName() {
+        return null;
+    }
 }

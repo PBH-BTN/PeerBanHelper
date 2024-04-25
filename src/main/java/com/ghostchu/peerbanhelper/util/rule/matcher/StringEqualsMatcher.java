@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.rule.matcher;
 
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
@@ -30,6 +31,11 @@ public class StringEqualsMatcher extends AbstractMatcher {
         } else {
             return miss;
         }
+    }
+
+    @Override
+    public @NotNull String matcherName() {
+        return Lang.RULE_MATCHER_STRING_LENGTH;
     }
 
     @Override
