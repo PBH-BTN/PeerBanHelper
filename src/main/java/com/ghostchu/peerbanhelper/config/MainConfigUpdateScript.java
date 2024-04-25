@@ -14,6 +14,11 @@ public class MainConfigUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 2)
+    public void addPersistBanlist() {
+        conf.set("persist.banlist", true);
+    }
+
     @UpdateScript(version = 1)
     public void addIncrementBan() {
         ConfigurationSection section = conf.getConfigurationSection("client");

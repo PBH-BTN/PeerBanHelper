@@ -149,7 +149,7 @@ public class PeerBanHelperServer {
 
     public void shutdown() {
         // place some clean code here
-        log.info(Lang.SHUTDOWN_SAVE_BANLIST);
+
         dumpBanListToFile();
         log.info(Lang.SHUTDOWN_CLOSE_METRICS);
         this.metrics.close();
@@ -175,6 +175,9 @@ public class PeerBanHelperServer {
     }
 
     private void loadBanListToMemory() {
+        if (!mainConfig.getBoolean("persist.banlist")) {
+            return;
+        }
         try {
             if (!banListFile.exists()) {
                 return;
@@ -195,6 +198,10 @@ public class PeerBanHelperServer {
     }
 
     private void dumpBanListToFile() {
+        if (!mainConfig.getBoolean("persist.banlist")) {
+            return;
+        }
+        log.info(Lang.SHUTDOWN_SAVE_BANLIST);
         try {
             if (!banListFile.exists()) {
                 banListFile.createNewFile();

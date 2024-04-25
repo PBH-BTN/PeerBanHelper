@@ -1,3 +1,4 @@
+config-version: 2
 # 客户端设置
 client:
   # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
@@ -68,6 +69,8 @@ threads:
 persist:
   # 封禁日志保留天数（开发中）
   ban-logs-keep-days: 30
+  # 持久保存封禁列表
+  banlist: true
 # BitTorrent Threat Network 威胁防护网络（测试版）
 btn:
   # 启用 BTN 模块
