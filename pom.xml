@@ -6,7 +6,8 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>3.2.1</version>
+    <version>3.3.0</version>
+    <packaging>jlink</packaging>
 
     <name>PeerBanHelper</name>
 
@@ -106,14 +107,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.16.2</version>
-                <configuration>
-                    <generateBackupPoms>true</generateBackupPoms>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
