@@ -3,14 +3,10 @@ package com.ghostchu.peerbanhelper.config;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.io.File;
-
 public class MainConfigUpdateScript {
-    private final File file;
     private final YamlConfiguration conf;
 
-    public MainConfigUpdateScript(File file, YamlConfiguration conf) {
-        this.file = file;
+    public MainConfigUpdateScript(YamlConfiguration conf) {
         this.conf = conf;
     }
 

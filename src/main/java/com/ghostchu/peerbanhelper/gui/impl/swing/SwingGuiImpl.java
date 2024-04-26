@@ -14,9 +14,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 
+@Getter
 @Slf4j
 public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
-    @Getter
     private MainWindow mainWindow;
 
     public SwingGuiImpl() {

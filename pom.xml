@@ -7,7 +7,6 @@
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
     <version>3.3.0</version>
-    <packaging>jlink</packaging>
 
     <name>PeerBanHelper</name>
 

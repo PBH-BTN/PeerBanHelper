@@ -125,7 +125,6 @@ public class Transmission implements Downloader {
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
             Thread.currentThread().interrupt();
         }
         RqTorrent resume = new RqTorrent(TorrentAction.START, new ArrayList<>());

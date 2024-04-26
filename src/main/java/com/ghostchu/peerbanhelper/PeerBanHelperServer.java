@@ -73,14 +73,14 @@ public class PeerBanHelperServer {
     @Getter
     private BasicMetrics metrics;
     @Getter
-    private HitRateMetric hitRateMetric = new HitRateMetric();
+    private final HitRateMetric hitRateMetric = new HitRateMetric();
     private DatabaseManager databaseManager;
     @Getter
     private DatabaseHelper databaseHelper;
     @Getter
     private ModuleManager moduleManager;
     @Getter
-    private List<BanListInvoker> banListInvoker = new ArrayList<>();
+    private final List<BanListInvoker> banListInvoker = new ArrayList<>();
 
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
@@ -94,7 +94,7 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
         this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
-        this.moduleMatchCache = new ModuleMatchCache(this, banDuration);
+        this.moduleMatchCache = new ModuleMatchCache(banDuration);
         this.banListFile = new File(Main.getDataDirectory(), "banlist.dump");
         registerHttpServer();
         this.moduleManager = new ModuleManager();
@@ -211,7 +211,7 @@ public class PeerBanHelperServer {
     }
 
     private void prepareDatabase() throws SQLException {
-        this.databaseManager = new DatabaseManager(this);
+        this.databaseManager = new DatabaseManager();
         this.databaseHelper = new DatabaseHelper(databaseManager);
     }
 
@@ -220,7 +220,7 @@ public class PeerBanHelperServer {
     }
 
     private void registerHttpServer() {
-        this.webManagerServer = new WebManager(httpdPort, this);
+        this.webManagerServer = new WebManager(httpdPort);
     }
 
     private void registerTimer() {

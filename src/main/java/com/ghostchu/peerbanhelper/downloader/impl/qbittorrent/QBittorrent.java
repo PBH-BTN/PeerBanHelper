@@ -61,7 +61,7 @@ public class QBittorrent implements Downloader {
                 })
                 .cookieHandler(cm);
         if (!verifySSL && HTTPUtil.getIgnoreSslContext() != null) {
-            builder = builder.sslContext(HTTPUtil.getIgnoreSslContext());
+            builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
         this.username = username;
@@ -244,7 +244,7 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
     }
 }

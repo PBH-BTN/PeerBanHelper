@@ -6,8 +6,8 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class HitRateMetric {
-    @Getter
     private final Map<Rule, HitRateMetricRecorder> hitRateMetric = new HashMap<>();
 
     public void addQuery(Rule object) {

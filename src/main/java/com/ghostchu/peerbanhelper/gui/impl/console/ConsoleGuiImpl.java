@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class ConsoleGuiImpl implements GuiImpl {
-    private AtomicBoolean wakeLock = new AtomicBoolean(false);
+    private final AtomicBoolean wakeLock = new AtomicBoolean(false);
 
     @Override
     public void showConfigurationSetupDialog() {

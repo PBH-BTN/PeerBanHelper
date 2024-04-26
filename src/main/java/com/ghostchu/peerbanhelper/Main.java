@@ -45,9 +45,9 @@ public class Main {
     private static PeerBanHelperServer server;
     private static PBHGuiManager guiManager;
     @Getter
-    private static EventBus eventBus = new EventBus();
+    private static final EventBus eventBus = new EventBus();
 
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) {
         initBuildMeta();
         initGUI(args);
         setupConfiguration();
@@ -55,10 +55,10 @@ public class Main {
         guiManager.createMainWindow();
         File mainConfigFile = new File(configDirectory, "config.yml");
         YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(mainConfigFile);
-        new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfigFile, mainConfig));
+        new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));
         File profileConfigFile = new File(configDirectory, "profile.yml");
         YamlConfiguration profileConfig = YamlConfiguration.loadConfiguration(profileConfigFile);
-        new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfigFile, profileConfig));
+        new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
         for (String client : clientSection.getKeys(false)) {
@@ -139,12 +139,6 @@ public class Main {
         }
         guiManager.setup();
     }
-//    private static void initLogger() throws IOException {
-//        if (!logsDirectory.exists()) {
-//            logsDirectory.mkdirs();
-//        }
-//        LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
-//    }
 
     private static void initBuildMeta() {
         meta = new BuildMeta();

@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule implements RuleFeatureModule {
-    private final YamlConfiguration profile;
     @Getter
     private final PeerBanHelperServer server;
     @Getter
@@ -17,7 +16,6 @@ public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule im
     public AbstractRuleFeatureModule(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
         this.server = server;
-        this.profile = profile;
     }
 
     /**

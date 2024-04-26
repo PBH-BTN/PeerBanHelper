@@ -18,9 +18,9 @@ import static org.apache.logging.log4j.core.layout.PatternLayout.createDefaultLa
 
 @Plugin(name = "SwingLoggerAppender", category = "Core", elementType = "appender", printObject = true)
 public class SwingLoggerAppender extends AbstractAppender {
-    private static volatile ArrayList<JTextArea> textAreas = new ArrayList<>();
+    private static final ArrayList<JTextArea> textAreas = new ArrayList<>();
 
-    private int maxLines;
+    private final int maxLines;
 
     private SwingLoggerAppender(String name, Layout<?> layout, Filter filter, int maxLines, boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions, new Property[0]);
@@ -61,7 +61,7 @@ public class SwingLoggerAppender extends AbstractAppender {
                 for (JTextArea textArea : textAreas) {
                     try {
                         if (textArea != null) {
-                            if (textArea.getText().length() == 0) {
+                            if (textArea.getText().isEmpty()) {
                                 textArea.setText(message);
                             } else {
                                 textArea.append("\n" + message);
