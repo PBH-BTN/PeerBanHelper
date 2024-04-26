@@ -20,7 +20,7 @@
 
 | Docker/Docker Compose | Windows | Linux |
 | --- | ---- | ---- |
-|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  查看(https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |
+|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |
 
 
 ## 支持的客户端
