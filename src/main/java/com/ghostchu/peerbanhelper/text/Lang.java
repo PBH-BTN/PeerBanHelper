@@ -37,6 +37,9 @@ public class Lang {
     public static String MODULE_AP_TCP_TEST_PORT_FAIL = "TCP 探测目标失败: %s";
     public static String MODULE_AP_EXECUTE_EXCEPTION = "烘焙缓存时出错，请将下面的错误日志发送给开发者以协助修复此错误";
     public static String MODULE_AP_SSL_CONTEXT_FAILURE = "初始化 SSLContext 时出错";
+    public static String MODULE_MDB_MULTI_DIALING_NOT_DETECTED = "未发现多拨下载，种子名称：{}";
+    public static String MODULE_MDB_MULTI_DIALING_DETECTED = "发现多拨下载，请持续关注，种子名称：{}，子网：{}，触发IP：{}";
+    public static String MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED = "触发多拨追猎名单，种子名称：{}，子网：{}，触发IP：{}";
     public static String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: \n{}";
     public static String DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST = "请求 Torrents 列表失败 - %d - %s";
     public static String DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";
@@ -68,6 +71,7 @@ public class Lang {
     public static String DATABASE_SETUP_FAILED = "[错误] 数据库初始化失败";
     public static String DATABASE_BUFFER_SAVED = "[保存] 已保存 {} 条内存缓存的封禁日志到数据库，用时 {}ms";
     public static String DATABASE_SAVE_BUFFER_FAILED = "[错误] 刷写内存缓存的封禁日志时出现了 SQL 错误，未保存的数据已被丢弃";
+    public static String DATABASE_READ_HUNTING_TARGET_FAILED = "[错误] 读取追猎名单时出现了 SQL 错误，无法应用追猎名单";
     public static String WEB_BANLOGS_INTERNAL_ERROR = "[错误] 读取封禁日志时遇到非预期错误";
     public static String PERSIST_DISABLED = "[禁用] Persist 持久化数据存储已在此服务器上被禁用";
     public static String BOOTSTRAP_FAILED = "[错误] PeerBanHelper 启动失败，遇到致命错误，请检查控制台日志";
