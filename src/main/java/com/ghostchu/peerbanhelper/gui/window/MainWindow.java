@@ -79,6 +79,8 @@ public class MainWindow extends JFrame {
 
             }
         });
+        ImageIcon imageIcon = new ImageIcon(Main.class.getResource("/assets/icon.png"));
+        setIconImage(imageIcon.getImage());
     }
 
     public static void setTabTitle(JPanel tab, String title) {
@@ -130,7 +132,7 @@ public class MainWindow extends JFrame {
     private Component generateAboutMenu() {
         JMenu aboutMenu = new JMenu(Lang.GUI_MENU_ABOUT);
         JMenuItem viewOnGithub = new JMenuItem(Lang.ABOUT_VIEW_GITHUB);
-        viewOnGithub.addItemListener(e -> swingGUI.openWebpage(URI.create("https://github.com/PBH-BTN/PeerBanHelper")));
+        viewOnGithub.addActionListener(e -> swingGUI.openWebpage(URI.create("https://github.com/PBH-BTN/PeerBanHelper")));
         aboutMenu.add(viewOnGithub);
         return aboutMenu;
     }
