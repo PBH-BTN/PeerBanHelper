@@ -127,4 +127,13 @@ public class Lang {
     public static String SHUTDOWN_SAVE_BANLIST_FAILED = "[退出] 保存封禁列表到文件失败";
     public static String LOAD_BANLIST_FROM_FILE = "[封禁] 已从保存的封禁列表缓存文件中恢复了 {} 个封禁项";
     public static String LOAD_BANLIST_FAIL = "[封禁] 加载封禁列表过程出现错误";
+
+    public static String GUI_MENU_WEBUI = "WebUI";
+    public static String GUI_MENU_WEBUI_OPEN = "打开 WebUI……";
+    public static String GUI_MENU_ABOUT = "关于";
+    public static String GUI_TRAY_MESSAGE_CAPTION = "PeerBanHelper 正在后台运行";
+    public static String GUI_TRAY_MESSAGE_DESCRIPTION = "点击托盘图标重新打开窗口；右键托盘图标可完全退出";
+    public static String GUI_TABBED_WEB_UI = "概览";
+    public static String GUI_TABBED_LOGS = "运行日志";
+    public static String ABOUT_VIEW_GITHUB = "查看 Github 页面";
 }

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.btn.ability;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBan;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
@@ -41,13 +42,13 @@ public class BtnAbilitySubmitBans implements BtnAbility {
 
     @Override
     public void load() {
-        btnNetwork.getServer().getEventBus().register(this);
+        Main.getEventBus().register(this);
         btnNetwork.getExecuteService().scheduleAtFixedRate(this::submit, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void unload() {
-        btnNetwork.getServer().getEventBus().unregister(this);
+        Main.getEventBus().unregister(this);
     }
 
     @Subscribe

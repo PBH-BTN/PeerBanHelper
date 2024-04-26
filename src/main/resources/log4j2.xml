@@ -13,6 +13,11 @@
             </Policies>
             <DefaultRolloverStrategy max="1000"/>
         </RollingRandomAccessFile>
+        <SwingLoggerAppender name="SwingLoggerAppender" maxLines="100">
+            <PatternLayout>
+                <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
+            </PatternLayout>
+        </SwingLoggerAppender>
     </Appenders>
     <Loggers>
         <Root level="info">
@@ -21,6 +26,7 @@
             </filters>
             <AppenderRef ref="SysOut"/>
             <AppenderRef ref="File"/>
+            <appender-ref ref="SwingLoggerAppender" level="info"/>
         </Root>
     </Loggers>
 </Configuration>

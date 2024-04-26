@@ -6,13 +6,19 @@ import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
+import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
+import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
+import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
+import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.google.common.eventbus.EventBus;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,10 +26,9 @@ import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class Main {
@@ -36,33 +41,24 @@ public class Main {
     private static final File pluginDirectory = new File(dataDirectory, "plugins");
     @Getter
     private static BuildMeta meta = new BuildMeta();
-    private static final AtomicInteger shutdown = new AtomicInteger(0);
     @Getter
     private static PeerBanHelperServer server;
+    private static PBHGuiManager guiManager;
+    @Getter
+    private static EventBus eventBus = new EventBus();
 
     public static void main(String[] args) throws InterruptedException, IOException {
         initBuildMeta();
+        initGUI(args);
+        setupConfiguration();
         List<Downloader> downloaderList = new ArrayList<>();
-        log.info(Lang.LOADING_CONFIG);
-        try {
-            if (!initConfiguration()) {
-                log.warn(Lang.CONFIG_PEERBANHELPER);
-                Scanner scanner = new Scanner(System.in);
-                scanner.nextLine();
-                return;
-            }
-        } catch (IOException e) {
-            log.error(Lang.ERR_SETUP_CONFIGURATION, e);
-            return;
-        }
-
+        guiManager.createMainWindow();
         File mainConfigFile = new File(configDirectory, "config.yml");
         YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfigFile, mainConfig));
         File profileConfigFile = new File(configDirectory, "profile.yml");
         YamlConfiguration profileConfig = YamlConfiguration.loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfigFile, profileConfig));
-
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
         for (String client : clientSection.getKeys(false)) {
@@ -100,29 +96,49 @@ public class Main {
             log.error(Lang.BOOTSTRAP_FAILED, e);
             throw new RuntimeException(e);
         }
+        guiManager.onPBHFullyStarted(server);
+        setupShutdownHook();
+        guiManager.sync();
+    }
+
+    private static void setupConfiguration() {
+        log.info(Lang.LOADING_CONFIG);
+        try {
+            if (!initConfiguration()) {
+                guiManager.showConfigurationSetupDialog();
+                System.exit(0);
+            }
+        } catch (IOException e) {
+            log.error(Lang.ERR_SETUP_CONFIGURATION, e);
+            System.exit(0);
+        }
+    }
+
+    private static void setupShutdownHook() {
         Thread shutdownThread = new Thread(() -> {
-            synchronized (shutdown) {
-                try {
-                    log.info(Lang.PBH_SHUTTING_DOWN);
-                    server.shutdown();
-                    shutdown.set(2); // We're completed shutdown!
-                    shutdown.notifyAll();
-                } catch (Throwable th) {
-                    th.printStackTrace();
-                }
+            try {
+                log.info(Lang.PBH_SHUTTING_DOWN);
+                eventBus.post(new PBHShutdownEvent());
+                server.shutdown();
+                guiManager.close();
+            } catch (Throwable th) {
+                th.printStackTrace();
             }
         });
         shutdownThread.setDaemon(false);
         shutdownThread.setName("ShutdownThread");
-
         Runtime.getRuntime().addShutdownHook(shutdownThread);
-        while (shutdown.get() != 2) {
-            synchronized (shutdown) {
-                shutdown.wait(1000 * 5);
-            }
-        }
     }
 
+    private static void initGUI(String[] args) {
+        if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
+                || !Desktop.isDesktopSupported()) {
+            guiManager = new PBHGuiManager(new ConsoleGuiImpl());
+        } else {
+            guiManager = new PBHGuiManager(new SwingGuiImpl());
+        }
+        guiManager.setup();
+    }
 //    private static void initLogger() throws IOException {
 //        if (!logsDirectory.exists()) {
 //            logsDirectory.mkdirs();
@@ -176,7 +192,7 @@ public class Main {
     }
 
     public static String getUserAgent() {
-        return "PeerBanHelper/" + meta.getVersion()+" BTN-Protocol/0.0.0-dev";
+        return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.0-dev";
     }
 
 }

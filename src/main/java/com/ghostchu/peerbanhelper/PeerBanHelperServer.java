@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
@@ -25,7 +26,6 @@ import com.ghostchu.peerbanhelper.web.WebManager;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.eventbus.EventBus;
 import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -81,8 +81,7 @@ public class PeerBanHelperServer {
     private ModuleManager moduleManager;
     @Getter
     private List<BanListInvoker> banListInvoker = new ArrayList<>();
-    @Getter
-    private EventBus eventBus = new EventBus();
+
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.downloaders = downloaders;
@@ -112,8 +111,8 @@ public class PeerBanHelperServer {
         loadBanListToMemory();
         registerTimer();
         registerBanListInvokers();
-
         banListInvoker.forEach(BanListInvoker::reset);
+        Main.getEventBus().post(new PBHServerStartedEvent(this));
     }
 
     private void resetKnownDownloaders() {
@@ -149,7 +148,6 @@ public class PeerBanHelperServer {
 
     public void shutdown() {
         // place some clean code here
-
         dumpBanListToFile();
         log.info(Lang.SHUTDOWN_CLOSE_METRICS);
         this.metrics.close();
@@ -533,7 +531,7 @@ public class PeerBanHelperServer {
                 banMetadata.setReverseLookup("N/A");
             }
         }, generalExecutor);
-        eventBus.post(new PeerBanEvent(peer, banMetadata, torrentObj, peerObj));
+        Main.getEventBus().post(new PeerBanEvent(peer, banMetadata, torrentObj, peerObj));
     }
 
     /**
@@ -549,7 +547,7 @@ public class PeerBanHelperServer {
             metrics.recordPeerUnban(address, metadata);
             banListInvoker.forEach(i -> i.add(address, metadata));
         }
-        eventBus.post(new PeerUnbanEvent(address, metadata));
+        Main.getEventBus().post(new PeerUnbanEvent(address, metadata));
         return metadata;
     }
 
