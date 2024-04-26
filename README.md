@@ -312,7 +312,14 @@ Docker 镜像为：`ghostchu/peerbanhelper`。
 ### 使用 Docker CLI 启动
 
 ```shell
-sudo docker run -d --name peerbanhelper -p 9898:9898 -v ${PWD}/peerbanhelper-data/:/app/data/ -v /etc/timezone:/etc/timezone ghostchu/peerbanhelper:最新版本号
+sudo docker run -d \
+  --name peerbanhelper \
+  -p 9898:9898 \
+  -v ${PWD}/peerbanhelper-data:/app/data \
+  -e PUID=0 \
+  -e PGID=0 \
+  -e TZ=UTC \
+  ghostchu/peerbanhelper:<最新版本号>
 ```
 
 ### 使用 Docker Compose 文件启动

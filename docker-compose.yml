@@ -1,12 +1,14 @@
 version: "3.9"
 services:
   peerbanhelper:
-    image: "ghostchu/peerbanhelper:最新版本号"
+    image: "ghostchu/peerbanhelper:<最新版本号>"
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
       - ./:/app/data
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - "9898:9898"
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=UTC
