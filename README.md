@@ -1,32 +1,34 @@
 # PeerBanHelper
 
-> [!NOTE]
-> PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知
-
-> [!NOTE]
-> QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题。
-
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
-<img width="1280" alt="homepage" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/60cf5635-1423-4ada-ab8b-b5e1e8f996a5">
-<img width="1280" alt="banlist" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/d843d26a-99a3-4eca-947c-c7c933f4a773">
-<img width="1280" alt="banlogs" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/a8e4b814-0465-4cf2-9bc0-008eefef8cff">
-<img width="1280" alt="maxban" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/ae78ebb9-67f7-481a-9afc-7ced2c6a2534">
-<img width="1082" alt="Snipaste_2024-03-14_12-34-16" src="https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/e30b294e-2509-484d-a510-37c20a63b0c3">
+> [!NOTE]
+> PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知
+> QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
 
-## 安装&环境要求
+> [!TIP]
+> ❤ PeerBanHelper 是一个社区项目，由贡献者们共同建设。点击[此处](https://github.com/PBH-BTN/PeerBanHelper/graphs/contributors)查看所有一同共建 PeerBanHelper 社区的人们。
 
-推荐：[Windows](https://github.com/Ghost-chu/PeerBanHelper#windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)  
-推荐：[Linux/Docker](https://github.com/Ghost-chu/PeerBanHelper#docker-%E9%83%A8%E7%BD%B2)
 
-配置文件在所有平台上需要统一使用 UTF-8 编码编辑和保存，建议使用第三方文本编辑器如 Visual Studio Code 或者 Notepad++。
+|   主界面   |    封禁列表  |   封禁日志  |   封禁统计   |
+| ---- | ---- | ---- | ---- |
+|   <img width="1280" alt="homepage" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/60cf5635-1423-4ada-ab8b-b5e1e8f996a5">   |   <img width="1280" alt="banlist" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/d843d26a-99a3-4eca-947c-c7c933f4a773">   |    <img width="1280" alt="banlogs" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/a8e4b814-0465-4cf2-9bc0-008eefef8cff">  | <img width="1280" alt="maxban" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/ae78ebb9-67f7-481a-9afc-7ced2c6a2534"> |
+
+## 安装 PeerBanHelper
+
+请选择您心仪的安装方式：
+
+| Docker/Docker Compose | Windows | Linux |
+| --- | ---- | ---- |
+|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |
+
 
 ## 支持的客户端
 
 * qBittorrent
 * Transmission **(3.00-20 或更高版本)**
   
-## 功能概述
+## 功能介绍
 
 PeerBanHelper 主要由以下几个功能模块组成：
 
