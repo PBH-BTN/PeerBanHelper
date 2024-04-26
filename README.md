@@ -1,12 +1,15 @@
 # PeerBanHelper
 
+自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+
 > [!NOTE]
 > PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知
+> QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
 
-> [!NOTE]
-> QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题。
+> [!TIP]
+> ❤ PeerBanHelper 是一个社区项目，由贡献者们共同建设。点击[此处](https://github.com/PBH-BTN/PeerBanHelper/graphs/contributors)查看所有一同共建 PeerBanHelper 社区的人们。
 
-自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+
 |   主界面   |    封禁列表  |   封禁日志  |   封禁统计   |
 | ---- | ---- | ---- | ---- |
 |   <img width="1280" alt="homepage" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/60cf5635-1423-4ada-ab8b-b5e1e8f996a5">   |   <img width="1280" alt="banlist" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/d843d26a-99a3-4eca-947c-c7c933f4a773">   |    <img width="1280" alt="banlogs" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/a8e4b814-0465-4cf2-9bc0-008eefef8cff">  | <img width="1280" alt="maxban" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/ae78ebb9-67f7-481a-9afc-7ced2c6a2534"> |
