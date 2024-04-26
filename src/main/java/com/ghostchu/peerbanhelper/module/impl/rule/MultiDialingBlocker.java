@@ -143,7 +143,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     }
 
     // 是否已从数据库恢复追猎名单，持久化用的，目前没用
-    private static boolean cacheRecovered = false;
+    private static volatile boolean cacheRecovered = false;
     // 所有peer的连接记录 torrentId+ip : createTime
     private static Cache<String, Long> cache;
     // 按子网统计的连接记录 torrentId+subnet : peerGroup
