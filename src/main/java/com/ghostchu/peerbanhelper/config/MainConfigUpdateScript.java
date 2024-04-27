@@ -10,6 +10,24 @@ public class MainConfigUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 4)
+    public void defTurnOffIncrementBans() {
+        ConfigurationSection section = conf.getConfigurationSection("client");
+        if (section == null) {
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection downloader = section.getConfigurationSection(key);
+            if (downloader != null) {
+                if (downloader.getString("type", "").equalsIgnoreCase("qBittorrent")) {
+                    downloader.set("increment-ban", false);
+                }
+            }
+        }
+
+    }
+
+
     @UpdateScript(version = 3)
     public void transmissionCustomRPCUrl() {
         ConfigurationSection section = conf.getConfigurationSection("client");
