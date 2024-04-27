@@ -108,9 +108,9 @@ public class PeerBanHelperServer {
         registerMetrics();
         registerModules();
         resetKnownDownloaders();
+        registerBanListInvokers();
         loadBanListToMemory();
         registerTimer();
-        registerBanListInvokers();
         banListInvoker.forEach(BanListInvoker::reset);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
     }
@@ -186,7 +186,10 @@ public class PeerBanHelperServer {
             }.getType());
             this.BAN_LIST.putAll(data);
             log.info(Lang.LOAD_BANLIST_FROM_FILE, data.size());
-            downloaders.forEach(downloader -> downloader.setBanList(BAN_LIST.keySet(), null, null));
+            downloaders.forEach(downloader -> {
+                downloader.login();
+                downloader.setBanList(BAN_LIST.keySet(), null, null);
+            });
             Collection<BanMetadata.TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
             downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
         } catch (Exception e) {
