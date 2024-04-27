@@ -42,7 +42,7 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
 
     @Override
     public boolean isConfigurable() {
-        return true;
+        return false; // 不可缓存，webui可能返回空值（握手完成前）
     }
 
     @Override
