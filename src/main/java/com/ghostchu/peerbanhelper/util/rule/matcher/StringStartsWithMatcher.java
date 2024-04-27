@@ -16,7 +16,7 @@ public class StringStartsWithMatcher extends AbstractMatcher {
 
     public StringStartsWithMatcher(JsonObject syntax) {
         super(syntax);
-        this.rule = syntax.get("content").getAsString();
+        this.rule = syntax.get("content").getAsString().toLowerCase(Locale.ROOT);
         if (syntax.has("hit")) {
             this.hit = MatchResult.valueOf(syntax.get("hit").getAsString());
         }
