@@ -41,7 +41,9 @@ public class ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void close() {
-        wakeLock.set(true);
-        wakeLock.notifyAll();
+        synchronized (wakeLock) {
+            wakeLock.set(true);
+            wakeLock.notifyAll();
+        }
     }
 }
