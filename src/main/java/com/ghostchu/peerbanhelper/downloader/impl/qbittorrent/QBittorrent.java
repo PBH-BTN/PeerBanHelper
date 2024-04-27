@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -17,6 +18,7 @@ import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import inet.ipaddr.IPAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -187,7 +189,7 @@ public class QBittorrent implements Downloader {
 
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<PeerAddress> added, @Nullable Collection<PeerAddress> removed) {
+    public void setBanList(@NotNull Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> fullList, @Nullable Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> added, @Nullable Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> removed) {
         if (removed != null && removed.isEmpty() && added != null && incrementBan) {
             setBanListIncrement(added);
         } else {
@@ -195,13 +197,16 @@ public class QBittorrent implements Downloader {
         }
     }
 
-    private void setBanListIncrement(Collection<PeerAddress> added) {
+    private void setBanListIncrement(Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> added) {
         StringJoiner joiner = new StringJoiner("|");
         added.forEach(p -> {
-            if (p.getAddress().isIPv6()) {
-                joiner.add("[" + p.getIp() + "]" + ":" + p.getPort());
+            String ip = p.getValue().getAddress().getIp();
+            int port = p.getValue().getAddress().getPort();
+            IPAddress ipObj = IPAddressUtil.getIPAddress(ip);
+            if (ipObj.isIPv6()) {
+                joiner.add("[" + ip + "]" + ":" + port);
             } else {
-                joiner.add(p.getIp() + ":" + p.getPort());
+                joiner.add(ip + ":" + port);
             }
 
         });
@@ -221,9 +226,9 @@ public class QBittorrent implements Downloader {
         }
     }
 
-    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
+    private void setBanListFull(Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.forEach(p -> joiner.add(p.getIp()));
+        peerAddresses.forEach(p -> joiner.add(p.getValue().getAddress().getIp()));
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(endpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()

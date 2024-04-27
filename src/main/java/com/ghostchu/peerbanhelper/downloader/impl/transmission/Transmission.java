@@ -17,10 +17,7 @@ import lombok.SneakyThrows;
 import org.slf4j.Logger;
 
 import java.net.http.HttpClient;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Transmission implements Downloader {
@@ -90,7 +87,7 @@ public class Transmission implements Downloader {
 
     @SneakyThrows(InterruptedException.class)
     @Override
-    public void setBanList(Collection<PeerAddress> peerAddresses, Collection<PeerAddress> added, Collection<PeerAddress> removed) {
+    public void setBanList(Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> peerAddresses, Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> added, Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> removed) {
         RqSessionSet set = RqSessionSet.builder()
                 .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
                 .blocklistEnabled(true)

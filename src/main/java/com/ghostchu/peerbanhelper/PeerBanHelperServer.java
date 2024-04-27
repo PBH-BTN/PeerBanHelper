@@ -188,7 +188,7 @@ public class PeerBanHelperServer {
             log.info(Lang.LOAD_BANLIST_FROM_FILE, data.size());
             downloaders.forEach(downloader -> {
                 downloader.login();
-                downloader.setBanList(BAN_LIST.keySet(), null, null);
+                downloader.setBanList(BAN_LIST.values().stream().map(banMetadata -> Map.entry(banMetadata.getTorrent(), banMetadata.getPeer())).toList(), null, null);
             });
             Collection<BanMetadata.TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
             downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
@@ -243,7 +243,7 @@ public class PeerBanHelperServer {
             // 并发处理下载器检查
             List<CompletableFuture<BanDownloaderResult>> futures = downloaders.stream().map(this::handleDownloader).toList();
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-            List<PeerAddress> bannedPeers = new ArrayList<>();
+            List<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> bannedPeers = new ArrayList<>();
             futures.stream().map(future -> future.getNow(null))
                     .filter(Objects::nonNull)
                     .forEach(r -> {
@@ -257,7 +257,7 @@ public class PeerBanHelperServer {
                         }
                     });
             // 移除可能的过期封禁对等体
-            Collection<PeerAddress> unbannedPeers = removeExpiredBans();
+            Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> unbannedPeers = removeExpiredBans();
             if (!unbannedPeers.isEmpty()) {
                 needUpdateBanList.set(true);
             }
@@ -277,7 +277,7 @@ public class PeerBanHelperServer {
      * @param updateBanList  是否需要从 BAN_LIST 常量更新封禁列表到下载器
      * @param needToRelaunch 传递一个集合，包含需要重启的种子；并非每个下载器都遵守此行为；对于 qbittorrent 等 banlist 可被实时应用的下载器来说，不会重启 Torrent
      */
-    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<PeerAddress> added, @Nullable Collection<PeerAddress> removed) {
+    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> added, @Nullable Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> removed) {
         if (!updateBanList && needToRelaunch.isEmpty()) return;
         try {
             if (!downloader.login()) {
@@ -285,7 +285,7 @@ public class PeerBanHelperServer {
                 downloader.setLastStatus(DownloaderLastStatus.ERROR);
                 return;
             }
-            downloader.setBanList(BAN_LIST.keySet(), added, removed);
+            downloader.setBanList(BAN_LIST.values().stream().map(banMetadata -> Map.entry(banMetadata.getTorrent(), banMetadata.getPeer())).toList(), added, removed);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
             log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
@@ -321,14 +321,16 @@ public class PeerBanHelperServer {
      *
      * @return 当封禁条目过期时，移除它们（解封禁）
      */
-    public Collection<PeerAddress> removeExpiredBans() {
-        List<PeerAddress> removeBan = new ArrayList<>();
+    public Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> removeExpiredBans() {
+        List<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> removeBan = new ArrayList<>();
         for (Map.Entry<PeerAddress, BanMetadata> pair : BAN_LIST.entrySet()) {
             if (System.currentTimeMillis() >= pair.getValue().getUnbanAt()) {
-                removeBan.add(pair.getKey());
+                removeBan.add(Map.entry(pair.getValue().getTorrent(), pair.getValue().getPeer()));
             }
         }
-        removeBan.forEach(this::unbanPeer);
+        removeBan.forEach(e -> {
+            this.unbanPeer(new PeerAddress(e.getValue().getAddress().getIp(), e.getValue().getAddress().getPort()));
+        });
         if (!removeBan.isEmpty()) {
             log.info(Lang.PEER_UNBAN_WAVE, removeBan.size());
         }
@@ -376,7 +378,7 @@ public class PeerBanHelperServer {
         CompletableFuture.allOf(fetchPeerFutures.toArray(new CompletableFuture[0])).join();
         // 多线程检查是否应该封禁 Peers （以优化启用了主动探测的环境下的检查性能）
         List<CompletableFuture<?>> checkPeersBanFutures = new ArrayList<>(map.size());
-        List<PeerAddress> bannedPeers = new CopyOnWriteArrayList<>();
+        List<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> bannedPeers = new CopyOnWriteArrayList<>();
         map.forEach((key, value) -> {
             peers.addAndGet(value.size());
             for (Peer peer : value) {
@@ -390,7 +392,7 @@ public class PeerBanHelperServer {
                         needUpdate.set(true);
                         needRelaunched.add(key);
                         banPeer(peer.getAddress(), new BanMetadata(banResult.moduleContext().getClass().getName(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.rule(), banResult.reason()), key, peer);
-                        bannedPeers.add(peer.getAddress());
+                        bannedPeers.add(Map.entry(new BanMetadata.TorrentWrapper(key), new BanMetadata.PeerWrapper(peer)));
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }
                 }, checkBanExecutor));
@@ -559,7 +561,7 @@ public class PeerBanHelperServer {
             Downloader downloader, // 目标下载器
             boolean needUpdateBanList, // 是否需要向下载器更新 banlist
             Collection<Torrent> torrentsAffected, // 受影响的 Torrent 列表
-            Collection<PeerAddress> added
+            Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> added
     ) {
     }
 

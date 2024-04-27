@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface Downloader extends AutoCloseable {
     String getEndpoint();
@@ -47,7 +48,7 @@ public interface Downloader extends AutoCloseable {
      * @param added 新增列表
      * @param removed 移除列表
      */
-    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<PeerAddress> added, @Nullable Collection<PeerAddress> removed);
+    void setBanList(Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> fullList, @Nullable Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> added, @Nullable Collection<Map.Entry<BanMetadata.TorrentWrapper, BanMetadata.PeerWrapper>> removed);
 
     /**
      * 如有需要，重启 Torrent 任务
