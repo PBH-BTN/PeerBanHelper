@@ -30,7 +30,6 @@ public class DatabaseManager {
         config.setJdbcUrl("jdbc:sqlite:" + file);
         config.setConnectionTestQuery("SELECT 1");
         config.setMaxLifetime(60000); // 60 Sec
-        config.setIdleTimeout(45000); // 45 Sec
         config.setMaximumPoolSize(4); // 50 Connections (including idle connections)
         this.ds = new HikariDataSource(config);
     }
