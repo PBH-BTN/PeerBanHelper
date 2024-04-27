@@ -1,2 +1,6 @@
 #!/bin/sh
-exec java -Xmx256M -XX:+UseSerialGC -jar PeerBanHelper.jar
+# shellcheck shell=sh
+
+chown -R "${PUID}":"${PGID}" /app
+
+exec gosu "${PUID}":"${PGID}" dumb-init java -Xmx256M -XX:+UseSerialGC -jar PeerBanHelper.jar
