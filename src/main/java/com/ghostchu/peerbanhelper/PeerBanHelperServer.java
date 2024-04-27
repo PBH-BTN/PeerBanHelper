@@ -433,7 +433,7 @@ public class PeerBanHelperServer {
             if (module.needCheckHandshake() && isHandshaking(peer)) {
                 continue; // 如果模块需要握手检查且peer正在握手 则跳过检查
             }
-            if (module.isCheckCacheable()) {
+            if (module.isCheckCacheable() && !isHandshaking(peer)) {
                 if (moduleMatchCache.shouldSkipCheck(module, torrent, peer.getAddress(), true)) {
                     continue;
                 }
