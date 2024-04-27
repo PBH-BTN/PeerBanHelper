@@ -435,7 +435,7 @@ public class PeerBanHelperServer {
             }
             if (module.isCheckCacheable()) {
                 if (moduleMatchCache.shouldSkipCheck(module, torrent, peer.getAddress(), true)) {
-                    return new BanResult(null, PeerAction.NO_ACTION, "check cache", "Hit cache");
+                    continue;
                 }
             }
             BanResult banResult = module.shouldBanPeer(torrent, peer, ruleExecuteExecutor);
