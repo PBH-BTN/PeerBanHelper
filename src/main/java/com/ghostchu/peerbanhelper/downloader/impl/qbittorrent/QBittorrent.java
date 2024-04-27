@@ -205,6 +205,7 @@ public class QBittorrent implements Downloader {
             }
 
         });
+        System.out.println(joiner);
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(endpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
