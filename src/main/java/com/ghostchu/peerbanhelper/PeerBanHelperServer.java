@@ -118,6 +118,7 @@ public class PeerBanHelperServer {
     private void resetKnownDownloaders() {
         try {
             for (Downloader downloader : downloaders) {
+                downloader.login();
                 downloader.setBanList(Collections.emptyList(), null, null);
             }
         } catch (Exception e) {
