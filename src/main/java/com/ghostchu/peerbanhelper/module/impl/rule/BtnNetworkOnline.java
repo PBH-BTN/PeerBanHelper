@@ -45,7 +45,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
 
     @Override
     public boolean needCheckHandshake() {
-        return false;
+        return true;
     }
 
     @Override

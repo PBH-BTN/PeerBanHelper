@@ -14,6 +14,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
 
@@ -35,6 +36,12 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
         long limit = Long.parseLong(session.getParameters().getOrDefault("limit", List.of("-1")).get(0));
         long lastBanTime = Long.parseLong(session.getParameters().getOrDefault("lastBanTime", List.of("-1")).get(0));
+        var banResponseList = getBanResponseStream(lastBanTime, limit);
+        String JSON = JsonUtil.prettyPrinting().toJson(banResponseList.toList());
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JSON));
+    }
+
+    private @NotNull Stream<BanResponse> getBanResponseStream(long lastBanTime, long limit) {
         var banResponseList = getServer().getBannedPeers()
                 .entrySet()
                 .stream()
@@ -46,8 +53,7 @@ public class PBHBanList extends AbstractFeatureModule implements PBHAPI {
         if (limit > 0) {
             banResponseList = banResponseList.limit(limit);
         }
-        String JSON = JsonUtil.prettyPrinting().toJson(banResponseList.toList());
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JSON));
+        return banResponseList;
     }
 
     @Override

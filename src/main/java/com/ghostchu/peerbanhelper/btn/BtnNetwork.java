@@ -36,7 +36,7 @@ public class BtnNetwork {
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     @Getter
-    private ScheduledExecutorService executeService = Executors.newScheduledThreadPool(2);
+    private final ScheduledExecutorService executeService = Executors.newScheduledThreadPool(2);
     @Getter
     private HttpClient httpClient;
 

@@ -46,6 +46,13 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
     }
 
     @Override
+    public boolean isCheckCacheable() {
+        return true;
+    }
+
+
+
+    @Override
     public void onEnable() {
         reloadConfig();
     }
@@ -67,11 +74,6 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
             return new BanResult(this, PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_PID_MATCH_PEER_ID, matchResult.rule()));
         }
         return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No matches");
-    }
-
-    @Override
-    public boolean isCheckCacheable() {
-        return true;
     }
 
 }

@@ -33,7 +33,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
 
     /**
      * 如果返回 false，则不初始化任何配置文件相关对象
-     * @return
+     * @return 是否支持使用配置文件进行配置
      */
     public abstract boolean isConfigurable();
 

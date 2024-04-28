@@ -1,4 +1,4 @@
-config-version: 3
+config-version: 4
 # 客户端设置
 client:
   # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
@@ -24,8 +24,8 @@ client:
     verify-ssl: true
     # Http 协议版本
     http-version: "HTTP_1_1"
-    # 增量封禁（有助于缓解保存封禁列表时的下载器压力，但可能不稳定）
-    increment-ban: true
+    # 增量封禁（有助于缓解保存封禁列表时的下载器压力，但可能不稳定，可能在部分下载器上会导致无法封禁Peers）
+    increment-ban: false
   transmission-002:
     type: Transmission
     endpoint: "http://127.0.0.1:9091"

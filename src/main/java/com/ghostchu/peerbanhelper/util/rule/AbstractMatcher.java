@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractMatcher implements Rule {
     private Rule condition;
@@ -14,8 +15,11 @@ public abstract class AbstractMatcher implements Rule {
     }
 
     @Override
-    public @NotNull MatchResult match(@NotNull String content) {
+    public @NotNull MatchResult match(@Nullable String content) {
         Main.getServer().getHitRateMetric().addQuery(this);
+        if (content == null) {
+            content = "";
+        }
         if (condition != null) {
             if (condition.match(content) == MatchResult.FALSE) {
                 Main.getServer().getHitRateMetric().addHit(this);
