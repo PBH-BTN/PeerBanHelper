@@ -11,4 +11,4 @@ ENV TZ=UTC
 WORKDIR /app
 COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
-CMD ["java","-Xmx256M","-XX:+UseSerialGC","-jar","PeerBanHelper.jar"]
+ENTRYPOINT ["java","-Xmx256M","-XX:+UseSerialGC","-jar","PeerBanHelper.jar"]
