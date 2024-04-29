@@ -1,21 +1,23 @@
-FROM eclipse-temurin:17.0.10_7-jre
+FROM eclipse-temurin:22 as build
 
+ADD ./pom.xml pom.xml
+ADD ./src src/
+ADD ./setup-webui.sh setup-webui.sh
+
+RUN sh setup-webui.sh && mvn -B clean package --file pom.xml && \
+    RUN $JAVA_HOME/bin/jlink \
+         --add-modules java.base \
+         --strip-debug \
+         --no-man-pages \
+         --no-header-files \
+         --compress=2 \
+         --output /javaruntime
+
+FROM debian:stable-slim
 LABEL MAINTAINER="https://github.com/PBH-BTN/PeerBanHelper"
 
-ENV TZ=UTC PUID=0 PGID=0
-
-RUN set -ex && \
-    export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update -y && \
-    apt-get install -y gosu dumb-init && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
+ENV TZ=UTC
 WORKDIR /app
+COPY --from=build target/PeerBanHelper.jar /app/PeerBanHelper.jar
 
-COPY --chmod=755 ./docker-entrypoint.sh /app/
-
-COPY ./target/PeerBanHelper.jar /app/
-
-ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
+CMD ["java","-Xmx256M","-XX:+UseSerialGC","-jar","PeerBanHelper.jar"]
