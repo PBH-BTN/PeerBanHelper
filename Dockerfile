@@ -3,8 +3,8 @@ FROM eclipse-temurin:22 as build
 ADD ./pom.xml pom.xml
 ADD ./src src/
 ADD ./setup-webui.sh setup-webui.sh
-
-RUN sh setup-webui.sh && mvn -B clean package --file pom.xml && \
+RUN apt-get update && apt-get install -y maven git && \
+    sh setup-webui.sh && mvn -B clean package --file pom.xml && \
     RUN $JAVA_HOME/bin/jlink \
          --add-modules java.base \
          --strip-debug \
