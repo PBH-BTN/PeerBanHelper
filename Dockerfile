@@ -17,7 +17,10 @@ FROM debian:stable-slim
 LABEL MAINTAINER="https://github.com/PBH-BTN/PeerBanHelper"
 
 ENV TZ=UTC
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH "${JAVA_HOME}/bin:${PATH}"
 WORKDIR /app
 COPY --from=build target/PeerBanHelper.jar /app/PeerBanHelper.jar
+COPY --from=build /javaruntime $JAVA_HOME
 
 CMD ["java","-Xmx256M","-XX:+UseSerialGC","-jar","PeerBanHelper.jar"]
