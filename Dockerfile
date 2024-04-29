@@ -1,6 +1,7 @@
 FROM maven:3.9.6-eclipse-temurin-22 as build
 
 ADD . /build
+WORKDIR /build
 RUN sh setup-webui.sh && mvn -B clean package --file pom.xml && \
     $JAVA_HOME/bin/jlink \
          --add-modules java.base \
