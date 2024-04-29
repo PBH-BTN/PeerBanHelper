@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.RuleFeatureModule;
@@ -18,12 +18,11 @@ import java.util.concurrent.TimeUnit;
 public class ModuleMatchCache {
     public final Map<RuleFeatureModule, Cache<Wrapper, Boolean>> CACHE_POOL = new ConcurrentHashMap<>();
     private final long banDuration;
-    private final PeerBanHelperServer server;
 
-    public ModuleMatchCache(PeerBanHelperServer server, long banDuration) {
-        this.server = server;
+    public ModuleMatchCache(long banDuration) {
+        ;
         this.banDuration = banDuration;
-        this.server.getEventBus().register(this);
+        Main.getEventBus().register(this);
     }
 
     public boolean shouldSkipCheck(RuleFeatureModule module, Torrent torrent, PeerAddress peerAddress, boolean writeCache) {
@@ -55,7 +54,7 @@ public class ModuleMatchCache {
     }
 
     public void close() {
-        this.server.getEventBus().unregister(this);
+        Main.getEventBus().unregister(this);
     }
 
     public record Wrapper(String torrentId, PeerAddress address) {

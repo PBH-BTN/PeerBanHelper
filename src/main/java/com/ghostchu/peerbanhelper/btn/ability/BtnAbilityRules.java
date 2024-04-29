@@ -85,7 +85,7 @@ public class BtnAbilityRules implements BtnAbility {
                     } else {
                         BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
                         this.btnRule = new BtnRuleParsed(btr);
-                        btnNetwork.getServer().getEventBus().post(new BtnRuleUpdateEvent());
+                        Main.getEventBus().post(new BtnRuleUpdateEvent());
                         try {
                             Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
                         } catch (IOException ignored) {

@@ -1,10 +1,16 @@
 package com.ghostchu.peerbanhelper.torrent;
 
+import lombok.Setter;
+
 public class TorrentImpl implements Torrent {
     private final double progress;
+    @Setter
     private String hash;
+    @Setter
     private String id;
+    @Setter
     private String name;
+    @Setter
     private long size;
 
     public TorrentImpl(String id, String name, String hash, long size,double progress) {
@@ -41,19 +47,4 @@ public class TorrentImpl implements Torrent {
     }
 
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
 }

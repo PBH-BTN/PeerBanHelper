@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -12,12 +11,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class DatabaseManager {
-    private File databaseDirectory;
     private HikariDataSource ds;
-    private ScheduledExecutorService cleanupService = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService cleanupService = Executors.newScheduledThreadPool(1);
 
-    public DatabaseManager(PeerBanHelperServer server) {
-        databaseDirectory = new File(Main.getDataDirectory(), "persist");
+    public DatabaseManager() {
+        File databaseDirectory = new File(Main.getDataDirectory(), "persist");
         if(!databaseDirectory.exists()){
             databaseDirectory.mkdirs();
         }
@@ -32,7 +30,6 @@ public class DatabaseManager {
         config.setJdbcUrl("jdbc:sqlite:" + file);
         config.setConnectionTestQuery("SELECT 1");
         config.setMaxLifetime(60000); // 60 Sec
-        config.setIdleTimeout(45000); // 45 Sec
         config.setMaximumPoolSize(4); // 50 Connections (including idle connections)
         this.ds = new HikariDataSource(config);
     }

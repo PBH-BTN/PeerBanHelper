@@ -31,6 +31,7 @@ public class RuleParser {
                 matchResult = new RuleMatchResult(true, rule);
             }
         }
+
         return matchResult;
     }
 

@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,11 +12,9 @@ import java.util.Locale;
 
 @Slf4j
 public class ProfileUpdateScript {
-    private final File file;
     private final YamlConfiguration conf;
 
-    public ProfileUpdateScript(File file, YamlConfiguration conf) {
-        this.file = file;
+    public ProfileUpdateScript(YamlConfiguration conf) {
         this.conf = conf;
     }
 

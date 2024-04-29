@@ -17,14 +17,12 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class CommandExec implements BanListInvoker {
-    private final PeerBanHelperServer server;
     private List<String> resetCommands;
     private List<String> banCommands;
     private List<String> unbanCommands;
     private boolean enabled = true;
 
     public CommandExec(PeerBanHelperServer server) {
-        this.server = server;
         if (!server.getMainConfig().getBoolean("banlist-invoker.command-exec.enabled", false)) {
             this.enabled = false;
             return;

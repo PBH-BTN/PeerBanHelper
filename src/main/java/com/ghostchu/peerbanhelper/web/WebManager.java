@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.web;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import fi.iki.elonen.NanoHTTPD;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +12,10 @@ import java.util.Set;
 @Slf4j
 public class WebManager extends NanoHTTPD {
 
-    private final PeerBanHelperServer peerBanHelperServer;
     private final Set<PBHAPI> apiEndpoints = new HashSet<>();
 
-    public WebManager(int port, PeerBanHelperServer peerBanHelperServer) {
+    public WebManager(int port) {
         super(port);
-        this.peerBanHelperServer = peerBanHelperServer;
         try {
             start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
         }catch (Exception e){

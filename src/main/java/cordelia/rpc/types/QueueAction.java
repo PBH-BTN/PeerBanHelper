@@ -3,6 +3,7 @@ package cordelia.rpc.types;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum QueueAction {
 
@@ -11,6 +12,5 @@ public enum QueueAction {
     DOWN("queue-move-down"),
     BOTTOM("queue-move-bottom");
 
-    @Getter
     private final String method;
 }

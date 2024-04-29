@@ -61,7 +61,7 @@ public class QBittorrent implements Downloader {
                 })
                 .cookieHandler(cm);
         if (!verifySSL && HTTPUtil.getIgnoreSslContext() != null) {
-            builder = builder.sslContext(HTTPUtil.getIgnoreSslContext());
+            builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
         this.username = username;
@@ -197,7 +197,14 @@ public class QBittorrent implements Downloader {
 
     private void setBanListIncrement(Collection<PeerAddress> added) {
         StringJoiner joiner = new StringJoiner("|");
-        added.forEach(p -> joiner.add(p.getIp() + ":" + p.getPort()));
+        added.forEach(p -> {
+            if (p.getAddress().isIPv6()) {
+                joiner.add("[" + p.getIp() + "]" + ":" + p.getPort());
+            } else {
+                joiner.add(p.getIp() + ":" + p.getPort());
+            }
+
+        });
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(endpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
@@ -244,7 +251,7 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
     }
 }
