@@ -36,19 +36,19 @@ public class Lang {
     public static String MODULE_AP_BAN_PEER_TCP_TEST = "TCP 测试通过: %s";
     public static String MODULE_AP_TCP_TEST_PORT_FAIL = "TCP 探测目标失败: %s";
     public static String MODULE_AP_EXECUTE_EXCEPTION = "烘焙缓存时出错，请将下面的错误日志发送给开发者以协助修复此错误";
-    public static String MODULE_AP_SSL_CONTEXT_FAILURE = "初始化 SSLContext 时出错";
-    public static String MODULE_MDB_MULTI_DIALING_NOT_DETECTED = "未发现多拨下载，种子名称：{}";
-    public static String MODULE_MDB_MULTI_DIALING_DETECTED = "发现多拨下载，请持续关注，种子名称：{}，子网：{}，触发IP：{}";
-    public static String MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED = "触发多拨追猎名单，种子名称：{}，子网：{}，触发IP：{}";
-    public static String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: \n{}";
-    public static String DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST = "请求 Torrents 列表失败 - %d - %s";
-    public static String DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";
-    public static String DOWNLOADER_QB_API_PREFERENCES_ERR = "qBittorrent 的首选项 API 返回了非 200 预期响应 - %d - %s";
-    public static String DOWNLOADER_QB_FAILED_SAVE_BANLIST = "无法保存 {} ({}) 的 Banlist！{} - {}\n{}";
-    public static String DOWNLOADER_TR_MOTD_WARNING = "[受限] 由于 Transmission 的 RPC-API 限制，PeerId 黑名单功能和 ProgressCheatBlocker 功能的过量下载模块不可用";
-    public static String DOWNLOADER_TR_DISCONNECT_PEERS = "[重置] 正在断开 Transmission 上的 {} 个种子连接的对等体，以便应用 IP 屏蔽列表的更改";
-    public static String DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP = "设置 Transmission 的 BanList 地址时，返回非成功响应：{}。";
-    public static String DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP = """
+    public static final String MODULE_AP_SSL_CONTEXT_FAILURE = "初始化 SSLContext 时出错";
+    public static final String MODULE_MDB_MULTI_DIALING_NOT_DETECTED = "未发现多拨下载，种子名称：{}";
+    public static final String MODULE_MDB_MULTI_DIALING_DETECTED = "发现多拨下载，请持续关注，种子名称：{}，子网：{}，触发IP：{}";
+    public static final String MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED = "触发多拨追猎名单，种子名称：{}，子网：{}，触发IP：{}";
+    public static final String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: \n{}";
+    public static final String DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST = "请求 Torrents 列表失败 - %d - %s";
+    public static final String DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";
+    public static final String DOWNLOADER_QB_API_PREFERENCES_ERR = "qBittorrent 的首选项 API 返回了非 200 预期响应 - %d - %s";
+    public static final String DOWNLOADER_QB_FAILED_SAVE_BANLIST = "无法保存 {} ({}) 的 Banlist！{} - {}\n{}";
+    public static final String DOWNLOADER_TR_MOTD_WARNING = "[受限] 由于 Transmission 的 RPC-API 限制，PeerId 黑名单功能和 ProgressCheatBlocker 功能的过量下载模块不可用";
+    public static final String DOWNLOADER_TR_DISCONNECT_PEERS = "[重置] 正在断开 Transmission 上的 {} 个种子连接的对等体，以便应用 IP 屏蔽列表的更改";
+    public static final String DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP = "设置 Transmission 的 BanList 地址时，返回非成功响应：{}。";
+    public static final String DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP = """
             无法应用 IP 黑名单到 Transmission，PBH 没有生效！
             请求 Transmission 更新 BanList 时，返回非成功响应。
             您是否正确映射了 PeerBanHelper 的外部交互端口，以便 Transmission 从 PBH 拉取 IP 黑名单？
@@ -70,9 +70,8 @@ public class Lang {
     public static final String ARB_BANNED = "IP 地址 %s 与另一个已封禁的 IP 地址 %s 处于同一封禁区间 %s 内，执行连锁封禁操作。";
     public static final String DATABASE_SETUP_FAILED = "[错误] 数据库初始化失败";
     public static String DATABASE_BUFFER_SAVED = "[保存] 已保存 {} 条内存缓存的封禁日志到数据库，用时 {}ms";
-    public static String DATABASE_SAVE_BUFFER_FAILED = "[错误] 刷写内存缓存的封禁日志时出现了 SQL 错误，未保存的数据已被丢弃";
-    public static String DATABASE_READ_HUNTING_TARGET_FAILED = "[错误] 读取追猎名单时出现了 SQL 错误，无法应用追猎名单";
-    public static String WEB_BANLOGS_INTERNAL_ERROR = "[错误] 读取封禁日志时遇到非预期错误";
+    public static final String DATABASE_SAVE_BUFFER_FAILED = "[错误] 刷写内存缓存的封禁日志时出现了 SQL 错误，未保存的数据已被丢弃";
+    public static final String WEB_BANLOGS_INTERNAL_ERROR = "[错误] 读取封禁日志时遇到非预期错误";
     public static String PERSIST_DISABLED = "[禁用] Persist 持久化数据存储已在此服务器上被禁用";
     public static final String BOOTSTRAP_FAILED = "[错误] PeerBanHelper 启动失败，遇到致命错误，请检查控制台日志";
     public static final String DATABASE_FAILURE = "[错误] 无法连接到持久化数据存储数据库，请检查是否同时启动了多个 PBH 示例？（如果 SQLite 数据库损坏，请删除它，PBH 将会重新生成新的数据库文件）";
