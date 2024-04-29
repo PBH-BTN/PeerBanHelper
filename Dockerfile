@@ -1,10 +1,8 @@
 FROM maven:3.9.6-eclipse-temurin-22 as build
 
-ADD ./pom.xml pom.xml
-ADD ./src src/
-ADD ./setup-webui.sh setup-webui.sh
+ADD . /build
 RUN sh setup-webui.sh && mvn -B clean package --file pom.xml && \
-    RUN $JAVA_HOME/bin/jlink \
+    $JAVA_HOME/bin/jlink \
          --add-modules java.base \
          --strip-debug \
          --no-man-pages \
@@ -19,7 +17,7 @@ ENV TZ=UTC
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 WORKDIR /app
-COPY --from=build target/PeerBanHelper.jar /app/PeerBanHelper.jar
+COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 COPY --from=build /javaruntime $JAVA_HOME
 
 CMD ["java","-Xmx256M","-XX:+UseSerialGC","-jar","PeerBanHelper.jar"]
