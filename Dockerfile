@@ -2,7 +2,7 @@ FROM maven:3.9.6-eclipse-temurin-22 as build
 
 ADD . /build
 WORKDIR /build
-RUN sh setup-webui.sh && mvn -B clean package --file pom.xml
+RUN sh setup-webui.sh && mvn -B clean package -Dmaven.compiler.release=21 --file pom.xml
 
 FROM alpine:edge
 LABEL MAINTAINER="https://github.com/PBH-BTN/PeerBanHelper"
