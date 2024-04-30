@@ -18,6 +18,17 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 3)
+    public void multiDialingBlocker() {
+        conf.set("module.multi-dialing-blocker.enabled", false);
+        conf.set("module.multi-dialing-blocker.subnet-mask-length", 24);
+        conf.set("module.multi-dialing-blocker.subnet-mask-v6-length", 64);
+        conf.set("module.multi-dialing-blocker.tolerate-num", 3);
+        conf.set("module.multi-dialing-blocker.cache-lifespan", 86400);
+        conf.set("module.multi-dialing-blocker.keep-hunting", true);
+        conf.set("module.multi-dialing-blocker.keep-hunting-time", 2592000);
+    }
+
     @UpdateScript(version = 2)
     public void newRuleSyntax() {
         List<String> peerId = conf.getStringList("module.peer-id-blacklist.exclude-peer-id");
