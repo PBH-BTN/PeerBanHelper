@@ -9,6 +9,6 @@ LABEL MAINTAINER="https://github.com/PBH-BTN/PeerBanHelper"
 
 ENV TZ=UTC
 WORKDIR /app
-RUN apk add --no-cache openjdk22-jre
+RUN apk add --no-cache openjdk21-jre-headless
 COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENTRYPOINT ["java","-Xmx256M","-XX:+UseSerialGC","-jar","PeerBanHelper.jar"]
