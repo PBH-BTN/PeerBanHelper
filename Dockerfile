@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.10_7-jre as build
+FROM maven:eclipse-temurin as build
 
 ADD . /build
 WORKDIR /build
