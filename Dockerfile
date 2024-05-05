@@ -2,6 +2,7 @@ FROM eclipse-temurin:17.0.10_7-jre as build
 
 ADD . /build
 WORKDIR /build
+RUN apt-get update && apt-get install git git-lfs -y
 RUN sh setup-webui.sh && mvn -B clean package --file pom.xml
 
 FROM eclipse-temurin:17.0.10_7-jre
