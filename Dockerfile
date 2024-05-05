@@ -1,10 +1,10 @@
-FROM maven:3.9.6-eclipse-temurin-22 as build
+FROM eclipse-temurin:17.0.10_7-jre as build
 
 ADD . /build
 WORKDIR /build
 RUN sh setup-webui.sh && mvn -B clean package --file pom.xml
 
-FROM ubuntu/jre:17_edge
+FROM eclipse-temurin:17.0.10_7-jre
 LABEL MAINTAINER="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 ENV TZ=UTC
