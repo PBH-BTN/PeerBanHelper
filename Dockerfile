@@ -1,4 +1,4 @@
-FROM maven:3.9.6-eclipse-temurin-17 as build
+FROM --platform=$BUILDPLATFORM maven:3.9.6-eclipse-temurin-17 as build
 
 ADD . /build
 WORKDIR /build
