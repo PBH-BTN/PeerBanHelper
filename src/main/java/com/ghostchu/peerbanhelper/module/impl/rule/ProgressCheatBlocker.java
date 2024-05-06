@@ -80,57 +80,64 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        final long uploaded = peer.getUploaded();
-        final long torrentSize = torrent.getSize();
-        if (torrentSize <= 0) {
-            return new BanResult(this, PeerAction.NO_ACTION, "N/A", Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
-        }
-        if (torrentSize < torrentMinimumSize) {
-            return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Skip due the torrent size");
-        }
-        final double actualProgress = (double) uploaded / torrentSize;
-        final double clientProgress = peer.getProgress();
-        // uploaded = -1 代表客户端不支持统计此 Peer 总上传量
-        if (uploaded != -1 && blockExcessiveClients && (uploaded > torrentSize)) {
-            // 下载过量，检查
-            long maxAllowedExcessiveThreshold = (long) (torrentSize * excessiveThreshold);
-            if (uploaded > maxAllowedExcessiveThreshold) {
-                return new BanResult(this, PeerAction.BAN, "Max allowed excessive threshold: " + maxAllowedExcessiveThreshold, String.format(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, torrentSize, uploaded, maxAllowedExcessiveThreshold));
+        // 从缓存取数据
+        List<ClientTask> lastRecordedProgress = progressRecorder.getIfPresent(peer.getAddress().getIp());
+        if (lastRecordedProgress == null) lastRecordedProgress = new ArrayList<>();
+        ClientTask clientTask = new ClientTask(torrent.getId(), 0d, 0L);
+        for (ClientTask recordedProgress : lastRecordedProgress) {
+            if (recordedProgress.getTorrentId().equals(torrent.getId())) {
+                clientTask = recordedProgress;
+                break;
             }
         }
-
-        if (actualProgress - clientProgress <= 0) {
-            return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, percent(clientProgress), percent(actualProgress)));
-        }
-
-        double difference = Math.abs(actualProgress - clientProgress);
-        if (difference > maximumDifference) {
-            return new BanResult(this, PeerAction.BAN, "Over max Difference: " + difference, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
-        }
-
-        double rewindAllow = rewindMaximumDifference;
-        if (rewindAllow > 0) {
-            List<ClientTask> lastRecordedProgress = progressRecorder.getIfPresent(peer.getAddress().getIp());
-            if (lastRecordedProgress == null) lastRecordedProgress = new ArrayList<>();
-            ClientTask clientTask = new ClientTask(torrent.getId(), 0d);
-            for (ClientTask recordedProgress : lastRecordedProgress) {
-                if (recordedProgress.getTorrentId().equals(torrent.getId())) {
-                    clientTask = recordedProgress;
-                    break;
+        // 获取真实已上传量
+        final long actualUploaded = peer.getUploaded() > clientTask.getUploaded() ? peer.getUploaded() : clientTask.getUploaded() + peer.getUploaded();
+        try {
+            final long torrentSize = torrent.getSize();
+            // 过滤
+            if (torrentSize <= 0) {
+                return new BanResult(this, PeerAction.NO_ACTION, "N/A", Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
+            }
+            if (torrentSize < torrentMinimumSize) {
+                return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Skip due the torrent size");
+            }
+            // 计算进度信息
+            final double actualProgress = (double) actualUploaded / torrentSize; // 实际进度
+            final double clientProgress = peer.getProgress(); // 客户端汇报进度
+            // actualUploaded = -1 代表客户端不支持统计此 Peer 总上传量
+            if (actualUploaded != -1 && blockExcessiveClients && (actualUploaded > torrentSize)) {
+                // 下载过量，检查
+                long maxAllowedExcessiveThreshold = (long) (torrentSize * excessiveThreshold);
+                if (actualUploaded > maxAllowedExcessiveThreshold) {
+                    return new BanResult(this, PeerAction.BAN, "Max allowed excessive threshold: " + maxAllowedExcessiveThreshold, String.format(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, torrentSize, actualUploaded, maxAllowedExcessiveThreshold));
                 }
             }
-            double lastRecord = clientTask.getProgress();
-            clientTask.setProgress(clientProgress);
+            // 如果客户端报告自己进度更多，则跳过检查
+            if (actualProgress - clientProgress <= 0) {
+                return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, percent(clientProgress), percent(actualProgress)));
+            }
+            // 计算进度差异
+            double difference = Math.abs(actualProgress - clientProgress);
+            if (difference > maximumDifference) {
+                return new BanResult(this, PeerAction.BAN, "Over max Difference: " + difference, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
+            }
+            if (rewindMaximumDifference > 0) {
+                double lastRecord = clientTask.getLastReportProgress();
+                double rewind = lastRecord - peer.getProgress();
+                boolean ban = rewind > rewindMaximumDifference;
+                return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, "RewindAllow: " + rewindMaximumDifference, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindMaximumDifference)));
+            }
+            return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
+        } finally {
+            // 无论如何都写入缓存，同步更改
+            clientTask.setUploaded(actualUploaded);
+            clientTask.setLastReportProgress(peer.getProgress());
             progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
-            double rewind = lastRecord - peer.getProgress();
-            boolean ban = rewind > rewindAllow;
-            return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, "RewindAllow: " + rewindAllow, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindAllow)));
         }
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
     }
 
-    private String percent(double d){
-        return (d*100)+"%";
+    private String percent(double d) {
+        return (d * 100) + "%";
     }
 
 
@@ -138,7 +145,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     @Data
     static class ClientTask {
         private String torrentId;
-        private Double progress;
+        private Double lastReportProgress;
+        private long uploaded;
     }
 }
 
