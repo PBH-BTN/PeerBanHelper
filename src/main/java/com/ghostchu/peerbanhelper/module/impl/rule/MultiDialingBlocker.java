@@ -25,6 +25,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class MultiDialingBlocker extends AbstractRuleFeatureModule {
+    // 计算缓存容量
+    private static final int TORRENT_PEER_MAX_NUM = 1024;
+    private static final int PEER_MAX_NUM_PER_SUBNET = 16;
 
     private int subnetMaskLength;
     private int subnetMaskV6Length;
@@ -80,10 +83,20 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
         keepHunting = getConfig().getBoolean("keep-hunting");
         keepHuntingTime = getConfig().getInt("keep-hunting-time") * 1000L;
 
-        cache = CacheBuilder.newBuilder().expireAfterWrite(cacheLifespan, TimeUnit.MILLISECONDS).build();
-        // 内层需要自己维护，外层交给Cache，回收不再使用的PeerGroup
-        subnetCounter = CacheBuilder.newBuilder().expireAfterAccess(cacheLifespan, TimeUnit.MILLISECONDS).build();
-        huntingList = CacheBuilder.newBuilder().expireAfterWrite(keepHuntingTime, TimeUnit.MILLISECONDS).build();
+        cache = CacheBuilder.newBuilder().
+                expireAfterWrite(cacheLifespan, TimeUnit.MILLISECONDS).
+                maximumSize(TORRENT_PEER_MAX_NUM).
+                build();
+        // 内层维护子网下的peer列表，外层回收不再使用的列表
+        // 外层按最后访问时间过期即可，若子网的列表还在被访问，说明还有属于该子网的peer在连接
+        subnetCounter = CacheBuilder.newBuilder().
+                expireAfterAccess(cacheLifespan, TimeUnit.MILLISECONDS).
+                maximumSize(TORRENT_PEER_MAX_NUM).
+                build();
+        huntingList = CacheBuilder.newBuilder().
+                expireAfterWrite(keepHuntingTime, TimeUnit.MILLISECONDS).
+                maximumSize(TORRENT_PEER_MAX_NUM).
+                build();
     }
 
     @Override
@@ -103,7 +116,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
             cache.put(torrentIpStr, currentTimestamp);
 
             String torrentSubnetStr = torrentId + '@' + peerSubnet;
-            PeerGroup subnetPeers = subnetCounter.get(torrentSubnetStr, () -> new PeerGroup(cacheLifespan));
+            Cache<String, Long> subnetPeers = subnetCounter.get(torrentSubnetStr, this::genPeerGroup);
             subnetPeers.put(peerIpStr, currentTimestamp);
 
             if (subnetPeers.size() > tolerateNum) {
@@ -148,42 +161,15 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     private static Cache<String, Long> cache;
     // 按子网统计的连接记录 torrentId+subnet : peerGroup
     // 需要统计同一子网下的peer数量，Cache不支持size()，所以需要自己维护
-    private static Cache<String, PeerGroup> subnetCounter;
+    private static Cache<String, Cache<String, Long>> subnetCounter;
     // 追猎名单 torrentId+subnet : createTime
     private static Cache<String, Long> huntingList;
 
-    /**
-     * 维护一组带寿命的peer，提供其准确数量
-     */
-    private static class PeerGroup extends ConcurrentHashMap<String, Long> {
-        // 5分钟清理一次，降低消耗
-        private static final long cleanCycle = 300000L;
-
-        public volatile long cleanTime = 0L;
-        private final long peerLifespan;
-
-        public PeerGroup(long peerLifespan) {
-            this.peerLifespan = peerLifespan;
-        }
-
-        @Override
-        public int size() {
-            clean();
-            return super.size();
-        }
-
-        private void clean() {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime > cleanTime) {
-                synchronized (this) {
-                    if (currentTime > cleanTime) {
-                        long passLine = currentTime - peerLifespan;
-                        entrySet().removeIf(x -> x.getValue() < passLine);
-                        cleanTime = currentTime + cleanCycle;
-                    }
-                }
-            }
-        }
+    private Cache<String, Long> genPeerGroup() {
+        return CacheBuilder.newBuilder().
+                expireAfterAccess(cacheLifespan, TimeUnit.MILLISECONDS).
+                maximumSize(PEER_MAX_NUM_PER_SUBNET).
+                build();
     }
 
     /**
