@@ -41,6 +41,7 @@ public class PBHMetrics extends AbstractFeatureModule implements PBHAPI {
         map.put("checkCounter", metrics.getCheckCounter());
         map.put("peerBanCounter", metrics.getPeerBanCounter());
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
+        map.put("banlistCounter", getServer().getBannedPeers().size());
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(map)));
     }
 
