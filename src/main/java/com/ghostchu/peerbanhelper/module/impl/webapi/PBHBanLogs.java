@@ -48,7 +48,7 @@ public class PBHBanLogs extends AbstractFeatureModule implements PBHAPI {
             map.put("pageIndex", pageIndex);
             map.put("pageSize", pageSize);
             map.put("results", db.queryBanLogs(null, null, pageIndex, pageSize));
-            map.put("total", db.queryBanLogsCount(null,null));
+            map.put("total", db.queryBanLogsCount());
             return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(map)));
         } catch (SQLException e) {
             log.error(Lang.WEB_BANLOGS_INTERNAL_ERROR, e);

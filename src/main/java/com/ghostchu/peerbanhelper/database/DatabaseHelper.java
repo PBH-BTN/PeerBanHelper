@@ -74,24 +74,10 @@ public class DatabaseHelper {
         }
     }
 
-    public long queryBanLogsCount(Date from, Date to) throws SQLException {
+    public long queryBanLogsCount() throws SQLException {
         try (Connection connection = manager.getConnection()) {
-            PreparedStatement ps;
-            if (from == null && to == null) {
-                ps = connection.prepareStatement("SELECT COUNT(*) AS count FROM ban_logs");
-            } else {
-                if (from == null || to == null) {
-                    throw new IllegalArgumentException("from or null cannot be null if any provided");
-                } else {
-                    ps = connection.prepareStatement("SELECT COUNT(*) AS count FROM ban_logs");
-                }
-            }
-            if (from != null) {
-                ps.setDate(1, from);
-                ps.setDate(2, to);
-            }
             @Cleanup
-            ResultSet set = ps.executeQuery();
+            ResultSet set = connection.createStatement().executeQuery("SELECT COUNT(*) AS count FROM ban_logs");
             return set.getLong("count");
         }
     }
