@@ -224,6 +224,41 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 </details>
 
+### 多拨侦测
+
+专业PCDN用户会在一台PCDN服务器上接入多条宽带，以此提升上传带宽，称为多拨。
+这类用户的刷下载工具一般也较为复杂，会利用多条宽带不同的出口IP分散流量，对抗基于下载进度的吸血检测。
+此模块对多拨下载现象进行侦测，发现同一网段集中下载同一种子，即予以全部封禁。
+目前已知可能误伤的情况：小ISP的骨干网出口在同一网段，造成多拨假象。如果种子涉及的BT网络主体在大陆以外，请谨慎使用。
+
+<details>
+
+<summary>查看示例配置文件</summary>
+
+```yaml
+  multi-dialing-blocker:
+    enabled: false
+    # 子网掩码长度
+    # IP地址前多少位相同的视为同一个子网，位数越少范围越大，一般不需要修改
+    subnet-mask-length: 24
+    # 对于同小区IPv6地址应该取多少位掩码没有调查过，64位是不会误杀的保险值
+    subnet-mask-v6-length: 64
+    # 容许同一网段下载同一种子的IP数量，正整数
+    # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
+    tolerate-num: 3
+    # 缓存持续时间（秒）
+    # 所有连接过的peer会记入缓存，DHCP服务会定期重新分配IP，缓存时间过长会导致误杀
+    cache-lifespan: 86400
+    # 是否追猎
+    # 如果某IP已判定为多拨，无视缓存时间限制继续搜寻其同伙
+    keep-hunting: true
+    # 追猎持续时间（秒）
+    # 和cache-lifspan作用相似，对被猎杀IP的缓存持续时间，keep-hunting为true时有效
+    keep-hunting-time: 2592000
+```
+
+</details>
+
 ## 添加下载器
 
 PeerBanHelper 能够连接多个支持的下载器，并共享 IP 黑名单。但每个下载器只能被一个 PeerBanHelper 添加，多个 PBH 会导致操作 IP 黑名单时出现冲突。
