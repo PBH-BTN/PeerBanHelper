@@ -61,7 +61,8 @@ public class SwingLoggerAppender extends AbstractAppender {
                 for (JTextArea textArea : textAreas) {
                     try {
                         textArea.append(message);
-                        int linesToCut = textArea.getLineCount() - maxLines;
+                        int linesToCut = (textArea.getLineCount() - maxLines) + (maxLines / 2);
+                        linesToCut = Math.min(linesToCut, textArea.getLineCount());
                         if (linesToCut > 0) {
                             int posOfLastLineToTrunk = textArea.getLineEndOffset(linesToCut - 1);
                             textArea.replaceRange("", 0, posOfLastLineToTrunk);
