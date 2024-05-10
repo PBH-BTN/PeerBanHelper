@@ -36,7 +36,7 @@ public class PBHClientStatus extends AbstractFeatureModule implements PBHAPI {
         for (Downloader downloader : getServer().getDownloaders()) {
             Map<String, Object> map = new HashMap<>(2);
             map.put("name", downloader.getName());
-            map.put("type", downloader.getDownloaderName());
+            map.put("type", downloader.getType());
             map.put("endpoint", downloader.getEndpoint());
             try {
                 map.put("status", downloader.getLastStatus().name());
