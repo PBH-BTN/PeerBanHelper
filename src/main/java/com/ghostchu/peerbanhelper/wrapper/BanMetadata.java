@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class BanMetadata implements Comparable<BanMetadata> {
     private String context;
+    private String downloader;
     private UUID randomId;
     private long banAt;
     private long unbanAt;
@@ -22,9 +23,10 @@ public class BanMetadata implements Comparable<BanMetadata> {
     private String description;
     private String reverseLookup = "N/A";
 
-    public BanMetadata(String context, long banAt, long unbanAt, Torrent torrent, Peer peer, String rule, String description) {
+    public BanMetadata(String context, String downloader, long banAt, long unbanAt, Torrent torrent, Peer peer, String rule, String description) {
         this.randomId = UUID.randomUUID();
         this.context = context;
+        this.downloader = downloader;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
         this.torrent = new TorrentWrapper(torrent);
