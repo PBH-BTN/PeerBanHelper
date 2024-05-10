@@ -67,6 +67,7 @@ public class SwingLoggerAppender extends AbstractAppender {
                             int posOfLastLineToTrunk = textArea.getLineEndOffset(linesToCut - 1);
                             textArea.replaceRange("", 0, posOfLastLineToTrunk);
                         }
+                        textArea.setCaretPosition(textArea.getDocument().getLength());
                     } catch (Throwable throwable) {
                         throwable.printStackTrace();
                     }
