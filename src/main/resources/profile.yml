@@ -165,6 +165,7 @@ module:
   # 启用来自 BTN 网络的规则
   btn:
     enabled: true
+  # 多拨封禁（实验性功能）
   multi-dialing-blocker:
     enabled: false
     # 子网掩码长度

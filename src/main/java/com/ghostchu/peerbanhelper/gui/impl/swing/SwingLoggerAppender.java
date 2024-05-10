@@ -60,18 +60,11 @@ public class SwingLoggerAppender extends AbstractAppender {
             {
                 for (JTextArea textArea : textAreas) {
                     try {
-                        if (textArea != null) {
-                            if (textArea.getText().isEmpty()) {
-                                textArea.setText(message);
-                            } else {
-                                textArea.append("\n" + message);
-                                if (maxLines > 0 & textArea.getLineCount() > maxLines + 1) {
-                                    int endIdx = textArea.getDocument().getText(0, textArea.getDocument().getLength()).indexOf("\n");
-                                    textArea.getDocument().remove(0, endIdx + 1);
-                                }
-                            }
-                            String content = textArea.getText();
-                            textArea.setText(content.substring(0, content.length() - 1));
+                        textArea.append(message);
+                        int linesToCut = textArea.getLineCount() - maxLines;
+                        if (linesToCut > 0) {
+                            int posOfLastLineToTrunk = textArea.getLineEndOffset(linesToCut - 1);
+                            textArea.replaceRange("", 0, posOfLastLineToTrunk);
                         }
                     } catch (Throwable throwable) {
                         throwable.printStackTrace();
