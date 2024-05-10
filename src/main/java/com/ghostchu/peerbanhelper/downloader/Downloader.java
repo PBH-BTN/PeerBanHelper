@@ -12,9 +12,19 @@ import java.util.List;
 public interface Downloader extends AutoCloseable {
     String getEndpoint();
 
+    /**
+     * 下载器用户定义名称
+     *
+     * @return 用户定义名称
+     */
     String getName();
 
-    String getDownloaderName();
+    /**
+     * 下载器类型
+     *
+     * @return 类型
+     */
+    String getType();
 
     /**
      * 登录到此下载器

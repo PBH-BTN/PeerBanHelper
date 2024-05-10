@@ -53,7 +53,7 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public String getDownloaderName() {
+    public String getType() {
         return "Transmission";
     }
 

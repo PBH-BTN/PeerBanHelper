@@ -79,7 +79,7 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public String getDownloaderName() {
+    public String getType() {
         return "qBittorrent";
     }
 
