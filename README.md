@@ -3,7 +3,7 @@
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
 > [!NOTE]
-> PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知
+> PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知  
 > QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
 
 > [!TIP]
@@ -295,105 +295,6 @@ client:
     username: "admin"
     password: "admin"
 ```
-
-</details>
-
-## 手动部署
-
-PeerBanHelper 需要使用 Java 17 或更高版本前置运行环境。  
-
-### Windows 手动部署
-
-<details>
-
-<summary>展开手动部署步骤</summary>
-
-从 [Eclipse Adoptium 网站](https://adoptium.net/zh-CN/temurin/releases/?package=jdk&os=windows)下载 Java JDK，版本必须大于等于 Java 17，下载时请选择 `.msi` 格式的安装包。
-
-运行 MSI 安装包，遇到图中页面时，点击所有条目前面的磁盘小图标，全部选择 “整个功能将安装在本地硬盘上”，随后一路下一步安装到系统中。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/f0428971-5724-4e84-b34c-52c3ae0d1629)
-
-新建一个文件夹，下载 PeerBanHelper 的最新版本 JAR 文件，并放入你新创建的文件夹中。(从 Release 中，任选一个系统版本，压缩包内包含通用
-JAR 文件)
-
-新建一个 `start.bat` 批处理文件，使用记事本打开，并复制下面的内容保存：
-
-```bat
-@echo off
-chcp 65001
-title PeerBanHelper
-:main
-java -Xmx256M -XX:+UseSerialGC -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -Dconsole.encoding=UTF-8 -Duser.language=en -Duser.region=US -jar PeerBanHelper.jar
-timeout /t 5 /nobreak >nul
-echo Restarting...
-goto main
-```
-
-完成后，双击 start.bat 启动 PeerBanHelper 即可。
-</details>
-
-
-### Linux 手动部署
-
-我相信 Linux 用户可以自己搞定这一切 ;)，如有需要，你还可以配置为系统服务并开机自启。
-
-## Docker 部署
-
-Docker 镜像为：`ghostchu/peerbanhelper`。  
-如需使用 docker-compose 启动，请参见仓库的 docker-compose.yml 文件。
-
-> [!IMPORTANT]
-> 如果您设置了 Docker 镜像源，拉取的镜像可能严重过期。需要显式指定明确的版本号，版本号可在 [DockerHub](https://hub.docker.com/r/ghostchu/peerbanhelper/tags) 找到。
-
-### 使用 Docker CLI 启动
-
-```shell
-sudo docker run -d \
-  --name peerbanhelper \
-  -p 9898:9898 \
-  -v ${PWD}/peerbanhelper-data:/app/data \
-  -e PUID=0 \
-  -e PGID=0 \
-  -e TZ=UTC \
-  ghostchu/peerbanhelper:<最新版本号>
-```
-
-### 使用 Docker Compose 文件启动
-
-请参见仓库的 docker-compose.yml 文件，使用 `docker-compose up` 快速部署。
-
-### 在群晖 DSM 上，使用 Container Manager 启动
-
-<details>
-
-<summary>查看手把手DSM配置步骤</summary>
-
-首先，为 PBH 创建文件夹，用于存放 PBH 的配置文件。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/8ee3a716-f192-4392-8362-c7c6a1f6e11f)
-
-在 Container Manager 中，选择项目，点击新增按钮，来源选择 “创建 docker-compose.yml”（请务必先选择来源，否则后续操作将覆盖已设置的内容）。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/ba742cc3-583e-4798-8947-f72ccc892164)
-
-随后，点击 `设置路径` 按钮，配置 Docker Compose 的位置到我们刚刚创建的好的文件夹：
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/fa0efd6c-182c-43ea-99b1-5116ba55fbc1)
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/642f8d48-69e5-4fa3-b5d6-92750100996d)
-
-从仓库的 `docker-compose.yml` 文件中复制所有内容，并粘贴到编辑框中：**（需要特别注意的是，如果你配置了 Docker 镜像源，则需要手动指定最新版本号，否则你可能拉取到一个史前版本的镜像，最新的版本号可以在[这里](https://github.com/Ghost-chu/PeerBanHelper/releases/latest)找到）**
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/bafd7b87-8c0e-4c65-81f0-b8ce378f5071)
-
-如果询问你是否设置网页门户，请**不要启用**：
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/849ed06a-ddc9-4ac5-bb89-a6062b5fe36d)
-
-一路下一步，启动容器。首次启动完成后，配置文件应该会自动生成，配置好配置文件后再次重启 Docker 容器即可使用。
-
-![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/758356d6-6cd0-42c4-a011-fbf5a66ebebd)
 
 </details>
 
