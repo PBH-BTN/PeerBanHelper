@@ -1,4 +1,4 @@
-config-version: 4
+config-version: 5
 # 客户端设置
 client:
   # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
@@ -49,6 +49,9 @@ logger:
   # 是否隐藏 [完成] 已检查 XX 的 X 个活跃 Torrent 和 X 个对等体 的日志消息？
   # 在 DSM 的 ContainerManager 上有助于大幅度减少日志数量，并仅记录有价值的封禁等日志条目
   hide-finish-log: false
+lookup:
+  # 启用 DNS 反查，能够通过 IP 反查域名，但可能增加你所使用 DNS 服务器的压力，并可能导致 DNS 服务器对你采取降低服务质量的措施
+  dns-reverse-lookup: false
 # 线程控制
 threads:
   # 全局检查线程池并发等级

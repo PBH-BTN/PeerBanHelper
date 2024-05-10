@@ -344,6 +344,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new PeerIdBlacklist(this, profile));
         moduleManager.register(new ClientNameBlacklist(this, profile));
         moduleManager.register(new ProgressCheatBlocker(this, profile));
+        moduleManager.register(new MultiDialingBlocker(this, profile));
         //moduleManager.register(new ActiveProbing(this, profile));
         moduleManager.register(new AutoRangeBan(this, profile));
         moduleManager.register(new BtnNetworkOnline(this, profile));
@@ -523,18 +524,22 @@ public class PeerBanHelperServer {
         BAN_LIST.put(peer, banMetadata);
         metrics.recordPeerBan(peer, banMetadata);
         banListInvoker.forEach(i -> i.add(peer, banMetadata));
-        CompletableFuture.runAsync(() -> {
-            try {
-                InetAddress address = InetAddress.getByName(peer.getAddress().toString());
-                if (!address.getCanonicalHostName().equals(peer.getIp())) {
-                    banMetadata.setReverseLookup(address.getCanonicalHostName());
-                } else {
+        if (mainConfig.getBoolean("lookup.dns-reverse-lookup")) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    InetAddress address = InetAddress.getByName(peer.getAddress().toString());
+                    if (!address.getCanonicalHostName().equals(peer.getIp())) {
+                        banMetadata.setReverseLookup(address.getCanonicalHostName());
+                    } else {
+                        banMetadata.setReverseLookup("N/A");
+                    }
+                } catch (UnknownHostException ignored) {
                     banMetadata.setReverseLookup("N/A");
                 }
-            } catch (UnknownHostException ignored) {
-                banMetadata.setReverseLookup("N/A");
-            }
-        }, generalExecutor);
+            }, generalExecutor);
+        } else {
+            banMetadata.setReverseLookup("N/A");
+        }
         Main.getEventBus().post(new PeerBanEvent(peer, banMetadata, torrentObj, peerObj));
     }
 

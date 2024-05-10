@@ -6,13 +6,12 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>3.3.7</version>
+    <version>3.4.0</version>
 
     <name>PeerBanHelper</name>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.ghostchu.peerbanhelper.Main</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
@@ -47,7 +46,7 @@
                                 <goal>shade</goal>
                             </goals>
                             <configuration>
-                                <finalName>${name}</finalName>
+                                <finalName>${project.name}</finalName>
                                 <createDependencyReducedPom>true</createDependencyReducedPom>
                                 <minimizeJar>false</minimizeJar>
                                 <createSourcesJar>false</createSourcesJar>
@@ -204,7 +203,9 @@
                                     <goal>shade</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>${name}-SNAPSHOT-${maven.build.timestamp}-${git.commit.id.abbrev}</finalName>
+                                    <finalName>
+                                        ${project.name}-SNAPSHOT-${maven.build.timestamp}-${git.commit.id.abbrev}
+                                    </finalName>
                                 </configuration>
                             </execution>
                         </executions>
@@ -310,6 +311,15 @@
             <artifactId>flatlaf</artifactId>
             <version>${flatlafVersion}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+
+
         <!--        <dependency>-->
         <!--            <groupId>com.formdev</groupId>-->
         <!--            <artifactId>flatlaf-intellij-themes</artifactId>-->

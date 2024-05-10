@@ -53,7 +53,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ghostchu/peerbanhelper
+          images: ghostchu/peerbanhelper-snapshot
           tags: |
             type=ref,event=branch
             type=ref,event=tag
@@ -68,7 +68,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          push: false
+          push: true
           platforms: |
             linux/amd64
             linux/arm64/v8

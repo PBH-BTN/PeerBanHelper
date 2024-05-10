@@ -70,11 +70,6 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     private void onColorThemeChanged() {
         OsThemeDetector detector = OsThemeDetector.getDetector();
         boolean isDarkThemeUsed = detector.isDark();
-        try {
-            setColorTheme(Class.forName(UIManager.getSystemLookAndFeelClassName()));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
         if (isDarkThemeUsed) {
             setColorTheme(FlatDarculaLaf.class);
         } else {

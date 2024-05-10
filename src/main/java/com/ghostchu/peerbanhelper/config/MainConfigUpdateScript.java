@@ -10,6 +10,11 @@ public class MainConfigUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 5)
+    public void optionForDnsReverseLookup() {
+        conf.set("lookup.dns-reverse-lookup", false);
+    }
+
     @UpdateScript(version = 4)
     public void defTurnOffIncrementBans() {
         ConfigurationSection section = conf.getConfigurationSection("client");
