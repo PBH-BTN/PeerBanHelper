@@ -11,7 +11,7 @@ public class MainConfigUpdateScript {
     }
 
     @UpdateScript(version = 5)
-    public void optionForDnsReserveLookup() {
+    public void optionForDnsReverseLookup() {
         conf.set("lookup.dns-reverse-lookup", false);
     }
 
