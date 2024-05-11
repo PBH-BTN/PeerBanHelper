@@ -28,6 +28,8 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
+import com.maxmind.geoip2.model.AsnResponse;
+import com.maxmind.geoip2.model.CityResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -416,7 +418,26 @@ public class PeerBanHelperServer {
                     if (banResult.action() == PeerAction.BAN) {
                         needUpdate.set(true);
                         needRelaunched.add(key);
-                        banPeer(peer.getAddress(), new BanMetadata(banResult.moduleContext().getClass().getName(), downloader.getName(), System.currentTimeMillis(), System.currentTimeMillis() + banDuration, key, peer, banResult.rule(), banResult.reason()), key, peer);
+                        CityResponse cityResponse = null;
+                        AsnResponse asnResponse = null;
+                        try {
+                            if (ipdb != null) {
+                                InetAddress mmdbAddress = peer.getAddress().getAddress().toInetAddress();
+                                if (ipdb.getMmdbCity() != null) {
+                                    cityResponse = ipdb.getMmdbCity().city(mmdbAddress);
+                                }
+                                if (ipdb.getMmdbASN() != null) {
+                                    asnResponse = ipdb.getMmdbASN().asn(mmdbAddress);
+                                }
+                            }
+                        } catch (Exception ignored) {
+                        }
+                        banPeer(peer.getAddress(),
+                                new BanMetadata(banResult.moduleContext().getClass().getName(),
+                                        downloader.getName(), System.currentTimeMillis(),
+                                        System.currentTimeMillis() + banDuration, key, peer,
+                                        banResult.rule(), banResult.reason(), cityResponse, asnResponse
+                                ), key, peer);
                         bannedPeers.add(peer.getAddress());
                         log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), key.getName(), banResult.reason());
                     }

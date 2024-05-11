@@ -2,9 +2,12 @@ package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.maxmind.geoip2.model.AsnResponse;
+import com.maxmind.geoip2.model.CityResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -12,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BanMetadata implements Comparable<BanMetadata> {
+
     private String context;
     private String downloader;
     private UUID randomId;
@@ -22,8 +26,11 @@ public class BanMetadata implements Comparable<BanMetadata> {
     private String rule;
     private String description;
     private String reverseLookup = "N/A";
+    private GeoWrapper geo;
+    private ASNWrapper asn;
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, Torrent torrent, Peer peer, String rule, String description) {
+    public BanMetadata(String context, String downloader, long banAt, long unbanAt, Torrent torrent, Peer peer, String rule,
+                       String description, @Nullable CityResponse cityResponse, @Nullable AsnResponse asnResponse) {
         this.randomId = UUID.randomUUID();
         this.context = context;
         this.downloader = downloader;
@@ -33,11 +40,59 @@ public class BanMetadata implements Comparable<BanMetadata> {
         this.peer = new PeerWrapper(peer);
         this.rule = rule;
         this.description = description;
+        if (cityResponse != null) {
+            this.geo = new GeoWrapper(cityResponse);
+        }
+        if (asnResponse != null) {
+            this.asn = new ASNWrapper(asnResponse);
+        }
     }
 
     @Override
     public int compareTo(BanMetadata o) {
         return this.randomId.compareTo(o.randomId);
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GeoWrapper {
+        private String iso;
+        private String countryRegion;
+        private String city;
+        private Double latitude;
+        private Double longitude;
+        private Integer accuracyRadius;
+
+        public GeoWrapper(CityResponse cityResponse) {
+            if (cityResponse.getCountry() != null) {
+                this.iso = cityResponse.getCountry().getIsoCode();
+                this.countryRegion = cityResponse.getCountry().getName();
+            }
+            if (cityResponse.getCity() != null) {
+                this.city = cityResponse.getCity().getName();
+            }
+            if (cityResponse.getLocation() != null) {
+                this.latitude = cityResponse.getLocation().getLatitude();
+                this.longitude = cityResponse.getLocation().getLongitude();
+                this.accuracyRadius = cityResponse.getLocation().getAccuracyRadius();
+            }
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ASNWrapper {
+        private long asn;
+        private String asOrganization;
+        private String asNetwork;
+
+        public ASNWrapper(AsnResponse asnResponse) {
+            this.asn = asnResponse.getAutonomousSystemNumber();
+            this.asOrganization = asnResponse.getAutonomousSystemOrganization();
+            this.asNetwork = asnResponse.getNetwork().toString();
+        }
     }
 
     @Data

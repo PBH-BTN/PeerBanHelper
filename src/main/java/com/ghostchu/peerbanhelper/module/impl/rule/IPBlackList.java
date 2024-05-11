@@ -34,7 +34,6 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     private List<Integer> ports;
     private List<Long> asns;
     private List<String> regions;
-    private List<String> traits;
     private Map<Object, Map<String, AtomicLong>> counter;
 
     public IPBlackList(PeerBanHelperServer server, YamlConfiguration profile) {
@@ -133,7 +132,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         if (ipdb == null) {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "IPDB not initialized");
         }
-        if (traits.isEmpty() && regions.isEmpty() && asns.isEmpty()) {
+        if (regions.isEmpty() && asns.isEmpty()) {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No feature enabled");
         }
         InetAddress address = peer.getAddress().getAddress().toInetAddress();
