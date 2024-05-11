@@ -5,8 +5,8 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import cordelia.client.TrClient;
 import cordelia.client.TypedResponse;
 import cordelia.rpc.*;
@@ -135,7 +135,7 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<BanMetadata.TorrentWrapper> torrents) {
+    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
         relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
     }
 

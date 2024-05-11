@@ -150,4 +150,6 @@ public class Lang {
     public static final String DOWNLOAD_PROGRESS_DETERMINED = "下载进度：已下载 {}/{} 字节，进度：{}%";
     public static final String DOWNLOAD_PROGRESS = "下载进度：已下载 {} 字节";
     public static final String DOWNLOAD_COMPLETED = "下载进度：已完成！共传输 {} 字节的数据";
+    public static final String[] GUI_LIVE_PEERS_COLUMN_NAMES = {"国家/地区", "IP地址", "PeerID", "客户端", "上传速度", "上传量", "下载速度", "下载量", "Torrent", "城市", "ASN", "AS组织", "AS网络"};
+
 }

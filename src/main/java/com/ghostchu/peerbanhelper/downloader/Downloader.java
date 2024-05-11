@@ -2,8 +2,8 @@ package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -72,7 +72,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @param torrents Torrent 任务列表
      */
-    void relaunchTorrentIfNeededByTorrentWrapper(Collection<BanMetadata.TorrentWrapper> torrents);
+    void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents);
 
     /**
      * 获取客户端最后一次请求的状态

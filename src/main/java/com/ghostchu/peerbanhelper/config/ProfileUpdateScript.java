@@ -18,6 +18,11 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 5)
+    public void updateLivePeers() {
+        conf.set("update-live-peers-interval", 13000);
+    }
+
     @UpdateScript(version = 4)
     public void ipDatabase() {
         conf.set("module.ip.asns", new ArrayList<>());

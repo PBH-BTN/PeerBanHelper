@@ -26,6 +26,8 @@ import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.WebManager;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip2.model.AsnResponse;
@@ -74,6 +76,8 @@ public class PeerBanHelperServer {
     private final HitRateMetric hitRateMetric = new HitRateMetric();
     @Getter
     private final List<BanListInvoker> banListInvoker = new ArrayList<>();
+    @Getter
+    private ImmutableMap<PeerAddress, PeerMetadata> LIVE_PEERS = ImmutableMap.of();
     @Getter
     private BtnNetwork btnNetwork;
     @Getter
@@ -212,13 +216,16 @@ public class PeerBanHelperServer {
             String json = Files.readString(banListFile.toPath(), StandardCharsets.UTF_8);
             Map<PeerAddress, BanMetadata> data = JsonUtil.getGson().fromJson(json, new TypeToken<Map<PeerAddress, BanMetadata>>() {
             }.getType());
+            if (data == null) {
+                return;
+            }
             this.BAN_LIST.putAll(data);
             log.info(Lang.LOAD_BANLIST_FROM_FILE, data.size());
             downloaders.forEach(downloader -> {
                 downloader.login();
                 downloader.setBanList(BAN_LIST.keySet(), null, null);
             });
-            Collection<BanMetadata.TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
+            Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
             downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
         } catch (Exception e) {
             log.error(Lang.LOAD_BANLIST_FAIL, e);
@@ -257,6 +264,45 @@ public class PeerBanHelperServer {
 
     private void registerTimer() {
         BAN_WAVE_SERVICE.scheduleAtFixedRate(this::banWave, 1, profile.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
+        MISC_SCHEDULER.scheduleAtFixedRate(this::updateLivePeers, 1, profile.getLong("update-live-peers-interval", 13000), TimeUnit.MILLISECONDS);
+    }
+
+    private void updateLivePeers() {
+        Map<PeerAddress, PeerMetadata> peers = new HashMap<>();
+        for (Downloader downloader : downloaders) {
+            try {
+                if (downloader.login()) {
+                    try {
+                        List<Torrent> torrents = downloader.getTorrents();
+                        for (Torrent torrent : torrents) {
+                            for (Peer peer : downloader.getPeers(torrent)) {
+                                CityResponse cityResponse = null;
+                                AsnResponse asnResponse = null;
+                                try {
+                                    if (ipdb != null) {
+                                        InetAddress mmdbAddress = peer.getAddress().getAddress().toInetAddress();
+                                        if (ipdb.getMmdbCity() != null) {
+                                            cityResponse = ipdb.getMmdbCity().city(mmdbAddress);
+                                        }
+                                        if (ipdb.getMmdbASN() != null) {
+                                            asnResponse = ipdb.getMmdbASN().asn(mmdbAddress);
+                                        }
+                                    }
+                                } catch (Exception ignored) {
+                                }
+                                peers.put(peer.getAddress(), new PeerMetadata(downloader.getName(),
+                                        torrent,
+                                        peer, cityResponse, asnResponse
+                                ));
+                            }
+                        }
+                    } catch (Throwable ignored2) {
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        LIVE_PEERS = ImmutableMap.copyOf(peers);
     }
 
     /**
