@@ -1,4 +1,4 @@
-config-version: 2
+config-version: 4
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 封禁持续时间（单位：毫秒）
@@ -102,7 +102,7 @@ module:
   # IP 地址/端口 封禁
   ip-address-blocker:
     enabled: true
-    # IP，支持 CIDR，其语法大致如下：
+    # 按 IP 封禁，支持 CIDR，其语法大致如下：
     # ::/64
     # a:b:c:d::a:b/64
     # a:b:c:d:e:f:1.2.3.4/112
@@ -111,9 +111,19 @@ module:
     ips:
     #- 8.8.8.8
     #- 9.9.9.9
-    # 端口
+
+    # 按端口封禁
     ports:
     #- 2003
+
+    # 按 ASN（自治系统代码）封禁（需要配置 GeoIP-ASN 数据库才能工作！）
+    asns:
+    #  - 0 # 网络 ASN 浩
+
+    # 按国家或地区封禁（需要配置 GeoIP-City 数据库才能工作！）
+    regions:
+    #  - ISO_CODE 输入国家或地区的 ISO 代码，大小写敏感，如：CN;UK;TW;HK;JP 等
+
   # 主动探测
   # 一些批量部署的恶意客户端的 WebUI/System Dashboard/或者你发现的其它特征服务 通常被固定在一个特定端口上以便批量管理
   # 此功能将尝试发送请求到 Peer 的指定端口以主动探测这些特征服务

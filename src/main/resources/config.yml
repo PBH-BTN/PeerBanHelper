@@ -129,8 +129,17 @@ banlist-invoker:
       - "/bin/sh -c 'ipset add peerbanhelper-blocklist ${peer.ip}'"
     unban:
       - "/bin/sh -c 'ipset remove peerbanhelper-blocklist ${peer.ip}'"
-# IP2Location 数据库
-# https://lite.ip2location.com/database-download
-ip2location:
-  # 下载 Token
-  token: ""
+# Maxmind GeoIP/ASN 数据库
+# https://www.maxmind.com/
+# 在您填写相关密钥信息后，PBH 将自动下载所需的数据库文件，这视为您同意 Maxmind 的最终用户许可协议：https://www.maxmind.com/en/end-user-license-agreement
+ip-database:
+  # ==== 密钥信息开始 ==== - 在 LicenseKeys 页面创建凭据时，网页会提供这些信息
+  account-id: ''
+  license-key: ''
+  # 允许自动更新 Maxmind GeoIP 数据库文件
+  auto-update: true
+  # ==== 密钥信息结束 ====
+  # GeoIP-City 的数据库名称，默认使用免费版（GeoLite2-City），如果您购买了付费的数据库，可以自行替换
+  database-city: 'GeoLite2-City'
+  # GeoIP-City 的数据库名称，默认使用免费版（GeoLite2-ASN），如果您购买了付费的数据库，可以自行替换
+  database-asn: 'GeoLite2-ASN'

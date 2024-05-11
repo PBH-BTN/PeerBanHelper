@@ -123,12 +123,16 @@ public class PeerBanHelperServer {
 
     private void setupIPDB() {
         try {
-            String token = mainConfig.getString("ip2location.token", "");
-            if (token.isEmpty()) {
+            String accountId = mainConfig.getString("ip-database.account-id", "");
+            String licenseKey = mainConfig.getString("ip-database.license-key", "");
+            String databaseCity = mainConfig.getString("ip-database.database-city", "");
+            String databaseASN = mainConfig.getString("ip-database.database-asn", "");
+            boolean autoUpdate = mainConfig.getBoolean("ip-database.auto-update");
+            if (accountId.isEmpty() || licenseKey.isEmpty() || databaseCity.isEmpty() || databaseASN.isEmpty()) {
                 log.warn(Lang.IPDB_NEED_CONFIG);
                 return;
             }
-            this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), token);
+            this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey, databaseCity, databaseASN, autoUpdate);
         } catch (Exception e) {
             log.info(Lang.IPDB_INVALID, e);
         }
@@ -182,6 +186,9 @@ public class PeerBanHelperServer {
         this.downloaderApiExecutor.shutdown();
         this.generalExecutor.shutdown();
         this.moduleMatchCache.close();
+        if (this.ipdb != null) {
+            this.ipdb.close();
+        }
         this.downloaders.forEach(d -> {
             try {
                 d.close();

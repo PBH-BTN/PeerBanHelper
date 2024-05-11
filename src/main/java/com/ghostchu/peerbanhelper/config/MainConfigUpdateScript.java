@@ -11,8 +11,12 @@ public class MainConfigUpdateScript {
     }
 
     @UpdateScript(version = 6)
-    public void ip2location() {
-        conf.set("ip2location.token", "");
+    public void maxmindIpDatabase() {
+        conf.set("ip-database.account-id", "");
+        conf.set("ip-database.license-key", "");
+        conf.set("ip-database.database-city", "GeoLite2-City");
+        conf.set("ip-database.database-asn", "GeoLite2-ASN");
+        conf.set("ip-database.auto-update", true);
     }
 
     @UpdateScript(version = 5)

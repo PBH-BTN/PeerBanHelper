@@ -21,6 +21,9 @@ public class Lang {
     public static final String ERR_INVALID_RULE_SYNTAX = "规则 {} 的表达式无效，请检查是否存在拼写错误";
     public static final String MODULE_CNB_MATCH_CLIENT_NAME = "匹配 ClientName (UserAgent): %s";
     public static final String MODULE_IBL_MATCH_IP = "匹配 IP 规则: %s";
+    public static final String MODULE_IBL_MATCH_ASN = "匹配 ASN 规则: %s";
+    public static final String MODULE_IBL_MATCH_REGION = "匹配国家或地区 ISO 代码规则: %s";
+    public static final String MODULE_IBL_EXCEPTION_GEOIP = "匹配 GeoIP 信息时出现异常，请反馈错误给开发者";
     public static final String MODULE_IBL_MATCH_PORT = "匹配 Port 规则: %s";
     public static final String MODULE_PID_MATCH_PEER_ID = "匹配 PeerId 规则: %s";
     public static final String MODULE_PCB_EXCESSIVE_DOWNLOAD = "客户端下载过量：种子大小：%d，上传给此对等体的总量：%d，最大允许的过量下载总量：%d";
@@ -139,11 +142,11 @@ public class Lang {
     public static String GUI_TABBED_WEB_UI = "概览";
     public static final String GUI_TABBED_LOGS = "运行日志";
     public static final String ABOUT_VIEW_GITHUB = "查看 Github 页面";
-    public static final String IPDB_UPDATING = "{} 数据库已过期且需要更新，请等待 PBH 连接到 IP2Location 服务器以更新 {} 数据库";
-    public static final String IPDB_UPDATE_FAILED = "从 IP2Location 下载数据库 {} 时出现错误：{}";
-    public static final String IPDB_UPDATE_SUCCESS = "从 IP2Location 更新数据库 {} 成功！";
+    public static final String IPDB_UPDATING = "{} 数据库已过期且需要更新，请等待 PBH 连接到 Maxmind 服务器更新数据……";
+    public static final String IPDB_UPDATE_FAILED = "从 Maxmind 下载数据库 {} 时出现错误：{}";
+    public static final String IPDB_UPDATE_SUCCESS = "从 Maxmind 更新数据库 {} 成功！";
     public static final String IPDB_INVALID = "由于在初始化过程中出现错误，IPDB 功能已被自动禁用。请检查日志文件以修复问题";
-    public static final String IPDB_NEED_CONFIG = "IPDB 功能需要配置才能使用，请在 config.yml 的 iplocation.token 中填写 IP2Location (Lite) 下载 Token 以启用此功能。https://lite.ip2location.com/database-download";
+    public static final String IPDB_NEED_CONFIG = "IPDB 功能需要配置才能使用，请在 config.yml 的 ip-database 中填写相关配置信息";
     public static final String DOWNLOAD_PROGRESS_DETERMINED = "下载进度：已下载 {}/{} 字节，进度：{}%";
     public static final String DOWNLOAD_PROGRESS = "下载进度：已下载 {} 字节";
     public static final String DOWNLOAD_COMPLETED = "下载进度：已完成！共传输 {} 字节的数据";
