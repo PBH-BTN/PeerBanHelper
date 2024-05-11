@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
+import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetric;
 import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
@@ -49,6 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PeerBanHelperServer {
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final ScheduledExecutorService BAN_WAVE_SERVICE = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService MISC_SCHEDULER = Executors.newScheduledThreadPool(2);
     private final YamlConfiguration profile;
     @Getter
     private final List<Downloader> downloaders;
@@ -63,24 +65,27 @@ public class PeerBanHelperServer {
     private final ExecutorService ruleExecuteExecutor;
     private final ModuleMatchCache moduleMatchCache;
     private final File banListFile;
-    @Getter
-    private BtnNetwork btnNetwork;
-    @Getter
-    private WebManager webManagerServer;
     private final ExecutorService generalExecutor;
     private final ExecutorService checkBanExecutor;
     private final ExecutorService downloaderApiExecutor;
     @Getter
-    private BasicMetrics metrics;
-    @Getter
     private final HitRateMetric hitRateMetric = new HitRateMetric();
+    @Getter
+    private final List<BanListInvoker> banListInvoker = new ArrayList<>();
+    @Getter
+    private BtnNetwork btnNetwork;
+    @Getter
+    private WebManager webManagerServer;
+    @Getter
+    private BasicMetrics metrics;
     private DatabaseManager databaseManager;
     @Getter
     private DatabaseHelper databaseHelper;
     @Getter
     private ModuleManager moduleManager;
     @Getter
-    private final List<BanListInvoker> banListInvoker = new ArrayList<>();
+    @Nullable
+    private IPDB ipdb = null;
 
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
@@ -105,6 +110,7 @@ public class PeerBanHelperServer {
             log.error(Lang.DATABASE_FAILURE, e);
             throw e;
         }
+        setupIPDB();
         registerMetrics();
         registerModules();
         resetKnownDownloaders();
@@ -113,6 +119,19 @@ public class PeerBanHelperServer {
         registerTimer();
         banListInvoker.forEach(BanListInvoker::reset);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
+    }
+
+    private void setupIPDB() {
+        try {
+            String token = mainConfig.getString("ip2location.token", "");
+            if (token.isEmpty()) {
+                log.warn(Lang.IPDB_NEED_CONFIG);
+                return;
+            }
+            this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), token);
+        } catch (Exception e) {
+            log.info(Lang.IPDB_INVALID, e);
+        }
     }
 
     private void resetKnownDownloaders() {

@@ -1,4 +1,4 @@
-config-version: 5
+config-version: 6
 # 客户端设置
 client:
   # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
@@ -129,3 +129,8 @@ banlist-invoker:
       - "/bin/sh -c 'ipset add peerbanhelper-blocklist ${peer.ip}'"
     unban:
       - "/bin/sh -c 'ipset remove peerbanhelper-blocklist ${peer.ip}'"
+# IP2Location 数据库
+# https://lite.ip2location.com/database-download
+ip2location:
+  # 下载 Token
+  token: ""

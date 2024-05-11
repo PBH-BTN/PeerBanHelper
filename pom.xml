@@ -318,7 +318,11 @@
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.ip2location</groupId>
+            <artifactId>ip2location-java</artifactId>
+            <version>8.11.2</version>
+        </dependency>
 
         <!--        <dependency>-->
         <!--            <groupId>com.formdev</groupId>-->

@@ -10,6 +10,11 @@ public class MainConfigUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 6)
+    public void ip2location() {
+        conf.set("ip2location.token", "");
+    }
+
     @UpdateScript(version = 5)
     public void optionForDnsReverseLookup() {
         conf.set("lookup.dns-reverse-lookup", false);
@@ -29,7 +34,6 @@ public class MainConfigUpdateScript {
                 }
             }
         }
-
     }
 
 
