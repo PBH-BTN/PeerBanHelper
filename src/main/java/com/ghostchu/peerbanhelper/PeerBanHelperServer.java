@@ -268,6 +268,7 @@ public class PeerBanHelperServer {
      * 启动新的一轮封禁序列
      */
     public void banWave() {
+        long startTimer = System.currentTimeMillis();
         try {
             // 重置所有下载器状态为健康，这样后面失败就会对其降级
             downloaders.forEach(downloader -> downloader.setLastStatus(DownloaderLastStatus.HEALTHY));
@@ -317,7 +318,7 @@ public class PeerBanHelperServer {
                 long downloadersCount = peers.keySet().size();
                 long torrentsCount = peers.values().stream().mapToLong(e -> e.keySet().size()).sum();
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
-                log.info(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size());
+                log.info(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer);
             }
         } finally {
             metrics.recordCheck();

@@ -4,11 +4,15 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Map;
 
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class StringEndsWithMatcher extends AbstractMatcher {
     private final String rule;
     private MatchResult hit = MatchResult.TRUE;
@@ -38,15 +42,6 @@ public class StringEndsWithMatcher extends AbstractMatcher {
     @Override
     public @NotNull String matcherName() {
         return Lang.RULE_MATCHER_STRING_ENDS_WITH;
-    }
-
-    @Override
-    public String toString() {
-        return "StringEndsWithMatcher{" +
-                "rule='" + rule + '\'' +
-                ", hit=" + hit +
-                ", miss=" + miss +
-                '}';
     }
 
     @Override
