@@ -31,6 +31,7 @@ module:
     # miss = 匹配失败返回的行为代码（与上相同）
     # 规则从上到下执行
     banned-peer-id:
+      - '{"method":"STARTS_WITH","content":"-xl0019", hit: "FALSE"}' # 排除新版迅雷（会提供上传）
       - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"-hp"}'
       - '{"method":"STARTS_WITH","content":"-dt"}'
@@ -55,8 +56,10 @@ module:
   client-name-blacklist:
     enabled: true
     banned-client-name:
-      - '{"method":"STARTS_WITH","content":"-xl00"}'
+      - '{"method":"CONTAINS","content":"xunlei 0019", "hit": "FALSE"}' # 排除新版迅雷（会提供上传）
+      - '{"method":"CONTAINS","content":"xunlei 0.0.1.9", "hit": "FALSE"}' # 排除新版迅雷（会提供上传）
       - '{"method":"CONTAINS","content":"xunlei"}'
+      - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"hp/torrent"}'
       - '{"method":"STARTS_WITH","content":"hp"}'
       - '{"method":"STARTS_WITH","content":"dt/torrent"}'
