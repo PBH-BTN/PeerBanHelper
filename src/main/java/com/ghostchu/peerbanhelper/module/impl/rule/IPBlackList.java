@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
@@ -121,6 +122,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
             if (ipdbResult.action() != PeerAction.NO_ACTION) {
                 return ipdbResult;
             }
+        } catch (AddressNotFoundException ignored) {
         } catch (Exception e) {
             log.error(Lang.MODULE_IBL_EXCEPTION_GEOIP, e);
         }
