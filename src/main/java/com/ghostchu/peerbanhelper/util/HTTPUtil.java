@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.ProgressTracker;
 import com.github.mizosoft.methanol.WritableBodyPublisher;
 import com.google.common.io.ByteStreams;
 import fi.iki.elonen.NanoHTTPD;
@@ -35,6 +36,10 @@ public class HTTPUtil {
     private static final CookieManager cookieManager = new CookieManager();
     @Getter
     private static SSLContext ignoreSslContext;
+    private static ProgressTracker tracker = ProgressTracker.newBuilder()
+            .bytesTransferredThreshold(60 * 1024) // 60 kB
+            .timePassedThreshold(Duration.of(3, ChronoUnit.SECONDS))
+            .build();
 
     static {
         TrustManager trustManager = new X509ExtendedTrustManager() {
@@ -116,6 +121,18 @@ public class HTTPUtil {
         return requestBody;
     }
 
+    public static void onProgress(ProgressTracker.Progress progress) {
+        if (progress.determinate()) { // Overall progress can be measured
+            var percent = 100 * progress.value();
+            log.info(Lang.DOWNLOAD_PROGRESS_DETERMINED, progress.totalBytesTransferred(), progress.contentLength(), String.format("%.2f", percent));
+        } else {
+            log.info(Lang.DOWNLOAD_PROGRESS, progress.totalBytesTransferred());
+        }
+        if (progress.done()) {
+            log.info(Lang.DOWNLOAD_COMPLETED, progress.totalBytesTransferred());
+        }
+    }
+
     public static <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
         return client.sendAsync(request, bodyHandler)
                 .handleAsync((r, t) -> tryResend(client, request, bodyHandler, MAX_RESEND, r, t))
@@ -127,6 +144,15 @@ public class HTTPUtil {
        return client.sendAsync(request, bodyHandler)
                         .handleAsync((r, t) -> tryResend(client, request, bodyHandler, 1, r, t))
                         .thenCompose(Function.identity());
+
+    }
+
+    public static <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+        bodyHandler = tracker.tracking(bodyHandler, HTTPUtil::onProgress);
+        HttpResponse.BodyHandler<T> finalBodyHandler = bodyHandler;
+        return client.sendAsync(request, bodyHandler)
+                .handleAsync((r, t) -> tryResend(client, request, finalBodyHandler, 1, r, t))
+                .thenCompose(Function.identity());
 
     }
 

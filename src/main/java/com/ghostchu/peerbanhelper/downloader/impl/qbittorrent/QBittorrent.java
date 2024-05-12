@@ -8,15 +8,18 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.github.mizosoft.methanol.FormBodyPublisher;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import inet.ipaddr.IPAddress;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -79,7 +82,7 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public String getDownloaderName() {
+    public String getType() {
         return "qBittorrent";
     }
 
@@ -140,7 +143,7 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<BanMetadata.TorrentWrapper> torrents) {
+    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
         // QB 很棒，什么都不需要做
     }
 
@@ -187,7 +190,7 @@ public class QBittorrent implements Downloader {
 
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<PeerAddress> added, @Nullable Collection<PeerAddress> removed) {
+    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
         if (removed != null && removed.isEmpty() && added != null && incrementBan) {
             setBanListIncrement(added);
         } else {
@@ -195,30 +198,35 @@ public class QBittorrent implements Downloader {
         }
     }
 
-    private void setBanListIncrement(Collection<PeerAddress> added) {
-        StringJoiner joiner = new StringJoiner("|");
+    private void setBanListIncrement(Collection<BanMetadata> added) {
+        Map<String, StringJoiner> banTasks = new HashMap<>();
         added.forEach(p -> {
-            if (p.getAddress().isIPv6()) {
-                joiner.add("[" + p.getIp() + "]" + ":" + p.getPort());
+            StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
+            IPAddress ipAddress = IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp());
+            if (ipAddress.isIPv6()) {
+                joiner.add("[" + p.getPeer().getAddress().getIp() + "]" + ":" + p.getPeer().getAddress().getPort());
             } else {
-                joiner.add(p.getIp() + ":" + p.getPort());
+                joiner.add(p.getPeer().getAddress().getIp() + ":" + p.getPeer().getAddress().getPort());
             }
-
+            banTasks.put(p.getTorrent().getHash(), joiner);
         });
-        try {
-            HttpResponse<String> request = httpClient.send(MutableRequest
-                            .POST(endpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
-                                    .query("peers", joiner.toString()).build())
-                            .header("Content-Type", "application/x-www-form-urlencoded")
-                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() != 200) {
-                log.warn(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, endpoint, request.statusCode(), "HTTP ERROR", request.body());
-                throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
+        banTasks.forEach((hash, peers) -> {
+            try {
+                HttpResponse<String> request = httpClient.send(MutableRequest
+                                .POST(endpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
+                                        .query("hash", hash)
+                                        .query("peers", peers.toString()).build())
+                                .header("Content-Type", "application/x-www-form-urlencoded")
+                        , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                if (request.statusCode() != 200) {
+                    log.warn(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, endpoint, request.statusCode(), "HTTP ERROR", request.body());
+                    throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
+                }
+            } catch (Exception e) {
+                log.warn(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, endpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+                throw new IllegalStateException(e);
             }
-        } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, endpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
-            throw new IllegalStateException(e);
-        }
+        });
     }
 
     private void setBanListFull(Collection<PeerAddress> peerAddresses) {

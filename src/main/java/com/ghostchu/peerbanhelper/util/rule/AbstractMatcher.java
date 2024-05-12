@@ -2,9 +2,13 @@ package com.ghostchu.peerbanhelper.util.rule;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@EqualsAndHashCode
+@ToString
 public abstract class AbstractMatcher implements Rule {
     private Rule condition;
 

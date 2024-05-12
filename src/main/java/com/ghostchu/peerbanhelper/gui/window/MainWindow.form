@@ -41,6 +41,39 @@
               </scrollpane>
             </children>
           </grid>
+          <grid id="32c17" binding="tabbedPaneLivePeers" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints>
+              <tabbedpane title="Peers"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="bbd14" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="North"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="e9d52" class="javax.swing.JButton" binding="resizeTable">
+                    <constraints border-constraint="West"/>
+                    <properties>
+                      <text value="Resize"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <scrollpane id="f2355">
+                <constraints border-constraint="Center"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="fb310" class="javax.swing.JTable" binding="livePeers">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                </children>
+              </scrollpane>
+            </children>
+          </grid>
         </children>
       </tabbedpane>
     </children>

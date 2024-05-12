@@ -4,11 +4,15 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class StringRegexMatcher extends AbstractMatcher {
     private final Pattern rule;
     private MatchResult hit = MatchResult.TRUE;
@@ -32,15 +36,6 @@ public class StringRegexMatcher extends AbstractMatcher {
         } else {
             return miss;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "StringRegexMatcher{" +
-                "rule=" + rule +
-                ", hit=" + hit +
-                ", miss=" + miss +
-                '}';
     }
 
     @Override

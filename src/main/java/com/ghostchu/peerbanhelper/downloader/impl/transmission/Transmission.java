@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import cordelia.client.TrClient;
 import cordelia.client.TypedResponse;
 import cordelia.rpc.*;
@@ -14,6 +15,7 @@ import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.net.http.HttpClient;
@@ -53,7 +55,7 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public String getDownloaderName() {
+    public String getType() {
         return "Transmission";
     }
 
@@ -88,9 +90,9 @@ public class Transmission implements Downloader {
         return Collections.emptyList();
     }
 
-    @SneakyThrows(InterruptedException.class)
+    @SneakyThrows
     @Override
-    public void setBanList(Collection<PeerAddress> peerAddresses, Collection<PeerAddress> added, Collection<PeerAddress> removed) {
+    public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
         RqSessionSet set = RqSessionSet.builder()
                 .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
                 .blocklistEnabled(true)
@@ -108,6 +110,7 @@ public class Transmission implements Downloader {
             log.info(Lang.DOWNLOADER_TR_UPDATED_BLOCKLIST, updateBlockListResp.getArgs().getBlockListSize());
         }
     }
+
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
@@ -135,7 +138,7 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<BanMetadata.TorrentWrapper> torrents) {
+    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
         relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
     }
 

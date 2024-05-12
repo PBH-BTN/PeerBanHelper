@@ -4,10 +4,14 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class StringLengthMatcher extends AbstractMatcher {
     private final int min;
     private final int max;
@@ -30,16 +34,6 @@ public class StringLengthMatcher extends AbstractMatcher {
     public @NotNull MatchResult match0(@NotNull String content) {
         int length = content.length();
         return (length >= min && length <= max) ? this.hit : this.miss;
-    }
-
-    @Override
-    public String toString() {
-        return "StringLengthMatcher{" +
-                "min=" + min +
-                ", max=" + max +
-                ", hit=" + hit +
-                ", miss=" + miss +
-                '}';
     }
 
     @Override

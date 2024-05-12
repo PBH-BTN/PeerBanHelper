@@ -2,7 +2,7 @@ FROM --platform=$BUILDPLATFORM maven:3.9.6-eclipse-temurin-17 as build
 
 ADD . /build
 WORKDIR /build
-RUN sh setup-webui.sh && mvn -B clean package --file pom.xml
+RUN sh setup-webui.sh && mvn -B clean package --file pom.xml -T 1C
 
 FROM eclipse-temurin:17.0.10_7-jre
 LABEL MAINTAINER="https://github.com/PBH-BTN/PeerBanHelper"
@@ -12,4 +12,4 @@ WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
-ENTRYPOINT ["java","-Xmx256M","-XX:+UseSerialGC","-jar","PeerBanHelper.jar"]
+ENTRYPOINT ["java","-Xmx256M","-XX:+UseG1GC", "-XX:+UseStringDeduplication","-XX:+ShrinkHeapInSteps","-jar","PeerBanHelper.jar"]

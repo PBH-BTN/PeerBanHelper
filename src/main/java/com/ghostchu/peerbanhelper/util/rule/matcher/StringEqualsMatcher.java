@@ -4,10 +4,14 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class StringEqualsMatcher extends AbstractMatcher {
     private final String rule;
     private MatchResult hit = MatchResult.TRUE;
@@ -36,15 +40,6 @@ public class StringEqualsMatcher extends AbstractMatcher {
     @Override
     public @NotNull String matcherName() {
         return Lang.RULE_MATCHER_STRING_LENGTH;
-    }
-
-    @Override
-    public String toString() {
-        return "StringEqualsMatcher{" +
-                "rule='" + rule + '\'' +
-                ", hit=" + hit +
-                ", miss=" + miss +
-                '}';
     }
 
     @Override

@@ -18,6 +18,12 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 4)
+    public void ipDatabase() {
+        conf.set("module.ip-address-blocker.asns", new ArrayList<>());
+        conf.set("module.ip-address-blocker.regions", new ArrayList<>());
+    }
+
     @UpdateScript(version = 3)
     public void multiDialingBlocker() {
         conf.set("module.multi-dialing-blocker.enabled", false);

@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -12,9 +13,19 @@ import java.util.List;
 public interface Downloader extends AutoCloseable {
     String getEndpoint();
 
+    /**
+     * 下载器用户定义名称
+     *
+     * @return 用户定义名称
+     */
     String getName();
 
-    String getDownloaderName();
+    /**
+     * 下载器类型
+     *
+     * @return 类型
+     */
+    String getType();
 
     /**
      * 登录到此下载器
@@ -47,7 +58,7 @@ public interface Downloader extends AutoCloseable {
      * @param added 新增列表
      * @param removed 移除列表
      */
-    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<PeerAddress> added, @Nullable Collection<PeerAddress> removed);
+    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed);
 
     /**
      * 如有需要，重启 Torrent 任务
@@ -62,7 +73,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @param torrents Torrent 任务列表
      */
-    void relaunchTorrentIfNeededByTorrentWrapper(Collection<BanMetadata.TorrentWrapper> torrents);
+    void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents);
 
     /**
      * 获取客户端最后一次请求的状态
