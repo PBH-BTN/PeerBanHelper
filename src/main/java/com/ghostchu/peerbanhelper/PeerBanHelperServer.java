@@ -276,9 +276,9 @@ public class PeerBanHelperServer {
             // 需要重启的种子列表
             Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
             // 被解除封禁的对等体列表
-            Collection<PeerAddress> unbannedPeers = removeExpiredBans();
+            Collection<BanMetadata> unbannedPeers = removeExpiredBans();
             // 被新封禁的对等体列表
-            List<PeerAddress> bannedPeers = new ArrayList<>();
+            Collection<BanMetadata> bannedPeers = new ArrayList<>();
             // 当前所有活跃的对等体列表
             Map<Downloader, Map<Torrent, List<Peer>>> peers = collectPeers();
             // 更新 LIVE_PEERS 用于数据展示
@@ -294,12 +294,12 @@ public class PeerBanHelperServer {
                 List<Torrent> relaunch = new ArrayList<>();
                 details.forEach(detail -> {
                     if (detail.result().action() == PeerAction.BAN) {
-                        bannedPeers.add(detail.peer().getAddress());
                         IPDBResponse ipdbResponse = queryIPDB(detail.peer().getAddress());
                         BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getClass().getName(), downloader.getName(),
                                 System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
                                 detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(),
                                 ipdbResponse.cityResponse(), ipdbResponse.asnResponse());
+                        bannedPeers.add(banMetadata);
                         relaunch.add(detail.torrent());
                         banPeer(banMetadata, detail.torrent(), detail.peer());
                         log.warn(Lang.BAN_PEER, detail.peer().getAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
@@ -362,7 +362,7 @@ public class PeerBanHelperServer {
      * @param updateBanList  是否需要从 BAN_LIST 常量更新封禁列表到下载器
      * @param needToRelaunch 传递一个集合，包含需要重启的种子；并非每个下载器都遵守此行为；对于 qbittorrent 等 banlist 可被实时应用的下载器来说，不会重启 Torrent
      */
-    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<PeerAddress> added, @Nullable Collection<PeerAddress> removed) {
+    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
         if (!updateBanList && needToRelaunch.isEmpty()) return;
         try {
             if (!downloader.login()) {
@@ -383,18 +383,20 @@ public class PeerBanHelperServer {
      *
      * @return 当封禁条目过期时，移除它们（解封禁）
      */
-    public Collection<PeerAddress> removeExpiredBans() {
+    public Collection<BanMetadata> removeExpiredBans() {
         List<PeerAddress> removeBan = new ArrayList<>();
+        List<BanMetadata> metadata = new ArrayList<>();
         for (Map.Entry<PeerAddress, BanMetadata> pair : BAN_LIST.entrySet()) {
             if (System.currentTimeMillis() >= pair.getValue().getUnbanAt()) {
                 removeBan.add(pair.getKey());
+                metadata.add(pair.getValue());
             }
         }
         removeBan.forEach(this::unbanPeer);
         if (!removeBan.isEmpty()) {
             log.info(Lang.PEER_UNBAN_WAVE, removeBan.size());
         }
-        return removeBan;
+        return metadata;
     }
 
     /**
@@ -565,7 +567,7 @@ public class PeerBanHelperServer {
         BanMetadata metadata = BAN_LIST.remove(address);
         if (metadata != null) {
             metrics.recordPeerUnban(address, metadata);
-            banListInvoker.forEach(i -> i.add(address, metadata));
+            banListInvoker.forEach(i -> i.remove(address, metadata));
         }
         Main.getEventBus().post(new PeerUnbanEvent(address, metadata));
         return metadata;

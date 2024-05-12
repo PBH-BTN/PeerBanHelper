@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +58,7 @@ public interface Downloader extends AutoCloseable {
      * @param added 新增列表
      * @param removed 移除列表
      */
-    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<PeerAddress> added, @Nullable Collection<PeerAddress> removed);
+    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed);
 
     /**
      * 如有需要，重启 Torrent 任务
