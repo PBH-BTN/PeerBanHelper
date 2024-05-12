@@ -24,6 +24,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 
@@ -63,8 +65,8 @@ public class IPDB implements AutoCloseable {
     }
 
     private void loadMMDB() throws IOException {
-        this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile).build();
-        this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile).build();
+        this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile).locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
+        this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile).locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
     }
 
     private void updateMMDB(String databaseName, File target) throws IOException {

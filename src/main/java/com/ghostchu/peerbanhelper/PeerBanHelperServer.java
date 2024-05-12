@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
@@ -106,6 +107,7 @@ public class PeerBanHelperServer {
         this.banListFile = new File(Main.getDataDirectory(), "banlist.dump");
         registerHttpServer();
         this.moduleManager = new ModuleManager();
+        setupIPDB();
         setupBtn();
         try {
             prepareDatabase();
@@ -113,7 +115,6 @@ public class PeerBanHelperServer {
             log.error(Lang.DATABASE_FAILURE, e);
             throw e;
         }
-        setupIPDB();
         registerMetrics();
         registerModules();
         resetKnownDownloaders();
@@ -347,6 +348,7 @@ public class PeerBanHelperServer {
             livePeers.put(address, metadata);
         })));
         LIVE_PEERS = ImmutableMap.copyOf(livePeers);
+        Main.getEventBus().post(new LivePeersUpdatedEvent(LIVE_PEERS));
     }
 
     /**
@@ -455,6 +457,7 @@ public class PeerBanHelperServer {
             }
         } catch (Exception ignored) {
         }
+
         return new IPDBResponse(cityResponse, asnResponse);
     }
 

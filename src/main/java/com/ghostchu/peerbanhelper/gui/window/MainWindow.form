@@ -48,16 +48,27 @@
             <properties/>
             <border type="none"/>
             <children>
-              <scrollpane id="a035b">
+              <grid id="bbd14" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="North"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="e9d52" class="javax.swing.JButton" binding="resizeTable">
+                    <constraints border-constraint="West"/>
+                    <properties>
+                      <text value="Resize"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <scrollpane id="f2355">
                 <constraints border-constraint="Center"/>
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="b7d34" class="javax.swing.JTable" binding="livePeers">
+                  <component id="fb310" class="javax.swing.JTable" binding="livePeers">
                     <constraints/>
-                    <properties>
-                      <autoCreateRowSorter value="false"/>
-                    </properties>
+                    <properties/>
                   </component>
                 </children>
               </scrollpane>

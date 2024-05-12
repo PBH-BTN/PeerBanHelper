@@ -31,6 +31,7 @@ public class Lang {
     public static final String MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS = "客户端进度：%s，实际进度：%s，差值：%s";
     public static final String MODULE_PCB_PEER_BAN_REWIND = "客户端进度：%s，实际进度：%s，上次记录进度：%s，本次进度：%s，差值：%s";
     public static final String MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT = "种子大小未知";
+    public static final String GUI_BUTTON_RESIZE_TABLE = "点击调整列宽";
     public static String MODULE_AP_PEER_BAN_PING = "Peer 发送了 ICMP 响应包";
     public static String MODULE_AP_INVALID_RULE = "规则 {} 无效，请检查语法和拼写错误";
     public static String MODULE_AP_BAN_PEER_CODE = "Peer 的 HTTP(S) 响应返回了预期状态码：%s";
@@ -64,9 +65,7 @@ public class Lang {
     public static final String ERR_CONFIG_DIRECTORY_INCORRECT = "初始化失败：config 不是一个目录。如果您正在使用 Docker，请确保其正确挂载。";
     public static String WEB_ENDPOINT_REGISTERED = "[注册] WebAPI 端点已注册：{}";
     public static String SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE = "检测到Native Images，跳过加载插件";
-
     public static final String PBH_SHUTTING_DOWN = "[退出] 正在退出，请等待我们完成剩余的工作……";
-
     public static String ERR_CANNOT_LOAD_PLUGIN = "[注册] 无法加载插件：{}";
     public static String ERR_CANNOT_UNLOAD_PLUGIN = "[退出] 无法卸载插件：{}";
     public static String ARB_ERROR_TO_CONVERTING_IP = "IP 地址 %s 既不是 IPV4 地址也不是 IPV6 地址。";
@@ -141,6 +140,7 @@ public class Lang {
     public static final String GUI_TRAY_MESSAGE_DESCRIPTION = "点击托盘图标重新打开窗口；右键托盘图标可完全退出";
     public static String GUI_TABBED_WEB_UI = "概览";
     public static final String GUI_TABBED_LOGS = "运行日志";
+    public static final String GUI_TABBED_PEERS = "已连接的Peers";
     public static final String ABOUT_VIEW_GITHUB = "查看 Github 页面";
     public static final String IPDB_UPDATING = "{} 数据库已过期且需要更新，请等待 PBH 连接到 Maxmind 服务器更新数据……";
     public static final String IPDB_UPDATE_FAILED = "从 Maxmind 下载数据库 {} 时出现错误：{}";
@@ -150,6 +150,6 @@ public class Lang {
     public static final String DOWNLOAD_PROGRESS_DETERMINED = "下载进度：已下载 {}/{} 字节，进度：{}%";
     public static final String DOWNLOAD_PROGRESS = "下载进度：已下载 {} 字节";
     public static final String DOWNLOAD_COMPLETED = "下载进度：已完成！共传输 {} 字节的数据";
-    public static final String[] GUI_LIVE_PEERS_COLUMN_NAMES = {"国家/地区", "IP地址", "PeerID", "客户端", "上传速度", "上传量", "下载速度", "下载量", "Torrent", "城市", "ASN", "AS组织", "AS网络"};
+    public static final String[] GUI_LIVE_PEERS_COLUMN_NAMES = {"国家/地区", "IP地址", "PeerID", "客户端", "汇报进度", "上传速度", "上传量", "下载速度", "下载量", "Torrent", "城市", "ASN", "AS组织", "AS网络"};
     public static final String BAN_WAVE_CHECK_COMPLETED = "已检查 {} 个下载器的 {} 个活跃 Torrent 与 {} 个 Peers。共封禁 {} 个 Peers，并解除 {} 个过期的封禁";
 }
