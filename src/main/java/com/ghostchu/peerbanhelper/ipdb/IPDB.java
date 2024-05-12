@@ -7,6 +7,7 @@ import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
+import com.maxmind.db.CHMCache;
 import com.maxmind.geoip2.DatabaseReader;
 import lombok.Cleanup;
 import lombok.Getter;
@@ -65,8 +66,12 @@ public class IPDB implements AutoCloseable {
     }
 
     private void loadMMDB() throws IOException {
-        this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile).locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
-        this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile).locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
+        this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
+                .withCache(new CHMCache())
+                .locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
+        this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
+                .withCache(new CHMCache())
+                .locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
     }
 
     private void updateMMDB(String databaseName, File target) throws IOException {

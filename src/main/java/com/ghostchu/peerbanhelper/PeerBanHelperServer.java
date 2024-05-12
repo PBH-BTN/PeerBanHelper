@@ -339,7 +339,9 @@ public class PeerBanHelperServer {
 
     private void updateLivePeers(Map<Downloader, Map<Torrent, List<Peer>>> peers) {
         Map<PeerAddress, PeerMetadata> livePeers = new HashMap<>();
-        peers.forEach((downloader, tasks) -> tasks.forEach((torrent, peer) -> peer.forEach(p -> {
+        peers.forEach((downloader, tasks) ->
+                tasks.forEach((torrent, peer) ->
+                        peer.forEach(p -> {
             PeerAddress address = p.getAddress();
             IPDBResponse ipdbResponse = queryIPDB(address);
             PeerMetadata metadata = new PeerMetadata(
