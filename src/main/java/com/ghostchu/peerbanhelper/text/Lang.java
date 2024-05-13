@@ -21,6 +21,7 @@ public class Lang {
     public static final String ERR_INVALID_RULE_SYNTAX = "规则 {} 的表达式无效，请检查是否存在拼写错误";
     public static final String MODULE_CNB_MATCH_CLIENT_NAME = "匹配 ClientName (UserAgent): %s";
     public static final String MODULE_IBL_MATCH_IP = "匹配 IP 规则: %s";
+    public static final String MODULE_IBL_MATCH_IP_RULE = "匹配 IP 订阅规则: %s";
     public static final String MODULE_IBL_MATCH_ASN = "匹配 ASN 规则: %s";
     public static final String MODULE_IBL_MATCH_REGION = "匹配国家或地区 ISO 代码规则: %s";
     public static final String MODULE_IBL_EXCEPTION_GEOIP = "匹配 GeoIP 信息时出现异常，请反馈错误给开发者";

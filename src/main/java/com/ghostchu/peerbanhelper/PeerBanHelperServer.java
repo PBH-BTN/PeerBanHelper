@@ -420,6 +420,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new PBHMetrics(this, profile));
         moduleManager.register(new PBHMetadata(this, profile));
         moduleManager.register(new PBHRuleMetrics(this, profile));
+        moduleManager.register(new IPBlackRuleList(this, profile));
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
