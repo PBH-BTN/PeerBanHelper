@@ -21,6 +21,7 @@ public class Lang {
     public static final String ERR_INVALID_RULE_SYNTAX = "规则 {} 的表达式无效，请检查是否存在拼写错误";
     public static final String MODULE_CNB_MATCH_CLIENT_NAME = "匹配 ClientName (UserAgent): %s";
     public static final String MODULE_IBL_MATCH_IP = "匹配 IP 规则: %s";
+    public static final String MODULE_IBL_MATCH_IP_RULE = "匹配 IP黑名单订阅 规则: %s";
     public static final String MODULE_IBL_MATCH_ASN = "匹配 ASN 规则: %s";
     public static final String MODULE_IBL_MATCH_REGION = "匹配国家或地区 ISO 代码规则: %s";
     public static final String MODULE_IBL_EXCEPTION_GEOIP = "匹配 GeoIP 信息时出现异常，请反馈错误给开发者";
@@ -121,6 +122,7 @@ public class Lang {
     public static String RULE_MATCHER_STRING_EQUALS = "匹配相同";
     public static final String RULE_MATCHER_STRING_LENGTH = "匹配长度";
     public static final String RULE_MATCHER_STRING_REGEX = "匹配正则";
+    public static final String RULE_MATCHER_SUB_RULE = "订阅规则";
     public static final String RESET_DOWNLOADER_FAILED = "[警告] 重置下载器封禁列表到初始状态时出现错误";
     public static final String DOWNLOADER_QB_INCREAMENT_BAN_FAILED = "[错误] 向下载器请求增量封禁对等体时出现错误，请在配置文件中关闭增量封禁(increment-ban)配置项";
     public static final String SHUTDOWN_CLOSE_METRICS = "[退出] 正在保存封禁日志和统计数据……";

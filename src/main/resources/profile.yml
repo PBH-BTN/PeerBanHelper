@@ -157,3 +157,23 @@ module:
     # 追猎持续时间（秒）
     # keep-hunting为true时有效，和cache-lifespan相似，对被猎杀IP的缓存持续时间
     keep-hunting-time: 2592000
+  # 订阅规则
+  ip-address-blocker-rules:
+    enabled: true
+    check-interval: 86400000 # 24小时检查一次 毫秒
+    rules:
+      rule1:
+        name: unknown
+        url: https://raw.githubusercontent.com/PBH-BTN/BTN-Collected-Rules/main/0xde-0xad-0xbe-0xef.txt
+      rule2:
+        name: 123pan
+        url: https://raw.githubusercontent.com/PBH-BTN/BTN-Collected-Rules/main/123pan.txt
+      rule3:
+        name: dt_torrent
+        url: https://raw.githubusercontent.com/PBH-BTN/BTN-Collected-Rules/main/dt_torrent.txt
+      rule4:
+        name: go.torrent.dev
+        url: https://raw.githubusercontent.com/PBH-BTN/BTN-Collected-Rules/main/go.torrent%20dev%2020181121.txt
+      rule5:
+        name: hp_torrent
+        url: https://raw.githubusercontent.com/PBH-BTN/BTN-Collected-Rules/main/hp_torrent.txt
