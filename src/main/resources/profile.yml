@@ -160,6 +160,7 @@ module:
   # 订阅规则
   ip-address-blocker-rules:
     enabled: true
+    check-interval: 86400000 # 24小时检查一次 毫秒
     rules:
       rule1:
         name: unknown

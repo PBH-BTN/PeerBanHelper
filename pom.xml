@@ -16,6 +16,7 @@
         <mainClass>com.ghostchu.peerbanhelper.Main</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.4.1</flatlafVersion>
+        <hutool.version>5.8.27</hutool.version>
     </properties>
     <build>
         <pluginManagement>
@@ -329,6 +330,18 @@
             <artifactId>javatar</artifactId>
             <version>2.5</version>
         </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-bloomFilter</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+
+
 
 
         <!--        <dependency>-->
