@@ -103,7 +103,7 @@ public class PeerBanHelperServer {
         this.ruleExecuteExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.rule-execute-parallelism", 16));
         this.downloaderApiExecutor = Executors.newWorkStealingPool(mainConfig.getInt("threads.downloader-api-parallelism", 8));
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
-        this.moduleMatchCache = new ModuleMatchCache(banDuration);
+        this.moduleMatchCache = new ModuleMatchCache();
         this.banListFile = new File(Main.getDataDirectory(), "banlist.dump");
         registerHttpServer();
         this.moduleManager = new ModuleManager();
