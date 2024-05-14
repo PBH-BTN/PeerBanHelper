@@ -37,7 +37,6 @@ public class IPBanMatcher extends AbstractMatcher {
     public void setData(String ruleName, List<IPAddress> ips){
         this.ruleName = ruleName;
         this.ips = ips;
-        log.info("加载IP黑名单订阅规则: {}", ruleName);
         bloomFilter = new BitSetBloomFilter(ips.size() * 2, ips.size(), 8);
         ips.forEach(ip -> bloomFilter.add(ip.toString()));
     }
@@ -46,7 +45,6 @@ public class IPBanMatcher extends AbstractMatcher {
     public @NotNull MatchResult match0(@NotNull String content) {
         // 先用bloom过滤器查一下，如果没查到那么必然不在黑名单中
         if (!bloomFilter.contains(content)) {
-            log.debug("Bloom过滤器不含: {}", content);
             return MatchResult.DEFAULT;
         }
         // 如果查到了，那么进一步验证到底是不是在黑名单中(bloom filter存在误报的可能性)
@@ -58,12 +56,10 @@ public class IPBanMatcher extends AbstractMatcher {
                 continue;
             }
             if (ra.equals(pa) || ra.contains(pa)) {
-                log.debug("{} 匹配次数统计: {}", pa, counter);
                 return MatchResult.TRUE;
             }
             counter++;
         }
-        log.debug("{} 匹配次数统计: {}", pa, counter);
         return MatchResult.DEFAULT;
     }
 
