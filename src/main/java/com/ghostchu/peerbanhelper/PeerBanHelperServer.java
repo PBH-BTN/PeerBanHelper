@@ -573,6 +573,10 @@ public class PeerBanHelperServer {
         return metadata;
     }
 
+    public ImmutableMap<PeerAddress, PeerMetadata> getLivePeersSnapshot() {
+        return LIVE_PEERS;
+    }
+
     public record IPDBResponse(
             CityResponse cityResponse,
             AsnResponse asnResponse

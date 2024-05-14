@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
@@ -40,9 +39,14 @@ public class PBHClientStatus extends AbstractFeatureModule implements PBHAPI {
             map.put("endpoint", downloader.getEndpoint());
             try {
                 map.put("status", downloader.getLastStatus().name());
-                List<Torrent> torrents = downloader.getTorrents();
-                long peers = torrents.stream().mapToLong(t -> downloader.getPeers(t).size()).sum();
-                map.put("torrents", torrents.size());
+                long torrents = getServer().getLivePeersSnapshot().values()
+                        .stream()
+                        .filter(peerMetadata -> peerMetadata.getDownloader().equals(downloader.getName()))
+                        .map(meta -> meta.getTorrent().getHash())
+                        .distinct()
+                        .count();
+                long peers = getServer().getLivePeersSnapshot().values().size();
+                map.put("torrents", torrents);
                 map.put("peers", peers);
             } catch (Throwable th) {
                 map.put("status", DownloaderLastStatus.ERROR);
