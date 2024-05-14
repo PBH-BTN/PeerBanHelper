@@ -49,9 +49,12 @@ public class IPBanMatcher extends AbstractMatcher {
         }
         // 如果查到了，那么进一步验证到底是不是在黑名单中(bloom filter存在误报的可能性)
         IPAddress pa = IPAddressUtil.getIPAddress(content);
+        if (pa.isIPv4Convertible()) {
+            pa = pa.toIPv4();
+        }
         int counter = 0;
         for (IPAddress ra : ips) {
-            if (ra.isIPv4() != pa.isIPv4()) {
+            if (ra.isIPv4Convertible() != pa.isIPv4Convertible()) {
                 counter++;
                 continue;
             }
