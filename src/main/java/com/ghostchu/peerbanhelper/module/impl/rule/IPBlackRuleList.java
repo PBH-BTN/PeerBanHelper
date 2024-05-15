@@ -129,6 +129,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                 String name = rule.getString("name");
                 String url = rule.getString("url");
                 List<IPAddress> ipAddresses = new ArrayList<>();
+                List<IPAddress> subnetAddresses = new ArrayList<>();
                 if (null != url && url.startsWith("http")) {
                     // 解析远程订阅
                     String ruleFileName = ruleId + ".txt";
@@ -138,6 +139,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                     try {
                         HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null), MutableRequest.GET(url), HttpResponse.BodyHandlers.ofFile(Path.of(tempFile.getPath()))).whenComplete((pathHttpResponse, throwable) -> {
                             if (throwable != null) {
+                                FileUtil.del(tempFile);
                                 throw new RuntimeException(throwable);
                             }
                             String tempHash = Hashing.sha256().hashBytes(FileUtil.readBytes(tempFile)).toString();
@@ -147,27 +149,27 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             }
                             if (!tempHash.equals(ruleHash)) {
                                 // 规则文件不存在或者规则文件与临时文件sha256不一致则需要更新
-                                fileToIPList(name, tempFile, ipAddresses);
+                                fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
                                 // 更新后重命名临时文件
                                 FileUtil.rename(tempFile, ruleFileName, true);
                             } else {
                                 // 如果一致，但bannedIps没有对应的规则内容，则加载内容
                                 if (bannedIps.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
-                                    fileToIPList(name, tempFile, ipAddresses);
+                                    fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
                                 } else {
                                     log.info("IP黑名单订阅规则 {} 未发生更新", name);
                                 }
                             }
                             FileUtil.del(tempFile);
                         }).join();
-                        // ip列表不为空代表需要更新matcher
-                        if (!ipAddresses.isEmpty()) {
+                        // ip列表或者subnet列表不为空代表需要更新matcher
+                        if (!ipAddresses.isEmpty() || !subnetAddresses.isEmpty()) {
                             // 如果已经存在则更新，否则添加
                             bannedIps.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
-                                ele.setData(name, ipAddresses);
+                                ele.setData(name, ipAddresses, subnetAddresses);
                                 log.info("IP黑名单订阅规则 {} 更新成功", name);
                             }, () -> {
-                                bannedIps.add(new IPBanMatcher(ruleId, name, ipAddresses));
+                                bannedIps.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
                                 log.info("IP黑名单订阅规则 {} 加载成功", name);
                             });
                         }
@@ -176,8 +178,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         if (ruleFile.exists()) {
                             // 如果一致，但bannedIps没有对应的规则内容，则加载内容
                             if (bannedIps.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
-                                fileToIPList(name, ruleFile, ipAddresses);
-                                bannedIps.add(new IPBanMatcher(ruleId, name, ipAddresses));
+                                fileToIPList(name, ruleFile, ipAddresses, subnetAddresses);
+                                bannedIps.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
                                 log.warn("IP黑名单订阅规则 {} 订阅失败，使用本地缓存加载成功", name);
                             }
                         } else {
@@ -192,19 +194,38 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
 
     /**
      * 读取规则文件并转为IpList
+     * 其中ipv4网段地址转为精确ip
+     * 考虑到ipv6分配地址通常是/64，所以ipv6网段不转为精确ip
      *
-     * @param ruleName    规则名称
-     * @param ruleFile    规则文件
-     * @param ipAddresses ipList
+     * @param ruleName 规则名称
+     * @param ruleFile 规则文件
+     * @param ips      精确ip列表
+     * @param subnets  网段列表
      */
-    private void fileToIPList(String ruleName, File ruleFile, List<IPAddress> ipAddresses) {
+    private void fileToIPList(String ruleName, File ruleFile, List<IPAddress> ips, List<IPAddress> subnets) {
         FileUtil.readLines(ruleFile, StandardCharsets.UTF_8).forEach(ele -> {
             IPAddress ipAddress = IPAddressUtil.getIPAddress(ele);
-            if (ipAddress.isIPv4Convertible()) {
-                ipAddress = ipAddress.toIPv4();
+            // 判断是否是网段
+            List<IPAddress> ipsList = new ArrayList<>();
+            if (null != ipAddress.getNetworkPrefixLength()) {
+                if (ipAddress.isIPv4Convertible() && ipAddress.getNetworkPrefixLength() >= 20) {
+                    // 前缀长度 >= 20 的ipv4网段地址转为精确ip
+                    ipAddress.nonZeroHostIterator().forEachRemaining(ipsList::add);
+                } else {
+                    subnets.add(ipAddress);
+                    log.debug("IP黑名单订阅规则 {} 加载CIDR : {}", ruleName, ipAddress);
+                }
+            } else {
+                ipsList.add(ipAddress);
             }
-            ipAddresses.add(ipAddress);
-            log.debug("IP黑名单订阅规则 {} 加载IP : {}", ruleName, ele);
+            ipsList.forEach(ip -> {
+                if (ip.isIPv4Convertible()) {
+                    ip = ip.toIPv4().withoutPrefixLength();
+                }
+                ips.add(ip);
+                log.debug("IP黑名单订阅规则 {} 加载精确IP : {}", ruleName, ip);
+            });
+
         });
     }
 
