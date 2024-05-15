@@ -350,7 +350,6 @@ public class PeerBanHelperServer {
                     updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
                             needRelaunched.getOrDefault(downloader, Collections.emptyList()),
                             bannedPeers, unbannedPeers));
-
             if (!hideFinishLogs) {
                 long downloadersCount = peers.keySet().size();
                 long torrentsCount = peers.values().stream().mapToLong(e -> e.keySet().size()).sum();
@@ -468,7 +467,14 @@ public class PeerBanHelperServer {
         downloaders.forEach(downloader -> fetchPeerFutures.add(
                 CompletableFuture.runAsync(() -> peers.put(downloader, collectPeers(downloader)), generalExecutor)
         ));
-        CompletableFuture.allOf(fetchPeerFutures.toArray(new CompletableFuture[0])).join();
+        try {
+            CompletableFuture.allOf(fetchPeerFutures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(Lang.INTERNAL_ERROR);
+        } catch (TimeoutException e) {
+            log.warn(Lang.PART_TASKS_TIMED_OUT);
+        }
+
         return peers;
     }
 

@@ -159,5 +159,7 @@ public class Lang {
     public static final String PBH_BAN_WAVE_STARTED = "PeerBanHelper BanWave Daemon 已启动";
     public static final String BAN_WAVE_WATCH_DOG_TITLE = "PeerBanHelper 正尝试从异常中恢复";
     public static final String BAN_WAVE_WATCH_DOG_DESCRIPTION = "我们检测到封禁线程因未知原因停止响应，因此 PeerBanHelper 已尝试重启问题线程。请查看程序日志并将有关信息发送给开发者以协助修复此错误。";
+    public static final String INTERNAL_ERROR = "出现了一个内部错误，请检查控制台日志";
+    public static final String PART_TASKS_TIMED_OUT = "[警告] 等待部分任务执行时超过最大时间限制，忽略未完成的任务……";
 
 }
