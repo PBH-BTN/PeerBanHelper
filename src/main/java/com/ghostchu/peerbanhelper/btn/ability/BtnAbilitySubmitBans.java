@@ -88,6 +88,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
             btnBan.setPeer(e.getKey());
             btnBan.setModule(e.getValue().getContext());
             btnBan.setRule(e.getValue().getDescription());
+            btnBan.setBanUniqueId(e.getValue().getRandomId().toString());
             list.add(btnBan);
         }
         return list;
