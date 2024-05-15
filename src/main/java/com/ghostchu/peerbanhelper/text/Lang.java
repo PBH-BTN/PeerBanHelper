@@ -154,4 +154,10 @@ public class Lang {
     public static final String DOWNLOAD_COMPLETED = "下载进度：已完成！共传输 {} 字节的数据";
     public static final String[] GUI_LIVE_PEERS_COLUMN_NAMES = {"国家/地区", "IP地址", "PeerID", "客户端", "汇报进度", "上传速度", "上传量", "下载速度", "下载量", "Torrent", "城市", "ASN", "AS组织", "AS网络"};
     public static final String BAN_WAVE_CHECK_COMPLETED = "已检查 {} 个下载器的 {} 个活跃 Torrent 与 {} 个 Peers。共封禁 {} 个 Peers，并解除 {} 个过期的封禁 ({}ms)";
+    public static final String WATCH_DOG_HUNGRY = "[警告] WatchDog Service {} 未在指定时间 {} 内得到重置，正在转储进程线程信息，请发送给 PeerBanHelper 开发者以协助修复此问题";
+    public static final String WATCH_DOG_CALLBACK_BLOCKED = "[错误] WatchDog Service 回调线程无响应，已强制离开回调";
+    public static final String PBH_BAN_WAVE_STARTED = "PeerBanHelper BanWave Daemon 已启动";
+    public static final String BAN_WAVE_WATCH_DOG_TITLE = "PeerBanHelper 正尝试从异常中恢复";
+    public static final String BAN_WAVE_WATCH_DOG_DESCRIPTION = "我们检测到封禁线程因未知原因停止响应，因此 PeerBanHelper 已尝试重启问题线程。请查看程序日志并将有关信息发送给开发者以协助修复此错误。";
+
 }

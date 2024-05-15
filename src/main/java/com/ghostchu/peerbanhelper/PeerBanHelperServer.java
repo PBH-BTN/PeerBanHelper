@@ -23,6 +23,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.WatchDog;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.WebManager;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -41,6 +42,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -48,11 +52,11 @@ import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.logging.Level;
 
 @Slf4j
 public class PeerBanHelperServer {
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService BAN_WAVE_SERVICE = Executors.newScheduledThreadPool(1);
     private final YamlConfiguration profile;
     @Getter
     private final List<Downloader> downloaders;
@@ -74,6 +78,7 @@ public class PeerBanHelperServer {
     private final HitRateMetric hitRateMetric = new HitRateMetric();
     @Getter
     private final List<BanListInvoker> banListInvoker = new ArrayList<>();
+    private ScheduledExecutorService BAN_WAVE_SERVICE;
     @Getter
     private ImmutableMap<PeerAddress, PeerMetadata> LIVE_PEERS = ImmutableMap.of();
     @Getter
@@ -90,6 +95,7 @@ public class PeerBanHelperServer {
     @Getter
     @Nullable
     private IPDB ipdb = null;
+    private WatchDog banWaveWatchDog;
 
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
@@ -261,7 +267,38 @@ public class PeerBanHelperServer {
     }
 
     private void registerTimer() {
+        this.banWaveWatchDog = new WatchDog("BanWave Thread", profile.getLong("check-interval", 5000) + (1000 * 60), this::watchDogHungry, null);
+        registerBanWaveTimer();
+        this.banWaveWatchDog.start();
+    }
+
+    private void registerBanWaveTimer() {
+        if (BAN_WAVE_SERVICE != null && (!BAN_WAVE_SERVICE.isShutdown() || !BAN_WAVE_SERVICE.isTerminated())) {
+            BAN_WAVE_SERVICE.shutdownNow().forEach(r -> log.warn("Unfinished runnable: {}", r));
+        }
+        BAN_WAVE_SERVICE = Executors.newScheduledThreadPool(1, new ThreadFactory() {
+            @Override
+            public Thread newThread(@NotNull Runnable r) {
+                Thread th = new Thread(r);
+                th.setName("Ban Wave");
+                th.setDaemon(true);
+                return th;
+            }
+        });
+        log.info(Lang.PBH_BAN_WAVE_STARTED);
         BAN_WAVE_SERVICE.scheduleAtFixedRate(this::banWave, 1, profile.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
+    }
+
+
+    private void watchDogHungry() {
+        StringBuilder threadDump = new StringBuilder(System.lineSeparator());
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
+            threadDump.append(threadInfo.toString());
+        }
+        log.info(threadDump.toString());
+        registerBanWaveTimer();
+        Main.getGuiManager().createNotification(Level.WARNING, Lang.BAN_WAVE_WATCH_DOG_TITLE, Lang.BAN_WAVE_WATCH_DOG_DESCRIPTION);
     }
 
     /**
@@ -321,6 +358,7 @@ public class PeerBanHelperServer {
                 log.info(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer);
             }
         } finally {
+            banWaveWatchDog.feed();
             metrics.recordCheck();
         }
     }
@@ -342,14 +380,14 @@ public class PeerBanHelperServer {
         peers.forEach((downloader, tasks) ->
                 tasks.forEach((torrent, peer) ->
                         peer.forEach(p -> {
-            PeerAddress address = p.getAddress();
-            IPDBResponse ipdbResponse = queryIPDB(address);
-            PeerMetadata metadata = new PeerMetadata(
-                    downloader.getName(),
-                    torrent, p, ipdbResponse.cityResponse(), ipdbResponse.asnResponse()
-            );
-            livePeers.put(address, metadata);
-        })));
+                            PeerAddress address = p.getAddress();
+                            IPDBResponse ipdbResponse = queryIPDB(address);
+                            PeerMetadata metadata = new PeerMetadata(
+                                    downloader.getName(),
+                                    torrent, p, ipdbResponse.cityResponse(), ipdbResponse.asnResponse()
+                            );
+                            livePeers.put(address, metadata);
+                        })));
         LIVE_PEERS = ImmutableMap.copyOf(livePeers);
         Main.getEventBus().post(new LivePeersUpdatedEvent(LIVE_PEERS));
     }

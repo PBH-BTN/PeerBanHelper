@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
+import java.util.logging.Level;
 
 @Getter
 @Slf4j
@@ -91,5 +92,22 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Override
     public void close() {
         // mainWindow.getWebviewManager().close();
+    }
+
+    @Override
+    public void createNotification(Level level, String title, String description) {
+        if (mainWindow.getTrayIcon() != null) {
+            if (level.equals(Level.INFO)) {
+                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.INFO);
+            }
+            if (level.equals(Level.WARNING)) {
+                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.WARNING);
+            }
+            if (level.equals(Level.SEVERE)) {
+                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.ERROR);
+            }
+        } else {
+            super.createNotification(level, title, description);
+        }
     }
 }

@@ -67,10 +67,10 @@ public class IPDB implements AutoCloseable {
 
     private void loadMMDB() throws IOException {
         this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
-                .withCache(new CHMCache())
+                .withCache(new CHMCache(1000))
                 .locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
         this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
-                .withCache(new CHMCache())
+                .withCache(new CHMCache(1000))
                 .locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
     }
 

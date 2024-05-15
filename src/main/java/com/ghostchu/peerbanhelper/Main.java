@@ -43,6 +43,7 @@ public class Main {
     private static BuildMeta meta = new BuildMeta();
     @Getter
     private static PeerBanHelperServer server;
+    @Getter
     private static PBHGuiManager guiManager;
     @Getter
     private static final EventBus eventBus = new EventBus();
