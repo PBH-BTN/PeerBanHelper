@@ -53,7 +53,7 @@ public class IPBanMatcher extends AbstractMatcher {
         // 先用bloom过滤器查一下
         if (bloomFilter.contains(content)) {
             // 如果查到了，那么进一步验证到底是不是在黑名单中(bloom filter存在误报的可能性)
-            if (ips.stream().anyMatch(ele -> ele.isIPv4Convertible() == ip.isIPv4Convertible() && (ele.equals(ip) || ele.contains(ip)))) {
+            if (ips.stream().anyMatch(ele -> ele.isIPv4Convertible() == ip.isIPv4Convertible() && ele.equals(ip))) {
                 return MatchResult.TRUE;
             }
         }
