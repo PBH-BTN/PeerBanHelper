@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.rule.matcher;
 
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
+import com.ghostchu.peerbanhelper.util.rule.AbstractJsonMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class StringEqualsMatcher extends AbstractMatcher {
+public class StringEqualsMatcher extends AbstractJsonMatcher {
     private final String rule;
     private MatchResult hit = MatchResult.TRUE;
     private MatchResult miss = MatchResult.DEFAULT;

@@ -38,6 +38,7 @@ public class MainWindow extends JFrame {
     private JPanel tabbedPaneLivePeers;
     private JButton resizeTable;
     @Nullable
+    @Getter
     private TrayIcon trayIcon;
     private String[] peersTableColumn = new String[]{"Loading..."};
     private String[][] peersTableData = new String[0][0];

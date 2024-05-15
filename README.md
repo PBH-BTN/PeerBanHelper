@@ -9,10 +9,9 @@
 > [!TIP]
 > ❤ PeerBanHelper 是一个社区项目，由贡献者们共同建设。点击[此处](https://github.com/PBH-BTN/PeerBanHelper/graphs/contributors)查看所有一同共建 PeerBanHelper 社区的人们。
 
-
 |   主界面   |    封禁列表  |   封禁日志  |   封禁统计   |
 | ---- | ---- | ---- | ---- |
-|   <img width="1280" alt="homepage" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/60cf5635-1423-4ada-ab8b-b5e1e8f996a5">   |   <img width="1280" alt="banlist" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/d843d26a-99a3-4eca-947c-c7c933f4a773">   |    <img width="1280" alt="banlogs" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/a8e4b814-0465-4cf2-9bc0-008eefef8cff">  | <img width="1280" alt="maxban" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/ae78ebb9-67f7-481a-9afc-7ced2c6a2534"> |
+|   <img width="1280" alt="homepage" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/60cf5635-1423-4ada-ab8b-b5e1e8f996a5">   |   <img width="1280" alt="banlist" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/c3e139e6-eb82-423f-b083-1839713ec801">   |    <img width="1280" alt="banlogs" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/a8e4b814-0465-4cf2-9bc0-008eefef8cff">  | <img width="1280" alt="maxban" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/ae78ebb9-67f7-481a-9afc-7ced2c6a2534"> |
 
 ## 安装 PeerBanHelper
 

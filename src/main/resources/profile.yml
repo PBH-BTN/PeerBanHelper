@@ -46,7 +46,6 @@ module:
       - '{"method":"STARTS_WITH","content":"-fg"}'
       - '{"method":"STARTS_WITH","content":"-tt"}'
       - '{"method":"STARTS_WITH","content":"-nx"}'
-      - '{"method":"STARTS_WITH","content":"-sp"}'
       - '{"method":"CONTAINS","content":"cacao"}'
 
     # 排除列表
@@ -67,7 +66,8 @@ module:
       - '{"method":"STARTS_WITH","content":"go.torrent.dev"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"STARTS_WITH","content":"xfplay"}'
-      - '{"method":"STARTS_WITH","content":"bitspirit"}'
+      - '{"method":"CONTAINS","content":"StellarPlayer"}'
+      - '{"method":"CONTAINS","content":"SP "}' # 不要删除尾随空格
       - '{"method":"CONTAINS","content":"flashget"}'
       - '{"method":"CONTAINS","content":"tudou"}'
       - '{"method":"CONTAINS","content":"torrentstorm"}'
@@ -77,9 +77,6 @@ module:
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
-    # 排除列表
-    # 这些规则优先级更高，一旦匹配到任何一条，则直接跳过其他所有规则检查，并放行此 Peer
-    exclude-peer-id: [ ]
   # 假进度检查
   progress-cheat-blocker:
     enabled: true
@@ -157,3 +154,16 @@ module:
     # 追猎持续时间（秒）
     # keep-hunting为true时有效，和cache-lifespan相似，对被猎杀IP的缓存持续时间
     keep-hunting-time: 2592000
+  # 订阅规则
+  ip-address-blocker-rules:
+    enabled: false
+    # 检查间隔
+    check-interval: 86400000 # 24小时检查一次 毫秒
+    # 规则列表
+    rules:
+      # 规则名称（任意）
+      example:
+        # 显示名称
+        name: Example
+        # 规则文件订阅地址
+        url: https://example.com/example.txt

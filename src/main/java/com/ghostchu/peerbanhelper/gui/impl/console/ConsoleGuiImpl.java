@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 @Slf4j
 public class ConsoleGuiImpl implements GuiImpl {
@@ -44,6 +45,19 @@ public class ConsoleGuiImpl implements GuiImpl {
         synchronized (wakeLock) {
             wakeLock.set(true);
             wakeLock.notifyAll();
+        }
+    }
+
+    @Override
+    public void createNotification(Level level, String title, String description) {
+        if (level.equals(Level.INFO)) {
+            log.info("{}: {}", title, description);
+        }
+        if (level.equals(Level.WARNING)) {
+            log.warn("{}: {}", title, description);
+        }
+        if (level.equals(Level.SEVERE)) {
+            log.error("{}: {}", title, description);
         }
     }
 }

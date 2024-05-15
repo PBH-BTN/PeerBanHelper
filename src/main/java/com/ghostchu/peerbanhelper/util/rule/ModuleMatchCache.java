@@ -17,11 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ModuleMatchCache {
     public final Map<RuleFeatureModule, Cache<Wrapper, Boolean>> CACHE_POOL = new ConcurrentHashMap<>();
-    private final long banDuration;
 
-    public ModuleMatchCache(long banDuration) {
-        ;
-        this.banDuration = banDuration;
+    public ModuleMatchCache() {
         Main.getEventBus().register(this);
     }
 
@@ -30,7 +27,8 @@ public class ModuleMatchCache {
         Cache<Wrapper, Boolean> ruleCacheZone = CACHE_POOL.get(module);
         if (ruleCacheZone == null) {
             ruleCacheZone = CacheBuilder.newBuilder()
-                    .expireAfterAccess(banDuration, TimeUnit.MILLISECONDS)
+                    .expireAfterAccess(30, TimeUnit.MINUTES)
+                    .maximumSize(15000)
                     .recordStats()
                     .build();
             CACHE_POOL.put(module, ruleCacheZone);

@@ -21,6 +21,7 @@ public class Lang {
     public static final String ERR_INVALID_RULE_SYNTAX = "规则 {} 的表达式无效，请检查是否存在拼写错误";
     public static final String MODULE_CNB_MATCH_CLIENT_NAME = "匹配 ClientName (UserAgent): %s";
     public static final String MODULE_IBL_MATCH_IP = "匹配 IP 规则: %s";
+    public static final String MODULE_IBL_MATCH_IP_RULE = "匹配 IP黑名单订阅 规则: %s";
     public static final String MODULE_IBL_MATCH_ASN = "匹配 ASN 规则: %s";
     public static final String MODULE_IBL_MATCH_REGION = "匹配国家或地区 ISO 代码规则: %s";
     public static final String MODULE_IBL_EXCEPTION_GEOIP = "匹配 GeoIP 信息时出现异常，请反馈错误给开发者";
@@ -121,6 +122,7 @@ public class Lang {
     public static String RULE_MATCHER_STRING_EQUALS = "匹配相同";
     public static final String RULE_MATCHER_STRING_LENGTH = "匹配长度";
     public static final String RULE_MATCHER_STRING_REGEX = "匹配正则";
+    public static final String RULE_MATCHER_SUB_RULE = "订阅规则";
     public static final String RESET_DOWNLOADER_FAILED = "[警告] 重置下载器封禁列表到初始状态时出现错误";
     public static final String DOWNLOADER_QB_INCREAMENT_BAN_FAILED = "[错误] 向下载器请求增量封禁对等体时出现错误，请在配置文件中关闭增量封禁(increment-ban)配置项";
     public static final String SHUTDOWN_CLOSE_METRICS = "[退出] 正在保存封禁日志和统计数据……";
@@ -152,4 +154,12 @@ public class Lang {
     public static final String DOWNLOAD_COMPLETED = "下载进度：已完成！共传输 {} 字节的数据";
     public static final String[] GUI_LIVE_PEERS_COLUMN_NAMES = {"国家/地区", "IP地址", "PeerID", "客户端", "汇报进度", "上传速度", "上传量", "下载速度", "下载量", "Torrent", "城市", "ASN", "AS组织", "AS网络"};
     public static final String BAN_WAVE_CHECK_COMPLETED = "已检查 {} 个下载器的 {} 个活跃 Torrent 与 {} 个 Peers。共封禁 {} 个 Peers，并解除 {} 个过期的封禁 ({}ms)";
+    public static final String WATCH_DOG_HUNGRY = "[警告] WatchDog Service {} 未在指定时间 {} 内得到重置，正在转储进程线程信息，请发送给 PeerBanHelper 开发者以协助修复此问题";
+    public static final String WATCH_DOG_CALLBACK_BLOCKED = "[错误] WatchDog Service 回调线程无响应，已强制离开回调";
+    public static final String PBH_BAN_WAVE_STARTED = "PeerBanHelper BanWave Daemon 已启动";
+    public static final String BAN_WAVE_WATCH_DOG_TITLE = "PeerBanHelper 正尝试从异常中恢复";
+    public static final String BAN_WAVE_WATCH_DOG_DESCRIPTION = "我们检测到封禁线程因未知原因停止响应，因此 PeerBanHelper 已尝试重启问题线程。请查看程序日志并将有关信息发送给开发者以协助修复此错误。";
+    public static final String INTERNAL_ERROR = "出现了一个内部错误，请检查控制台日志";
+    public static final String PART_TASKS_TIMED_OUT = "[警告] 等待部分任务执行时超过最大时间限制，忽略未完成的任务……";
+
 }
