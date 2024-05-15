@@ -26,42 +26,40 @@ public class IPBanMatcher extends AbstractMatcher {
 
     @Getter
     private String ruleName;
+    private List<IPAddress> subnets;
     private List<IPAddress> ips;
     private BloomFilter bloomFilter;
 
-    public IPBanMatcher(String ruleId, String ruleName, List<IPAddress> ips) {
+    public IPBanMatcher(String ruleId, String ruleName, List<IPAddress> ips, List<IPAddress> subnets) {
         this.ruleId = ruleId;
-        setData(ruleName, ips);
+        setData(ruleName, ips, subnets);
     }
 
-    public void setData(String ruleName, List<IPAddress> ips){
+    public void setData(String ruleName, List<IPAddress> ips, List<IPAddress> subnets) {
         this.ruleName = ruleName;
         this.ips = ips;
+        this.subnets = subnets;
         bloomFilter = new BitSetBloomFilter(ips.size() * 2, ips.size(), 8);
         ips.forEach(ip -> bloomFilter.add(ip.toString()));
     }
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
-        // 先用bloom过滤器查一下，如果没查到那么必然不在黑名单中
-        if (!bloomFilter.contains(content)) {
-            return MatchResult.DEFAULT;
-        }
-        // 如果查到了，那么进一步验证到底是不是在黑名单中(bloom filter存在误报的可能性)
         IPAddress pa = IPAddressUtil.getIPAddress(content);
         if (pa.isIPv4Convertible()) {
             pa = pa.toIPv4();
         }
-        int counter = 0;
-        for (IPAddress ra : ips) {
-            if (ra.isIPv4Convertible() != pa.isIPv4Convertible()) {
-                counter++;
-                continue;
-            }
-            if (ra.equals(pa) || ra.contains(pa)) {
+        final IPAddress ip = pa;
+        // 先用bloom过滤器查一下
+        if (bloomFilter.contains(content)) {
+            // 如果查到了，那么进一步验证到底是不是在黑名单中(bloom filter存在误报的可能性)
+            if (ips.stream().anyMatch(ele -> ele.isIPv4Convertible() == ip.isIPv4Convertible() && ele.equals(ip))) {
                 return MatchResult.TRUE;
             }
-            counter++;
+        }
+        // 最后subnet表查一下
+        if (subnets.stream().anyMatch(subnet -> subnet.contains(ip))) {
+            return MatchResult.TRUE;
         }
         return MatchResult.DEFAULT;
     }
@@ -78,6 +76,6 @@ public class IPBanMatcher extends AbstractMatcher {
 
     @Override
     public String matcherIdentifier() {
-        return "peerbanhelper:subrulematcher";
+        return "peerbanhelper:ipbanmatcher";
     }
 }
