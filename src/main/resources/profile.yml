@@ -46,7 +46,6 @@ module:
       - '{"method":"STARTS_WITH","content":"-fg"}'
       - '{"method":"STARTS_WITH","content":"-tt"}'
       - '{"method":"STARTS_WITH","content":"-nx"}'
-      - '{"method":"STARTS_WITH","content":"-sp"}'
       - '{"method":"CONTAINS","content":"cacao"}'
 
     # 排除列表
@@ -67,7 +66,8 @@ module:
       - '{"method":"STARTS_WITH","content":"go.torrent.dev"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"STARTS_WITH","content":"xfplay"}'
-      - '{"method":"STARTS_WITH","content":"bitspirit"}'
+      - '{"method":"CONTAINS","content":"StellarPlayer"}'
+      - '{"method":"CONTAINS","content":"SP "}' # 不要删除尾随空格
       - '{"method":"CONTAINS","content":"flashget"}'
       - '{"method":"CONTAINS","content":"tudou"}'
       - '{"method":"CONTAINS","content":"torrentstorm"}'
