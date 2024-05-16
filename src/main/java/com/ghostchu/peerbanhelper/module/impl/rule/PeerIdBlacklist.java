@@ -59,7 +59,7 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
     public void onEnable() {
         reloadConfig();
         getServer().getJavalinWebContainer().getJavalin()
-                .get("/api/module/" + getConfigName(), this::handleWebAPI);
+                .get("/api/modules/" + getConfigName(), this::handleWebAPI);
     }
 
     private void handleWebAPI(Context ctx) {

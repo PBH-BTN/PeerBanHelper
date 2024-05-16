@@ -54,8 +54,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     public void onEnable() {
         reloadConfig();
         getServer().getJavalinWebContainer().getJavalin()
-                .get("/api/module/" + getConfigName(), this::handleConfig)
-                .get("/api/module/" + getConfigName() + "/status", this::handleStatus);
+                .get("/api/modules/" + getConfigName(), this::handleConfig)
+                .get("/api/modules/" + getConfigName() + "/status", this::handleStatus);
     }
 
     private void handleStatus(Context ctx) {

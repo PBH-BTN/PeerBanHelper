@@ -47,8 +47,8 @@ public class PBHBanController extends AbstractFeatureModule {
     public void onEnable() {
         getServer().getJavalinWebContainer().getJavalin()
                 .get("/api/bans", this::handleBans)
-                .get("/api/ban/logs", this::handleLogs)
-                .get("/api/ban/ranks", this::handleRanks);
+                .get("/api/bans/logs", this::handleLogs)
+                .get("/api/bans/ranks", this::handleRanks);
     }
 
     private void handleRanks(Context ctx) {
