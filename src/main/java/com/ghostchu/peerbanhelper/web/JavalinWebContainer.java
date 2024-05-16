@@ -6,6 +6,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.staticfiles.Location;
 import lombok.Getter;
 
 import java.util.Map;
@@ -26,7 +27,19 @@ public class JavalinWebContainer {
     public JavalinWebContainer(int port, String token) {
         this.port = port;
         this.token = token;
-        this.javalin = Javalin.create()
+        this.javalin = Javalin.create(c -> {
+                    c.http.gzipOnlyCompression();
+                    c.http.generateEtags = true;
+                    c.useVirtualThreads = true;
+                    c.staticFiles.add(staticFiles -> {
+                        staticFiles.hostedPath = "/";
+                        staticFiles.directory = "/static";
+                        staticFiles.location = Location.CLASSPATH;
+                        staticFiles.precompress = false;
+                        staticFiles.aliasCheck = null;
+                        staticFiles.skipFileFunction = req -> false;
+                    });
+                })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);
                     ctx.json(Map.of("message", "IP banned for 15 minutes, try again later!"));
