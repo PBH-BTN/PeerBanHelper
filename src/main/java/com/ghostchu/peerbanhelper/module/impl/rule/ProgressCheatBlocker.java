@@ -119,11 +119,11 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             }
         }
         if (clientTask == null) {
-            clientTask = new ClientTask(torrent.getId(), 0d, 0L);
+            clientTask = new ClientTask(torrent.getId(), 0d, 0L, 0L);
             lastRecordedProgress.add(clientTask);
         }
         // 获取真实已上传量
-        final long actualUploaded = peer.getUploaded() > clientTask.getUploaded() ? peer.getUploaded() : clientTask.getUploaded() + peer.getUploaded();
+        final long actualUploaded = Math.max(peer.getUploaded(), clientTask.getUploaded());
         try {
             final long torrentSize = torrent.getSize();
             // 过滤
@@ -145,7 +145,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
                 }
             }
             // 如果客户端报告自己进度更多，则跳过检查
-            if (actualProgress - clientProgress <= 0) {
+            if (actualProgress <= clientProgress) {
                 return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, percent(clientProgress), percent(actualProgress)));
             }
             // 计算进度差异
@@ -185,6 +185,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         private String torrentId;
         private Double lastReportProgress;
         private long uploaded;
+        private long offset;
     }
 }
 
