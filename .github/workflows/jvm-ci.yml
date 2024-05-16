@@ -27,7 +27,7 @@ jobs:
       - uses: graalvm/setup-graalvm@v1
         name: Setup GraalVM
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build with Maven

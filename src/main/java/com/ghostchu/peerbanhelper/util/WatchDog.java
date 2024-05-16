@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +18,10 @@ public class WatchDog {
     private final ScheduledExecutorService service;
     private final Runnable hungry;
     private final Runnable good;
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor(); // Watch dog 使用平台线程
+    @Setter
+    @Getter
+    private String lastOperation = "N/A";
 
     public WatchDog(String name, long timeout, @NotNull Runnable hungry, @Nullable Runnable good) {
         this.name = name;
@@ -41,12 +47,12 @@ public class WatchDog {
     private void watchDogCheck() {
         try {
             CompletableFuture.runAsync(() -> {
-                if (System.currentTimeMillis() - lastFeedAt.get() > timeout) {
+                if ((System.currentTimeMillis() - lastFeedAt.get()) > timeout) {
                     hungry();
                 } else {
                     good();
                 }
-            }).get(3, TimeUnit.SECONDS);
+            }, executor).get(3, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.error(Lang.WATCH_DOG_CALLBACK_BLOCKED, e);
         }
@@ -60,7 +66,7 @@ public class WatchDog {
     }
 
     private void hungry() {
-        log.info(Lang.WATCH_DOG_HUNGRY, name, timeout + "ms");
+        log.info(Lang.WATCH_DOG_HUNGRY, name, timeout + "ms", lastOperation);
         if (hungry != null) {
             hungry.run();
         }
