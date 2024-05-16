@@ -1,17 +1,16 @@
 package com.ghostchu.peerbanhelper.database;
 
+import cn.hutool.core.util.StrUtil;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class DatabaseHelper {
@@ -226,6 +225,23 @@ public class DatabaseHelper {
                         """);
                 ps.executeUpdate();
             }
+            if (!hasTable("rule_sub_logs")) {
+                @Cleanup
+                PreparedStatement ps = connection.prepareStatement("""
+                                            
+                                                          create table rule_sub_logs
+                                                                  (
+                                                                          id         integer not null
+                                                          constraint rule_sub_logs_pk
+                                                          primary key autoincrement,
+                                                                  rule_id    integer not null,
+                                                                  update_time integer,
+                                                                  ent_count  integer,
+                                                                  update_type  TEXT
+                                              );
+                        """);
+                ps.executeUpdate();
+            }
         }
     }
 
@@ -280,6 +296,96 @@ public class DatabaseHelper {
             connection.close();
         }
         return match;
+    }
+
+    /**
+     * 查询订阅规则更新日志数量
+     *
+     * @param ruleId 订阅规则ID
+     * @return 日志数量
+     * @throws SQLException SQL异常
+     */
+    public int countRuleSubLogs(String ruleId) throws SQLException {
+        try (Connection connection = manager.getConnection()) {
+            PreparedStatement ps;
+            boolean idNotEmpty = StrUtil.isNotEmpty(ruleId);
+            StringBuilder sql = StrUtil.builder().append("SELECT count(1) as count FROM rule_sub_logs ");
+            sql.append(idNotEmpty ? "WHERE rule_id = ? " : "");
+            ps = connection.prepareStatement(sql.toString());
+            if (idNotEmpty) {
+                ps.setString(1, ruleId);
+            }
+            try (ps) {
+                try (ResultSet set = ps.executeQuery()) {
+                    int count = 0;
+                    while (set.next()) {
+                        count = set.getInt("count");
+                    }
+                    return count;
+                }
+            }
+        }
+    }
+
+    /**
+     * 查询订阅规则更新日志
+     *
+     * @param ruleId    订阅规则ID
+     * @param pageIndex 页码
+     * @param pageSize  每页数量
+     * @return 日志列表
+     * @throws SQLException SQL异常
+     */
+    public List<RuleSubLog> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
+        try (Connection connection = manager.getConnection()) {
+            PreparedStatement ps;
+            boolean idNotEmpty = StrUtil.isNotEmpty(ruleId);
+            StringBuilder sql = StrUtil.builder().append("SELECT * FROM rule_sub_logs ");
+            sql.append(idNotEmpty ? "WHERE rule_id = ? " : "");
+            sql.append("ORDER BY id DESC LIMIT ").append(pageIndex * pageSize).append(", ").append(pageSize);
+            ps = connection.prepareStatement(sql.toString());
+            if (idNotEmpty) {
+                ps.setString(1, ruleId);
+            }
+            try (ps) {
+                try (ResultSet set = ps.executeQuery()) {
+                    List<RuleSubLog> infos = new ArrayList<>();
+                    while (set.next()) {
+                        infos.add(new RuleSubLog(
+                                set.getString("rule_id"),
+                                set.getLong("update_time"),
+                                set.getInt("ent_count"),
+                                set.getString("update_type")
+                        ));
+                    }
+                    return infos;
+                }
+            }
+        }
+    }
+
+    /**
+     * 插入订阅规则更新日志
+     *
+     * @param ruleId     订阅规则ID
+     * @param count      更新数量
+     * @param updateType 更新类型
+     * @throws SQLException SQL异常
+     */
+    public void insertRuleSubLog(String ruleId, int count, String updateType) throws SQLException {
+        try (Connection connection = manager.getConnection()) {
+            PreparedStatement ps;
+            boolean idNotEmpty = StrUtil.isNotEmpty(ruleId);
+            if (!idNotEmpty) {
+                throw new SQLException("ruleId不能为空");
+            }
+            ps = connection.prepareStatement("INSERT INTO rule_sub_logs (rule_id, update_time, ent_count, update_type) VALUES (?,?,?,?)");
+            ps.setString(1, ruleId);
+            ps.setLong(2, System.currentTimeMillis());
+            ps.setInt(3, count);
+            ps.setString(4, updateType);
+            ps.executeUpdate();
+        }
     }
 
 }

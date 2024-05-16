@@ -450,7 +450,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new AutoRangeBan(this, profile));
         moduleManager.register(new BtnNetworkOnline(this, profile));
         moduleManager.register(new DownloaderCIDRBlockList(this, profile));
-        moduleManager.register(new IPBlackRuleList(this, profile));
+        moduleManager.register(new IPBlackRuleList(this, profile, databaseHelper));
         moduleManager.register(new PBHBanList(this, profile));
         moduleManager.register(new PBHBanLogs(this, profile, databaseHelper));
         moduleManager.register(new PBHClientStatus(this, profile));
@@ -459,6 +459,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new PBHMetadata(this, profile));
         moduleManager.register(new PBHRuleMetrics(this, profile));
         moduleManager.register(new PBHLivePeers(this, profile));
+        moduleManager.register(new RuleSubApi(this, profile));
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

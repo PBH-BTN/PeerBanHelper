@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.PBHAPI;
@@ -7,6 +8,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
 
 @Slf4j
 public abstract class AbstractFeatureModule implements FeatureModule {
@@ -33,6 +38,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
 
     /**
      * 如果返回 false，则不初始化任何配置文件相关对象
+     *
      * @return 是否支持使用配置文件进行配置
      */
     public abstract boolean isConfigurable();
@@ -40,7 +46,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Override
     public ConfigurationSection getConfig() {
         if (!isConfigurable()) return null;
-        ConfigurationSection section = profile.getConfigurationSection("module").getConfigurationSection(getConfigName());
+        ConfigurationSection section = Objects.requireNonNull(profile.getConfigurationSection("module")).getConfigurationSection(getConfigName());
         if (section == null) {
             log.warn(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName());
             YamlConfiguration configuration = new YamlConfiguration();
@@ -70,5 +76,12 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         register = true;
         onEnable();
         log.info(Lang.MODULE_REGISTER, getName());
+    }
+
+    @Override
+    public void saveConfig() throws IOException {
+        if (!isConfigurable()) return;
+        profile.set("module." + getConfigName(), getConfig());
+        profile.save(new File(Main.getConfigDirectory(), "profile.yml"));
     }
 }

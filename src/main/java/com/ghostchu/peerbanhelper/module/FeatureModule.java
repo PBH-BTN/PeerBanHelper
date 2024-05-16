@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.module;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+
 public interface FeatureModule {
     /**
      * 获取功能模块的人类可读名称
@@ -42,5 +44,9 @@ public interface FeatureModule {
      */
     void disable();
 
+    /**
+     * 保存配置
+     */
+    void saveConfig() throws IOException;
 
 }
