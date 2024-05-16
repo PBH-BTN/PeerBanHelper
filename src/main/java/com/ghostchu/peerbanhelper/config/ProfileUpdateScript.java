@@ -22,6 +22,7 @@ public class ProfileUpdateScript {
     public void subModule() {
         conf.set("module.ip-address-blocker-rules.enabled", false);
         conf.set("module.ip-address-blocker-rules.check-interval", 86400000);
+        conf.set("module.ip-address-blocker-rules.rules.example-rule.enabled", false);
         conf.set("module.ip-address-blocker-rules.rules.example-rule.name", "Example");
         conf.set("module.ip-address-blocker-rules.rules.example-rule.url", "https://example.com/example.txt");
     }
