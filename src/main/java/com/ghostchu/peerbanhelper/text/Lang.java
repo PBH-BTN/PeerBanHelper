@@ -177,6 +177,7 @@ public class Lang {
     public static final String RULE_SUB_API_NO_DEPENDENCY =  "[错误] 未找到 IPBlackRuleList 模块，无法启用 RuleSubApi 模块";
     public static final String RULE_SUB_API_INTERNAL_ERROR = "[错误] 读取订阅规则信息时遇到非预期错误";
     public static final String IP_BAN_RULE_CANT_FIND = "[错误] 未找到对应的IP黑名单订阅规则";
+    public static final String IP_BAN_RULE_PARAM_WRONG = "[错误] IP黑名单订阅规则参数错误";
     public static final String IP_BAN_RULE_ENABLED =  "IP黑名单订阅规则已启用";
     public static final String IP_BAN_RULE_DISABLED =  "IP黑名单订阅规则已禁用";
     public static final String IP_BAN_RULE_UPDATED =  "IP黑名单订阅规则已更新";
@@ -184,4 +185,6 @@ public class Lang {
     public static final String IP_BAN_RULE_DELETED =  "IP黑名单订阅规则已删除";
     public static final String IP_BAN_RULE_INFO_QUERY_SUCCESS =  "IP黑名单订阅规则查询成功";
     public static final String IP_BAN_RULE_LOG_QUERY_SUCCESS =  "IP黑名单订阅规则更新日志查询成功";
+    public static final String IP_BAN_RULE_NO_CHECK_INTERVAL = "IP黑名单订阅规则更新间隔为空";
+    public static final String IP_BAN_RULE_CHECK_INTERVAL_UPDATED = "IP黑名单订阅规则更新间隔设置成功";
 }

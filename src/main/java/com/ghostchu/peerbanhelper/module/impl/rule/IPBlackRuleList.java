@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -51,6 +52,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
     final private DatabaseHelper db;
     private List<IPBanMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
+    private ScheduledExecutorService scheduledExecutorService;
 
     public IPBlackRuleList(PeerBanHelperServer server, YamlConfiguration profile, DatabaseHelper db) {
         super(server, profile);
@@ -87,7 +89,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         ConfigurationSection config = getConfig();
         // 读取检查间隔
         checkInterval = config.getLong("check-interval", checkInterval);
-        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, java.util.concurrent.TimeUnit.MILLISECONDS);
+        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -287,7 +290,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @return 规则订阅信息
      */
     public RuleSubInfo getRuleSubInfo(String ruleId) throws SQLException {
-        ConfigurationSection rules = getConfig().getConfigurationSection("rules");
+        ConfigurationSection rules = getRuleSubsConfig();
         if (rules == null) {
             return null;
         }
@@ -309,7 +312,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @throws IOException 保存异常
      */
     public ConfigurationSection saveRuleSubInfo(@NotNull RuleSubInfo ruleSubInfo) throws IOException {
-        ConfigurationSection rules = getConfig().getConfigurationSection("rules");
+        ConfigurationSection rules = getRuleSubsConfig();
         String ruleId = ruleSubInfo.ruleId();
         rules.set(ruleId + ".enabled", ruleSubInfo.enabled());
         rules.set(ruleId + ".name", ruleSubInfo.ruleName());
@@ -325,7 +328,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @throws IOException 删除异常
      */
     public void deleteRuleSubInfo(String ruleId) throws IOException {
-        ConfigurationSection rules = getConfig().getConfigurationSection("rules");
+        ConfigurationSection rules = getRuleSubsConfig();
         rules.set(ruleId, null);
         saveConfig();
     }
@@ -352,6 +355,24 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      */
     public int countRuleSubLogs(String ruleId) throws SQLException {
         return db.countRuleSubLogs(ruleId);
+    }
+
+    /**
+     * 更改检查间隔
+     * 会立即触发一次更新
+     *
+     * @param checkInterval 检查间隔
+     * @throws IOException 保存异常
+     */
+    public void changeCheckInterval(long checkInterval) throws IOException {
+        this.checkInterval = checkInterval;
+        getConfig().set("check-interval", checkInterval);
+        saveConfig();
+        if (null != scheduledExecutorService) {
+            scheduledExecutorService.shutdown();
+        }
+        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 }
 

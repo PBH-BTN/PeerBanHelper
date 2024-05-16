@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.RuleSubInfo;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
@@ -60,38 +62,85 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
 
     @Override
     public boolean shouldHandle(String uri) {
-        return uri.equals("/api/rulesub");
+        return uri.startsWith("/api/rulesub");
+    }
+
+    @Override
+    public List<NanoHTTPD.Method> shouldHandleMethods() {
+        return List.of(NanoHTTPD.Method.GET, NanoHTTPD.Method.POST, NanoHTTPD.Method.DELETE);
     }
 
     @Override
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
+        String uri = session.getUri();
+        String subUri = uri.substring(uri.lastIndexOf("/"));
+        AtomicReference<NanoHTTPD.Response> resp = new AtomicReference<>();
+        resp.set(HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.RULE_SUB_API_INTERNAL_ERROR)))));
+        switch (subUri) {
+            case "/logs" -> limitRequestMethod(session, NanoHTTPD.Method.GET).ifPresentOrElse(resp::set, () -> {
+                try {
+                    resp.set(logs(session));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            case "/interval" -> limitRequestMethod(session, NanoHTTPD.Method.POST).ifPresentOrElse(resp::set, () -> {
+                try {
+                    resp.set(changeCheckInterval(session));
+                } catch (IOException | NanoHTTPD.ResponseException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            case "/list" ->
+                    limitRequestMethod(session, NanoHTTPD.Method.GET).ifPresentOrElse(resp::set, () -> resp.set(list(session)));
+            case "/save" -> limitRequestMethod(session, NanoHTTPD.Method.POST).ifPresentOrElse(resp::set, () -> {
+                try {
+                    resp.set(save(session));
+                } catch (IOException | SQLException | NanoHTTPD.ResponseException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            case "/remove" -> limitRequestMethod(session, NanoHTTPD.Method.DELETE).ifPresentOrElse(resp::set, () -> {
+                try {
+                    resp.set(delete(session));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            case "/enable" -> limitRequestMethod(session, NanoHTTPD.Method.POST).ifPresentOrElse(resp::set, () -> {
+                try {
+                    resp.set(switcher(session, true));
+                } catch (IOException | SQLException | NanoHTTPD.ResponseException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            case "/disable" -> limitRequestMethod(session, NanoHTTPD.Method.POST).ifPresentOrElse(resp::set, () -> {
+                try {
+                    resp.set(switcher(session, false));
+                } catch (IOException | SQLException | NanoHTTPD.ResponseException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            case "/update" -> limitRequestMethod(session, NanoHTTPD.Method.POST).ifPresentOrElse(resp::set, () -> {
+                try {
+                    resp.set(update(session));
+                } catch (NanoHTTPD.ResponseException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            default -> log.error(Lang.RULE_SUB_API_INTERNAL_ERROR);
+        }
+        return resp.get();
+    }
 
-        String method = null;
-        List<String> methodParam = session.getParameters().get("method");
-        if (null != methodParam && !methodParam.isEmpty()) {
-            method = methodParam.get(0);
+    private NanoHTTPD.Response changeCheckInterval(NanoHTTPD.IHTTPSession session) throws IOException, NanoHTTPD.ResponseException {
+        session.parseBody(new HashMap<String, String>(1)); // damn you, NanoHTTPD
+        String checkInterval = session.getParameters().getOrDefault("checkInterval", List.of("")).get(0);
+        if (StrUtil.isEmpty(checkInterval)) {
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.IP_BAN_RULE_NO_CHECK_INTERVAL))));
         }
-        try {
-            if ("query".equals(method)) {
-                return query(session);
-            } else if ("save".equals(method)) {
-                return save(session);
-            } else if ("delete".equals(method)) {
-                return delete(session);
-            } else if ("enable".equals(method)) {
-                return switcher(session, true);
-            } else if ("disable".equals(method)) {
-                return switcher(session, false);
-            } else if ("upgrade".equals(method)) {
-                return upgrade(session);
-            } else if ("logs".equals(method)) {
-                return logs(session);
-            }
-            log.error(Lang.RULE_SUB_API_INTERNAL_ERROR);
-        } catch (SQLException | IOException e) {
-            log.error(Lang.RULE_SUB_API_INTERNAL_ERROR, e);
-        }
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.RULE_SUB_API_INTERNAL_ERROR))));
+        ipBlackRuleList.changeCheckInterval(Long.parseLong(checkInterval));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", Lang.IP_BAN_RULE_CHECK_INTERVAL_UPDATED))));
     }
 
     private NanoHTTPD.Response logs(NanoHTTPD.IHTTPSession session) throws SQLException {
@@ -112,7 +161,8 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
      * @param session 请求
      * @return 响应
      */
-    private NanoHTTPD.Response upgrade(NanoHTTPD.IHTTPSession session) {
+    private NanoHTTPD.Response update(NanoHTTPD.IHTTPSession session) throws NanoHTTPD.ResponseException, IOException {
+        session.parseBody(new HashMap<String, String>(1)); // damn you, NanoHTTPD
         String ruleId = session.getParameters().getOrDefault("ruleId", List.of("")).get(0);
         ipBlackRuleList.getIpBanMatchers().stream().filter(ele -> StrUtil.isEmpty(ruleId) || ele.getRuleId().equals(ruleId))
                 .forEach(ele -> ipBlackRuleList.updateRule(Objects.requireNonNull(ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ele.getRuleId())), Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL));
@@ -126,7 +176,8 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
      * @param enabled 启用/禁用
      * @return 响应
      */
-    private NanoHTTPD.Response switcher(NanoHTTPD.IHTTPSession session, boolean enabled) throws SQLException, IOException {
+    private NanoHTTPD.Response switcher(NanoHTTPD.IHTTPSession session, boolean enabled) throws SQLException, IOException, NanoHTTPD.ResponseException {
+        session.parseBody(new HashMap<String, String>(1)); // damn you, NanoHTTPD
         String ruleId = session.getParameters().getOrDefault("ruleId", List.of("")).get(0);
         if (StrUtil.isEmpty(ruleId)) {
             return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND))));
@@ -164,15 +215,20 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
      * @param session 请求
      * @return 响应
      */
-    private NanoHTTPD.Response save(NanoHTTPD.IHTTPSession session) throws IOException, SQLException {
+    private NanoHTTPD.Response save(NanoHTTPD.IHTTPSession session) throws IOException, SQLException, NanoHTTPD.ResponseException {
+        session.parseBody(new HashMap<String, String>(1)); // damn you, NanoHTTPD
         String ruleId = session.getParameters().getOrDefault("ruleId", List.of("")).get(0);
         if (StrUtil.isEmpty(ruleId)) {
             return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND))));
         }
-        String enabled = session.getParameters().getOrDefault("enabled", List.of("false")).get(0);
+        String enableStr = session.getParameters().getOrDefault("enabled", List.of("false")).get(0);
         String ruleName = session.getParameters().getOrDefault("ruleName", List.of("")).get(0);
         String subUrl = session.getParameters().getOrDefault("subUrl", List.of("")).get(0);
-        ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, Boolean.parseBoolean(enabled), ruleName, subUrl, 0, 0));
+        if (!List.of("TRUE", "FALSE").contains(enableStr.toUpperCase()) || StrUtil.isEmpty(ruleName) || StrUtil.isEmpty(subUrl)) {
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.IP_BAN_RULE_PARAM_WRONG))));
+        }
+        boolean enabled = BooleanUtil.toBoolean(enableStr);
+        ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, enabled, ruleName, subUrl, 0, 0));
         ipBlackRuleList.updateRule(configurationSection, Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL);
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", Lang.IP_BAN_RULE_SAVED))));
     }
@@ -183,7 +239,7 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
      * @param session 请求
      * @return 响应
      */
-    private NanoHTTPD.Response query(NanoHTTPD.IHTTPSession session) {
+    private NanoHTTPD.Response list(NanoHTTPD.IHTTPSession session) {
         String ruleId = session.getParameters().getOrDefault("ruleId", List.of("")).get(0);
         List<RuleSubInfo> collect = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().filter(ele -> StrUtil.isEmpty(ruleId) || ele.equals(ruleId))
                 .map(ele -> {
@@ -196,5 +252,19 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
         return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS, "data", collect))));
     }
 
+    /**
+     * 限制请求方法
+     *
+     * @param session 请求
+     * @param method  方法
+     * @return 响应
+     */
+    private Optional<NanoHTTPD.Response> limitRequestMethod(NanoHTTPD.IHTTPSession session, NanoHTTPD.Method method) {
+        if (session.getMethod() != method) {
+            NanoHTTPD.Response.Status methodNotAllowed = NanoHTTPD.Response.Status.METHOD_NOT_ALLOWED;
+            return Optional.of(HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(methodNotAllowed, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", methodNotAllowed.getDescription())))));
+        }
+        return Optional.empty();
+    }
 
 }

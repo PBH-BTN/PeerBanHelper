@@ -18,7 +18,7 @@ public class WebManager extends NanoHTTPD {
         super(port);
         try {
             start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.warn(Lang.ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE, e);
         }
     }
@@ -51,12 +51,16 @@ public class WebManager extends NanoHTTPD {
     @Override
     @ApiStatus.Internal
     public Response serve(IHTTPSession session) {
-        if (session.getMethod() != Method.GET) {
+        /*if (session.getMethod() != Method.GET) {
             return newFixedLengthResponse(Response.Status.METHOD_NOT_ALLOWED, "text/plain", "error method");
-        }
+        }*/
         for (PBHAPI apiEndpoint : apiEndpoints) {
             try {
                 if (apiEndpoint.shouldHandle(session.getUri())) {
+                    // 检查是否支持该方法
+                    if (!apiEndpoint.shouldHandleMethods().contains(session.getMethod())) {
+                        return newFixedLengthResponse(Response.Status.METHOD_NOT_ALLOWED, "text/plain", Response.Status.METHOD_NOT_ALLOWED.getDescription());
+                    }
                     return apiEndpoint.handle(session);
                 }
             } catch (Exception e) {
