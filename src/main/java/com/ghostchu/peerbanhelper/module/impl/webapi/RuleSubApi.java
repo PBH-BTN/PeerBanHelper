@@ -50,7 +50,7 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
         first.ifPresentOrElse(ele -> {
             ipBlackRuleList = (IPBlackRuleList) ele;
             getServer().getWebManagerServer().register(this);
-        }, () -> log.error("未找到 IPBlackRuleList 模块，无法启用 RuleSubApi 模块"));
+        }, () -> log.error(Lang.RULE_SUB_API_NO_DEPENDENCY));
     }
 
     @Override
@@ -65,6 +65,7 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
 
     @Override
     public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
+
         String method = null;
         List<String> methodParam = session.getParameters().get("method");
         if (null != methodParam && !methodParam.isEmpty()) {
@@ -86,11 +87,11 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
             } else if ("logs".equals(method)) {
                 return logs(session);
             }
-            log.error(Lang.WEB_RULESUB_INTERNAL_ERROR);
+            log.error(Lang.RULE_SUB_API_INTERNAL_ERROR);
         } catch (SQLException | IOException e) {
-            log.error(Lang.WEB_RULESUB_INTERNAL_ERROR, e);
+            log.error(Lang.RULE_SUB_API_INTERNAL_ERROR, e);
         }
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", "未知错误"))));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.RULE_SUB_API_INTERNAL_ERROR))));
     }
 
     private NanoHTTPD.Response logs(NanoHTTPD.IHTTPSession session) throws SQLException {
@@ -102,7 +103,7 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
         map.put("pageSize", pageSize);
         map.put("results", ipBlackRuleList.queryRuleSubLogs(ruleId, pageIndex, pageSize));
         map.put("total", ipBlackRuleList.countRuleSubLogs(ruleId));
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", "查询成功", "data", map))));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS, "data", map))));
     }
 
     /**
@@ -114,8 +115,8 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
     private NanoHTTPD.Response upgrade(NanoHTTPD.IHTTPSession session) {
         String ruleId = session.getParameters().getOrDefault("ruleId", List.of("")).get(0);
         ipBlackRuleList.getIpBanMatchers().stream().filter(ele -> StrUtil.isEmpty(ruleId) || ele.getRuleId().equals(ruleId))
-                .forEach(ele -> ipBlackRuleList.updateRule(Objects.requireNonNull(ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ele.getRuleId())), "手动更新"));
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", "订阅规则已更新"))));
+                .forEach(ele -> ipBlackRuleList.updateRule(Objects.requireNonNull(ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ele.getRuleId())), Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", Lang.IP_BAN_RULE_UPDATED))));
     }
 
     /**
@@ -128,17 +129,17 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
     private NanoHTTPD.Response switcher(NanoHTTPD.IHTTPSession session, boolean enabled) throws SQLException, IOException {
         String ruleId = session.getParameters().getOrDefault("ruleId", List.of("")).get(0);
         if (StrUtil.isEmpty(ruleId)) {
-            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", "未找到对应的订阅规则: ruleId为空"))));
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND))));
         }
         RuleSubInfo ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
-            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", String.format("未找到对应的订阅规则: %s", ruleId)))));
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND))));
         }
         if (enabled != ruleSubInfo.enabled()) {
             ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, !ruleSubInfo.enabled(), ruleSubInfo.ruleName(), ruleSubInfo.subUrl(), 0, 0));
-            ipBlackRuleList.updateRule(configurationSection, "手动更新");
+            ipBlackRuleList.updateRule(configurationSection, Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL);
         }
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", "订阅规则已" + (enabled ? "启用" : "禁用")))));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", enabled ? Lang.IP_BAN_RULE_ENABLED : Lang.IP_BAN_RULE_DISABLED))));
     }
 
     /**
@@ -150,11 +151,11 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
     private NanoHTTPD.Response delete(NanoHTTPD.IHTTPSession session) throws IOException {
         String ruleId = session.getParameters().getOrDefault("ruleId", List.of("")).get(0);
         if (StrUtil.isEmpty(ruleId)) {
-            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", "未找到对应的订阅规则: ruleId为空"))));
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND))));
         }
         ipBlackRuleList.deleteRuleSubInfo(ruleId);
         ipBlackRuleList.getIpBanMatchers().removeIf(ele -> ele.getRuleId().equals(ruleId));
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true))));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", Lang.IP_BAN_RULE_DELETED))));
     }
 
     /**
@@ -166,14 +167,14 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
     private NanoHTTPD.Response save(NanoHTTPD.IHTTPSession session) throws IOException, SQLException {
         String ruleId = session.getParameters().getOrDefault("ruleId", List.of("")).get(0);
         if (StrUtil.isEmpty(ruleId)) {
-            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", "未找到对应的订阅规则: ruleId为空"))));
+            return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND))));
         }
         String enabled = session.getParameters().getOrDefault("enabled", List.of("false")).get(0);
         String ruleName = session.getParameters().getOrDefault("ruleName", List.of("")).get(0);
         String subUrl = session.getParameters().getOrDefault("subUrl", List.of("")).get(0);
         ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, Boolean.parseBoolean(enabled), ruleName, subUrl, 0, 0));
-        ipBlackRuleList.updateRule(configurationSection, "手动更新");
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true))));
+        ipBlackRuleList.updateRule(configurationSection, Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL);
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", Lang.IP_BAN_RULE_SAVED))));
     }
 
     /**
@@ -192,7 +193,7 @@ public class RuleSubApi extends AbstractFeatureModule implements PBHAPI {
                         throw new RuntimeException(e);
                     }
                 }).toList();
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", "查询成功", "data", collect))));
+        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.prettyPrinting().toJson(Map.of("success", true, "message", Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS, "data", collect))));
     }
 
 

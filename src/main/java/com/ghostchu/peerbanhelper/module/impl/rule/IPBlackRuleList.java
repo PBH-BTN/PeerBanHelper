@@ -112,12 +112,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                 }
                 return match;
             } catch (Exception e) {
-                log.error("IP黑名单订阅规则匹配异常", e);
+                log.error(Lang.IP_BAN_RULE_MATCH_ERROR, e);
                 return false;
             }
         });
         watch.stop();
-        log.debug("匹配IP黑名单订阅规则花费时间：{}", watch.getLastTaskTimeNanos());
+        log.debug(Lang.IP_BAN_RULE_MATCH_TIME, watch.getLastTaskTimeNanos());
         if (mr) {
             return new BanResult(this, PeerAction.BAN, ip, String.format(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName()));
         }
@@ -140,9 +140,9 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             for (String ruleId : rules.getKeys(false)) {
                 ConfigurationSection rule = rules.getConfigurationSection(ruleId);
                 assert rule != null;
-                updateRule(rule, "自动更新");
+                updateRule(rule, Lang.IP_BAN_RULE_UPDATE_TYPE_AUTO);
             }
-            log.info("IP黑名单规则订阅完毕");
+            log.info(Lang.IP_BAN_RULE_UPDATE_FINISH);
         }
     }
 
@@ -191,7 +191,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
                             ent_count = fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
                         } else {
-                            log.info("IP黑名单订阅规则 {} 未发生更新", name);
+                            log.info(Lang.IP_BAN_RULE_NO_UPDATE, name);
                         }
                     }
                     FileUtil.del(tempFile);
@@ -200,10 +200,10 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         // 如果已经存在则更新，否则添加
                         ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                             ele.setData(name, ipAddresses, subnetAddresses);
-                            log.info("IP黑名单订阅规则 {} 更新成功", name);
+                            log.info(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name);
                         }, () -> {
                             ipBanMatchers.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
-                            log.info("IP黑名单订阅规则 {} 加载成功", name);
+                            log.info(Lang.IP_BAN_RULE_LOAD_SUCCESS, name);
                         });
                     }
                     if (ent_count > 0) {
@@ -211,7 +211,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         try {
                             db.insertRuleSubLog(ruleId, ent_count, updateType);
                         } catch (SQLException e) {
-                            log.error("IP黑名单订阅规则 {} 更新日志失败", ruleId, e);
+                            log.error(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId, e);
                         }
                     }
                 }).join();
@@ -222,10 +222,10 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                     if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
                         fileToIPList(name, ruleFile, ipAddresses, subnetAddresses);
                         ipBanMatchers.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
-                        log.warn("IP黑名单订阅规则 {} 订阅失败，使用本地缓存加载成功", name);
+                        log.warn(Lang.IP_BAN_RULE_USE_CACHE, name);
                     }
                 } else {
-                    log.error("IP黑名单订阅规则 {} 加载失败", ruleId, e);
+                    log.error(Lang.IP_BAN_RULE_LOAD_FAILED, ruleId, e);
                 }
             }
         }
@@ -255,7 +255,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                     ipAddress.nonZeroHostIterator().forEachRemaining(ipsList::add);
                 } else {
                     subnets.add(ipAddress);
-                    log.debug("IP黑名单订阅规则 {} 加载CIDR : {}", ruleName, ipAddress);
+                    log.debug(Lang.IP_BAN_RULE_LOAD_CIDR, ruleName, ipAddress);
                 }
             } else {
                 ipsList.add(ipAddress);
@@ -265,7 +265,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                     ip = ip.toIPv4().withoutPrefixLength();
                 }
                 ips.add(ip);
-                log.debug("IP黑名单订阅规则 {} 加载精确IP : {}", ruleName, ip);
+                log.debug(Lang.IP_BAN_RULE_LOAD_IP, ruleName, ip);
             });
         });
         return count.get();

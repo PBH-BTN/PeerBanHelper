@@ -375,10 +375,10 @@ public class DatabaseHelper {
     public void insertRuleSubLog(String ruleId, int count, String updateType) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
-            boolean idNotEmpty = StrUtil.isNotEmpty(ruleId);
-            if (!idNotEmpty) {
-                throw new SQLException("ruleId不能为空");
-            }
+            // boolean idNotEmpty = StrUtil.isNotEmpty(ruleId);
+            // if (!idNotEmpty) {
+            //     throw new SQLException("ruleId不能为空");
+            // }
             ps = connection.prepareStatement("INSERT INTO rule_sub_logs (rule_id, update_time, ent_count, update_type) VALUES (?,?,?,?)");
             ps.setString(1, ruleId);
             ps.setLong(2, System.currentTimeMillis());

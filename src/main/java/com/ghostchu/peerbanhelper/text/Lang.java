@@ -75,7 +75,6 @@ public class Lang {
     public static String DATABASE_BUFFER_SAVED = "[保存] 已保存 {} 条内存缓存的封禁日志到数据库，用时 {}ms";
     public static final String DATABASE_SAVE_BUFFER_FAILED = "[错误] 刷写内存缓存的封禁日志时出现了 SQL 错误，未保存的数据已被丢弃";
     public static final String WEB_BANLOGS_INTERNAL_ERROR = "[错误] 读取封禁日志时遇到非预期错误";
-    public static final String WEB_RULESUB_INTERNAL_ERROR = "[错误] 读取订阅规则信息时遇到非预期错误";
     public static String PERSIST_DISABLED = "[禁用] Persist 持久化数据存储已在此服务器上被禁用";
     public static final String BOOTSTRAP_FAILED = "[错误] PeerBanHelper 启动失败，遇到致命错误，请检查控制台日志";
     public static final String DATABASE_FAILURE = "[错误] 无法连接到持久化数据存储数据库，请检查是否同时启动了多个 PBH 示例？（如果 SQLite 数据库损坏，请删除它，PBH 将会重新生成新的数据库文件）";
@@ -162,5 +161,27 @@ public class Lang {
     public static final String BAN_WAVE_WATCH_DOG_DESCRIPTION = "我们检测到封禁线程因未知原因停止响应，因此 PeerBanHelper 已尝试重启问题线程。请查看程序日志并将有关信息发送给开发者以协助修复此错误。";
     public static final String INTERNAL_ERROR = "出现了一个内部错误，请检查控制台日志";
     public static final String PART_TASKS_TIMED_OUT = "[警告] 等待部分任务执行时超过最大时间限制，忽略未完成的任务……";
-
+    public static final String IP_BAN_RULE_MATCH_ERROR = "[错误] IP黑名单订阅规则匹配异常";
+    public static final String IP_BAN_RULE_MATCH_TIME = "匹配IP黑名单订阅规则花费时间：{}";
+    public static final String IP_BAN_RULE_UPDATE_TYPE_AUTO = "自动更新";
+    public static final String IP_BAN_RULE_UPDATE_TYPE_MANUAL = "手动更新";
+    public static final String IP_BAN_RULE_UPDATE_FINISH = "IP黑名单规则订阅完毕";
+    public static final String IP_BAN_RULE_NO_UPDATE = "IP黑名单订阅规则 {} 未发生更新";
+    public static final String IP_BAN_RULE_UPDATE_SUCCESS =  "IP黑名单订阅规则 {} 更新成功";
+    public static final String IP_BAN_RULE_LOAD_SUCCESS =  "IP黑名单订阅规则 {} 加载成功";
+    public static final String IP_BAN_RULE_UPDATE_LOG_ERROR =  "[错误] IP黑名单订阅规则 {} 更新日志失败";
+    public static final String IP_BAN_RULE_USE_CACHE =  "[警告] IP黑名单订阅规则 {} 订阅失败，使用本地缓存加载成功";
+    public static final String IP_BAN_RULE_LOAD_FAILED =  "[错误] IP黑名单订阅规则 {} 加载失败";
+    public static final String IP_BAN_RULE_LOAD_CIDR =  "IP黑名单订阅规则 {} 加载CIDR : {}";
+    public static final String IP_BAN_RULE_LOAD_IP =  "IP黑名单订阅规则 {} 加载精确IP : {}";
+    public static final String RULE_SUB_API_NO_DEPENDENCY =  "[错误] 未找到 IPBlackRuleList 模块，无法启用 RuleSubApi 模块";
+    public static final String RULE_SUB_API_INTERNAL_ERROR = "[错误] 读取订阅规则信息时遇到非预期错误";
+    public static final String IP_BAN_RULE_CANT_FIND = "[错误] 未找到对应的IP黑名单订阅规则";
+    public static final String IP_BAN_RULE_ENABLED =  "IP黑名单订阅规则已启用";
+    public static final String IP_BAN_RULE_DISABLED =  "IP黑名单订阅规则已禁用";
+    public static final String IP_BAN_RULE_UPDATED =  "IP黑名单订阅规则已更新";
+    public static final String IP_BAN_RULE_SAVED =  "IP黑名单订阅规则已保存";
+    public static final String IP_BAN_RULE_DELETED =  "IP黑名单订阅规则已删除";
+    public static final String IP_BAN_RULE_INFO_QUERY_SUCCESS =  "IP黑名单订阅规则查询成功";
+    public static final String IP_BAN_RULE_LOG_QUERY_SUCCESS =  "IP黑名单订阅规则更新日志查询成功";
 }
