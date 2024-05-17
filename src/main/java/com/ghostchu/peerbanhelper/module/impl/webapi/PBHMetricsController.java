@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
+import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -35,8 +36,8 @@ public class PBHMetricsController extends AbstractFeatureModule {
     public void onEnable() {
         this.metrics = getServer().getMetrics();
         getServer().getWebContainer().javalin()
-                .get("/api/statistic/counter", this::handleBasicCounter)
-                .get("/api/statistic/rules", this::handleRules);
+                .get("/api/statistic/counter", this::handleBasicCounter, Role.USER_READ)
+                .get("/api/statistic/rules", this::handleRules, Role.USER_READ);
     }
 
     private void handleRules(Context ctx) {

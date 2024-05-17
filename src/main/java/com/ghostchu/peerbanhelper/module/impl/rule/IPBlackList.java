@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
@@ -71,7 +72,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     public void onEnable() {
         reloadConfig();
         getServer().getWebContainer().javalin()
-                .get("/api/modules/" + getConfigName(), this::handleWebAPI);
+                .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
     }
 
     private void handleWebAPI(Context ctx) {

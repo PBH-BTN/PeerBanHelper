@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.web.Role;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
@@ -46,8 +47,8 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     public void onEnable() {
         reloadConfig();
         getServer().getWebContainer().javalin()
-                .get("/api/modules/" + getConfigName(), this::handleConfig)
-                .get("/api/modules/" + getConfigName() + "/status", this::handleStatus);
+                .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
+                .get("/api/modules/" + getConfigName() + "/status", this::handleStatus, Role.USER_READ);
     }
 
     private void handleStatus(Context ctx) {

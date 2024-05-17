@@ -20,6 +20,7 @@ import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.proxy.PBHSocks5Server;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
@@ -96,6 +97,7 @@ public class PeerBanHelperServer {
     private WatchDog banWaveWatchDog;
     @Getter
     private JavalinWebContainer webContainer;
+    private PBHSocks5Server socks5Server;
 
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
@@ -108,6 +110,7 @@ public class PeerBanHelperServer {
         this.moduleMatchCache = new ModuleMatchCache();
         this.banListFile = new File(Main.getDataDirectory(), "banlist.dump");
         registerHttpServer();
+        registerSocks5Server();
         this.moduleManager = new ModuleManager();
         setupIPDB();
         setupBtn();
@@ -125,6 +128,10 @@ public class PeerBanHelperServer {
         registerTimer();
         banListInvoker.forEach(BanListInvoker::reset);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
+    }
+
+    private void registerSocks5Server() {
+        this.socks5Server = new PBHSocks5Server(this);
     }
 
     private void setupIPDB() {
@@ -254,7 +261,14 @@ public class PeerBanHelperServer {
     }
 
     private void registerHttpServer() {
-        this.webContainer = new JavalinWebContainer(httpdPort, getMainConfig().getString("server.token"));
+        String token = System.getenv("PBH_API_TOKEN");
+        if (token == null) {
+            token = System.getProperty("pbh.api_token");
+        }
+        if (token == null) {
+            token = getMainConfig().getString("server.token");
+        }
+        this.webContainer = new JavalinWebContainer(httpdPort, token);
     }
 
     private void registerTimer() {
@@ -473,6 +487,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new PBHBanController(this, profile, databaseHelper));
         moduleManager.register(new PBHMetadataController(this, profile));
         moduleManager.register(new PBHDownloaderController(this, profile));
+        moduleManager.register(new PBHAuthenticateController(this, profile));
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

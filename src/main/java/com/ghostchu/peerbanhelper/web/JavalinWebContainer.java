@@ -3,29 +3,22 @@ package com.ghostchu.peerbanhelper.web;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class JavalinWebContainer {
     private final int port;
     private final Javalin javalin;
-
-    private final Cache<String, AtomicInteger> antiBruteAttack = CacheBuilder.newBuilder()
-            .expireAfterWrite(15, TimeUnit.MINUTES)
-            .build();
+    @Getter
     private final String token;
 
     public JavalinWebContainer(int port, String token) {
@@ -63,28 +56,25 @@ public class JavalinWebContainer {
                 })
                 .exception(NotLoggedInException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.FORBIDDEN);
-                    ctx.json(Map.of("message", "Token incorrect or Not logged in"));
+                    ctx.json(Map.of("message", "Not logged in"));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
                     ctx.json(Map.of("message", "Internal server error"));
                     log.warn("500 Internal Server Error", e);
                 })
-                .before(ctx -> {
-                    if (ctx.path().startsWith("/api/metadata/manifest")) { // Bypass authenticate
+                .beforeMatched(ctx -> {
+                    if (ctx.routeRoles().isEmpty()) {
                         return;
                     }
-                    if (!ctx.path().startsWith("/api")) {
+                    if (ctx.routeRoles().contains(Role.ANYONE)) {
                         return;
                     }
-                    String authToken = ctx.header("PBH-Auth-Token");
-                    if (isBruteAttack(ctx.ip())) {
-                        throw new IPAddressBannedException();
+                    String authenticated = ctx.sessionAttribute("authenticated");
+                    if (authenticated != null && authenticated.equals(token)) {
+                        return;
                     }
-                    if (authToken == null || !authToken.equals(this.token)) {
-                        markBruteAttack(ctx.ip());
-                        throw new NotLoggedInException();
-                    }
+                    throw new NotLoggedInException();
                 })
                 .after(ctx -> {
                     ctx.header("Access-Control-Allow-Origin", "*");
@@ -98,19 +88,5 @@ public class JavalinWebContainer {
 
     public Javalin javalin() {
         return javalin;
-    }
-
-    private void markBruteAttack(String ipAddress) {
-        try {
-            AtomicInteger counter = antiBruteAttack.get(ipAddress, () -> new AtomicInteger(0));
-            counter.addAndGet(1);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private boolean isBruteAttack(String ipAddress) {
-        AtomicInteger counter = antiBruteAttack.getIfPresent(ipAddress);
-        return counter != null && counter.get() >= 10;
     }
 }

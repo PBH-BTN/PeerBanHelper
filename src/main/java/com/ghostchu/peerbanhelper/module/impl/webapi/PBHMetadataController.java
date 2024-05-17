@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.web.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -30,7 +31,7 @@ public class PBHMetadataController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getWebContainer().javalin().get("/api/metadata/manifest", this::handleManifest);
+        getServer().getWebContainer().javalin().get("/api/metadata/manifest", this::handleManifest, Role.USER_READ);
     }
 
     private void handleManifest(Context ctx) {
