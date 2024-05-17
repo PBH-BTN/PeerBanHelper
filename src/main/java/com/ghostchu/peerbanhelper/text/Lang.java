@@ -188,6 +188,8 @@ public class Lang {
     public static final String IP_BAN_RULE_DELETED =  "IP黑名单订阅规则已删除";
     public static final String IP_BAN_RULE_INFO_QUERY_SUCCESS =  "IP黑名单订阅规则查询成功";
     public static final String IP_BAN_RULE_LOG_QUERY_SUCCESS =  "IP黑名单订阅规则更新日志查询成功";
-    public static final String IP_BAN_RULE_NO_CHECK_INTERVAL = "IP黑名单订阅规则更新间隔为空";
+    public static final String IP_BAN_RULE_LOG_QUERY_WRONG_PARAM = "IP黑名单订阅规则更新日志查询参数错误";
+    public static final String IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM = "IP黑名单订阅规则更新间隔参数错误";
     public static final String IP_BAN_RULE_CHECK_INTERVAL_UPDATED = "IP黑名单订阅规则更新间隔设置成功";
+    public static final String IP_BAN_RULE_ENABLED_WRONG_PARAM = "IP黑名单订阅规则启用禁用参数错误";
 }
