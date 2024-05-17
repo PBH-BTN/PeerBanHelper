@@ -37,7 +37,7 @@ public class Lang {
     public static final String MODULE_MDB_MULTI_DIALING_NOT_DETECTED = "未发现多拨下载，种子名称：{}";
     public static final String MODULE_MDB_MULTI_DIALING_DETECTED = "发现多拨下载，请持续关注，种子名称：{}，子网：{}，触发IP：{}";
     public static final String MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED = "触发多拨追猎名单，种子名称：{}，子网：{}，触发IP：{}";
-    public static final String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: \n{}";
+    public static final String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: {}";
     public static final String DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST = "请求 Torrents 列表失败 - %d - %s";
     public static final String DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";
     public static final String DOWNLOADER_QB_API_PREFERENCES_ERR = "qBittorrent 的首选项 API 返回了非 200 预期响应 - %d - %s";
@@ -162,6 +162,7 @@ public class Lang {
     public static final String CONFIGURATION_INVALID = "[错误] 配置文件加载失败，可能由于人为修改错误或设备异常断电导致损坏，请删除文件 {} 来重置配置文件";
     public static final String CONFIGURATION_INVALID_TITLE = "配置文件加载失败";
     public static final String CONFIGURATION_INVALID_DESCRIPTION = "PeerBanHelper 无法正确加载必要的配置文件，这可能由于人为修改错误或设备异常断电导致损坏，请删除文件 %s 来重置配置文件。\nPeerBanHelper 即将退出……";
+    public static final String TRCLIENT_API_ERROR = "[错误] TrClient 请求下载器时出现错误 {} - {}";
     public static final String IP_BAN_RULE_MATCH_ERROR = "[错误] IP黑名单订阅规则匹配异常";
     public static final String IP_BAN_RULE_MATCH_TIME = "匹配IP黑名单订阅规则花费时间：{}";
     public static final String IP_BAN_RULE_UPDATE_TYPE_AUTO = "自动更新";

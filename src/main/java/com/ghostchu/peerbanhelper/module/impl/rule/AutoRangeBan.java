@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -51,7 +52,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     public void onEnable() {
         reloadConfig();
         getServer().getWebContainer().javalin()
-                .get("/api/modules/" + getConfigName(), this::handleWebAPI);
+                .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
     }
 
     private void handleWebAPI(Context ctx) {

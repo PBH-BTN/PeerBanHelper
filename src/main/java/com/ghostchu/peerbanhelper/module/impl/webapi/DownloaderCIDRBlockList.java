@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import io.javalin.http.HttpStatus;
@@ -34,7 +35,7 @@ public class DownloaderCIDRBlockList extends AbstractFeatureModule {
                     }
                     ctx.status(HttpStatus.OK);
                     ctx.result(builder.toString());
-                });
+                }, Role.ANYONE);
     }
 
     @Override

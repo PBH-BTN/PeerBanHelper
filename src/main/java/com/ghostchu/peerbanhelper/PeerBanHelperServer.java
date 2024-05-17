@@ -254,7 +254,14 @@ public class PeerBanHelperServer {
     }
 
     private void registerHttpServer() {
-        this.webContainer = new JavalinWebContainer(httpdPort, getMainConfig().getString("server.token"));
+        String token = System.getenv("PBH_API_TOKEN");
+        if (token == null) {
+            token = System.getProperty("pbh.api_token");
+        }
+        if (token == null) {
+            token = getMainConfig().getString("server.token");
+        }
+        this.webContainer = new JavalinWebContainer(httpdPort, token);
     }
 
     private void registerTimer() {
@@ -468,12 +475,11 @@ public class PeerBanHelperServer {
         moduleManager.register(new AutoRangeBan(this, profile));
         moduleManager.register(new BtnNetworkOnline(this, profile));
         moduleManager.register(new DownloaderCIDRBlockList(this, profile));
-        moduleManager.register(new IPBlackRuleList(this, profile, databaseHelper));
+        moduleManager.register(new IPBlackRuleList(this, profile));
         moduleManager.register(new PBHMetricsController(this, profile));
         moduleManager.register(new PBHBanController(this, profile, databaseHelper));
         moduleManager.register(new PBHMetadataController(this, profile));
         moduleManager.register(new PBHDownloaderController(this, profile));
-        moduleManager.register(new RuleSubController(this, profile));
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

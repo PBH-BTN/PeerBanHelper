@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -46,9 +47,9 @@ public class PBHBanController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         getServer().getWebContainer().javalin()
-                .get("/api/bans", this::handleBans)
-                .get("/api/bans/logs", this::handleLogs)
-                .get("/api/bans/ranks", this::handleRanks);
+                .get("/api/bans", this::handleBans, Role.USER_READ)
+                .get("/api/bans/logs", this::handleLogs, Role.USER_READ)
+                .get("/api/bans/ranks", this::handleRanks, Role.USER_READ);
     }
 
     private void handleRanks(Context ctx) {

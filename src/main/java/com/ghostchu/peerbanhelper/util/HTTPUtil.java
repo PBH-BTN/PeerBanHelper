@@ -5,7 +5,6 @@ import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.ProgressTracker;
 import com.github.mizosoft.methanol.WritableBodyPublisher;
 import com.google.common.io.ByteStreams;
-import fi.iki.elonen.NanoHTTPD;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -193,13 +192,4 @@ public class HTTPUtil {
         }
     }
 
-    public static NanoHTTPD.Response cors(NanoHTTPD.Response resp) {
-        resp.addHeader("Access-Control-Allow-Origin", "*");
-        resp.addHeader("Access-Control-Max-Age", "3628800");
-        resp.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
-        resp.addHeader("Access-Control-Allow-Headers", "X-Requested-With");
-        resp.addHeader("Access-Control-Allow-Headers", "Authorization");
-        resp.setChunkedTransfer(true);
-        return resp;
-    }
 }

@@ -66,6 +66,9 @@ public class Main {
         for (String client : clientSection.getKeys(false)) {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
             String endpoint = downloaderSection.getString("endpoint");
+            if (endpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
+                endpoint = endpoint.substring(0, endpoint.length() - 1);
+            }
             String username = downloaderSection.getString("username");
             String password = downloaderSection.getString("password");
             String baUser = downloaderSection.getString("basic-auth.user");
