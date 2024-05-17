@@ -8,12 +8,14 @@ import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 public class JavalinWebContainer {
     private final int port;
     @Getter
@@ -23,6 +25,7 @@ public class JavalinWebContainer {
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
     private final String token;
+
 
     public JavalinWebContainer(int port, String token) {
         this.port = port;
@@ -47,6 +50,11 @@ public class JavalinWebContainer {
                 .exception(NotLoggedInException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.FORBIDDEN);
                     ctx.json(Map.of("message", "Token incorrect or Not logged in"));
+                })
+                .exception(Exception.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+                    ctx.json(Map.of("message", "Internal server error"));
+                    log.warn("500 Internal Server Error", e);
                 })
                 .before(ctx -> {
                     if (ctx.path().startsWith("/api/metadata/manifest")) { // Bypass authenticate
