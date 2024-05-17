@@ -182,7 +182,7 @@ public class Lang {
     public static final String IP_BAN_RULE_LOAD_CIDR =  "IP黑名单订阅规则 {} 加载CIDR : {}";
     public static final String IP_BAN_RULE_LOAD_IP =  "IP黑名单订阅规则 {} 加载精确IP : {}";
     public static final String RULE_SUB_API_NO_DEPENDENCY =  "[错误] 未找到 IPBlackRuleList 模块，无法启用 RuleSubApi 模块";
-    public static final String RULE_SUB_API_INTERNAL_ERROR = "[错误] 读取订阅规则信息时遇到非预期错误";
+    public static final String RULE_SUB_API_INTERNAL_ERROR = "[错误] 订阅规则API遇到非预期错误";
     public static final String IP_BAN_RULE_NO_ID = "[错误] IP黑名单订阅规则ID为空";
     public static final String IP_BAN_RULE_ID_CONFLICT = "[错误] IP黑名单订阅规则ID冲突";
     public static final String IP_BAN_RULE_CANT_FIND = "[错误] 未找到对应的IP黑名单订阅规则";

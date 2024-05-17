@@ -35,7 +35,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -102,12 +101,9 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         StopWatch watch = StopWatch.create("timer");
         watch.start("t1");
         String ip = peer.getAddress().getIp();
-        List<CompletableFuture<IPBanResult>> fetchPeerFutures = new ArrayList<>(ipBanMatchers.size());
-        ipBanMatchers.forEach(rule -> fetchPeerFutures.add(CompletableFuture.supplyAsync(() -> new IPBanResult(rule.getRuleName(), rule.match(ip)))));
-        CompletableFuture.allOf(fetchPeerFutures.toArray(new CompletableFuture[0])).join();
         List<IPBanResult> results = new ArrayList<>();
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
-            bannedIps.forEach(rule -> service.submit(() -> {
+            ipBanMatchers.forEach(rule -> service.submit(() -> {
                 results.add(new IPBanResult(rule.getRuleName(), rule.match(ip)));
             }));
         }
