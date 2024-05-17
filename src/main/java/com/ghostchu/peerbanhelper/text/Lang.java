@@ -33,14 +33,6 @@ public class Lang {
     public static final String MODULE_PCB_PEER_BAN_REWIND = "客户端进度：%s，实际进度：%s，上次记录进度：%s，本次进度：%s，差值：%s";
     public static final String MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT = "种子大小未知";
     public static final String GUI_BUTTON_RESIZE_TABLE = "点击调整列宽";
-    public static String MODULE_AP_PEER_BAN_PING = "Peer 发送了 ICMP 响应包";
-    public static String MODULE_AP_INVALID_RULE = "规则 {} 无效，请检查语法和拼写错误";
-    public static String MODULE_AP_BAN_PEER_CODE = "Peer 的 HTTP(S) 响应返回了预期状态码：%s";
-    public static String MODULE_AP_PEER_CODE = "Peer 的 HTTP(S) 响应返回了状态码：%s";
-    public static String MODULE_AP_INCORRECT_TCP_TEST_PORT = "TCP 探测规则 %s 的端口号无效: %s";
-    public static String MODULE_AP_BAN_PEER_TCP_TEST = "TCP 测试通过: %s";
-    public static String MODULE_AP_TCP_TEST_PORT_FAIL = "TCP 探测目标失败: %s";
-    public static String MODULE_AP_EXECUTE_EXCEPTION = "烘焙缓存时出错，请将下面的错误日志发送给开发者以协助修复此错误";
     public static final String MODULE_AP_SSL_CONTEXT_FAILURE = "初始化 SSLContext 时出错";
     public static final String MODULE_MDB_MULTI_DIALING_NOT_DETECTED = "未发现多拨下载，种子名称：{}";
     public static final String MODULE_MDB_MULTI_DIALING_DETECTED = "发现多拨下载，请持续关注，种子名称：{}，子网：{}，触发IP：{}";
@@ -140,7 +132,6 @@ public class Lang {
     public static final String GUI_MENU_ABOUT = "关于";
     public static final String GUI_TRAY_MESSAGE_CAPTION = "PeerBanHelper 正在后台运行";
     public static final String GUI_TRAY_MESSAGE_DESCRIPTION = "点击托盘图标重新打开窗口；右键托盘图标可完全退出";
-    public static String GUI_TABBED_WEB_UI = "概览";
     public static final String GUI_TABBED_LOGS = "运行日志";
     public static final String GUI_TABBED_PEERS = "已连接的Peers";
     public static final String ABOUT_VIEW_GITHUB = "查看 Github 页面";
@@ -167,7 +158,10 @@ public class Lang {
     public static final String TIMING_ADD_BANS = "[超时] 在处理新增 Peers 封禁时出现操作超时，任务已被强制终止";
     public static final String TIMING_APPLY_BAN_LIST = "[超时] 在应用封禁列表到下载器时出现操作超时，任务已被强制终止";
     public static final String TIMING_COLLECT_PEERS = "[超时] 在请求下载器 WebAPI 以获取已连接的 Peers 时操作超时，任务已被强制终止，建议检查下载器状态和网络连接。";
-    public static final String TIMING_UNFINISHED_TASK = "未完成的任务 -> {}";
+    public static final String TIMING_UNFINISHED_TASK = "[超时] 未完成的任务已被强制终止 -> {}";
+    public static final String CONFIGURATION_INVALID = "[错误] 配置文件加载失败，可能由于人为修改错误或设备异常断电导致损坏，请删除文件 {} 来重置配置文件";
+    public static final String CONFIGURATION_INVALID_TITLE = "配置文件加载失败";
+    public static final String CONFIGURATION_INVALID_DESCRIPTION = "PeerBanHelper 无法正确加载必要的配置文件，这可能由于人为修改错误或设备异常断电导致损坏，请删除文件 %s 来重置配置文件。\nPeerBanHelper 即将退出……";
     public static final String IP_BAN_RULE_MATCH_ERROR = "[错误] IP黑名单订阅规则匹配异常";
     public static final String IP_BAN_RULE_MATCH_TIME = "匹配IP黑名单订阅规则花费时间：{}";
     public static final String IP_BAN_RULE_UPDATE_TYPE_AUTO = "自动更新";

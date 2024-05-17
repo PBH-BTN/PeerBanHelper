@@ -95,7 +95,7 @@ public class PeerBanHelperServer {
     private IPDB ipdb = null;
     private WatchDog banWaveWatchDog;
     @Getter
-    private JavalinWebContainer javalinWebContainer;
+    private JavalinWebContainer webContainer;
 
 
     public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
@@ -254,7 +254,7 @@ public class PeerBanHelperServer {
     }
 
     private void registerHttpServer() {
-        this.javalinWebContainer = new JavalinWebContainer(httpdPort, getMainConfig().getString("server.token"));
+        this.webContainer = new JavalinWebContainer(httpdPort, getMainConfig().getString("server.token"));
     }
 
     private void registerTimer() {

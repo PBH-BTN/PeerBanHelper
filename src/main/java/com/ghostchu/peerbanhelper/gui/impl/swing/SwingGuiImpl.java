@@ -100,6 +100,21 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
+    public void createDialog(Level level, String title, String description) {
+        int msgType = JOptionPane.PLAIN_MESSAGE;
+        if (level == Level.INFO) {
+            msgType = JOptionPane.INFORMATION_MESSAGE;
+        }
+        if (level == Level.WARNING) {
+            msgType = JOptionPane.WARNING_MESSAGE;
+        }
+        if (level == Level.SEVERE) {
+            msgType = JOptionPane.ERROR_MESSAGE;
+        }
+        JOptionPane.showMessageDialog(null, description, title, msgType);
+    }
+
+    @Override
     public void createNotification(Level level, String title, String description) {
         if (mainWindow.getTrayIcon() != null) {
             if (level.equals(Level.INFO)) {
