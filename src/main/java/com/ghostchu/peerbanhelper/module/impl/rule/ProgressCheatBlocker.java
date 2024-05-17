@@ -122,8 +122,17 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             clientTask = new ClientTask(torrent.getId(), 0d, 0L, 0L);
             lastRecordedProgress.add(clientTask);
         }
-        // 获取真实已上传量
-        final long actualUploaded = Math.max(peer.getUploaded(), clientTask.getUploaded());
+        long uploadedIncremental; // 上传增量
+        if (peer.getUploaded() < clientTask.getLastReportUploaded()) {
+            uploadedIncremental = peer.getUploaded();
+            ;
+        } else {
+            uploadedIncremental = peer.getUploaded() - clientTask.getLastReportUploaded();
+        }
+        // 累加上传增量
+        clientTask.setTrackingUploadedIncreaseTotal(clientTask.getTrackingUploadedIncreaseTotal() + uploadedIncremental);
+        // 获取真实已上传量（下载器报告、PBH上次报告记录，增量总计，三者取最大）
+        final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), clientTask.getTrackingUploadedIncreaseTotal()));
         try {
             final long torrentSize = torrent.getSize();
             // 过滤
@@ -151,18 +160,18 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             // 计算进度差异
             double difference = Math.abs(actualProgress - clientProgress);
             if (difference > maximumDifference) {
-                return new BanResult(this, PeerAction.BAN, "Over max Difference: " + difference, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
+                return new BanResult(this, PeerAction.BAN, "Over max Difference: " + difference + " Details: " + clientTask, String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
             }
             if (rewindMaximumDifference > 0) {
                 double lastRecord = clientTask.getLastReportProgress();
                 double rewind = lastRecord - peer.getProgress();
                 boolean ban = rewind > rewindMaximumDifference;
-                return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, "RewindAllow: " + rewindMaximumDifference, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindMaximumDifference)));
+                return new BanResult(this, ban ? PeerAction.BAN : PeerAction.NO_ACTION, "RewindAllow: " + rewindMaximumDifference + " Details: " + clientTask, String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindMaximumDifference)));
             }
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
         } finally {
             // 无论如何都写入缓存，同步更改
-            clientTask.setUploaded(actualUploaded);
+            clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
             progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
         }
@@ -184,8 +193,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     static class ClientTask {
         private String torrentId;
         private Double lastReportProgress;
-        private long uploaded;
-        private long offset;
+        private long lastReportUploaded;
+        private long trackingUploadedIncreaseTotal;
     }
 }
 
