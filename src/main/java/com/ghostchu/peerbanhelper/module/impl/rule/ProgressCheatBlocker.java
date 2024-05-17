@@ -129,8 +129,9 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         } else {
             uploadedIncremental = peer.getUploaded() - clientTask.getLastReportUploaded();
         }
+        // 累加上传增量
         clientTask.setTrackingUploadedIncreaseTotal(clientTask.getTrackingUploadedIncreaseTotal() + uploadedIncremental);
-        // 获取真实已上传量
+        // 获取真实已上传量（下载器报告、PBH上次报告记录，增量总计，三者取最大）
         final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), clientTask.getTrackingUploadedIncreaseTotal()));
         try {
             final long torrentSize = torrent.getSize();
