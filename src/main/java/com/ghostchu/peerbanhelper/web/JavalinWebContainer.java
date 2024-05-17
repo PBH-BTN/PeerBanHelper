@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.web;
 
+import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
 import com.google.common.cache.Cache;
@@ -7,8 +8,11 @@ import com.google.common.cache.CacheBuilder;
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
+import io.javalin.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -27,9 +31,22 @@ public class JavalinWebContainer {
     public JavalinWebContainer(int port, String token) {
         this.port = port;
         this.token = token;
+        JsonMapper gsonMapper = new JsonMapper() {
+            @Override
+            public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
+                return JsonUtil.standard().toJson(obj, type);
+            }
+
+            @Override
+            public <T> @NotNull T fromJsonString(@NotNull String json, @NotNull Type targetType) {
+                return JsonUtil.standard().fromJson(json, targetType);
+            }
+        };
         this.javalin = Javalin.create(c -> {
                     c.http.gzipOnlyCompression();
                     c.http.generateEtags = true;
+                    c.showJavalinBanner = false;
+                    c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
                     c.staticFiles.add(staticFiles -> {
                         staticFiles.hostedPath = "/";
