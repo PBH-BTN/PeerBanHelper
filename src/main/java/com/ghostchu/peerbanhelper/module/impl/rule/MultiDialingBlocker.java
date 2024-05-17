@@ -45,7 +45,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         reloadConfig();
-        getServer().getJavalinWebContainer().getJavalin()
+        getServer().getWebContainer().javalin()
                 .get("/api/modules/" + getConfigName(), this::handleConfig)
                 .get("/api/modules/" + getConfigName() + "/status", this::handleStatus);
     }

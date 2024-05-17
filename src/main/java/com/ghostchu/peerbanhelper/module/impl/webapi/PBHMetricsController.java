@@ -34,7 +34,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         this.metrics = getServer().getMetrics();
-        getServer().getJavalinWebContainer().getJavalin()
+        getServer().getWebContainer().javalin()
                 .get("/api/statistic/counter", this::handleBasicCounter)
                 .get("/api/statistic/rules", this::handleRules);
     }

@@ -30,7 +30,7 @@ public class PBHMetadataController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getJavalinWebContainer().getJavalin().get("/api/metadata/manifest", this::handleManifest);
+        getServer().getWebContainer().javalin().get("/api/metadata/manifest", this::handleManifest);
     }
 
     private void handleManifest(Context ctx) {
