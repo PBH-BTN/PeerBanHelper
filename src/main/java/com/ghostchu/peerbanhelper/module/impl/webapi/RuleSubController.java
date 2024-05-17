@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.web.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -52,27 +53,27 @@ public class RuleSubController extends AbstractFeatureModule {
             ipBlackRuleList = (IPBlackRuleList) ele;
             getServer().getWebContainer().javalin()
                     // 修改检查间隔
-                    .patch("/api/sub", this::changeCheckInterval)
+                    .patch("/api/sub", this::changeCheckInterval, Role.USER_WRITE)
                     // 新增订阅规则
-                    .put("/api/sub/rule", ctx -> save(ctx, null, true))
+                    .put("/api/sub/rule", ctx -> save(ctx, null, true), Role.USER_WRITE)
                     // 更新订阅规则
-                    .get("/api/sub/rule/update/{ruleId}", ctx -> ctx.json(update(ctx.pathParam("ruleId"))))
+                    .get("/api/sub/rule/update/{ruleId}", ctx -> ctx.json(update(ctx.pathParam("ruleId"))), Role.USER_READ)
                     // 查询订阅规则
-                    .get("/api/sub/rule/{ruleId}", ctx -> ctx.json(get(ctx.pathParam("ruleId"))))
+                    .get("/api/sub/rule/{ruleId}", ctx -> ctx.json(get(ctx.pathParam("ruleId"))), Role.USER_READ)
                     // 修改订阅规则
-                    .post("/api/sub/rule/{ruleId}", ctx -> save(ctx, ctx.pathParam("ruleId"), false))
+                    .post("/api/sub/rule/{ruleId}", ctx -> save(ctx, ctx.pathParam("ruleId"), false), Role.USER_WRITE)
                     // 删除订阅规则
-                    .delete("/api/sub/rule/{ruleId}", ctx -> ctx.json(delete(ctx.pathParam("ruleId"))))
+                    .delete("/api/sub/rule/{ruleId}", ctx -> ctx.json(delete(ctx.pathParam("ruleId"))), Role.USER_WRITE)
                     // 启用/禁用订阅规则
-                    .patch("/api/sub/rule/{ruleId}", this::switcher)
+                    .patch("/api/sub/rule/{ruleId}", this::switcher, Role.USER_WRITE)
                     // 查询订阅规则列表
-                    .get("/api/sub/rules", ctx -> ctx.json(list()))
+                    .get("/api/sub/rules", ctx -> ctx.json(list()), Role.USER_READ)
                     // 手动更新全部订阅规则
-                    .get("/api/sub/rules/update", ctx -> ctx.json(updateAll()))
+                    .get("/api/sub/rules/update", ctx -> ctx.json(updateAll()), Role.USER_WRITE)
                     // 查询全部订阅规则更新日志
-                    .get("/api/sub/logs", ctx -> logs(ctx, null))
+                    .get("/api/sub/logs", ctx -> logs(ctx, null), Role.USER_READ)
                     // 查询订阅规则更新日志
-                    .get("/api/sub/logs/{ruleId}", ctx -> logs(ctx, ctx.pathParam("ruleId")));
+                    .get("/api/sub/logs/{ruleId}", ctx -> logs(ctx, ctx.pathParam("ruleId")), Role.USER_READ);
         }, () -> log.error(Lang.RULE_SUB_API_NO_DEPENDENCY));
     }
 
