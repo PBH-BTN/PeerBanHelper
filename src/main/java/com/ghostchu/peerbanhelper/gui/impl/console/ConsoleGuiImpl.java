@@ -60,4 +60,19 @@ public class ConsoleGuiImpl implements GuiImpl {
             log.error("{}: {}", title, description);
         }
     }
+
+    @Override
+    public void createDialog(Level level, String title, String description) {
+        if (level.equals(Level.INFO)) {
+            log.info("{}: {}", title, description);
+        }
+        if (level.equals(Level.WARNING)) {
+            log.warn("{}: {}", title, description);
+        }
+        if (level.equals(Level.SEVERE)) {
+            log.error("{}: {}", title, description);
+        }
+    }
+
+
 }

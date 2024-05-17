@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 
 @Slf4j
 public class Main {
@@ -55,10 +56,10 @@ public class Main {
         List<Downloader> downloaderList = new ArrayList<>();
         guiManager.createMainWindow();
         File mainConfigFile = new File(configDirectory, "config.yml");
-        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(mainConfigFile);
+        YamlConfiguration mainConfig = loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));
         File profileConfigFile = new File(configDirectory, "profile.yml");
-        YamlConfiguration profileConfig = YamlConfiguration.loadConfiguration(profileConfigFile);
+        YamlConfiguration profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
@@ -100,6 +101,16 @@ public class Main {
         guiManager.onPBHFullyStarted(server);
         setupShutdownHook();
         guiManager.sync();
+    }
+
+    private static YamlConfiguration loadConfiguration(File file) {
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if (config.getKeys(false).isEmpty()) {
+            log.error(Lang.CONFIGURATION_INVALID, file);
+            guiManager.createDialog(Level.SEVERE, Lang.CONFIGURATION_INVALID_TITLE, String.format(Lang.CONFIGURATION_INVALID_DESCRIPTION, file));
+            System.exit(1);
+        }
+        return config;
     }
 
     private static void setupConfiguration() {

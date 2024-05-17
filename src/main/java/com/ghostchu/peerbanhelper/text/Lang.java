@@ -168,4 +168,7 @@ public class Lang {
     public static final String TIMING_APPLY_BAN_LIST = "[超时] 在应用封禁列表到下载器时出现操作超时，任务已被强制终止";
     public static final String TIMING_COLLECT_PEERS = "[超时] 在请求下载器 WebAPI 以获取已连接的 Peers 时操作超时，任务已被强制终止，建议检查下载器状态和网络连接。";
     public static final String TIMING_UNFINISHED_TASK = "未完成的任务 -> {}";
+    public static final String CONFIGURATION_INVALID = "[错误] 配置文件加载失败，可能由于人为修改错误或设备异常断电导致损坏，请删除文件 {} 来重置配置文件";
+    public static final String CONFIGURATION_INVALID_TITLE = "配置文件加载失败";
+    public static final String CONFIGURATION_INVALID_DESCRIPTION = "PeerBanHelper 无法正确加载必要的配置文件，这可能由于人为修改错误或设备异常断电导致损坏，请删除文件 %s 来重置配置文件。\nPeerBanHelper 即将退出……";
 }
