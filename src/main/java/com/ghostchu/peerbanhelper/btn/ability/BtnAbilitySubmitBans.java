@@ -32,6 +32,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
     private final String endpoint;
     private final long randomInitialDelay;
     private final Map<BtnPeer, BanMetadata> bans = new ConcurrentHashMap<>();
+    private long lastReport = System.currentTimeMillis();
 
     public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
@@ -83,6 +84,9 @@ public class BtnAbilitySubmitBans implements BtnAbility {
     private List<BtnBan> generateBans() {
         List<BtnBan> list = new ArrayList<>();
         for (Map.Entry<BtnPeer, BanMetadata> e : bans.entrySet()) {
+            if (e.getValue().getBanAt() <= lastReport) {
+                continue;
+            }
             BtnBan btnBan = new BtnBan();
             btnBan.setBtnBan(e.getValue().getContext().equals(BtnNetworkOnline.class.getName()));
             btnBan.setPeer(e.getKey());
@@ -91,6 +95,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
             btnBan.setBanUniqueId(e.getValue().getRandomId().toString());
             list.add(btnBan);
         }
+        lastReport = System.currentTimeMillis();
         return list;
     }
 
