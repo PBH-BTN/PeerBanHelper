@@ -170,7 +170,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
         } finally {
             // 无论如何都写入缓存，同步更改
-            clientTask.setLastReportUploaded(actualUploaded);
+            clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
             progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
         }
