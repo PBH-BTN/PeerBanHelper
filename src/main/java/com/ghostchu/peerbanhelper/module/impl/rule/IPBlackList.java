@@ -12,8 +12,11 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
+import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -26,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Getter
 @Slf4j
@@ -35,7 +37,6 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     private List<Integer> ports;
     private List<Long> asns;
     private List<String> regions;
-    private Map<Object, Map<String, AtomicLong>> counter;
 
     public IPBlackList(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -69,6 +70,18 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         reloadConfig();
+        getServer().getJavalinWebContainer().getJavalin()
+                .get("/api/modules/" + getConfigName(), this::handleWebAPI);
+    }
+
+    private void handleWebAPI(Context ctx) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("ip", ips.stream().map(Address::toString).toList());
+        map.put("port", ports);
+        map.put("asn", asns);
+        map.put("region", regions);
+        ctx.status(HttpStatus.OK);
+        ctx.json(map);
     }
 
     @Override
@@ -88,7 +101,6 @@ public class IPBlackList extends AbstractRuleFeatureModule {
             }
         }
         this.ports = getConfig().getIntList("ports");
-        this.counter = new LinkedHashMap<>(ips.size() + ports.size());
         this.regions = getConfig().getStringList("regions");
         this.asns = getConfig().getLongList("asns");
     }

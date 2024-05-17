@@ -27,6 +27,8 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
@@ -34,6 +36,7 @@ import java.util.zip.GZIPOutputStream;
 public class HTTPUtil {
     private static final int MAX_RESEND = 5;
     private static final CookieManager cookieManager = new CookieManager();
+    private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     @Getter
     private static SSLContext ignoreSslContext;
     private static ProgressTracker tracker = ProgressTracker.newBuilder()
@@ -135,23 +138,24 @@ public class HTTPUtil {
 
     public static <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
         return client.sendAsync(request, bodyHandler)
-                .handleAsync((r, t) -> tryResend(client, request, bodyHandler, MAX_RESEND, r, t))
+                .handleAsync((r, t) -> tryResend(client, request, bodyHandler, MAX_RESEND, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler <T> bodyHandler){
-       return client.sendAsync(request, bodyHandler)
-                        .handleAsync((r, t) -> tryResend(client, request, bodyHandler, 1, r, t))
-                        .thenCompose(Function.identity());
+    public static <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+        return client.sendAsync(request, bodyHandler)
+                .handleAsync((r, t) -> tryResend(client, request, bodyHandler, 1, r, t), executor)
+                .thenCompose(Function.identity());
 
     }
 
     public static <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
         bodyHandler = tracker.tracking(bodyHandler, HTTPUtil::onProgress);
         HttpResponse.BodyHandler<T> finalBodyHandler = bodyHandler;
+
         return client.sendAsync(request, bodyHandler)
-                .handleAsync((r, t) -> tryResend(client, request, finalBodyHandler, 1, r, t))
+                .handleAsync((r, t) -> tryResend(client, request, finalBodyHandler, 1, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
@@ -174,13 +178,13 @@ public class HTTPUtil {
                                                                    HttpResponse.BodyHandler<T> handler, int count,
                                                                    HttpResponse<T> resp, Throwable t) {
         if (shouldRetry(resp, t, count)) {
-            if(resp == null){
-                log.warn("Request to {} failed, retry {}/{}: {}", request.uri().toString(), count, MAX_RESEND, t.getClass().getName()+": "+t.getMessage());
-            }else{
-                log.warn("Request to {} failed, retry {}/{}: {} ", request.uri().toString(), count, MAX_RESEND,resp.statusCode()+" - "+resp.body());
+            if (resp == null) {
+                log.warn("Request to {} failed, retry {}/{}: {}", request.uri().toString(), count, MAX_RESEND, t.getClass().getName() + ": " + t.getMessage());
+            } else {
+                log.warn("Request to {} failed, retry {}/{}: {} ", request.uri().toString(), count, MAX_RESEND, resp.statusCode() + " - " + resp.body());
             }
             return client.sendAsync(request, handler)
-                    .handleAsync((r, x) -> tryResend(client, request, handler, count + 1, r, x))
+                    .handleAsync((r, x) -> tryResend(client, request, handler, count + 1, r, x), executor)
                     .thenCompose(Function.identity());
         } else if (t != null) {
             return CompletableFuture.failedFuture(t);
@@ -189,7 +193,7 @@ public class HTTPUtil {
         }
     }
 
-    public static NanoHTTPD.Response cors(NanoHTTPD.Response resp){
+    public static NanoHTTPD.Response cors(NanoHTTPD.Response resp) {
         resp.addHeader("Access-Control-Allow-Origin", "*");
         resp.addHeader("Access-Control-Max-Age", "3628800");
         resp.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");

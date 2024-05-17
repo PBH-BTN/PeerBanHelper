@@ -9,13 +9,17 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +51,34 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     }
 
     @Override
+    public void onEnable() {
+        reloadConfig();
+        getServer().getJavalinWebContainer().getJavalin()
+                .get("/api/modules/" + getConfigName(), this::handleConfig)
+                .get("/api/modules/" + getConfigName() + "/status", this::handleStatus);
+    }
+
+    private void handleStatus(Context ctx) {
+        ctx.status(HttpStatus.OK);
+        List<ClientTaskRecord> records = progressRecorder.asMap().entrySet().stream()
+                .map(entry -> new ClientTaskRecord(entry.getKey(), entry.getValue()))
+                .toList();
+        ctx.json(records);
+    }
+
+
+    public void handleConfig(Context ctx) {
+        Map<String, Object> config = new LinkedHashMap<>();
+        config.put("torrentMinimumSize", torrentMinimumSize);
+        config.put("blockExcessiveClients", blockExcessiveClients);
+        config.put("excessiveThreshold", excessiveThreshold);
+        config.put("maximumDifference", maximumDifference);
+        config.put("rewindMaximumDifference", rewindMaximumDifference);
+        ctx.status(HttpStatus.OK);
+        ctx.json(config);
+    }
+
+    @Override
     public boolean needCheckHandshake() {
         return true;
     }
@@ -56,10 +88,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         return true;
     }
 
-    @Override
-    public void onEnable() {
-        reloadConfig();
-    }
 
     @Override
     public void onDisable() {
@@ -83,15 +111,19 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         // 从缓存取数据
         List<ClientTask> lastRecordedProgress = progressRecorder.getIfPresent(peer.getAddress().getIp());
         if (lastRecordedProgress == null) lastRecordedProgress = new ArrayList<>();
-        ClientTask clientTask = new ClientTask(torrent.getId(), 0d, 0L);
+        ClientTask clientTask = null;
         for (ClientTask recordedProgress : lastRecordedProgress) {
             if (recordedProgress.getTorrentId().equals(torrent.getId())) {
                 clientTask = recordedProgress;
                 break;
             }
         }
+        if (clientTask == null) {
+            clientTask = new ClientTask(torrent.getId(), 0d, 0L, 0L);
+            lastRecordedProgress.add(clientTask);
+        }
         // 获取真实已上传量
-        final long actualUploaded = peer.getUploaded() > clientTask.getUploaded() ? peer.getUploaded() : clientTask.getUploaded() + peer.getUploaded();
+        final long actualUploaded = Math.max(peer.getUploaded(), clientTask.getUploaded());
         try {
             final long torrentSize = torrent.getSize();
             // 过滤
@@ -113,7 +145,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
                 }
             }
             // 如果客户端报告自己进度更多，则跳过检查
-            if (actualProgress - clientProgress <= 0) {
+            if (actualProgress <= clientProgress) {
                 return new BanResult(this, PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, percent(clientProgress), percent(actualProgress)));
             }
             // 计算进度差异
@@ -140,6 +172,12 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         return (d * 100) + "%";
     }
 
+    @AllArgsConstructor
+    @Data
+    static class ClientTaskRecord {
+        private final String address;
+        private final List<ClientTask> task;
+    }
 
     @AllArgsConstructor
     @Data
@@ -147,6 +185,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         private String torrentId;
         private Double lastReportProgress;
         private long uploaded;
+        private long offset;
     }
 }
 

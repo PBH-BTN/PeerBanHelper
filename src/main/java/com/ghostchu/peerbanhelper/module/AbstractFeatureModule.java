@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.web.PBHAPI;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -66,9 +65,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     }
 
     private void cleanupResources() {
-        if (this instanceof PBHAPI pbhapi) {
-            server.getWebManagerServer().unregister(pbhapi);
-        }
+
     }
 
     @Override

@@ -105,10 +105,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         List<CompletableFuture<IPBanResult>> fetchPeerFutures = new ArrayList<>(ipBanMatchers.size());
         ipBanMatchers.forEach(rule -> fetchPeerFutures.add(CompletableFuture.supplyAsync(() -> new IPBanResult(rule.getRuleName(), rule.match(ip)))));
         CompletableFuture.allOf(fetchPeerFutures.toArray(new CompletableFuture[0])).join();
+        List<IPBanResult> results = new ArrayList<>();
+        try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
+            bannedIps.forEach(rule -> service.submit(() -> {
+                results.add(new IPBanResult(rule.getRuleName(), rule.match(ip)));
+            }));
+        }
         AtomicReference<IPBanResult> matchRule = new AtomicReference<>();
-        boolean mr = fetchPeerFutures.stream().anyMatch(ele -> {
+        boolean mr = results.stream().anyMatch(ipBanResult -> {
             try {
-                IPBanResult ipBanResult = ele.get();
                 boolean match = ipBanResult.matchResult() == MatchResult.TRUE;
                 if (match) {
                     matchRule.set(ipBanResult);

@@ -10,7 +10,7 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master", "release" ]
+    branches: [ "master", "release", "javalin" ]
   workflow_dispatch:
   release:
     types:
@@ -27,7 +27,7 @@ jobs:
       - uses: graalvm/setup-graalvm@v1
         name: Setup GraalVM
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build with Maven

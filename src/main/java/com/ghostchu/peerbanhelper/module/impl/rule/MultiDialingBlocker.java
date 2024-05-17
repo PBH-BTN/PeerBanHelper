@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -11,11 +10,14 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +43,37 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     }
 
     @Override
+    public void onEnable() {
+        reloadConfig();
+        getServer().getJavalinWebContainer().getJavalin()
+                .get("/api/modules/" + getConfigName(), this::handleConfig)
+                .get("/api/modules/" + getConfigName() + "/status", this::handleStatus);
+    }
+
+    private void handleStatus(Context ctx) {
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("huntingList", huntingList.asMap());
+        status.put("cache", cache.asMap());
+        Map<String, Map<String, Long>> mapSubnetCounter = new LinkedHashMap<>();
+        subnetCounter.asMap().forEach((k, v) -> mapSubnetCounter.put(k, v.asMap()));
+        status.put("subnetCounter", mapSubnetCounter);
+        ctx.status(HttpStatus.OK);
+        ctx.json(status);
+    }
+
+    private void handleConfig(Context ctx) {
+        Map<String, Object> config = new LinkedHashMap<>();
+        config.put("subnetMaskLength", subnetMaskLength);
+        config.put("subnetMaskV6Length", subnetMaskV6Length);
+        config.put("tolerateNum", tolerateNum);
+        config.put("cacheLifespan", cacheLifespan);
+        config.put("keepHunting", keepHunting);
+        config.put("keepHuntingTime", keepHuntingTime);
+        ctx.status(HttpStatus.OK);
+        ctx.json(config);
+    }
+
+    @Override
     public @NotNull String getName() {
         return "Multi Dialing Blocker";
     }
@@ -63,11 +96,6 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     @Override
     public boolean isConfigurable() {
         return true;
-    }
-
-    @Override
-    public void onEnable() {
-        reloadConfig();
     }
 
     @Override

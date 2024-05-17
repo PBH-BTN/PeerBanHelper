@@ -9,11 +9,15 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
 @Slf4j
 public class AutoRangeBan extends AbstractRuleFeatureModule {
     private int ipv4Prefix;
@@ -46,6 +50,13 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         reloadConfig();
+        getServer().getJavalinWebContainer().getJavalin()
+                .get("/api/modules/" + getConfigName(), this::handleWebAPI);
+    }
+
+    private void handleWebAPI(Context ctx) {
+        ctx.status(HttpStatus.OK);
+        ctx.json(Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix));
     }
 
     @Override
@@ -65,7 +76,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        if(peer.getPeerId() == null || peer.getPeerId().isEmpty()){
+        if (peer.getPeerId() == null || peer.getPeerId().isEmpty()) {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Waiting for Bittorrent handshaking.");
         }
         IPAddress peerAddress = peer.getAddress().getAddress().withoutPrefixLength();
@@ -95,7 +106,6 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
         }
         return new BanResult(this, PeerAction.NO_ACTION, "N/A", "All ok!");
     }
-
 
 
 }

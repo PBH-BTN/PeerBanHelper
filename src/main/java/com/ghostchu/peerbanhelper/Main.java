@@ -133,7 +133,7 @@ public class Main {
 
     private static void initGUI(String[] args) {
         if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
-                || !Desktop.isDesktopSupported()) {
+                || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
             guiManager = new PBHGuiManager(new ConsoleGuiImpl());
         } else {
             guiManager = new PBHGuiManager(new SwingGuiImpl());
