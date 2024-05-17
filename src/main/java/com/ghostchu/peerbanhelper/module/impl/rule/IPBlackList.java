@@ -70,7 +70,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         reloadConfig();
-        getServer().getJavalinWebContainer().getJavalin()
+        getServer().getWebContainer().javalin()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI);
     }
 

@@ -7,7 +7,6 @@ import com.google.common.cache.CacheBuilder;
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -18,14 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class JavalinWebContainer {
     private final int port;
-    @Getter
     private final Javalin javalin;
 
     private final Cache<String, AtomicInteger> antiBruteAttack = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
     private final String token;
-
 
     public JavalinWebContainer(int port, String token) {
         this.port = port;
@@ -80,6 +77,10 @@ public class JavalinWebContainer {
                     ctx.header("Access-Control-Allow-Headers", "Authorization");
                 })
                 .start(this.port);
+    }
+
+    public Javalin javalin() {
+        return javalin;
     }
 
     private void markBruteAttack(String ipAddress) {

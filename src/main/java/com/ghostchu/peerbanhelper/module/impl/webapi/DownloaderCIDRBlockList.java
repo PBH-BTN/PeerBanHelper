@@ -26,7 +26,7 @@ public class DownloaderCIDRBlockList extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getJavalinWebContainer().getJavalin()
+        getServer().getWebContainer().javalin()
                 .get("/blocklist/transmission", ctx -> {
                     StringBuilder builder = new StringBuilder();
                     for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {

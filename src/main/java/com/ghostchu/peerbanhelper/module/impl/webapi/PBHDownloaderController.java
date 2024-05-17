@@ -37,7 +37,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getJavalinWebContainer().getJavalin()
+        getServer().getWebContainer().javalin()
                 .get("/api/downloaders", this::handleDownloaderList)
                 .get("/api/downloaders/{downloaderName}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderName")))
                 .get("/api/downloaders/{downloaderName}/torrents", ctx -> handleDownloaderTorrents(ctx, ctx.pathParam("downloaderName")))
