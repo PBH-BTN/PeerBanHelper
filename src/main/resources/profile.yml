@@ -161,8 +161,10 @@ module:
     check-interval: 86400000 # 24小时检查一次 毫秒
     # 规则列表
     rules:
-      # 规则名称（任意）
+      # 规则ID（任意）
       example:
+        # 是否启用
+        enabled: false
         # 显示名称
         name: Example
         # 规则文件订阅地址

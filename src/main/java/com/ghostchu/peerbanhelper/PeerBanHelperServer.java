@@ -475,12 +475,12 @@ public class PeerBanHelperServer {
         moduleManager.register(new AutoRangeBan(this, profile));
         moduleManager.register(new BtnNetworkOnline(this, profile));
         moduleManager.register(new DownloaderCIDRBlockList(this, profile));
-        moduleManager.register(new IPBlackRuleList(this, profile));
+        moduleManager.register(new IPBlackRuleList(this, profile, databaseHelper));
         moduleManager.register(new PBHMetricsController(this, profile));
         moduleManager.register(new PBHBanController(this, profile, databaseHelper));
         moduleManager.register(new PBHMetadataController(this, profile));
         moduleManager.register(new PBHDownloaderController(this, profile));
-        moduleManager.register(new PBHAuthenticateController(this, profile));
+        moduleManager.register(new RuleSubController(this, profile));
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
