@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
@@ -82,8 +83,17 @@ public class JavalinWebContainer {
                     ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
                     ctx.header("Access-Control-Allow-Headers", "X-Requested-With");
                     ctx.header("Access-Control-Allow-Headers", "Authorization");
+                    setSameSiteForSession(ctx);
                 })
                 .start(this.port);
+    }
+
+    private void setSameSiteForSession(Context ctx) {
+        String sessionCookie = ctx.cookie("JSESSIONID");
+        if (sessionCookie != null) {
+            ctx.cookie("JSESSIONID", sessionCookie);
+            ctx.header("Set-Cookie", "JSESSIONID=" + sessionCookie + "; Path=/; SameSite=none");
+        }
     }
 
     public Javalin javalin() {
