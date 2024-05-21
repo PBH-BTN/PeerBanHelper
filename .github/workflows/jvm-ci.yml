@@ -16,7 +16,7 @@ on:
     types:
       - published
 jobs:
-  build:
+  java_ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,6 +40,14 @@ jobs:
             target/*.jar
             target/peerbanhelper-binary
         id: project
+  build_snapshot_docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get WebUI Files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx
