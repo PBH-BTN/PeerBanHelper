@@ -6,7 +6,6 @@ import cn.hutool.core.util.StrUtil;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.RuleSubInfo;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -48,8 +47,7 @@ public class RuleSubController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        Optional<FeatureModule> first = getServer().getModuleManager().getModules().stream().filter(ele -> ele.getConfigName().equals("ip-address-blocker-rules")).findFirst();
-        first.ifPresentOrElse(ele -> {
+        getServer().getModuleManager().getModules().stream().filter(ele -> ele.getConfigName().equals("ip-address-blocker-rules")).findFirst().ifPresent(ele -> {
             ipBlackRuleList = (IPBlackRuleList) ele;
             getServer().getWebContainer().javalin()
                     // 修改检查间隔
@@ -74,7 +72,7 @@ public class RuleSubController extends AbstractFeatureModule {
                     .get("/api/sub/logs", ctx -> logs(ctx, null), Role.USER_READ)
                     // 查询订阅规则更新日志
                     .get("/api/sub/logs/{ruleId}", ctx -> logs(ctx, ctx.pathParam("ruleId")), Role.USER_READ);
-        }, () -> log.error(Lang.RULE_SUB_API_NO_DEPENDENCY));
+        });
     }
 
     @Override
