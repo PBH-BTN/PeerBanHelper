@@ -80,8 +80,8 @@ public class PBHBanController extends AbstractFeatureModule {
         if (getServer().getMetrics() instanceof PersistMetrics persistMetrics) {
             persistMetrics.flush();
         }
-        int pageIndex = Integer.parseInt(Objects.requireNonNullElse(ctx.header("pageIndex"), "0"));
-        int pageSize = Integer.parseInt(Objects.requireNonNullElse(ctx.header("pageSize"), "100"));
+        int pageIndex = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0"));
+        int pageSize = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100"));
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("pageIndex", pageIndex);
@@ -98,8 +98,8 @@ public class PBHBanController extends AbstractFeatureModule {
     }
 
     private void handleBans(Context ctx) {
-        long limit = Long.parseLong(Objects.requireNonNullElse(ctx.header("limit"), "-1"));
-        long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.header("lastBanTime"), "-1"));
+        long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
+        long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
         var banResponseList = getBanResponseStream(lastBanTime, limit);
         ctx.status(HttpStatus.OK);
         ctx.json(banResponseList.toList());
