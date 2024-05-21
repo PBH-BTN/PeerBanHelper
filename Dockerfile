@@ -1,6 +1,7 @@
 FROM --platform=$BUILDPLATFORM docker.io/library/maven:3.9.6-eclipse-temurin-21 as build
 
 ADD . /build
+ADD .git /build/
 WORKDIR /build
 RUN sh setup-webui.sh && mvn -B clean package --file pom.xml -T 1C
 
