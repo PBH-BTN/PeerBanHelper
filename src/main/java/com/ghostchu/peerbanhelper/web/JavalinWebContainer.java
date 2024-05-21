@@ -4,10 +4,10 @@ import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
 import io.javalin.Javalin;
-import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
+import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +42,9 @@ public class JavalinWebContainer {
                     c.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
+                    c.bundledPlugins.enableCors(cors -> {
+                        cors.addRule(CorsPluginConfig.CorsRule::anyHost);
+                    });
                     c.staticFiles.add(staticFiles -> {
                         staticFiles.hostedPath = "/";
                         staticFiles.directory = "/static";
@@ -81,23 +84,8 @@ public class JavalinWebContainer {
                     }
                     throw new NotLoggedInException();
                 })
-                .after(ctx -> {
-                    ctx.header("Access-Control-Allow-Origin", "*");
-                    ctx.header("Access-Control-Max-Age", "3628800");
-                    ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-                    ctx.header("Access-Control-Allow-Headers", "X-Requested-With");
-                    ctx.header("Access-Control-Allow-Headers", "Authorization");
-                    setSameSiteForSession(ctx);
-                })
+                .options("/*", ctx -> ctx.status(200))
                 .start(this.port);
-    }
-
-    private void setSameSiteForSession(Context ctx) {
-        String sessionCookie = ctx.cookie("JSESSIONID");
-        if (sessionCookie != null) {
-            ctx.cookie("JSESSIONID", sessionCookie);
-            ctx.header("Set-Cookie", "JSESSIONID=" + sessionCookie + "; Path=/; SameSite=none");
-        }
     }
 
     public Javalin javalin() {
