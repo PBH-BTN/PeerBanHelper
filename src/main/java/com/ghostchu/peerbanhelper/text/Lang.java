@@ -192,4 +192,9 @@ public class Lang {
     public static final String IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM = "IP黑名单订阅规则更新间隔参数错误";
     public static final String IP_BAN_RULE_CHECK_INTERVAL_UPDATED = "IP黑名单订阅规则更新间隔设置成功";
     public static final String IP_BAN_RULE_ENABLED_WRONG_PARAM = "IP黑名单订阅规则启用禁用参数错误";
+    public static final String WEBAPI_AUTH_INVALID_TOKEN = "登录失败，Token 无效";
+    public static final String WEBAPI_AUTH_OK = "登录成功";
+    public static final String WEBAPI_AUTH_BANNED_TOO_FREQ = "登录错误次数过多，此 IP 地址已被暂时封禁";
+    public static final String WEBAPI_NOT_LOGGED = "操作失败，您还未登录";
+    public static final String WEBAPI_INTERNAL_ERROR = "处理 WebAPI 请求时出现了一个内部服务器错误，请查看控制台日志";
 }

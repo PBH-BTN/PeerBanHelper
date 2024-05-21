@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.web;
 
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
@@ -56,15 +57,15 @@ public class JavalinWebContainer {
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);
-                    ctx.json(Map.of("message", "IP banned for 15 minutes, try again later!"));
+                    ctx.json(Map.of("message", Lang.WEBAPI_AUTH_BANNED_TOO_FREQ));
                 })
                 .exception(NotLoggedInException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.FORBIDDEN);
-                    ctx.json(Map.of("message", "Not logged in"));
+                    ctx.json(Map.of("message", Lang.WEBAPI_NOT_LOGGED));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                    ctx.json(Map.of("message", "Internal server error"));
+                    ctx.json(Map.of("message", Lang.WEBAPI_INTERNAL_ERROR));
                     log.warn("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {

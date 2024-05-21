@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -53,12 +54,12 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
         if (loginRequest == null || !getServer().getWebContainer().getToken().equals(loginRequest.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
-            ctx.json(Map.of("message", "Incorrect token"));
+            ctx.json(Map.of("message", Lang.WEBAPI_AUTH_INVALID_TOKEN));
             return;
         }
         ctx.sessionAttribute("authenticated", getServer().getWebContainer().getToken());
         ctx.status(HttpStatus.OK);
-        ctx.json(Map.of("message", "Login success!"));
+        ctx.json(Map.of("message", Lang.WEBAPI_AUTH_OK));
     }
 
 
