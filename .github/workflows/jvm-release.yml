@@ -22,12 +22,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
-      - uses: graalvm/setup-graalvm@v1
-        name: Setup GraalVM
+      - uses: actions/setup-java@v4
         with:
+          distribution: 'temurin'
           java-version: '21'
-          distribution: 'graalvm'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
       - name: Build with Maven
         run: mvn -B clean package --file pom.xml
       - name: Upload build artifacts
