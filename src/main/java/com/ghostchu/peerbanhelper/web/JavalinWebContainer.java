@@ -75,9 +75,14 @@ public class JavalinWebContainer {
                     if (authenticated != null && authenticated.equals(token)) {
                         return;
                     }
-                    String authToken = ctx.header("PBH-Auth-Token");
-                    if (authToken != null && authToken.equals(token)) {
-                        return;
+                    String authToken = ctx.header("Authorization");
+                    if (authToken != null) {
+                        if (authToken.startsWith("Bearer ")) {
+                            String tk = authToken.substring(7);
+                            if (tk.equals(token)) {
+                                return;
+                            }
+                        }
                     }
                     throw new NotLoggedInException();
                 })
