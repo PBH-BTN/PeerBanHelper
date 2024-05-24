@@ -65,10 +65,10 @@ public final class TrClient {
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(Main.getUserAgent())
-                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .requestTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
@@ -124,7 +124,7 @@ public final class TrClient {
                 String sessionId = resp.headers().firstValue(Session.SESSION_ID).orElseThrow();
                 sessionStore.set(new Session(sessionId));
             } catch (IOException | InterruptedException e) {
-                log.warn("Request Transmission JsonRPC for getting session failure", e);
+                log.warn(Lang.TRCLIENT_API_ERROR, e.getClass().getName(), e.getMessage());
                 throw new IllegalStateException(e);
             }
         }

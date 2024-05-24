@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.window.MainWindow;
@@ -33,6 +34,10 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Override
     public void setup() {
         super.setup();
+        if (SystemInfo.isMacOS) {
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            System.setProperty("apple.awt.application.appearance", "system");
+        }
         OsThemeDetector detector = OsThemeDetector.getDetector();
         onColorThemeChanged();
         detector.registerListener(isDark -> onColorThemeChanged());
@@ -92,6 +97,21 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Override
     public void close() {
         // mainWindow.getWebviewManager().close();
+    }
+
+    @Override
+    public void createDialog(Level level, String title, String description) {
+        int msgType = JOptionPane.PLAIN_MESSAGE;
+        if (level == Level.INFO) {
+            msgType = JOptionPane.INFORMATION_MESSAGE;
+        }
+        if (level == Level.WARNING) {
+            msgType = JOptionPane.WARNING_MESSAGE;
+        }
+        if (level == Level.SEVERE) {
+            msgType = JOptionPane.ERROR_MESSAGE;
+        }
+        JOptionPane.showMessageDialog(null, description, title, msgType);
     }
 
     @Override

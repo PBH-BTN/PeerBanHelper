@@ -53,8 +53,8 @@ public class QBittorrent implements Downloader {
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(Main.getUserAgent())
-                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
@@ -113,7 +113,7 @@ public class QBittorrent implements Downloader {
             }
             return request.statusCode() == 200;
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage(), e);
+            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage());
             return false;
         }
     }

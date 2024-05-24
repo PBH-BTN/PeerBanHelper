@@ -20,4 +20,6 @@ public interface GuiManager {
     void onPBHFullyStarted(PeerBanHelperServer server);
 
     void createNotification(Level level, String title, String description);
+
+    void createDialog(Level level, String title, String description);
 }

@@ -1,14 +1,14 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.metric.HitRateMetric;
+import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
-import com.ghostchu.peerbanhelper.web.PBHAPI;
-import fi.iki.elonen.NanoHTTPD;
+import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,12 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PBHRuleMetrics extends AbstractFeatureModule implements PBHAPI {
+public class PBHMetricsController extends AbstractFeatureModule {
 
-    private HitRateMetric metrics;
+    private BasicMetrics metrics;
 
-    public PBHRuleMetrics(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
+    public PBHMetricsController(PeerBanHelperServer server, YamlConfiguration profile) {
+       super(server, profile);
     }
 
     @Override
@@ -33,13 +33,15 @@ public class PBHRuleMetrics extends AbstractFeatureModule implements PBHAPI {
     }
 
     @Override
-    public boolean shouldHandle(String uri) {
-        return uri.equals("/api/ruleStatistic");
+    public void onEnable() {
+        this.metrics = getServer().getMetrics();
+        getServer().getWebContainer().javalin()
+                .get("/api/statistic/counter", this::handleBasicCounter, Role.USER_READ)
+                .get("/api/statistic/rules", this::handleRules, Role.USER_READ);
     }
 
-    @Override
-    public NanoHTTPD.Response handle(NanoHTTPD.IHTTPSession session) {
-        Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(metrics.getHitRateMetric());
+    private void handleRules(Context ctx) {
+        Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(getServer().getHitRateMetric().getHitRateMetric());
         Map<String, String> dict = new HashMap<>();
         List<RuleData> dat = metric.entrySet().stream()
                 .map(obj -> {
@@ -52,35 +54,44 @@ public class PBHRuleMetrics extends AbstractFeatureModule implements PBHAPI {
                 })
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
                 .toList();
-
-
         Map<String, Object> resp = new HashMap<>();
         resp.put("dict", dict);
         resp.put("data", dat);
-
-        return HTTPUtil.cors(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", JsonUtil.getGson().toJson(resp)));
+        ctx.status(HttpStatus.OK);
+        ctx.json(resp);
     }
 
-    @Override
-    public void onEnable() {
-        this.metrics = getServer().getHitRateMetric();
-        getServer().getWebManagerServer().register(this);
+    private void handleBasicCounter(Context ctx) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("checkCounter", metrics.getCheckCounter());
+        map.put("peerBanCounter", metrics.getPeerBanCounter());
+        map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
+        map.put("banlistCounter", getServer().getBannedPeers().size());
+        ctx.status(HttpStatus.OK);
+        ctx.json(map);
     }
 
     @Override
     public void onDisable() {
         this.metrics = null;
-        getServer().getWebManagerServer().unregister(this);
     }
 
     @Override
     public @NotNull String getName() {
-        return "WebAPI - Rule Metrics";
+        return "WebAPI - Metrics";
     }
 
     @Override
     public @NotNull String getConfigName() {
-        return "webapi-rule-metrics";
+        return "webapi-metrics";
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    static class BanResponse {
+        private String address;
+        private BanMetadata banMetadata;
     }
 
     @AllArgsConstructor

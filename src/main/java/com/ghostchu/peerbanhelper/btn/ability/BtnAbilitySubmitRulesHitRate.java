@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.btn.ability;
 
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
-import com.ghostchu.peerbanhelper.module.impl.webapi.PBHRuleMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
@@ -50,11 +49,10 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
     private void submit() {
         log.info(Lang.BTN_SUBMITTING_HITRATE);
         Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(btnNetwork.getServer().getHitRateMetric().getHitRateMetric());
-        List<PBHRuleMetrics.RuleData> dat = metric.entrySet().stream()
-                .map(obj -> new PBHRuleMetrics.RuleData(obj.getKey().getClass().getSimpleName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
+        List<RuleData> dat = metric.entrySet().stream()
+                .map(obj -> new RuleData(obj.getKey().getClass().getSimpleName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
                 .toList();
-
         MutableRequest request = MutableRequest.POST(endpoint
                 , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(dat).getBytes(StandardCharsets.UTF_8))
         ).header("Content-Encoding", "gzip");

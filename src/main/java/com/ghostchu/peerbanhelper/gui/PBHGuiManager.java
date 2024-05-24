@@ -53,4 +53,9 @@ public class PBHGuiManager implements GuiManager {
     public void createNotification(Level level, String title, String description) {
         gui.createNotification(level, title, description);
     }
+
+    @Override
+    public void createDialog(Level level, String title, String description) {
+        gui.createDialog(level, title, description);
+    }
 }
