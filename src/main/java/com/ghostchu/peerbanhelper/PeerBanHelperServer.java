@@ -411,9 +411,9 @@ public class PeerBanHelperServer {
                                     livePeers.put(address, metadata);
                                 });
                             })));
-            LIVE_PEERS = ImmutableMap.copyOf(livePeers);
-            Main.getEventBus().post(new LivePeersUpdatedEvent(LIVE_PEERS));
         }
+        LIVE_PEERS = ImmutableMap.copyOf(livePeers);
+        Main.getEventBus().post(new LivePeersUpdatedEvent(LIVE_PEERS));
     }
 
     /**
