@@ -40,7 +40,7 @@ public interface Peer extends Comparable<Peer> {
      * @return 您向此对等体分享数据的速度 (bytes per second)
      */
 
-    long getUploadedSpeed();
+    long getUploadSpeed();
 
     /**
      * 获取您向此对等体提供数据的累计大小

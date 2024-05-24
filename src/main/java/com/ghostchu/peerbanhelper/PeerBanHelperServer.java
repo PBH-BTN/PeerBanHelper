@@ -547,7 +547,7 @@ public class PeerBanHelperServer {
             return true;
         }
         //noinspection RedundantIfStatement
-        if (peer.getDownloadSpeed() <= 0 && peer.getUploadedSpeed() <= 0) {
+        if (peer.getDownloadSpeed() <= 0 && peer.getUploadSpeed() <= 0) {
             // 跳过此 Peer，速度都是0，可能是没有完成握手
             return true;
         }

@@ -3,10 +3,7 @@ package com.ghostchu.peerbanhelper.btn.ability;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeer;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeerPing;
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -67,21 +64,9 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
 
     private List<BtnPeer> generatePing() {
         List<BtnPeer> btnPeers = new ArrayList<>();
-        for (Downloader downloader : btnNetwork.getServer().getDownloaders()) {
-            try {
-                downloader.login();
-                for (Torrent torrent : downloader.getTorrents()) {
-                    try {
-                        for (Peer peer : downloader.getPeers(torrent)) {
-                            btnPeers.add(BtnPeer.from(torrent, peer));
-                        }
-                    } catch (Exception ignored) {
-                    }
-                }
-            } catch (Exception e) {
-                log.warn(Lang.BTN_DOWNLOADER_GENERAL_FAILURE, downloader.getName(), e);
-            }
-        }
+        btnNetwork.getServer().getLivePeersSnapshot().forEach((pa, pm) -> {
+            btnPeers.add(BtnPeer.from(pm.getTorrent(), pm.getPeer()));
+        });
         return btnPeers;
     }
 

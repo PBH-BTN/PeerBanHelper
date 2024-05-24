@@ -74,7 +74,7 @@ public class SingleTorrentPeer implements Peer {
     }
 
     @Override
-    public long getUploadedSpeed() {
+    public long getUploadSpeed() {
         return upSpeed;
     }
 
