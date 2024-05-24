@@ -42,6 +42,14 @@ public class JavalinWebContainer {
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
                     c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
+                    c.staticFiles.add(staticFiles -> {
+                        staticFiles.hostedPath = "/";
+                        staticFiles.directory = "/static";
+                        staticFiles.location = Location.CLASSPATH;
+                        staticFiles.precompress = false;
+                        staticFiles.aliasCheck = null;
+                        staticFiles.skipFileFunction = req -> false;
+                    });
                     c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
