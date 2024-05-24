@@ -19,4 +19,6 @@ public interface GuiImpl {
     }
 
     void createNotification(Level level, String title, String description);
+
+    void createDialog(Level level, String title, String description);
 }

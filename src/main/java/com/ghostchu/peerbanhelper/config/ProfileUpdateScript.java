@@ -18,10 +18,17 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 7)
+    public void progressCheckerIPPrefixLength() {
+        conf.set("module.progress-cheat-blocker.ipv4-prefix-length", 32);
+        conf.set("module.progress-cheat-blocker.ipv6-prefix-length", 64);
+    }
+
     @UpdateScript(version = 5)
     public void subModule() {
         conf.set("module.ip-address-blocker-rules.enabled", false);
         conf.set("module.ip-address-blocker-rules.check-interval", 86400000);
+        conf.set("module.ip-address-blocker-rules.rules.example-rule.enabled", false);
         conf.set("module.ip-address-blocker-rules.rules.example-rule.name", "Example");
         conf.set("module.ip-address-blocker-rules.rules.example-rule.url", "https://example.com/example.txt");
     }
