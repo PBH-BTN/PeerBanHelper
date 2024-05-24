@@ -4,7 +4,7 @@ COPY . /build
 WORKDIR /build
 RUN sh setup-webui.sh && mvn -B clean package --file pom.xml -T 1C
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre-alpine
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 ENV TZ=UTC
