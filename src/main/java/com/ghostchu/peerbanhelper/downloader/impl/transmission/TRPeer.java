@@ -38,7 +38,7 @@ public class TRPeer implements Peer {
     }
 
     @Override
-    public long getUploadedSpeed() {
+    public long getUploadSpeed() {
         return backend.getRateToPeer();
     }
 

@@ -26,7 +26,7 @@ public class PeerWrapper {
         this.downloaded = peer.getDownloaded();
         this.downloadSpeed = peer.getDownloadSpeed();
         this.uploaded = peer.getUploaded();
-        this.uploadSpeed = peer.getUploadedSpeed();
+        this.uploadSpeed = peer.getUploadSpeed();
         this.progress = peer.getProgress();
         this.flags = peer.getFlags();
     }
