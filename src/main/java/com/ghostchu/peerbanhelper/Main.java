@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 
 @Slf4j
 public class Main {
@@ -55,16 +56,19 @@ public class Main {
         List<Downloader> downloaderList = new ArrayList<>();
         guiManager.createMainWindow();
         File mainConfigFile = new File(configDirectory, "config.yml");
-        YamlConfiguration mainConfig = YamlConfiguration.loadConfiguration(mainConfigFile);
+        YamlConfiguration mainConfig = loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));
         File profileConfigFile = new File(configDirectory, "profile.yml");
-        YamlConfiguration profileConfig = YamlConfiguration.loadConfiguration(profileConfigFile);
+        YamlConfiguration profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
         for (String client : clientSection.getKeys(false)) {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
             String endpoint = downloaderSection.getString("endpoint");
+            if (endpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
+                endpoint = endpoint.substring(0, endpoint.length() - 1);
+            }
             String username = downloaderSection.getString("username");
             String password = downloaderSection.getString("password");
             String baUser = downloaderSection.getString("basic-auth.user");
@@ -102,6 +106,16 @@ public class Main {
         guiManager.sync();
     }
 
+    private static YamlConfiguration loadConfiguration(File file) {
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if (config.getKeys(false).isEmpty()) {
+            log.error(Lang.CONFIGURATION_INVALID, file);
+            guiManager.createDialog(Level.SEVERE, Lang.CONFIGURATION_INVALID_TITLE, String.format(Lang.CONFIGURATION_INVALID_DESCRIPTION, file));
+            System.exit(1);
+        }
+        return config;
+    }
+
     private static void setupConfiguration() {
         log.info(Lang.LOADING_CONFIG);
         try {
@@ -133,7 +147,7 @@ public class Main {
 
     private static void initGUI(String[] args) {
         if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
-                || !Desktop.isDesktopSupported()) {
+                || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
             guiManager = new PBHGuiManager(new ConsoleGuiImpl());
         } else {
             guiManager = new PBHGuiManager(new SwingGuiImpl());

@@ -1,16 +1,39 @@
 package com.ghostchu.peerbanhelper.config;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
+import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.UUID;
 
+@Slf4j
 public class MainConfigUpdateScript {
     private final YamlConfiguration conf;
 
     public MainConfigUpdateScript(YamlConfiguration conf) {
         this.conf = conf;
+        validate();
+    }
+
+    private void validate() {
+        String token = conf.getString("server.token");
+        if (token == null || token.isBlank() || token.length() < 8) {
+            conf.set("server.token", UUID.randomUUID().toString());
+            log.info(Lang.TOO_WEAK_TOKEN);
+        }
+    }
+
+    @UpdateScript(version = 8)
+    public void webToken() {
+        conf.set("server.token", UUID.randomUUID().toString());
+    }
+
+    @UpdateScript(version = 7)
+    public void virtualThreads() {
+        conf.set("threads", null);
     }
 
     @UpdateScript(version = 6)

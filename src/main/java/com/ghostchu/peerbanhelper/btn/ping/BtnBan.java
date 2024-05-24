@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 public class BtnBan {
     @SerializedName("btn_ban")
     private boolean btnBan;
+    @SerializedName("ban_unique_id")
+    private String banUniqueId;
     @SerializedName("module")
     private String module;
     @SerializedName("rule")

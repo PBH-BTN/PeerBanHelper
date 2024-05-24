@@ -10,11 +10,15 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
+import com.ghostchu.peerbanhelper.web.Role;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import lombok.Getter;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 @Getter
@@ -55,6 +59,13 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         reloadConfig();
+        getServer().getWebContainer().javalin()
+                .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
+    }
+
+    private void handleWebAPI(Context ctx) {
+        ctx.status(HttpStatus.OK);
+        ctx.json(Map.of("peerId", bannedPeers.stream().map(Rule::toPrintableText).toList()));
     }
 
     @Override

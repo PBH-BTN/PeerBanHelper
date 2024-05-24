@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper.util;
 
+import java.lang.management.LockInfo;
+import java.lang.management.MonitorInfo;
+import java.lang.management.ThreadInfo;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 
@@ -29,5 +32,69 @@ public class MsgUtil {
             ci.next();
         }
         return String.format("%.1f %cB", bytes / 1000.0, ci.current());
+    }
+
+    public static String threadInfoToString(ThreadInfo info) {
+        StringBuilder sb = new StringBuilder("\"" + info.getThreadName() + "\"" +
+                (info.isDaemon() ? " daemon" : "") +
+                " prio=" + info.getPriority() +
+                " Id=" + info.getThreadId() + " " +
+                info.getThreadState());
+        if (info.getLockName() != null) {
+            sb.append(" on ").append(info.getLockName());
+        }
+        if (info.getLockOwnerName() != null) {
+            sb.append(" owned by \"").append(info.getLockOwnerName()).append("\" Id=").append(info.getLockOwnerId());
+        }
+        if (info.isSuspended()) {
+            sb.append(" (suspended)");
+        }
+        if (info.isInNative()) {
+            sb.append(" (in native)");
+        }
+        sb.append('\n');
+        int i = 0;
+        for (; i < info.getStackTrace().length && i < 500; i++) {
+            StackTraceElement ste = info.getStackTrace()[i];
+            sb.append("\tat ").append(ste.toString());
+            sb.append('\n');
+            if (i == 0 && info.getLockInfo() != null) {
+                Thread.State ts = info.getThreadState();
+                switch (ts) {
+                    case BLOCKED:
+                        sb.append("\t-  blocked on ").append(info.getLockInfo());
+                        sb.append('\n');
+                        break;
+                    case WAITING, TIMED_WAITING:
+                        sb.append("\t-  waiting on ").append(info.getLockInfo());
+                        sb.append('\n');
+                        break;
+                    default:
+                }
+            }
+
+            for (MonitorInfo mi : info.getLockedMonitors()) {
+                if (mi.getLockedStackDepth() == i) {
+                    sb.append("\t-  locked ").append(mi);
+                    sb.append('\n');
+                }
+            }
+        }
+        if (i < info.getStackTrace().length) {
+            sb.append("\t...");
+            sb.append('\n');
+        }
+
+        LockInfo[] locks = info.getLockedSynchronizers();
+        if (locks.length > 0) {
+            sb.append("\n\tNumber of locked synchronizers = ").append(locks.length);
+            sb.append('\n');
+            for (LockInfo li : locks) {
+                sb.append("\t- ").append(li);
+                sb.append('\n');
+            }
+        }
+        sb.append('\n');
+        return sb.toString();
     }
 }
