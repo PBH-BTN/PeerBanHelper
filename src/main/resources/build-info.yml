@@ -15,7 +15,7 @@ git:
       name: "${git.commit.user.name}"
       email: "${git.commit.user.email}"
     message:
-      short: '${git.commit.message.short}'
+      short: "${git.commit.message.short}"
     time: "${git.commit.time}"
   build:
     user:
