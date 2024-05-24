@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -89,7 +90,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         // 读取检查间隔
         checkInterval = config.getLong("check-interval", checkInterval);
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, java.util.concurrent.TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -155,13 +156,14 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      *
      * @param rule 规则
      */
-    public void updateRule(@NotNull ConfigurationSection rule, String updateType) {
+    public String updateRule(@NotNull ConfigurationSection rule, String updateType) {
+        AtomicReference<String> result = new AtomicReference<>();
         String ruleId = rule.getName();
         if (!rule.getBoolean("enabled", false)) {
             // 检查ipBanMatchers是否有对应的规则，有则删除
             ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
             // 未启用跳过更新逻辑
-            return;
+            return Lang.IP_BAN_RULE_DISABLED.replace("{}", ruleId);
         }
         String name = rule.getString("name", ruleId);
         String url = rule.getString("url");
@@ -196,6 +198,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             ent_count = fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
                         } else {
                             log.info(Lang.IP_BAN_RULE_NO_UPDATE, name);
+                            result.set(Lang.IP_BAN_RULE_NO_UPDATE.replace("{}", name));
                         }
                     }
                     FileUtil.del(tempFile);
@@ -205,9 +208,11 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                             ele.setData(name, ipAddresses, subnetAddresses);
                             log.info(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name);
+                            result.set(Lang.IP_BAN_RULE_UPDATE_SUCCESS.replace("{}", name));
                         }, () -> {
                             ipBanMatchers.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
                             log.info(Lang.IP_BAN_RULE_LOAD_SUCCESS, name);
+                            result.set(Lang.IP_BAN_RULE_LOAD_SUCCESS.replace("{}", name));
                         });
                     }
                     if (ent_count > 0) {
@@ -216,6 +221,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             db.insertRuleSubLog(ruleId, ent_count, updateType);
                         } catch (SQLException e) {
                             log.error(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId, e);
+                            result.set(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR.replace("{}", name));
                         }
                     }
                 }).join();
@@ -227,12 +233,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         fileToIPList(name, ruleFile, ipAddresses, subnetAddresses);
                         ipBanMatchers.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
                         log.warn(Lang.IP_BAN_RULE_USE_CACHE, name);
+                        result.set(Lang.IP_BAN_RULE_USE_CACHE.replace("{}", name));
                     }
                 } else {
                     log.error(Lang.IP_BAN_RULE_LOAD_FAILED, ruleId, e);
+                    result.set(Lang.IP_BAN_RULE_LOAD_FAILED.replace("{}", name));
                 }
             }
         }
+        return result.get();
     }
 
     /**
@@ -373,7 +382,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             scheduledExecutorService.shutdown();
         }
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, java.util.concurrent.TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 }
 

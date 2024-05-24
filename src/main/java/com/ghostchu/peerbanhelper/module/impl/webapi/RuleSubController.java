@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class RuleSubController extends AbstractFeatureModule {
@@ -61,7 +62,7 @@ public class RuleSubController extends AbstractFeatureModule {
                     // 修改订阅规则
                     .post("/api/sub/rule/{ruleId}", ctx -> save(ctx, ctx.pathParam("ruleId"), false), Role.USER_WRITE)
                     // 删除订阅规则
-                    .delete("/api/sub/rule/{ruleId}", ctx -> ctx.json(delete(ctx.pathParam("ruleId"))), Role.USER_WRITE)
+                    .delete("/api/sub/rule/{ruleId}", this::delete, Role.USER_WRITE)
                     // 启用/禁用订阅规则
                     .patch("/api/sub/rule/{ruleId}", this::switcher, Role.USER_WRITE)
                     // 查询订阅规则列表
@@ -137,11 +138,12 @@ public class RuleSubController extends AbstractFeatureModule {
      */
     private Map<String, ? extends Serializable> update(String ruleId) {
         if (StrUtil.isEmpty(ruleId)) {
-            return Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND);
+            return Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId));
         }
-        ipBlackRuleList.getIpBanMatchers().stream().filter(ele -> ele.getRuleId().equals(ruleId))
-                .forEach(ele -> ipBlackRuleList.updateRule(Objects.requireNonNull(ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ele.getRuleId())), Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL));
-        return Map.of("success", true, "message", Lang.IP_BAN_RULE_UPDATED);
+        AtomicReference<String> result = new AtomicReference<>();
+        ipBlackRuleList.getIpBanMatchers().stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst()
+                .ifPresent(ele -> result.set(ipBlackRuleList.updateRule(Objects.requireNonNull(ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ele.getRuleId())), Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL)));
+        return Map.of("success", true, "message", result.get());
     }
 
     /**
@@ -160,27 +162,40 @@ public class RuleSubController extends AbstractFeatureModule {
         RuleSubInfo ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND));
+            ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId)));
             return;
         }
         boolean enabled = BooleanUtil.toBoolean(enabledStr);
+        String msg = (enabled ? Lang.IP_BAN_RULE_ENABLED : Lang.IP_BAN_RULE_DISABLED).replace("{}", ruleSubInfo.ruleName());
         if (enabled != ruleSubInfo.enabled()) {
-            ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, !ruleSubInfo.enabled(), ruleSubInfo.ruleName(), ruleSubInfo.subUrl(), 0, 0));
+            ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, enabled, ruleSubInfo.ruleName(), ruleSubInfo.subUrl(), 0, 0));
             ipBlackRuleList.updateRule(configurationSection, Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL);
+            log.info(msg);
+            ctx.json(Map.of("success", true, "message", msg));
+        } else {
+            // 表示已经是启用/禁用状态
+            ctx.json(Map.of("success", false, "message", msg));
         }
-        ctx.json(Map.of("success", true, "message", enabled ? Lang.IP_BAN_RULE_ENABLED : Lang.IP_BAN_RULE_DISABLED));
     }
 
     /**
      * 删除订阅规则
      *
-     * @param ruleId 规则ID
-     * @return 响应
+     * @param ctx 上下文
      */
-    private Map<String, ? extends Serializable> delete(String ruleId) throws IOException {
+    private void delete(Context ctx) throws IOException, SQLException {
+        String ruleId = ctx.pathParam("ruleId");
+        RuleSubInfo ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
+        if (null == ruleSubInfo) {
+            ctx.status(HttpStatus.BAD_REQUEST);
+            ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId)));
+            return;
+        }
         ipBlackRuleList.deleteRuleSubInfo(ruleId);
         ipBlackRuleList.getIpBanMatchers().removeIf(ele -> ele.getRuleId().equals(ruleId));
-        return Map.of("success", true, "message", Lang.IP_BAN_RULE_DELETED);
+        String msg = Lang.IP_BAN_RULE_DELETED.replace("{}", ruleSubInfo.ruleName());
+        log.info(msg);
+        ctx.json(Map.of("success", false, "message", msg));
     }
 
     /**
@@ -211,13 +226,13 @@ public class RuleSubController extends AbstractFeatureModule {
         if (isAdd && ruleSubInfo != null) {
             // 新增时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_ID_CONFLICT));
+            ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_ID_CONFLICT.replace("{}", ruleId)));
             return;
         }
         if (!isAdd && ruleSubInfo == null) {
             // 更新时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND));
+            ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId)));
             return;
         }
         ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, enabled, ruleName, subUrl, 0, 0));
