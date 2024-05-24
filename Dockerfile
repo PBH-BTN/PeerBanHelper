@@ -1,11 +1,11 @@
 FROM --platform=$BUILDPLATFORM docker.io/library/maven:3.9.6-eclipse-temurin-21 as build
 
-ADD . /build
+COPY . /build
 WORKDIR /build
 RUN sh setup-webui.sh && mvn -B clean package --file pom.xml -T 1C
 
 FROM eclipse-temurin:21-jre-alpine
-LABEL MAINTAINER="https://github.com/PBH-BTN/PeerBanHelper"
+LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 ENV TZ=UTC
 WORKDIR /app

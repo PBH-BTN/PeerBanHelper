@@ -1,5 +1,5 @@
 FROM eclipse-temurin:21-jre-alpine
-LABEL MAINTAINER="https://github.com/PBH-BTN/PeerBanHelper"
+LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 COPY target/PeerBanHelper.jar /app/PeerBanHelper.jar
 USER 0
 ENV TZ=UTC
