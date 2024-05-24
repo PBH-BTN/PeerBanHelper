@@ -73,5 +73,6 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64/v8
+            linux/arm/v7
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
