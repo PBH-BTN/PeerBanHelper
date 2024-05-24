@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.text;
 public class Lang {
     public static final String ERR_BUILD_NO_INFO_FILE = "错误：构建信息文件不存在";
     public static final String ERR_CANNOT_LOAD_BUILD_INFO = "错误：无法加载构建信息文件";
-    public static final String MOTD = "PeerBanHelper v{} - by Ghost_chu";
+    public static final String MOTD = "PeerBanHelper v{} - by PBH-BTN Community, Made with ❤";
     public static final String LOADING_CONFIG = "正在加载配置文件……";
     public static final String CONFIG_PEERBANHELPER = "已初始化目录结构，相关文件已放置在运行目录的 data 文件夹下，请配置相关文件后，再重新启动 PeerBanHelper";
     public static final String ERR_SETUP_CONFIGURATION = "错误：无法初始化配置文件结构";
