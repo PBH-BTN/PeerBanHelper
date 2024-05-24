@@ -75,6 +75,7 @@ module:
       - '{"method":"CONTAINS","content":"github.com/anacrolix/torrent"}'
       - '{"method":"STARTS_WITH","content":"qbittorrent/3.3.15"}'
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
+      - '{"method":"STARTS_WITH","content":"ljyun.cn/hangzhou/monitoring"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
   # 假进度检查
