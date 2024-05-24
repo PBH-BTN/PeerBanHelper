@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     private double excessiveThreshold;
     private double maximumDifference;
     private double rewindMaximumDifference;
+    private int ipv4PrefixLength;
+    private int ipv6PrefixLength;
 
     public ProgressCheatBlocker(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -105,12 +108,22 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         this.excessiveThreshold = getConfig().getDouble("excessive-threshold");
         this.maximumDifference = getConfig().getDouble("maximum-difference");
         this.rewindMaximumDifference = getConfig().getDouble("rewind-maximum-difference");
+        this.ipv4PrefixLength = getConfig().getInt("ipv4-prefix-length");
+        this.ipv6PrefixLength = getConfig().getInt("ipv6-prefix-length");
     }
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+        // 处理 IPV6
+        IPAddress peerIp;
+        if (peer.getAddress().getAddress().isIPv4Convertible()) {
+            peerIp = peer.getAddress().getAddress().toIPv4().toPrefixBlock(ipv4PrefixLength);
+        } else {
+            peerIp = peer.getAddress().getAddress().toIPv6().toPrefixBlock(ipv6PrefixLength);
+        }
+        String peerIpString = peerIp.toString();
         // 从缓存取数据
-        List<ClientTask> lastRecordedProgress = progressRecorder.getIfPresent(peer.getAddress().getIp());
+        List<ClientTask> lastRecordedProgress = progressRecorder.getIfPresent(peerIpString);
         if (lastRecordedProgress == null) lastRecordedProgress = new ArrayList<>();
         ClientTask clientTask = null;
         for (ClientTask recordedProgress : lastRecordedProgress) {
@@ -174,7 +187,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             // 无论如何都写入缓存，同步更改
             clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
-            progressRecorder.put(peer.getAddress().getIp(), lastRecordedProgress);
+            progressRecorder.put(peerIpString, lastRecordedProgress);
         }
     }
 

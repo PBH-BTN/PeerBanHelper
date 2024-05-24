@@ -1,4 +1,4 @@
-config-version: 5
+config-version: 6
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 更新 Peers UI 频率（单位：毫秒），此项仅用于显示数据，不影响封禁，建议设置一个不会给下载器增加太多压力的值
@@ -102,6 +102,12 @@ module:
     # 过量下载计算阈值
     # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive-threshold)
     excessive-threshold: 1.5
+    # IPV4 前缀长度，前缀相同的 IP 都被视为同一个用户
+    # 32 = 单个 IP 地址，IPV4 资源宝贵，通常 ISP 不会分配多个 IP 地址
+    ipv4-prefix-length: 32
+    # IPV4 前缀长度，前缀相同的 IP 都被视为同一个用户
+    # 64 = 常见的 ISP 为单个接入用户分配的前缀长度
+    ipv6-prefix-length: 64
   # IP 地址/端口 封禁
   ip-address-blocker:
     enabled: true
