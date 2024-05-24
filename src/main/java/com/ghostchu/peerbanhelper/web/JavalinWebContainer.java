@@ -18,13 +18,11 @@ import java.util.Map;
 
 @Slf4j
 public class JavalinWebContainer {
-    private final int port;
     private final Javalin javalin;
     @Getter
     private final String token;
 
     public JavalinWebContainer(int port, String token) {
-        this.port = port;
         this.token = token;
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
@@ -43,9 +41,7 @@ public class JavalinWebContainer {
                     c.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
-                    c.bundledPlugins.enableCors(cors -> {
-                        cors.addRule(CorsPluginConfig.CorsRule::anyHost);
-                    });
+                    c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
                     c.staticFiles.add(staticFiles -> {
                         staticFiles.hostedPath = "/";
                         staticFiles.directory = "/static";
@@ -54,6 +50,7 @@ public class JavalinWebContainer {
                         staticFiles.aliasCheck = null;
                         staticFiles.skipFileFunction = req -> false;
                     });
+                    c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);
@@ -91,7 +88,7 @@ public class JavalinWebContainer {
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200))
-                .start(this.port);
+                .start(port);
     }
 
     public Javalin javalin() {
