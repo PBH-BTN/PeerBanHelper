@@ -10,7 +10,9 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master", "release", "javalin" ]
+    branches: [ "master", "release" ]
+  pull_request:
+    branches: [ "master", "release" ]
   workflow_dispatch:
   release:
     types:
@@ -26,9 +28,9 @@ jobs:
         run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
       - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
+          distribution: "temurin"
+          java-version: "21"
+          cache: "maven"
       - name: Build with Maven
         run: mvn -B clean package --file pom.xml
       - name: Upload build artifacts
