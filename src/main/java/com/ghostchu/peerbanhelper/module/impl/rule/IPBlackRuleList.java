@@ -381,11 +381,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         if (null != scheduledExecutorService) {
             scheduledExecutorService.shutdown();
         }
-        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduledExecutorService = Executors.newScheduledThreadPool(1, r -> Thread.ofVirtual().name("IPBlackRuleList - Update Thread").unstarted(r));
         scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+    }
+
+    record IPBanResult(String ruleName, MatchResult matchResult) {
     }
 }
 
-record IPBanResult(String ruleName, MatchResult matchResult) {
-}
 
