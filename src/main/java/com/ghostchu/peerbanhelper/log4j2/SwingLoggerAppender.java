@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.gui.impl.swing;
+package com.ghostchu.peerbanhelper.log4j2;
 
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;

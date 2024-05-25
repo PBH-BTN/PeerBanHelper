@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.core.config.plugins.util.PluginManager;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -50,6 +51,7 @@ public class Main {
     private static final EventBus eventBus = new EventBus();
 
     public static void main(String[] args) {
+        setupLog4j2();
         initBuildMeta();
         initGUI(args);
         setupConfiguration();
@@ -104,6 +106,10 @@ public class Main {
         guiManager.onPBHFullyStarted(server);
         setupShutdownHook();
         guiManager.sync();
+    }
+
+    private static void setupLog4j2() {
+        PluginManager.addPackage("com.ghostchu.peerbanhelper.log4j2");
     }
 
     private static YamlConfiguration loadConfiguration(File file) {

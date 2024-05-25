@@ -18,6 +18,11 @@
                 <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
             </PatternLayout>
         </SwingLoggerAppender>
+        <MemoryLoggerAppender name="MemoryLoggerAppender" maxLines="1000">
+            <PatternLayout>
+                <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
+            </PatternLayout>
+        </MemoryLoggerAppender>
     </Appenders>
     <Loggers>
         <Root level="info">
@@ -26,7 +31,8 @@
             </filters>
             <AppenderRef ref="SysOut"/>
             <AppenderRef ref="File"/>
-            <appender-ref ref="SwingLoggerAppender" level="info"/>
+            <AppenderRef ref="SwingLoggerAppender" level="info"/>
+            <AppenderRef ref="MemoryLoggerAppender" level="info"/>
         </Root>
     </Loggers>
 </Configuration>
