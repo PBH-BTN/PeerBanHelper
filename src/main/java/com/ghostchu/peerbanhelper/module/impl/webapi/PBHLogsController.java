@@ -33,7 +33,7 @@ public class PBHLogsController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getWebContainer().javalin().get("/api/logs/view", this::handleLogs, Role.USER_READ);
+        getServer().getWebContainer().javalin().get("/api/logs/main", this::handleLogs, Role.USER_READ);
     }
 
     private void handleLogs(Context ctx) {
