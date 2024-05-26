@@ -6,6 +6,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.window.MainWindow;
+import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
@@ -14,15 +15,19 @@ import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.logging.Level;
 
 @Getter
 @Slf4j
 public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
+    @Getter
+    private final boolean silentStart;
     private MainWindow mainWindow;
 
-    public SwingGuiImpl() {
-
+    public SwingGuiImpl(String[] args) {
+        super(args);
+        this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
     }
 
     @Override
