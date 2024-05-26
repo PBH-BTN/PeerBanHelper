@@ -154,9 +154,9 @@ public class Main {
     private static void initGUI(String[] args) {
         if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
                 || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
-            guiManager = new PBHGuiManager(new ConsoleGuiImpl());
+            guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         } else {
-            guiManager = new PBHGuiManager(new SwingGuiImpl());
+            guiManager = new PBHGuiManager(new SwingGuiImpl(args));
         }
         guiManager.setup();
     }

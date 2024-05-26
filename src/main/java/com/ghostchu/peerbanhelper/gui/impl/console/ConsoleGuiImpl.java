@@ -13,6 +13,9 @@ import java.util.logging.Level;
 public class ConsoleGuiImpl implements GuiImpl {
     private final AtomicBoolean wakeLock = new AtomicBoolean(false);
 
+    public ConsoleGuiImpl(String[] args) {
+    }
+
     @Override
     public void showConfigurationSetupDialog() {
         log.info(Lang.CONFIG_PEERBANHELPER);
