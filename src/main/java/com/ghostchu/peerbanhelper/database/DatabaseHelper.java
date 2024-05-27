@@ -1,13 +1,12 @@
 package com.ghostchu.peerbanhelper.database;
 
-import cn.hutool.core.util.StrUtil;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -308,10 +307,10 @@ public class DatabaseHelper {
     public int countRuleSubLogs(String ruleId) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
-            boolean idNotEmpty = StrUtil.isNotEmpty(ruleId);
-            StringBuilder sql = StrUtil.builder().append("SELECT count(1) as count FROM rule_sub_logs ");
-            sql.append(idNotEmpty ? "WHERE rule_id = ? " : "");
-            ps = connection.prepareStatement(sql.toString());
+            boolean idNotEmpty = null != ruleId && !ruleId.isEmpty();
+            String sql = "SELECT count(1) as count FROM rule_sub_logs " +
+                    (idNotEmpty ? "WHERE rule_id = ? " : "");
+            ps = connection.prepareStatement(sql);
             if (idNotEmpty) {
                 ps.setString(1, ruleId);
             }
@@ -339,11 +338,11 @@ public class DatabaseHelper {
     public List<RuleSubLog> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
-            boolean idNotEmpty = StrUtil.isNotEmpty(ruleId);
-            StringBuilder sql = StrUtil.builder().append("SELECT * FROM rule_sub_logs ");
-            sql.append(idNotEmpty ? "WHERE rule_id = ? " : "");
-            sql.append("ORDER BY id DESC LIMIT ").append(pageIndex * pageSize).append(", ").append(pageSize);
-            ps = connection.prepareStatement(sql.toString());
+            boolean idNotEmpty = null != ruleId && !ruleId.isEmpty();
+            String sql = "SELECT * FROM rule_sub_logs " +
+                    (idNotEmpty ? "WHERE rule_id = ? " : "") +
+                    "ORDER BY id DESC LIMIT " + pageIndex * pageSize + ", " + pageSize;
+            ps = connection.prepareStatement(sql);
             if (idNotEmpty) {
                 ps.setString(1, ruleId);
             }
