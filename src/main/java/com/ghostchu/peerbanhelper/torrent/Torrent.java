@@ -1,9 +1,6 @@
 package com.ghostchu.peerbanhelper.torrent;
 
-import com.google.common.hash.Hashing;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
+import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 
 public interface Torrent {
     /**
@@ -42,8 +39,7 @@ public interface Torrent {
      * @return 不可逆匿名识别符
      */
     default String getHashedIdentifier() {
-        String salt = Hashing.crc32().hashString(getHash().toLowerCase(Locale.ROOT), StandardCharsets.UTF_8).toString();
-        return Hashing.sha256().hashString(getHash().toLowerCase(Locale.ROOT) + salt, StandardCharsets.UTF_8).toString();
+        return InfoHashUtil.getHashedIdentifier(getHash());
     }
 
 }

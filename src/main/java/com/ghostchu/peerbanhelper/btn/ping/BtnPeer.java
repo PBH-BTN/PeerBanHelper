@@ -2,16 +2,13 @@ package com.ghostchu.peerbanhelper.btn.ping;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
-import com.google.common.hash.Hashing;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 
 @Data
 @AllArgsConstructor
@@ -54,8 +51,7 @@ public class BtnPeer {
         btnPeer.setPeerPort(peer.getAddress().getPort());
         btnPeer.setPeerId(peer.getId());
         btnPeer.setClientName(peer.getClientName());
-        String salt = Hashing.crc32().hashString(torrent.getHash().toLowerCase(Locale.ROOT), StandardCharsets.UTF_8).toString();
-        String hashedId = Hashing.sha256().hashString(torrent.getHash().toLowerCase(Locale.ROOT) + salt, StandardCharsets.UTF_8).toString();
+        String hashedId = InfoHashUtil.getHashedIdentifier(torrent.getHash());
         btnPeer.setTorrentIdentifier(hashedId);
         btnPeer.setTorrentSize(torrent.getSize());
         btnPeer.setDownloaded(peer.getDownloaded());
