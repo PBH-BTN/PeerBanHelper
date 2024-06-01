@@ -56,7 +56,7 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
         MutableRequest request = MutableRequest.POST(endpoint
                 , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(dat).getBytes(StandardCharsets.UTF_8))
         ).header("Content-Encoding", "gzip");
-        HTTPUtil.retryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
+        HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
                         log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());

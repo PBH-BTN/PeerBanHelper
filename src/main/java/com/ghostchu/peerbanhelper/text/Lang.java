@@ -34,9 +34,9 @@ public class Lang {
     public static final String MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT = "种子大小未知";
     public static final String GUI_BUTTON_RESIZE_TABLE = "点击调整列宽";
     public static final String MODULE_AP_SSL_CONTEXT_FAILURE = "初始化 SSLContext 时出错";
-    public static final String MODULE_MDB_MULTI_DIALING_NOT_DETECTED = "未发现多拨下载，种子名称：{}";
-    public static final String MODULE_MDB_MULTI_DIALING_DETECTED = "发现多拨下载，请持续关注，种子名称：%s，子网：%s，触发IP：%s";
-    public static final String MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED = "触发多拨追猎名单，种子名称：%s，子网：%s，触发IP：%s";
+    public static final String MODULE_MDB_MULTI_DIALING_NOT_DETECTED = "未发现多拨下载";
+    public static final String MODULE_MDB_MULTI_DIALING_DETECTED = "发现多拨下载，请持续关注，子网：%s，触发IP：%s";
+    public static final String MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED = "触发多拨追猎名单，子网：%s，触发IP：%s";
     public static final String DOWNLOADER_QB_LOGIN_FAILED = "登录到 {} 失败：{} - {}: {}";
     public static final String DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST = "请求 Torrents 列表失败 - %d - %s";
     public static final String DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";

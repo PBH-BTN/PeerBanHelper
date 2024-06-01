@@ -48,7 +48,6 @@ public class MainWindow extends JFrame {
         setJMenuBar(setupMenuBar());
         //sendCommandBtn.addActionListener(e -> guiManager.setColorTheme(FlatDarculaLaf.class));
         setTitle("PeerBanHelper (GUI) - v" + Main.getMeta().getVersion() + "(" + Main.getMeta().getAbbrev() + ")");
-        setVisible(true);
         setSize(1000, 600);
         setContentPane(mainPanel);
         setupTabbedPane();
@@ -64,10 +63,7 @@ public class MainWindow extends JFrame {
 
             @Override
             public void windowClosing(WindowEvent e) {
-                if (trayIcon != null) {
-                    setVisible(false);
-                    trayIcon.displayMessage(Lang.GUI_TRAY_MESSAGE_CAPTION, Lang.GUI_TRAY_MESSAGE_DESCRIPTION, TrayIcon.MessageType.INFO);
-                }
+                minimizeToTray();
             }
 
             @Override
@@ -98,6 +94,14 @@ public class MainWindow extends JFrame {
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("/assets/icon.png"));
         setIconImage(imageIcon.getImage());
         Main.getEventBus().register(this);
+        setVisible(!swingGUI.isSilentStart());
+    }
+
+    private void minimizeToTray() {
+        if (trayIcon != null) {
+            setVisible(false);
+            trayIcon.displayMessage(Lang.GUI_TRAY_MESSAGE_CAPTION, Lang.GUI_TRAY_MESSAGE_DESCRIPTION, TrayIcon.MessageType.INFO);
+        }
     }
 
     public static void setTabTitle(JPanel tab, String title) {
@@ -134,7 +138,6 @@ public class MainWindow extends JFrame {
             } catch (AWTException e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 

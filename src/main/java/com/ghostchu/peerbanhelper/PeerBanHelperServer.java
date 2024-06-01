@@ -482,6 +482,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new PBHDownloaderController(this, profile));
         moduleManager.register(new RuleSubController(this, profile));
         moduleManager.register(new PBHAuthenticateController(this, profile));
+        moduleManager.register(new PBHLogsController(this, profile));
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

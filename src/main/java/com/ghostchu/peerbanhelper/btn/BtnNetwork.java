@@ -25,7 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 public class BtnNetwork {
-    private static final int BTN_PROTOCOL_VERSION = 3;
+    private static final int BTN_PROTOCOL_VERSION = 5;
     @Getter
     private final PeerBanHelperServer server;
     @Getter
@@ -113,6 +113,9 @@ public class BtnNetwork {
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("BTN-AppID", appId)
                 .defaultHeader("BTN-AppSecret", appSecret)
+                .defaultHeader("X-BTN-AppID", appId)
+                .defaultHeader("X-BTN-AppSecret", appSecret)
+                .defaultHeader("Authentication", "Bearer " + appId + "@" + appSecret)
                 .requestTimeout(Duration.ofMinutes(1))
                 .connectTimeout(Duration.ofSeconds(10))
                 .cookieHandler(cm).build();

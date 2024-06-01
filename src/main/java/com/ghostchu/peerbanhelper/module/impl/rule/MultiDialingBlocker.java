@@ -154,7 +154,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                 // 返回当前IP即可，其他IP会在下一周期被封禁
                 return new BanResult(this, PeerAction.BAN, "Multi-dialing download detected",
                         String.format(Lang.MODULE_MDB_MULTI_DIALING_DETECTED,
-                                torrentName, peerSubnet, peerIpStr));
+                                peerSubnet, peerIpStr));
             }
 
             if (keepHunting) {
@@ -167,7 +167,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                             huntingList.put(torrentSubnetStr, currentTimestamp);
                             return new BanResult(this, PeerAction.BAN, "Multi-dialing hunting",
                                     String.format(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED,
-                                            torrentName, peerSubnet, peerIpStr));
+                                            peerSubnet, peerIpStr));
                         }
                         else {
                             huntingList.invalidate(torrentSubnetStr);
