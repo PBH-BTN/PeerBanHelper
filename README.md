@@ -24,6 +24,7 @@
 ## 运行环境要求
 
 * 一台支持 OpenJDK 的设备，可为 JVM 预留 200MB 内存，PBH（无GUI模式）至少需要 72MB Heap 内存来运行（-Xmx72M），长期稳定运行建议分配 128MB~256MB Heap RAM
+* 由于 SQLite 数据库支持，CPU 架构需要是其中之一：aarch64, arm, armv6, armv7, ppc64, x86, x86_64，因此 riscv 等新兴 CPU 架构暂不兼容
 
 ## 支持的客户端
 
