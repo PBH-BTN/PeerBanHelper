@@ -102,6 +102,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         this.progressRecorder = CacheBuilder.newBuilder()
                 .maximumSize(512)
                 .expireAfterWrite(getServer().getBanDuration(), TimeUnit.MILLISECONDS)
+                .softValues()
                 .build();
         this.torrentMinimumSize = getConfig().getLong("minimum-size");
         this.blockExcessiveClients = getConfig().getBoolean("block-excessive-clients");

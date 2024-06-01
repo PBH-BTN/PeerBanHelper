@@ -115,16 +115,19 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
         cache = CacheBuilder.newBuilder().
                 expireAfterWrite(cacheLifespan, TimeUnit.MILLISECONDS).
                 maximumSize(TORRENT_PEER_MAX_NUM).
+                softValues().
                 build();
         // 内层维护子网下的peer列表，外层回收不再使用的列表
         // 外层按最后访问时间过期即可，若子网的列表还在被访问，说明还有属于该子网的peer在连接
         subnetCounter = CacheBuilder.newBuilder().
                 expireAfterAccess(cacheLifespan, TimeUnit.MILLISECONDS).
                 maximumSize(TORRENT_PEER_MAX_NUM).
+                softValues().
                 build();
         huntingList = CacheBuilder.newBuilder().
                 expireAfterWrite(keepHuntingTime, TimeUnit.MILLISECONDS).
                 maximumSize(TORRENT_PEER_MAX_NUM).
+                softValues().
                 build();
     }
 
@@ -198,6 +201,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
         return CacheBuilder.newBuilder().
                 expireAfterAccess(cacheLifespan, TimeUnit.MILLISECONDS).
                 maximumSize(PEER_MAX_NUM_PER_SUBNET).
+                softValues().
                 build();
     }
 

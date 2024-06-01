@@ -28,7 +28,8 @@ public class ModuleMatchCache {
         if (ruleCacheZone == null) {
             ruleCacheZone = CacheBuilder.newBuilder()
                     .expireAfterAccess(30, TimeUnit.MINUTES)
-                    .maximumSize(15000)
+                    .maximumSize(3000)
+                    .softValues()
                     .recordStats()
                     .build();
             CACHE_POOL.put(module, ruleCacheZone);

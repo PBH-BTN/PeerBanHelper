@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class IPAddressUtil {
     private static final Cache<String, IPAddress> IP_ADDRESS_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(15, TimeUnit.MINUTES)
+            .softValues()
             .recordStats()
             .build();
 
