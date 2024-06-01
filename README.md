@@ -23,7 +23,7 @@
 
 ## 运行环境要求
 
-* 一台支持 OpenJDK 的设备，可为 JVM 预留 200MB 内存，PBH（无GUI模式）至少需要 72MB Heap 内存来运行（-Xmx72M），长期稳定运行建议分配 128MB~256MB RAM
+* 一台支持 OpenJDK 的设备，可为 JVM 预留 200MB 内存，PBH（无GUI模式）至少需要 72MB Heap 内存来运行（-Xmx72M），长期稳定运行建议分配 128MB~256MB Heap RAM
 
 ## 支持的客户端
 
