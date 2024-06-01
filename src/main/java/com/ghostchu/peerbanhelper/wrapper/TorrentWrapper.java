@@ -13,11 +13,13 @@ public class TorrentWrapper {
     private long size;
     private String name;
     private String hash;
+    private double progress;
 
     public TorrentWrapper(Torrent torrent) {
         this.id = torrent.getId();
         this.size = torrent.getSize();
         this.name = torrent.getName();
         this.hash = torrent.getHash();
+        this.progress = torrent.getProgress();
     }
 }

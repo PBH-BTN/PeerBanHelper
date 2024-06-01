@@ -59,7 +59,7 @@ public class BtnPeer {
         btnPeer.setUploaded(peer.getUploaded());
         btnPeer.setRtUploadSpeed(peer.getUploadSpeed());
         btnPeer.setPeerProgress(peer.getProgress());
-        btnPeer.setDownloaderProgress(peer.getProgress());
+        btnPeer.setDownloaderProgress(torrent.getProgress());
         btnPeer.setPeerFlag(peer.getFlags());
         return btnPeer;
     }
