@@ -25,7 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 public class BtnNetwork {
-    private static final int BTN_PROTOCOL_VERSION = 4;
+    private static final int BTN_PROTOCOL_VERSION = 5;
     @Getter
     private final PeerBanHelperServer server;
     @Getter
