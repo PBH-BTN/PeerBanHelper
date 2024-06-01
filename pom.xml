@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>4.0.4</version>
+    <version>4.0.5</version>
 
     <name>PeerBanHelper</name>
 
@@ -325,11 +325,6 @@
             <groupId>javatar</groupId>
             <artifactId>javatar</artifactId>
             <version>2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-bloomFilter</artifactId>
-            <version>${hutool.version}</version>
         </dependency>
         <dependency>
             <groupId>io.javalin</groupId>

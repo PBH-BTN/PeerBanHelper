@@ -1,8 +1,5 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.RuleSubInfo;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -85,12 +82,13 @@ public class RuleSubController extends AbstractFeatureModule {
      *
      * @param ctx 上下文
      */
-    private void changeCheckInterval(Context ctx) throws IOException {
+    private void changeCheckInterval(Context ctx) {
         String checkInterval = Objects.requireNonNullElse(ctx.formParam("checkInterval"), "");
-        if (NumberUtil.isLong(checkInterval)) {
-            ipBlackRuleList.changeCheckInterval(Long.parseLong(checkInterval));
+        try {
+            long interval = Long.parseLong(checkInterval);
+            ipBlackRuleList.changeCheckInterval(interval);
             ctx.json(Map.of("success", true, "message", Lang.IP_BAN_RULE_CHECK_INTERVAL_UPDATED));
-        } else {
+        } catch (Exception e) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM));
         }
@@ -102,10 +100,10 @@ public class RuleSubController extends AbstractFeatureModule {
      * @param ctx    上下文
      * @param ruleId 规则ID
      */
-    private void logs(Context ctx, String ruleId) throws SQLException {
+    private void logs(Context ctx, String ruleId) {
         String pageIndexStr = Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0");
         String pageSizeStr = Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100");
-        if (NumberUtil.isInteger(pageIndexStr) && NumberUtil.isInteger(pageIndexStr)) {
+        try {
             int pageIndex = Integer.parseInt(pageIndexStr);
             int pageSize = Integer.parseInt(pageSizeStr);
             Map<String, Object> map = new HashMap<>();
@@ -114,7 +112,7 @@ public class RuleSubController extends AbstractFeatureModule {
             map.put("results", ipBlackRuleList.queryRuleSubLogs(ruleId, pageIndex, pageSize));
             map.put("total", ipBlackRuleList.countRuleSubLogs(ruleId));
             ctx.json(Map.of("success", true, "message", Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS, "data", map));
-        } else {
+        } catch (Exception e) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM));
         }
@@ -137,8 +135,8 @@ public class RuleSubController extends AbstractFeatureModule {
      * @return 响应
      */
     private Map<String, ? extends Serializable> update(String ruleId) {
-        if (StrUtil.isEmpty(ruleId)) {
-            return Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId));
+        if (ruleId == null || ruleId.isEmpty()) {
+            return Map.of("success", false, "message", Lang.IP_BAN_RULE_NO_ID);
         }
         AtomicReference<String> result = new AtomicReference<>();
         ipBlackRuleList.getIpBanMatchers().stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst()
@@ -165,7 +163,7 @@ public class RuleSubController extends AbstractFeatureModule {
             ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId)));
             return;
         }
-        boolean enabled = BooleanUtil.toBoolean(enabledStr);
+        boolean enabled = Boolean.parseBoolean(enabledStr);
         String msg = (enabled ? Lang.IP_BAN_RULE_ENABLED : Lang.IP_BAN_RULE_DISABLED).replace("{}", ruleSubInfo.ruleName());
         if (enabled != ruleSubInfo.enabled()) {
             ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, enabled, ruleSubInfo.ruleName(), ruleSubInfo.subUrl(), 0, 0));
@@ -209,7 +207,7 @@ public class RuleSubController extends AbstractFeatureModule {
             // 新增时从form-data中获取ruleId
             ruleId = ctx.formParam("ruleId");
         }
-        if (StrUtil.isEmpty(ruleId)) {
+        if (ruleId == null || ruleId.isEmpty()) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_NO_ID));
             return;
@@ -217,7 +215,7 @@ public class RuleSubController extends AbstractFeatureModule {
         boolean enabled = Boolean.parseBoolean(Objects.requireNonNullElse(ctx.formParam("enabled"), "false"));
         String ruleName = Objects.requireNonNullElse(ctx.formParam("ruleName"), "");
         String subUrl = Objects.requireNonNullElse(ctx.formParam("subUrl"), "");
-        if (StrUtil.isEmpty(ruleName) || StrUtil.isEmpty(subUrl)) {
+        if (ruleName.isEmpty() || subUrl.isEmpty()) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("success", false, "message", Lang.IP_BAN_RULE_PARAM_WRONG));
             return;

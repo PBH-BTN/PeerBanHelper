@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -14,6 +13,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class DownloaderCIDRBlockList extends AbstractFeatureModule {
     public DownloaderCIDRBlockList(PeerBanHelperServer server, YamlConfiguration profile) {
@@ -31,7 +31,10 @@ public class DownloaderCIDRBlockList extends AbstractFeatureModule {
                 .get("/blocklist/transmission", ctx -> {
                     StringBuilder builder = new StringBuilder();
                     for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
-                        builder.append(IPAddressUtil.getIPAddress(pair.getKey().getIp()).assignPrefixForSingleBlock().toString()).append("\n");
+                        String ruleName = UUID.randomUUID().toString().replace("-", "");
+                        String start = pair.getKey().getIp();
+                        String end = pair.getKey().getIp();
+                        builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
                     }
                     ctx.status(HttpStatus.OK);
                     ctx.result(builder.toString());
