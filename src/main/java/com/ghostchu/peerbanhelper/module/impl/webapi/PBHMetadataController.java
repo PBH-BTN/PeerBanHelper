@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.web.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -42,12 +41,18 @@ public class PBHMetadataController extends AbstractFeatureModule {
         ctx.status(HttpStatus.OK);
         Map<String, Object> data = new HashMap<>();
         data.put("version-manifest", Main.getMeta());
-        data.put("modules", getServer().getModuleManager().getModules().stream().map(FeatureModule::getConfigName).toList());
-        ctx.json(Main.getMeta());
+        data.put("modules", getServer().getModuleManager().getModules().stream().map(f -> new ModuleRecord(f.getClass().getName(), f.getConfigName())).toList());
+        ctx.json(data);
     }
 
     @Override
     public void onDisable() {
 
+    }
+
+    record ModuleRecord(
+            String className,
+            String configName
+    ) {
     }
 }
