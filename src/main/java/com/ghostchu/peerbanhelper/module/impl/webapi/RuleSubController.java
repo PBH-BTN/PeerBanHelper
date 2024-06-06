@@ -53,7 +53,7 @@ public class RuleSubController extends AbstractFeatureModule {
                     // 新增订阅规则
                     .put("/api/sub/rule", ctx -> save(ctx, null, true), Role.USER_WRITE)
                     // 更新订阅规则
-                    .get("/api/sub/rule/update/{ruleId}", ctx -> ctx.json(update(ctx.pathParam("ruleId"))), Role.USER_READ)
+                    .post("/api/sub/rule/{ruleId}/update", ctx -> ctx.json(update(ctx.pathParam("ruleId"))), Role.USER_READ)
                     // 查询订阅规则
                     .get("/api/sub/rule/{ruleId}", ctx -> ctx.json(get(ctx.pathParam("ruleId"))), Role.USER_READ)
                     // 修改订阅规则
@@ -65,7 +65,7 @@ public class RuleSubController extends AbstractFeatureModule {
                     // 查询订阅规则列表
                     .get("/api/sub/rules", ctx -> ctx.json(list()), Role.USER_READ)
                     // 手动更新全部订阅规则
-                    .get("/api/sub/rules/update", ctx -> ctx.json(updateAll()), Role.USER_WRITE)
+                    .post("/api/sub/rules/update", ctx -> ctx.json(updateAll()), Role.USER_WRITE)
                     // 查询全部订阅规则更新日志
                     .get("/api/sub/logs", ctx -> logs(ctx, null), Role.USER_READ)
                     // 查询订阅规则更新日志
