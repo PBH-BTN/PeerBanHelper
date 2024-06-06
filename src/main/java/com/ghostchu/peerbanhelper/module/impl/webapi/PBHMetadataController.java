@@ -3,11 +3,15 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.web.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PBHMetadataController extends AbstractFeatureModule {
     public PBHMetadataController(PeerBanHelperServer server, YamlConfiguration profile) {
@@ -36,6 +40,9 @@ public class PBHMetadataController extends AbstractFeatureModule {
 
     private void handleManifest(Context ctx) {
         ctx.status(HttpStatus.OK);
+        Map<String, Object> data = new HashMap<>();
+        data.put("version-manifest", Main.getMeta());
+        data.put("modules", getServer().getModuleManager().getModules().stream().map(FeatureModule::getConfigName).toList());
         ctx.json(Main.getMeta());
     }
 
