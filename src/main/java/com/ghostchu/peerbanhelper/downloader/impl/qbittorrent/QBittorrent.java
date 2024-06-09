@@ -133,7 +133,7 @@ public class QBittorrent implements Downloader {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (TorrentDetail detail : torrentDetail) {
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(), detail.getProgress()));
+            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(), detail.getDlspeed()));
         }
         return torrents;
     }
