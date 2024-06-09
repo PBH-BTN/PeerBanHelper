@@ -34,6 +34,20 @@ public interface Torrent {
     long getSize();
 
     /**
+     * 实时下载速度
+     *
+     * @return 实时下载速度
+     */
+    long getRtUploadSpeed();
+
+    /**
+     * 实时上传速度
+     *
+     * @return 实时上传速度
+     */
+    long getRtDownloadSpeed();
+
+    /**
      * 获取种子不可逆匿名识别符
      *
      * @return 不可逆匿名识别符

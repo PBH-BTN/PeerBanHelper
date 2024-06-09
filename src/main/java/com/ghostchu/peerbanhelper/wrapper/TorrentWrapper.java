@@ -14,6 +14,8 @@ public class TorrentWrapper {
     private String name;
     private String hash;
     private double progress;
+    private long rtUploadSpeed;
+    private long rtDownloadSpeed;
 
     public TorrentWrapper(Torrent torrent) {
         this.id = torrent.getId();
@@ -21,5 +23,7 @@ public class TorrentWrapper {
         this.name = torrent.getName();
         this.hash = torrent.getHash();
         this.progress = torrent.getProgress();
+        this.rtDownloadSpeed = torrent.getRtDownloadSpeed();
+        this.rtUploadSpeed = torrent.getRtUploadSpeed();
     }
 }
