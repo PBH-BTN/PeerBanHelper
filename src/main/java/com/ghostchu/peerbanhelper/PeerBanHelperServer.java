@@ -306,7 +306,6 @@ public class PeerBanHelperServer {
         try {
             // 重置所有下载器状态为健康，这样后面失败就会对其降级
             banWaveWatchDog.setLastOperation("Reset last status");
-            downloaders.forEach(downloader -> downloader.setLastStatus(DownloaderLastStatus.HEALTHY));
             // 声明基本集合
             // 需要重启的种子列表
             Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
@@ -431,6 +430,8 @@ public class PeerBanHelperServer {
                 log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
                 downloader.setLastStatus(DownloaderLastStatus.ERROR);
                 return;
+            } else {
+                downloader.setLastStatus(DownloaderLastStatus.HEALTHY);
             }
             downloader.setBanList(BAN_LIST.keySet(), added, removed);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
@@ -518,6 +519,7 @@ public class PeerBanHelperServer {
                     parallelReqRestrict.release();
                 }
             }));
+            downloader.setLastStatus(DownloaderLastStatus.HEALTHY);
         }
 
         return peers;

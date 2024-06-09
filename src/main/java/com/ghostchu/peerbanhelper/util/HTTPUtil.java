@@ -152,7 +152,6 @@ public class HTTPUtil {
     public static <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
         bodyHandler = tracker.tracking(bodyHandler, HTTPUtil::onProgress);
         HttpResponse.BodyHandler<T> finalBodyHandler = bodyHandler;
-
         return client.sendAsync(request, bodyHandler)
                 .handleAsync((r, t) -> tryResend(client, request, finalBodyHandler, 1, r, t), executor)
                 .thenCompose(Function.identity());

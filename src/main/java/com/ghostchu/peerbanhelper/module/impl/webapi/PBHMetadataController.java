@@ -9,6 +9,9 @@ import io.javalin.http.HttpStatus;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PBHMetadataController extends AbstractFeatureModule {
     public PBHMetadataController(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -36,11 +39,20 @@ public class PBHMetadataController extends AbstractFeatureModule {
 
     private void handleManifest(Context ctx) {
         ctx.status(HttpStatus.OK);
-        ctx.json(Main.getMeta());
+        Map<String, Object> data = new HashMap<>();
+        data.put("version", Main.getMeta());
+        data.put("modules", getServer().getModuleManager().getModules().stream().map(f -> new ModuleRecord(f.getClass().getName(), f.getConfigName())).toList());
+        ctx.json(data);
     }
 
     @Override
     public void onDisable() {
 
+    }
+
+    record ModuleRecord(
+            String className,
+            String configName
+    ) {
     }
 }

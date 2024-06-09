@@ -40,6 +40,16 @@ public class TRTorrent implements Torrent {
         return backend.getTotalSize();
     }
 
+    @Override
+    public long getRtUploadSpeed() {
+        return backend.getRateUpload();
+    }
+
+    @Override
+    public long getRtDownloadSpeed() {
+        return backend.getRateDownload();
+    }
+
     @NotNull
     public List<Peer> getPeers() {
         return backend.getPeers().stream().map(TRPeer::new).collect(Collectors.toList());
