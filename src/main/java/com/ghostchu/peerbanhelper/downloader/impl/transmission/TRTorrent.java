@@ -41,12 +41,12 @@ public class TRTorrent implements Torrent {
     }
 
     @Override
-    public long rtUploadSpeed() {
+    public long getRtUploadSpeed() {
         return backend.getRateUpload();
     }
 
     @Override
-    public long rtDownloadSpeed() {
+    public long getRtDownloadSpeed() {
         return backend.getRateDownload();
     }
 
