@@ -519,6 +519,7 @@ public class PeerBanHelperServer {
                     parallelReqRestrict.release();
                 }
             }));
+            downloader.setLastStatus(DownloaderLastStatus.HEALTHY);
         }
 
         return peers;
