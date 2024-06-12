@@ -51,9 +51,9 @@ public class RuleSubController extends AbstractFeatureModule {
             ipBlackRuleList = (IPBlackRuleList) ele;
             getServer().getWebContainer().javalin()
                     // 查询检查间隔
-                    .get("/api/sub", this::getCheckInterval, Role.USER_READ)
+                    .get("/api/sub/interval", this::getCheckInterval, Role.USER_READ)
                     // 修改检查间隔
-                    .patch("/api/sub", this::changeCheckInterval, Role.USER_WRITE)
+                    .patch("/api/sub/interval", this::changeCheckInterval, Role.USER_WRITE)
                     // 新增订阅规则
                     .put("/api/sub/rule", ctx -> save(ctx, null, true), Role.USER_WRITE)
                     // 更新订阅规则
