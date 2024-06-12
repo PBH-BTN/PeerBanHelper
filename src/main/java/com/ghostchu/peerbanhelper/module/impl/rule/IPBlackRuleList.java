@@ -28,12 +28,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -155,14 +157,14 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      *
      * @param rule 规则
      */
-    public String updateRule(@NotNull ConfigurationSection rule, String updateType) {
-        AtomicReference<String> result = new AtomicReference<>();
+    public Map<String, ? extends Serializable> updateRule(@NotNull ConfigurationSection rule, String updateType) {
+        AtomicReference<Map<String, ? extends Serializable>> result = new AtomicReference<>();
         String ruleId = rule.getName();
         if (!rule.getBoolean("enabled", false)) {
             // 检查ipBanMatchers是否有对应的规则，有则删除
             ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
             // 未启用跳过更新逻辑
-            return Lang.IP_BAN_RULE_DISABLED.replace("{}", ruleId);
+            return Map.of("success", false, "message", Lang.IP_BAN_RULE_DISABLED.replace("{}", ruleId));
         }
         String name = rule.getString("name", ruleId);
         String url = rule.getString("url");
@@ -188,7 +190,6 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             ruleHash = Files.asByteSource(ruleFile).hash(Hashing.sha256());
                         }
                         int ent_count = 0;
-
                         if (!tempHash.equals(ruleHash)) {
                             // 规则文件不存在或者规则文件与临时文件sha256不一致则需要更新
                             ent_count = fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
@@ -201,7 +202,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                                 ent_count = fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
                             } else {
                                 log.info(Lang.IP_BAN_RULE_NO_UPDATE, name);
-                                result.set(Lang.IP_BAN_RULE_NO_UPDATE.replace("{}", name));
+                                result.set(Map.of("success", true, "message", Lang.IP_BAN_RULE_NO_UPDATE.replace("{}", name)));
                             }
                             tempFile.delete();
                         }
@@ -211,21 +212,24 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                                 ele.setData(name, ipAddresses, subnetAddresses);
                                 log.info(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name);
-                                result.set(Lang.IP_BAN_RULE_UPDATE_SUCCESS.replace("{}", name));
+                                result.set(Map.of("success", true, "message", Lang.IP_BAN_RULE_UPDATE_SUCCESS.replace("{}", name)));
                             }, () -> {
                                 ipBanMatchers.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
                                 log.info(Lang.IP_BAN_RULE_LOAD_SUCCESS, name);
-                                result.set(Lang.IP_BAN_RULE_LOAD_SUCCESS.replace("{}", name));
+                                result.set(Map.of("success", true, "message", Lang.IP_BAN_RULE_LOAD_SUCCESS.replace("{}", name)));
                             });
                         }
                         if (ent_count > 0) {
                             // 更新日志
                             try {
                                 db.insertRuleSubLog(ruleId, ent_count, updateType);
+                                result.set(Map.of("success", true, "message", Lang.IP_BAN_RULE_UPDATED.replace("{}", name)));
                             } catch (SQLException e) {
                                 log.error(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId, e);
-                                result.set(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR.replace("{}", name));
+                                result.set(Map.of("success", false, "message", Lang.IP_BAN_RULE_UPDATE_LOG_ERROR.replace("{}", name)));
                             }
+                        } else {
+                            result.set(Map.of("success", true, "message", Lang.IP_BAN_RULE_NO_UPDATE.replace("{}", name)));
                         }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -240,17 +244,21 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             fileToIPList(name, ruleFile, ipAddresses, subnetAddresses);
                             ipBanMatchers.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
                             log.warn(Lang.IP_BAN_RULE_USE_CACHE, name);
-                            result.set(Lang.IP_BAN_RULE_USE_CACHE.replace("{}", name));
+                            result.set(Map.of("success", false, "message", Lang.IP_BAN_RULE_USE_CACHE.replace("{}", name)));
                         } catch (IOException ex) {
                             log.error(Lang.IP_BAN_RULE_LOAD_FAILED, name, ex);
-                            result.set(Lang.IP_BAN_RULE_LOAD_FAILED.replace("{}", name));
+                            result.set(Map.of("success", false, "message", Lang.IP_BAN_RULE_LOAD_FAILED.replace("{}", name)));
                         }
+                    } else {
+                        result.set(Map.of("success", false, "message", Lang.IP_BAN_RULE_UPDATE_FAILED.replace("{}", name)));
                     }
                 } else {
                     log.error(Lang.IP_BAN_RULE_LOAD_FAILED, name, e);
-                    result.set(Lang.IP_BAN_RULE_LOAD_FAILED.replace("{}", name));
+                    result.set(Map.of("success", false, "message", Lang.IP_BAN_RULE_LOAD_FAILED.replace("{}", name)));
                 }
             }
+        } else {
+            result.set(Map.of("success", false, "message", Lang.IP_BAN_RULE_URL_WRONG.replace("{}", name)));
         }
         return result.get();
     }

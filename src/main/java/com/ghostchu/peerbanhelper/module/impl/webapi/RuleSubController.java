@@ -50,6 +50,8 @@ public class RuleSubController extends AbstractFeatureModule {
         getServer().getModuleManager().getModules().stream().filter(ele -> ele.getConfigName().equals("ip-address-blocker-rules")).findFirst().ifPresent(ele -> {
             ipBlackRuleList = (IPBlackRuleList) ele;
             getServer().getWebContainer().javalin()
+                    // 查询检查间隔
+                    .get("/api/sub", this::getCheckInterval, Role.USER_READ)
                     // 修改检查间隔
                     .patch("/api/sub", this::changeCheckInterval, Role.USER_WRITE)
                     // 新增订阅规则
@@ -77,6 +79,15 @@ public class RuleSubController extends AbstractFeatureModule {
 
     @Override
     public void onDisable() {
+    }
+
+    /**
+     * 查询检查间隔
+     *
+     * @param ctx 上下文
+     */
+    private void getCheckInterval(Context ctx) {
+        ctx.json(Map.of("success", true, "message", Lang.IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS, "data", ipBlackRuleList.getCheckInterval()));
     }
 
     /**
@@ -126,8 +137,9 @@ public class RuleSubController extends AbstractFeatureModule {
      * @return 响应
      */
     private Map<String, ? extends Serializable> updateAll() {
-        ipBlackRuleList.getIpBanMatchers().forEach(ele -> ipBlackRuleList.updateRule(Objects.requireNonNull(ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ele.getRuleId())), Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL));
-        return Map.of("success", true, "message", Lang.IP_BAN_RULE_UPDATED);
+        AtomicReference<Map<String, ? extends Serializable>> result = new AtomicReference<>();
+        ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().map(this::update).filter(ele -> ele.get("success").equals(false)).findFirst().ifPresentOrElse(result::set, () -> result.set(Map.of("success", true, "message", Lang.IP_BAN_RULE_ALL_UPDATED)));
+        return result.get();
     }
 
     /**
@@ -140,9 +152,11 @@ public class RuleSubController extends AbstractFeatureModule {
         if (ruleId == null || ruleId.isEmpty()) {
             return Map.of("success", false, "message", Lang.IP_BAN_RULE_NO_ID);
         }
-        AtomicReference<String> result = new AtomicReference<>();
-        ipBlackRuleList.getIpBanMatchers().stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresent(ele -> result.set(ipBlackRuleList.updateRule(Objects.requireNonNull(ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ele.getRuleId())), Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL)));
-        return Map.of("success", true, "message", result.get());
+        ConfigurationSection configurationSection = ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ruleId);
+        if (null == configurationSection) {
+            return Map.of("success", false, "message", Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId));
+        }
+        return ipBlackRuleList.updateRule(configurationSection, Lang.IP_BAN_RULE_UPDATE_TYPE_MANUAL);
     }
 
     /**
