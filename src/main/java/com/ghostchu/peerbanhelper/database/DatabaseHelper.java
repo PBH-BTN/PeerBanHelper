@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database;
 
+import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
@@ -227,7 +228,6 @@ public class DatabaseHelper {
             if (!hasTable("rule_sub_logs")) {
                 @Cleanup
                 PreparedStatement ps = connection.prepareStatement("""
-                                            
                                                           create table rule_sub_logs
                                                                   (
                                                                           id         integer not null
@@ -240,6 +240,18 @@ public class DatabaseHelper {
                                               );
                         """);
                 ps.executeUpdate();
+            }
+            if (hasTable("rule_sub_logs")) {
+                @Cleanup
+                PreparedStatement ps1 = connection.prepareStatement("""
+                        update rule_sub_logs set update_type = 'AUTO' where update_type = '自动更新';
+                        """);
+                ps1.executeUpdate();
+                @Cleanup
+                PreparedStatement ps2 = connection.prepareStatement("""
+                        update rule_sub_logs set update_type = 'MANUAL' where update_type = '手动更新';
+                        """);
+                ps2.executeUpdate();
             }
         }
     }
@@ -354,7 +366,7 @@ public class DatabaseHelper {
                                 set.getString("rule_id"),
                                 set.getLong("update_time"),
                                 set.getInt("ent_count"),
-                                set.getString("update_type")
+                                IPBanRuleUpdateType.valueOf(set.getString("update_type"))
                         ));
                     }
                     return infos;
@@ -371,18 +383,14 @@ public class DatabaseHelper {
      * @param updateType 更新类型
      * @throws SQLException SQL异常
      */
-    public void insertRuleSubLog(String ruleId, int count, String updateType) throws SQLException {
+    public void insertRuleSubLog(String ruleId, int count, IPBanRuleUpdateType updateType) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
-            // boolean idNotEmpty = StrUtil.isNotEmpty(ruleId);
-            // if (!idNotEmpty) {
-            //     throw new SQLException("ruleId不能为空");
-            // }
             ps = connection.prepareStatement("INSERT INTO rule_sub_logs (rule_id, update_time, ent_count, update_type) VALUES (?,?,?,?)");
             ps.setString(1, ruleId);
             ps.setLong(2, System.currentTimeMillis());
             ps.setInt(3, count);
-            ps.setString(4, updateType);
+            ps.setString(4, updateType.toString());
             ps.executeUpdate();
         }
     }
