@@ -170,6 +170,7 @@ public class Lang {
     public static final String IP_BAN_RULE_UPDATE_FINISH = "IP黑名单规则订阅完毕";
     public static final String IP_BAN_RULE_NO_UPDATE = "IP黑名单订阅规则 {} 未发生更新";
     public static final String IP_BAN_RULE_UPDATE_SUCCESS =  "IP黑名单订阅规则 {} 更新成功";
+    public static final String IP_BAN_RULE_UPDATE_FAILED = "IP黑名单订阅规则 {} 更新失败";
     public static final String IP_BAN_RULE_LOAD_SUCCESS =  "IP黑名单订阅规则 {} 加载成功";
     public static final String IP_BAN_RULE_UPDATE_LOG_ERROR =  "[错误] IP黑名单订阅规则 {} 更新日志失败";
     public static final String IP_BAN_RULE_USE_CACHE =  "[警告] IP黑名单订阅规则 {} 订阅失败，使用本地缓存加载成功";
@@ -181,14 +182,17 @@ public class Lang {
     public static final String IP_BAN_RULE_ID_CONFLICT = "[错误] IP黑名单订阅规则ID冲突: {}";
     public static final String IP_BAN_RULE_CANT_FIND = "[错误] 未找到IP黑名单订阅规则: {}";
     public static final String IP_BAN_RULE_PARAM_WRONG = "[错误] IP黑名单订阅规则参数错误";
+    public static final String IP_BAN_RULE_URL_WRONG = "[错误] IP黑名单订阅规则URL错误: {}";
     public static final String IP_BAN_RULE_ENABLED = "IP黑名单订阅规则 {} 已启用";
     public static final String IP_BAN_RULE_DISABLED = "IP黑名单订阅规则 {} 已禁用";
-    public static final String IP_BAN_RULE_UPDATED =  "IP黑名单订阅规则已更新";
+    public static final String IP_BAN_RULE_UPDATED = "IP黑名单订阅规则 {} 已更新";
+    public static final String IP_BAN_RULE_ALL_UPDATED = "IP黑名单订阅规则已全部更新";
     public static final String IP_BAN_RULE_SAVED =  "IP黑名单订阅规则已保存";
     public static final String IP_BAN_RULE_DELETED = "IP黑名单订阅规则 {} 已删除";
     public static final String IP_BAN_RULE_INFO_QUERY_SUCCESS =  "IP黑名单订阅规则查询成功";
     public static final String IP_BAN_RULE_LOG_QUERY_SUCCESS =  "IP黑名单订阅规则更新日志查询成功";
     public static final String IP_BAN_RULE_LOG_QUERY_WRONG_PARAM = "IP黑名单订阅规则更新日志查询参数错误";
+    public static final String IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS = "IP黑名单订阅规则更新间隔查询成功";
     public static final String IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM = "IP黑名单订阅规则更新间隔参数错误";
     public static final String IP_BAN_RULE_CHECK_INTERVAL_UPDATED = "IP黑名单订阅规则更新间隔设置成功";
     public static final String IP_BAN_RULE_ENABLED_WRONG_PARAM = "IP黑名单订阅规则启用禁用参数错误";
