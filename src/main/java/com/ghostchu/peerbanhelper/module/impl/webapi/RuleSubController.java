@@ -230,13 +230,6 @@ public class RuleSubController extends AbstractFeatureModule {
             ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_NO_ID));
             return;
         }
-        String ruleName = subInfo.ruleName();
-        String subUrl = subInfo.subUrl();
-        if (ruleName.isEmpty() || subUrl.isEmpty()) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_PARAM_WRONG));
-            return;
-        }
         RuleSubInfo ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (isAdd && ruleSubInfo != null) {
             // 新增时检查规则是否存在
@@ -249,6 +242,22 @@ public class RuleSubController extends AbstractFeatureModule {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId)));
             return;
+        }
+        String ruleName = subInfo.ruleName();
+        String subUrl = subInfo.subUrl();
+        if (isAdd) {
+            if (ruleName == null || subUrl == null || ruleName.isEmpty() || subUrl.isEmpty()) {
+                ctx.status(HttpStatus.BAD_REQUEST);
+                ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_PARAM_WRONG));
+                return;
+            }
+        } else {
+            if (ruleName == null) {
+                ruleName = ruleSubInfo.ruleName();
+            }
+            if (subUrl == null) {
+                subUrl = ruleSubInfo.subUrl();
+            }
         }
         ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, isAdd || ruleSubInfo.enabled(), ruleName, subUrl, 0, 0));
         assert configurationSection != null;
