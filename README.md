@@ -311,6 +311,24 @@ client:
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/20d49093-bf99-41f6-971f-c0c574d493af)
 
+### 管理 Token 在哪里？
+
+在 config.yml 中：
+
+```yaml
+# Http 服务器设置
+server:
+  # 监听端口
+  http: 9898
+  # 客户端远程 URL 设置
+  # Docker 网络请改 host 模式使用或者设置容器端口暴露
+  # 当客户端需要与 PBH 通信时，客户端的 URL 会被更改为 http://<address>:<http-port>/<client-api-route>
+  address: 127.0.0.1
+  # 在 PBH 需要给下载器传递地址时，将使用此地址传递，请确保此地址最终可被下载器访问，请【不要】以 / 结尾
+  prefix: http://127.0.0.1:9898
+  token: "*************************" # <-- 你的管理 Token
+```
+
 ### Transmission 的有限支持
 
 由于 Transmission 有以下问题，因此支持是有限的
