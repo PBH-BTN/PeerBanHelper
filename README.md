@@ -9,9 +9,9 @@
 > [!TIP]
 > ❤ PeerBanHelper 是一个社区项目，由贡献者们共同建设。点击[此处](https://github.com/PBH-BTN/PeerBanHelper/graphs/contributors)查看所有一同共建 PeerBanHelper 社区的人们。
 
-|   主界面   |    封禁列表  |   封禁日志  |   封禁统计   |
-| ---- | ---- | ---- | ---- |
-|   <img width="1280" alt="homepage" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/60cf5635-1423-4ada-ab8b-b5e1e8f996a5">   |   <img width="1280" alt="banlist" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/c3e139e6-eb82-423f-b083-1839713ec801">   |    <img width="1280" alt="banlogs" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/a8e4b814-0465-4cf2-9bc0-008eefef8cff">  | <img width="1280" alt="maxban" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/ae78ebb9-67f7-481a-9afc-7ced2c6a2534"> |
+| 主界面                                                                                                                                   | 封禁列表                                                                                                                                 | 封禁日志                                                                                                                                 | 封禁统计                                                                                                                                | 规则统计                                                                                                                                    | 规则订阅                                                                                                                                    |
+|---------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| <img width="1280" alt="homepage" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/d7f7ea9f-70df-40f1-a782-260450972bc9"> | <img width="1280" alt="banlist" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/c3e139e6-eb82-423f-b083-1839713ec801"> | <img width="1280" alt="banlogs" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/00d8efcc-0dd7-4e05-bdeb-9444e14739d6"> | <img width="1280" alt="maxban" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/ae78ebb9-67f7-481a-9afc-7ced2c6a2534"> | <img width="1280" alt="banMetrics" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/9e4cd7b7-aaff-4b66-8d1d-ad4ef3466b1f"> | <img width="1280" alt="banMetrics" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/dc312186-9643-4f23-9d53-7b8e0852f228"> |
 
 ## 安装 PeerBanHelper
 
@@ -310,6 +310,24 @@ client:
 前往 Container Manager，找到网络选项卡，查看 `bridge` 中的网关地址，使用网关地址作为下载器 IP。
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/20d49093-bf99-41f6-971f-c0c574d493af)
+
+### 管理 Token 在哪里？
+
+在 config.yml 中：
+
+```yaml
+# Http 服务器设置
+server:
+  # 监听端口
+  http: 9898
+  # 客户端远程 URL 设置
+  # Docker 网络请改 host 模式使用或者设置容器端口暴露
+  # 当客户端需要与 PBH 通信时，客户端的 URL 会被更改为 http://<address>:<http-port>/<client-api-route>
+  address: 127.0.0.1
+  # 在 PBH 需要给下载器传递地址时，将使用此地址传递，请确保此地址最终可被下载器访问，请【不要】以 / 结尾
+  prefix: http://127.0.0.1:9898
+  token: "*************************" # <-- 你的管理 Token
+```
 
 ### Transmission 的有限支持
 

@@ -169,10 +169,10 @@ module:
     # 规则列表
     rules:
       # 规则ID（任意）
-      example:
+      dh_torrents:
         # 是否启用
         enabled: false
         # 显示名称
-        name: Example
+        name: dh_torrents
         # 规则文件订阅地址
-        url: https://example.com/example.txt
+        url: https://raw.githubusercontent.com/PBH-BTN/BTN-Collected-Rules/main/dt_torrent.txt
