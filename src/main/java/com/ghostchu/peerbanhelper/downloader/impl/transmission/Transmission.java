@@ -15,6 +15,8 @@ import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
 import lombok.SneakyThrows;
+import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -31,17 +33,56 @@ public class Transmission implements Downloader {
     private final String endpoint;
     private final TrClient client;
     private final String blocklistUrl;
+    private final String username;
+    private final String password;
+    private final HttpClient.Version httpVersion;
+    private final boolean verifySSL;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
 
     /*
-        API 受限，实际实现起来意义不大
-    */
+            API 受限，实际实现起来意义不大
+        */
     public Transmission(String name, String endpoint, String username, String password, String blocklistUrl, boolean verifySSL, HttpClient.Version httpVersion, String rpcUrl) {
         this.name = name;
+        this.username = username;
+        this.password = password;
+        this.httpVersion = httpVersion;
+        this.verifySSL = verifySSL;
         this.client = new TrClient(endpoint + rpcUrl, username, password, verifySSL, httpVersion);
         this.endpoint = endpoint;
         this.blocklistUrl = blocklistUrl;
         log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);
+    }
+
+    public static Transmission loadFromConfig(String name, String pbhServerAddress, ConfigurationSection section) {
+        String endpoint = section.getString("endpoint");
+        if (endpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
+            endpoint = endpoint.substring(0, endpoint.length() - 1);
+        }
+        String username = section.getString("username");
+        String password = section.getString("password");
+        String httpVersion = section.getString("http-version", "HTTP_1_1");
+        String rpcUrl = section.getString("rpc-url");
+        boolean verifySSL = section.getBoolean("verify-ssl", true);
+        HttpClient.Version httpVersionEnum;
+        try {
+            httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
+        } catch (IllegalArgumentException e) {
+            httpVersionEnum = HttpClient.Version.HTTP_1_1;
+        }
+        return new Transmission(name, endpoint, username, password, pbhServerAddress + "/blocklist/transmission", verifySSL, httpVersionEnum, rpcUrl);
+    }
+
+    @Override
+    public ConfigurationSection saveDownloader() {
+        ConfigurationSection section = new MemoryConfiguration();
+        section.set("endpoint", endpoint);
+        section.set("username", username);
+        section.set("password", password);
+        section.set("http-version", httpVersion.name());
+        section.set("verify-ssl", verifySSL);
+        section.set("rpc-url", blocklistUrl);
+        return null;
     }
 
     @Override

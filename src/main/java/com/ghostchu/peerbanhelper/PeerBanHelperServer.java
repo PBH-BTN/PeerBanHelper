@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
+import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
@@ -39,6 +41,8 @@ import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,7 +66,7 @@ public class PeerBanHelperServer {
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final YamlConfiguration profile;
     @Getter
-    private final List<Downloader> downloaders;
+    private final List<Downloader> downloaders = new ArrayList<>();
     @Getter
     private final long banDuration;
     @Getter
@@ -78,6 +82,7 @@ public class PeerBanHelperServer {
     private final HitRateMetric hitRateMetric = new HitRateMetric();
     @Getter
     private final List<BanListInvoker> banListInvoker = new ArrayList<>();
+    private final String pbhServerAddress;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
     @Getter
     private ImmutableMap<PeerAddress, PeerMetadata> LIVE_PEERS = ImmutableMap.of();
@@ -98,8 +103,9 @@ public class PeerBanHelperServer {
     private JavalinWebContainer webContainer;
 
 
-    public PeerBanHelperServer(List<Downloader> downloaders, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
-        this.downloaders = downloaders;
+    public PeerBanHelperServer(String pbhServerAddress, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
+        this.pbhServerAddress = pbhServerAddress;
+        loadDownloaders();
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
         this.mainConfig = mainConfig;
@@ -125,6 +131,42 @@ public class PeerBanHelperServer {
         registerTimer();
         banListInvoker.forEach(BanListInvoker::reset);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
+    }
+
+    public void loadDownloaders() {
+        this.downloaders.clear();
+        ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
+        for (String client : clientSection.getKeys(false)) {
+            ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
+            String endpoint = downloaderSection.getString("endpoint");
+            switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
+                case "qbittorrent" -> {
+                    registerDownloader(QBittorrent.loadFromConfig(client, downloaderSection));
+                    log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
+                }
+                case "transmission" -> {
+                    registerDownloader(Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection));
+                    log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission", client, endpoint);
+                }
+            }
+        }
+    }
+
+    public void saveDownloaders() throws IOException {
+        ConfigurationSection clientSection = new MemoryConfiguration();
+        for (Downloader downloader : this.downloaders) {
+            clientSection.set(downloader.getName(), downloader.saveDownloader());
+        }
+        mainConfig.set("client", clientSection);
+        mainConfig.save(Main.getMainConfigFile());
+    }
+
+    public void registerDownloader(Downloader downloader) {
+        this.downloaders.add(downloader);
+    }
+
+    public void unregisterDownloader(Downloader downloader) {
+        this.downloaders.remove(downloader);
     }
 
     private void setupIPDB() {

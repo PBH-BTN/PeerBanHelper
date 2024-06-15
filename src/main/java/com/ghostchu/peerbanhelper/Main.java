@@ -4,8 +4,6 @@ import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
-import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
@@ -15,7 +13,6 @@ import com.google.common.eventbus.EventBus;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.core.config.plugins.util.PluginManager;
-import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
@@ -23,13 +20,11 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 
 @Slf4j
@@ -49,6 +44,10 @@ public class Main {
     private static PBHGuiManager guiManager;
     @Getter
     private static final EventBus eventBus = new EventBus();
+    @Getter
+    private static File mainConfigFile;
+    @Getter
+    private static File profileConfigFile;
 
     public static void main(String[] args) {
         setupLog4j2();
@@ -57,47 +56,16 @@ public class Main {
         setupConfiguration();
         List<Downloader> downloaderList = new ArrayList<>();
         guiManager.createMainWindow();
-        File mainConfigFile = new File(configDirectory, "config.yml");
+        mainConfigFile = new File(configDirectory, "config.yml");
         YamlConfiguration mainConfig = loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));
-        File profileConfigFile = new File(configDirectory, "profile.yml");
+        profileConfigFile = new File(configDirectory, "profile.yml");
         YamlConfiguration profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-        ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
-        for (String client : clientSection.getKeys(false)) {
-            ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
-            String endpoint = downloaderSection.getString("endpoint");
-            if (endpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
-                endpoint = endpoint.substring(0, endpoint.length() - 1);
-            }
-            String username = downloaderSection.getString("username");
-            String password = downloaderSection.getString("password");
-            String baUser = downloaderSection.getString("basic-auth.user");
-            String baPass = downloaderSection.getString("basic-auth.pass");
-            String httpVersion = downloaderSection.getString("http-version", "HTTP_1_1");
-            boolean incrementBan = downloaderSection.getBoolean("increment-ban");
-            String rpcUrl = downloaderSection.getString("rpc-url");
-            HttpClient.Version httpVersionEnum;
-            try {
-                httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
-            } catch (IllegalArgumentException e) {
-                httpVersionEnum = HttpClient.Version.HTTP_1_1;
-            }
-            boolean verifySSL = downloaderSection.getBoolean("verify-ssl", true);
-            switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-                case "qbittorrent" -> {
-                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum, incrementBan));
-                    log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
-                }
-                case "transmission" -> {
-                    downloaderList.add(new Transmission(client, endpoint, username, password, pbhServerAddress + "/blocklist/transmission", verifySSL, httpVersionEnum, rpcUrl));
-                    log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission", client, endpoint);
-                }
-            }
-        }
+
         try {
-            server = new PeerBanHelperServer(downloaderList,
+            server = new PeerBanHelperServer(pbhServerAddress,
                     YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
         } catch (Exception e) {
             log.error(Lang.BOOTSTRAP_FAILED, e);
