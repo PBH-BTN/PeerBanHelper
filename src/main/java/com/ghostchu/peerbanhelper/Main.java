@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
-import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
@@ -22,9 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Level;
 
 @Slf4j
@@ -54,7 +51,6 @@ public class Main {
         initBuildMeta();
         initGUI(args);
         setupConfiguration();
-        List<Downloader> downloaderList = new ArrayList<>();
         guiManager.createMainWindow();
         mainConfigFile = new File(configDirectory, "config.yml");
         YamlConfiguration mainConfig = loadConfiguration(mainConfigFile);
@@ -63,7 +59,6 @@ public class Main {
         YamlConfiguration profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-
         try {
             server = new PeerBanHelperServer(pbhServerAddress,
                     YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
