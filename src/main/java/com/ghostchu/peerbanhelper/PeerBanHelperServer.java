@@ -139,17 +139,20 @@ public class PeerBanHelperServer {
         for (String client : clientSection.getKeys(false)) {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
             String endpoint = downloaderSection.getString("endpoint");
-            switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-                case "qbittorrent" -> {
-                    registerDownloader(QBittorrent.loadFromConfig(client, downloaderSection));
-                    log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
-                }
-                case "transmission" -> {
-                    registerDownloader(Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection));
-                    log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission", client, endpoint);
-                }
-            }
+            Downloader downloader = createDownloader(client, downloaderSection);
+            log.info(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), client, endpoint);
         }
+    }
+
+    public Downloader createDownloader(String client, ConfigurationSection downloaderSection) {
+        Downloader downloader = null;
+        switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
+            case "transmission" ->
+                    downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
+        }
+        return downloader;
+
     }
 
     public void saveDownloaders() throws IOException {
@@ -161,8 +164,12 @@ public class PeerBanHelperServer {
         mainConfig.save(Main.getMainConfigFile());
     }
 
-    public void registerDownloader(Downloader downloader) {
+    public boolean registerDownloader(Downloader downloader) {
+        if (this.downloaders.stream().anyMatch(d -> d.getName().equals(downloader.getName()))) {
+            return false;
+        }
         this.downloaders.add(downloader);
+        return true;
     }
 
     public void unregisterDownloader(Downloader downloader) {
