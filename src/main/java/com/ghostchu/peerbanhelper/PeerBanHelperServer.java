@@ -105,14 +105,14 @@ public class PeerBanHelperServer {
 
     public PeerBanHelperServer(String pbhServerAddress, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.pbhServerAddress = pbhServerAddress;
-        loadDownloaders();
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
         this.mainConfig = mainConfig;
         this.httpdPort = mainConfig.getInt("server.http");
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
-        this.moduleMatchCache = new ModuleMatchCache();
         this.banListFile = new File(Main.getDataDirectory(), "banlist.dump");
+        loadDownloaders();
+        this.moduleMatchCache = new ModuleMatchCache();
         registerHttpServer();
         this.moduleManager = new ModuleManager();
         setupIPDB();

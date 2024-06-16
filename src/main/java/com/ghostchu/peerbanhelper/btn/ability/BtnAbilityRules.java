@@ -83,7 +83,6 @@ public class BtnAbilityRules implements BtnAbility {
                     if (r.statusCode() != 200) {
                         log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
                     } else {
-                        System.out.println(r.body());
                         BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
                         this.btnRule = new BtnRuleParsed(btr);
                         Main.getEventBus().post(new BtnRuleUpdateEvent());
