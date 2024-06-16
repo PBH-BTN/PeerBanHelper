@@ -140,6 +140,7 @@ public class PeerBanHelperServer {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
             String endpoint = downloaderSection.getString("endpoint");
             Downloader downloader = createDownloader(client, downloaderSection);
+            registerDownloader(downloader);
             log.info(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), client, endpoint);
         }
     }
