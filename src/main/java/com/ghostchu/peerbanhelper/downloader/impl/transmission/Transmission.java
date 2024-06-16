@@ -16,7 +16,7 @@ import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
 import lombok.SneakyThrows;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
-import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -74,8 +74,8 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public ConfigurationSection saveDownloader() {
-        ConfigurationSection section = new MemoryConfiguration();
+    public YamlConfiguration saveDownloader() {
+        YamlConfiguration section = new YamlConfiguration();
         section.set("endpoint", endpoint);
         section.set("username", username);
         section.set("password", password);

@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
-import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface Downloader extends AutoCloseable {
 
-    ConfigurationSection saveDownloader();
+    YamlConfiguration saveDownloader();
 
     String getEndpoint();
 
