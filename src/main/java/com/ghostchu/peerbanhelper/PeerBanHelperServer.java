@@ -35,6 +35,7 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip2.model.AsnResponse;
@@ -65,7 +66,6 @@ import java.util.logging.Level;
 public class PeerBanHelperServer {
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final YamlConfiguration profile;
-    @Getter
     private final List<Downloader> downloaders = new ArrayList<>();
     @Getter
     private final long banDuration;
@@ -682,6 +682,10 @@ public class PeerBanHelperServer {
             banMetadata.setReverseLookup("N/A");
         }
         Main.getEventBus().post(new PeerBanEvent(peer.getAddress(), banMetadata, torrentObj, peer));
+    }
+
+    public List<Downloader> getDownloaders() {
+        return ImmutableList.copyOf(downloaders);
     }
 
     /**

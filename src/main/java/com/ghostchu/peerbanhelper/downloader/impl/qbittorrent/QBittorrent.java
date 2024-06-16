@@ -111,6 +111,7 @@ public class QBittorrent implements Downloader {
     @Override
     public YamlConfiguration saveDownloader() {
         YamlConfiguration section = new YamlConfiguration();
+        section.set("type", "qbittorrent");
         section.set("endpoint", webuiEndpoint);
         section.set("username", username);
         section.set("password", password);

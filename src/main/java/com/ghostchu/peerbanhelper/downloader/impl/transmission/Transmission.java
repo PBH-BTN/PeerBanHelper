@@ -76,6 +76,7 @@ public class Transmission implements Downloader {
     @Override
     public YamlConfiguration saveDownloader() {
         YamlConfiguration section = new YamlConfiguration();
+        section.set("type", "transmission");
         section.set("endpoint", endpoint);
         section.set("username", username);
         section.set("password", password);

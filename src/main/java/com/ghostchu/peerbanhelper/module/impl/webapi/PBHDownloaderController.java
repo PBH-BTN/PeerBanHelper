@@ -42,7 +42,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     public void onEnable() {
         getServer().getWebContainer().javalin()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
-                .put("/api/downloaders/{downloaderName}", this::handleDownloaderPut, Role.USER_WRITE)
+                .put("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPut(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
                 .post("/api/downloaders/test", this::handleDownloaderTest, Role.USER_WRITE)
                 .delete("/api/downloaders/{downloaderName}", ctx -> handleDownloaderDelete(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
                 .get("/api/downloaders/{downloaderName}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderName")), Role.USER_READ)
@@ -51,7 +51,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     }
 
 
-    private void handleDownloaderPut(Context ctx) {
+    private void handleDownloaderPut(Context ctx, String downloaderName) {
         DraftDownloader draftDownloader = ctx.bodyAsClass(DraftDownloader.class);
         YamlConfiguration configuration = new YamlConfiguration();
         try {
@@ -67,7 +67,10 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(Map.of("message", "Unable to create/update downloader, unsupported downloader type?"));
             return;
         }
-        getServer().getDownloaders().stream().filter(d -> d.getName().equals(draftDownloader.name())).forEach(d -> getServer().unregisterDownloader(d));
+        // 可能重命名了？
+        getServer().getDownloaders().stream()
+                .filter(d -> d.getName().equals(downloaderName))
+                .forEach(d -> getServer().unregisterDownloader(d));
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.OK);
             ctx.json(Map.of("message", "Download created/updated!"));
