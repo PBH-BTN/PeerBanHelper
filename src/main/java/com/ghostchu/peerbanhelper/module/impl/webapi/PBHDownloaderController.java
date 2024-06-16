@@ -55,7 +55,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         DraftDownloader draftDownloader = ctx.bodyAsClass(DraftDownloader.class);
         YamlConfiguration configuration = new YamlConfiguration();
         try {
-            configuration.loadFromString(draftDownloader.yaml());
+            configuration.loadFromString(draftDownloader.config());
         } catch (InvalidConfigurationException e) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("message", "Invalid configuration: " + e.getMessage()));
@@ -87,7 +87,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         DraftDownloader draftDownloader = ctx.bodyAsClass(DraftDownloader.class);
         YamlConfiguration configuration = new YamlConfiguration();
         try {
-            configuration.loadFromString(draftDownloader.yaml());
+            configuration.loadFromString(draftDownloader.config());
         } catch (InvalidConfigurationException e) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("message", "Invalid configuration: " + e.getMessage()));
@@ -186,7 +186,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
     }
 
-    record DraftDownloader(String name, String yaml) {
+    record DraftDownloader(String name, String config) {
     }
 
     record DownloaderStatus(DownloaderLastStatus lastStatus, long activeTorrents, long activePeers) {
