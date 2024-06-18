@@ -44,6 +44,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         getServer().getWebContainer().javalin()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
                 .put("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPut(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
+                .patch("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPut(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
                 .post("/api/downloaders/test", this::handleDownloaderTest, Role.USER_WRITE)
                 .delete("/api/downloaders/{downloaderName}", ctx -> handleDownloaderDelete(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
                 .get("/api/downloaders/{downloaderName}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderName")), Role.USER_READ)
