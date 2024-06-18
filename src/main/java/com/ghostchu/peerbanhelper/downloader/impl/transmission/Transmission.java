@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.google.gson.JsonObject;
 import cordelia.client.TrClient;
 import cordelia.client.TypedResponse;
 import cordelia.rpc.*;
@@ -71,6 +72,38 @@ public class Transmission implements Downloader {
             httpVersionEnum = HttpClient.Version.HTTP_1_1;
         }
         return new Transmission(name, endpoint, username, password, pbhServerAddress + "/blocklist/transmission", verifySSL, httpVersionEnum, rpcUrl);
+    }
+
+    public static Transmission loadFromConfig(String name, String pbhServerAddress, JsonObject section) {
+        String endpoint = section.get("endpoint").getAsString();
+        if (endpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
+            endpoint = endpoint.substring(0, endpoint.length() - 1);
+        }
+        String username = section.get("username").getAsString();
+        String password = section.get("password").getAsString();
+        String httpVersion = section.get("http-version").getAsString();
+        String rpcUrl = section.get("rpc-url").getAsString();
+        boolean verifySSL = section.get("verify-ssl").getAsBoolean();
+        HttpClient.Version httpVersionEnum;
+        try {
+            httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
+        } catch (IllegalArgumentException e) {
+            httpVersionEnum = HttpClient.Version.HTTP_1_1;
+        }
+        return new Transmission(name, endpoint, username, password, pbhServerAddress + "/blocklist/transmission", verifySSL, httpVersionEnum, rpcUrl);
+    }
+
+    @Override
+    public JsonObject saveDownloaderJson() {
+        JsonObject section = new JsonObject();
+        section.addProperty("type", "transmission");
+        section.addProperty("endpoint", endpoint);
+        section.addProperty("username", username);
+        section.addProperty("password", password);
+        section.addProperty("http-version", httpVersion.name());
+        section.addProperty("verify-ssl", verifySSL);
+        section.addProperty("rpc-url", blocklistUrl);
+        return section;
     }
 
     @Override

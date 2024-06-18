@@ -7,9 +7,10 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
-import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,18 +51,11 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .get("/api/downloaders/{downloaderName}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderName"), ctx.pathParam("torrentId")), Role.USER_READ);
     }
 
-
     private void handleDownloaderPut(Context ctx, String downloaderName) {
-        DraftDownloader draftDownloader = ctx.bodyAsClass(DraftDownloader.class);
-        YamlConfiguration configuration = new YamlConfiguration();
-        try {
-            configuration.loadFromString(draftDownloader.config());
-        } catch (InvalidConfigurationException e) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Invalid configuration: " + e.getMessage()));
-            return;
-        }
-        Downloader downloader = getServer().createDownloader(draftDownloader.name(), configuration);
+        JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
+        String name = draftDownloader.get("name").getAsString();
+        JsonObject config = draftDownloader.get("config").getAsJsonObject();
+        Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("message", "Unable to create/update downloader, unsupported downloader type?"));
@@ -87,16 +81,15 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     }
 
     private void handleDownloaderTest(Context ctx) {
-        DraftDownloader draftDownloader = ctx.bodyAsClass(DraftDownloader.class);
-        YamlConfiguration configuration = new YamlConfiguration();
-        try {
-            configuration.loadFromString(draftDownloader.config());
-        } catch (InvalidConfigurationException e) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Invalid configuration: " + e.getMessage()));
+        JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
+        String name = draftDownloader.get("name").getAsString();
+        JsonObject config = draftDownloader.get("config").getAsJsonObject();
+        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
+            ctx.status(HttpStatus.CONFLICT);
+            ctx.json(Map.of("message", "The downloader name conflict with exists downloader"));
             return;
         }
-        Downloader downloader = getServer().createDownloader(draftDownloader.name(), configuration);
+        Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("message", "Unable to create downloader, unsupported downloader type?"));
@@ -135,7 +128,11 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             return;
         }
         Downloader downloader = selected.get();
-        List<PeerMetadata> peerWrappers = getServer().getLivePeersSnapshot().values().stream().filter(p -> p.getDownloader().equals(downloader.getName())).toList();
+        List<PeerMetadata> peerWrappers = getServer().getLivePeersSnapshot().values()
+                .stream()
+                .filter(p -> p.getDownloader().equals(downloader.getName()))
+                .filter(p -> p.getTorrent().getHash().equals(torrentId))
+                .toList();
         ctx.status(HttpStatus.OK);
         ctx.json(peerWrappers);
     }
@@ -186,12 +183,13 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(downloaders);
     }
 
+
     @Override
     public void onDisable() {
 
     }
 
-    record DraftDownloader(String name, String config) {
+    record DraftDownloader(String name, JsonObject config) {
     }
 
     record DownloaderStatus(DownloaderLastStatus lastStatus, long activeTorrents, long activePeers, String config) {

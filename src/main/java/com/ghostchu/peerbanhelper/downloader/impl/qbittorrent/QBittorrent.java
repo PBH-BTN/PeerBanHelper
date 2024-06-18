@@ -86,6 +86,28 @@ public class QBittorrent implements Downloader {
         this.password = password;
     }
 
+    public static QBittorrent loadFromConfig(String name, JsonObject section) {
+        String webuiEndpoint = section.get("endpoint").getAsString();
+        if (webuiEndpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
+            webuiEndpoint = webuiEndpoint.substring(0, webuiEndpoint.length() - 1);
+        }
+        String username = section.get("username").getAsString();
+        String password = section.get("password").getAsString();
+        JsonObject basicAuth = section.getAsJsonObject("basic-auth");
+        String baUser = basicAuth.get("user").getAsString();
+        String baPass = basicAuth.get("pass").getAsString();
+        String httpVersion = section.get("http-version").getAsString();
+        boolean incrementBan = section.get("increment-ban").getAsBoolean();
+        boolean verifySSL = section.get("verify-ssl").getAsBoolean();
+        HttpClient.Version httpVersionEnum;
+        try {
+            httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
+        } catch (IllegalArgumentException e) {
+            httpVersionEnum = HttpClient.Version.HTTP_1_1;
+        }
+        return new QBittorrent(name, webuiEndpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum, incrementBan);
+    }
+
     public static QBittorrent loadFromConfig(String name, ConfigurationSection section) {
         String webuiEndpoint = section.getString("endpoint");
         if (webuiEndpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
@@ -106,6 +128,21 @@ public class QBittorrent implements Downloader {
         }
 
         return new QBittorrent(name, webuiEndpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum, incrementBan);
+    }
+
+    @Override
+    public JsonObject saveDownloaderJson() {
+        JsonObject section = new JsonObject();
+        section.addProperty("type", "qbittorrent");
+        section.addProperty("endpoint", webuiEndpoint);
+        section.addProperty("username", username);
+        section.addProperty("password", password);
+        section.addProperty("basic-auth.user", baUser);
+        section.addProperty("basic-auth.pass", baPass);
+        section.addProperty("http-version", httpVersion.name());
+        section.addProperty("increment-ban", incrementBan);
+        section.addProperty("verify-ssl", verifySSL);
+        return section;
     }
 
     @Override

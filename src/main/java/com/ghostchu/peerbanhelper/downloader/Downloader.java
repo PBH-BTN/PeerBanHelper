@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.google.gson.JsonObject;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +15,8 @@ import java.util.List;
 public interface Downloader extends AutoCloseable {
 
     YamlConfiguration saveDownloader();
+
+    JsonObject saveDownloaderJson();
 
     String getEndpoint();
 

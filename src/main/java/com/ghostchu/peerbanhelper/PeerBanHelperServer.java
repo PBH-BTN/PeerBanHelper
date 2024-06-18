@@ -37,6 +37,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
@@ -148,6 +149,17 @@ public class PeerBanHelperServer {
     public Downloader createDownloader(String client, ConfigurationSection downloaderSection) {
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
+            case "transmission" ->
+                    downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
+        }
+        return downloader;
+
+    }
+
+    public Downloader createDownloader(String client, JsonObject downloaderSection) {
+        Downloader downloader = null;
+        switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
