@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
+import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
@@ -115,12 +116,16 @@ public class Main {
     }
 
     private static void initGUI(String[] args) {
+        boolean useJavaFx = Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("javafx"));
         if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
                 || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
             guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         } else {
-            //guiManager = new PBHGuiManager(new SwingGuiImpl(args));
-            guiManager = new PBHGuiManager(new JavaFxImpl(args));
+            if (useJavaFx) {
+                guiManager = new PBHGuiManager(new JavaFxImpl(args));
+            } else {
+                guiManager = new PBHGuiManager(new SwingGuiImpl(args));
+            }
         }
         guiManager.setup();
     }

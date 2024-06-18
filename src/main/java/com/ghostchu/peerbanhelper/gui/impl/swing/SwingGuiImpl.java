@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.window.MainWindow;
@@ -37,13 +38,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Override
     public void setup() {
         super.setup();
-//        if (SystemInfo.isMacOS) {
-//            System.setProperty("apple.laf.useScreenMenuBar", "true");
-//            System.setProperty("apple.awt.application.appearance", "system");
-//        }
-//        OsThemeDetector detector = OsThemeDetector.getDetector();
-//        onColorThemeChanged();
-//        detector.registerListener(isDark -> onColorThemeChanged());
+        FlatIntelliJLaf.setup();
     }
 
     @Override
@@ -68,8 +63,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     private void initLoggerRedirection() {
         SwingLoggerAppender.registerListener(event -> {
             try {
-                invokeLater(() ->
-                {
+                invokeLater(() -> {
                     JTextArea textArea = mainWindow.getLoggerTextArea();
                     try {
                         textArea.append(event.message());
@@ -97,16 +91,6 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         super.sync();
     }
 
-    private void onColorThemeChanged() {
-//        OsThemeDetector detector = OsThemeDetector.getDetector();
-//        boolean isDarkThemeUsed = detector.isDark();
-//        if (isDarkThemeUsed) {
-//            setColorTheme(FlatDarculaLaf.class);
-//        } else {
-//            setColorTheme(FlatIntelliJLaf.class);
-//        }
-    }
-
     public void setColorTheme(Class<?> clazz) {
         if (clazz.getName().equals(UIManager.getLookAndFeel().getClass().getName()))
             return;
@@ -120,7 +104,6 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void close() {
-        // mainWindow.getWebviewManager().close();
     }
 
     @Override
