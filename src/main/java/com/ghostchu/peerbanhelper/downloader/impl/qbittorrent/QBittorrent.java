@@ -18,9 +18,11 @@ import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import inet.ipaddr.IPAddress;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -38,33 +40,19 @@ import java.util.*;
 public class QBittorrent implements Downloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(QBittorrent.class);
     private final String apiEndpoint;
-    @Getter
-    private final String webuiEndpoint;
-    private final String username;
-    private final String password;
-    private final String name;
     private final HttpClient httpClient;
-    private final boolean incrementBan;
-    private final String baUser;
-    private final String baPass;
-    private final HttpClient.Version httpVersion;
-    private final boolean verifySSL;
+    private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
+    private String name;
 
-    public QBittorrent(String name, String webuiEndpoint, String username, String password, String baUser, String baPass, boolean verifySSL, HttpClient.Version httpVersion, boolean incrementBan) {
-        this.name = name;
-        this.webuiEndpoint = webuiEndpoint;
-        this.apiEndpoint = webuiEndpoint + "/api/v2";
-        this.incrementBan = incrementBan;
-        this.baUser = baUser;
-        this.baPass = baPass;
-        this.httpVersion = httpVersion;
-        this.verifySSL = verifySSL;
+    public QBittorrent(String name, Config config) {
+        this.config = config;
+        this.apiEndpoint = config.getEndpoint() + "/api/v2";
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         Methanol.Builder builder = Methanol
                 .newBuilder()
-                .version(httpVersion)
+                .version(HttpClient.Version.valueOf(config.getHttpversion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(Main.getUserAgent())
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
@@ -74,90 +62,55 @@ public class QBittorrent implements Downloader {
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(baUser, baPass.toCharArray());
+                        return new PasswordAuthentication(config.getBasicauth().getUser(), config.getBasicauth().getPass().toCharArray());
                     }
                 })
                 .cookieHandler(cm);
-        if (!verifySSL && HTTPUtil.getIgnoreSslContext() != null) {
+        if (!config.getVerifyssl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
-        this.username = username;
-        this.password = password;
     }
 
     public static QBittorrent loadFromConfig(String name, JsonObject section) {
-        String webuiEndpoint = section.get("endpoint").getAsString();
-        if (webuiEndpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
-            webuiEndpoint = webuiEndpoint.substring(0, webuiEndpoint.length() - 1);
-        }
-        String username = section.get("username").getAsString();
-        String password = section.get("password").getAsString();
-        JsonObject basicAuth = section.getAsJsonObject("basic-auth");
-        String baUser = basicAuth.get("user").getAsString();
-        String baPass = basicAuth.get("pass").getAsString();
-        String httpVersion = section.get("http-version").getAsString();
-        boolean incrementBan = section.get("increment-ban").getAsBoolean();
-        boolean verifySSL = section.get("verify-ssl").getAsBoolean();
-        HttpClient.Version httpVersionEnum;
-        try {
-            httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
-        } catch (IllegalArgumentException e) {
-            httpVersionEnum = HttpClient.Version.HTTP_1_1;
-        }
-        return new QBittorrent(name, webuiEndpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum, incrementBan);
+        Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
+        return new QBittorrent(name, config);
     }
 
     public static QBittorrent loadFromConfig(String name, ConfigurationSection section) {
-        String webuiEndpoint = section.getString("endpoint");
-        if (webuiEndpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
-            webuiEndpoint = webuiEndpoint.substring(0, webuiEndpoint.length() - 1);
-        }
-        String username = section.getString("username");
-        String password = section.getString("password");
-        String baUser = section.getString("basic-auth.user");
-        String baPass = section.getString("basic-auth.pass");
-        String httpVersion = section.getString("http-version", "HTTP_1_1");
-        boolean incrementBan = section.getBoolean("increment-ban");
-        boolean verifySSL = section.getBoolean("verify-ssl", true);
-        HttpClient.Version httpVersionEnum;
-        try {
-            httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
-        } catch (IllegalArgumentException e) {
-            httpVersionEnum = HttpClient.Version.HTTP_1_1;
-        }
-
-        return new QBittorrent(name, webuiEndpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum, incrementBan);
+        Config config = Config.readFromYaml(section);
+        return new QBittorrent(name, config);
     }
 
     @Override
     public JsonObject saveDownloaderJson() {
-        JsonObject section = new JsonObject();
-        section.addProperty("type", "qbittorrent");
-        section.addProperty("endpoint", webuiEndpoint);
-        section.addProperty("username", username);
-        section.addProperty("password", password);
-        section.addProperty("basic-auth.user", baUser);
-        section.addProperty("basic-auth.pass", baPass);
-        section.addProperty("http-version", httpVersion.name());
-        section.addProperty("increment-ban", incrementBan);
-        section.addProperty("verify-ssl", verifySSL);
-        return section;
+        return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
     public YamlConfiguration saveDownloader() {
-        YamlConfiguration section = new YamlConfiguration();
-        section.set("type", "qbittorrent");
-        section.set("endpoint", webuiEndpoint);
-        section.set("username", username);
-        section.set("password", password);
-        section.set("basic-auth.user", baUser);
-        section.set("basic-auth.pass", baPass);
-        section.set("http-version", httpVersion.name());
-        section.set("increment-ban", incrementBan);
-        section.set("verify-ssl", verifySSL);
-        return section;
+        return config.saveToYaml();
+    }
+
+    public boolean login() {
+        if (isLoggedIn()) return true; // 重用 Session 会话
+        try {
+            HttpResponse<String> request = httpClient
+                    .send(MutableRequest.POST(apiEndpoint + "/auth/login",
+                                            FormBodyPublisher.newBuilder()
+                                                    .query("username", config.getUsername())
+                                                    .query("password", config.getPassword()).build())
+                                    .header("Content-Type", "application/x-www-form-urlencoded")
+                            , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+            if (request.statusCode() != 200) {
+                log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, request.statusCode(), "HTTP ERROR", request.body());
+            }
+            return request.statusCode() == 200;
+        } catch (Exception e) {
+            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage());
+            return false;
+        }
     }
 
     @Override
@@ -185,24 +138,12 @@ public class QBittorrent implements Downloader {
         return resp.statusCode() == 200;
     }
 
-    public boolean login() {
-        if (isLoggedIn()) return true; // 重用 Session 会话
-        try {
-            HttpResponse<String> request = httpClient
-                    .send(MutableRequest.POST(apiEndpoint + "/auth/login",
-                                            FormBodyPublisher.newBuilder()
-                                                    .query("username", username)
-                                                    .query("password", password).build())
-                                    .header("Content-Type", "application/x-www-form-urlencoded")
-                            , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-
-            if (request.statusCode() != 200) {
-                log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, request.statusCode(), "HTTP ERROR", request.body());
-            }
-            return request.statusCode() == 200;
-        } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage());
-            return false;
+    @Override
+    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
+        if (removed != null && removed.isEmpty() && added != null && config.getIncrementban()) {
+            setBanListIncrement(added);
+        } else {
+            setBanListFull(fullList);
         }
     }
 
@@ -277,13 +218,67 @@ public class QBittorrent implements Downloader {
         return Arrays.stream(ips).map(ip -> new PeerAddress(ip, 0)).toList();
     }
 
+    @NoArgsConstructor
+    @Data
+    public static class Config {
 
-    @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
-        if (removed != null && removed.isEmpty() && added != null && incrementBan) {
-            setBanListIncrement(added);
-        } else {
-            setBanListFull(fullList);
+        @SerializedName("type")
+        private String type;
+        @SerializedName("endpoint")
+        private String endpoint;
+        @SerializedName("username")
+        private String username;
+        @SerializedName("password")
+        private String password;
+        @SerializedName("basic-auth")
+        private BasicauthDTO basicauth;
+        @SerializedName("http-version")
+        private String httpversion;
+        @SerializedName("increment-ban")
+        private Boolean incrementban;
+        @SerializedName("verify-ssl")
+        private Boolean verifyssl;
+
+        public static Config readFromYaml(ConfigurationSection section) {
+            Config config = new Config();
+            config.setType("qbittorrent");
+            config.setEndpoint(section.getString("endpoint"));
+            if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
+                config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
+            }
+            config.setUsername(section.getString("username"));
+            config.setPassword(section.getString("password"));
+            Config.BasicauthDTO basicauthDTO = new BasicauthDTO();
+            basicauthDTO.setUser(section.getString("basic-auth.user"));
+            basicauthDTO.setPass(section.getString("basic-auth.pass"));
+            config.setBasicauth(basicauthDTO);
+            config.setHttpversion(section.getString("http-version", "HTTP_1_1"));
+            config.setIncrementban(section.getBoolean("increment-ban"));
+            config.setVerifyssl(section.getBoolean("verify-ssl", true));
+            return config;
+        }
+
+        public YamlConfiguration saveToYaml() {
+            YamlConfiguration section = new YamlConfiguration();
+            section.set("type", "qbittorrent");
+            section.set("endpoint", endpoint);
+            section.set("username", username);
+            section.set("password", password);
+            section.set("basic-auth.user", Objects.requireNonNullElse(basicauth.user, ""));
+            section.set("basic-auth.pass", Objects.requireNonNullElse(basicauth.pass, ""));
+            section.set("http-version", httpversion);
+            section.set("increment-ban", incrementban);
+            section.set("verify-ssl", verifyssl);
+            return section;
+        }
+
+        @NoArgsConstructor
+        @Data
+        public static class BasicauthDTO {
+            @SerializedName("user")
+            private String user;
+            @SerializedName("pass")
+            private String pass;
         }
     }
 
