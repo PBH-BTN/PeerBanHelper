@@ -139,7 +139,9 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     }
 
     private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderName) {
-        Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
+        Optional<Downloader> selected = getServer().getDownloaders().stream()
+                .filter(d -> d.getName().equals(downloaderName))
+                .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
             ctx.json(Map.of("message", "The requested downloader not registered in PeerBanHelper configuration"));
@@ -155,7 +157,9 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     }
 
     private void handleDownloaderStatus(@NotNull Context ctx, String downloaderName) {
-        Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
+        Optional<Downloader> selected = getServer().getDownloaders().stream()
+                .filter(d -> d.getName().equals(downloaderName))
+                .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
             ctx.json(Map.of("message", "The requested downloader not registered in PeerBanHelper configuration"));
@@ -173,7 +177,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .count();
 
-        String config = downloader.saveDownloader().saveToString();
+        JsonObject config = downloader.saveDownloaderJson();
         ctx.status(HttpStatus.OK);
         ctx.json(new DownloaderStatus(lastStatus, activeTorrents, activePeers, config));
     }
@@ -193,7 +197,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     record DraftDownloader(String name, JsonObject config) {
     }
 
-    record DownloaderStatus(DownloaderLastStatus lastStatus, long activeTorrents, long activePeers, String config) {
+    record DownloaderStatus(DownloaderLastStatus lastStatus, long activeTorrents, long activePeers, JsonObject config) {
 
     }
 

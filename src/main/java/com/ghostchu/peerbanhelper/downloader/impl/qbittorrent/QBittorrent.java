@@ -46,6 +46,7 @@ public class QBittorrent implements Downloader {
     private String name;
 
     public QBittorrent(String name, Config config) {
+        this.name = name;
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
         CookieManager cm = new CookieManager();
