@@ -311,7 +311,11 @@ public class PeerBanHelperServer {
         if (token == null) {
             token = getMainConfig().getString("server.token");
         }
-        this.webContainer = new JavalinWebContainer(httpdPort, token);
+        String host = getMainConfig().getString("server.address");
+        if (host.equals("0.0.0.0") || host.equals("::")) {
+            host = null;
+        }
+        this.webContainer = new JavalinWebContainer(host, httpdPort, token);
     }
 
     private void registerTimer() {
