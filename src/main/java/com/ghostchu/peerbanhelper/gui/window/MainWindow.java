@@ -46,13 +46,11 @@ public class MainWindow extends JFrame {
     public MainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
         setJMenuBar(setupMenuBar());
-        //sendCommandBtn.addActionListener(e -> guiManager.setColorTheme(FlatDarculaLaf.class));
-        setTitle("PeerBanHelper (GUI) - v" + Main.getMeta().getVersion() + "(" + Main.getMeta().getAbbrev() + ")");
+        setTitle(String.format(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         setSize(1000, 600);
         setContentPane(mainPanel);
         setupTabbedPane();
         setupSystemTray();
-        //setupLoggerForward();
         setComponents();
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowListener() {
@@ -152,7 +150,7 @@ public class MainWindow extends JFrame {
     private Component generateAboutMenu() {
         JMenu aboutMenu = new JMenu(Lang.GUI_MENU_ABOUT);
         JMenuItem viewOnGithub = new JMenuItem(Lang.ABOUT_VIEW_GITHUB);
-        viewOnGithub.addActionListener(e -> swingGUI.openWebpage(URI.create("https://github.com/PBH-BTN/PeerBanHelper")));
+        viewOnGithub.addActionListener(e -> swingGUI.openWebpage(URI.create(Lang.GITHUB_PAGE)));
         aboutMenu.add(viewOnGithub);
         return aboutMenu;
     }
@@ -160,7 +158,7 @@ public class MainWindow extends JFrame {
     private JMenu generateWebUIMenu() {
         JMenu webUIMenu = new JMenu(Lang.GUI_MENU_WEBUI);
         JMenuItem openWebUIMenuItem = new JMenuItem(Lang.GUI_MENU_WEBUI_OPEN);
-        openWebUIMenuItem.addActionListener(e -> swingGUI.openWebpage(URI.create("http://127.0.0.1:" + Main.getServer().getWebContainer().javalin().port())));
+        openWebUIMenuItem.addActionListener(e -> swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port())));
         webUIMenu.add(openWebUIMenuItem);
         return webUIMenu;
     }

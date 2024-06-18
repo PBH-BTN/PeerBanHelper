@@ -8,7 +8,7 @@ public class URLUtil {
     /**
      * 在指定url后追加参数
      *
-     * @param url UR类地址
+     * @param url  UR类地址
      * @param data 参数集合 key = value
      * @return 新 URL
      */
@@ -21,7 +21,7 @@ public class URLUtil {
         String paramStr = param.toString();
         paramStr = paramStr.substring(0, paramStr.length() - 1);
         if (newUrl.contains("?")) {
-            newUrl += "&" +paramStr;
+            newUrl += "&" + paramStr;
         } else {
             newUrl += "?" + paramStr;
         }
@@ -31,7 +31,7 @@ public class URLUtil {
     /**
      * 获取指定url中的某个参数
      *
-     * @param url URl 地址
+     * @param url  URl 地址
      * @param name 参数名称
      * @return 参数值
      */

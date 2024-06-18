@@ -9,6 +9,7 @@ public class InMemoryMetrics implements BasicMetrics {
     private long checks = 0;
     private long bans = 0;
     private long unbans = 0;
+
     @Override
     public long getCheckCounter() {
         return checks;

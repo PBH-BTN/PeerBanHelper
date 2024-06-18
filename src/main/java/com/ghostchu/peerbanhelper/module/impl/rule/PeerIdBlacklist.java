@@ -55,7 +55,6 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
     }
 
 
-
     @Override
     public void onEnable() {
         reloadConfig();

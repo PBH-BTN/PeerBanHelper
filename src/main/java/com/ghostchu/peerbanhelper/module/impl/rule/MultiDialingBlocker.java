@@ -171,15 +171,14 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                             return new BanResult(this, PeerAction.BAN, "Multi-dialing hunting",
                                     String.format(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED,
                                             peerSubnet, peerIpStr));
-                        }
-                        else {
+                        } else {
                             huntingList.invalidate(torrentSubnetStr);
                         }
                     }
-                } catch (ExecutionException ignored) {}
+                } catch (ExecutionException ignored) {
+                }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("shouldBanPeer exception", e);
         }
 
@@ -221,10 +220,10 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
         }
     }
 
-    public record HuntingTarget (
+    public record HuntingTarget(
             String hashSubnet,
             long createTime
-    ){
+    ) {
     }
 }
 

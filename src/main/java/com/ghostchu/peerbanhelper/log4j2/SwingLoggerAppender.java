@@ -10,21 +10,21 @@ import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
-import javax.swing.*;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
 
-import static javax.swing.SwingUtilities.invokeLater;
 import static org.apache.logging.log4j.core.layout.PatternLayout.createDefaultLayout;
 
 @Plugin(name = "SwingLoggerAppender", category = "Core", elementType = "appender", printObject = true)
 public class SwingLoggerAppender extends AbstractAppender {
-    private static final ArrayList<JTextArea> textAreas = new ArrayList<>();
+    private static final Set<Consumer<LoggerEvent>> listeners = new HashSet<>();
 
-    private final int maxLines;
+    public static int maxLinesSetting = 300;
 
     private SwingLoggerAppender(String name, Layout<?> layout, Filter filter, int maxLines, boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions, new Property[0]);
-        this.maxLines = maxLines;
+        this.maxLinesSetting = maxLines;
     }
 
     @SuppressWarnings("unused")
@@ -34,6 +34,7 @@ public class SwingLoggerAppender extends AbstractAppender {
                                                      @PluginAttribute("ignoreExceptions") boolean ignoreExceptions,
                                                      @PluginElement("Layout") Layout<?> layout,
                                                      @PluginElement("Filters") Filter filter) {
+        maxLinesSetting = maxLines;
         if (name == null) {
             LOGGER.error("No name provided for JTextAreaAppender");
             return null;
@@ -45,36 +46,16 @@ public class SwingLoggerAppender extends AbstractAppender {
         return new SwingLoggerAppender(name, layout, filter, maxLines, ignoreExceptions);
     }
 
-    // Add the target JTextArea to be populated and updated by the logging information.
-    public static void addLog4j2TextAreaAppender(final JTextArea textArea) {
-        SwingLoggerAppender.textAreas.add(textArea);
+    public static void registerListener(Consumer<LoggerEvent> listener) {
+        listeners.add(listener);
     }
 
     @Override
     public void append(LogEvent event) {
         String message = new String(this.getLayout().toByteArray(event));
+        listeners.forEach(c -> c.accept(new LoggerEvent(message, event, maxLinesSetting)));
+    }
 
-        // Append formatted message to text area using the Thread.
-        try {
-            invokeLater(() ->
-            {
-                for (JTextArea textArea : textAreas) {
-                    try {
-                        textArea.append(message);
-                        int linesToCut = (textArea.getLineCount() - maxLines) + (maxLines / 2);
-                        linesToCut = Math.min(linesToCut, textArea.getLineCount());
-                        if (linesToCut > 0) {
-                            int posOfLastLineToTrunk = textArea.getLineEndOffset(linesToCut - 1);
-                            textArea.replaceRange("", 0, posOfLastLineToTrunk);
-                        }
-                        textArea.setCaretPosition(textArea.getDocument().getLength());
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                }
-            });
-        } catch (IllegalStateException exception) {
-            exception.printStackTrace();
-        }
+    public record LoggerEvent(String message, LogEvent event, int maxLines) {
     }
 }

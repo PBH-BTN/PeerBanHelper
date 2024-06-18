@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.database;
 
 import org.jetbrains.annotations.Nullable;
 
-public record BanLog (
+public record BanLog(
         long banAt,
         long unbanAt,
         String peerIp,
@@ -18,5 +18,5 @@ public record BanLog (
         @Nullable
         String module,
         String description
-){
+) {
 }

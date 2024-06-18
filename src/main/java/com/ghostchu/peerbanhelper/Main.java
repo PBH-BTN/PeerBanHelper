@@ -6,7 +6,7 @@ import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
 import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
-import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
+import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
@@ -119,7 +119,8 @@ public class Main {
                 || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
             guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         } else {
-            guiManager = new PBHGuiManager(new SwingGuiImpl(args));
+            //guiManager = new PBHGuiManager(new SwingGuiImpl(args));
+            guiManager = new PBHGuiManager(new JavaFxImpl(args));
         }
         guiManager.setup();
     }

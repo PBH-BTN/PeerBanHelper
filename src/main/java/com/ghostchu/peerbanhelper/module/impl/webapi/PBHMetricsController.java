@@ -24,7 +24,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
     private BasicMetrics metrics;
 
     public PBHMetricsController(PeerBanHelperServer server, YamlConfiguration profile) {
-       super(server, profile);
+        super(server, profile);
     }
 
     @Override
