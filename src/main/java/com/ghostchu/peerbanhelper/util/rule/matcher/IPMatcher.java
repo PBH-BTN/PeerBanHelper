@@ -4,7 +4,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatcher;
-import com.ghostchu.peerbanhelper.util.rule.SubRuleType;
+import com.ghostchu.peerbanhelper.util.rule.RuleType;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import inet.ipaddr.IPAddress;
@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
@@ -27,7 +26,7 @@ public class IPMatcher extends RuleMatcher {
     private BloomFilter<String> bloomFilter;
 
     public IPMatcher(String ruleId, String ruleName, Object... ruleData) {
-        super(SubRuleType.IP, ruleId, ruleName, ruleData);
+        super(RuleType.IP, ruleId, ruleName, ruleData);
     }
 
     @Override
@@ -61,17 +60,12 @@ public class IPMatcher extends RuleMatcher {
     }
 
     @Override
-    public Map<String, Object> metadata() {
-        return Map.of("rule", ruleName);
-    }
-
-    @Override
     public @NotNull String matcherName() {
         return Lang.RULE_MATCHER_SUB_RULE;
     }
 
     @Override
     public String matcherIdentifier() {
-        return "peerbanhelper:ipbanmatcher";
+        return "peerbanhelper:ipmatcher";
     }
 }
