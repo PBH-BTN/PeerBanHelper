@@ -43,8 +43,8 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     public void onEnable() {
         getServer().getWebContainer().javalin()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
-                .put("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPut(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
-                .patch("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPut(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
+                .put("/api/downloaders", this::handleDownloaderPut, Role.USER_WRITE)
+                .patch("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPatch(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
                 .post("/api/downloaders/test", this::handleDownloaderTest, Role.USER_WRITE)
                 .delete("/api/downloaders/{downloaderName}", ctx -> handleDownloaderDelete(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
                 .get("/api/downloaders/{downloaderName}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderName")), Role.USER_READ)
@@ -52,14 +52,39 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .get("/api/downloaders/{downloaderName}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderName"), ctx.pathParam("torrentId")), Role.USER_READ);
     }
 
-    private void handleDownloaderPut(Context ctx, String downloaderName) {
+    private void handleDownloaderPut(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Unable to create/update downloader, unsupported downloader type?"));
+            ctx.json(Map.of("message", "Unable to create downloader, unsupported downloader type?"));
+            return;
+        }
+        if (getServer().registerDownloader(downloader)) {
+            ctx.status(HttpStatus.OK);
+            ctx.json(Map.of("message", "Download created!"));
+        } else {
+            ctx.status(HttpStatus.BAD_REQUEST);
+            ctx.json(Map.of("message", "Unable to create downloader, same name downloader already registered!"));
+        }
+        try {
+            getServer().saveDownloaders();
+        } catch (IOException e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            ctx.json(Map.of("message", "Unable to create downloader, I/O error: " + e.getMessage()));
+        }
+    }
+
+    private void handleDownloaderPatch(Context ctx, String downloaderName) {
+        JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
+        String name = draftDownloader.get("name").getAsString();
+        JsonObject config = draftDownloader.get("config").getAsJsonObject();
+        Downloader downloader = getServer().createDownloader(name, config);
+        if (downloader == null) {
+            ctx.status(HttpStatus.BAD_REQUEST);
+            ctx.json(Map.of("message", "Unable to update downloader, unsupported downloader type?"));
             return;
         }
         // 可能重命名了？
@@ -68,16 +93,16 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .forEach(d -> getServer().unregisterDownloader(d));
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", "Download created/updated!"));
+            ctx.json(Map.of("message", "Downloader updated!"));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Unable to create/update downloader, same name downloader already registered (and failed to remove)!"));
+            ctx.json(Map.of("message", "Unable to update downloader, same name downloader already registered (and failed to remove)!"));
         }
         try {
             getServer().saveDownloaders();
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(Map.of("message", "Unable to create/update downloader, I/O error: " + e.getMessage()));
+            ctx.json(Map.of("message", "Unable to update downloader, I/O error: " + e.getMessage()));
         }
     }
 
