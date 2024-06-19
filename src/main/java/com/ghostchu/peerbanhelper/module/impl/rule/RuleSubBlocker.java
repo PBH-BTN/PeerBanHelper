@@ -128,7 +128,7 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                     matchStr = ctx.getPeer().getAddress().getIp();
                 }
                 if (matcher.match(matchStr) == MatchResult.TRUE) {
-                    result.set(new CheckResult(true, matcher.metadata().get("name").toString(), String.format(Lang.MODULE_IBL_MATCH_SUB_RULE, matcher.metadata().get("name").toString())));
+                    result.set(new CheckResult(true, matcher.metadata().get("rule").toString(), String.format(Lang.MODULE_IBL_MATCH_SUB_RULE, matcher.metadata().get("rule").toString())));
                 }
                 latch.countDown();
             }));
