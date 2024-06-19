@@ -2,13 +2,13 @@ package com.ghostchu.peerbanhelper.util.rule.matcher;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
+import com.ghostchu.peerbanhelper.util.rule.RuleMatcher;
+import com.ghostchu.peerbanhelper.util.rule.SubRuleType;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import inet.ipaddr.IPAddress;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -20,26 +20,21 @@ import java.util.Map;
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class IPBanMatcher extends AbstractMatcher {
+public class IPMatcher extends RuleMatcher {
 
-    @Getter
-    private final String ruleId;
-
-    @Getter
-    private String ruleName;
     private List<IPAddress> subnets;
     private List<IPAddress> ips;
     private BloomFilter<String> bloomFilter;
 
-    public IPBanMatcher(String ruleId, String ruleName, List<IPAddress> ips, List<IPAddress> subnets) {
-        this.ruleId = ruleId;
-        setData(ruleName, ips, subnets);
+    public IPMatcher(String ruleId, String ruleName, Object... ruleData) {
+        super(SubRuleType.IP, ruleId, ruleName, ruleData);
     }
 
-    public void setData(String ruleName, List<IPAddress> ips, List<IPAddress> subnets) {
+    @Override
+    public void setData(String ruleName, Object... ruleData) {
         this.ruleName = ruleName;
-        this.ips = ips;
-        this.subnets = subnets;
+        this.ips = ruleData.length > 0 ? (List<IPAddress>) ruleData[0] : List.of();
+        this.subnets = ruleData.length > 1 ? (List<IPAddress>) ruleData[1] : List.of();
         bloomFilter = BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8), ips.size(), 0.01);
         ips.forEach(ip -> bloomFilter.put(ip.toString()));
     }

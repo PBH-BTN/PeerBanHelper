@@ -5,18 +5,16 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.RuleSubInfo;
 import com.ghostchu.peerbanhelper.database.RuleSubLog;
-import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.AbstractRuleBlocker;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
-import com.ghostchu.peerbanhelper.module.PeerAction;
+import com.ghostchu.peerbanhelper.module.PeerMatchRecord;
 import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
-import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
-import com.ghostchu.peerbanhelper.util.rule.matcher.IPBanMatcher;
+import com.ghostchu.peerbanhelper.util.rule.RuleMatcher;
+import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -27,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,57 +36,46 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * IP黑名单远程订阅模块
- */
-@Getter
 @Slf4j
-public class IPBlackRuleList extends AbstractRuleFeatureModule {
+public class RuleSubBlocker extends AbstractRuleBlocker {
 
     final private DatabaseHelper db;
-    private List<IPBanMatcher> ipBanMatchers;
+    @Getter
+    private List<RuleMatcher> ruleMatchers;
+    @Getter
     private long checkInterval = 86400000; // 默认24小时检查一次
     private ScheduledExecutorService scheduledExecutorService;
 
-    public IPBlackRuleList(PeerBanHelperServer server, YamlConfiguration profile, DatabaseHelper db) {
+    public RuleSubBlocker(PeerBanHelperServer server, YamlConfiguration profile, DatabaseHelper db) {
         super(server, profile);
         this.db = db;
     }
 
     @Override
-    public boolean isConfigurable() {
-        return true;
-    }
-
-    @Override
-    public boolean isCheckCacheable() {
-        return true;
-    }
-
-    @Override
-    public boolean needCheckHandshake() {
-        return false;
-    }
-
-    @Override
     public @NotNull String getName() {
-        return "IP Blacklist Rule List";
+        return "Rule Sub Blocker";
     }
 
     @Override
     public @NotNull String getConfigName() {
-        return "ip-address-blocker-rules";
+        return "rule-sub-blockers";
+    }
+
+    @Override
+    public Logger getLogger() {
+        return log;
     }
 
     @Override
     public void onEnable() {
+        stateMachine = ruleSmBuilder().build(getConfigName());
         ConfigurationSection config = getConfig();
         // 读取检查间隔
         checkInterval = config.getLong("check-interval", checkInterval);
@@ -95,47 +83,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
-    @Override
-    public void onDisable() {
-    }
-
-    @Override
-    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        long t1 = System.currentTimeMillis();
-        String ip = peer.getAddress().getIp();
-        List<IPBanResult> results = new ArrayList<>();
-        try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
-            ipBanMatchers.forEach(rule -> service.submit(() -> {
-                results.add(new IPBanResult(rule.getRuleName(), rule.match(ip)));
-            }));
-        }
-        AtomicReference<IPBanResult> matchRule = new AtomicReference<>();
-        boolean mr = results.stream().anyMatch(ipBanResult -> {
-            try {
-                boolean match = ipBanResult.matchResult() == MatchResult.TRUE;
-                if (match) {
-                    matchRule.set(ipBanResult);
-                }
-                return match;
-            } catch (Exception e) {
-                log.error(Lang.IP_BAN_RULE_MATCH_ERROR, e);
-                return false;
-            }
-        });
-        long t2 = System.currentTimeMillis();
-        log.debug(Lang.IP_BAN_RULE_MATCH_TIME, t2 - t1);
-        if (mr) {
-            return new BanResult(this, PeerAction.BAN, ip, String.format(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName()));
-        }
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No matches");
-    }
-
     /**
      * Reload the configuration for this module.
      */
     private void reloadConfig() {
-        if (null == ipBanMatchers) {
-            ipBanMatchers = new ArrayList<>();
+        if (null == ruleMatchers) {
+            ruleMatchers = new ArrayList<>();
         }
         ConfigurationSection config = getConfig();
         // 读取检查间隔
@@ -152,6 +105,27 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         }
     }
 
+    @Override
+    public CheckResult shouldBanPeer(PeerMatchRecord ctx) {
+        String ip = ctx.getPeer().getAddress().getIp();
+        AtomicReference<CheckResult> result = new AtomicReference<>(new CheckResult(false, null, null));
+        CountDownLatch latch = new CountDownLatch(ruleMatchers.size());
+        try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
+            ruleMatchers.forEach(matcher -> service.submit(() -> {
+                if (matcher.match(ip) == MatchResult.TRUE) {
+                    result.set(new CheckResult(true, matcher.getRuleName(), Lang.MODULE_IBL_MATCH_IP_RULE.replace("{}", matcher.getRuleName())));
+                }
+                latch.countDown();
+            }));
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return result.get();
+    }
+
     /**
      * 更新规则
      *
@@ -162,7 +136,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         String ruleId = rule.getName();
         if (!rule.getBoolean("enabled", false)) {
             // 检查ipBanMatchers是否有对应的规则，有则删除
-            ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
+            ruleMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
             // 未启用跳过更新逻辑
             return new SlimMsg(false, Lang.IP_BAN_RULE_DISABLED.replace("{}", ruleId));
         }
@@ -183,10 +157,10 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                     // 加载远程订阅文件出错,尝试从本地缓存中加载
                     if (ruleFile.exists()) {
                         // 如果一致，但ipBanMatchers没有对应的规则内容，则加载内容
-                        if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
+                        if (ruleMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
                             try {
                                 fileToIPList(name, ruleFile, ipAddresses, subnetAddresses);
-                                ipBanMatchers.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
+                                ruleMatchers.add(new IPMatcher(ruleId, name, ipAddresses, subnetAddresses));
                                 log.warn(Lang.IP_BAN_RULE_USE_CACHE, name);
                                 result.set(new SlimMsg(false, Lang.IP_BAN_RULE_USE_CACHE.replace("{}", name)));
                             } catch (IOException ex) {
@@ -217,7 +191,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         tempFile.renameTo(ruleFile);
                     } else {
                         // 如果一致，但ipBanMatchers没有对应的规则内容，则加载内容
-                        if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
+                        if (ruleMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
                             ent_count = fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
                         } else {
                             log.info(Lang.IP_BAN_RULE_NO_UPDATE, name);
@@ -228,12 +202,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                     // ip列表或者subnet列表不为空代表需要更新matcher
                     if (!ipAddresses.isEmpty() || !subnetAddresses.isEmpty()) {
                         // 如果已经存在则更新，否则添加
-                        ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
+                        ruleMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                             ele.setData(name, ipAddresses, subnetAddresses);
                             log.info(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name);
                             result.set(new SlimMsg(true, Lang.IP_BAN_RULE_UPDATE_SUCCESS.replace("{}", name)));
                         }, () -> {
-                            ipBanMatchers.add(new IPBanMatcher(ruleId, name, ipAddresses, subnetAddresses));
+                            ruleMatchers.add(new IPMatcher(ruleId, name, ipAddresses, subnetAddresses));
                             log.info(Lang.IP_BAN_RULE_LOAD_SUCCESS, name);
                             result.set(new SlimMsg(true, Lang.IP_BAN_RULE_LOAD_SUCCESS.replace("{}", name)));
                         });
@@ -400,9 +374,4 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         scheduledExecutorService = Executors.newScheduledThreadPool(1, r -> Thread.ofVirtual().name("IPBlackRuleList - Update Thread").unstarted(r));
         scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
-
-    record IPBanResult(String ruleName, MatchResult matchResult) {
-    }
 }
-
-

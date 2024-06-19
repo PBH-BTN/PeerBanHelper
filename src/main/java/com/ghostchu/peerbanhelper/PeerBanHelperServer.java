@@ -71,6 +71,8 @@ public class PeerBanHelperServer {
     @Getter
     private final long banDuration;
     @Getter
+    private final long disconnectDuration;
+    @Getter
     private final int httpdPort;
     @Getter
     private final boolean hideFinishLogs;
@@ -95,19 +97,22 @@ public class PeerBanHelperServer {
     @Getter
     private DatabaseHelper databaseHelper;
     @Getter
-    private ModuleManager moduleManager;
+    private final ModuleManager moduleManager;
     @Getter
     @Nullable
     private IPDB ipdb = null;
     private WatchDog banWaveWatchDog;
     @Getter
     private JavalinWebContainer webContainer;
-
+    @Getter
+    // private List<PeerMatchRecord> matchRecords = new CopyOnWriteArrayList<>();
+    private final Map<PeerAddress, PeerMatchRecord> matchRecords = new ConcurrentHashMap<>();
 
     public PeerBanHelperServer(String pbhServerAddress, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.pbhServerAddress = pbhServerAddress;
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
+        this.disconnectDuration = profile.getLong("disconnect-duration");
         this.mainConfig = mainConfig;
         this.httpdPort = mainConfig.getInt("server.http");
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
@@ -374,7 +379,7 @@ public class PeerBanHelperServer {
             banWaveWatchDog.setLastOperation("Reset last status");
             // 声明基本集合
             // 需要重启的种子列表
-            Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
+            Map<Downloader, List<Torrent>> needRelaunched = new ConcurrentHashMap<>();
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
@@ -386,6 +391,43 @@ public class PeerBanHelperServer {
             // 更新 LIVE_PEERS 用于数据展示
             banWaveWatchDog.setLastOperation("Update live peers");
             executor.submit(() -> updateLivePeers(peers));
+            // ===============基于 状态机 的封禁逻辑
+            banWaveWatchDog.setLastOperation("Check Bans New");
+            // long t1 = System.currentTimeMillis();
+            // 断开连接超时剔除
+            matchRecords.values().stream().filter(ele -> ele.getResult().state() == PeerState.ACTIVE && ele.getResult().expireTime() < System.currentTimeMillis())
+                    .map(ele -> ele.getPeer().getAddress()).forEach(matchRecords::remove);
+            // 封禁超时解禁后剔除
+            matchRecords.values().stream().filter(ele -> ele.getResult().state() == PeerState.BAN && ele.getResult().expireTime() < System.currentTimeMillis())
+                    .map(ele -> ele.getPeer().getAddress()).forEach(ele -> {
+                        unbanPeer(ele);
+                        matchRecords.remove(ele);
+                    });
+            // 按模块并行检查标记Peer
+            List<FeatureModule> ruleBlockers = moduleManager.getModules().stream().filter(ele -> ele instanceof RuleBlocker).toList();
+            CountDownLatch fsmLatch = new CountDownLatch(ruleBlockers.size());
+            ruleBlockers.forEach(ele -> {
+                RuleBlocker blocker = (RuleBlocker) ele;
+                try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
+                    log.warn(Lang.TIMING_CHECK_BANS);
+                    fsmLatch.countDown();
+                })) {
+                    protect.getService().submit(() -> {
+                        blocker.runCheck();
+                        fsmLatch.countDown();
+                    });
+                }
+            });
+            fsmLatch.await();
+            // 标记完成后将结果为Ban的Peer封禁
+            banWaveWatchDog.setLastOperation("Add banned peers into banlist New");
+            matchRecords.values().stream().filter(ele -> ele.getResult().state() == PeerState.BAN && !BAN_LIST.containsKey(ele.getPeer().getAddress()))
+                    .forEach(record -> Optional.ofNullable(needRelaunched.get(record.getDownloader())).ifPresentOrElse(torrents ->
+                            banPeer(record.getDownloader(), record.getTorrent(), record.getPeer(), record.getResult().moduleContext().getClass().getName(), record.getResult().rule(), record.getResult().reason(), bannedPeers, torrents), () -> {
+                        List<Torrent> torrents = new ArrayList<>();
+                        banPeer(record.getDownloader(), record.getTorrent(), record.getPeer(), record.getResult().moduleContext().getClass().getName(), record.getResult().rule(), record.getResult().reason(), bannedPeers, torrents);
+                        needRelaunched.put(record.getDownloader(), torrents);
+                    }));
             // ========== 处理封禁逻辑 ==========
             Map<Downloader, List<BanDetail>> downloaderBanDetailMap = new ConcurrentHashMap<>();
             banWaveWatchDog.setLastOperation("Check Bans");
@@ -399,25 +441,20 @@ public class PeerBanHelperServer {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> {
                 log.warn(Lang.TIMING_ADD_BANS);
             })) {
-                downloaderBanDetailMap.forEach((downloader, details) -> {
-                    List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
-                    details.forEach(detail -> {
-                        protect.getService().submit(() -> {
+                downloaderBanDetailMap.forEach((downloader, details) -> Optional.ofNullable(needRelaunched.get(downloader)).ifPresentOrElse(torrents ->
+                        details.forEach(detail -> protect.getService().submit(() -> {
                             if (detail.result().action() == PeerAction.BAN) {
-                                IPDBResponse ipdbResponse = queryIPDB(detail.peer().getAddress());
-                                BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getClass().getName(), downloader.getName(),
-                                        System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
-                                        detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(),
-                                        ipdbResponse.cityResponse(), ipdbResponse.asnResponse());
-                                bannedPeers.add(banMetadata);
-                                relaunch.add(detail.torrent());
-                                banPeer(banMetadata, detail.torrent(), detail.peer());
-                                log.warn(Lang.BAN_PEER, detail.peer().getAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
+                                banPeer(downloader, detail.torrent(), detail.peer(), detail.result().moduleContext().getClass().getName(), detail.result().rule(), detail.result().reason(), bannedPeers, torrents);
                             }
-                        });
-                    });
-                    needRelaunched.put(downloader, relaunch);
-                });
+                        })), () -> {
+                    List<Torrent> torrents = new ArrayList<>();
+                    details.forEach(detail -> protect.getService().submit(() -> {
+                        if (detail.result().action() == PeerAction.BAN) {
+                            banPeer(downloader, detail.torrent(), detail.peer(), detail.result().moduleContext().getClass().getName(), detail.result().rule(), detail.result().reason(), bannedPeers, torrents);
+                        }
+                    }));
+                    needRelaunched.put(downloader, torrents);
+                }));
             }
             banWaveWatchDog.setLastOperation("Apply banlist");
             // 如果需要，则应用更改封禁列表到下载器
@@ -435,6 +472,8 @@ public class PeerBanHelperServer {
                 log.info(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer);
             }
             banWaveWatchDog.setLastOperation("Completed");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
             banWaveWatchDog.feed();
             metrics.recordCheck();
@@ -474,6 +513,15 @@ public class PeerBanHelperServer {
                                             torrent, p, ipdbResponse.cityResponse(), ipdbResponse.asnResponse()
                                     );
                                     livePeers.put(address, metadata);
+                                    // 更新匹配记录
+                                    if (matchRecords.containsKey(address)) {
+                                        PeerMatchRecord peerMatchRecord = matchRecords.get(address);
+                                        peerMatchRecord.setDownloader(downloader);
+                                        peerMatchRecord.setTorrent(torrent);
+                                        peerMatchRecord.setPeer(p);
+                                    } else {
+                                        matchRecords.put(address, new PeerMatchRecord(downloader, torrent, p, new MatchResultDetail(null, PeerState.INIT, "N/A", "no matches", 0)));
+                                    }
                                 });
                             })));
         }
@@ -534,7 +582,8 @@ public class PeerBanHelperServer {
     private void registerModules() {
         log.info(Lang.WAIT_FOR_MODULES_STARTUP);
         moduleManager.register(new IPBlackList(this, profile));
-        moduleManager.register(new PeerIdBlacklist(this, profile));
+        //moduleManager.register(new PeerIdBlacklist(this, profile));
+        moduleManager.register(new PeerIdBlocker(this, profile));
         moduleManager.register(new ClientNameBlacklist(this, profile));
         moduleManager.register(new ProgressCheatBlocker(this, profile));
         moduleManager.register(new MultiDialingBlocker(this, profile));
@@ -542,7 +591,7 @@ public class PeerBanHelperServer {
         moduleManager.register(new AutoRangeBan(this, profile));
         moduleManager.register(new BtnNetworkOnline(this, profile));
         moduleManager.register(new DownloaderCIDRBlockList(this, profile));
-        moduleManager.register(new IPBlackRuleList(this, profile, databaseHelper));
+        moduleManager.register(new RuleSubBlocker(this, profile, databaseHelper));
         moduleManager.register(new PBHMetricsController(this, profile));
         moduleManager.register(new PBHBanController(this, profile, databaseHelper));
         moduleManager.register(new PBHMetadataController(this, profile));
@@ -674,10 +723,18 @@ public class PeerBanHelperServer {
     /**
      * 以指定元数据封禁一个特定的对等体
      *
-     * @param peer        对等体 IP 地址
-     * @param banMetadata 封禁元数据
+     * @param peer 对等体 IP 地址
      */
-    public void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
+    public void banPeer(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull String module, @NotNull String ruleName, @NotNull String reason, @NotNull Collection<BanMetadata> bannedPeers, @NotNull List<Torrent> relaunch) {
+        if (BAN_LIST.containsKey(peer.getAddress())) {
+            return;
+        }
+        relaunch.add(torrent);
+        IPDBResponse ipdbResponse = queryIPDB(peer.getAddress());
+        BanMetadata banMetadata = new BanMetadata(module, downloader.getName(),
+                System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
+                torrent, peer, ruleName, reason, ipdbResponse.cityResponse(), ipdbResponse.asnResponse());
+        bannedPeers.add(banMetadata);
         BAN_LIST.put(peer.getAddress(), banMetadata);
         metrics.recordPeerBan(peer.getAddress(), banMetadata);
         banListInvoker.forEach(i -> i.add(peer.getAddress(), banMetadata));
@@ -697,7 +754,8 @@ public class PeerBanHelperServer {
         } else {
             banMetadata.setReverseLookup("N/A");
         }
-        Main.getEventBus().post(new PeerBanEvent(peer.getAddress(), banMetadata, torrentObj, peer));
+        Main.getEventBus().post(new PeerBanEvent(peer.getAddress(), banMetadata, torrent, peer));
+        log.warn(Lang.BAN_PEER, peer.getAddress(), peer.getPeerId(), peer.getClientName(), peer.getProgress(), peer.getUploaded(), peer.getDownloaded(), torrent.getName(), reason);
     }
 
     public List<Downloader> getDownloaders() {

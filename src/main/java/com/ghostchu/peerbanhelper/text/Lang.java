@@ -211,4 +211,6 @@ public class Lang {
     public static final String GUI_TITLE_LOADED = "PeerBanHelper (%s) - %s (%s)";
     public static final String WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED = "未找到 JavaFx Web 模块，您正在使用精简构建，WebUI 选项卡未启用";
     public static final String WEBVIEW_ENABLED = "已找到 JavaFx Web，WebUI 选项卡已启用";
+    public static final String RULE_MODULE_MATCH_TIME = "规则模块 {} 匹配花费时间：{}ms";
+    public static final String RULE_MODULE_PEER_BAN = "[封禁] 规则模块 {} : {} ";
 }
