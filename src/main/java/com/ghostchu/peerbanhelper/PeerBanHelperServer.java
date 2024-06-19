@@ -71,7 +71,7 @@ public class PeerBanHelperServer {
     @Getter
     private final long banDuration;
     @Getter
-    private final long disconnectDuration;
+    private final long disconnectTimeout;
     @Getter
     private final int httpdPort;
     @Getter
@@ -105,14 +105,13 @@ public class PeerBanHelperServer {
     @Getter
     private JavalinWebContainer webContainer;
     @Getter
-    // private List<PeerMatchRecord> matchRecords = new CopyOnWriteArrayList<>();
     private final Map<PeerAddress, PeerMatchRecord> matchRecords = new ConcurrentHashMap<>();
 
     public PeerBanHelperServer(String pbhServerAddress, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.pbhServerAddress = pbhServerAddress;
         this.profile = profile;
         this.banDuration = profile.getLong("ban-duration");
-        this.disconnectDuration = profile.getLong("disconnect-duration");
+        this.disconnectTimeout = profile.getLong("disconnect-timeout");
         this.mainConfig = mainConfig;
         this.httpdPort = mainConfig.getInt("server.http");
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");

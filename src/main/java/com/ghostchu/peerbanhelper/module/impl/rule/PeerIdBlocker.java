@@ -43,15 +43,10 @@ public class PeerIdBlocker extends AbstractRuleBlocker {
     }
 
     @Override
-    public void onEnable() {
-        stateMachine = ruleSmBuilder().build(getConfigName());
-        reloadConfig();
+    public void init() {
+        this.bannedPeers = RuleParser.parse(getConfig().getStringList("banned-peer-id"));
         getServer().getWebContainer().javalin()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
-    }
-
-    public void reloadConfig() {
-        this.bannedPeers = RuleParser.parse(getConfig().getStringList("banned-peer-id"));
     }
 
     private void handleWebAPI(Context ctx) {

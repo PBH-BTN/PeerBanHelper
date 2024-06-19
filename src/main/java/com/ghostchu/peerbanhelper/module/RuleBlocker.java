@@ -26,22 +26,22 @@ public interface RuleBlocker extends FeatureModule {
                     // 匹配
                     CheckResult result = shouldBanPeer(context);
                     if (result.hit()) {
-                        context.setResult(new MatchResultDetail(this, to, result.rule(), result.reason(), System.currentTimeMillis() + getServer().getDisconnectDuration()));
+                        context.setResult(new MatchResultDetail(this, to, result.rule(), result.reason(), System.currentTimeMillis() + getServer().getDisconnectTimeout()));
                         triggerEvent(MatchEvents.HIT, context);
                     } else {
-                        context.setResult(new MatchResultDetail(this, to, "N/A", "No matches", System.currentTimeMillis() + getServer().getDisconnectDuration()));
+                        context.setResult(new MatchResultDetail(this, to, "N/A", "No matches", System.currentTimeMillis() + getServer().getDisconnectTimeout()));
                         triggerEvent(MatchEvents.PASS, context);
                     }
                 });
         fsmBuilder.externalTransition().from(PeerState.MATCH).to(PeerState.ACTIVE).on(MatchEvents.PASS)
                 .perform((from, to, event, context) -> {
                     // 活跃
-                    context.setResult(new MatchResultDetail(this, to, "N/A", "No matches", System.currentTimeMillis() + getServer().getDisconnectDuration()));
+                    context.setResult(new MatchResultDetail(this, to, "N/A", "No matches", System.currentTimeMillis() + getServer().getDisconnectTimeout()));
                 });
         fsmBuilder.externalTransition().from(PeerState.MATCH).to(PeerState.BAN).on(MatchEvents.HIT)
                 .perform((from, to, event, context) -> {
                     // 封禁
-                    getLogger().info(Lang.RULE_MODULE_PEER_BAN, getName(), context.getPeer().getAddress());
+                    getLogger().debug(Lang.RULE_MODULE_PEER_BAN, getName(), context.getPeer().getAddress());
                     context.setResult(new MatchResultDetail(this, to, context.getResult().rule(), context.getResult().reason(), System.currentTimeMillis() + getServer().getBanDuration()));
                 });
         /*fsmBuilder.externalTransition().from(PeerState.ACTIVE).to(PeerState.END).on(PeerEvents.DISCONNECT)
