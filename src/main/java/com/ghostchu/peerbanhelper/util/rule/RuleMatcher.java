@@ -29,7 +29,7 @@ public abstract class RuleMatcher extends AbstractMatcher {
     public abstract void setData(String ruleName, Object... ruleData);
 
     public Map<String, Object> metadata() {
-        return Map.of("id", ruleId, "name", ruleName, "type", ruleType);
+        return Map.of("id", ruleId, "rule", ruleName, "type", ruleType);
     }
 
 }
