@@ -1,7 +1,5 @@
 package com.ghostchu.peerbanhelper.alert;
 
-import java.util.logging.Level;
-
 /**
  * 警告信息
  *
@@ -11,5 +9,5 @@ import java.util.logging.Level;
  * @param level       警告等级
  * @param timestamp   时间戳
  */
-public record Alert(String id, String title, String description, Level level, long timestamp) {
+public record Alert(String id, String title, String description, AlertLevel level, long timestamp) {
 }
