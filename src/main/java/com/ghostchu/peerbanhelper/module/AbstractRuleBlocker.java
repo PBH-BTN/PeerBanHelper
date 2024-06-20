@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.module;
 
 import com.alibaba.cola.statemachine.StateMachine;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.util.rule.Rule;
+import com.ghostchu.peerbanhelper.util.rule.RuleMatcher;
 import lombok.Getter;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
@@ -11,9 +11,9 @@ import java.util.List;
 public abstract class AbstractRuleBlocker extends AbstractFeatureModule implements RuleBlocker {
 
     @Getter
-    public List<Rule> rules;
+    public List<RuleMatcher> rules;
 
-    public StateMachine<PeerState, MatchEvents, PeerMatchRecord> stateMachine;
+    public StateMachine<PeerState, MatchEvents, PeerMatchContext> stateMachine;
 
     public AbstractRuleBlocker(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -35,7 +35,7 @@ public abstract class AbstractRuleBlocker extends AbstractFeatureModule implemen
     }
 
     @Override
-    public StateMachine<PeerState, MatchEvents, PeerMatchRecord> getStateMachine() {
+    public StateMachine<PeerState, MatchEvents, PeerMatchContext> getStateMachine() {
         return stateMachine;
     }
 

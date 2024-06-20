@@ -9,10 +9,6 @@ public enum PeerState {
      */
     INIT,
     /**
-     * 匹配
-     */
-    MATCH,
-    /**
      * 封禁
      */
     BAN,

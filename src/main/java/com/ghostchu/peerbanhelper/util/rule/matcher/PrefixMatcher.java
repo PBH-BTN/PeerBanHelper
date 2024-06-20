@@ -9,28 +9,30 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class PrefixMatcher extends RuleMatcher {
+public class PrefixMatcher extends RuleMatcher<String> {
 
     private List<String> prefixes;
 
-    public PrefixMatcher(RuleType ruleType, String ruleId, String ruleName, Object... ruleData) {
+    public PrefixMatcher(RuleType ruleType, String ruleId, String ruleName, List<String> ruleData) {
         super(ruleType, ruleId, ruleName, ruleData);
     }
 
     @Override
-    public void setData(String ruleName, Object... ruleData) {
+    public void setData(String ruleName, List<String> ruleData) {
         this.ruleName = ruleName;
-        this.prefixes = ruleData.length > 0 ? (List<String>) ruleData[0] : List.of();
+        Optional.ofNullable(ruleData).ifPresentOrElse(list -> this.prefixes = list, () -> this.prefixes = new ArrayList<>());
     }
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
-        if (prefixes.parallelStream().anyMatch(content::startsWith)) {
+        if (prefixes.stream().anyMatch(content::startsWith)) {
             return MatchResult.TRUE;
         }
         return MatchResult.DEFAULT;

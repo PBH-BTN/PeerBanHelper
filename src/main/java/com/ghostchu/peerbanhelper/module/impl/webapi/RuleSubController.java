@@ -155,7 +155,7 @@ public class RuleSubController extends AbstractFeatureModule {
         }
         ConfigurationSection configurationSection = ruleSubBlocker.getRuleSubsConfig().getConfigurationSection(ruleId);
         if (null == configurationSection) {
-            return new SlimMsg(false, Lang.SUB_RULE_CANT_FIND.replace("{}", ruleId));
+            return new SlimMsg(false, String.format(Lang.SUB_RULE_CANT_FIND, ruleId));
         }
         return ruleSubBlocker.updateRule(configurationSection, RuleUpdateType.MANUAL);
     }
@@ -178,10 +178,10 @@ public class RuleSubController extends AbstractFeatureModule {
         RuleSubInfo ruleSubInfo = ruleSubBlocker.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, Lang.SUB_RULE_CANT_FIND.replace("{}", ruleId)));
+            ctx.json(new SlimMsg(false, String.format(Lang.SUB_RULE_CANT_FIND, ruleId)));
             return;
         }
-        String msg = (enabled ? Lang.SUB_RULE_ENABLED : Lang.SUB_RULE_DISABLED).replace("{}", ruleSubInfo.ruleName());
+        String msg = String.format(enabled ? Lang.SUB_RULE_ENABLED : Lang.SUB_RULE_DISABLED, ruleSubInfo.ruleName());
         if (enabled != ruleSubInfo.enabled()) {
             ConfigurationSection configurationSection = ruleSubBlocker.saveRuleSubInfo(new RuleSubInfo(ruleId, enabled, ruleSubInfo.ruleName(), ruleSubInfo.subUrl(), 0, 0));
             ruleSubBlocker.updateRule(configurationSection, RuleUpdateType.MANUAL);
@@ -203,12 +203,12 @@ public class RuleSubController extends AbstractFeatureModule {
         RuleSubInfo ruleSubInfo = ruleSubBlocker.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, Lang.SUB_RULE_CANT_FIND.replace("{}", ruleId)));
+            ctx.json(new SlimMsg(false, String.format(Lang.SUB_RULE_CANT_FIND, ruleId)));
             return;
         }
         ruleSubBlocker.deleteRuleSubInfo(ruleId);
         ruleSubBlocker.getRules().removeIf(ele -> ele.metadata().get("id").equals(ruleId));
-        String msg = Lang.SUB_RULE_DELETED.replace("{}", ruleSubInfo.ruleName());
+        String msg = String.format(Lang.SUB_RULE_DELETED, ruleSubInfo.ruleName());
         log.info(msg);
         ctx.json(new SlimMsg(true, msg));
     }
@@ -234,13 +234,13 @@ public class RuleSubController extends AbstractFeatureModule {
         if (isAdd && ruleSubInfo != null) {
             // 新增时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, Lang.SUB_RULE_ID_CONFLICT.replace("{}", ruleId)));
+            ctx.json(new SlimMsg(false, String.format(Lang.SUB_RULE_ID_CONFLICT, ruleId)));
             return;
         }
         if (!isAdd && ruleSubInfo == null) {
             // 更新时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, Lang.SUB_RULE_CANT_FIND.replace("{}", ruleId)));
+            ctx.json(new SlimMsg(false, String.format(Lang.SUB_RULE_CANT_FIND, ruleId)));
             return;
         }
         String ruleName = subInfo.ruleName();
@@ -277,7 +277,7 @@ public class RuleSubController extends AbstractFeatureModule {
                 ruleSubBlocker.saveRuleSubInfo(ruleSubInfo);
             }
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, Lang.SUB_RULE_URL_WRONG.replace("{}", ruleName)));
+            ctx.json(new SlimMsg(false, String.format(Lang.SUB_RULE_URL_WRONG, ruleName)));
         }
     }
 
