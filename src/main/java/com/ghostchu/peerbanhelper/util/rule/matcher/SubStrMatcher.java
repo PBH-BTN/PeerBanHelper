@@ -32,8 +32,10 @@ public class SubStrMatcher extends RuleMatcher<String> {
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
-        if (subs.stream().anyMatch(content::contains)) {
-            return MatchResult.TRUE;
+        for (String sub : subs) {
+            if (content.contains(sub)) {
+                return MatchResult.TRUE;
+            }
         }
         return MatchResult.DEFAULT;
     }

@@ -32,8 +32,10 @@ public class PrefixMatcher extends RuleMatcher<String> {
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
-        if (prefixes.stream().anyMatch(content::startsWith)) {
-            return MatchResult.TRUE;
+        for (String prefix : prefixes) {
+            if (content.startsWith(prefix)) {
+                return MatchResult.TRUE;
+            }
         }
         return MatchResult.DEFAULT;
     }
