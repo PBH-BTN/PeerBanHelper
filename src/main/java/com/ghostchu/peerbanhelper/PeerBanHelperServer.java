@@ -36,6 +36,8 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
@@ -105,6 +107,11 @@ public class PeerBanHelperServer {
     private JavalinWebContainer webContainer;
     @Getter
     private AlertManager alertManager;
+    private Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .maximumSize(3000)
+            .softValues()
+            .build();
 
 
     public PeerBanHelperServer(String pbhServerAddress, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
@@ -468,17 +475,15 @@ public class PeerBanHelperServer {
         })) {
             peers.forEach((downloader, tasks) ->
                     tasks.forEach((torrent, peer) ->
-                            peer.forEach(p -> {
-                                protect.getService().submit(() -> {
-                                    PeerAddress address = p.getAddress();
-                                    IPDBResponse ipdbResponse = queryIPDB(address);
-                                    PeerMetadata metadata = new PeerMetadata(
-                                            downloader.getName(),
-                                            torrent, p, ipdbResponse.cityResponse(), ipdbResponse.asnResponse()
-                                    );
-                                    livePeers.put(address, metadata);
-                                });
-                            })));
+                            peer.forEach(p -> protect.getService().submit(() -> {
+                                PeerAddress address = p.getAddress();
+                                IPDBResponse ipdbResponse = queryIPDB(address);
+                                PeerMetadata metadata = new PeerMetadata(
+                                        downloader.getName(),
+                                        torrent, p, ipdbResponse.cityResponse(), ipdbResponse.asnResponse()
+                                );
+                                livePeers.put(address, metadata);
+                            }))));
         }
         LIVE_PEERS = ImmutableMap.copyOf(livePeers);
         Main.getEventBus().post(new LivePeersUpdatedEvent(LIVE_PEERS));
@@ -595,22 +600,30 @@ public class PeerBanHelperServer {
     }
 
     public IPDBResponse queryIPDB(PeerAddress address) {
-        CityResponse cityResponse = null;
-        AsnResponse asnResponse = null;
         try {
-            if (ipdb != null) {
-                InetAddress mmdbAddress = address.getAddress().toInetAddress();
-                if (ipdb.getMmdbCity() != null) {
-                    cityResponse = ipdb.getMmdbCity().city(mmdbAddress);
+            return geoIpCache.get(address.getIp(), () -> {
+                CityResponse cityResponse = null;
+                AsnResponse asnResponse = null;
+                try {
+                    if (ipdb != null) {
+                        InetAddress mmdbAddress = address.getAddress().toInetAddress();
+                        if (ipdb.getMmdbCity() != null) {
+                            cityResponse = ipdb.getMmdbCity().city(mmdbAddress);
+                        }
+                        if (ipdb.getMmdbASN() != null) {
+                            asnResponse = ipdb.getMmdbASN().asn(mmdbAddress);
+                        }
+                    }
+                } catch (Exception ignored) {
+                    return new IPDBResponse(null, null);
                 }
-                if (ipdb.getMmdbASN() != null) {
-                    asnResponse = ipdb.getMmdbASN().asn(mmdbAddress);
-                }
-            }
-        } catch (Exception ignored) {
+
+                return new IPDBResponse(cityResponse, asnResponse);
+            });
+        } catch (ExecutionException e) {
+            return new IPDBResponse(null, null);
         }
 
-        return new IPDBResponse(cityResponse, asnResponse);
     }
 
     private boolean isHandshaking(Peer peer) {
