@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
@@ -105,7 +106,7 @@ public class PeerBanHelperServer {
     @Getter
     private JavalinWebContainer webContainer;
     @Getter
-    private final Map<String, PeerMatchRecord> matchRecords = new ConcurrentHashMap<>();
+    private final Map<PeerAddress, PeerMatchRecord> matchRecords = new ConcurrentHashMap<>();
 
     public PeerBanHelperServer(String pbhServerAddress, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.pbhServerAddress = pbhServerAddress;
@@ -523,16 +524,16 @@ public class PeerBanHelperServer {
         try {
             if (!downloader.login()) {
                 log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
-                downloader.setLastStatus(DownloaderLastStatus.ERROR);
+                downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_LOGIN_FAILED);
                 return;
             } else {
-                downloader.setLastStatus(DownloaderLastStatus.HEALTHY);
+                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, Lang.STATUS_TEXT_OK);
             }
             downloader.setBanList(BAN_LIST.keySet(), added, removed);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
             log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
-            downloader.setLastStatus(DownloaderLastStatus.ERROR);
+            downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_EXCEPTION);
         }
     }
 
@@ -597,7 +598,7 @@ public class PeerBanHelperServer {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         if (!downloader.login()) {
             log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
-            downloader.setLastStatus(DownloaderLastStatus.ERROR);
+            downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_LOGIN_FAILED);
             return Collections.emptyMap();
         }
         List<Torrent> torrents = downloader.getTorrents();
@@ -615,7 +616,7 @@ public class PeerBanHelperServer {
                     parallelReqRestrict.release();
                 }
             }));
-            downloader.setLastStatus(DownloaderLastStatus.HEALTHY);
+            downloader.setLastStatus(DownloaderLastStatus.HEALTHY, Lang.STATUS_TEXT_OK);
         }
 
         return peers;
