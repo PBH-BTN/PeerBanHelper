@@ -12,6 +12,9 @@ public class AlertManager {
     private Map<String, Alert> alerts = new ConcurrentHashMap<>();
 
     public void addAlert(Alert alert) {
+        if (alerts.containsKey(alert.id())) {
+            return;
+        }
         if (alerts.put(alert.id(), alert) == null) {
             Main.getEventBus().register(new NewAlertCreated(alert));
         }

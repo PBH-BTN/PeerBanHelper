@@ -9,6 +9,7 @@ import java.util.logging.Level;
  * @param title       警告标题
  * @param description 警告内容
  * @param level       警告等级
+ * @param timestamp   时间戳
  */
-public record Alert(String id, String title, String description, Level level) {
+public record Alert(String id, String title, String description, Level level, long timestamp) {
 }
