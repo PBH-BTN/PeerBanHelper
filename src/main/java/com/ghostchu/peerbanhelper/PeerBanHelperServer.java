@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
@@ -102,6 +103,8 @@ public class PeerBanHelperServer {
     private WatchDog banWaveWatchDog;
     @Getter
     private JavalinWebContainer webContainer;
+    @Getter
+    private AlertManager alertManager;
 
 
     public PeerBanHelperServer(String pbhServerAddress, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
