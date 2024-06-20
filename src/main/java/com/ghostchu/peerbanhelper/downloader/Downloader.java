@@ -100,5 +100,12 @@ public interface Downloader extends AutoCloseable {
      *
      * @param lastStatus 最后请求状态
      */
-    void setLastStatus(DownloaderLastStatus lastStatus);
+    void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage);
+
+    /**
+     * 获取客户端状态描述说明
+     *
+     * @return 状态描述说明
+     */
+    String getLastStatusMessage();
 }

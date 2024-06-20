@@ -44,6 +44,7 @@ public class QBittorrent implements Downloader {
     private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private String name;
+    private String statusMessage;
 
     public QBittorrent(String name, Config config) {
         this.name = name;
@@ -53,7 +54,7 @@ public class QBittorrent implements Downloader {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         Methanol.Builder builder = Methanol
                 .newBuilder()
-                .version(HttpClient.Version.valueOf(config.getHttpversion()))
+                .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(Main.getUserAgent())
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
@@ -63,11 +64,11 @@ public class QBittorrent implements Downloader {
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(config.getBasicauth().getUser(), config.getBasicauth().getPass().toCharArray());
+                        return new PasswordAuthentication(config.getBasicAuth().getUser(), config.getBasicAuth().getPass().toCharArray());
                     }
                 })
                 .cookieHandler(cm);
-        if (!config.getVerifyssl() && HTTPUtil.getIgnoreSslContext() != null) {
+        if (!config.getVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
@@ -141,7 +142,7 @@ public class QBittorrent implements Downloader {
 
     @Override
     public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
-        if (removed != null && removed.isEmpty() && added != null && config.getIncrementban()) {
+        if (removed != null && removed.isEmpty() && added != null && config.getIncrementBan()) {
             setBanListIncrement(added);
         } else {
             setBanListFull(fullList);
@@ -223,22 +224,14 @@ public class QBittorrent implements Downloader {
     @Data
     public static class Config {
 
-        @SerializedName("type")
         private String type;
-        @SerializedName("endpoint")
         private String endpoint;
-        @SerializedName("username")
         private String username;
-        @SerializedName("password")
         private String password;
-        @SerializedName("basic-auth")
-        private BasicauthDTO basicauth;
-        @SerializedName("http-version")
-        private String httpversion;
-        @SerializedName("increment-ban")
-        private Boolean incrementban;
-        @SerializedName("verify-ssl")
-        private Boolean verifyssl;
+        private BasicauthDTO basicAuth;
+        private String httpVersion;
+        private Boolean incrementBan;
+        private Boolean verifySsl;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -252,10 +245,10 @@ public class QBittorrent implements Downloader {
             Config.BasicauthDTO basicauthDTO = new BasicauthDTO();
             basicauthDTO.setUser(section.getString("basic-auth.user"));
             basicauthDTO.setPass(section.getString("basic-auth.pass"));
-            config.setBasicauth(basicauthDTO);
-            config.setHttpversion(section.getString("http-version", "HTTP_1_1"));
-            config.setIncrementban(section.getBoolean("increment-ban"));
-            config.setVerifyssl(section.getBoolean("verify-ssl", true));
+            config.setBasicAuth(basicauthDTO);
+            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
+            config.setIncrementBan(section.getBoolean("increment-ban"));
+            config.setVerifySsl(section.getBoolean("verify-ssl", true));
             return config;
         }
 
@@ -265,11 +258,11 @@ public class QBittorrent implements Downloader {
             section.set("endpoint", endpoint);
             section.set("username", username);
             section.set("password", password);
-            section.set("basic-auth.user", Objects.requireNonNullElse(basicauth.user, ""));
-            section.set("basic-auth.pass", Objects.requireNonNullElse(basicauth.pass, ""));
-            section.set("http-version", httpversion);
-            section.set("increment-ban", incrementban);
-            section.set("verify-ssl", verifyssl);
+            section.set("basic-auth.user", Objects.requireNonNullElse(basicAuth.user, ""));
+            section.set("basic-auth.pass", Objects.requireNonNullElse(basicAuth.pass, ""));
+            section.set("http-version", httpVersion);
+            section.set("increment-ban", incrementBan);
+            section.set("verify-ssl", verifySsl);
             return section;
         }
 
@@ -339,8 +332,14 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus) {
+    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
         this.lastStatus = lastStatus;
+        this.statusMessage = statusMessage;
+    }
+
+    @Override
+    public String getLastStatusMessage() {
+        return statusMessage;
     }
 
     @Override

@@ -212,6 +212,10 @@ public class Lang {
     public static final String GUI_TITLE_LOADED = "PeerBanHelper (%s) - %s (%s)";
     public static final String WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED = "未找到 JavaFx Web 模块，您正在使用精简构建，WebUI 选项卡未启用";
     public static final String WEBVIEW_ENABLED = "已找到 JavaFx Web，WebUI 选项卡已启用";
+    public static final String STATUS_TEXT_OK = "当前工作正常";
+    public static final String STATUS_TEXT_LOGIN_FAILED = "尝试登陆到下载器失败";
+    public static final String STATUS_TEXT_EXCEPTION = "出现异常，请检查 PeerBanHelper 控制台";
+    public static final String STATUS_TEXT_NEED_PRIVILEGE = "权限不足，请求权限提升（以管理员/root身份运行）";
     public static final String RULE_MODULE_MATCH_TIME = "规则模块 {} 匹配花费时间：{}ms";
     public static final String RULE_MODULE_PEER_HIT = "规则模块 {} : {} 命中";
     public static final String RULE_MODULE_PEER_DISCONNECT = "规则模块 {} : {} 已断开连接";
