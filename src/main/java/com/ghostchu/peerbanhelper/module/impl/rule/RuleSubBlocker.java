@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
-import com.ghostchu.peerbanhelper.util.rule.RuleMatcher;
 import com.ghostchu.peerbanhelper.util.rule.RuleType;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.util.rule.matcher.PrefixMatcher;
@@ -39,7 +38,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -115,7 +113,6 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
     @Override
     public CheckResult shouldBanPeer(PeerMatchRecord ctx) {
         AtomicReference<CheckResult> result = new AtomicReference<>(new CheckResult(false, null, null));
-        CountDownLatch latch = new CountDownLatch(rules.size());
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
             rules.forEach(matcher -> service.submit(() -> {
                 String matchStr;
@@ -130,13 +127,7 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                 if (matcher.match(matchStr) == MatchResult.TRUE) {
                     result.set(new CheckResult(true, matcher.metadata().get("rule").toString(), String.format(Lang.MODULE_IBL_MATCH_SUB_RULE, matcher.metadata().get("rule").toString())));
                 }
-                latch.countDown();
             }));
-        }
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
         return result.get();
     }
@@ -153,7 +144,7 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
             // 检查ipBanMatchers是否有对应的规则，有则删除
             rules.removeIf(ele -> ele.metadata().get("id").equals(ruleId));
             // 未启用跳过更新逻辑
-            return new SlimMsg(false, Lang.SUB_RULE_DISABLED.replace("{}", ruleId));
+            return new SlimMsg(false, String.format(Lang.SUB_RULE_DISABLED, ruleId));
         }
         String name = rule.getString("name", ruleId);
         String url = rule.getString("url");
@@ -166,7 +157,6 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
             File tempFile = new File(dir, "temp_" + ruleFileName);
             File ruleFile = new File(dir, ruleFileName);
             List<IPAddress> ipAddresses = new ArrayList<>();
-            List<IPAddress> subnetAddresses = new ArrayList<>();
             List<String> fileLines = new ArrayList<>();
             HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null), MutableRequest.GET(url), HttpResponse.BodyHandlers.ofFile(Path.of(tempFile.getPath()))).whenComplete((pathHttpResponse, throwable) -> {
                 if (throwable != null) {
@@ -186,8 +176,8 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                                         rules.add(new SubStrMatcher(ruleType, ruleId, name, fileLines));
                                     }
                                     default -> {
-                                        fileToIPList(name, ruleFile, ipAddresses, subnetAddresses);
-                                        rules.add(new IPMatcher(ruleId, name, ipAddresses, subnetAddresses));
+                                        fileToIPList(name, ruleFile, ipAddresses);
+                                        rules.add(new IPMatcher(ruleId, name, ipAddresses));
                                     }
                                 }
                                 log.warn(Lang.SUB_RULE_USE_CACHE, name);
@@ -197,13 +187,13 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                                 result.set(new SlimMsg(false, Lang.SUB_RULE_LOAD_FAILED.replace("{}", name)));
                             }
                         } else {
+                            log.error(Lang.SUB_RULE_UPDATE_FAILED, name);
                             result.set(new SlimMsg(false, Lang.SUB_RULE_UPDATE_FAILED.replace("{}", name)));
                         }
                     } else {
                         // log.error(Lang.IP_BAN_RULE_LOAD_FAILED, name, throwable);
                         result.set(new SlimMsg(false, Lang.SUB_RULE_LOAD_FAILED.replace("{}", name)));
                     }
-                    throw new RuntimeException(throwable);
                 }
                 try {
                     HashCode ruleHash = null;
@@ -217,7 +207,7 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                         ent_count = switch (ruleType) {
                             case PEER_ID_STARTS_WITH, PEER_ID_CONTAINS, CLIENT_NAME_STARTS_WITH, CLIENT_NAME_CONTAINS ->
                                     fileToLines(name, ruleFile, fileLines);
-                            default -> fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
+                            default -> fileToIPList(name, tempFile, ipAddresses);
                         };
                         // 更新后重命名临时文件
                         ruleFile.delete();
@@ -228,7 +218,7 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                             ent_count = switch (ruleType) {
                                 case PEER_ID_STARTS_WITH, PEER_ID_CONTAINS, CLIENT_NAME_STARTS_WITH,
                                      CLIENT_NAME_CONTAINS -> fileToLines(name, ruleFile, fileLines);
-                                default -> fileToIPList(name, tempFile, ipAddresses, subnetAddresses);
+                                default -> fileToIPList(name, tempFile, ipAddresses);
                             };
                         } else {
                             log.info(Lang.SUB_RULE_NO_UPDATE, name);
@@ -237,13 +227,13 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                         tempFile.delete();
                     }
                     // ip列表或者subnet列表不为空代表需要更新matcher
-                    if (!ipAddresses.isEmpty() || !subnetAddresses.isEmpty() || !fileLines.isEmpty()) {
+                    if (!ipAddresses.isEmpty() || !fileLines.isEmpty()) {
                         // 如果已经存在则更新，否则添加
                         rules.stream().filter(ele -> ele.metadata().get("id").equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                             switch (ruleType) {
                                 case PEER_ID_STARTS_WITH, PEER_ID_CONTAINS, CLIENT_NAME_STARTS_WITH,
-                                     CLIENT_NAME_CONTAINS -> ((RuleMatcher) ele).setData(name, fileLines);
-                                default -> ((IPMatcher) ele).setData(name, ipAddresses, subnetAddresses);
+                                     CLIENT_NAME_CONTAINS -> ele.setData(name, fileLines);
+                                default -> ele.setData(name, ipAddresses);
                             }
                             log.info(Lang.SUB_RULE_UPDATE_SUCCESS, name);
                             result.set(new SlimMsg(true, Lang.SUB_RULE_UPDATE_SUCCESS.replace("{}", name)));
@@ -253,7 +243,7 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                                         rules.add(new PrefixMatcher(ruleType, ruleId, name, fileLines));
                                 case PEER_ID_CONTAINS, CLIENT_NAME_CONTAINS ->
                                         rules.add(new SubStrMatcher(ruleType, ruleId, name, fileLines));
-                                default -> rules.add(new IPMatcher(ruleId, name, ipAddresses, subnetAddresses));
+                                default -> rules.add(new IPMatcher(ruleId, name, ipAddresses));
                             }
                             log.info(Lang.SUB_RULE_LOAD_SUCCESS, name);
                             result.set(new SlimMsg(true, Lang.SUB_RULE_LOAD_SUCCESS.replace("{}", name)));
@@ -263,7 +253,7 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                         // 更新日志
                         try {
                             db.insertRuleSubLog(ruleId, ent_count, updateType);
-                            result.set(new SlimMsg(true, Lang.SUB_RULE_UPDATED.replace("{}", name)));
+                            result.set(new SlimMsg(true, String.format(Lang.SUB_RULE_UPDATED, name)));
                         } catch (SQLException e) {
                             log.error(Lang.SUB_RULE_UPDATE_LOG_ERROR, ruleId, e);
                             result.set(new SlimMsg(false, Lang.SUB_RULE_UPDATE_LOG_ERROR.replace("{}", name)));
@@ -276,7 +266,7 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
                 }
             }).join();
         } else {
-            result.set(new SlimMsg(false, Lang.SUB_RULE_URL_WRONG.replace("{}", name)));
+            result.set(new SlimMsg(false, String.format(Lang.SUB_RULE_URL_WRONG, name)));
         }
         return result.get();
     }
@@ -306,35 +296,15 @@ public class RuleSubBlocker extends AbstractRuleBlocker {
      *
      * @param ruleName 规则名称
      * @param ruleFile 规则文件
-     * @param ips      精确ip列表
-     * @param subnets  网段列表
+     * @param ips      ip列表
      * @return 加载的行数
      */
-    private int fileToIPList(String ruleName, File ruleFile, List<IPAddress> ips, List<IPAddress> subnets) throws IOException {
+    private int fileToIPList(String ruleName, File ruleFile, List<IPAddress> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
         Files.readLines(ruleFile, StandardCharsets.UTF_8).forEach(ele -> {
             count.getAndIncrement();
-            IPAddress ipAddress = IPAddressUtil.getIPAddress(ele);
-            // 判断是否是网段
-            List<IPAddress> ipsList = new ArrayList<>();
-            if (null != ipAddress.getNetworkPrefixLength()) {
-                if (ipAddress.isIPv4Convertible() && ipAddress.getNetworkPrefixLength() >= 20) {
-                    // 前缀长度 >= 20 的ipv4网段地址转为精确ip
-                    ipAddress.nonZeroHostIterator().forEachRemaining(ipsList::add);
-                } else {
-                    subnets.add(ipAddress);
-                    log.debug(Lang.IP_BAN_RULE_LOAD_CIDR, ruleName, ipAddress);
-                }
-            } else {
-                ipsList.add(ipAddress);
-            }
-            ipsList.forEach(ip -> {
-                if (ip.isIPv4Convertible()) {
-                    ip = ip.toIPv4().withoutPrefixLength();
-                }
-                ips.add(ip);
-                log.debug(Lang.IP_BAN_RULE_LOAD_IP, ruleName, ip);
-            });
+            log.debug(Lang.IP_BAN_RULE_LOAD_CIDR, ruleName, ele);
+            ips.add(IPAddressUtil.getIPAddress(ele));
         });
         return count.get();
     }

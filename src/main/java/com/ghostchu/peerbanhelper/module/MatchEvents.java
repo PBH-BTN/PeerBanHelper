@@ -5,10 +5,6 @@ package com.ghostchu.peerbanhelper.module;
  */
 public enum MatchEvents {
     /**
-     * 匹配规则
-     */
-    MATCH,
-    /**
      * 命中规则
      */
     HIT,

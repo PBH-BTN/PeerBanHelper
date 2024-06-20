@@ -182,16 +182,16 @@ public class Lang {
     public static final String SUB_RULE_LOAD_CONTENT = "订阅规则 {} 加载内容 : {}";
     public static final String RULE_SUB_API_INTERNAL_ERROR = "[错误] 订阅规则API遇到非预期错误";
     public static final String SUB_RULE_NO_ID = "[错误] 订阅规则ID为空";
-    public static final String SUB_RULE_ID_CONFLICT = "[错误] 订阅规则ID冲突: {}";
-    public static final String SUB_RULE_CANT_FIND = "[错误] 未找到订阅规则: {}";
+    public static final String SUB_RULE_ID_CONFLICT = "[错误] 订阅规则ID冲突: %s";
+    public static final String SUB_RULE_CANT_FIND = "[错误] 未找到订阅规则: %s";
     public static final String SUB_RULE_PARAM_WRONG = "[错误] 订阅规则参数错误";
-    public static final String SUB_RULE_URL_WRONG = "[错误] 订阅规则 {} URL错误";
-    public static final String SUB_RULE_ENABLED = "订阅规则 {} 已启用";
-    public static final String SUB_RULE_DISABLED = "订阅规则 {} 已禁用";
-    public static final String SUB_RULE_UPDATED = "订阅规则 {} 已更新";
+    public static final String SUB_RULE_URL_WRONG = "[错误] 订阅规则 %s URL错误";
+    public static final String SUB_RULE_ENABLED = "订阅规则 %s 已启用";
+    public static final String SUB_RULE_DISABLED = "订阅规则 %s 已禁用";
+    public static final String SUB_RULE_UPDATED = "订阅规则 %s 已更新";
     public static final String SUB_RULE_ALL_UPDATED = "订阅规则已全部更新";
     public static final String SUB_RULE_SAVED = "订阅规则已保存";
-    public static final String SUB_RULE_DELETED = "订阅规则 {} 已删除";
+    public static final String SUB_RULE_DELETED = "订阅规则 %s 已删除";
     public static final String SUB_RULE_INFO_QUERY_SUCCESS = "订阅规则查询成功";
     public static final String SUB_RULE_LOG_QUERY_SUCCESS = "订阅规则更新日志查询成功";
     public static final String SUB_RULE_LOG_QUERY_ERROR = "订阅规则更新日志查询出错";
@@ -213,5 +213,7 @@ public class Lang {
     public static final String WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED = "未找到 JavaFx Web 模块，您正在使用精简构建，WebUI 选项卡未启用";
     public static final String WEBVIEW_ENABLED = "已找到 JavaFx Web，WebUI 选项卡已启用";
     public static final String RULE_MODULE_MATCH_TIME = "规则模块 {} 匹配花费时间：{}ms";
-    public static final String RULE_MODULE_PEER_BAN = "[封禁] 规则模块 {} : {} ";
+    public static final String RULE_MODULE_PEER_HIT = "规则模块 {} : {} 命中";
+    public static final String RULE_MODULE_PEER_DISCONNECT = "规则模块 {} : {} 已断开连接";
+    public static final String RULE_MODULE_PEER_BAN_TIMEOUT = "规则模块 {} : {} 已解禁";
 }

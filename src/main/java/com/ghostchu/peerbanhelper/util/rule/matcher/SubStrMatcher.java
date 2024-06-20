@@ -9,28 +9,30 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class SubStrMatcher extends RuleMatcher {
+public class SubStrMatcher extends RuleMatcher<String> {
 
-    private List<String> subStrs;
+    private List<String> subs;
 
-    public SubStrMatcher(RuleType ruleType, String ruleId, String ruleName, Object... ruleData) {
+    public SubStrMatcher(RuleType ruleType, String ruleId, String ruleName, List<String> ruleData) {
         super(ruleType, ruleId, ruleName, ruleData);
     }
 
     @Override
-    public void setData(String ruleName, Object... ruleData) {
+    public void setData(String ruleName, List<String> ruleData) {
         this.ruleName = ruleName;
-        this.subStrs = ruleData.length > 0 ? (List<String>) ruleData[0] : List.of();
+        Optional.ofNullable(ruleData).ifPresentOrElse(list -> this.subs = list, () -> this.subs = new ArrayList<>());
     }
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
-        if (subStrs.parallelStream().anyMatch(content::contains)) {
+        if (subs.stream().anyMatch(content::contains)) {
             return MatchResult.TRUE;
         }
         return MatchResult.DEFAULT;
