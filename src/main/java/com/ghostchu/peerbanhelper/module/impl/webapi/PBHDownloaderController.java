@@ -204,7 +204,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
         JsonObject config = downloader.saveDownloaderJson();
         ctx.status(HttpStatus.OK);
-        ctx.json(new DownloaderStatus(lastStatus, activeTorrents, activePeers, config));
+        ctx.json(new DownloaderStatus(lastStatus, downloader.getLastStatusMessage(), activeTorrents, activePeers, config));
     }
 
     private void handleDownloaderList(@NotNull Context ctx) {
@@ -222,7 +222,8 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     record DraftDownloader(String name, JsonObject config) {
     }
 
-    record DownloaderStatus(DownloaderLastStatus lastStatus, long activeTorrents, long activePeers, JsonObject config) {
+    record DownloaderStatus(DownloaderLastStatus lastStatus, String lastStatusMessage, long activeTorrents,
+                            long activePeers, JsonObject config) {
 
     }
 
