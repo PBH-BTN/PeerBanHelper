@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
 import cordelia.client.TrClient;
 import cordelia.client.TypedResponse;
 import cordelia.rpc.*;
@@ -47,7 +46,7 @@ public class Transmission implements Downloader {
     public Transmission(String name, String blocklistUrl, Config config) {
         this.name = name;
         this.config = config;
-        this.client = new TrClient(config.getEndpoint() + config.getRpcurl(), config.getUsername(), config.getPassword(), config.getVerifyssl(), HttpClient.Version.valueOf(config.getHttpversion()));
+        this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.getVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
         log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);
     }
@@ -193,20 +192,13 @@ public class Transmission implements Downloader {
     @Data
     public static class Config {
 
-        @SerializedName("type")
         private String type;
-        @SerializedName("endpoint")
         private String endpoint;
-        @SerializedName("username")
         private String username;
-        @SerializedName("password")
         private String password;
-        @SerializedName("http-version")
-        private String httpversion;
-        @SerializedName("verify-ssl")
-        private Boolean verifyssl;
-        @SerializedName("rpc-url")
-        private String rpcurl;
+        private String httpVersion;
+        private Boolean verifySsl;
+        private String rpcUrl;
 
         public static Transmission.Config readFromYaml(ConfigurationSection section) {
             Transmission.Config config = new Transmission.Config();
@@ -217,9 +209,9 @@ public class Transmission implements Downloader {
             }
             config.setUsername(section.getString("username"));
             config.setPassword(section.getString("password"));
-            config.setRpcurl(section.getString("rpc-url"));
-            config.setHttpversion(section.getString("http-version", "HTTP_1_1"));
-            config.setVerifyssl(section.getBoolean("verify-ssl", true));
+            config.setRpcUrl(section.getString("rpc-url"));
+            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
+            config.setVerifySsl(section.getBoolean("verify-ssl", true));
             return config;
         }
 
@@ -229,9 +221,9 @@ public class Transmission implements Downloader {
             section.set("endpoint", endpoint);
             section.set("username", username);
             section.set("password", password);
-            section.set("rpc-url", rpcurl);
-            section.set("http-version", httpversion);
-            section.set("verify-ssl", verifyssl);
+            section.set("rpc-url", rpcUrl);
+            section.set("http-version", httpVersion);
+            section.set("verify-ssl", verifySsl);
             return section;
         }
     }
