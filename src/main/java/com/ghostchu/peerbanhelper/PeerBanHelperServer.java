@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper;
 
-import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
@@ -106,7 +105,7 @@ public class PeerBanHelperServer {
     @Getter
     private JavalinWebContainer webContainer;
     @Getter
-    private final Map<PeerAddress, PeerMatchRecord> matchRecords = new ConcurrentHashMap<>();
+    private final Map<String, PeerMatchRecord> matchRecords = new ConcurrentHashMap<>();
 
     public PeerBanHelperServer(String pbhServerAddress, YamlConfiguration profile, YamlConfiguration mainConfig) throws SQLException {
         this.pbhServerAddress = pbhServerAddress;
