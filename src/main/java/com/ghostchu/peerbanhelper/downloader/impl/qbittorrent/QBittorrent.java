@@ -44,6 +44,7 @@ public class QBittorrent implements Downloader {
     private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private String name;
+    private String statusMessage;
 
     public QBittorrent(String name, Config config) {
         this.name = name;
@@ -331,8 +332,14 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus) {
+    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
         this.lastStatus = lastStatus;
+        this.statusMessage = statusMessage;
+    }
+
+    @Override
+    public String getLastStatusMessage() {
+        return statusMessage;
     }
 
     @Override

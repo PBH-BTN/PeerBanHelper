@@ -38,6 +38,7 @@ public class Transmission implements Downloader {
     private final String blocklistUrl;
     private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
+    private String statusMessage;
 
     /*
             API 受限，实际实现起来意义不大
@@ -179,9 +180,16 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus) {
+    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
         this.lastStatus = lastStatus;
+        this.statusMessage = statusMessage;
     }
+
+    @Override
+    public String getLastStatusMessage() {
+        return statusMessage;
+    }
+
 
     @Override
     public void close() {
