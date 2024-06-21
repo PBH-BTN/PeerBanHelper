@@ -19,6 +19,7 @@ ignore-peers-from-addresses:
 # 功能模块
 module:
   # 规则引擎，支持 AviatorScript 语言
+  # 提供在 PBH 上自行编程编写规则的能力
   expression-engine:
     # 是否启用
     enabled: true
@@ -52,6 +53,12 @@ module:
     # Main - 启动主类，可用于访问配置文件
     # 对于其它的常用函数，语法等，参见 AviatorScript 文档：https://www.yuque.com/boyan-avfmj/aviatorscript/cpow90
     # 规则引擎支持 AviatorScript 的全部能力，您可以自由使用反射或者动态创建特性
+    #
+    # 每个规则必须提供一个返回值，PBH 会根据您提供的返回值，决定此 Peer 是否封禁。支持的返回值如下：
+    #   Boolean: [false=不采取任何操作, true=封禁Peer]
+    #   Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它用户规则]
+    #   com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
+    #   com.ghostchu.peerbanhelper.module.BanResult
     rules:
       # 允许迅雷 0.0.1.9 SDK
       allow-good-xunlei-0019-sdk:
