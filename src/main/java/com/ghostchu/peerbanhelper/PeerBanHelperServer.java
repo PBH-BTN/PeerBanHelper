@@ -60,7 +60,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -715,18 +714,7 @@ public class PeerBanHelperServer {
         metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
         banListInvoker.forEach(i -> i.add(peer.getPeerAddress(), banMetadata));
         if (mainConfig.getBoolean("lookup.dns-reverse-lookup")) {
-            executor.submit(() -> {
-                try {
-                    InetAddress address = InetAddress.getByName(peer.getPeerAddress().getAddress().toString());
-                    if (!address.getCanonicalHostName().equals(peer.getPeerAddress().getIp())) {
-                        banMetadata.setReverseLookup(address.getCanonicalHostName());
-                    } else {
-                        banMetadata.setReverseLookup("N/A");
-                    }
-                } catch (UnknownHostException ignored) {
-                    banMetadata.setReverseLookup("N/A");
-                }
-            });
+            executor.submit(() -> banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toReverseDNSLookupString()));
         } else {
             banMetadata.setReverseLookup("N/A");
         }
