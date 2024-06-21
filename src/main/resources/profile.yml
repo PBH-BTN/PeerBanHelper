@@ -65,7 +65,7 @@ module:
         # 规则执行后，是否对相同 Peer 缓存结果，避免重复执行？
         cacheable: true
         # AviatorScript 内容
-        script: |
+        script: |-
           if(string.startsWith(peer.peerId, '-XL0019') 
           || string.startsWith(peer.clientName, 'XunLei 0019')
           || string.startsWith(peer.clientName, 'XunLei 0.0.1.9')) {
@@ -73,9 +73,9 @@ module:
           }
           return 0; ## 不做任何操作
       # 允许非吸血迅雷 SDK，其它的全部封禁
-      allow-good-xunlei-sdk:
+      xunlei-check:
         cacheable: true
-        script: |
+        script: |-
           if(string.startsWith(peer.peerId, '-XL0012')){
             if(peer.peerAddress.port != 15000 && peer.peerAddress.port != 15001){
               if(peer.progress != 0.0){
@@ -92,7 +92,7 @@ module:
       # 各类杂项规则大杂烩
       id-name-block-list:
         cacheable: true
-        script: |
+        script: |-
           ## 全部转换为小写
           let peerIdLowercase = toLowerCase(peer.peerId);
           let clientNameLowercase = toLowerCase(peer.clientName);
@@ -154,9 +154,14 @@ module:
             'tixati', 'tix'
           );
           ## 伪装检查
-          for clientName in seq.keys(table) {
-            if(string.contains(clientNameLowercase, clientName)){
-                return !string.startsWith(peerIdLowercase, table[clientName]);
+          for tableName in seq.keys(table) {
+            if(string.startsWith(clientNameLowercase, tableName)){
+                if(string.startsWith(peerIdLowercase, seq.get(table, tableName))){
+                    return false;
+                }else{
+                    ## p('peerId='+peerIdLowercase+', clientName='+clientNameLowercase + ', excepted='+ seq.get(table, tableName));
+                    return true;
+                }
             }
           }
           return false;
