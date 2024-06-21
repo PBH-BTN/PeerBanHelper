@@ -12,6 +12,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+/**
+ * IP 地址工具类
+ */
 public class IPAddressUtil {
     private static final Cache<String, IPAddress> IP_ADDRESS_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(15, TimeUnit.MINUTES)
@@ -24,6 +27,12 @@ public class IPAddressUtil {
             .softValues()
             .build();
 
+    /**
+     * 将字符串转换为 IPAddress 对象，并自动进行 IPV4 in IPV6 提取转换
+     *
+     * @param ip
+     * @return
+     */
     @Contract("_ -> !null")
     public static IPAddress getIPAddress(String ip) {
         try {

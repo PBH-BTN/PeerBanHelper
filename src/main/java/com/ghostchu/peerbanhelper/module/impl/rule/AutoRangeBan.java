@@ -86,9 +86,6 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Waiting for Bittorrent handshaking.");
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
-        if (peerAddress.isIPv4Convertible()) {
-            peerAddress = peerAddress.toIPv4();
-        }
         for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
             IPAddress bannedPeerAddress = banListMappingCache.get(bannedPeer);
             if (bannedPeerAddress == null) {
