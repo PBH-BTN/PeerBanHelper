@@ -1,10 +1,21 @@
-config-version: 6
+config-version: 8
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 更新 Peers UI 频率（单位：毫秒），此项仅用于显示数据，不影响封禁，建议设置一个不会给下载器增加太多压力的值
 update-live-peers-interval: 13000
 # 封禁持续时间（单位：毫秒）
 ban-duration: 86400000
+# 来自这些 IP 地址的 Peers 不会被 PBH 检查，绕过所有检查规则
+ignore-peers-from-addresses:
+  - "10.0.0.0/8" # 大型企业内部网络
+  - "172.16.0.0/12" # 中型企业内部网络
+  - "192.168.0.0/16" # 小型企业和家庭内部网络
+  - "fc00::/7" # 唯一本地地址 (ULA)，用于站点内部通信
+  - "fd00::/8" # 本地分配的ULA
+  - "100.64.0.0/10" # 用于大规模NAT (CGNAT, Carrier-Grade NAT)，也常被 Tailscale 使用
+  - "169.254.0.0/16" # 链路本地地址 (Link-Local Address)
+  - "127.0.0.0/8" # 本地回环地址
+  - "fe80::/10" # 链路本地地址 (Link-Local Address)，用于局部链路通信
 # 功能模块
 module:
   # PeerId 封禁

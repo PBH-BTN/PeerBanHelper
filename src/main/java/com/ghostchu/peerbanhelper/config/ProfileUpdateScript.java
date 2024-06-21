@@ -18,6 +18,13 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 8)
+    public void ignorePeersFromAddresses() {
+        conf.set("ignore-peers-from-addresses", List.of(
+                "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7",
+                "fd00::/8", "100.64.0.0/10", "169.254.0.0/16", "127.0.0.0/8", "fe80::/10"));
+    }
+
     @UpdateScript(version = 7)
     public void progressCheckerIPPrefixLength() {
         conf.set("module.progress-cheat-blocker.ipv4-prefix-length", 32);

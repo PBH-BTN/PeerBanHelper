@@ -25,6 +25,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.WatchDog;
@@ -44,6 +45,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
+import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -77,6 +79,8 @@ public class PeerBanHelperServer {
     private final int httpdPort;
     @Getter
     private final boolean hideFinishLogs;
+    @Getter
+    private final List<IPAddress> ignoreAddresses = new ArrayList<>();
     @Getter
     private final YamlConfiguration mainConfig;
     private final ModuleMatchCache moduleMatchCache;
@@ -121,6 +125,10 @@ public class PeerBanHelperServer {
         this.mainConfig = mainConfig;
         this.httpdPort = mainConfig.getInt("server.http");
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
+        profile.getStringList("ignore-peers-from-addresses").forEach(ip -> {
+            IPAddress ignored = IPAddressUtil.getIPAddress(ip);
+            ignoreAddresses.add(ignored);
+        });
         this.banListFile = new File(Main.getDataDirectory(), "banlist.dump");
         loadDownloaders();
         this.moduleMatchCache = new ModuleMatchCache();
@@ -649,6 +657,14 @@ public class PeerBanHelperServer {
     @NotNull
     public BanResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
         List<BanResult> results = new ArrayList<>();
+        if (peer.getAddress().getAddress().isAnyLocal()) {
+            return new BanResult(null, PeerAction.SKIP, "local access", "skip local network peers");
+        }
+        for (IPAddress ignoreAddress : ignoreAddresses) {
+            if (ignoreAddress.contains(peer.getAddress().getAddress())) {
+                return new BanResult(null, PeerAction.SKIP, "ignored addresses", "skip peers from ignored addresses");
+            }
+        }
         for (FeatureModule registeredModule : moduleManager.getModules()) {
             if (!(registeredModule instanceof RuleFeatureModule module)) {
                 continue;
