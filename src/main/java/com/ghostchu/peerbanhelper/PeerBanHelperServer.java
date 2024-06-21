@@ -314,7 +314,7 @@ public class PeerBanHelperServer {
             if (!banListFile.exists()) {
                 banListFile.createNewFile();
             }
-            Files.writeString(banListFile.toPath(), JsonUtil.prettyPrinting().toJson(BAN_LIST));
+            Files.writeString(banListFile.toPath(), JsonUtil.getGson().toJson(BAN_LIST));
         } catch (IOException e) {
             log.error(Lang.SHUTDOWN_SAVE_BANLIST_FAILED);
         }
@@ -418,11 +418,9 @@ public class PeerBanHelperServer {
                     details.forEach(detail -> {
                         protect.getService().submit(() -> {
                             if (detail.result().action() == PeerAction.BAN) {
-                                IPDBResponse ipdbResponse = queryIPDB(detail.peer().getPeerAddress());
-                                BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getClass().getName(), downloader.getName(),
+                                BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext() == null ? "Unknown" : detail.result().moduleContext().getClass().getName(), downloader.getName(),
                                         System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
-                                        detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(),
-                                        ipdbResponse.cityResponse(), ipdbResponse.asnResponse());
+                                        detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                 bannedPeers.add(banMetadata);
                                 relaunch.add(detail.torrent());
                                 banPeer(banMetadata, detail.torrent(), detail.peer());
@@ -484,8 +482,7 @@ public class PeerBanHelperServer {
                                 IPDBResponse ipdbResponse = queryIPDB(address);
                                 PeerMetadata metadata = new PeerMetadata(
                                         downloader.getName(),
-                                        torrent, p, ipdbResponse.cityResponse(), ipdbResponse.asnResponse()
-                                );
+                                        torrent, p);
                                 livePeers.put(address, metadata);
                             }))));
         }

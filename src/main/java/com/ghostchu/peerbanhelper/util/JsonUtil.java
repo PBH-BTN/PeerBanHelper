@@ -3,23 +3,15 @@ package com.ghostchu.peerbanhelper.util;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Reader;
 import java.util.Objects;
 
 public class JsonUtil {
+    private static final Gson DEFAULT_GSON = new Gson();
     private static final Gson STANDARD_GSON = new GsonBuilder()
             .enableComplexMapKeySerialization()
             .setExclusionStrategies(new HiddenAnnotationExclusionStrategy())
             .serializeNulls()
             .disableHtmlEscaping()
-            .create();
-
-    private static final Gson PRETTY_PRINT_GSON = new GsonBuilder()
-            .enableComplexMapKeySerialization()
-            .setExclusionStrategies(new HiddenAnnotationExclusionStrategy())
-            .serializeNulls()
-            .disableHtmlEscaping()
-            .setPrettyPrinting()
             .create();
 
     @NotNull
@@ -37,21 +29,6 @@ public class JsonUtil {
         return STANDARD_GSON;
     }
 
-    @NotNull
-    @Deprecated
-    public static Gson getPrettyPrinting() {
-        return prettyPrinting();
-    }
-
-    @NotNull
-    public static Gson prettyPrinting() {
-        return PRETTY_PRINT_GSON;
-    }
-
-    @NotNull
-    public static JsonObject readObject(@NotNull Reader reader) {
-        return JsonParser.parseReader(reader).getAsJsonObject();
-    }
 
     @NotNull
     public static JsonObject readObject(@NotNull String s) {
@@ -67,25 +44,12 @@ public class JsonUtil {
         return Objects.requireNonNull(standard().toJson(element));
     }
 
-    @NotNull
-    public static String toStringPretty(@NotNull JsonElement element) {
-        return Objects.requireNonNull(prettyPrinting().toJson(element));
-    }
-
     public static void writeElement(@NotNull Appendable writer, @NotNull JsonElement element) {
         standard().toJson(element, writer);
     }
 
-    public static void writeElementPretty(@NotNull Appendable writer, @NotNull JsonElement element) {
-        prettyPrinting().toJson(element, writer);
-    }
-
     public static void writeObject(@NotNull Appendable writer, @NotNull JsonObject object) {
         standard().toJson(object, writer);
-    }
-
-    public static void writeObjectPretty(@NotNull Appendable writer, @NotNull JsonObject object) {
-        prettyPrinting().toJson(object, writer);
     }
 
     public @interface Hidden {

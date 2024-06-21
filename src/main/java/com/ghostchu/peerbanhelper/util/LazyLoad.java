@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
 import java.util.function.Supplier;
-
 public class LazyLoad<T> {
     private Supplier<T> loader;
     private T content;

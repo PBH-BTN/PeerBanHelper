@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.wrapper.BakedPeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.google.common.eventbus.Subscribe;
@@ -253,14 +254,15 @@ public class MainWindow extends JFrame {
             String asn = "N/A";
             String asOrg = "N/A";
             String asNetwork = "N/A";
-            if (entry.getValue().getGeo() != null) {
-                countryRegion = entry.getValue().getGeo().get().getCountry().getName();
-                city = entry.getValue().getGeo().get().getCity().getName();
+            BakedPeerMetadata bakedBanMetadata = new BakedPeerMetadata(entry.getValue());
+            if (bakedBanMetadata.getGeo() != null) {
+                countryRegion = bakedBanMetadata.getGeo().getCountryRegion();
+                city = bakedBanMetadata.getGeo().getCity();
             }
-            if (entry.getValue().getAsn() != null) {
-                asn = "AS" + entry.getValue().getAsn().get().getAutonomousSystemNumber();
-                asOrg = entry.getValue().getAsn().get().getAutonomousSystemOrganization();
-                asNetwork = entry.getValue().getAsn().get().getNetwork().toString();
+            if (bakedBanMetadata.getAsn() != null) {
+                asn = "AS" + bakedBanMetadata.getAsn().getAsn();
+                asOrg = bakedBanMetadata.getAsn().getAsOrganization();
+                asNetwork = bakedBanMetadata.getAsn().getAsNetwork();
             }
             List<String> array = new ArrayList<>(); // 这里用 List，这样动态创建 array 就不用指定位置了
             array.add(countryRegion);
