@@ -156,7 +156,7 @@ module:
           ## 伪装检查
           for clientName in seq.keys(table) {
             if(string.contains(clientNameLowercase, clientName)){
-                return !table[clientName]; ## 如果不匹配，封禁
+                return !string.startsWith(peerIdLowercase, table[clientName]);
             }
           }
           return false;

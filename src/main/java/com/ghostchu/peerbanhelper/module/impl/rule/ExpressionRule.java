@@ -92,7 +92,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                     log.warn(Lang.MODULE_EXPRESSION_RULE_TIMEOUT, maxScriptExecuteTime, timeoutException);
                     continue;
                 } catch (Exception ex) {
-                    log.warn(Lang.MODULE_EXPRESSION_RULE_ERROR, ex);
+                    log.warn(Lang.MODULE_EXPRESSION_RULE_ERROR, expressionMetadata.name(), ex);
                     continue;
                 }
             }
