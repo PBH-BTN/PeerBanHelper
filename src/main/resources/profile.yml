@@ -21,8 +21,6 @@ module:
   # 规则引擎，支持 AviatorScript 语言
   # 提供在 PBH 上自行编程编写规则的能力
   expression-engine:
-    # 是否启用
-    enabled: true
     # 规则列表
     # 在 AviatorScript 执行时，PBH 会注入以下环境变量，您可以自由使用它们：
     # peer - 一个 com.ghostchu.peerbanhelper.peer.Peer 对象，您可以使用这个对象下面的任何属性，这些是您可能用到的：
@@ -59,112 +57,10 @@ module:
     #   Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它用户规则]
     #   com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
     #   com.ghostchu.peerbanhelper.module.BanResult
-    rules:
-      # 允许迅雷 0.0.1.9 SDK
-      allow-good-xunlei-0019-sdk:
-        # 规则执行后，是否对相同 Peer 缓存结果，避免重复执行？
-        cacheable: true
-        # AviatorScript 内容
-        script: |-
-          if(string.startsWith(peer.peerId, '-XL0019') 
-          || string.startsWith(peer.clientName, 'XunLei 0019')
-          || string.startsWith(peer.clientName, 'XunLei 0.0.1.9')) {
-            return 2; ## 跳过其它检查
-          }
-          return 0; ## 不做任何操作
-      # 允许非吸血迅雷 SDK，其它的全部封禁
-      xunlei-check:
-        cacheable: true
-        script: |-
-          if(string.startsWith(peer.peerId, '-XL0012')){
-            if(peer.peerAddress.port != 15000 && peer.peerAddress.port != 15001){
-              if(peer.progress != 0.0){
-                  return false; ## 不封禁非吸血迅雷
-              }
-           }
-           return true; ## 其它的全部封禁
-          }
-          return false;
-      # 各各种 GT 改版
-      ban-gt:
-        cacheable: true
-        script: "string.startsWith(peer.peerId, '-GT0002') || string.startsWith(peer.peerId, '-GT0003')"
-      # 各类杂项规则大杂烩
-      id-name-block-list:
-        cacheable: true
-        script: |-
-          ## 全部转换为小写
-          let peerIdLowercase = toLowerCase(peer.peerId);
-          let clientNameLowercase = toLowerCase(peer.clientName);
-          ## 封禁列表
-          let bannedPeerIds = seq.array(java.lang.String, 
-          '-hp', '-dt', '-sd', '-xf',
-          '-qd', '-bn', '-dl', '-ts', 
-          '-fg', '-tt', '-nx', '-ax', 
-          '-lp', '-nx', '-vg', '-mg');
-          
-          let bannedClientNames = seq.array(java.lang.String,
-          'hp/torrent', 'hp ', 'dt/torrent', 'dt ',
-          'go.torrent.dev', 'xfplay',
-          'stellarplayer', 'sp ', 
-          'flashget', 'tudou',
-          'torrentstorm', 'qqdownload',
-          'github.com/anacrolix/torrent', 
-          'qbittorrent/3.3.15', 'github.com/thank423/trafficconsume',
-          'ljyun.cn/hangzhou/monitoring', 'taipei-torrent');
-          
-          ## 检查封禁
-          for bannedPeerId in bannedPeerIds {
-            if(string.startsWith(peerIdLowercase, bannedPeerId)){
-                return true;
-            }
-          }
-          for bannedClientName in bannedClientNames {
-            if(string.startsWith(clientNameLowercase, bannedClientName)){
-                return true;
-            }
-          }
-          return false;
-      # 检查那些 PeerID 和 Client Name 驴头不对马嘴的 Peers
-      id-name-check:
-        cachable: true
-        script: |-
-          if(isBlank(peer.clientName) || isBlank(peer.peerId)) {
-              return false; ## 二元组任意为空都不能继续检查，需要下载器支持
-          }
-          ## 全部转换为小写
-          let peerIdLowercase = toLowerCase(peer.peerId);
-          let clientNameLowercase = toLowerCase(peer.clientName);
-          ## 映射表
-          let table = seq.map(
-            'bitcomet', '-bc',
-            'transmission', '-tr',
-            'qbittorrent', '-qb',
-            'bitlord', '-bl',
-            'bitwombat', '-bw',
-            'deluge', '-de',
-            'frostwire', '-fw',
-            'gospeed', '-gp',
-            'adm', '-ad',
-            'bitspirit', '-sp',
-            'aria2', 'a2',
-            'μtorrent', '-ut',
-            'utorrent', '-ut',
-            'tixati', 'tix'
-          );
-          ## 伪装检查
-          for tableName in seq.keys(table) {
-            if(string.startsWith(clientNameLowercase, tableName)){
-                if(string.startsWith(peerIdLowercase, seq.get(table, tableName))){
-                    return false;
-                }else{
-                    ## p('peerId='+peerIdLowercase+', clientName='+clientNameLowercase + ', excepted='+ seq.get(table, tableName));
-                    return true;
-                }
-            }
-          }
-          return false;
-
+    #
+    # 所有的脚本文件默认放置在 data/scripts 目录内，您也可以修改已有的、或者新建新的脚本文件
+    # 是否启用
+    enabled: true
   # PeerId 封禁
   # 此模块对 Transmission 不起效
   peer-id-blacklist:

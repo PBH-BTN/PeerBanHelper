@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper;
 
+import com.alessiodp.libby.LibraryManager;
+import com.alessiodp.libby.logging.LogLevel;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
@@ -9,6 +11,7 @@ import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,7 @@ public class Main {
     @Getter
     private static final File configDirectory = new File(dataDirectory, "config");
     private static final File pluginDirectory = new File(dataDirectory, "plugins");
+    private static final File libraryDirectory = new File(dataDirectory, "libraries");
     @Getter
     private static BuildMeta meta = new BuildMeta();
     @Getter
@@ -46,13 +50,24 @@ public class Main {
     private static File mainConfigFile;
     @Getter
     private static File profileConfigFile;
+    @Getter
+    private static LibraryManager libraryManager;
 
     public static void main(String[] args) {
         setupLog4j2();
+        if (!libraryDirectory.exists()) {
+            libraryDirectory.mkdirs();
+        }
+        libraryManager = new PBHLibraryManager(
+                new Slf4jLogAppender(),
+                libraryDirectory.toPath()
+        );
+        libraryManager.setLogLevel(LogLevel.ERROR);
         initBuildMeta();
         initGUI(args);
         setupConfiguration();
         guiManager.createMainWindow();
+
         mainConfigFile = new File(configDirectory, "config.yml");
         YamlConfiguration mainConfig = loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));

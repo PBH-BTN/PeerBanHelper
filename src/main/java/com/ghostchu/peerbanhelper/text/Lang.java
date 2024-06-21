@@ -233,4 +233,7 @@ public class Lang {
             """;
     public static final String MODULE_EXPRESSION_RULE_TIMEOUT = "用户脚本 {} 执行超时，最大允许时间是 {}ms";
     public static final String MODULE_EXPRESSION_RULE_ERROR = "执行用户脚本 {} 时出错";
+    public static final String MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED = "[错误] 在释放预设脚本文件 {} 时遇到了系统错误";
+    public static final String JAVAFX_LOAD_WEBVIEW_NEED_RESTART = "PeerBanHelper ";
+
 }

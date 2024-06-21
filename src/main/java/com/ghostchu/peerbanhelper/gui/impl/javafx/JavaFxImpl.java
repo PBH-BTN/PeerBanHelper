@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.javafx;
 
+import com.alessiodp.libby.Library;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.MainJavaFx;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
@@ -8,6 +9,8 @@ import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow.JFXWindowController;
 import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.maven.GeoUtil;
+import com.ghostchu.peerbanhelper.util.maven.MavenCentralMirror;
 import com.google.common.eventbus.Subscribe;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -27,6 +30,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -70,21 +74,69 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Subscribe
     public void onPBHServerStarted(PBHServerStartedEvent event) {
-        Platform.runLater(() -> {
-            MainJavaFx.getStage().setTitle(String.format(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
-            String webuiPath = "http://localhost:" + Main.getServer().getHttpdPort();
+        CompletableFuture.runAsync(() -> {
+            if (!isWebViewSupported()) {
+                try {
+                    tryLoadWebViewLibraries();
+                } catch (Exception e) {
+                    log.error("Unable to load webviews", e);
+                }
+            }
             if (isWebViewSupported()) {
-                JFXWindowController controller = MainJavaFx.INSTANCE.getController();
-                Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), webuiPath);
-                javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
-                selectionModel.select(webuiTab);
-                log.info(Lang.WEBVIEW_ENABLED);
-            } else {
-                log.info(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED);
+                Platform.runLater(() -> {
+                    MainJavaFx.getStage().setTitle(String.format(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+                    String webuiPath = "http://localhost:" + Main.getServer().getHttpdPort();
+                    if (isWebViewSupported()) {
+                        JFXWindowController controller = MainJavaFx.INSTANCE.getController();
+                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), webuiPath);
+                        javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
+                        selectionModel.select(webuiTab);
+                        log.info(Lang.WEBVIEW_ENABLED);
+                    } else {
+                        log.info(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED);
+                    }
+                });
             }
         });
     }
 
+
+    private void tryLoadWebViewLibraries() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        String sysArch = "win";
+        if (osName.contains("linux")) {
+            sysArch = "linux";
+        } else if (osName.contains("mac")) {
+            sysArch = "mac";
+        }
+        List<MavenCentralMirror> server = GeoUtil.determineBestMirrorServer(log);
+        if (!server.isEmpty()) {
+            MavenCentralMirror mirror = server.getFirst();
+            if (mirror != null) {
+                Main.getLibraryManager().addRepository(mirror.getRepoUrl());
+            }
+        }
+        String javafx = Main.getMeta().getJavafx().replace("${javafx.version}", "21");
+        Main.getLibraryManager().loadLibraries(Library.builder()
+                .groupId("org{}openjfx") // "{}" is replaced with ".", useful to avoid unwanted changes made by maven-shade-plugin
+                .artifactId("javafx-media")
+                .version(javafx)
+                .classifier(sysArch)
+                .resolveTransitiveDependencies(false)
+                .build(), Library.builder()
+                .groupId("org{}openjfx") // "{}" is replaced with ".", useful to avoid unwanted changes made by maven-shade-plugin
+                .artifactId("javafx-graphics")
+                .version(javafx)
+                .classifier(sysArch)
+                .resolveTransitiveDependencies(false)
+                .build(), Library.builder()
+                .groupId("org{}openjfx") // "{}" is replaced with ".", useful to avoid unwanted changes made by maven-shade-plugin
+                .artifactId("javafx-web")
+                .version(javafx)
+                .classifier(sysArch)
+                .resolveTransitiveDependencies(false)
+                .build());
+    }
     @SneakyThrows
     @Override
     public void createMainWindow() {

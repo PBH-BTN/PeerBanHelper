@@ -1,0 +1,39 @@
+## @NAME PeerID/ClientName 伪装检查
+## @AUTHOR PBH-BTN Community
+## @CACHEABLE true
+
+if(isBlank(peer.clientName) || isBlank(peer.peerId)) {
+    return false; ## 二元组任意为空都不能继续检查，需要下载器支持
+}
+## 全部转换为小写
+let peerIdLowercase = toLowerCase(peer.peerId);
+let clientNameLowercase = toLowerCase(peer.clientName);
+## 映射表
+let table = seq.map(
+  'bitcomet', '-bc',
+  'transmission', '-tr',
+  'qbittorrent', '-qb',
+  'bitlord', '-bl',
+  'bitwombat', '-bw',
+  'deluge', '-de',
+  'frostwire', '-fw',
+  'gospeed', '-gp',
+  'adm', '-ad',
+  'bitspirit', '-sp',
+  'aria2', 'a2',
+  'μtorrent', '-ut',
+  'utorrent', '-ut',
+  'tixati', 'tix'
+);
+## 伪装检查
+for tableName in seq.keys(table) {
+  if(string.startsWith(clientNameLowercase, tableName)){
+      if(string.startsWith(peerIdLowercase, seq.get(table, tableName))){
+          return false;
+      }else{
+          ## p('peerId='+peerIdLowercase+', clientName='+clientNameLowercase + ', excepted='+ seq.get(table, tableName));
+          return true;
+      }
+  }
+}
+return false;

@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Expression;
@@ -30,14 +31,20 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.MathContext;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class ExpressionRule extends AbstractRuleFeatureModule {
@@ -68,42 +75,15 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         return true;
     }
 
-    @SneakyThrows
-    @Override
-    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        String cacheKey = peer.getCacheKey();
-        Map<String, Object> env = new HashMap<>();
-        env.put("torrent", torrent);
-        env.put("peer", peer);
-        for (Expression expression : expressions.keySet()) {
-            ExpressionMetadata expressionMetadata = expressions.get(expression);
-            Map<String, Optional<BanResult>> cached = cacheMap.get(cacheKey, HashMap::new);
-            BanResult result;
-            if (cached.containsKey(expressionMetadata.name())) {
-                result = cached.get(expressionMetadata.name()).orElse(null);
-            } else {
-                try {
-                    Object returns = expression.execute(env);
-                    result = handleResult(expression, returns);
-                    if (expressionMetadata.cacheable()) {
-                        cached.put(expressionMetadata.name(), Optional.ofNullable(result));
-                    }
-                } catch (TimeoutException timeoutException) {
-                    log.warn(Lang.MODULE_EXPRESSION_RULE_TIMEOUT, maxScriptExecuteTime, timeoutException);
-                    continue;
-                } catch (Exception ex) {
-                    log.warn(Lang.MODULE_EXPRESSION_RULE_ERROR, expressionMetadata.name(), ex);
-                    continue;
-                }
-            }
-            if (cached.isEmpty()) {
-                cacheMap.invalidate(cacheKey);
-            }
-            if (result != null && result.action() != PeerAction.NO_ACTION) {
-                return result;
-            }
+    public static List<File> readAllResFiles(String path) throws IOException, URISyntaxException {
+        List<File> files = new ArrayList<>();
+        var urlEnumeration = Main.class.getClassLoader().getResources(path);
+        while (urlEnumeration.hasMoreElements()) {
+            var url = urlEnumeration.nextElement();
+            var fileDir = new File(new URI(url.toString()));
+            files.addAll(recursiveReadFile(fileDir));
         }
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "All ok!");
+        return files;
     }
 
     @Nullable
@@ -147,8 +127,74 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         return "expression-engine";
     }
 
+    public static List<File> recursiveReadFile(File fileOrDir) {
+        List<File> files = new ArrayList<>();
+        if (fileOrDir == null) {
+            return files;
+        }
+
+        if (fileOrDir.isFile()) {
+            files.add(fileOrDir);
+        } else {
+            for (var file : Objects.requireNonNull(fileOrDir.listFiles())) {
+                files.addAll(recursiveReadFile(file));
+            }
+        }
+        return files;
+    }
+
+    private void registerFunctions(Class<?> clazz) {
+        try {
+            AviatorEvaluator.addInstanceFunctions(clazz.getSimpleName(), clazz);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+        String cacheKey = peer.getCacheKey();
+
+        for (Expression expression : expressions.keySet()) {
+            ExpressionMetadata expressionMetadata = expressions.get(expression);
+            Map<String, Optional<BanResult>> cached = cacheMap.get(cacheKey, HashMap::new);
+            BanResult result;
+            if (cached.containsKey(expressionMetadata.name())) {
+                result = cached.get(expressionMetadata.name()).orElse(null);
+            } else {
+                try {
+                    Map<String, Object> env = new HashMap<>();
+                    env.put("torrent", torrent);
+                    env.put("peer", peer);
+                    env.put("cacheable", new AtomicBoolean(false));
+                    Object returns = expression.execute(env);
+                    result = handleResult(expression, returns);
+                    if (((AtomicBoolean) env.get("cacheable")).get()) {
+                        cached.put(expressionMetadata.name(), Optional.ofNullable(result));
+                    }
+                } catch (TimeoutException timeoutException) {
+                    log.warn(Lang.MODULE_EXPRESSION_RULE_TIMEOUT, maxScriptExecuteTime, timeoutException);
+                    continue;
+                } catch (Exception ex) {
+                    log.warn(Lang.MODULE_EXPRESSION_RULE_ERROR, expressionMetadata.name(), ex);
+                    continue;
+                }
+            }
+            if (cached.isEmpty()) {
+                cacheMap.invalidate(cacheKey);
+            }
+            if (result != null && result.action() != PeerAction.NO_ACTION) {
+                return result;
+            }
+        }
+        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "All ok!");
+    }
+
     @Override
     public void onEnable() {
+        // 默认启用脚本编译缓存
+        AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
         // ASM 性能优先
         AviatorEvaluator.getInstance().setOption(Options.EVAL_MODE, EvalMode.ASM);
         // EVAL 性能优先
@@ -174,45 +220,91 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         registerFunctions(PeerBanHelperServer.class);
         registerFunctions(InfoHashUtil.class);
         registerFunctions(Main.class);
-        reloadConfig();
-    }
-
-    private void registerFunctions(Class<?> clazz) {
         try {
-            AviatorEvaluator.addInstanceFunctions(clazz.getSimpleName(), clazz);
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
+            reloadConfig();
+        } catch (Exception e) {
+            log.error("Failed to load scripts", e);
+            System.exit(1);
         }
     }
 
-    private void reloadConfig() {
+    private void reloadConfig() throws IOException, URISyntaxException {
         expressions.clear();
+        initScripts();
         log.info(Lang.MODULE_EXPRESSION_RULE_COMPILING);
         ConfigurationSection section = getConfig().getConfigurationSection("rules");
         long start = System.currentTimeMillis();
         Map<Expression, ExpressionMetadata> userRules = new ConcurrentHashMap<>();
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            for (String ruleName : section.getKeys(false)) {
-                ConfigurationSection ruleSection = section.getConfigurationSection(ruleName);
-                if (ruleSection == null) {
-                    continue;
-                }
-                boolean cacheable = ruleSection.getBoolean("cacheable", true);
-                String script = ruleSection.getString("script", "");
-                executor.submit(() -> {
-                    try {
-                        AviatorEvaluator.getInstance().validate(script);
-                        Expression expression = AviatorEvaluator.getInstance().compile(script);
-                        expression.newEnv("peerbanhelper", getServer(), "moduleConfig", getConfig(), "ipdb", getServer().getIpdb());
-                        userRules.put(expression, new ExpressionMetadata(ruleName, cacheable, script));
-                    } catch (ExpressionSyntaxErrorException err) {
-                        log.warn(Lang.MODULE_EXPRESSION_RULE_BAD_EXPRESSION, err);
+            File scriptDir = new File(Main.getDataDirectory(), "scripts");
+            File[] scripts = scriptDir.listFiles();
+            if (scripts != null) {
+                for (File script : scripts) {
+                    if (!script.getName().endsWith(".av") || script.isHidden()) {
+                        continue;
                     }
-                });
+                    String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
+                    ExpressionMetadata expressionMetadata = parseScriptMetadata(script.getName(), scriptContent);
+                    executor.submit(() -> {
+                        try {
+                            AviatorEvaluator.getInstance().validate(expressionMetadata.script());
+                            Expression expression = AviatorEvaluator.getInstance().compile(expressionMetadata.script());
+                            expression.newEnv("peerbanhelper", getServer(), "moduleConfig", getConfig(), "ipdb", getServer().getIpdb());
+                            userRules.put(expression, expressionMetadata);
+                        } catch (ExpressionSyntaxErrorException err) {
+                            log.warn(Lang.MODULE_EXPRESSION_RULE_BAD_EXPRESSION, err);
+                        }
+                    });
+                }
             }
+
+
         }
         expressions = ImmutableMap.copyOf(userRules);
         log.info(Lang.MODULE_EXPRESSION_RULE_COMPILED, expressions.size(), System.currentTimeMillis() - start);
+    }
+
+    private ExpressionMetadata parseScriptMetadata(String fallbackName, String scriptContent) {
+        try (BufferedReader reader = new BufferedReader(new StringReader(scriptContent))) {
+            String name = fallbackName;
+            String author = "Unknown";
+            boolean cacheable = false;
+            while (true) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                if (line.startsWith("#")) {
+                    line = line.substring(2).trim();
+                    if (line.startsWith("@NAME")) {
+                        name = line.substring(5).trim();
+                    } else if (line.startsWith("@AUTHOR")) {
+                        author = line.substring(7).trim();
+                    } else if (line.startsWith("@CACHEABLE")) {
+                        cacheable = Boolean.parseBoolean(line.substring(10).trim());
+                    }
+                }
+            }
+            return new ExpressionMetadata(name, author, cacheable, scriptContent);
+        } catch (IOException e) {
+            return new ExpressionMetadata("Failed to parse name", "Unknown", true, scriptContent);
+        }
+    }
+
+    private void initScripts() throws IOException, URISyntaxException {
+        File scriptDir = new File(Main.getDataDirectory(), "scripts");
+        if (scriptDir.exists()) {
+            return;
+        }
+        scriptDir.mkdirs();
+        List<File> files = readAllResFiles("scripts");
+        files.forEach(f -> {
+            try {
+                Files.copy(f, new File(scriptDir, f.getName()));
+            } catch (IOException e) {
+                log.warn(Lang.MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED, f.getName(), e);
+            }
+        });
     }
 
     @Override
@@ -220,6 +312,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
 
     }
 
-    record ExpressionMetadata(String name, boolean cacheable, String script) {
+    record ExpressionMetadata(String name, String author, boolean cacheable, String script) {
     }
 }
