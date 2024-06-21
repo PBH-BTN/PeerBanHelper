@@ -42,13 +42,18 @@ public class SingleTorrentPeer implements Peer {
     private Long upSpeed;
     @SerializedName("uploaded")
     private Long uploaded;
+    private transient PeerAddress peerAddress;
 
     public SingleTorrentPeer() {
     }
 
     @Override
     public PeerAddress getPeerAddress() {
-        return new PeerAddress(ip, port);
+        if (this.peerAddress == null) {
+            this.peerAddress = new PeerAddress(ip, port);
+            ;
+        }
+        return this.peerAddress;
     }
 
     @Override
