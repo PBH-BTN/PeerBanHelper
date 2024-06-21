@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper.text;
 
+import lombok.Getter;
+
+@Getter
 public class Lang {
     public static final String ERR_BUILD_NO_INFO_FILE = "错误：构建信息文件不存在";
     public static final String ERR_CANNOT_LOAD_BUILD_INFO = "错误：无法加载构建信息文件";
@@ -215,4 +218,19 @@ public class Lang {
     public static final String STATUS_TEXT_LOGIN_FAILED = "尝试登陆到下载器失败";
     public static final String STATUS_TEXT_EXCEPTION = "出现异常，请检查 PeerBanHelper 控制台";
     public static final String STATUS_TEXT_NEED_PRIVILEGE = "权限不足，请求权限提升（以管理员/root身份运行）";
+    public static final String SUGGEST_FIREWALL_IPTABELS = "不推荐使用原生 iptables，可能引起网络性能下降。请考虑安装 ipset 代替使用 iptabels";
+    public static final String SUGGEST_FIREWALL_FIREWALLD = "不推荐使用原生 firewalld，可能引起网络性能下降。请考虑安装 ipset 代替使用 firewalld";
+    public static final String SUGGEST_FIREWALL_WINDOWS_FIREWALL_DISABLED = "Windows 防火墙目前处于禁用状态，请为 “公用网络” 和 “专用网络” 打开 Windows 防火墙，否则系统防火墙集成将不起作用";
+    public static final String MODULE_EXPRESSION_RULE_BAD_EXPRESSION = "解析表达式时出错，请检查是否有语法错误";
+    public static final String MODULE_EXPRESSION_RULE_COMPILING = "请稍等，规则引擎正在编译用户规则以提高执行性能，这可能需要一点时间……";
+    public static final String MODULE_EXPRESSION_RULE_COMPILED = "已成功编译 {} 条用户规则，耗时 {}ms";
+    public static final String MODULE_EXPRESSION_RULE_INVALID_RETURNS = """
+            用户规则 {} 返回了无效值，返回的值必须是以下类型中的其一：
+                Boolean: [false=不采取任何操作, true=封禁Peer]
+                Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它用户规则]
+                com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
+                com.ghostchu.peerbanhelper.module.BanResult
+            """;
+    public static final String MODULE_EXPRESSION_RULE_TIMEOUT = "用户脚本 {} 执行超时，最大允许时间是 {}ms";
+    public static final String MODULE_EXPRESSION_RULE_ERROR = "执行用户脚本 {} 时出错";
 }

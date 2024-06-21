@@ -114,7 +114,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
 
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        PeerAddress peerAddress = peer.getAddress();
+        PeerAddress peerAddress = peer.getPeerAddress();
         if (ports.contains(peerAddress.getPort())) {
             return new BanResult(this, PeerAction.BAN, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
         }
@@ -150,7 +150,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         if (regions.isEmpty() && asns.isEmpty()) {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No feature enabled");
         }
-        InetAddress address = peer.getAddress().getAddress().toInetAddress();
+        InetAddress address = peer.getPeerAddress().getAddress().toInetAddress();
         if (!asns.isEmpty() && ipdb.getMmdbASN() != null) {
             long asn = ipdb.getMmdbASN().asn(address).getAutonomousSystemNumber();
             if (asns.contains(asn)) {

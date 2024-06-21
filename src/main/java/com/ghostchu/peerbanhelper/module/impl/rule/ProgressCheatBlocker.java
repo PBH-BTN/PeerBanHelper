@@ -117,10 +117,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         // 处理 IPV6
         IPAddress peerIp;
-        if (peer.getAddress().getAddress().isIPv4Convertible()) {
-            peerIp = peer.getAddress().getAddress().toIPv4().toPrefixBlock(ipv4PrefixLength);
+        if (peer.getPeerAddress().getAddress().isIPv4Convertible()) {
+            peerIp = peer.getPeerAddress().getAddress().toIPv4().toPrefixBlock(ipv4PrefixLength);
         } else {
-            peerIp = peer.getAddress().getAddress().toIPv6().toPrefixBlock(ipv6PrefixLength);
+            peerIp = peer.getPeerAddress().getAddress().toIPv6().toPrefixBlock(ipv6PrefixLength);
         }
         String peerIpString = peerIp.toString();
         // 从缓存取数据

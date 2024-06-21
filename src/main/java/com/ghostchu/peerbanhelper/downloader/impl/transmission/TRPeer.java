@@ -13,7 +13,7 @@ public class TRPeer implements Peer {
     }
 
     @Override
-    public PeerAddress getAddress() {
+    public PeerAddress getPeerAddress() {
         return new PeerAddress(backend.getAddress(), backend.getPort());
     }
 

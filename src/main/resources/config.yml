@@ -126,3 +126,11 @@ ip-database:
   database-city: 'GeoLite2-City'
   # GeoIP-City 的数据库名称，默认使用免费版（GeoLite2-ASN），如果您购买了付费的数据库，可以自行替换
   database-asn: 'GeoLite2-ASN'
+firewall-integration:
+  order:
+    - "wf" # Windows Firewall
+    - "ipset" # ipset (Linux)
+    - "ufw" # ufw (Linux)
+    - "firewalld" # firewalld (Linux)
+    - "iptables" # iptables (Linux)
+

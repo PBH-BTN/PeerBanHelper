@@ -422,7 +422,7 @@ public class PeerBanHelperServer {
                     details.forEach(detail -> {
                         protect.getService().submit(() -> {
                             if (detail.result().action() == PeerAction.BAN) {
-                                IPDBResponse ipdbResponse = queryIPDB(detail.peer().getAddress());
+                                IPDBResponse ipdbResponse = queryIPDB(detail.peer().getPeerAddress());
                                 BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getClass().getName(), downloader.getName(),
                                         System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
                                         detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(),
@@ -430,7 +430,7 @@ public class PeerBanHelperServer {
                                 bannedPeers.add(banMetadata);
                                 relaunch.add(detail.torrent());
                                 banPeer(banMetadata, detail.torrent(), detail.peer());
-                                log.warn(Lang.BAN_PEER, detail.peer().getAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
+                                log.warn(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
                             }
                         });
                     });
@@ -484,7 +484,7 @@ public class PeerBanHelperServer {
             peers.forEach((downloader, tasks) ->
                     tasks.forEach((torrent, peer) ->
                             peer.forEach(p -> protect.getService().submit(() -> {
-                                PeerAddress address = p.getAddress();
+                                PeerAddress address = p.getPeerAddress();
                                 IPDBResponse ipdbResponse = queryIPDB(address);
                                 PeerMetadata metadata = new PeerMetadata(
                                         downloader.getName(),
@@ -550,8 +550,9 @@ public class PeerBanHelperServer {
     private void registerModules() {
         log.info(Lang.WAIT_FOR_MODULES_STARTUP);
         moduleManager.register(new IPBlackList(this, profile));
-        moduleManager.register(new PeerIdBlacklist(this, profile));
-        moduleManager.register(new ClientNameBlacklist(this, profile));
+        // moduleManager.register(new PeerIdBlacklist(this, profile));
+        //moduleManager.register(new ClientNameBlacklist(this, profile));
+        moduleManager.register(new ExpressionRule(this, profile));
         moduleManager.register(new ProgressCheatBlocker(this, profile));
         moduleManager.register(new MultiDialingBlocker(this, profile));
         //moduleManager.register(new ActiveProbing(this, profile));
@@ -657,11 +658,11 @@ public class PeerBanHelperServer {
     @NotNull
     public BanResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
         List<BanResult> results = new ArrayList<>();
-        if (peer.getAddress().getAddress().isAnyLocal()) {
+        if (peer.getPeerAddress().getAddress().isAnyLocal()) {
             return new BanResult(null, PeerAction.SKIP, "local access", "skip local network peers");
         }
         for (IPAddress ignoreAddress : ignoreAddresses) {
-            if (ignoreAddress.contains(peer.getAddress().getAddress())) {
+            if (ignoreAddress.contains(peer.getPeerAddress().getAddress())) {
                 return new BanResult(null, PeerAction.SKIP, "ignored addresses", "skip peers from ignored addresses");
             }
         }
@@ -673,7 +674,7 @@ public class PeerBanHelperServer {
                 continue; // 如果模块需要握手检查且peer正在握手 则跳过检查
             }
             if (module.isCheckCacheable() && !isHandshaking(peer)) {
-                if (moduleMatchCache.shouldSkipCheck(module, torrent, peer.getAddress(), true)) {
+                if (moduleMatchCache.shouldSkipCheck(module, torrent, peer.getPeerAddress(), true)) {
                     continue;
                 }
             }
@@ -710,14 +711,14 @@ public class PeerBanHelperServer {
      * @param banMetadata 封禁元数据
      */
     public void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
-        BAN_LIST.put(peer.getAddress(), banMetadata);
-        metrics.recordPeerBan(peer.getAddress(), banMetadata);
-        banListInvoker.forEach(i -> i.add(peer.getAddress(), banMetadata));
+        BAN_LIST.put(peer.getPeerAddress(), banMetadata);
+        metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
+        banListInvoker.forEach(i -> i.add(peer.getPeerAddress(), banMetadata));
         if (mainConfig.getBoolean("lookup.dns-reverse-lookup")) {
             executor.submit(() -> {
                 try {
-                    InetAddress address = InetAddress.getByName(peer.getAddress().getAddress().toString());
-                    if (!address.getCanonicalHostName().equals(peer.getAddress().getIp())) {
+                    InetAddress address = InetAddress.getByName(peer.getPeerAddress().getAddress().toString());
+                    if (!address.getCanonicalHostName().equals(peer.getPeerAddress().getIp())) {
                         banMetadata.setReverseLookup(address.getCanonicalHostName());
                     } else {
                         banMetadata.setReverseLookup("N/A");
@@ -729,7 +730,7 @@ public class PeerBanHelperServer {
         } else {
             banMetadata.setReverseLookup("N/A");
         }
-        Main.getEventBus().post(new PeerBanEvent(peer.getAddress(), banMetadata, torrentObj, peer));
+        Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
     }
 
     public List<Downloader> getDownloaders() {

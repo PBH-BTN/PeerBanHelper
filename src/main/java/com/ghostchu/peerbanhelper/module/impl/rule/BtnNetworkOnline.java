@@ -136,7 +136,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
 
     @Nullable
     private BanResult checkIpRule(BtnRuleParsed rule, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        IPAddress pa = peer.getAddress().getAddress();
+        IPAddress pa = peer.getPeerAddress().getAddress();
         if (pa == null) return null;
         if (pa.isIPv4Convertible()) {
             pa = pa.toIPv4();

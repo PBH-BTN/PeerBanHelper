@@ -47,7 +47,7 @@ public class SingleTorrentPeer implements Peer {
     }
 
     @Override
-    public PeerAddress getAddress() {
+    public PeerAddress getPeerAddress() {
         return new PeerAddress(ip, port);
     }
 

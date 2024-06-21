@@ -102,7 +102,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
     @Override
     public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         long t1 = System.currentTimeMillis();
-        String ip = peer.getAddress().getIp();
+        String ip = peer.getPeerAddress().getIp();
         List<IPBanResult> results = new ArrayList<>();
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
             ipBanMatchers.forEach(rule -> service.submit(() -> {

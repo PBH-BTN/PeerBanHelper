@@ -80,7 +80,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
         if (peer.getPeerId() == null || peer.getPeerId().isEmpty()) {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Waiting for Bittorrent handshaking.");
         }
-        IPAddress peerAddress = peer.getAddress().getAddress().withoutPrefixLength();
+        IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }

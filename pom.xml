@@ -403,5 +403,10 @@
             <scope>provided</scope>
             <classifier>linux</classifier>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.aviator</groupId>
+            <artifactId>aviator</artifactId>
+            <version>5.4.3</version>
+        </dependency>
     </dependencies>
 </project>

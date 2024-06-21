@@ -136,7 +136,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
             @NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         String torrentName = torrent.getName();
         String torrentId = torrent.getId();
-        IPAddress peerAddress = peer.getAddress().getAddress();
+        IPAddress peerAddress = peer.getPeerAddress().getAddress();
         String peerIpStr = peerAddress.toString();
         IPAddress peerSubnet = peerAddress.isIPv4() ?
                 peerAddress.toPrefixBlock(subnetMaskLength) : peerAddress.toPrefixBlock(subnetMaskV6Length);
