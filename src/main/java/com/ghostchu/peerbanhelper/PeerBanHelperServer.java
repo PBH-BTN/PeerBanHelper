@@ -717,6 +717,10 @@ public class PeerBanHelperServer {
         Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
     }
 
+    public String getWebUiUrl() {
+        return "http://localhost:" + Main.getServer().getHttpdPort() + "/?token=" + UrlEncoderDecoder.encodePath(getWebContainer().getToken());
+    }
+
     public List<Downloader> getDownloaders() {
         return ImmutableList.copyOf(downloaders);
     }

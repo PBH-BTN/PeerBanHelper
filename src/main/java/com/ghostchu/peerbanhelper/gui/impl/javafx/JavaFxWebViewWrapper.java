@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 public class JavaFxWebViewWrapper {
     public static Tab installWebViewTab(TabPane tabPane, String webuiPath) {
         WebView webView = new WebView();
-        log.info("JavaFx WebView engine: Loading page {}", webuiPath);
         webView.getEngine().load(webuiPath);
         AnchorPane anchorPane = new AnchorPane();
         anchorPane.setMinHeight(0);

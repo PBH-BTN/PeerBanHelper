@@ -85,10 +85,9 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
             if (isWebViewSupported()) {
                 Platform.runLater(() -> {
                     MainJavaFx.getStage().setTitle(String.format(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
-                    String webuiPath = "http://localhost:" + Main.getServer().getHttpdPort();
                     if (isWebViewSupported()) {
                         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
-                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), webuiPath);
+                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), Main.getServer().getWebUiUrl());
                         javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
                         selectionModel.select(webuiTab);
                         log.info(Lang.WEBVIEW_ENABLED);
@@ -179,7 +178,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         controller.getMenuProgramOpenInGithub().setText(Lang.ABOUT_VIEW_GITHUB);
         controller.getMenuProgramOpenInGithub().setOnAction(e -> openWebpage(URI.create(Lang.GITHUB_PAGE)));
         controller.getMenuProgramOpenInBrowser().setText(Lang.GUI_MENU_WEBUI_OPEN);
-        controller.getMenuProgramOpenInBrowser().setOnAction(e -> openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port())));
+        controller.getMenuProgramOpenInBrowser().setOnAction(e -> openWebpage(URI.create(Main.getServer().getWebUiUrl())));
         controller.getMenuProgramCopyWebuiToken().setText(Lang.GUI_COPY_WEBUI_TOKEN);
         controller.getMenuProgramCopyWebuiToken().setOnAction(e -> {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
