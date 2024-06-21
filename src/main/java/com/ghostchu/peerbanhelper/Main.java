@@ -61,8 +61,7 @@ public class Main {
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         try {
-            server = new PeerBanHelperServer(pbhServerAddress,
-                    YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
+            server = new PeerBanHelperServer(pbhServerAddress, profileConfig, mainConfig);
         } catch (Exception e) {
             log.error(Lang.BOOTSTRAP_FAILED, e);
             throw new RuntimeException(e);
@@ -77,13 +76,18 @@ public class Main {
     }
 
     private static YamlConfiguration loadConfiguration(File file) {
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        if (config.getKeys(false).isEmpty()) {
+        YamlConfiguration configuration = new YamlConfiguration();
+        configuration.getOptions()
+                .setParseComments(true)
+                .setWidth(1000);
+        try {
+            configuration.load(file);
+        } catch (IOException | InvalidConfigurationException e) {
             log.error(Lang.CONFIGURATION_INVALID, file);
             guiManager.createDialog(Level.SEVERE, Lang.CONFIGURATION_INVALID_TITLE, String.format(Lang.CONFIGURATION_INVALID_DESCRIPTION, file));
             System.exit(1);
         }
-        return config;
+        return configuration;
     }
 
     private static void setupConfiguration() {
