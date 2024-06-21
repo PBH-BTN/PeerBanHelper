@@ -65,7 +65,7 @@ public class Lang {
     public static String ERR_CANNOT_LOAD_PLUGIN = "[注册] 无法加载插件：{}";
     public static String ERR_CANNOT_UNLOAD_PLUGIN = "[退出] 无法卸载插件：{}";
     public static String ARB_ERROR_TO_CONVERTING_IP = "IP 地址 %s 既不是 IPV4 地址也不是 IPV6 地址。";
-    public static final String ARB_BANNED = "IP 地址 %s 与另一个已封禁的 IP 地址 %s 处于同一封禁区间 %s 内，执行连锁封禁操作。";
+    public static final String ARB_BANNED = "IP 地址 %s 与另一个已封禁的 IP 地址 %s 处于同一封禁区间内，执行连锁封禁操作。";
     public static final String DATABASE_SETUP_FAILED = "[错误] 数据库初始化失败";
     public static String DATABASE_BUFFER_SAVED = "[保存] 已保存 {} 条内存缓存的封禁日志到数据库，用时 {}ms";
     public static final String DATABASE_SAVE_BUFFER_FAILED = "[错误] 刷写内存缓存的封禁日志时出现了 SQL 错误，未保存的数据已被丢弃";

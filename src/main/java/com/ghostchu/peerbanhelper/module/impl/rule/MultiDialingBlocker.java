@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -138,9 +139,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
         String torrentId = torrent.getId();
         IPAddress peerAddress = peer.getPeerAddress().getAddress();
         String peerIpStr = peerAddress.toString();
-        IPAddress peerSubnet = peerAddress.isIPv4() ?
-                peerAddress.toPrefixBlock(subnetMaskLength) : peerAddress.toPrefixBlock(subnetMaskV6Length);
-
+        IPAddress peerSubnet = peerAddress.isIPv4() ? IPAddressUtil.toPrefixBlock(peerAddress, subnetMaskLength) : IPAddressUtil.toPrefixBlock(peerAddress, subnetMaskV6Length);
         try {
             long currentTimestamp = System.currentTimeMillis();
 

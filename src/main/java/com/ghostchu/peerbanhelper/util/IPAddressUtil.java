@@ -6,6 +6,7 @@ import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -16,16 +17,36 @@ public class IPAddressUtil {
             .expireAfterAccess(15, TimeUnit.MINUTES)
             .maximumSize(2000)
             .softValues()
-            .recordStats()
+            .build();
+    private static final Cache<IPAddress, IPAddress> IP_WITHOUT_PREFIX_CACHE = CacheBuilder.newBuilder()
+            .expireAfterAccess(15, TimeUnit.MINUTES)
+            .maximumSize(2000)
+            .softValues()
             .build();
 
     @Contract("_ -> !null")
     public static IPAddress getIPAddress(String ip) {
         try {
-            return IP_ADDRESS_CACHE.get(ip, () -> new IPAddressString(ip).toAddress());
+            return IP_ADDRESS_CACHE.get(ip, () -> {
+                IPAddress ipAddress = new IPAddressString(ip).toAddress();
+                if (ipAddress.isIPv4Convertible()) {
+                    ipAddress = ipAddress.toIPv4();
+                }
+                return ipAddress;
+            });
         } catch (ExecutionException e) {
             log.error("Unable to get ipaddress from ip {}", ip, e);
             return null;
+        }
+    }
+
+    @NotNull
+    public static IPAddress toPrefixBlock(IPAddress ipAddress, int length) {
+        try {
+            return IP_WITHOUT_PREFIX_CACHE.get(ipAddress, () -> ipAddress.toPrefixBlock(length));
+        } catch (ExecutionException e) {
+            log.error("Unable to get ipaddress with prefixblock for ip {}", ipAddress, e);
+            return ipAddress;
         }
     }
 }

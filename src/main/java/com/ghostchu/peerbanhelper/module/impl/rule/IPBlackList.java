@@ -15,7 +15,6 @@ import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
-import inet.ipaddr.IPAddressString;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.Getter;
@@ -93,13 +92,8 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     private void reloadConfig() {
         this.ips = new ArrayList<>();
         for (String s : getConfig().getStringList("ips")) {
-            IPAddress ipAddress = new IPAddressString(s).getAddress();
-            if (ipAddress != null) {
-                if (ipAddress.isIPv4Convertible()) {
-                    ipAddress = ipAddress.toIPv4();
-                }
-                this.ips.add(ipAddress);
-            }
+            IPAddress ipAddress = IPAddressUtil.getIPAddress(s);
+            this.ips.add(ipAddress);
         }
         this.ports = getConfig().getIntList("ports");
         this.regions = getConfig().getStringList("regions");
@@ -119,13 +113,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
             return new BanResult(this, PeerAction.BAN, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
         }
         IPAddress pa = IPAddressUtil.getIPAddress(peerAddress.getIp());
-        if (pa.isIPv4Convertible()) {
-            pa = pa.toIPv4();
-        }
         for (IPAddress ra : ips) {
-            if (ra.isIPv4() != pa.isIPv4()) { // 在上面的规则处统一进行过转换，此处可直接进行检查
-                continue;
-            }
             if (ra.equals(pa) || ra.contains(pa)) {
                 return new BanResult(this, PeerAction.BAN, ra.toString(), String.format(Lang.MODULE_IBL_MATCH_IP, ra));
             }

@@ -279,7 +279,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             // 判断是否是网段
             List<IPAddress> ipsList = new ArrayList<>();
             if (null != ipAddress.getNetworkPrefixLength()) {
-                if (ipAddress.isIPv4Convertible() && ipAddress.getNetworkPrefixLength() >= 20) {
+                if (ipAddress.isIPv4() && ipAddress.getNetworkPrefixLength() >= 20) {
                     // 前缀长度 >= 20 的ipv4网段地址转为精确ip
                     ipAddress.nonZeroHostIterator().forEachRemaining(ipsList::add);
                 } else {
@@ -290,9 +290,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                 ipsList.add(ipAddress);
             }
             ipsList.forEach(ip -> {
-                if (ip.isIPv4Convertible()) {
-                    ip = ip.toIPv4().withoutPrefixLength();
-                }
+                ip = ip.withoutPrefixLength();
                 ips.add(ip);
                 log.debug(Lang.IP_BAN_RULE_LOAD_IP, ruleName, ip);
             });
