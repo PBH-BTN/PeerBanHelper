@@ -254,13 +254,13 @@ public class MainWindow extends JFrame {
             String asOrg = "N/A";
             String asNetwork = "N/A";
             if (entry.getValue().getGeo() != null) {
-                countryRegion = entry.getValue().getGeo().getCountryRegion();
-                city = entry.getValue().getGeo().getCity();
+                countryRegion = entry.getValue().getGeo().get().getCountry().getName();
+                city = entry.getValue().getGeo().get().getCity().getName();
             }
             if (entry.getValue().getAsn() != null) {
-                asn = "AS" + entry.getValue().getAsn().getAsn();
-                asOrg = entry.getValue().getAsn().getAsOrganization();
-                asNetwork = entry.getValue().getAsn().getAsNetwork();
+                asn = "AS" + entry.getValue().getAsn().get().getAutonomousSystemNumber();
+                asOrg = entry.getValue().getAsn().get().getAutonomousSystemOrganization();
+                asNetwork = entry.getValue().getAsn().get().getNetwork().toString();
             }
             List<String> array = new ArrayList<>(); // 这里用 List，这样动态创建 array 就不用指定位置了
             array.add(countryRegion);

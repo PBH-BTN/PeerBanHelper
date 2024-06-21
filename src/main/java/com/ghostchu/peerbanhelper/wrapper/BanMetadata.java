@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
 import lombok.Data;
@@ -20,7 +21,7 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
     private String description;
 
     public BanMetadata(String context, String downloader, long banAt, long unbanAt, Torrent torrent, Peer peer, String rule,
-                       String description, @Nullable CityResponse cityResponse, @Nullable AsnResponse asnResponse) {
+                       String description, @Nullable LazyLoad<CityResponse> cityResponse, @Nullable LazyLoad<AsnResponse> asnResponse) {
         super(downloader, torrent, peer, cityResponse, asnResponse);
         this.context = context;
         this.banAt = banAt;

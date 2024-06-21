@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.BanResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -11,8 +10,6 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.maxmind.geoip2.exception.AddressNotFoundException;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
 import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -22,8 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -98,12 +93,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         this.ports = getConfig().getIntList("ports");
         this.regions = getConfig().getStringList("regions");
         this.asns = getConfig().getLongList("asns");
-    }
 
-    private void registerEntry(List<String> to, boolean condition, String entry) {
-        if (condition) {
-            to.add(entry);
-        }
     }
 
     @Override
@@ -123,30 +113,24 @@ public class IPBlackList extends AbstractRuleFeatureModule {
             if (ipdbResult.action() != PeerAction.NO_ACTION) {
                 return ipdbResult;
             }
-        } catch (AddressNotFoundException ignored) {
         } catch (Exception e) {
             log.error(Lang.MODULE_IBL_EXCEPTION_GEOIP, e);
         }
         return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No matches");
     }
 
-    private BanResult checkIPDB(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) throws IOException, GeoIp2Exception {
-        IPDB ipdb = getServer().getIpdb();
-        if (ipdb == null) {
-            return new BanResult(this, PeerAction.NO_ACTION, "N/A", "IPDB not initialized");
-        }
+    private BanResult checkIPDB(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         if (regions.isEmpty() && asns.isEmpty()) {
             return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No feature enabled");
         }
-        InetAddress address = peer.getPeerAddress().getAddress().toInetAddress();
-        if (!asns.isEmpty() && ipdb.getMmdbASN() != null) {
-            long asn = ipdb.getMmdbASN().asn(address).getAutonomousSystemNumber();
+        if (!asns.isEmpty()) {
+            long asn = getServer().queryIPDB(peer.getPeerAddress()).asnResponse().get().getAutonomousSystemNumber();
             if (asns.contains(asn)) {
                 return new BanResult(this, PeerAction.BAN, String.valueOf(asn), String.format(Lang.MODULE_IBL_MATCH_ASN, asn));
             }
         }
-        if (!regions.isEmpty() && ipdb.getMmdbCity() != null) {
-            String iso = ipdb.getMmdbCity().city(address).getCountry().getIsoCode();
+        if (!regions.isEmpty()) {
+            String iso = getServer().queryIPDB(peer.getPeerAddress()).cityResponse().get().getCountry().getIsoCode();
             if (regions.contains(iso)) {
                 return new BanResult(this, PeerAction.BAN, String.valueOf(iso), String.format(Lang.MODULE_IBL_MATCH_REGION, iso));
             }

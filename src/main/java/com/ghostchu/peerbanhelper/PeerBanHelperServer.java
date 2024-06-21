@@ -25,10 +25,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
-import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.WatchDog;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.time.ExceptedTime;
 import com.ghostchu.peerbanhelper.util.time.TimeoutProtect;
@@ -43,6 +40,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
 import inet.ipaddr.IPAddress;
@@ -59,7 +57,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -610,28 +607,30 @@ public class PeerBanHelperServer {
     public IPDBResponse queryIPDB(PeerAddress address) {
         try {
             return geoIpCache.get(address.getIp(), () -> {
-                CityResponse cityResponse = null;
-                AsnResponse asnResponse = null;
-                try {
-                    if (ipdb != null) {
-                        InetAddress mmdbAddress = address.getAddress().toInetAddress();
-                        if (ipdb.getMmdbCity() != null) {
-                            cityResponse = ipdb.getMmdbCity().city(mmdbAddress);
-                        }
-                        if (ipdb.getMmdbASN() != null) {
-                            asnResponse = ipdb.getMmdbASN().asn(mmdbAddress);
+                if (ipdb == null) {
+                    return new IPDBResponse(new LazyLoad<>(() -> null), new LazyLoad<>(() -> null));
+                }
+                return new IPDBResponse(new LazyLoad<>(() -> {
+                    if (ipdb.getMmdbCity() != null) {
+                        try {
+                            return ipdb.getMmdbCity().city(address.getAddress().toInetAddress());
+                        } catch (IOException | GeoIp2Exception ignored) {
                         }
                     }
-                } catch (Exception ignored) {
-                    return new IPDBResponse(null, null);
-                }
-
-                return new IPDBResponse(cityResponse, asnResponse);
+                    return null;
+                }), new LazyLoad<>(() -> {
+                    if (ipdb.getMmdbCity() != null) {
+                        try {
+                            return ipdb.getMmdbASN().asn(address.getAddress().toInetAddress());
+                        } catch (IOException | GeoIp2Exception ignored) {
+                        }
+                    }
+                    return null;
+                }));
             });
         } catch (ExecutionException e) {
             return new IPDBResponse(null, null);
         }
-
     }
 
     private boolean isHandshaking(Peer peer) {
@@ -747,8 +746,8 @@ public class PeerBanHelperServer {
     }
 
     public record IPDBResponse(
-            CityResponse cityResponse,
-            AsnResponse asnResponse
+            LazyLoad<CityResponse> cityResponse,
+            LazyLoad<AsnResponse> asnResponse
     ) {
     }
 
