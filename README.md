@@ -338,6 +338,12 @@ server:
 * API 设置黑名单只能让 Transmission 请求 URL 更新，因此 PBH 需要打开一个 API 端点，且您需要保证 Transmission 能够访问到它（可在 config.yml 中配置细节）
 * API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。PBH 会短暂的暂停您的 Torrent 然后恢复它。
 
+## Install4j
+
+PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) 打包多平台安装程序。
+
+![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)
+
 ## Credit
 
 * [Cordelia](https://github.com/bochkov/cordelia)
