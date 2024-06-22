@@ -135,7 +135,7 @@ public class Main {
     }
 
     private static void initGUI(String[] args) {
-        boolean useJavaFx = Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("javafx"));
+        boolean useJavaFx = Arrays.stream(args).noneMatch(arg -> arg.equalsIgnoreCase("swing"));
         if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
                 || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
             guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
