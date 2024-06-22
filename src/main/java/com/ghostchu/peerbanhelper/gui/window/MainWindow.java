@@ -1,30 +1,20 @@
 package com.ghostchu.peerbanhelper.gui.window;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.wrapper.BakedPeerMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
-import com.google.common.eventbus.Subscribe;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.net.URI;
-import java.util.List;
-import java.util.*;
+import java.util.Locale;
 
 @Slf4j
 public class MainWindow extends JFrame {
@@ -33,16 +23,17 @@ public class MainWindow extends JFrame {
     @Getter
     private JTextArea loggerTextArea;
     private JTabbedPane tabbedPane;
-    private JPanel tabbedPaneWebUI;
+    //  private JPanel tabbedPaneWebUI;
     private JPanel tabbedPaneLogs;
     private JTable livePeers;
     private JPanel tabbedPaneLivePeers;
     private JButton resizeTable;
+    private JPanel tabbedPaneWebView;
     @Nullable
     @Getter
     private TrayIcon trayIcon;
-    private String[] peersTableColumn = new String[]{"Loading..."};
-    private String[][] peersTableData = new String[0][0];
+    // private String[] peersTableColumn = new String[]{"Loading..."};
+    //private String[][] peersTableData = new String[0][0];
 
     public MainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
@@ -114,7 +105,7 @@ public class MainWindow extends JFrame {
     }
 
     private void setComponents() {
-        setLivePeersTable();
+        // setLivePeersTable();
     }
 
     private void setupSystemTray() {
@@ -170,119 +161,119 @@ public class MainWindow extends JFrame {
 
     private void setupTabbedPane() {
         setTabTitle(tabbedPaneLogs, Lang.GUI_TABBED_LOGS);
-        setTabTitle(tabbedPaneLivePeers, Lang.GUI_TABBED_PEERS);
+        //    setTabTitle(tabbedPaneLivePeers, Lang.GUI_TABBED_PEERS);
     }
 
-    private void setLivePeersTable() {
-        //livePeers.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        resizeTable.setText(Lang.GUI_BUTTON_RESIZE_TABLE);
-        resizeTable.addActionListener(l -> fitTableColumns(livePeers));
-        livePeers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        peersTableColumn = Lang.GUI_LIVE_PEERS_COLUMN_NAMES;
-        livePeers.setModel(new AbstractTableModel() {
-            @Override
-            public int getRowCount() {
-                return peersTableData.length;
-            }
+//    private void setLivePeersTable() {
+//        //livePeers.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+//        resizeTable.setText(Lang.GUI_BUTTON_RESIZE_TABLE);
+//        resizeTable.addActionListener(l -> fitTableColumns(livePeers));
+//        livePeers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//        peersTableColumn = Lang.GUI_LIVE_PEERS_COLUMN_NAMES;
+//        livePeers.setModel(new AbstractTableModel() {
+//            @Override
+//            public int getRowCount() {
+//                return peersTableData.length;
+//            }
+//
+//            @Override
+//            public int getColumnCount() {
+//                return peersTableColumn.length;
+//            }
+//
+//            @Override
+//            public String getColumnName(int columnIndex) {
+//                return peersTableColumn[columnIndex];
+//            }
+//
+//            @Override
+//            public boolean isCellEditable(int rowIndex, int columnIndex) {
+//                return false;
+//            }
+//
+//            @Override
+//            public Object getValueAt(int rowIndex, int columnIndex) {
+//                return peersTableData[rowIndex][columnIndex];
+//            }
+//        });
+//    }
+//
+//    private void fitTableColumns(JTable myTable) {
+//        JTableHeader header = myTable.getTableHeader();
+//        int rowCount = myTable.getRowCount();
+//        Enumeration<TableColumn> columns = myTable.getColumnModel().getColumns();
+//        while (columns.hasMoreElements()) {
+//            TableColumn column = columns.nextElement();
+//            int col = header.getColumnModel().getColumnIndex(column.getIdentifier());
+//            int width = (int) myTable.getTableHeader().getDefaultRenderer()
+//                    .getTableCellRendererComponent(myTable, column.getIdentifier()
+//                            , false, false, -1, col).getPreferredSize().getWidth();
+//            for (int row = 0; row < rowCount; row++) {
+//                int preferedWidth = (int) myTable.getCellRenderer(row, col).getTableCellRendererComponent(myTable,
+//                        myTable.getValueAt(row, col), false, false, row, col).getPreferredSize().getWidth();
+//                width = Math.max(width, preferedWidth);
+//            }
+//            header.setResizingColumn(column);
+//            column.setWidth(width + myTable.getIntercellSpacing().width);
+//        }
+//    }
 
-            @Override
-            public int getColumnCount() {
-                return peersTableColumn.length;
-            }
+//    private void updateLivePeersTable(String[][] data) {
+//        this.peersTableData = data;
+//        if (livePeers.isShowing()) { // 只在显示时重绘以显示数据更新，节约非 peers 页面的资源消耗
+//            livePeers.repaint();
+//        }
+//    }
 
-            @Override
-            public String getColumnName(int columnIndex) {
-                return peersTableColumn[columnIndex];
-            }
-
-            @Override
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return false;
-            }
-
-            @Override
-            public Object getValueAt(int rowIndex, int columnIndex) {
-                return peersTableData[rowIndex][columnIndex];
-            }
-        });
-    }
-
-    private void fitTableColumns(JTable myTable) {
-        JTableHeader header = myTable.getTableHeader();
-        int rowCount = myTable.getRowCount();
-        Enumeration<TableColumn> columns = myTable.getColumnModel().getColumns();
-        while (columns.hasMoreElements()) {
-            TableColumn column = columns.nextElement();
-            int col = header.getColumnModel().getColumnIndex(column.getIdentifier());
-            int width = (int) myTable.getTableHeader().getDefaultRenderer()
-                    .getTableCellRendererComponent(myTable, column.getIdentifier()
-                            , false, false, -1, col).getPreferredSize().getWidth();
-            for (int row = 0; row < rowCount; row++) {
-                int preferedWidth = (int) myTable.getCellRenderer(row, col).getTableCellRendererComponent(myTable,
-                        myTable.getValueAt(row, col), false, false, row, col).getPreferredSize().getWidth();
-                width = Math.max(width, preferedWidth);
-            }
-            header.setResizingColumn(column);
-            column.setWidth(width + myTable.getIntercellSpacing().width);
-        }
-    }
-
-    private void updateLivePeersTable(String[][] data) {
-        this.peersTableData = data;
-        if (livePeers.isShowing()) { // 只在显示时重绘以显示数据更新，节约非 peers 页面的资源消耗
-            livePeers.repaint();
-        }
-    }
-
-    @Subscribe
-    public void onLivePeersUpdated(LivePeersUpdatedEvent event) {
-        String[][] data = new String[event.getLivePeers().size()][Lang.GUI_LIVE_PEERS_COLUMN_NAMES.length];
-        List<Map.Entry<PeerAddress, PeerMetadata>> entrySet = new ArrayList<>(event.getLivePeers().entrySet());
-        for (int i = 0; i < entrySet.size(); i++) {
-            Map.Entry<PeerAddress, PeerMetadata> entry = entrySet.get(i);
-            String countryRegion = "N/A";
-            String ip = entry.getKey().getIp();
-            String peerId = entry.getValue().getPeer().getId();
-            String clientName = entry.getValue().getPeer().getClientName();
-            String progress = String.format("%.1f", entry.getValue().getPeer().getProgress() * 100) + "%";
-            String uploadSpeed = MsgUtil.humanReadableByteCountBin(entry.getValue().getPeer().getUploadSpeed()) + "/s";
-            String uploaded = MsgUtil.humanReadableByteCountBin(entry.getValue().getPeer().getUploaded());
-            String downloadSpeed = MsgUtil.humanReadableByteCountBin(entry.getValue().getPeer().getDownloadSpeed()) + "/s";
-            String downloaded = MsgUtil.humanReadableByteCountBin(entry.getValue().getPeer().getDownloaded());
-            String torrent = entry.getValue().getTorrent().getName();
-            String city = "N/A";
-            String asn = "N/A";
-            String asOrg = "N/A";
-            String asNetwork = "N/A";
-            BakedPeerMetadata bakedBanMetadata = new BakedPeerMetadata(entry.getValue());
-            if (bakedBanMetadata.getGeo() != null) {
-                countryRegion = bakedBanMetadata.getGeo().getCountryRegion();
-                city = bakedBanMetadata.getGeo().getCity();
-            }
-            if (bakedBanMetadata.getAsn() != null) {
-                asn = "AS" + bakedBanMetadata.getAsn().getAsn();
-                asOrg = bakedBanMetadata.getAsn().getAsOrganization();
-                asNetwork = bakedBanMetadata.getAsn().getAsNetwork();
-            }
-            List<String> array = new ArrayList<>(); // 这里用 List，这样动态创建 array 就不用指定位置了
-            array.add(countryRegion);
-            array.add(ip);
-            array.add(peerId);
-            array.add(clientName);
-            array.add(progress);
-            array.add(uploadSpeed);
-            array.add(uploaded);
-            array.add(downloadSpeed);
-            array.add(downloaded);
-            array.add(torrent);
-            array.add(city);
-            array.add(asn);
-            array.add(asOrg);
-            array.add(asNetwork);
-            System.arraycopy(array.toArray(new String[0]), 0, data[i], 0, array.size());
-        }
-        updateLivePeersTable(data);
-    }
+//    @Subscribe
+//    public void onLivePeersUpdated(LivePeersUpdatedEvent event) {
+//        String[][] data = new String[event.getLivePeers().size()][Lang.GUI_LIVE_PEERS_COLUMN_NAMES.length];
+//        List<Map.Entry<PeerAddress, PeerMetadata>> entrySet = new ArrayList<>(event.getLivePeers().entrySet());
+//        for (int i = 0; i < entrySet.size(); i++) {
+//            Map.Entry<PeerAddress, PeerMetadata> entry = entrySet.get(i);
+//            String countryRegion = "N/A";
+//            String ip = entry.getKey().getIp();
+//            String peerId = entry.getValue().getPeer().getId();
+//            String clientName = entry.getValue().getPeer().getClientName();
+//            String progress = String.format("%.1f", entry.getValue().getPeer().getProgress() * 100) + "%";
+//            String uploadSpeed = MsgUtil.humanReadableByteCountBin(entry.getValue().getPeer().getUploadSpeed()) + "/s";
+//            String uploaded = MsgUtil.humanReadableByteCountBin(entry.getValue().getPeer().getUploaded());
+//            String downloadSpeed = MsgUtil.humanReadableByteCountBin(entry.getValue().getPeer().getDownloadSpeed()) + "/s";
+//            String downloaded = MsgUtil.humanReadableByteCountBin(entry.getValue().getPeer().getDownloaded());
+//            String torrent = entry.getValue().getTorrent().getName();
+//            String city = "N/A";
+//            String asn = "N/A";
+//            String asOrg = "N/A";
+//            String asNetwork = "N/A";
+//            BakedPeerMetadata bakedBanMetadata = new BakedPeerMetadata(entry.getValue());
+//            if (bakedBanMetadata.getGeo() != null) {
+//                countryRegion = bakedBanMetadata.getGeo().getCountryRegion();
+//                city = bakedBanMetadata.getGeo().getCity();
+//            }
+//            if (bakedBanMetadata.getAsn() != null) {
+//                asn = "AS" + bakedBanMetadata.getAsn().getAsn();
+//                asOrg = bakedBanMetadata.getAsn().getAsOrganization();
+//                asNetwork = bakedBanMetadata.getAsn().getAsNetwork();
+//            }
+//            List<String> array = new ArrayList<>(); // 这里用 List，这样动态创建 array 就不用指定位置了
+//            array.add(countryRegion);
+//            array.add(ip);
+//            array.add(peerId);
+//            array.add(clientName);
+//            array.add(progress);
+//            array.add(uploadSpeed);
+//            array.add(uploaded);
+//            array.add(downloadSpeed);
+//            array.add(downloaded);
+//            array.add(torrent);
+//            array.add(city);
+//            array.add(asn);
+//            array.add(asOrg);
+//            array.add(asNetwork);
+//            System.arraycopy(array.toArray(new String[0]), 0, data[i], 0, array.size());
+//        }
+//        updateLivePeersTable(data);
+//    }
 
     @Override
     public void dispose() {
@@ -335,6 +326,9 @@ public class MainWindow extends JFrame {
         tabbedPaneLivePeers.add(scrollPane2, BorderLayout.CENTER);
         livePeers = new JTable();
         scrollPane2.setViewportView(livePeers);
+        tabbedPaneWebView = new JPanel();
+        tabbedPaneWebView.setLayout(new BorderLayout(0, 0));
+        tabbedPane.addTab("JCEF", tabbedPaneWebView);
     }
 
     /**

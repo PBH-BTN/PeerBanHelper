@@ -1,25 +1,113 @@
 package com.ghostchu.peerbanhelper.gui.impl.javafx;
 
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
+import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
 import com.ghostchu.peerbanhelper.text.Lang;
+import javafx.concurrent.Worker;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Document;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayOutputStream;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+import java.util.Map;
+import java.util.StringJoiner;
 
 @Slf4j
 public class JavaFxWebViewWrapper {
-    public static Tab installWebViewTab(TabPane tabPane, String webuiPath) {
+    public static Tab installWebViewTab(TabPane tabPane, String tabName, String webuiPath, Map<String, String> headers, @Nullable WebViewScriptCallback initScript) {
         WebView webView = new WebView();
-        webView.getEngine().load(webuiPath);
+        StringJoiner joiner = new StringJoiner("\n");
+        if (!headers.containsKey("User-Agent")) {
+            joiner.add(webView.getEngine().getUserAgent());
+        }
+        headers.forEach((key, value) -> joiner.add(key + ": " + value));
+        webView.getEngine().setUserAgent(joiner.toString());
+        installWebViewEventListeners(webView, initScript);
         AnchorPane anchorPane = new AnchorPane();
         anchorPane.setMinHeight(0);
         anchorPane.getChildren().add(webView);
-        Tab tab = new Tab(Lang.GUI_MENU_WEBUI);
+        Tab tab = new Tab(tabName);
         tab.setContent(anchorPane);
         JFXUtil.jfxNodeFitParent(anchorPane);
         JFXUtil.jfxNodeFitParent(webView);
         tabPane.getTabs().add(tab);
+        webView.getEngine().load(webuiPath);
         return tab;
     }
+
+    public static String docToString(Document doc) {
+        // XML转字符串
+        String xmlStr = "";
+        try {
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer t = tf.newTransformer();
+            t.setOutputProperty("encoding", "UTF-8");// 解决中文问题，试过用GBK不行
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            t.transform(new DOMSource(doc), new StreamResult(bos));
+            xmlStr = bos.toString();
+        } catch (TransformerConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return xmlStr;
+    }
+
+
+    public static void installWebViewEventListeners(WebView webView, @Nullable WebViewScriptCallback callback) {
+        System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
+        System.setProperty("jdk.http.auth.proxying.disabledSchemes", "");
+        if (callback != null) {
+            webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+                if (newState == Worker.State.SUCCEEDED) {
+                    String js = callback.pageLoaded(webView.getEngine().getLocation(), docToString(webView.getEngine().getDocument()));
+                    if (js != null) {
+                        webView.getEngine().executeScript(js);
+                    }
+                }
+            });
+        }
+        webView.getEngine().setOnError(event -> log.warn("[WebView] {}", event.getMessage(), event.getException()));
+
+        Authenticator.setDefault(new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                String prefix = getRequestingScheme() + "://" + getRequestingHost() + ":" + getRequestingPort();
+                for (Downloader downloader : Main.getServer().getDownloaders()) {
+                    DownloaderBasicAuth dba = downloader.getDownloaderBasicAuth();
+                    if (dba != null) {
+                        if (prefix.startsWith(dba.urlPrefix())) {
+                            return new PasswordAuthentication(dba.username(), dba.password().toCharArray());
+                        }
+                    }
+                }
+                return null;
+            }
+        });
+        webView.getEngine().setOnAlert((WebEvent<String> wEvent) -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(Lang.JFX_WEBVIEW_ALERT);
+            alert.setHeaderText(Lang.JFX_WEBVIEW_ALERT);
+            alert.setContentText(wEvent.getData());
+        });
+    }
+
 }

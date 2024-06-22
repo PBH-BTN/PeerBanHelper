@@ -17,7 +17,9 @@
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.4.1</flatlafVersion>
         <hutool.version>5.8.27</hutool.version>
-        <javafx.version>21</javafx.version>
+        <javafx.version>22.0.1</javafx.version>
+        <chromium.version>126.2.0</chromium.version>
+        <chromium.platform.version>126.2.0</chromium.platform.version>
     </properties>
     <build>
         <pluginManagement>
@@ -287,6 +289,10 @@
             <id>maven-snapshots</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>Equo-Chromium</id>
+            <url>https://dl.equo.dev/chromium-swt-ee/equoSamples/mvn</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -441,7 +447,27 @@
             <scope>provided</scope>
             <classifier>linux</classifier>
         </dependency>
-
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+            <scope>compile</scope>
+            <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+            <scope>compile</scope>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+            <scope>compile</scope>
+            <classifier>mac</classifier>
+        </dependency>
         <dependency>
             <groupId>com.googlecode.aviator</groupId>
             <artifactId>aviator</artifactId>

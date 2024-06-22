@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.gui.impl.javafx;
 import com.alessiodp.libby.Library;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.MainJavaFx;
+import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
@@ -29,8 +31,9 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.net.URI;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -87,16 +90,30 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                     MainJavaFx.getStage().setTitle(String.format(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
                     if (isWebViewSupported()) {
                         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
-                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), Main.getServer().getWebUiUrl());
+                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), Lang.GUI_MENU_WEBUI, Main.getServer().getWebUiUrl(), Collections.emptyMap(), null);
                         javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
                         selectionModel.select(webuiTab);
                         log.info(Lang.WEBVIEW_ENABLED);
+                        for (Downloader downloader : Main.getServer().getDownloaders()) {
+                            DownloaderBasicAuth basicAuth = downloader.getDownloaderBasicAuth();
+                            Map<String, String> headers = new HashMap<>();
+                            if (basicAuth != null) {
+                                String cred = Base64.getEncoder().encodeToString((basicAuth.username() + ":" + basicAuth.password()).getBytes(StandardCharsets.UTF_8));
+                                headers.put("Authorization", "Basic " + cred);
+                            }
+                            JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(),
+                                    downloader.getName(),
+                                    downloader.getWebUIEndpoint(),
+                                    headers, downloader.getWebViewJavaScript());
+                        }
                     } else {
                         log.info(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED);
                     }
                 });
             }
         });
+
+
     }
 
 
@@ -115,7 +132,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 Main.getLibraryManager().addRepository(mirror.getRepoUrl());
             }
         }
-        String javafx = Main.getMeta().getJavafx().replace("${javafx.version}", "21");
+        String javafx = Main.getMeta().getJavafx().replace("${javafx.version}", "22.0.1");
         Main.getLibraryManager().loadLibraries(Library.builder()
                 .groupId("org{}openjfx") // "{}" is replaced with ".", useful to avoid unwanted changes made by maven-shade-plugin
                 .artifactId("javafx-media")
@@ -136,6 +153,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 .resolveTransitiveDependencies(false)
                 .build());
     }
+
     @SneakyThrows
     @Override
     public void createMainWindow() {
