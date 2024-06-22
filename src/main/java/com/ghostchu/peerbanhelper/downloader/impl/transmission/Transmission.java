@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -82,6 +84,22 @@ public class Transmission implements Downloader {
     }
 
     @Override
+    public String getWebUIEndpoint() {
+        return config.getEndpoint();
+    }
+
+    @Override
+    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
+        return new DownloaderBasicAuth(config.getEndpoint(), config.getUsername(), config.getPassword());
+    }
+
+    @Override
+    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
+        return null;
+    }
+
+
+    @Override
     public String getName() {
         return name;
     }
@@ -104,7 +122,7 @@ public class Transmission implements Downloader {
 
     @Override
     public List<Torrent> getTorrents() {
-        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT);
+        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
         return rsp.getArgs().getTorrents().stream()
                 .filter(t -> t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING)
@@ -217,7 +235,7 @@ public class Transmission implements Downloader {
             }
             config.setUsername(section.getString("username"));
             config.setPassword(section.getString("password"));
-            config.setRpcUrl(section.getString("rpc-url"));
+            config.setRpcUrl(section.getString("rpc-url", "transmission/rpc"));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             return config;

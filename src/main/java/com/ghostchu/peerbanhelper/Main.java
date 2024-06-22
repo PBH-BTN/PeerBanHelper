@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper;
 
+import com.alessiodp.libby.LibraryManager;
+import com.alessiodp.libby.logging.LogLevel;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
@@ -9,6 +11,7 @@ import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,7 @@ public class Main {
     @Getter
     private static final File configDirectory = new File(dataDirectory, "config");
     private static final File pluginDirectory = new File(dataDirectory, "plugins");
+    private static final File libraryDirectory = new File(dataDirectory, "libraries");
     @Getter
     private static BuildMeta meta = new BuildMeta();
     @Getter
@@ -46,13 +50,24 @@ public class Main {
     private static File mainConfigFile;
     @Getter
     private static File profileConfigFile;
+    @Getter
+    private static LibraryManager libraryManager;
 
     public static void main(String[] args) {
         setupLog4j2();
+        if (!libraryDirectory.exists()) {
+            libraryDirectory.mkdirs();
+        }
+        libraryManager = new PBHLibraryManager(
+                new Slf4jLogAppender(),
+                libraryDirectory.toPath()
+        );
+        libraryManager.setLogLevel(LogLevel.ERROR);
         initBuildMeta();
         initGUI(args);
         setupConfiguration();
         guiManager.createMainWindow();
+
         mainConfigFile = new File(configDirectory, "config.yml");
         YamlConfiguration mainConfig = loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));
@@ -61,8 +76,7 @@ public class Main {
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         try {
-            server = new PeerBanHelperServer(pbhServerAddress,
-                    YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
+            server = new PeerBanHelperServer(pbhServerAddress, profileConfig, mainConfig);
         } catch (Exception e) {
             log.error(Lang.BOOTSTRAP_FAILED, e);
             throw new RuntimeException(e);
@@ -77,13 +91,18 @@ public class Main {
     }
 
     private static YamlConfiguration loadConfiguration(File file) {
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        if (config.getKeys(false).isEmpty()) {
+        YamlConfiguration configuration = new YamlConfiguration();
+        configuration.getOptions()
+                .setParseComments(true)
+                .setWidth(1000);
+        try {
+            configuration.load(file);
+        } catch (IOException | InvalidConfigurationException e) {
             log.error(Lang.CONFIGURATION_INVALID, file);
             guiManager.createDialog(Level.SEVERE, Lang.CONFIGURATION_INVALID_TITLE, String.format(Lang.CONFIGURATION_INVALID_DESCRIPTION, file));
             System.exit(1);
         }
-        return config;
+        return configuration;
     }
 
     private static void setupConfiguration() {
@@ -116,7 +135,7 @@ public class Main {
     }
 
     private static void initGUI(String[] args) {
-        boolean useJavaFx = Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("javafx"));
+        boolean useJavaFx = Arrays.stream(args).noneMatch(arg -> arg.equalsIgnoreCase("swing"));
         if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
                 || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
             guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
@@ -174,6 +193,7 @@ public class Main {
         }
         return exists;
     }
+
 
     public static String getUserAgent() {
         return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.0-dev";

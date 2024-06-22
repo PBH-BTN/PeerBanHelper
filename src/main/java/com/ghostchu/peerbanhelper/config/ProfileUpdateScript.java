@@ -1,10 +1,14 @@
 package com.ghostchu.peerbanhelper.config;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
+import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +20,29 @@ public class ProfileUpdateScript {
 
     public ProfileUpdateScript(YamlConfiguration conf) {
         this.conf = conf;
+    }
+
+    @UpdateScript(version = 8)
+    public void bigUpdate() {
+        conf.set("ignore-peers-from-addresses", List.of(
+                "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7",
+                "fd00::/8", "100.64.0.0/10", "169.254.0.0/16", "127.0.0.0/8", "fe80::/10"));
+        YamlConfiguration configuration = new YamlConfiguration();
+        configuration.getOptions().setParseComments(true);
+        try (var in = Main.class.getResourceAsStream("/profile.yml")) {
+            if (in == null) {
+                log.error("Failed to upgrade configuration, no resources");
+                System.exit(1);
+                return;
+            }
+            String str = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            configuration.loadFromString(str);
+            conf.set("module.expression-engine", configuration.get("module.expression-engine"));
+        } catch (IOException | InvalidConfigurationException e) {
+            log.error("Failed to upgrade configuration", e);
+            System.exit(1);
+        }
+
     }
 
     @UpdateScript(version = 7)

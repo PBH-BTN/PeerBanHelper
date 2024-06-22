@@ -2,7 +2,9 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -10,6 +12,7 @@ import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -118,6 +121,43 @@ public class QBittorrent implements Downloader {
     @Override
     public String getEndpoint() {
         return apiEndpoint;
+    }
+
+    @Override
+    public String getWebUIEndpoint() {
+        return config.getEndpoint();
+    }
+
+    @Override
+    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
+        if (config.getBasicAuth() != null) {
+            return new DownloaderBasicAuth(config.getEndpoint(), config.getBasicAuth().getUser(), config.getBasicAuth().getPass());
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
+        return (url, content) -> {
+            if (content.contains("loginform")) {
+                return String.format("""
+                            const xhr = new XMLHttpRequest();
+                            xhr.open('POST', 'api/v2/auth/login', true);
+                            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
+                            xhr.addEventListener('readystatechange', function() {
+                                    if (xhr.readyState === 4) { // DONE state
+                                        if ((xhr.status === 200) && (xhr.responseText === "Ok."))
+                                            location.reload(true);
+                                    }
+                                }
+                            );
+                            const queryString = "username=%s&password=%s";
+                            xhr.send(queryString);
+                        """, UrlEncoderDecoder.encodePath(config.getUsername()), UrlEncoderDecoder.encodePath(config.getPassword()));
+            } else {
+                return null;
+            }
+        };
     }
 
     @Override

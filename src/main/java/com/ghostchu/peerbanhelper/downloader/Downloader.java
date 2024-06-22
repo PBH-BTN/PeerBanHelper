@@ -20,6 +20,15 @@ public interface Downloader extends AutoCloseable {
 
     String getEndpoint();
 
+    String getWebUIEndpoint();
+
+    @Nullable
+    DownloaderBasicAuth getDownloaderBasicAuth();
+
+    @Nullable
+    WebViewScriptCallback getWebViewJavaScript();
+
+
     /**
      * 下载器用户定义名称
      *

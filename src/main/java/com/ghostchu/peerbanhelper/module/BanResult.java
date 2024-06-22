@@ -1,4 +1,8 @@
 package com.ghostchu.peerbanhelper.module;
 
-public record BanResult(FeatureModule moduleContext, PeerAction action, String rule, String reason) {
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public record BanResult(@Nullable FeatureModule moduleContext, @NotNull PeerAction action, @NotNull String rule,
+                        @NotNull String reason) {
 }

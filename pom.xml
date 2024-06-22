@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>4.0.7</version>
+    <version>4.1.0</version>
 
     <name>PeerBanHelper</name>
 
@@ -17,7 +17,9 @@
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.4.1</flatlafVersion>
         <hutool.version>5.8.27</hutool.version>
-        <javafx.version>21</javafx.version>
+        <javafx.version>22.0.1</javafx.version>
+        <chromium.version>126.2.0</chromium.version>
+        <chromium.platform.version>126.2.0</chromium.platform.version>
     </properties>
     <build>
         <pluginManagement>
@@ -164,10 +166,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-            </plugin>
+
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
@@ -229,8 +228,41 @@
             </build>
         </profile>
         <profile>
-            <id>no-webview</id>
-
+            <id>webview</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-web</artifactId>
+                    <version>${javafx.version}</version>
+                    <scope>compile</scope>
+                    <classifier>linux</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-web</artifactId>
+                    <version>${javafx.version}</version>
+                    <scope>compile</scope>
+                    <classifier>mac</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-web</artifactId>
+                    <version>${javafx.version}</version>
+                    <scope>compile</scope>
+                    <classifier>win</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>javafx</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
@@ -248,6 +280,18 @@
         <repository>
             <id>codemc-releases</id>
             <url>https://repo.codemc.io/repository/maven-releases/</url>
+        </repository>
+        <repository>
+            <id>codemc-snapshots</id>
+            <url>https://repo.codemc.io/repository/maven-snapshots/</url>
+        </repository>
+        <repository>
+            <id>maven-snapshots</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>Equo-Chromium</id>
+            <url>https://dl.equo.dev/chromium-swt-ee/equoSamples/mvn</url>
         </repository>
     </repositories>
 
@@ -402,6 +446,42 @@
             <version>${javafx.version}</version>
             <scope>provided</scope>
             <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+            <scope>compile</scope>
+            <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+            <scope>compile</scope>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+            <scope>compile</scope>
+            <classifier>mac</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.aviator</groupId>
+            <artifactId>aviator</artifactId>
+            <version>5.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ghostchu.lib.unofficial.com.alessiodp.libby</groupId>
+            <artifactId>libby-core</artifactId> <!-- Replace bukkit if you're using another platform -->
+            <version>2.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ghostchu.lib.unofficial.com.alessiodp.libby</groupId>
+            <artifactId>libby-standalone</artifactId> <!-- Replace bukkit if you're using another platform -->
+            <version>2.0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
