@@ -197,7 +197,7 @@ module:
     enabled: true
   # 多拨封禁（实验性功能）
   multi-dialing-blocker:
-    enabled: false
+    enabled: true
     # 子网掩码长度
     # IP地址前多少位相同的视为同一个子网，位数越少范围越大，一般不需要修改
     subnet-mask-length: 24
@@ -217,7 +217,7 @@ module:
     keep-hunting-time: 2592000
   # 订阅规则
   ip-address-blocker-rules:
-    enabled: false
+    enabled: true
     # 检查间隔
     check-interval: 86400000 # 24小时检查一次 毫秒
     # 规则列表
