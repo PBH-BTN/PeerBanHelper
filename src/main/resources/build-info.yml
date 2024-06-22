@@ -1,5 +1,7 @@
 maven:
   version: "${project.version}"
+javafx:
+  version: "${javafx.version}"
 git:
   branch: "${git.branch}"
   dirty: ${git.dirty}

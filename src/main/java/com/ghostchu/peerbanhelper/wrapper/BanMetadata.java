@@ -2,12 +2,9 @@ package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.maxmind.geoip2.model.AsnResponse;
-import com.maxmind.geoip2.model.CityResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -20,8 +17,8 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
     private String description;
 
     public BanMetadata(String context, String downloader, long banAt, long unbanAt, Torrent torrent, Peer peer, String rule,
-                       String description, @Nullable CityResponse cityResponse, @Nullable AsnResponse asnResponse) {
-        super(downloader, torrent, peer, cityResponse, asnResponse);
+                       String description) {
+        super(downloader, torrent, peer);
         this.context = context;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
@@ -29,4 +26,13 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
         this.description = description;
     }
 
+    public BanMetadata(String context, String downloader, long banAt, long unbanAt, TorrentWrapper torrent, PeerWrapper peer, String rule,
+                       String description) {
+        super(downloader, torrent, peer);
+        this.context = context;
+        this.banAt = banAt;
+        this.unbanAt = unbanAt;
+        this.rule = rule;
+        this.description = description;
+    }
 }

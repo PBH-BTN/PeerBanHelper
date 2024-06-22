@@ -7,14 +7,19 @@ import cordelia.rpc.types.Peers;
 public class TRPeer implements Peer {
 
     private final Peers backend;
+    private transient PeerAddress peerAddress;
 
     public TRPeer(Peers backend) {
         this.backend = backend;
     }
 
     @Override
-    public PeerAddress getAddress() {
-        return new PeerAddress(backend.getAddress(), backend.getPort());
+    public PeerAddress getPeerAddress() {
+        if (this.peerAddress == null) {
+            this.peerAddress = new PeerAddress(backend.getAddress(), backend.getPort());
+            ;
+        }
+        return this.peerAddress;
     }
 
     @Override

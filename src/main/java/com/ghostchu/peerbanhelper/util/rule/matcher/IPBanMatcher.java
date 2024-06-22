@@ -46,11 +46,7 @@ public class IPBanMatcher extends AbstractMatcher {
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
-        IPAddress pa = IPAddressUtil.getIPAddress(content);
-        if (pa.isIPv4Convertible()) {
-            pa = pa.toIPv4();
-        }
-        final IPAddress ip = pa;
+        final IPAddress ip = IPAddressUtil.getIPAddress(content);
         // 先用bloom过滤器查一下
         if (bloomFilter.mightContain(content)) {
             // 如果查到了，那么进一步验证到底是不是在黑名单中(bloom filter存在误报的可能性)

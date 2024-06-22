@@ -8,7 +8,7 @@ public interface Peer extends Comparable<Peer> {
      *
      * @return 地址包装器
      */
-    PeerAddress getAddress();
+    PeerAddress getPeerAddress();
 
     /**
      * 获取此对等体的 PeerId
@@ -71,6 +71,10 @@ public interface Peer extends Comparable<Peer> {
 
     @Override
     default int compareTo(Peer o) {
-        return this.getAddress().compareTo(o.getAddress());
+        return this.getPeerAddress().compareTo(o.getPeerAddress());
+    }
+
+    default String getCacheKey() {
+        return "pa=" + this.getPeerAddress().toString() + ",pid=" + this.getPeerId() + ",pname=" + this.getClientName();
     }
 }

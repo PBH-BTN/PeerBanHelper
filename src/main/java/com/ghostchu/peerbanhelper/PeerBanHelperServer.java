@@ -25,9 +25,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
-import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.WatchDog;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.time.ExceptedTime;
 import com.ghostchu.peerbanhelper.util.time.TimeoutProtect;
@@ -42,8 +40,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
+import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -57,8 +57,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -77,6 +75,8 @@ public class PeerBanHelperServer {
     private final int httpdPort;
     @Getter
     private final boolean hideFinishLogs;
+    @Getter
+    private final List<IPAddress> ignoreAddresses = new ArrayList<>();
     @Getter
     private final YamlConfiguration mainConfig;
     private final ModuleMatchCache moduleMatchCache;
@@ -121,6 +121,10 @@ public class PeerBanHelperServer {
         this.mainConfig = mainConfig;
         this.httpdPort = mainConfig.getInt("server.http");
         this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
+        profile.getStringList("ignore-peers-from-addresses").forEach(ip -> {
+            IPAddress ignored = IPAddressUtil.getIPAddress(ip);
+            ignoreAddresses.add(ignored);
+        });
         this.banListFile = new File(Main.getDataDirectory(), "banlist.dump");
         loadDownloaders();
         this.moduleMatchCache = new ModuleMatchCache();
@@ -310,7 +314,7 @@ public class PeerBanHelperServer {
             if (!banListFile.exists()) {
                 banListFile.createNewFile();
             }
-            Files.writeString(banListFile.toPath(), JsonUtil.prettyPrinting().toJson(BAN_LIST));
+            Files.writeString(banListFile.toPath(), JsonUtil.getGson().toJson(BAN_LIST));
         } catch (IOException e) {
             log.error(Lang.SHUTDOWN_SAVE_BANLIST_FAILED);
         }
@@ -414,15 +418,13 @@ public class PeerBanHelperServer {
                     details.forEach(detail -> {
                         protect.getService().submit(() -> {
                             if (detail.result().action() == PeerAction.BAN) {
-                                IPDBResponse ipdbResponse = queryIPDB(detail.peer().getAddress());
-                                BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getClass().getName(), downloader.getName(),
+                                BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext() == null ? "Unknown" : detail.result().moduleContext().getClass().getName(), downloader.getName(),
                                         System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
-                                        detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(),
-                                        ipdbResponse.cityResponse(), ipdbResponse.asnResponse());
+                                        detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                 bannedPeers.add(banMetadata);
                                 relaunch.add(detail.torrent());
                                 banPeer(banMetadata, detail.torrent(), detail.peer());
-                                log.warn(Lang.BAN_PEER, detail.peer().getAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
+                                log.warn(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
                             }
                         });
                     });
@@ -476,12 +478,10 @@ public class PeerBanHelperServer {
             peers.forEach((downloader, tasks) ->
                     tasks.forEach((torrent, peer) ->
                             peer.forEach(p -> protect.getService().submit(() -> {
-                                PeerAddress address = p.getAddress();
-                                IPDBResponse ipdbResponse = queryIPDB(address);
+                                PeerAddress address = p.getPeerAddress();
                                 PeerMetadata metadata = new PeerMetadata(
                                         downloader.getName(),
-                                        torrent, p, ipdbResponse.cityResponse(), ipdbResponse.asnResponse()
-                                );
+                                        torrent, p);
                                 livePeers.put(address, metadata);
                             }))));
         }
@@ -542,8 +542,9 @@ public class PeerBanHelperServer {
     private void registerModules() {
         log.info(Lang.WAIT_FOR_MODULES_STARTUP);
         moduleManager.register(new IPBlackList(this, profile));
-        moduleManager.register(new PeerIdBlacklist(this, profile));
-        moduleManager.register(new ClientNameBlacklist(this, profile));
+        // moduleManager.register(new PeerIdBlacklist(this, profile));
+        //moduleManager.register(new ClientNameBlacklist(this, profile));
+        moduleManager.register(new ExpressionRule(this, profile));
         moduleManager.register(new ProgressCheatBlocker(this, profile));
         moduleManager.register(new MultiDialingBlocker(this, profile));
         //moduleManager.register(new ActiveProbing(this, profile));
@@ -602,28 +603,30 @@ public class PeerBanHelperServer {
     public IPDBResponse queryIPDB(PeerAddress address) {
         try {
             return geoIpCache.get(address.getIp(), () -> {
-                CityResponse cityResponse = null;
-                AsnResponse asnResponse = null;
-                try {
-                    if (ipdb != null) {
-                        InetAddress mmdbAddress = address.getAddress().toInetAddress();
-                        if (ipdb.getMmdbCity() != null) {
-                            cityResponse = ipdb.getMmdbCity().city(mmdbAddress);
-                        }
-                        if (ipdb.getMmdbASN() != null) {
-                            asnResponse = ipdb.getMmdbASN().asn(mmdbAddress);
+                if (ipdb == null) {
+                    return new IPDBResponse(new LazyLoad<>(() -> null), new LazyLoad<>(() -> null));
+                }
+                return new IPDBResponse(new LazyLoad<>(() -> {
+                    if (ipdb.getMmdbCity() != null) {
+                        try {
+                            return ipdb.getMmdbCity().city(address.getAddress().toInetAddress());
+                        } catch (IOException | GeoIp2Exception ignored) {
                         }
                     }
-                } catch (Exception ignored) {
-                    return new IPDBResponse(null, null);
-                }
-
-                return new IPDBResponse(cityResponse, asnResponse);
+                    return null;
+                }), new LazyLoad<>(() -> {
+                    if (ipdb.getMmdbCity() != null) {
+                        try {
+                            return ipdb.getMmdbASN().asn(address.getAddress().toInetAddress());
+                        } catch (IOException | GeoIp2Exception ignored) {
+                        }
+                    }
+                    return null;
+                }));
             });
         } catch (ExecutionException e) {
             return new IPDBResponse(null, null);
         }
-
     }
 
     private boolean isHandshaking(Peer peer) {
@@ -649,6 +652,14 @@ public class PeerBanHelperServer {
     @NotNull
     public BanResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
         List<BanResult> results = new ArrayList<>();
+        if (peer.getPeerAddress().getAddress().isAnyLocal()) {
+            return new BanResult(null, PeerAction.SKIP, "local access", "skip local network peers");
+        }
+        for (IPAddress ignoreAddress : ignoreAddresses) {
+            if (ignoreAddress.contains(peer.getPeerAddress().getAddress())) {
+                return new BanResult(null, PeerAction.SKIP, "ignored addresses", "skip peers from ignored addresses");
+            }
+        }
         for (FeatureModule registeredModule : moduleManager.getModules()) {
             if (!(registeredModule instanceof RuleFeatureModule module)) {
                 continue;
@@ -656,8 +667,8 @@ public class PeerBanHelperServer {
             if (module.needCheckHandshake() && isHandshaking(peer)) {
                 continue; // 如果模块需要握手检查且peer正在握手 则跳过检查
             }
-            if (module.isCheckCacheable() && !isHandshaking(peer)) {
-                if (moduleMatchCache.shouldSkipCheck(module, torrent, peer.getAddress(), true)) {
+            if (module.isCheckCacheable()) {
+                if (moduleMatchCache.shouldSkipCheck(module, torrent, peer.getPeerAddress(), true)) {
                     continue;
                 }
             }
@@ -694,26 +705,19 @@ public class PeerBanHelperServer {
      * @param banMetadata 封禁元数据
      */
     public void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
-        BAN_LIST.put(peer.getAddress(), banMetadata);
-        metrics.recordPeerBan(peer.getAddress(), banMetadata);
-        banListInvoker.forEach(i -> i.add(peer.getAddress(), banMetadata));
+        BAN_LIST.put(peer.getPeerAddress(), banMetadata);
+        metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
+        banListInvoker.forEach(i -> i.add(peer.getPeerAddress(), banMetadata));
         if (mainConfig.getBoolean("lookup.dns-reverse-lookup")) {
-            executor.submit(() -> {
-                try {
-                    InetAddress address = InetAddress.getByName(peer.getAddress().getAddress().toString());
-                    if (!address.getCanonicalHostName().equals(peer.getAddress().getIp())) {
-                        banMetadata.setReverseLookup(address.getCanonicalHostName());
-                    } else {
-                        banMetadata.setReverseLookup("N/A");
-                    }
-                } catch (UnknownHostException ignored) {
-                    banMetadata.setReverseLookup("N/A");
-                }
-            });
+            executor.submit(() -> banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toReverseDNSLookupString()));
         } else {
             banMetadata.setReverseLookup("N/A");
         }
-        Main.getEventBus().post(new PeerBanEvent(peer.getAddress(), banMetadata, torrentObj, peer));
+        Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
+    }
+
+    public String getWebUiUrl() {
+        return "http://localhost:" + Main.getServer().getHttpdPort() + "/?token=" + UrlEncoderDecoder.encodePath(getWebContainer().getToken());
     }
 
     public List<Downloader> getDownloaders() {
@@ -742,8 +746,8 @@ public class PeerBanHelperServer {
     }
 
     public record IPDBResponse(
-            CityResponse cityResponse,
-            AsnResponse asnResponse
+            LazyLoad<CityResponse> cityResponse,
+            LazyLoad<AsnResponse> asnResponse
     ) {
     }
 
