@@ -342,7 +342,7 @@ server:
 
 PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) 打包多平台安装程序。
 
-![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)
+[![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
 ## Credit
 
