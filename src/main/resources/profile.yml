@@ -18,49 +18,6 @@ ignore-peers-from-addresses:
   - "fe80::/10" # 链路本地地址 (Link-Local Address)，用于局部链路通信
 # 功能模块
 module:
-  # 规则引擎，支持 AviatorScript 语言
-  # 提供在 PBH 上自行编程编写规则的能力
-  expression-engine:
-    # 规则列表
-    # 在 AviatorScript 执行时，PBH 会注入以下环境变量，您可以自由使用它们：
-    # peer - 一个 com.ghostchu.peerbanhelper.peer.Peer 对象，您可以使用这个对象下面的任何属性，这些是您可能用到的：
-    # peer.peerAddress.ip - 字符串型 IP 地址
-    # peer.peerAddress.port - 整型端口号
-    # peer.peerAddress.address - IPAddress 对象，可提供高级功能
-    # peer.peerId - 字符串型 PeerID，在不支持的下载器上可能为空字符串，使用 isEmpty 判断
-    # peer.clientName - 客户端名称，在不支持的下载器上可能为空字符串，使用 isEmpty 判断
-    # peer.downloadSpeed - 您的下载器从该 Peer 下载数据的速率（bytes）
-    # peer.uploadSpeed - 您的下载器向该 Peer 上传数据的速率（bytes）
-    # peer.downloaded - 您的下载器从该 Peer 下载的数据的累计数据量（bytes），在不支持的下载器上为 -1
-    # peer.uploaded - 您的下载器从该 Peer 上传的数据的累计数据量（bytes），在不支持的下载器上为 -1
-    # peer.progress - 此 Peer 汇报的自己的下载进度，浮点型数据，0.00=0%，1.00=100%
-    # peer.flags - 由您的下载器汇报的此 Peer 的 Flags 状态，各下载器对其定义可能有所不同
-    # torrent - 一个 com.ghostchu.peerbanhelper.torrent.Torrent 对象，您可以使用这个对象下面的任何属性
-    # torrent.id - 在您的下载器内，此 Torrent 的对应内部 ID 标识符
-    # torrent.name - 此 Torrent 的名称
-    # torrent.hash - 此 Torrent 的 InfoHash，具体是 v1 还是 v2，由您使用的下载器的偏好而定
-    # torrent.progress - 您的下载器上，此 Torrent 的任务进度
-    # torrent.size - 此 Torrent 的任务大小
-    # torrent.rtUploadSpeed - 您的下载器上的此任务的当前上传速率（bytes）
-    # torrent.rtDownloadSpeed - 您的下载器上的此任务的当前下载速率（bytes）
-    # torrent.hashedIdentifier - 此 Torrent 的匿名哈希标识符
-    # peerbanhelper - PBH 主实例
-    # HTTPUtil - 提供脚本对网络的访问能力，但请注意，脚本通常只有 1500ms 的执行时间，网络请求也包含在内
-    # JsonUtil - 提供脚本对 JSON 内容的解析能力
-    # IPAddressUtil - 提供将字符串的 IP/CIDR 转换为 IPAddress 对象的工具
-    # Main - 启动主类，可用于访问配置文件
-    # 对于其它的常用函数，语法等，参见 AviatorScript 文档：https://www.yuque.com/boyan-avfmj/aviatorscript/cpow90
-    # 规则引擎支持 AviatorScript 的全部能力，您可以自由使用反射或者动态创建特性
-    #
-    # 每个规则必须提供一个返回值，PBH 会根据您提供的返回值，决定此 Peer 是否封禁。支持的返回值如下：
-    #   Boolean: [false=不采取任何操作, true=封禁Peer]
-    #   Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它用户规则]
-    #   com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
-    #   com.ghostchu.peerbanhelper.module.BanResult
-    #
-    # 所有的脚本文件默认放置在 data/scripts 目录内，您也可以修改已有的、或者新建新的脚本文件
-    # 是否启用
-    enabled: true
   # PeerId 封禁
   # 此模块对 Transmission 不起效
   peer-id-blacklist:
@@ -215,6 +172,49 @@ module:
     # 追猎持续时间（秒）
     # keep-hunting为true时有效，和cache-lifespan相似，对被猎杀IP的缓存持续时间
     keep-hunting-time: 2592000
+  # 规则引擎，支持 AviatorScript 语言
+  # 提供在 PBH 上自行编程编写规则的能力
+  expression-engine:
+    # 规则列表
+    # 在 AviatorScript 执行时，PBH 会注入以下环境变量，您可以自由使用它们：
+    # peer - 一个 com.ghostchu.peerbanhelper.peer.Peer 对象，您可以使用这个对象下面的任何属性，这些是您可能用到的：
+    # peer.peerAddress.ip - 字符串型 IP 地址
+    # peer.peerAddress.port - 整型端口号
+    # peer.peerAddress.address - IPAddress 对象，可提供高级功能
+    # peer.peerId - 字符串型 PeerID，在不支持的下载器上可能为空字符串，使用 isEmpty 判断
+    # peer.clientName - 客户端名称，在不支持的下载器上可能为空字符串，使用 isEmpty 判断
+    # peer.downloadSpeed - 您的下载器从该 Peer 下载数据的速率（bytes）
+    # peer.uploadSpeed - 您的下载器向该 Peer 上传数据的速率（bytes）
+    # peer.downloaded - 您的下载器从该 Peer 下载的数据的累计数据量（bytes），在不支持的下载器上为 -1
+    # peer.uploaded - 您的下载器从该 Peer 上传的数据的累计数据量（bytes），在不支持的下载器上为 -1
+    # peer.progress - 此 Peer 汇报的自己的下载进度，浮点型数据，0.00=0%，1.00=100%
+    # peer.flags - 由您的下载器汇报的此 Peer 的 Flags 状态，各下载器对其定义可能有所不同
+    # torrent - 一个 com.ghostchu.peerbanhelper.torrent.Torrent 对象，您可以使用这个对象下面的任何属性
+    # torrent.id - 在您的下载器内，此 Torrent 的对应内部 ID 标识符
+    # torrent.name - 此 Torrent 的名称
+    # torrent.hash - 此 Torrent 的 InfoHash，具体是 v1 还是 v2，由您使用的下载器的偏好而定
+    # torrent.progress - 您的下载器上，此 Torrent 的任务进度
+    # torrent.size - 此 Torrent 的任务大小
+    # torrent.rtUploadSpeed - 您的下载器上的此任务的当前上传速率（bytes）
+    # torrent.rtDownloadSpeed - 您的下载器上的此任务的当前下载速率（bytes）
+    # torrent.hashedIdentifier - 此 Torrent 的匿名哈希标识符
+    # peerbanhelper - PBH 主实例
+    # HTTPUtil - 提供脚本对网络的访问能力，但请注意，脚本通常只有 1500ms 的执行时间，网络请求也包含在内
+    # JsonUtil - 提供脚本对 JSON 内容的解析能力
+    # IPAddressUtil - 提供将字符串的 IP/CIDR 转换为 IPAddress 对象的工具
+    # Main - 启动主类，可用于访问配置文件
+    # 对于其它的常用函数，语法等，参见 AviatorScript 文档：https://www.yuque.com/boyan-avfmj/aviatorscript/cpow90
+    # 规则引擎支持 AviatorScript 的全部能力，您可以自由使用反射或者动态创建特性
+    #
+    # 每个规则必须提供一个返回值，PBH 会根据您提供的返回值，决定此 Peer 是否封禁。支持的返回值如下：
+    #   Boolean: [false=不采取任何操作, true=封禁Peer]
+    #   Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它用户规则]
+    #   com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
+    #   com.ghostchu.peerbanhelper.module.BanResult
+    #
+    # 所有的脚本文件默认放置在 data/scripts 目录内，您也可以修改已有的、或者新建新的脚本文件
+    # 是否启用
+    enabled: true
   # 订阅规则
   ip-address-blocker-rules:
     enabled: true
