@@ -479,7 +479,6 @@ public class PeerBanHelperServer {
                     tasks.forEach((torrent, peer) ->
                             peer.forEach(p -> protect.getService().submit(() -> {
                                 PeerAddress address = p.getPeerAddress();
-                                IPDBResponse ipdbResponse = queryIPDB(address);
                                 PeerMetadata metadata = new PeerMetadata(
                                         downloader.getName(),
                                         torrent, p);
