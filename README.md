@@ -262,6 +262,10 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 </details>
 
+## AviatorScript 脚本引擎
+
+AviatorScript 脚本引擎提供了完整编程能力，您可以编写自己的脚本控制是否封禁，参见 [AviatorScript 脚本引擎 WIKI](https://github.com/PBH-BTN/PeerBanHelper/wiki/AviatorScript-%E8%84%9A%E6%9C%AC%E5%BC%95%E6%93%8E)
+
 ## 添加下载器
 
 PeerBanHelper 能够连接多个支持的下载器，并共享 IP 黑名单。但每个下载器只能被一个 PeerBanHelper 添加，多个 PBH 会导致操作 IP 黑名单时出现冲突。
