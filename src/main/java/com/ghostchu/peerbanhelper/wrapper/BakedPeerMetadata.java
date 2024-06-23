@@ -14,7 +14,11 @@ public class BakedPeerMetadata extends PeerMetadata {
     public BakedPeerMetadata(PeerMetadata banMetadata) {
         super(banMetadata.getDownloader(), banMetadata.getTorrent(), banMetadata.getPeer());
         PeerBanHelperServer.IPDBResponse resp = Main.getServer().queryIPDB(new PeerAddress(banMetadata.getPeer().getAddress().getIp(), banMetadata.getPeer().getAddress().getPort()));
-        this.geo = new GeoWrapper(resp.cityResponse().get());
-        this.asn = new ASNWrapper(resp.asnResponse().get());
+        if (resp.cityResponse().get() != null) {
+            this.geo = new GeoWrapper(resp.cityResponse().get());
+        }
+        if (resp.asnResponse().get() != null) {
+            this.asn = new ASNWrapper(resp.asnResponse().get());
+        }
     }
 }

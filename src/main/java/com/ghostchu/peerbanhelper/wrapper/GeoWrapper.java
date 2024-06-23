@@ -4,6 +4,7 @@ import com.maxmind.geoip2.model.CityResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class GeoWrapper {
     private Double longitude;
     private Integer accuracyRadius;
 
-    public GeoWrapper(CityResponse cityResponse) {
+    public GeoWrapper(@NotNull CityResponse cityResponse) {
         if (cityResponse.getCountry() != null) {
             this.iso = cityResponse.getCountry().getIsoCode();
             this.countryRegion = cityResponse.getCountry().getName();

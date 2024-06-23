@@ -57,12 +57,11 @@ public class PBHLibrariesLoader {
     }
 
     public void loadLibraries(List<String> libraries, Map<String, String> env) throws RuntimeException {
-
         FlatIntelliJLaf.setup();
         CrossDownloaderDialog downloaderDialog = new CrossDownloaderDialog();
         downloaderDialog.setTitle(Lang.LIBRARIES_DOWNLOAD_DIALOG_TITLE);
         downloaderDialog.getTaskTitle().setText(Lang.LIBRARIES_DOWNLOAD_DIALOG_TITLE);
-        downloaderDialog.getTooltip().setText(Lang.LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_TOOLTIP);
+        downloaderDialog.getTooltip().setText(Lang.LIBRARIES_DOWNLOAD_DIALOG_TOOLTIP);
         downloaderDialog.getProgressBar().setValue(0);
         try {
             loadLibraries0(libraries, env, (dependency, pos, total) -> {
