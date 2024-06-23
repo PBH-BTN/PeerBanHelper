@@ -12,6 +12,10 @@ if(string.startsWith(peer.peerId, '-XL0019')
    return 2; ## 跳过其它检查
 }
 
+if(string.startsWith(peer.peerId, '-XL0018')){
+   return true;
+}
+
 if(string.startsWith(peer.peerId, '-XL0012')){
    if(peer.peerAddress.port != 15000 && peer.peerAddress.port != 15001){
        if(peer.progress != 0.0){
