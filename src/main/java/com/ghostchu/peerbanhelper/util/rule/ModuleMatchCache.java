@@ -30,7 +30,6 @@ public class ModuleMatchCache {
                     .expireAfterAccess(30, TimeUnit.MINUTES)
                     .maximumSize(3000)
                     .softValues()
-                    .recordStats()
                     .build();
             CACHE_POOL.put(module, ruleCacheZone);
         }

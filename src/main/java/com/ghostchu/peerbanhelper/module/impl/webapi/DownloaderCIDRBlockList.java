@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class DownloaderCIDRBlockList extends AbstractFeatureModule {
     public DownloaderCIDRBlockList(PeerBanHelperServer server, YamlConfiguration profile) {
-       super(server, profile);
+        super(server, profile);
     }
 
     @Override

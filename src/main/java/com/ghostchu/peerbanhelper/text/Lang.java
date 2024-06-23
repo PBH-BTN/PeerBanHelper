@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper.text;
 
+import lombok.Getter;
+
+@Getter
 public class Lang {
     public static final String ERR_BUILD_NO_INFO_FILE = "错误：构建信息文件不存在";
     public static final String ERR_CANNOT_LOAD_BUILD_INFO = "错误：无法加载构建信息文件";
@@ -62,7 +65,7 @@ public class Lang {
     public static String ERR_CANNOT_LOAD_PLUGIN = "[注册] 无法加载插件：{}";
     public static String ERR_CANNOT_UNLOAD_PLUGIN = "[退出] 无法卸载插件：{}";
     public static String ARB_ERROR_TO_CONVERTING_IP = "IP 地址 %s 既不是 IPV4 地址也不是 IPV6 地址。";
-    public static final String ARB_BANNED = "IP 地址 %s 与另一个已封禁的 IP 地址 %s 处于同一封禁区间 %s 内，执行连锁封禁操作。";
+    public static final String ARB_BANNED = "IP 地址 %s 与另一个已封禁的 IP 地址 %s 处于同一封禁区间内，执行连锁封禁操作。";
     public static final String DATABASE_SETUP_FAILED = "[错误] 数据库初始化失败";
     public static String DATABASE_BUFFER_SAVED = "[保存] 已保存 {} 条内存缓存的封禁日志到数据库，用时 {}ms";
     public static final String DATABASE_SAVE_BUFFER_FAILED = "[错误] 刷写内存缓存的封禁日志时出现了 SQL 错误，未保存的数据已被丢弃";
@@ -126,15 +129,17 @@ public class Lang {
     public static final String SHUTDOWN_SAVE_BANLIST_FAILED = "[退出] 保存封禁列表到文件失败";
     public static final String LOAD_BANLIST_FROM_FILE = "[封禁] 已从保存的封禁列表缓存文件中恢复了 {} 个封禁项";
     public static final String LOAD_BANLIST_FAIL = "[封禁] 加载封禁列表过程出现错误";
-
+    public static final String GUI_MENU_PROGRAM = "程序";
     public static final String GUI_MENU_WEBUI = "WebUI";
-    public static final String GUI_MENU_WEBUI_OPEN = "打开 WebUI……";
+    public static final String GUI_MENU_WEBUI_OPEN = "打开 WebUI...";
     public static final String GUI_MENU_ABOUT = "关于";
+    public static final String GUI_MENU_QUIT = "退出";
+    public static final String GUI_COPY_WEBUI_TOKEN = "复制 WebUI Token...";
     public static final String GUI_TRAY_MESSAGE_CAPTION = "PeerBanHelper 正在后台运行";
     public static final String GUI_TRAY_MESSAGE_DESCRIPTION = "点击托盘图标重新打开窗口；右键托盘图标可完全退出";
     public static final String GUI_TABBED_LOGS = "运行日志";
     public static final String GUI_TABBED_PEERS = "已连接的Peers";
-    public static final String ABOUT_VIEW_GITHUB = "查看 Github 页面";
+    public static final String ABOUT_VIEW_GITHUB = "查看 Github 页面...";
     public static final String IPDB_UPDATING = "{} 数据库已过期且需要更新，请等待 PBH 连接到 Maxmind 服务器更新数据……";
     public static final String IPDB_UPDATE_FAILED = "从 Maxmind 下载数据库 {} 时出现错误：{}";
     public static final String IPDB_UPDATE_SUCCESS = "从 Maxmind 更新数据库 {} 成功！";
@@ -169,26 +174,31 @@ public class Lang {
     public static final String IP_BAN_RULE_UPDATE_TYPE_MANUAL = "手动更新";
     public static final String IP_BAN_RULE_UPDATE_FINISH = "IP黑名单规则订阅完毕";
     public static final String IP_BAN_RULE_NO_UPDATE = "IP黑名单订阅规则 {} 未发生更新";
-    public static final String IP_BAN_RULE_UPDATE_SUCCESS =  "IP黑名单订阅规则 {} 更新成功";
-    public static final String IP_BAN_RULE_LOAD_SUCCESS =  "IP黑名单订阅规则 {} 加载成功";
-    public static final String IP_BAN_RULE_UPDATE_LOG_ERROR =  "[错误] IP黑名单订阅规则 {} 更新日志失败";
-    public static final String IP_BAN_RULE_USE_CACHE =  "[警告] IP黑名单订阅规则 {} 订阅失败，使用本地缓存加载成功";
-    public static final String IP_BAN_RULE_LOAD_FAILED =  "[错误] IP黑名单订阅规则 {} 加载失败";
-    public static final String IP_BAN_RULE_LOAD_CIDR =  "IP黑名单订阅规则 {} 加载CIDR : {}";
-    public static final String IP_BAN_RULE_LOAD_IP =  "IP黑名单订阅规则 {} 加载精确IP : {}";
+    public static final String IP_BAN_RULE_UPDATE_SUCCESS = "IP黑名单订阅规则 {} 更新成功";
+    public static final String IP_BAN_RULE_UPDATE_FAILED = "IP黑名单订阅规则 {} 更新失败";
+    public static final String IP_BAN_RULE_LOAD_SUCCESS = "IP黑名单订阅规则 {} 加载成功";
+    public static final String IP_BAN_RULE_UPDATE_LOG_ERROR = "[错误] IP黑名单订阅规则 {} 更新日志失败";
+    public static final String IP_BAN_RULE_USE_CACHE = "[警告] IP黑名单订阅规则 {} 订阅失败，使用本地缓存加载成功";
+    public static final String IP_BAN_RULE_LOAD_FAILED = "[错误] IP黑名单订阅规则 {} 加载失败";
+    public static final String IP_BAN_RULE_LOAD_CIDR = "IP黑名单订阅规则 {} 加载CIDR : {}";
+    public static final String IP_BAN_RULE_LOAD_IP = "IP黑名单订阅规则 {} 加载精确IP : {}";
     public static final String RULE_SUB_API_INTERNAL_ERROR = "[错误] 订阅规则API遇到非预期错误";
     public static final String IP_BAN_RULE_NO_ID = "[错误] IP黑名单订阅规则ID为空";
     public static final String IP_BAN_RULE_ID_CONFLICT = "[错误] IP黑名单订阅规则ID冲突: {}";
     public static final String IP_BAN_RULE_CANT_FIND = "[错误] 未找到IP黑名单订阅规则: {}";
     public static final String IP_BAN_RULE_PARAM_WRONG = "[错误] IP黑名单订阅规则参数错误";
+    public static final String IP_BAN_RULE_URL_WRONG = "[错误] IP黑名单订阅规则 {} URL错误";
     public static final String IP_BAN_RULE_ENABLED = "IP黑名单订阅规则 {} 已启用";
     public static final String IP_BAN_RULE_DISABLED = "IP黑名单订阅规则 {} 已禁用";
-    public static final String IP_BAN_RULE_UPDATED =  "IP黑名单订阅规则已更新";
-    public static final String IP_BAN_RULE_SAVED =  "IP黑名单订阅规则已保存";
+    public static final String IP_BAN_RULE_UPDATED = "IP黑名单订阅规则 {} 已更新";
+    public static final String IP_BAN_RULE_ALL_UPDATED = "IP黑名单订阅规则已全部更新";
+    public static final String IP_BAN_RULE_SAVED = "IP黑名单订阅规则已保存";
     public static final String IP_BAN_RULE_DELETED = "IP黑名单订阅规则 {} 已删除";
-    public static final String IP_BAN_RULE_INFO_QUERY_SUCCESS =  "IP黑名单订阅规则查询成功";
-    public static final String IP_BAN_RULE_LOG_QUERY_SUCCESS =  "IP黑名单订阅规则更新日志查询成功";
+    public static final String IP_BAN_RULE_INFO_QUERY_SUCCESS = "IP黑名单订阅规则查询成功";
+    public static final String IP_BAN_RULE_LOG_QUERY_SUCCESS = "IP黑名单订阅规则更新日志查询成功";
+    public static final String IP_BAN_RULE_LOG_QUERY_ERROR = "IP黑名单订阅规则更新日志查询出错";
     public static final String IP_BAN_RULE_LOG_QUERY_WRONG_PARAM = "IP黑名单订阅规则更新日志查询参数错误";
+    public static final String IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS = "IP黑名单订阅规则更新间隔查询成功";
     public static final String IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM = "IP黑名单订阅规则更新间隔参数错误";
     public static final String IP_BAN_RULE_CHECK_INTERVAL_UPDATED = "IP黑名单订阅规则更新间隔设置成功";
     public static final String IP_BAN_RULE_ENABLED_WRONG_PARAM = "IP黑名单订阅规则启用禁用参数错误";
@@ -197,4 +207,47 @@ public class Lang {
     public static final String WEBAPI_AUTH_BANNED_TOO_FREQ = "登录错误次数过多，此 IP 地址已被暂时封禁";
     public static final String WEBAPI_NOT_LOGGED = "操作失败，您还未登录";
     public static final String WEBAPI_INTERNAL_ERROR = "处理 WebAPI 请求时出现了一个内部服务器错误，请查看控制台日志";
+    public static final String GITHUB_PAGE = "https://github.com/PBH-BTN/PeerBanHelper";
+    public static final String GUI_COPY_TO_CLIPBOARD_TITLE = "复制到剪贴板";
+    public static final String GUI_COPY_TO_CLIPBOARD_DESCRIPTION = "已成功复制到系统剪贴板: \n%S";
+    public static final String GUI_TITLE_LOADING = "PeerBanHelper (%s) - 正在加载，请稍候...";
+    public static final String GUI_TITLE_LOADED = "PeerBanHelper (%s) - %s (%s)";
+    public static final String WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED = "未找到 JavaFx Web 模块，您正在使用精简构建，WebUI 选项卡未启用";
+    public static final String WEBVIEW_ENABLED = "已找到 JavaFx Web，WebUI 选项卡已启用";
+    public static final String STATUS_TEXT_OK = "当前工作正常";
+    public static final String STATUS_TEXT_LOGIN_FAILED = "尝试登陆到下载器失败";
+    public static final String STATUS_TEXT_EXCEPTION = "出现异常，请检查 PeerBanHelper 控制台";
+    public static final String STATUS_TEXT_NEED_PRIVILEGE = "权限不足，请求权限提升（以管理员/root身份运行）";
+    public static final String SUGGEST_FIREWALL_IPTABELS = "不推荐使用原生 iptables，可能引起网络性能下降。请考虑安装 ipset 代替使用 iptabels";
+    public static final String SUGGEST_FIREWALL_FIREWALLD = "不推荐使用原生 firewalld，可能引起网络性能下降。请考虑安装 ipset 代替使用 firewalld";
+    public static final String SUGGEST_FIREWALL_WINDOWS_FIREWALL_DISABLED = "Windows 防火墙目前处于禁用状态，请为 “公用网络” 和 “专用网络” 打开 Windows 防火墙，否则系统防火墙集成将不起作用";
+    public static final String MODULE_EXPRESSION_RULE_BAD_EXPRESSION = "解析表达式时出错，请检查是否有语法错误";
+    public static final String MODULE_EXPRESSION_RULE_COMPILING = "请稍等，规则引擎正在编译用户脚本以提高执行性能，这可能需要一点时间……";
+    public static final String MODULE_EXPRESSION_RULE_COMPILED = "已成功编译 {} 条用户脚本，耗时 {}ms";
+    public static final String MODULE_EXPRESSION_RULE_INVALID_RETURNS = """
+            用户脚本 {} 返回了无效值，返回的值必须是以下类型中的其一：
+                Boolean: [false=不采取任何操作, true=封禁Peer]
+                Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它规则]
+                com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
+                com.ghostchu.peerbanhelper.module.BanResult
+            """;
+    public static final String MODULE_EXPRESSION_RULE_TIMEOUT = "用户脚本 {} 执行超时，最大允许时间是 {}ms";
+    public static final String MODULE_EXPRESSION_RULE_ERROR = "执行用户脚本 {} 时出错";
+    public static final String MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED = "[错误] 在释放预设脚本文件 {} 时遇到了系统错误";
+    public static final String JFX_WEBVIEW_ALERT = "来自网页的消息";
+    public static final String DATABASE_OUTDATED_LOGS_CLEANED_UP = "已清理数据库中 {} 条过期封禁日志数据";
+    public static final String LIBRARIES_LOADER_DETERMINE_BEST_MIRROR = "请稍等，正在初始化并测试最佳下载源（最多 15 秒）……";
+    public static final String LIBRARIES_LOADER_DETERMINE_TEST_RESULT = "下载测试结果：";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TITLE = "下载依赖文件";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_DESCRIPTION = "正在下载：%s";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_BAR_TEXT = "下载进度：%s/%s";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TOOLTIP = "正在下载所需的运行时依赖文件，请稍等……";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER = "测试最佳镜像源";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_DESCRIPTION = "正在测试共 %s 个 Maven 镜像仓库，最多 15 秒……";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_TOOLTIP = "使用最佳的镜像源可在下载依赖文件时显著提升下载速度。";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_BAR_TEXT = "很快就好！";
+    public static final String WEBVIEW_RELOAD_PAGE = "刷新网页";
+    public static final String WEBVIEW_RESET_PAGE = "回到初始页";
+    public static final String WEBVIEW_BACK = "后退";
+    public static final String WEBVIEW_FORWARD = "前进";
 }

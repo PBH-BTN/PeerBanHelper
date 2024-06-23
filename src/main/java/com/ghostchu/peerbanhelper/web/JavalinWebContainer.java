@@ -22,7 +22,7 @@ public class JavalinWebContainer {
     @Getter
     private final String token;
 
-    public JavalinWebContainer(int port, String token) {
+    public JavalinWebContainer(String host, int port, String token) {
         this.token = token;
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
@@ -88,7 +88,7 @@ public class JavalinWebContainer {
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200))
-                .start(port);
+                .start(host, port);
     }
 
     public Javalin javalin() {

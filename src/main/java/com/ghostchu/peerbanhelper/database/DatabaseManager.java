@@ -16,7 +16,7 @@ public class DatabaseManager {
 
     public DatabaseManager() {
         File databaseDirectory = new File(Main.getDataDirectory(), "persist");
-        if(!databaseDirectory.exists()){
+        if (!databaseDirectory.exists()) {
             databaseDirectory.mkdirs();
         }
         File sqliteDb = new File(databaseDirectory, "persist-data.db");

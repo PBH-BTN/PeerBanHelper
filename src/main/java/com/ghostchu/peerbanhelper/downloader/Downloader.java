@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.google.gson.JsonObject;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -12,7 +14,20 @@ import java.util.List;
 
 public interface Downloader extends AutoCloseable {
 
+    YamlConfiguration saveDownloader();
+
+    JsonObject saveDownloaderJson();
+
     String getEndpoint();
+
+    String getWebUIEndpoint();
+
+    @Nullable
+    DownloaderBasicAuth getDownloaderBasicAuth();
+
+    @Nullable
+    WebViewScriptCallback getWebViewJavaScript();
+
 
     /**
      * 下载器用户定义名称
@@ -94,5 +109,12 @@ public interface Downloader extends AutoCloseable {
      *
      * @param lastStatus 最后请求状态
      */
-    void setLastStatus(DownloaderLastStatus lastStatus);
+    void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage);
+
+    /**
+     * 获取客户端状态描述说明
+     *
+     * @return 状态描述说明
+     */
+    String getLastStatusMessage();
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 public interface FeatureModule {
     /**
      * 获取功能模块的人类可读名称
+     *
      * @return 模块可读名称
      */
     @NotNull
@@ -15,6 +16,7 @@ public interface FeatureModule {
 
     /**
      * 获取功能模块的内部配置键名
+     *
      * @return 配置键名
      */
     @NotNull

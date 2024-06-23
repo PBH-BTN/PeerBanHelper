@@ -21,7 +21,7 @@ public class PeerWrapper {
 
     public PeerWrapper(Peer peer) {
         this.id = peer.getPeerId();
-        this.address = new PeerAddressWrapper(peer.getAddress());
+        this.address = new PeerAddressWrapper(peer.getPeerAddress());
         this.clientName = peer.getClientName();
         this.downloaded = peer.getDownloaded();
         this.downloadSpeed = peer.getDownloadSpeed();

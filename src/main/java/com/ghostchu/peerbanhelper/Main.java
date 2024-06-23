@@ -1,21 +1,23 @@
 package com.ghostchu.peerbanhelper;
 
+import com.alessiodp.libby.LibraryManager;
+import com.alessiodp.libby.logging.LogLevel;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
-import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
+import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.PBHLibrariesLoader;
+import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.core.config.plugins.util.PluginManager;
-import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
@@ -23,13 +25,12 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 
 @Slf4j
@@ -41,6 +42,7 @@ public class Main {
     @Getter
     private static final File configDirectory = new File(dataDirectory, "config");
     private static final File pluginDirectory = new File(dataDirectory, "plugins");
+    private static final File libraryDirectory = new File(dataDirectory, "libraries");
     @Getter
     private static BuildMeta meta = new BuildMeta();
     @Getter
@@ -49,56 +51,38 @@ public class Main {
     private static PBHGuiManager guiManager;
     @Getter
     private static final EventBus eventBus = new EventBus();
+    @Getter
+    private static File mainConfigFile;
+    @Getter
+    private static File profileConfigFile;
+    @Getter
+    private static LibraryManager libraryManager;
+    @Getter
+    private static PBHLibrariesLoader librariesLoader;
 
     public static void main(String[] args) {
         setupLog4j2();
+        libraryManager = new PBHLibraryManager(
+                new Slf4jLogAppender(),
+                dataDirectory.toPath(), "libraries"
+        );
+        Path librariesPath = dataDirectory.toPath().toAbsolutePath().resolve("libraries");
+        libraryManager.setLogLevel(LogLevel.ERROR);
+        librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath);
         initBuildMeta();
         initGUI(args);
         setupConfiguration();
-        List<Downloader> downloaderList = new ArrayList<>();
         guiManager.createMainWindow();
-        File mainConfigFile = new File(configDirectory, "config.yml");
+
+        mainConfigFile = new File(configDirectory, "config.yml");
         YamlConfiguration mainConfig = loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));
-        File profileConfigFile = new File(configDirectory, "profile.yml");
+        profileConfigFile = new File(configDirectory, "profile.yml");
         YamlConfiguration profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
         String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-        ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
-        for (String client : clientSection.getKeys(false)) {
-            ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
-            String endpoint = downloaderSection.getString("endpoint");
-            if (endpoint.endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
-                endpoint = endpoint.substring(0, endpoint.length() - 1);
-            }
-            String username = downloaderSection.getString("username");
-            String password = downloaderSection.getString("password");
-            String baUser = downloaderSection.getString("basic-auth.user");
-            String baPass = downloaderSection.getString("basic-auth.pass");
-            String httpVersion = downloaderSection.getString("http-version", "HTTP_1_1");
-            boolean incrementBan = downloaderSection.getBoolean("increment-ban");
-            String rpcUrl = downloaderSection.getString("rpc-url");
-            HttpClient.Version httpVersionEnum;
-            try {
-                httpVersionEnum = HttpClient.Version.valueOf(httpVersion);
-            } catch (IllegalArgumentException e) {
-                httpVersionEnum = HttpClient.Version.HTTP_1_1;
-            }
-            boolean verifySSL = downloaderSection.getBoolean("verify-ssl", true);
-            switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-                case "qbittorrent" -> {
-                    downloaderList.add(new QBittorrent(client, endpoint, username, password, baUser, baPass, verifySSL, httpVersionEnum, incrementBan));
-                    log.info(Lang.DISCOVER_NEW_CLIENT, "qBittorrent", client, endpoint);
-                }
-                case "transmission" -> {
-                    downloaderList.add(new Transmission(client, endpoint, username, password, pbhServerAddress + "/blocklist/transmission", verifySSL, httpVersionEnum, rpcUrl));
-                    log.info(Lang.DISCOVER_NEW_CLIENT, "Transmission", client, endpoint);
-                }
-            }
-        }
         try {
-            server = new PeerBanHelperServer(downloaderList,
-                    YamlConfiguration.loadConfiguration(new File(configDirectory, "profile.yml")), mainConfig);
+            server = new PeerBanHelperServer(pbhServerAddress, profileConfig, mainConfig);
         } catch (Exception e) {
             log.error(Lang.BOOTSTRAP_FAILED, e);
             throw new RuntimeException(e);
@@ -113,13 +97,18 @@ public class Main {
     }
 
     private static YamlConfiguration loadConfiguration(File file) {
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        if (config.getKeys(false).isEmpty()) {
+        YamlConfiguration configuration = new YamlConfiguration();
+        configuration.getOptions()
+                .setParseComments(true)
+                .setWidth(1000);
+        try {
+            configuration.load(file);
+        } catch (IOException | InvalidConfigurationException e) {
             log.error(Lang.CONFIGURATION_INVALID, file);
             guiManager.createDialog(Level.SEVERE, Lang.CONFIGURATION_INVALID_TITLE, String.format(Lang.CONFIGURATION_INVALID_DESCRIPTION, file));
             System.exit(1);
         }
-        return config;
+        return configuration;
     }
 
     private static void setupConfiguration() {
@@ -152,13 +141,46 @@ public class Main {
     }
 
     private static void initGUI(String[] args) {
-        if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
-                || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
-            guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
-        } else {
-            guiManager = new PBHGuiManager(new SwingGuiImpl(args));
+        String guiType = "javafx";
+        if (!Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+            guiType = "console";
+        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
+            guiType = "swing";
+        }
+        if ("javafx".equals(guiType)) {
+            try {
+                if (!loadJavaFxDependencies()) {
+                    guiType = "swing";
+                }
+            } catch (IOException e) {
+                log.warn("Failed to load JavaFx dependencies", e);
+                guiType = "swing";
+            }
+        }
+        switch (guiType) {
+            case "javafx" -> guiManager = new PBHGuiManager(new JavaFxImpl(args));
+            case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
+            case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         }
         guiManager.setup();
+    }
+
+    private static boolean loadJavaFxDependencies() throws IOException {
+        List<String> libraries = Files.readAllLines(MiscUtil.readResFile("libraries/javafx.maven").toPath(), StandardCharsets.UTF_8);
+        String osName = System.getProperty("os.name").toLowerCase();
+        String sysArch = "win";
+        if (osName.contains("linux")) {
+            sysArch = "linux";
+        } else if (osName.contains("mac")) {
+            sysArch = "mac";
+        }
+        try {
+            librariesLoader.loadLibraries(libraries, Map.of("system.platform", sysArch, "javafx.version", meta.getJavafx()));
+            return true;
+        } catch (Exception e) {
+            log.warn("Unable to load JavaFx dependencies", e);
+            return false;
+        }
     }
 
     private static void initBuildMeta() {
@@ -205,6 +227,7 @@ public class Main {
         }
         return exists;
     }
+
 
     public static String getUserAgent() {
         return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.0-dev";

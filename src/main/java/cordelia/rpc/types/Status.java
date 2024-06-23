@@ -18,9 +18,9 @@ public enum Status {
 
     private final int idx;
 
-    public static Status fromIdx(int idx){
+    public static Status fromIdx(int idx) {
         for (Status value : values()) {
-            if(value.getIdx() == idx) return value;
+            if (value.getIdx() == idx) return value;
         }
         throw new NoSuchElementException();
     }

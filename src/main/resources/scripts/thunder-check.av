@@ -1,0 +1,23 @@
+## @NAME 迅雷检测，只封禁吸血迅雷
+## @AUTHOR PBH-BTN Community
+## @CACHEABLE true
+
+if(isBlank(peer.clientName) || isBlank(peer.peerId)) {
+    return false; ## 二元组任意为空都不能继续检查，需要下载器支持
+}
+
+if(string.startsWith(peer.peerId, '-XL0019')
+          || string.startsWith(peer.clientName, 'XunLei 0019')
+          || string.startsWith(peer.clientName, 'XunLei 0.0.1.9')) {
+   return 2; ## 跳过其它检查
+}
+
+if(string.startsWith(peer.peerId, '-XL0012')){
+   if(peer.peerAddress.port != 15000 && peer.peerAddress.port != 15001){
+       if(peer.progress != 0.0){
+          return false; ## 不封禁非吸血迅雷
+       }
+    }
+    return true; ## 其它的全部封禁
+}
+return false;

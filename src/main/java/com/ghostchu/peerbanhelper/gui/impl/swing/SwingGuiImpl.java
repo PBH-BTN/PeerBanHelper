@@ -1,14 +1,10 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
-import com.ghostchu.peerbanhelper.gui.window.MainWindow;
 import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +13,8 @@ import java.awt.*;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.logging.Level;
+
+import static javax.swing.SwingUtilities.invokeLater;
 
 @Getter
 @Slf4j
@@ -39,13 +37,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Override
     public void setup() {
         super.setup();
-        if (SystemInfo.isMacOS) {
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-            System.setProperty("apple.awt.application.appearance", "system");
-        }
-        OsThemeDetector detector = OsThemeDetector.getDetector();
-        onColorThemeChanged();
-        detector.registerListener(isDark -> onColorThemeChanged());
+        FlatIntelliJLaf.setup();
     }
 
     @Override
@@ -68,7 +60,27 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     private void initLoggerRedirection() {
-        SwingLoggerAppender.addLog4j2TextAreaAppender(mainWindow.getLoggerTextArea());
+        SwingLoggerAppender.registerListener(event -> {
+            try {
+                invokeLater(() -> {
+                    JTextArea textArea = mainWindow.getLoggerTextArea();
+                    try {
+                        textArea.append(event.message());
+                        int linesToCut = (textArea.getLineCount() - event.maxLines()) + (event.maxLines() / 5);
+                        linesToCut = Math.min(linesToCut, textArea.getLineCount());
+                        if (linesToCut > 0) {
+                            int posOfLastLineToTrunk = textArea.getLineEndOffset(linesToCut - 1);
+                            textArea.replaceRange("", 0, posOfLastLineToTrunk);
+                        }
+                        textArea.setCaretPosition(textArea.getDocument().getLength());
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                });
+            } catch (IllegalStateException exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 
 
@@ -76,16 +88,6 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     public void sync() {
         mainWindow.sync();
         super.sync();
-    }
-
-    private void onColorThemeChanged() {
-        OsThemeDetector detector = OsThemeDetector.getDetector();
-        boolean isDarkThemeUsed = detector.isDark();
-        if (isDarkThemeUsed) {
-            setColorTheme(FlatDarculaLaf.class);
-        } else {
-            setColorTheme(FlatIntelliJLaf.class);
-        }
     }
 
     public void setColorTheme(Class<?> clazz) {
@@ -101,7 +103,6 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void close() {
-        // mainWindow.getWebviewManager().close();
     }
 
     @Override
