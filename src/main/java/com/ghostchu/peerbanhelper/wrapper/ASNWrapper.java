@@ -14,6 +14,9 @@ public class ASNWrapper {
     private String asNetwork;
 
     public ASNWrapper(AsnResponse asnResponse) {
+        if (asnResponse == null) {
+            return;
+        }
         this.asn = asnResponse.getAutonomousSystemNumber();
         this.asOrganization = asnResponse.getAutonomousSystemOrganization();
         this.asNetwork = asnResponse.getNetwork().toString();
