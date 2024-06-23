@@ -236,5 +236,14 @@ public class Lang {
     public static final String MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED = "[错误] 在释放预设脚本文件 {} 时遇到了系统错误";
     public static final String JFX_WEBVIEW_ALERT = "来自网页的消息";
     public static final String DATABASE_OUTDATED_LOGS_CLEANED_UP = "已清理数据库中 {} 条过期封禁日志数据";
-
+    public static final String LIBRARIES_LOADER_DETERMINE_BEST_MIRROR = "请稍等，正在初始化并测试最佳下载源（最多 15 秒）……";
+    public static final String LIBRARIES_LOADER_DETERMINE_TEST_RESULT = "下载测试结果：";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TITLE = "下载依赖文件";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_DESCRIPTION = "正在下载：%s";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_BAR_TEXT = "下载进度：%s/%s";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TOOLTIP = "正在下载所需的运行时依赖文件，请稍等……";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER = "测试最佳镜像源";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_DESCRIPTION = "正在测试共 %s 个 Maven 镜像仓库，最多 15 秒……";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_TOOLTIP = "使用最佳的镜像源可在下载依赖文件时显著提升下载速度。";
+    public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_BAR_TEXT = "很快就好！";
 }

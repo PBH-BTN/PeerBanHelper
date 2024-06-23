@@ -11,6 +11,8 @@ import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.PBHLibrariesLoader;
 import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
@@ -25,7 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 @Slf4j
@@ -52,17 +57,18 @@ public class Main {
     private static File profileConfigFile;
     @Getter
     private static LibraryManager libraryManager;
+    @Getter
+    private static PBHLibrariesLoader librariesLoader;
 
     public static void main(String[] args) {
         setupLog4j2();
-        if (!libraryDirectory.exists()) {
-            libraryDirectory.mkdirs();
-        }
         libraryManager = new PBHLibraryManager(
                 new Slf4jLogAppender(),
-                libraryDirectory.toPath()
+                dataDirectory.toPath(), "libraries"
         );
+        Path librariesPath = dataDirectory.toPath().toAbsolutePath().resolve("libraries");
         libraryManager.setLogLevel(LogLevel.ERROR);
+        librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath);
         initBuildMeta();
         initGUI(args);
         setupConfiguration();
@@ -135,18 +141,46 @@ public class Main {
     }
 
     private static void initGUI(String[] args) {
-        boolean useJavaFx = Arrays.stream(args).noneMatch(arg -> arg.equalsIgnoreCase("swing"));
-        if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))
-                || !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null) {
-            guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
-        } else {
-            if (useJavaFx) {
-                guiManager = new PBHGuiManager(new JavaFxImpl(args));
-            } else {
-                guiManager = new PBHGuiManager(new SwingGuiImpl(args));
+        String guiType = "javafx";
+        if (!Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+            guiType = "console";
+        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
+            guiType = "swing";
+        }
+        if ("javafx".equals(guiType)) {
+            try {
+                if (!loadJavaFxDependencies()) {
+                    guiType = "swing";
+                }
+            } catch (IOException e) {
+                log.warn("Failed to load JavaFx dependencies", e);
+                guiType = "swing";
             }
         }
+        switch (guiType) {
+            case "javafx" -> guiManager = new PBHGuiManager(new JavaFxImpl(args));
+            case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
+            case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
+        }
         guiManager.setup();
+    }
+
+    private static boolean loadJavaFxDependencies() throws IOException {
+        List<String> libraries = Files.readAllLines(MiscUtil.readResFile("libraries/javafx.maven").toPath(), StandardCharsets.UTF_8);
+        String osName = System.getProperty("os.name").toLowerCase();
+        String sysArch = "win";
+        if (osName.contains("linux")) {
+            sysArch = "linux";
+        } else if (osName.contains("mac")) {
+            sysArch = "mac";
+        }
+        try {
+            librariesLoader.loadLibraries(libraries, Map.of("system.platform", sysArch, "javafx.version", meta.getJavafx()));
+            return true;
+        } catch (Exception e) {
+            log.warn("Unable to load JavaFx dependencies", e);
+            return false;
+        }
     }
 
     private static void initBuildMeta() {

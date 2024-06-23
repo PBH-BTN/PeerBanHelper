@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.maven;
 
+import com.ghostchu.peerbanhelper.text.Lang;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -23,7 +24,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class GeoUtil {
     private static volatile Boolean inChinaRegion = null;
 
-
     public static CompletableFuture<Integer> connectTest(String ipAddress, int port, int timeout) {
         return CompletableFuture.supplyAsync(() -> {
             try (Socket socket = new Socket()) {
@@ -43,7 +43,7 @@ public class GeoUtil {
                 .build()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(urlStr))
-                    .timeout(Duration.of(5, ChronoUnit.SECONDS))
+                    .timeout(Duration.of(15, ChronoUnit.SECONDS))
                     .GET()
                     .build();
             long time = System.currentTimeMillis();
@@ -59,6 +59,7 @@ public class GeoUtil {
 
     @NotNull
     public static List<MavenCentralMirror> determineBestMirrorServer(Logger logger) {
+        logger.info(Lang.LIBRARIES_LOADER_DETERMINE_BEST_MIRROR);
         List<CompletableFuture<Void>> testEntry = new ArrayList<>();
         Map<MavenCentralMirror, Long> mirrorPingMap = new ConcurrentSkipListMap<>();
         for (MavenCentralMirror value : MavenCentralMirror.values()) {
@@ -70,14 +71,14 @@ public class GeoUtil {
         testEntry.forEach(CompletableFuture::join);
         List<Map.Entry<MavenCentralMirror, Long>> list = new ArrayList<>(mirrorPingMap.entrySet());
         list.sort(Map.Entry.comparingByValue());
-//        logger.info("Maven repository mirror test result:");
-//        list.forEach(e -> {
-//            String cost = "DNF";
-//            if (e.getValue() != Long.MAX_VALUE) {
-//                cost = e.getValue() + "ms";
-//            }
-//            logger.info("[" + e.getKey().getRegion() + "] " + e.getKey().name() + ": " + cost);
-//        });
+        logger.info(Lang.LIBRARIES_LOADER_DETERMINE_TEST_RESULT);
+        list.forEach(e -> {
+            String cost = "DNF";
+            if (e.getValue() != Long.MAX_VALUE) {
+                cost = e.getValue() + "ms";
+            }
+            logger.info("[" + e.getKey().getRegion() + "] " + e.getKey().name() + ": " + cost);
+        });
         if (list.isEmpty()) {
             return Collections.emptyList();
         }

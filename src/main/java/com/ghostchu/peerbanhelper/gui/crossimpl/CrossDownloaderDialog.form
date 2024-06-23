@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.ghostchu.peerbanhelper.gui.crossimpl.CrossDownloaderDialog">
+  <grid id="27dc6" binding="mainPane" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="681" height="1089"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="54fe0" class="javax.swing.JLabel" binding="taskTitle">
+        <constraints border-constraint="North"/>
+        <properties>
+          <font size="24"/>
+          <text value="Downloading libraries..."/>
+        </properties>
+      </component>
+      <grid id="99f66" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="2c332" class="javax.swing.JLabel" binding="description">
+            <constraints border-constraint="North"/>
+            <properties>
+              <font size="14"/>
+              <text value="Downloading xxx.yyy.zzz...."/>
+            </properties>
+          </component>
+          <component id="90053" class="javax.swing.JLabel" binding="tooltip">
+            <constraints border-constraint="South"/>
+            <properties>
+              <text value="PeerBanHelper are downloading libraries from Internet, it is necessary to make sure PBH running correctly..."/>
+            </properties>
+          </component>
+          <grid id="ca612" layout-manager="BorderLayout" hgap="50" vgap="50">
+            <constraints border-constraint="Center"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="7db4a" class="javax.swing.JProgressBar" binding="progressBar">
+                <constraints border-constraint="North"/>
+                <properties>
+                  <font size="16"/>
+                  <stringPainted value="true"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

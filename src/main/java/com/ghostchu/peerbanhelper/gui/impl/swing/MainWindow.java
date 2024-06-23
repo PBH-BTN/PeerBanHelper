@@ -1,7 +1,6 @@
-package com.ghostchu.peerbanhelper.gui.window;
+package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,6 @@ public class MainWindow extends JFrame {
     private JTable livePeers;
     private JPanel tabbedPaneLivePeers;
     private JButton resizeTable;
-    private JPanel tabbedPaneWebView;
     @Nullable
     @Getter
     private TrayIcon trayIcon;
@@ -326,9 +324,6 @@ public class MainWindow extends JFrame {
         tabbedPaneLivePeers.add(scrollPane2, BorderLayout.CENTER);
         livePeers = new JTable();
         scrollPane2.setViewportView(livePeers);
-        tabbedPaneWebView = new JPanel();
-        tabbedPaneWebView.setLayout(new BorderLayout(0, 0));
-        tabbedPane.addTab("JCEF", tabbedPaneWebView);
     }
 
     /**

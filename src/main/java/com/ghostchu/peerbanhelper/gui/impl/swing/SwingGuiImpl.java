@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
-import com.ghostchu.peerbanhelper.gui.window.MainWindow;
 import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;

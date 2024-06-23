@@ -18,8 +18,10 @@
         <flatlafVersion>3.4.1</flatlafVersion>
         <hutool.version>5.8.27</hutool.version>
         <javafx.version>22.0.1</javafx.version>
+        <javafx.scope>provided</javafx.scope>
         <chromium.version>126.2.0</chromium.version>
         <chromium.platform.version>126.2.0</chromium.platform.version>
+
     </properties>
     <build>
         <pluginManagement>
@@ -193,6 +195,10 @@
                     </gitDescribe>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -254,15 +260,10 @@
             </dependencies>
         </profile>
         <profile>
-            <id>javafx</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.openjfx</groupId>
-                        <artifactId>javafx-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
+            <id>include-javafx-jars</id>
+            <properties>
+                <javafx.scope>compile</javafx.scope>
+            </properties>
         </profile>
     </profiles>
 

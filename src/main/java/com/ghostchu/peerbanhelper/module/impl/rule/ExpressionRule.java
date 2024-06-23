@@ -8,10 +8,7 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
-import com.ghostchu.peerbanhelper.util.StrUtil;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -36,10 +33,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.MathContext;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -75,16 +74,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         return true;
     }
 
-    public static List<File> readAllResFiles(String path) throws IOException, URISyntaxException {
-        List<File> files = new ArrayList<>();
-        var urlEnumeration = Main.class.getClassLoader().getResources(path);
-        while (urlEnumeration.hasMoreElements()) {
-            var url = urlEnumeration.nextElement();
-            var fileDir = new File(new URI(url.toString()));
-            files.addAll(recursiveReadFile(fileDir));
-        }
-        return files;
-    }
+
 
     @Nullable
     public BanResult handleResult(Expression expression, Object returns) {
@@ -127,21 +117,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         return "expression-engine";
     }
 
-    public static List<File> recursiveReadFile(File fileOrDir) {
-        List<File> files = new ArrayList<>();
-        if (fileOrDir == null) {
-            return files;
-        }
 
-        if (fileOrDir.isFile()) {
-            files.add(fileOrDir);
-        } else {
-            for (var file : Objects.requireNonNull(fileOrDir.listFiles())) {
-                files.addAll(recursiveReadFile(file));
-            }
-        }
-        return files;
-    }
 
     private void registerFunctions(Class<?> clazz) {
         try {
@@ -297,7 +273,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             return;
         }
         scriptDir.mkdirs();
-        List<File> files = readAllResFiles("scripts");
+        List<File> files = MiscUtil.readAllResFiles("scripts");
         files.forEach(f -> {
             try {
                 Files.copy(f, new File(scriptDir, f.getName()));

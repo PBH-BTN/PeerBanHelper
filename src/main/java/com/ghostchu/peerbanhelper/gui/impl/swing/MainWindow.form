@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.ghostchu.peerbanhelper.gui.window.MainWindow">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.ghostchu.peerbanhelper.gui.impl.swing.MainWindow">
   <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
     <constraints>
       <xy x="20" y="20" width="544" height="367"/>
@@ -73,14 +73,6 @@
                 </children>
               </scrollpane>
             </children>
-          </grid>
-          <grid id="1f27" binding="tabbedPaneWebView" layout-manager="BorderLayout" hgap="0" vgap="0">
-            <constraints>
-              <tabbedpane title="JCEF"/>
-            </constraints>
-            <properties/>
-            <border type="none"/>
-            <children/>
           </grid>
         </children>
       </tabbedpane>
