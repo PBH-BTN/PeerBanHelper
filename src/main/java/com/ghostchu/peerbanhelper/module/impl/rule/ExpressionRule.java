@@ -8,12 +8,15 @@ import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Files;
+import com.google.common.io.ByteStreams;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Expression;
@@ -35,6 +38,7 @@ import java.io.StringReader;
 import java.math.MathContext;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +77,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
     public boolean needCheckHandshake() {
         return true;
     }
-
 
 
     @Nullable
@@ -116,7 +119,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
     public @NotNull String getConfigName() {
         return "expression-engine";
     }
-
 
 
     private void registerFunctions(Class<?> clazz) {
@@ -273,14 +275,14 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             return;
         }
         scriptDir.mkdirs();
-        List<File> files = MiscUtil.readAllResFiles("scripts");
-        files.forEach(f -> {
-            try {
-                Files.copy(f, new File(scriptDir, f.getName()));
-            } catch (IOException e) {
-                log.warn(Lang.MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED, f.getName(), e);
+        for (String s : List.of("name-id-verify.av", "thunder-check.av", "peer-ids.av.example")) {
+            try (var is = Main.class.getResourceAsStream("/scripts/" + s)) {
+                String content = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
+                File file = new File(scriptDir, s);
+                file.createNewFile();
+                Files.writeString(file.toPath(), content);
             }
-        });
+        }
     }
 
     @Override
