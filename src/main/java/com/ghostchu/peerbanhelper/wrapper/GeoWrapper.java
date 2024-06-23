@@ -17,6 +17,9 @@ public class GeoWrapper {
     private Integer accuracyRadius;
 
     public GeoWrapper(CityResponse cityResponse) {
+        if (cityResponse == null) {
+            return;
+        }
         if (cityResponse.getCountry() != null) {
             this.iso = cityResponse.getCountry().getIsoCode();
             this.countryRegion = cityResponse.getCountry().getName();
