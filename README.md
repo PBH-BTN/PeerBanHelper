@@ -311,6 +311,11 @@ client:
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/20d49093-bf99-41f6-971f-c0c574d493af)
 
+### 非本机（例如：NAS上、Docker里）的 PBH 的 WebUI 打不开怎么办？
+
+打开 `config.yml`，找到 `address`，它的默认值是 `127.0.0.1`（只有PBH所在机器可以访问），请更改为 `0.0.0.0` 开启外部访问。  
+**对于下面的 prefix 选项，除非你知道那是干什么的，否则请保持默认，或者询问其它用户**
+
 ### 管理 Token 在哪里？
 
 在 config.yml 中：
