@@ -414,21 +414,26 @@ public class PeerBanHelperServer {
                 log.warn(Lang.TIMING_ADD_BANS);
             })) {
                 downloaderBanDetailMap.forEach((downloader, details) -> {
-                    List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
-                    details.forEach(detail -> {
-                        protect.getService().submit(() -> {
-                            if (detail.result().action() == PeerAction.BAN) {
-                                BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext() == null ? "Unknown" : detail.result().moduleContext().getClass().getName(), downloader.getName(),
-                                        System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
-                                        detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
-                                bannedPeers.add(banMetadata);
-                                relaunch.add(detail.torrent());
-                                banPeer(banMetadata, detail.torrent(), detail.peer());
-                                log.warn(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
-                            }
+                    try {
+                        List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
+                        details.forEach(detail -> {
+                            protect.getService().submit(() -> {
+                                if (detail.result().action() == PeerAction.BAN) {
+                                    BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext() == null ? "Unknown" : detail.result().moduleContext().getClass().getName(), downloader.getName(),
+                                            System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
+                                            detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
+                                    bannedPeers.add(banMetadata);
+                                    relaunch.add(detail.torrent());
+                                    banPeer(banMetadata, detail.torrent(), detail.peer());
+                                    log.warn(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
+                                }
+                            });
                         });
-                    });
+
                     needRelaunched.put(downloader, relaunch);
+                    } catch (Exception e) {
+                        log.error("Unable to complete peer ban task, report to PBH developer!!!");
+                    }
                 });
             }
             banWaveWatchDog.setLastOperation("Apply banlist");
