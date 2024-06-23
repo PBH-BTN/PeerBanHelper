@@ -246,4 +246,8 @@ public class Lang {
     public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_DESCRIPTION = "正在测试共 %s 个 Maven 镜像仓库，最多 15 秒……";
     public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_TOOLTIP = "使用最佳的镜像源可在下载依赖文件时显著提升下载速度。";
     public static final String LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_BAR_TEXT = "很快就好！";
+    public static final String WEBVIEW_RELOAD_PAGE = "刷新网页";
+    public static final String WEBVIEW_RESET_PAGE = "回到初始页";
+    public static final String WEBVIEW_BACK = "后退";
+    public static final String WEBVIEW_FORWARD = "前进";
 }

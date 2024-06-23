@@ -5,19 +5,21 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.sun.javafx.scene.control.ContextMenuContent;
 import javafx.concurrent.Worker;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
+import javafx.stage.PopupWindow;
+import javafx.stage.Window;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -47,8 +49,50 @@ public class JavaFxWebViewWrapper {
         JFXUtil.jfxNodeFitParent(anchorPane);
         JFXUtil.jfxNodeFitParent(webView);
         tabPane.getTabs().add(tab);
+        createContextMenu(webView, webuiPath);
         webView.getEngine().load(webuiPath);
         return tab;
+    }
+
+    private static PopupWindow getPopupWindow(WebView webView, String webuiPath) {
+        for (Window window : Window.getWindows()) {
+            if (window instanceof ContextMenu) {
+                if (window.getScene() != null && window.getScene().getRoot() != null) {
+                    Parent root = window.getScene().getRoot();
+                    if (!root.getChildrenUnmodifiable().isEmpty()) {
+                        Node popup = root.getChildrenUnmodifiable().getFirst();
+                        if (popup.lookup(".context-menu") != null) {
+                            Node bridge = popup.lookup(".context-menu");
+                            ContextMenuContent cmc = (ContextMenuContent) ((Parent) bridge).getChildrenUnmodifiable().get(0);
+                            ContextMenu contextMenu = new ContextMenu();
+                            MenuItem reload = new MenuItem(Lang.WEBVIEW_RELOAD_PAGE);
+                            reload.setOnAction(e -> webView.getEngine().reload());
+                            MenuItem reset = new MenuItem(Lang.WEBVIEW_RESET_PAGE);
+                            reset.setOnAction(e -> webView.getEngine().load(webuiPath));
+                            MenuItem back = new MenuItem(Lang.WEBVIEW_BACK);
+                            back.setOnAction(e -> webView.getEngine().executeScript("history.back()"));
+                            MenuItem forward = new MenuItem(Lang.WEBVIEW_FORWARD);
+                            forward.setOnAction(e -> webView.getEngine().executeScript("history.forward()"));
+                            contextMenu.getItems().addAll(back, forward, new SeparatorMenuItem(), reset);
+                            // add new item:
+                            cmc.getItemsContainer().getChildren().add(cmc.new MenuItemContainer(new SeparatorMenuItem()));
+                            cmc.getItemsContainer().getChildren().add(cmc.new MenuItemContainer(reload));
+                            cmc.getItemsContainer().getChildren().add(cmc.new MenuItemContainer(reset));
+                            cmc.getItemsContainer().getChildren().add(cmc.new MenuItemContainer(back));
+                            cmc.getItemsContainer().getChildren().add(cmc.new MenuItemContainer(forward));
+                            return (PopupWindow) window;
+                        }
+                    }
+                }
+                return null;
+            }
+        }
+        return null;
+    }
+
+
+    private static void createContextMenu(WebView webView, String webuiPath) {
+        webView.setOnContextMenuRequested(e -> getPopupWindow(webView, webuiPath));
     }
 
     public static String docToString(Document doc) {
@@ -57,13 +101,10 @@ public class JavaFxWebViewWrapper {
         try {
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer t = tf.newTransformer();
-            t.setOutputProperty("encoding", "UTF-8");// 解决中文问题，试过用GBK不行
+            t.setOutputProperty("encoding", "UTF-8");
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             t.transform(new DOMSource(doc), new StreamResult(bos));
             xmlStr = bos.toString();
-        } catch (TransformerConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (TransformerException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
