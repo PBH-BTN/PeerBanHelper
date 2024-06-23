@@ -11,10 +11,10 @@ import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.PBHLibrariesLoader;
 import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
 import com.google.common.eventbus.EventBus;
+import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.core.config.plugins.util.PluginManager;
@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -166,21 +165,25 @@ public class Main {
     }
 
     private static boolean loadJavaFxDependencies() throws IOException {
-        List<String> libraries = Files.readAllLines(MiscUtil.readResFile("libraries/javafx.maven").toPath(), StandardCharsets.UTF_8);
-        String osName = System.getProperty("os.name").toLowerCase();
-        String sysArch = "win";
-        if (osName.contains("linux")) {
-            sysArch = "linux";
-        } else if (osName.contains("mac")) {
-            sysArch = "mac";
+        try (var is = Main.class.getResourceAsStream("/libraries/javafx.maven")) {
+            String str = new String(ByteStreams.toByteArray(is));
+            String[] libraries = str.split("\n");
+            String osName = System.getProperty("os.name").toLowerCase();
+            String sysArch = "win";
+            if (osName.contains("linux")) {
+                sysArch = "linux";
+            } else if (osName.contains("mac")) {
+                sysArch = "mac";
+            }
+            try {
+                librariesLoader.loadLibraries(Arrays.stream(libraries).toList(), Map.of("system.platform", sysArch, "javafx.version", meta.getJavafx()));
+                return true;
+            } catch (Exception e) {
+                log.warn("Unable to load JavaFx dependencies", e);
+                return false;
+            }
         }
-        try {
-            librariesLoader.loadLibraries(libraries, Map.of("system.platform", sysArch, "javafx.version", meta.getJavafx()));
-            return true;
-        } catch (Exception e) {
-            log.warn("Unable to load JavaFx dependencies", e);
-            return false;
-        }
+
     }
 
     private static void initBuildMeta() {
