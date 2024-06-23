@@ -268,7 +268,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         try (BufferedReader reader = new BufferedReader(new StringReader(scriptContent))) {
             String name = fallbackName;
             String author = "Unknown";
-            boolean cacheable = false;
+            boolean cacheable = true;
             while (true) {
                 String line = reader.readLine();
                 if (line == null) {
