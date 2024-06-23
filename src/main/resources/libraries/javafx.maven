@@ -2,5 +2,6 @@ org.openjfx:javafx-base:${javafx.version}:${system.platform}
 org.openjfx:javafx-fxml:${javafx.version}:${system.platform}
 org.openjfx:javafx-controls:${javafx.version}:${system.platform}
 org.openjfx:javafx-graphics:${javafx.version}:${system.platform}
+org.openjfx:javafx-media:${javafx.version}:${system.platform}
 org.openjfx:javafx-web:${javafx.version}:${system.platform}
 org.openjfx:javafx-swing:${javafx.version}:${system.platform}

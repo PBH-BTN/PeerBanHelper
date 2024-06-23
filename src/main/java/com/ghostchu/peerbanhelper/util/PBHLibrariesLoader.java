@@ -57,7 +57,7 @@ public class PBHLibrariesLoader {
     }
 
     public void loadLibraries(List<String> libraries, Map<String, String> env) throws RuntimeException {
-        addRepositories();
+
         FlatIntelliJLaf.setup();
         CrossDownloaderDialog downloaderDialog = new CrossDownloaderDialog();
         downloaderDialog.setTitle(Lang.LIBRARIES_DOWNLOAD_DIALOG_TITLE);
@@ -119,7 +119,7 @@ public class PBHLibrariesLoader {
                     .groupId(groupId)
                     .artifactId(artifactId)
                     .version(version)
-                    .resolveTransitiveDependencies(true)
+                    .resolveTransitiveDependencies(false)
                     .isolatedLoad(false);
             if (classifier != null) {
                 libBuilder = libBuilder.classifier(classifier);
@@ -134,6 +134,7 @@ public class PBHLibrariesLoader {
         if (libraryList.isEmpty()) {
             return; // Do not trigger callback because it will open a download window
         }
+        addRepositories();
         log.info("Loading {} libraries ({} skipped libraries)...", libraryList.size(), skipped);
         for (int i = 0; i < libraryList.size(); i++) {
             Library load = libraryList.get(i);
