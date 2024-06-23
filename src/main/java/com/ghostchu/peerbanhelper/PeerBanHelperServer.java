@@ -322,7 +322,7 @@ public class PeerBanHelperServer {
 
     private void prepareDatabase() throws SQLException {
         this.databaseManager = new DatabaseManager();
-        this.databaseHelper = new DatabaseHelper(databaseManager);
+        this.databaseHelper = new DatabaseHelper(this, databaseManager);
     }
 
     private void registerMetrics() {

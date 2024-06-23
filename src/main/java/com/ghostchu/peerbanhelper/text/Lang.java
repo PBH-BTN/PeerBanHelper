@@ -222,12 +222,12 @@ public class Lang {
     public static final String SUGGEST_FIREWALL_FIREWALLD = "不推荐使用原生 firewalld，可能引起网络性能下降。请考虑安装 ipset 代替使用 firewalld";
     public static final String SUGGEST_FIREWALL_WINDOWS_FIREWALL_DISABLED = "Windows 防火墙目前处于禁用状态，请为 “公用网络” 和 “专用网络” 打开 Windows 防火墙，否则系统防火墙集成将不起作用";
     public static final String MODULE_EXPRESSION_RULE_BAD_EXPRESSION = "解析表达式时出错，请检查是否有语法错误";
-    public static final String MODULE_EXPRESSION_RULE_COMPILING = "请稍等，规则引擎正在编译用户规则以提高执行性能，这可能需要一点时间……";
-    public static final String MODULE_EXPRESSION_RULE_COMPILED = "已成功编译 {} 条用户规则，耗时 {}ms";
+    public static final String MODULE_EXPRESSION_RULE_COMPILING = "请稍等，规则引擎正在编译用户脚本以提高执行性能，这可能需要一点时间……";
+    public static final String MODULE_EXPRESSION_RULE_COMPILED = "已成功编译 {} 条用户脚本，耗时 {}ms";
     public static final String MODULE_EXPRESSION_RULE_INVALID_RETURNS = """
-            用户规则 {} 返回了无效值，返回的值必须是以下类型中的其一：
+            用户脚本 {} 返回了无效值，返回的值必须是以下类型中的其一：
                 Boolean: [false=不采取任何操作, true=封禁Peer]
-                Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它用户规则]
+                Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它规则]
                 com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
                 com.ghostchu.peerbanhelper.module.BanResult
             """;
@@ -235,5 +235,6 @@ public class Lang {
     public static final String MODULE_EXPRESSION_RULE_ERROR = "执行用户脚本 {} 时出错";
     public static final String MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED = "[错误] 在释放预设脚本文件 {} 时遇到了系统错误";
     public static final String JFX_WEBVIEW_ALERT = "来自网页的消息";
+    public static final String DATABASE_OUTDATED_LOGS_CLEANED_UP = "已清理数据库中 {} 条过期封禁日志数据";
 
 }

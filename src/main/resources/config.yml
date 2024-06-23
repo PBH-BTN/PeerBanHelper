@@ -54,7 +54,7 @@ lookup:
   dns-reverse-lookup: false
 # 数据持久化
 persist:
-  # 封禁日志保留天数（开发中）
+  # 封禁日志保留天数
   ban-logs-keep-days: 30
   # 持久保存封禁列表
   banlist: true
