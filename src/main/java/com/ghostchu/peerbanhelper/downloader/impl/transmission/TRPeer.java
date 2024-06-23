@@ -17,14 +17,13 @@ public class TRPeer implements Peer {
     public PeerAddress getPeerAddress() {
         if (this.peerAddress == null) {
             this.peerAddress = new PeerAddress(backend.getAddress(), backend.getPort());
-            ;
         }
         return this.peerAddress;
     }
 
     @Override
     public String getPeerId() {
-        return backend.getClientName();
+        return "";
     }
 
     @Override
