@@ -166,7 +166,7 @@ public class Main {
 
     private static boolean loadJavaFxDependencies() throws IOException {
         try (var is = Main.class.getResourceAsStream("/libraries/javafx.maven")) {
-            String str = new String(ByteStreams.toByteArray(is));
+            String str = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
             String[] libraries = str.split("\n");
             String osName = System.getProperty("os.name").toLowerCase();
             String sysArch = "win";
