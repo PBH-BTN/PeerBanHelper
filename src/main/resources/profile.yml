@@ -4,7 +4,7 @@ check-interval: 5000
 # 更新 Peers UI 频率（单位：毫秒），此项仅用于显示数据，不影响封禁，建议设置一个不会给下载器增加太多压力的值
 update-live-peers-interval: 13000
 # 封禁持续时间（单位：毫秒）
-ban-duration: 86400000
+ban-duration: 1209600000
 # 来自这些 IP 地址的 Peers 不会被 PBH 检查，绕过所有检查规则
 ignore-peers-from-addresses:
   - "10.0.0.0/8" # 大型企业内部网络
@@ -90,6 +90,7 @@ module:
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
   # 假进度检查
+  # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。
   progress-cheat-blocker:
     enabled: true
     # Torrent 小于此值不进行检查（单位：字节），对等体可能来不及同步正确的下载进度
