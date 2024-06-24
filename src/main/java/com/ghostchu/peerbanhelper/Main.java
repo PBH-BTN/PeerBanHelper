@@ -35,13 +35,13 @@ import java.util.logging.Level;
 @Slf4j
 public class Main {
     @Getter
-    private static final File dataDirectory = new File("data");
+    private static File dataDirectory;
     @Getter
-    private static final File logsDirectory = new File(dataDirectory, "logs");
+    private static File logsDirectory;
     @Getter
-    private static final File configDirectory = new File(dataDirectory, "config");
-    private static final File pluginDirectory = new File(dataDirectory, "plugins");
-    private static final File libraryDirectory = new File(dataDirectory, "libraries");
+    private static File configDirectory;
+    private static File pluginDirectory;
+    private static File libraryDirectory;
     @Getter
     private static BuildMeta meta = new BuildMeta();
     @Getter
@@ -60,6 +60,7 @@ public class Main {
     private static PBHLibrariesLoader librariesLoader;
 
     public static void main(String[] args) {
+        setupConfDirectory();
         setupLog4j2();
         libraryManager = new PBHLibraryManager(
                 new Slf4jLogAppender(),
@@ -89,6 +90,18 @@ public class Main {
         guiManager.onPBHFullyStarted(server);
         setupShutdownHook();
         guiManager.sync();
+    }
+
+    private static void setupConfDirectory() {
+        String root = "data";
+        if (System.getProperty("pbh.datadir") != null) {
+            root = System.getProperty("pbh.datadir");
+        }
+        dataDirectory = new File(root);
+        logsDirectory = new File(dataDirectory, "logs");
+        configDirectory = new File(dataDirectory, "config");
+        pluginDirectory = new File(dataDirectory, "plugins");
+        libraryDirectory = new File(dataDirectory, "libraries");
     }
 
     private static void setupLog4j2() {
