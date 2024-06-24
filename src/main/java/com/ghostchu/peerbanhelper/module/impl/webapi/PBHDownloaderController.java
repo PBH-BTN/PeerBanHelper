@@ -67,7 +67,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         }
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.CREATED);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATED, "code", HttpStatus.CREATED));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATED, "code", HttpStatus.CREATED.getCode()));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS));
@@ -97,7 +97,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .forEach(d -> getServer().unregisterDownloader(d));
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATED, "code", HttpStatus.OK));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATED, "code", HttpStatus.OK.getCode()));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATE_FAILURE_ALREADY_EXISTS));
@@ -143,7 +143,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         try {
             getServer().saveDownloaders();
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_REMOVE_SAVED, "code", HttpStatus.OK));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_REMOVE_SAVED, "code", HttpStatus.OK.getCode()));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", e.getClass().getName() + ": " + e.getMessage()));
