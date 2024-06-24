@@ -547,8 +547,8 @@ public class PeerBanHelperServer {
     private void registerModules() {
         log.info(Lang.WAIT_FOR_MODULES_STARTUP);
         moduleManager.register(new IPBlackList(this, profile));
-        // moduleManager.register(new PeerIdBlacklist(this, profile));
-        //moduleManager.register(new ClientNameBlacklist(this, profile));
+        moduleManager.register(new PeerIdBlacklist(this, profile));
+        moduleManager.register(new ClientNameBlacklist(this, profile));
         moduleManager.register(new ExpressionRule(this, profile));
         moduleManager.register(new ProgressCheatBlocker(this, profile));
         moduleManager.register(new MultiDialingBlocker(this, profile));
