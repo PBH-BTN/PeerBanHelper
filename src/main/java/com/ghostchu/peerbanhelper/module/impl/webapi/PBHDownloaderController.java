@@ -128,7 +128,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         }
         boolean testResult = downloader.login();
         ctx.status(HttpStatus.OK);
-        ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_OK, "test", testResult));
+        ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_OK, "valid", testResult));
     }
 
     private void handleDownloaderDelete(Context ctx, String downloaderName) {
