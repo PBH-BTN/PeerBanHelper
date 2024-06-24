@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
     <version>4.1.4</version>
-    <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
 
     <properties>
-        <java.version>21</java.version>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.ghostchu.peerbanhelper.Main</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
@@ -32,10 +31,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.12.1</version>
                     <configuration>
-                        <skip>true</skip>
-                        <skipMain>true</skipMain>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -134,17 +130,6 @@
                         <mainClass>com.ghostchu.peerbanhelper.MainJavaFx</mainClass>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>io.takari.maven.plugins</groupId>
-                    <artifactId>takari-lifecycle-plugin</artifactId>
-                    <version>2.1.5</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <proc>proc</proc>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -157,32 +142,32 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.5.3</version>
             </plugin>
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-resources-plugin</artifactId>-->
-            <!--                <version>3.3.1</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>copy-resources</id>-->
-            <!--                        <phase>initialize</phase>-->
-            <!--                        <goals>-->
-            <!--                            <goal>copy-resources</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <outputDirectory>${basedir}/target/extra-resources</outputDirectory>-->
-            <!--                            <resources>-->
-            <!--                                <resource>-->
-            <!--                                    <directory>src/main/resources</directory>-->
-            <!--                                    <filtering>true</filtering>-->
-            <!--                                    <includes>-->
-            <!--                                        <include>*</include>-->
-            <!--                                    </includes>-->
-            <!--                                </resource>-->
-            <!--                            </resources>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/extra-resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
@@ -198,14 +183,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <useNativeGit>true</useNativeGit>
-                    <offline>true</offline>
-                    <includeOnlyProperties>
-                        <includeOnlyProperty>^git.build.(time|version|host|user)$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.(id|message|time|user)$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.(branch|dirty|remote)$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.remote.(origin-url)$</includeOnlyProperty>
-                    </includeOnlyProperties>
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
                     <verbose>false</verbose>
                     <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
@@ -222,32 +199,11 @@
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>io.takari.maven.plugins</groupId>
-                <artifactId>takari-lifecycle-plugin</artifactId>
-            </plugin>
         </plugins>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-                <excludes>
-                    <exclude>/static/**</exclude>
-                    <exclude>/assets/**</exclude>
-                    <exclude>/javafx/**</exclude>
-                </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/resources/static</directory>
-                <filtering>false</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources/javafx</directory>
-                <filtering>false</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources/assets</directory>
-                <filtering>false</filtering>
             </resource>
         </resources>
     </build>

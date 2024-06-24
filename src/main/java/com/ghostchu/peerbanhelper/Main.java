@@ -201,7 +201,7 @@ public class Main {
 
     private static void initBuildMeta() {
         meta = new BuildMeta();
-        try (InputStream stream = Main.class.getResourceAsStream("/manifest/build-info.yml")) {
+        try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
             if (stream == null) {
                 log.error(Lang.ERR_BUILD_NO_INFO_FILE);
             } else {
