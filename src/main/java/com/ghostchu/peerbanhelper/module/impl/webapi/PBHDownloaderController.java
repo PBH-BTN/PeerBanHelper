@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -11,6 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 public class PBHDownloaderController extends AbstractFeatureModule {
     public PBHDownloaderController(PeerBanHelperServer server, YamlConfiguration profile) {
         super(server, profile);
@@ -59,21 +62,22 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Unable to create downloader, unsupported downloader type?"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_ADD_FAILURE));
             return;
         }
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", "Download created!"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATED));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Unable to create downloader, same name downloader already registered!"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS));
         }
         try {
             getServer().saveDownloaders();
         } catch (IOException e) {
+            log.warn("Internal server error, unable to create downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(Map.of("message", "Unable to create downloader, I/O error: " + e.getMessage()));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION));
         }
     }
 
@@ -84,7 +88,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Unable to update downloader, unsupported downloader type?"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATE_FAILURE));
             return;
         }
         // 可能重命名了？
@@ -93,16 +97,17 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .forEach(d -> getServer().unregisterDownloader(d));
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", "Downloader updated!"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATED));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Unable to update downloader, same name downloader already registered (and failed to remove)!"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATE_FAILURE_ALREADY_EXISTS));
         }
         try {
             getServer().saveDownloaders();
         } catch (IOException e) {
+            log.warn("Internal server error, unable to update downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(Map.of("message", "Unable to update downloader, I/O error: " + e.getMessage()));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION));
         }
     }
 
@@ -112,25 +117,25 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
             ctx.status(HttpStatus.CONFLICT);
-            ctx.json(Map.of("message", "The downloader name conflict with exists downloader"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_NAME_EXISTS));
             return;
         }
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", "Unable to create downloader, unsupported downloader type?"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_ADD_FAILURE));
             return;
         }
         boolean testResult = downloader.login();
         ctx.status(HttpStatus.OK);
-        ctx.json(Map.of("message", "Successfully to test the downloader", "test", testResult));
+        ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_OK, "test", testResult));
     }
 
     private void handleDownloaderDelete(Context ctx, String downloaderName) {
         Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(Map.of("message", "The requested downloader not registered in PeerBanHelper configuration"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_REMOVE_NOT_EXISTS));
             return;
         }
         Downloader downloader = selected.get();
@@ -138,7 +143,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         try {
             getServer().saveDownloaders();
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", "Configuration saved!"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_REMOVE_SAVED));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", e.getClass().getName() + ": " + e.getMessage()));
@@ -150,7 +155,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(Map.of("message", "The requested downloader not registered in PeerBanHelper configuration"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS));
             return;
         }
         Downloader downloader = selected.get();
@@ -169,7 +174,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(Map.of("message", "The requested downloader not registered in PeerBanHelper configuration"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS));
             return;
         }
         Downloader downloader = selected.get();
@@ -187,7 +192,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(Map.of("message", "The requested downloader not registered in PeerBanHelper configuration"));
+            ctx.json(Map.of("message", Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS));
             return;
         }
         Downloader downloader = selected.get();

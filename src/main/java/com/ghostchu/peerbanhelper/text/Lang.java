@@ -250,4 +250,16 @@ public class Lang {
     public static final String WEBVIEW_RESET_PAGE = "回到初始页";
     public static final String WEBVIEW_BACK = "后退";
     public static final String WEBVIEW_FORWARD = "前进";
+    public static final String DOWNLOADER_API_ADD_FAILURE = "下载器创建失败，是否传递的是一个不受支持的下载器类型？";
+    public static final String DOWNLOADER_API_CREATED = "下载器创建成功";
+    public static final String DOWNLOADER_API_UPDATED = "下载器更新成功";
+    public static final String DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS = "下载器创建失败，已有相同的下载器配置存在";
+    public static final String DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION = "下载器创建失败，出现 I/O 错误，请检查控制台日志";
+    public static final String DOWNLOADER_API_UPDATE_FAILURE = "下载器更新失败，是否传递的是一个不受支持的下载器类型？";
+    public static final String DOWNLOADER_API_UPDATE_FAILURE_ALREADY_EXISTS = "下载器更新失败，已有一个相同的下载器配置存在，且移除失败";
+    public static final String DOWNLOADER_API_TEST_NAME_EXISTS = "下载器所使用的名称与另一个已存在的下载器冲突";
+    public static final String DOWNLOADER_API_TEST_OK = "验证成功，配置有效";
+    public static final String DOWNLOADER_API_REMOVE_NOT_EXISTS = "无法移除指定的下载器，指定的下载器并没有在 PeerBanHelper 中注册";
+    public static final String DOWNLOADER_API_REMOVE_SAVED = "移除成功，配置已保存";
+    public static final String DOWNLOADER_API_DOWNLOADER_NOT_EXISTS = "请求的下载器未在 PeerBanHelper 中注册";
 }
