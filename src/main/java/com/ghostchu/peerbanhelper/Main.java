@@ -60,7 +60,7 @@ public class Main {
     private static PBHLibrariesLoader librariesLoader;
 
     public static void main(String[] args) {
-        setupConfDirectory();
+        setupConfDirectory(args);
         setupLog4j2();
         libraryManager = new PBHLibraryManager(
                 new Slf4jLogAppender(),
@@ -92,8 +92,16 @@ public class Main {
         guiManager.sync();
     }
 
-    private static void setupConfDirectory() {
+    private static void setupConfDirectory(String[] args) {
+        String osName = System.getProperty("os.name");
         String root = "data";
+        if (System.getProperty("pbh.usePlatformConfigLocation").equals("true")) {
+            if (osName.contains("Windows")) {
+                root = new File(System.getenv("LOCALAPPDATA"), "PeerBanHelper").getAbsolutePath();
+            } else {
+                root = new File(System.getProperty("user.home"), ".config/PeerBanHelper").getAbsolutePath();
+            }
+        }
         if (System.getProperty("pbh.datadir") != null) {
             root = System.getProperty("pbh.datadir");
         }
@@ -221,6 +229,9 @@ public class Main {
     }
 
     private static boolean initConfiguration() throws IOException {
+        if (!dataDirectory.exists()) {
+            configDirectory.mkdirs();
+        }
         if (!configDirectory.exists()) {
             configDirectory.mkdirs();
         }
