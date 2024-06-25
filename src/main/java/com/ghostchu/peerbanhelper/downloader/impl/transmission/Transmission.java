@@ -48,7 +48,7 @@ public class Transmission implements Downloader {
     public Transmission(String name, String blocklistUrl, Config config) {
         this.name = name;
         this.config = config;
-        this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.getVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
+        this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
         log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);
     }
@@ -223,7 +223,7 @@ public class Transmission implements Downloader {
         private String username;
         private String password;
         private String httpVersion;
-        private Boolean verifySsl;
+        private boolean verifySsl;
         private String rpcUrl;
 
         public static Transmission.Config readFromYaml(ConfigurationSection section) {

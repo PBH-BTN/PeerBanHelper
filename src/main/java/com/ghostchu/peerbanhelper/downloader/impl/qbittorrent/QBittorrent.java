@@ -71,7 +71,7 @@ public class QBittorrent implements Downloader {
                     }
                 })
                 .cookieHandler(cm);
-        if (!config.getVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
+        if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
@@ -187,7 +187,7 @@ public class QBittorrent implements Downloader {
 
     @Override
     public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
-        if (removed != null && removed.isEmpty() && added != null && config.getIncrementBan()) {
+        if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan()) {
             setBanListIncrement(added);
         } else {
             setBanListFull(fullList);
@@ -258,8 +258,8 @@ public class QBittorrent implements Downloader {
         private String password;
         private BasicauthDTO basicAuth;
         private String httpVersion;
-        private Boolean incrementBan;
-        private Boolean verifySsl;
+        private boolean incrementBan;
+        private boolean verifySsl;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();

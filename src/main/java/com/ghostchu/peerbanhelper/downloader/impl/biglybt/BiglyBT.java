@@ -74,7 +74,7 @@ public class BiglyBT implements Downloader {
                 .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
 
                 .cookieHandler(cm);
-        if (!config.getVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
+        if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
@@ -293,7 +293,7 @@ public class BiglyBT implements Downloader {
         private String token;
         private String httpVersion;
         private boolean incrementBan;
-        private Boolean verifySsl;
+        private boolean verifySsl;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
