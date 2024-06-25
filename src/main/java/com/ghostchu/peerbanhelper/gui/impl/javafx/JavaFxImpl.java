@@ -47,7 +47,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private final boolean silentStart;
     private final String[] args;
     private TrayIcon trayIcon;
-    private static final int MAX_LINES = 1000;
+    private static final int MAX_LINES = 300;
     private final LinkedList<String> lines = new LinkedList<>();
 
     public JavaFxImpl(String[] args) {
@@ -239,7 +239,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         }
         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
         javafx.scene.control.TextArea textArea = controller.getLogsTextArea();
-        textArea.setText(limitedText.toString());
+        textArea.setText(String.join("\n", limitedText));
         textArea.positionCaret(limitedText.length());
     }
 
