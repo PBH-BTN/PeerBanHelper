@@ -74,7 +74,7 @@ module:
       - '{"method":"STARTS_WITH","content":"hp"}'
       - '{"method":"STARTS_WITH","content":"dt/torrent"}'
       - '{"method":"STARTS_WITH","content":"dt"}'
-      - '{"method":"STARTS_WITH","content":"go.torrent.dev"}'
+      - '{"method":"STARTS_WITH","content":"go.torrent"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"STARTS_WITH","content":"xfplay"}'
       - '{"method":"CONTAINS","content":"StellarPlayer"}'
@@ -88,6 +88,7 @@ module:
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ljyun.cn/hangzhou/monitoring"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
+      - '{"method":"STARTS_WITH","content":"-XL"}'
       #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
   # 假进度检查
   # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。
