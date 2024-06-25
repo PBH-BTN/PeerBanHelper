@@ -24,6 +24,7 @@ import javafx.stage.WindowEvent;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,6 +47,8 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private final boolean silentStart;
     private final String[] args;
     private TrayIcon trayIcon;
+    private static final int MAX_LINES = 1000;
+    private final LinkedList<String> lines = new LinkedList<>();
 
     public JavaFxImpl(String[] args) {
         super(args);
@@ -221,13 +224,27 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         }
     }
 
+    private void insertLog(@NotNull String newText) {
+        String[] newLines = newText.split("\n");
+        lines.addAll(Arrays.asList(newLines));
+        while (lines.size() > MAX_LINES) {
+            lines.removeFirst();
+        }
+        StringBuilder limitedText = new StringBuilder();
+        for (String line : lines) {
+            limitedText.append(line).append("\n");
+        }
+        JFXWindowController controller = MainJavaFx.INSTANCE.getController();
+        javafx.scene.control.TextArea textArea = controller.getLogsTextArea();
+        textArea.setText(limitedText.toString());
+        textArea.positionCaret(limitedText.length());
+    }
+
     private void initLoggerRedirection() {
         SwingLoggerAppender.registerListener(loggerEvent -> {
             try {
                 Platform.runLater(() -> {
-                    JFXWindowController controller = MainJavaFx.INSTANCE.getController();
-                    javafx.scene.control.TextArea textArea = controller.getLogsTextArea();
-                    textArea.appendText(loggerEvent.message());
+                    insertLog(loggerEvent.message());
                 });
             } catch (IllegalStateException exception) {
                 exception.printStackTrace();
