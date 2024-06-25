@@ -41,6 +41,8 @@
             <menus>
                 <Menu fx:id="menuProgram" mnemonicParsing="false" text="Program">
                     <items>
+                        <MenuItem fx:id="menuProgramOpenDataDirectory" mnemonicParsing="false"
+                                  text="Open Data Directory..."/>
                         <MenuItem fx:id="menuProgramOpenInGithub" mnemonicParsing="false" text="Open in Github..."/>
                         <SeparatorMenuItem mnemonicParsing="false"/>
                         <MenuItem fx:id="menuProgramQuit" mnemonicParsing="false" text="Quit"/>

@@ -31,6 +31,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -210,6 +211,14 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
             Transferable ts = new StringSelection(content);
             clipboard.setContents(ts, null);
             createDialog(Level.INFO, Lang.GUI_COPY_TO_CLIPBOARD_TITLE, String.format(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content));
+        });
+        controller.getMenuProgramOpenDataDirectory().setText(Lang.GUI_MENU_OPEN_DATA_DIRECTORY);
+        controller.getMenuProgramOpenDataDirectory().setOnAction(e -> {
+            try {
+                Desktop.getDesktop().open(Main.getDataDirectory());
+            } catch (IOException ex) {
+                log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
+            }
         });
         if (silentStart) {
             setVisible(false);

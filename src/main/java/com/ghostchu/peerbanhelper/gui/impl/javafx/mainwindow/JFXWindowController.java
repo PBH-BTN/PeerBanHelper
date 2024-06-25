@@ -36,6 +36,9 @@ public class JFXWindowController implements Initializable {
     @FXML
     @Getter
     private MenuItem menuProgramCopyWebuiToken;
+    @FXML
+    @Getter
+    private MenuItem menuProgramOpenDataDirectory;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

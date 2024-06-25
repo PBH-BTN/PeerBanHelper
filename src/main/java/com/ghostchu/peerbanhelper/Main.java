@@ -95,7 +95,7 @@ public class Main {
     private static void setupConfDirectory(String[] args) {
         String osName = System.getProperty("os.name");
         String root = "data";
-        if (System.getProperty("pbh.usePlatformConfigLocation").equals("true")) {
+        if ("true".equalsIgnoreCase(System.getProperty("pbh.usePlatformConfigLocation"))) {
             if (osName.contains("Windows")) {
                 root = new File(System.getenv("LOCALAPPDATA"), "PeerBanHelper").getAbsolutePath();
             } else {
@@ -229,6 +229,7 @@ public class Main {
     }
 
     private static boolean initConfiguration() throws IOException {
+        log.info("PeerBanHelper data directory: {}", dataDirectory.getAbsolutePath());
         if (!dataDirectory.exists()) {
             configDirectory.mkdirs();
         }
