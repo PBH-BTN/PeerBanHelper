@@ -115,11 +115,11 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
-            ctx.status(HttpStatus.CONFLICT);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_NAME_EXISTS));
-            return;
-        }
+//        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
+//            ctx.status(HttpStatus.CONFLICT);
+//            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_NAME_EXISTS));
+//            return;
+//        }
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
