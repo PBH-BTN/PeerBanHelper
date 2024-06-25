@@ -62,6 +62,7 @@ public class Main {
     public static void main(String[] args) {
         setupConfDirectory(args);
         setupLog4j2();
+        setupProxySettings();
         libraryManager = new PBHLibraryManager(
                 new Slf4jLogAppender(),
                 dataDirectory.toPath(), "libraries"
@@ -90,6 +91,12 @@ public class Main {
         guiManager.onPBHFullyStarted(server);
         setupShutdownHook();
         guiManager.sync();
+    }
+
+    private static void setupProxySettings() {
+        if (System.getenv("http_proxy") != null || System.getenv("HTTP_PROXY") != null) {
+            log.warn(Lang.ALERT_INCORRECT_PROXY_SETTING);
+        }
     }
 
     private static void setupConfDirectory(String[] args) {

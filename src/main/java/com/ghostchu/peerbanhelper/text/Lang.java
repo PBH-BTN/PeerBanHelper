@@ -268,4 +268,5 @@ public class Lang {
     public static final String DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";
     public static final String DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED = "[错误] 向下载器请求增量封禁对等体时出现错误，请尝试在配置文件中关闭增量封禁(increment-ban)配置项";
     public static final String DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST = "无法保存 {} ({}) 的 Banlist！{} - {}\n{}";
+    public static final String ALERT_INCORRECT_PROXY_SETTING = "警告！通过 HTTP_PROXY 环境变量无法为 Java 应用程序设置代理服务器！您的代理设置可能并不会生效。";
 }
