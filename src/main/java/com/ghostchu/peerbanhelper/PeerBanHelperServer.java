@@ -147,14 +147,6 @@ public class PeerBanHelperServer {
         registerTimer();
         banListInvoker.forEach(BanListInvoker::reset);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
-        for (int i = 0; i < 5000; i++) {
-            log.info(UUID.randomUUID().toString());
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     public void loadDownloaders() {
