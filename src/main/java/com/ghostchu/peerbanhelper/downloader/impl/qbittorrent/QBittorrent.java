@@ -161,6 +161,11 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
+    public boolean isSupportWebview() {
+        return true;
+    }
+
+    @Override
     public String getName() {
         return name;
     }
@@ -241,23 +246,6 @@ public class QBittorrent implements Downloader {
             peersList.add(singleTorrentPeer);
         }
         return peersList;
-    }
-
-    @Override
-    public List<PeerAddress> getBanList() {
-        HttpResponse<String> resp;
-        try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/preferences"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException(String.format(Lang.DOWNLOADER_QB_API_PREFERENCES_ERR, resp.statusCode(), resp.body()));
-        }
-        Preferences preferences = JsonUtil.getGson().fromJson(resp.body(), Preferences.class);
-        String[] ips = preferences.getBannedIps().split("\n");
-        return Arrays.stream(ips).map(ip -> new PeerAddress(ip, 0)).toList();
     }
 
     @NoArgsConstructor

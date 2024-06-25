@@ -46,7 +46,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
 
     @Override
     public boolean needCheckHandshake() {
-        return false;
+        return true;
     }
 
     @Override

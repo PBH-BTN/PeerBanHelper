@@ -59,6 +59,7 @@ public class Lang {
     public static final String DOWNLOADER_TR_KNOWN_INCOMPATIBILITY = "[错误] 您正在使用的 Transmission 版本与 PeerBanHelper 不兼容: %s";
     public static final String DOWNLOADER_TR_INCOMPATIBILITY_BANAPI = "当前版本存在封禁 API 的已知问题，请升级至 3.0-20 或更高版本";
     public static final String ERR_CONFIG_DIRECTORY_INCORRECT = "初始化失败：config 不是一个目录。如果您正在使用 Docker，请确保其正确挂载。";
+
     public static String WEB_ENDPOINT_REGISTERED = "[注册] WebAPI 端点已注册：{}";
     public static String SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE = "检测到Native Images，跳过加载插件";
     public static final String PBH_SHUTTING_DOWN = "[退出] 正在退出，请等待我们完成剩余的工作……";
@@ -250,4 +251,20 @@ public class Lang {
     public static final String WEBVIEW_RESET_PAGE = "回到初始页";
     public static final String WEBVIEW_BACK = "后退";
     public static final String WEBVIEW_FORWARD = "前进";
+    public static final String DOWNLOADER_API_ADD_FAILURE = "下载器创建失败，是否传递的是一个不受支持的下载器类型？";
+    public static final String DOWNLOADER_API_CREATED = "下载器创建成功";
+    public static final String DOWNLOADER_API_UPDATED = "下载器更新成功";
+    public static final String DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS = "下载器创建失败，已有相同的下载器配置存在";
+    public static final String DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION = "下载器创建失败，出现 I/O 错误，请检查控制台日志";
+    public static final String DOWNLOADER_API_UPDATE_FAILURE = "下载器更新失败，是否传递的是一个不受支持的下载器类型？";
+    public static final String DOWNLOADER_API_UPDATE_FAILURE_ALREADY_EXISTS = "下载器更新失败，已有一个相同的下载器配置存在，且移除失败";
+    public static final String DOWNLOADER_API_TEST_NAME_EXISTS = "下载器所使用的名称与另一个已存在的下载器冲突";
+    public static final String DOWNLOADER_API_TEST_OK = "验证成功，配置有效";
+    public static final String DOWNLOADER_API_REMOVE_NOT_EXISTS = "无法移除指定的下载器，指定的下载器并没有在 PeerBanHelper 中注册";
+    public static final String DOWNLOADER_API_REMOVE_SAVED = "移除成功，配置已保存";
+    public static final String DOWNLOADER_API_DOWNLOADER_NOT_EXISTS = "请求的下载器未在 PeerBanHelper 中注册";
+    public static final String DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE = "请求 Torrent 列表失败：%s - %s";
+    public static final String DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT = "请求 Torrent 的 Peers 列表失败 - %d - %s";
+    public static final String DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED = "[错误] 向下载器请求增量封禁对等体时出现错误，请尝试在配置文件中关闭增量封禁(increment-ban)配置项";
+    public static final String DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST = "无法保存 {} ({}) 的 Banlist！{} - {}\n{}";
 }

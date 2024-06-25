@@ -6,5 +6,5 @@ package com.ghostchu.peerbanhelper.module.impl.webapi.common;
  * @param success 是否成功
  * @param message 消息
  */
-public record SlimMsg(boolean success, String message) {
+public record SlimMsg(boolean success, String message, int code) {
 }

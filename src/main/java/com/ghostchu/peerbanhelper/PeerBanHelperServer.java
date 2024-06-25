@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
@@ -166,6 +167,7 @@ public class PeerBanHelperServer {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
         }
         return downloader;
 
@@ -177,6 +179,7 @@ public class PeerBanHelperServer {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
         }
         return downloader;
 
