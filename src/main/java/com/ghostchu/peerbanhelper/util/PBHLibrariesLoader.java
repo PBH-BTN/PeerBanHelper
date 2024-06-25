@@ -104,7 +104,7 @@ public class PBHLibrariesLoader {
             for (int i = 0; i < libExplode.length; i++) {
                 libExplode[i] = libExplode[i].trim();
                 for (Map.Entry<String, String> pair : env.entrySet()) {
-                    libExplode[i] = libExplode[i].replace("${" + pair.getKey() + "}", pair.getValue());
+                    libExplode[i] = libExplode[i].replace("{" + pair.getKey() + "}", pair.getValue());
                 }
             }
             String groupId = libExplode[0];
