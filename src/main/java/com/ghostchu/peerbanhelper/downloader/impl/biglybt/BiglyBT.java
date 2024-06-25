@@ -311,7 +311,7 @@ public class BiglyBT implements Downloader {
 
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
-            section.set("type", "qbittorrent");
+            section.set("type", "biglybt");
             section.set("endpoint", endpoint);
             section.set("token", token);
             section.set("http-version", httpVersion);
