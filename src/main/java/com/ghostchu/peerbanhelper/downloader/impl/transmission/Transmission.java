@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,6 +97,11 @@ public class Transmission implements Downloader {
         return null;
     }
 
+    @Override
+    public boolean isSupportWebview() {
+        return true;
+    }
+
 
     @Override
     public String getName() {
@@ -135,10 +139,6 @@ public class Transmission implements Downloader {
         return trTorrent.getPeers();
     }
 
-    @Override
-    public List<PeerAddress> getBanList() {
-        return Collections.emptyList();
-    }
 
     @SneakyThrows
     @Override

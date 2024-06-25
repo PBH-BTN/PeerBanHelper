@@ -98,6 +98,9 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                         selectionModel.select(webuiTab);
                         log.info(Lang.WEBVIEW_ENABLED);
                         for (Downloader downloader : Main.getServer().getDownloaders()) {
+                            if (!downloader.isSupportWebview()) {
+                                continue;
+                            }
                             DownloaderBasicAuth basicAuth = downloader.getDownloaderBasicAuth();
                             Map<String, String> headers = new HashMap<>();
                             if (basicAuth != null) {

@@ -7,6 +7,7 @@ client:
     # 支持的客户端列表：
     # qBittorrent
     # Transmission
+    # BiglyBT
     # 其它也许以后会加
     type: qBittorrent
     # 客户端地址
@@ -34,6 +35,14 @@ client:
     verify-ssl: true
     http-version: "HTTP_1_1"
     rpc-url: "/transmission/rpc"
+  biglybt-003:
+    type: BiglyBT
+    # 填写 PeerBanHelper 提供的 BiglyBT 适配插件的 IP+端口
+    endpoint: "http://127.0.0.1:55667"
+    # 填写 PeerBanHelper 提供的 BiglyBT 适配插件的 Token
+    token: ""
+    # 是否使用增量封禁，在 BiglyBT 上这是推荐的选项
+    increment-ban: true
 # Http 服务器设置
 server:
   # WebUI 监听端口

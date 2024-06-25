@@ -28,6 +28,7 @@ public interface Downloader extends AutoCloseable {
     @Nullable
     WebViewScriptCallback getWebViewJavaScript();
 
+    boolean isSupportWebview();
 
     /**
      * 下载器用户定义名称
@@ -65,12 +66,6 @@ public interface Downloader extends AutoCloseable {
      */
     List<Peer> getPeers(Torrent torrent);
 
-    /**
-     * 获取此下载器已设置的 BanList
-     *
-     * @return BanList
-     */
-    List<PeerAddress> getBanList();
 
     /**
      * 设置并使新的 BanList 生效
