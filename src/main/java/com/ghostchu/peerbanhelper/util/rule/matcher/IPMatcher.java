@@ -37,7 +37,8 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
      * @param ruleName 规则名
      * @param ruleData 规则数据
      */
-    public void setData(@NotNull String ruleName, @NotNull List<IPAddress> ruleData) {
+    public void setData(@NotNull String ruleName, List<IPAddress> ruleData) {
+        setRuleName(ruleName);
         this.ips = new ArrayList<>();
         this.subnets = new ArrayList<>();
         ruleData.forEach(ipAddress -> {
