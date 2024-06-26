@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
+import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import inet.ipaddr.IPAddress;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
@@ -71,13 +72,7 @@ public class BtnRuleParsed {
     @NotNull
     public Map<String, List<Rule>> parseIPRule(@NotNull Map<String, List<String>> raw) {
         Map<String, List<Rule>> rules = new HashMap<>();
-        raw.forEach((k, v) -> {
-            List<Rule> addresses = new ArrayList<>();
-            for (String s : v) {
-                addresses.add(new BtnRuleIpMatcher(IPAddressUtil.getIPAddress(s)));
-            }
-            rules.put(k, addresses);
-        });
+        raw.forEach((k, v) -> rules.put(k, List.of(new BtnRuleIpMatcher(k, k, v.stream().map(IPAddressUtil::getIPAddress).toList()))));
         return rules;
     }
 
@@ -88,37 +83,14 @@ public class BtnRuleParsed {
         return rules;
     }
 
-    public static class BtnRuleIpMatcher implements Rule {
-        private IPAddress ipAddress;
+    public static class BtnRuleIpMatcher extends IPMatcher {
 
-        public BtnRuleIpMatcher(IPAddress ipAddress) {
-            this.ipAddress = ipAddress;
-            if (this.ipAddress.isIPv4Convertible()) {
-                this.ipAddress = this.ipAddress.toIPv4();
-            }
+        public BtnRuleIpMatcher(String ruleId, String ruleName, List<IPAddress> ruleData) {
+            super(ruleId, ruleName, ruleData);
         }
 
         @Override
-        public @NotNull MatchResult match(@NotNull String content) {
-            Main.getServer().getHitRateMetric().addQuery(this);
-            IPAddress contentAddr = IPAddressUtil.getIPAddress(content);
-            if (contentAddr.isIPv4Convertible()) {
-                contentAddr = contentAddr.toIPv4();
-            }
-            MatchResult result = (ipAddress.contains(contentAddr) || ipAddress.equals(contentAddr)) ? MatchResult.TRUE : MatchResult.DEFAULT;
-            if (result != MatchResult.DEFAULT) {
-                Main.getServer().getHitRateMetric().addHit(this);
-            }
-            return result;
-        }
-
-        @Override
-        public Map<String, Object> metadata() {
-            return Map.of("ip", this.ipAddress.toString());
-        }
-
-        @Override
-        public String matcherName() {
+        public @NotNull String matcherName() {
             return "BTN-IP";
         }
 
