@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -20,12 +21,13 @@ public class PeerAddress implements Comparable<PeerAddress> {
      */
     private int port;
 
-    public PeerAddress(String ip, int port) {
+    public PeerAddress(@NotNull String ip, int port) {
         this.ip = ip;
         this.port = port;
         this.address = IPAddressUtil.getIPAddress(ip);
     }
 
+    @NotNull
     public IPAddress getAddress() {
         if (address == null) { // 可能由 Gson 反序列化时导致此值为空
             address = IPAddressUtil.getIPAddress(ip);

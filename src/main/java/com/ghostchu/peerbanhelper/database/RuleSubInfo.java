@@ -1,10 +1,12 @@
 package com.ghostchu.peerbanhelper.database;
 
+import org.jetbrains.annotations.NotNull;
+
 public record RuleSubInfo(
-        String ruleId,
+        @NotNull String ruleId,
         boolean enabled,
-        String ruleName,
-        String subUrl,
+        @NotNull String ruleName,
+        @NotNull String subUrl,
         long lastUpdate,
         int entCount
 ) {

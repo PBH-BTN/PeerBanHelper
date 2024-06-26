@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -16,8 +17,8 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
     private String rule;
     private String description;
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, Torrent torrent, Peer peer, String rule,
-                       String description) {
+    public BanMetadata(@NotNull String context, @NotNull String downloader, long banAt, long unbanAt, @NotNull Torrent torrent, @NotNull Peer peer, String rule,
+                       @NotNull String description) {
         super(downloader, torrent, peer);
         this.context = context;
         this.banAt = banAt;
@@ -26,8 +27,8 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
         this.description = description;
     }
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, TorrentWrapper torrent, PeerWrapper peer, String rule,
-                       String description) {
+    public BanMetadata(@NotNull String context, @NotNull String downloader, long banAt, long unbanAt, @NotNull TorrentWrapper torrent, @NotNull PeerWrapper peer, @NotNull String rule,
+                       @NotNull String description) {
         super(downloader, torrent, peer);
         this.context = context;
         this.banAt = banAt;

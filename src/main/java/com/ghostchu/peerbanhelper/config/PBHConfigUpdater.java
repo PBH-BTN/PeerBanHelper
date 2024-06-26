@@ -18,7 +18,7 @@ public class PBHConfigUpdater {
     private final YamlConfiguration yaml;
     private final File file;
 
-    public PBHConfigUpdater(File file, YamlConfiguration yaml) {
+    public PBHConfigUpdater(@NotNull File file, @NotNull YamlConfiguration yaml) {
         this.yaml = yaml;
         this.file = file;
     }

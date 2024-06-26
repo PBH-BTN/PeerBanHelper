@@ -7,6 +7,7 @@ import com.github.mizosoft.methanol.WritableBodyPublisher;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -100,6 +101,7 @@ public class HTTPUtil {
         return builder.build();
     }
 
+    @NotNull
     public static WritableBodyPublisher gzipBody(byte[] bytes) {
         WritableBodyPublisher requestBody = WritableBodyPublisher.create();
         try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream());
@@ -112,6 +114,7 @@ public class HTTPUtil {
         return requestBody;
     }
 
+    @NotNull
     public static WritableBodyPublisher gzipBody(InputStream is) {
         WritableBodyPublisher requestBody = WritableBodyPublisher.create();
         try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream())) {
@@ -123,7 +126,7 @@ public class HTTPUtil {
         return requestBody;
     }
 
-    public static void onProgress(ProgressTracker.Progress progress) {
+    public static void onProgress(@NotNull ProgressTracker.Progress progress) {
         if (progress.determinate()) { // Overall progress can be measured
             var percent = 100 * progress.value();
             log.info(Lang.DOWNLOAD_PROGRESS_DETERMINED, progress.totalBytesTransferred(), progress.contentLength(), String.format("%.2f", percent));
@@ -135,21 +138,24 @@ public class HTTPUtil {
         }
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+    @NotNull
+    public static <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(@NotNull HttpClient client, @NotNull HttpRequest request, @NotNull HttpResponse.BodyHandler<T> bodyHandler) {
         return client.sendAsync(request, bodyHandler)
                 .handleAsync((r, t) -> tryResend(client, request, bodyHandler, MAX_RESEND, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+    @NotNull
+    public static <T> CompletableFuture<HttpResponse<T>> retryableSend(@NotNull HttpClient client, @NotNull HttpRequest request, @NotNull HttpResponse.BodyHandler<T> bodyHandler) {
         return client.sendAsync(request, bodyHandler)
                 .handleAsync((r, t) -> tryResend(client, request, bodyHandler, 1, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+    @NotNull
+    public static <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(@NotNull HttpClient client, @NotNull HttpRequest request, @NotNull HttpResponse.BodyHandler<T> bodyHandler) {
         bodyHandler = tracker.tracking(bodyHandler, HTTPUtil::onProgress);
         HttpResponse.BodyHandler<T> finalBodyHandler = bodyHandler;
         return client.sendAsync(request, bodyHandler)
@@ -159,7 +165,7 @@ public class HTTPUtil {
     }
 
 
-    public static boolean shouldRetry(HttpResponse<?> r, Throwable t, int count) {
+    public static boolean shouldRetry(@NotNull HttpResponse<?> r, Throwable t, int count) {
         if (count >= MAX_RESEND) {
             return false;
         }
@@ -172,9 +178,10 @@ public class HTTPUtil {
         return false;
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> tryResend(HttpClient client, HttpRequest request,
-                                                                   HttpResponse.BodyHandler<T> handler, int count,
-                                                                   HttpResponse<T> resp, Throwable t) {
+    @NotNull
+    public static <T> CompletableFuture<HttpResponse<T>> tryResend(@NotNull HttpClient client, HttpRequest request,
+                                                                   @NotNull HttpResponse.BodyHandler<T> handler, int count,
+                                                                   @NotNull HttpResponse<T> resp, Throwable t) {
         if (shouldRetry(resp, t, count)) {
             if (resp == null) {
                 log.warn("Request to {} failed, retry {}/{}: {}", request.uri().toString(), count, MAX_RESEND, t.getClass().getName() + ": " + t.getMessage());

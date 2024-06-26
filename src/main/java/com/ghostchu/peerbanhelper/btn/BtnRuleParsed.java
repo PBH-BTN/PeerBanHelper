@@ -22,7 +22,7 @@ public class BtnRuleParsed {
     private Map<String, List<Rule>> ipRules;
     private Map<String, List<Rule>> portRules;
 
-    public BtnRuleParsed(BtnRule btnRule) {
+    public BtnRuleParsed(@NotNull BtnRule btnRule) {
         this.version = btnRule.getVersion();
         this.ipRules = parseIPRule(btnRule.getIpRules());
         this.portRules = parsePortRule(btnRule.getPortRules());
@@ -30,7 +30,8 @@ public class BtnRuleParsed {
         this.clientNameRules = parseRule(btnRule.getClientNameRules());
     }
 
-    private Map<String, List<Rule>> parsePortRule(Map<String, List<Integer>> portRules) {
+    @NotNull
+    private Map<String, List<Rule>> parsePortRule(@NotNull Map<String, List<Integer>> portRules) {
         Map<String, List<Rule>> rules = new HashMap<>();
         portRules.forEach((k, v) -> {
             List<Rule> addresses = new ArrayList<>();
@@ -67,7 +68,8 @@ public class BtnRuleParsed {
         return rules;
     }
 
-    public Map<String, List<Rule>> parseIPRule(Map<String, List<String>> raw) {
+    @NotNull
+    public Map<String, List<Rule>> parseIPRule(@NotNull Map<String, List<String>> raw) {
         Map<String, List<Rule>> rules = new HashMap<>();
         raw.forEach((k, v) -> {
             List<Rule> addresses = new ArrayList<>();
@@ -79,7 +81,8 @@ public class BtnRuleParsed {
         return rules;
     }
 
-    public Map<String, List<Rule>> parseRule(Map<String, List<String>> raw) {
+    @NotNull
+    public Map<String, List<Rule>> parseRule(@NotNull Map<String, List<String>> raw) {
         Map<String, List<Rule>> rules = new HashMap<>();
         raw.forEach((k, v) -> rules.put(k, RuleParser.parse(v)));
         return rules;

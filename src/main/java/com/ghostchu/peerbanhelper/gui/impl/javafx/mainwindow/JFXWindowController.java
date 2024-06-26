@@ -8,36 +8,27 @@ import lombok.Getter;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+@Getter
 public class JFXWindowController implements Initializable {
     @FXML
-    @Getter
     private TabPane tabPane;
     @FXML
-    @Getter
     private Tab tabLogs;
     @FXML
-    @Getter
     private TextArea logsTextArea;
     @FXML
-    @Getter
     private Menu menuProgram;
     @FXML
-    @Getter
     private Menu menuWebui;
     @FXML
-    @Getter
     private MenuItem menuProgramOpenInGithub;
     @FXML
-    @Getter
     private MenuItem menuProgramQuit;
     @FXML
-    @Getter
     private MenuItem menuProgramOpenInBrowser;
     @FXML
-    @Getter
     private MenuItem menuProgramCopyWebuiToken;
     @FXML
-    @Getter
     private MenuItem menuProgramOpenDataDirectory;
 
     @Override

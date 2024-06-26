@@ -3,15 +3,16 @@ package com.ghostchu.peerbanhelper.alert;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.NewAlertCreated;
 import com.google.common.collect.ImmutableList;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AlertManager {
-    private Map<String, Alert> alerts = new ConcurrentHashMap<>();
+    private final Map<String, Alert> alerts = new ConcurrentHashMap<>();
 
-    public void addAlert(Alert alert) {
+    public void addAlert(@NotNull Alert alert) {
         if (alerts.containsKey(alert.id())) {
             return;
         }
@@ -20,14 +21,15 @@ public class AlertManager {
         }
     }
 
-    public boolean removeAlert(String id) {
+    public boolean removeAlert(@NotNull String id) {
         return alerts.remove(id) != null;
     }
 
-    public boolean removeAlert(Alert alert) {
+    public boolean removeAlert(@NotNull Alert alert) {
         return alerts.remove(alert.id()) != null;
     }
 
+    @NotNull
     public List<Alert> getAlerts() {
         return ImmutableList.copyOf(alerts.values());
     }

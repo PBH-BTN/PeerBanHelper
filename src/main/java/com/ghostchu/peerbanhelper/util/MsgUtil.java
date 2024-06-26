@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.management.LockInfo;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
@@ -7,6 +9,7 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 
 public class MsgUtil {
+    @NotNull
     public static String humanReadableByteCountBin(long bytes) {
         long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
         if (absB < 1024) {
@@ -22,6 +25,7 @@ public class MsgUtil {
         return String.format("%.1f %ciB", value / 1024.0, ci.current());
     }
 
+    @NotNull
     public static String humanReadableByteCountSI(long bytes) {
         if (-1000 < bytes && bytes < 1000) {
             return bytes + " B";
@@ -34,6 +38,7 @@ public class MsgUtil {
         return String.format("%.1f %cB", bytes / 1000.0, ci.current());
     }
 
+    @NotNull
     public static String threadInfoToString(ThreadInfo info) {
         StringBuilder sb = new StringBuilder("\"" + info.getThreadName() + "\"" +
                 (info.isDaemon() ? " daemon" : "") +

@@ -23,6 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -45,7 +46,7 @@ public class Transmission implements Downloader {
             API 受限，实际实现起来意义不大
 
             */
-    public Transmission(String name, String blocklistUrl, Config config) {
+    public Transmission(@NotNull String name, @NotNull String blocklistUrl, @NotNull Config config) {
         this.name = name;
         this.config = config;
         this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
@@ -53,32 +54,33 @@ public class Transmission implements Downloader {
         log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);
     }
 
-    private static String generateBlocklistUrl(String pbhServerAddress) {
+    @NotNull
+    private static String generateBlocklistUrl(@NotNull String pbhServerAddress) {
         return pbhServerAddress + "/blocklist/transmission";
     }
 
-    public static Transmission loadFromConfig(String name, String pbhServerAddress, ConfigurationSection section) {
+    public static Transmission loadFromConfig(@NotNull String name, @NotNull String pbhServerAddress, @NotNull ConfigurationSection section) {
         Config config = Config.readFromYaml(section);
         return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config);
     }
 
-    public static Transmission loadFromConfig(String name, String pbhServerAddress, JsonObject section) {
+    public static Transmission loadFromConfig(@NotNull String name, @NotNull String pbhServerAddress, @NotNull JsonObject section) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
         return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config);
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return config.getEndpoint();
     }
 
@@ -104,12 +106,12 @@ public class Transmission implements Downloader {
 
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "Transmission";
     }
 
@@ -125,7 +127,7 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
         return rsp.getArgs().getTorrents().stream()
@@ -134,7 +136,7 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         TRTorrent trTorrent = (TRTorrent) torrent;
         return trTorrent.getPeers();
     }
@@ -142,7 +144,7 @@ public class Transmission implements Downloader {
 
     @SneakyThrows
     @Override
-    public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
+    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
         RqSessionSet set = RqSessionSet.builder()
                 .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
                 .blocklistEnabled(true)
@@ -163,11 +165,11 @@ public class Transmission implements Downloader {
 
 
     @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+    public void relaunchTorrentIfNeeded(@NotNull Collection<Torrent> torrents) {
         relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
     }
 
-    private void relaunchTorrents(Collection<Long> ids) {
+    private void relaunchTorrents(@NotNull Collection<Long> ids) {
         if (ids.isEmpty()) return;
         log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, ids.size());
         RqTorrent stop = new RqTorrent(TorrentAction.STOP, new ArrayList<>());
@@ -188,17 +190,17 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
+    public void relaunchTorrentIfNeededByTorrentWrapper(@NotNull Collection<TorrentWrapper> torrents) {
         relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
     }
 
     @Override
-    public DownloaderLastStatus getLastStatus() {
+    public @NotNull DownloaderLastStatus getLastStatus() {
         return lastStatus;
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
+    public void setLastStatus(@NotNull DownloaderLastStatus lastStatus, @NotNull String statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }
@@ -226,7 +228,8 @@ public class Transmission implements Downloader {
         private boolean verifySsl;
         private String rpcUrl;
 
-        public static Transmission.Config readFromYaml(ConfigurationSection section) {
+        @NotNull
+        public static Transmission.Config readFromYaml(@NotNull ConfigurationSection section) {
             Transmission.Config config = new Transmission.Config();
             config.setType("transmission");
             config.setEndpoint(section.getString("endpoint"));
@@ -241,6 +244,7 @@ public class Transmission implements Downloader {
             return config;
         }
 
+        @NotNull
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "qbittorrent");

@@ -1,18 +1,24 @@
 package com.ghostchu.peerbanhelper.torrent;
 
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @Setter
 public class TorrentImpl implements Torrent {
     private double progress;
     private long rtUploadSpeed;
     private long rtDownloadSpeed;
+    @NotNull
     private String hash;
+    @NotNull
     private String id;
+    @NotNull
     private String name;
     private long size;
 
-    public TorrentImpl(String id, String name, String hash, long size, double progress, long rtUploadSpeed, long rtDownloadSpeed) {
+    public TorrentImpl(@NotNull String id, @NotNull String name, @NotNull String hash,
+                       long size, double progress, long rtUploadSpeed,
+                       long rtDownloadSpeed) {
         this.id = id;
         this.name = name;
         this.hash = hash;
@@ -23,17 +29,17 @@ public class TorrentImpl implements Torrent {
     }
 
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getHash() {
+    public @NotNull String getHash() {
         return hash;
     }
 

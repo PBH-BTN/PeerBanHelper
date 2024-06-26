@@ -13,7 +13,7 @@ public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule im
     @Getter
     private boolean register;
 
-    public AbstractRuleFeatureModule(PeerBanHelperServer server, YamlConfiguration profile) {
+    public AbstractRuleFeatureModule(@NotNull PeerBanHelperServer server, @NotNull YamlConfiguration profile) {
         super(server, profile);
         this.server = server;
     }

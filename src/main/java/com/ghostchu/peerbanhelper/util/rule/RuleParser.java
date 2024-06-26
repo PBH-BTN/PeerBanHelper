@@ -7,20 +7,21 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 public class RuleParser {
-    public static List<Rule> parse(List<String> string) {
+    public static List<Rule> parse(@NotNull List<String> string) {
         return string.stream()
                 .map(JsonParser::parseString)
                 .map(RuleParser::parse)
                 .toList();
     }
 
-    public static RuleMatchResult matchRule(List<Rule> rules, String content) {
+    public static RuleMatchResult matchRule(@NotNull List<Rule> rules, @NotNull String content) {
         RuleMatchResult matchResult = new RuleMatchResult(false, null);
         for (Rule rule : rules) {
             MatchResult result = rule.match(content);
@@ -35,7 +36,8 @@ public class RuleParser {
         return matchResult;
     }
 
-    public static Rule parse(JsonElement element) {
+    @NotNull
+    public static Rule parse(@Nullable JsonElement element) {
         if (element == null) {
             // 虚拟规则不记录数据
             return new Rule() {

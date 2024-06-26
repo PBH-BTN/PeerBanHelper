@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +18,7 @@ public class TorrentWrapper {
     private long rtUploadSpeed;
     private long rtDownloadSpeed;
 
-    public TorrentWrapper(Torrent torrent) {
+    public TorrentWrapper(@NotNull Torrent torrent) {
         this.id = torrent.getId();
         this.size = torrent.getSize();
         this.name = torrent.getName();

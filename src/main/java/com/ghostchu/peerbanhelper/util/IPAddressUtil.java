@@ -50,7 +50,7 @@ public class IPAddressUtil {
     }
 
     @NotNull
-    public static IPAddress toPrefixBlock(IPAddress ipAddress, int length) {
+    public static IPAddress toPrefixBlock(@NotNull IPAddress ipAddress, int length) {
         try {
             return IP_WITHOUT_PREFIX_CACHE.get(ipAddress, () -> ipAddress.toPrefixBlock(length));
         } catch (ExecutionException e) {

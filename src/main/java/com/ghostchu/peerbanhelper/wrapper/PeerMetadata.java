@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -19,14 +20,14 @@ public class PeerMetadata implements Comparable<PeerMetadata> {
     private String reverseLookup = "N/A";
 
 
-    public PeerMetadata(String downloader, Torrent torrent, Peer peer) {
+    public PeerMetadata(@NotNull String downloader, @NotNull Torrent torrent, @NotNull Peer peer) {
         this.randomId = UUID.randomUUID();
         this.downloader = downloader;
         this.torrent = new com.ghostchu.peerbanhelper.wrapper.TorrentWrapper(torrent);
         this.peer = new com.ghostchu.peerbanhelper.wrapper.PeerWrapper(peer);
     }
 
-    public PeerMetadata(String downloader, TorrentWrapper torrent, PeerWrapper peer) {
+    public PeerMetadata(@NotNull String downloader, @NotNull TorrentWrapper torrent, @NotNull PeerWrapper peer) {
         this.randomId = UUID.randomUUID();
         this.downloader = downloader;
         this.torrent = torrent;

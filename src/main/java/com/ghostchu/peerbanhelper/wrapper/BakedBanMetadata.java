@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -11,7 +12,7 @@ public class BakedBanMetadata extends BanMetadata {
     private GeoWrapper geo;
     private ASNWrapper asn;
 
-    public BakedBanMetadata(BanMetadata banMetadata) {
+    public BakedBanMetadata(@NotNull BanMetadata banMetadata) {
         super(banMetadata.getContext(), banMetadata.getDownloader(), banMetadata.getBanAt(),
                 banMetadata.getUnbanAt(), banMetadata.getTorrent(), banMetadata.getPeer(), banMetadata.getRule(),
                 banMetadata.getDescription());

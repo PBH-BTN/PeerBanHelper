@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.time;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -10,7 +11,8 @@ import java.util.function.Supplier;
 
 @Slf4j
 public class RestrictedExecutor {
-    public static <T> RestrictedExecResult<T> execute(long timeout, Supplier<T> target) {
+    @NotNull
+    public static <T> RestrictedExecResult<T> execute(long timeout, @NotNull Supplier<T> target) {
         CompletableFuture<T> sandbox = CompletableFuture.supplyAsync(target);
         try {
             return new RestrictedExecResult<>(false, sandbox.get(timeout, TimeUnit.MILLISECONDS));

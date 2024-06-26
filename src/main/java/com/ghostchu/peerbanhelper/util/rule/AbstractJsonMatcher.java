@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class AbstractJsonMatcher extends AbstractMatcher {
     private Rule condition;
 
-    public AbstractJsonMatcher(JsonObject rule) {
+    public AbstractJsonMatcher(@NotNull JsonObject rule) {
         if (rule.has("if")) {
             this.condition = RuleParser.parse(rule.get("if"));
         }

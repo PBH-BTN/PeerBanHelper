@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
+import org.jetbrains.annotations.NotNull;
 
 public class TRPeer implements Peer {
 
@@ -14,7 +15,7 @@ public class TRPeer implements Peer {
     }
 
     @Override
-    public PeerAddress getPeerAddress() {
+    public @NotNull PeerAddress getPeerAddress() {
         if (this.peerAddress == null) {
             this.peerAddress = new PeerAddress(backend.getAddress(), backend.getPort());
         }

@@ -2,20 +2,28 @@ package com.ghostchu.peerbanhelper.peer;
 
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Setter
 public class PeerImpl implements Peer {
+    @NotNull
     private PeerAddress peerAddress;
+    @Nullable
     private String peerId;
+    @Nullable
     private String clientName;
     private long downloadSpeed;
     private long downloaded;
     private long uploadSpeed;
     private long uploaded;
     private double progress;
+    @Nullable
     private String flags;
 
-    public PeerImpl(PeerAddress peerAddress, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, String flags) {
+    public PeerImpl(@NotNull PeerAddress peerAddress, @Nullable String peerId, @Nullable String clientName,
+                    long downloadSpeed, long downloaded, long uploadSpeed,
+                    long uploaded, double progress, @Nullable String flags) {
         this.peerAddress = peerAddress;
         this.peerId = peerId;
         this.clientName = clientName;
@@ -28,7 +36,7 @@ public class PeerImpl implements Peer {
     }
 
     @Override
-    public PeerAddress getPeerAddress() {
+    public @NotNull PeerAddress getPeerAddress() {
         return peerAddress;
     }
 

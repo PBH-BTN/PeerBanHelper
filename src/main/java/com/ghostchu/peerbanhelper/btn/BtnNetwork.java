@@ -12,6 +12,7 @@ import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -40,7 +41,7 @@ public class BtnNetwork {
     @Getter
     private HttpClient httpClient;
 
-    public BtnNetwork(PeerBanHelperServer server, ConfigurationSection section) {
+    public BtnNetwork(@NotNull PeerBanHelperServer server, @NotNull ConfigurationSection section) {
         this.server = server;
         if (!section.getBoolean("enabled")) {
             throw new IllegalStateException("BTN has been disabled");

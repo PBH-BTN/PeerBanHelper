@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.UUID;
@@ -13,7 +14,7 @@ import java.util.UUID;
 public class MainConfigUpdateScript {
     private final YamlConfiguration conf;
 
-    public MainConfigUpdateScript(YamlConfiguration conf) {
+    public MainConfigUpdateScript(@NotNull YamlConfiguration conf) {
         this.conf = conf;
         validate();
     }

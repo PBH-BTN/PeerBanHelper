@@ -88,12 +88,12 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
@@ -119,7 +119,7 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return apiEndpoint;
     }
 
@@ -166,12 +166,12 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "qBittorrent";
     }
 
@@ -195,7 +195,7 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         HttpResponse<String> request;
         try {
             request = httpClient.send(MutableRequest.GET(apiEndpoint + "/torrents/info?filter=active"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
@@ -215,17 +215,17 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+    public void relaunchTorrentIfNeeded(@NotNull Collection<Torrent> torrents) {
         // QB 很棒，什么都不需要做
     }
 
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
+    public void relaunchTorrentIfNeededByTorrentWrapper(@NotNull Collection<TorrentWrapper> torrents) {
         // QB 很棒，什么都不需要做
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         HttpResponse<String> resp;
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId()),
@@ -355,12 +355,12 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public DownloaderLastStatus getLastStatus() {
+    public @NotNull DownloaderLastStatus getLastStatus() {
         return lastStatus;
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
+    public void setLastStatus(@NotNull DownloaderLastStatus lastStatus, @NotNull String statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }

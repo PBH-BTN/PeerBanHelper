@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +17,7 @@ public class BuildMeta {
     private String abbrev;
     private String javafx;
 
-    public void loadBuildMeta(YamlConfiguration configuration) {
+    public void loadBuildMeta(@NotNull YamlConfiguration configuration) {
         this.version = configuration.getString("maven.version");
         this.branch = configuration.getString("git.branch");
         this.commit = configuration.getString("git.commit.id.commit-id");

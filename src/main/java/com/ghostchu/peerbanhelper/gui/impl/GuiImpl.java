@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
 
@@ -18,7 +19,7 @@ public interface GuiImpl {
     default void onPBHFullyStarted(PeerBanHelperServer server) {
     }
 
-    void createNotification(Level level, String title, String description);
+    void createNotification(@NotNull Level level, @NotNull String title, @NotNull String description);
 
-    void createDialog(Level level, String title, String description);
+    void createDialog(@NotNull Level level, @NotNull String title, @NotNull String description);
 }

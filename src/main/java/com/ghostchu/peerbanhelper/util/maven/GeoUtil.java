@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class GeoUtil {
     private static volatile Boolean inChinaRegion = null;
 
-    public static CompletableFuture<Integer> connectTest(String ipAddress, int port, int timeout) {
+    public static CompletableFuture<Integer> connectTest(@NotNull String ipAddress, int port, int timeout) {
         return CompletableFuture.supplyAsync(() -> {
             try (Socket socket = new Socket()) {
                 long time = System.currentTimeMillis();
@@ -36,7 +36,7 @@ public class GeoUtil {
         });
     }
 
-    private static long sendGetTest(String urlStr) {
+    private static long sendGetTest(@NotNull String urlStr) {
         try (HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.of(5, ChronoUnit.SECONDS))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
@@ -58,7 +58,7 @@ public class GeoUtil {
     }
 
     @NotNull
-    public static List<MavenCentralMirror> determineBestMirrorServer(Logger logger) {
+    public static List<MavenCentralMirror> determineBestMirrorServer(@NotNull Logger logger) {
         logger.info(Lang.LIBRARIES_LOADER_DETERMINE_BEST_MIRROR);
         List<CompletableFuture<Void>> testEntry = new ArrayList<>();
         Map<MavenCentralMirror, Long> mirrorPingMap = new ConcurrentSkipListMap<>();

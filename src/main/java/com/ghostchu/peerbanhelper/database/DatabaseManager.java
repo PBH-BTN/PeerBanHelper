@@ -3,16 +3,14 @@ package com.ghostchu.peerbanhelper.database;
 import com.ghostchu.peerbanhelper.Main;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class DatabaseManager {
     private HikariDataSource ds;
-    private final ScheduledExecutorService cleanupService = Executors.newScheduledThreadPool(1);
 
     public DatabaseManager() {
         File databaseDirectory = new File(Main.getDataDirectory(), "persist");
@@ -23,7 +21,7 @@ public class DatabaseManager {
         setupDatabase(sqliteDb);
     }
 
-    public void setupDatabase(File file) {
+    public void setupDatabase(@NotNull File file) {
         HikariConfig config = new HikariConfig();
         config.setPoolName("PeerBanHelper SQLite Connection Pool");
         config.setDriverClassName("org.sqlite.JDBC");

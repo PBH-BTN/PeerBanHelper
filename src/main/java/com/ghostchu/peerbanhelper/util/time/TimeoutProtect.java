@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util.time;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -21,18 +22,18 @@ public class TimeoutProtect implements AutoCloseable {
     private List<Runnable> unfinishedTasks;
     private Consumer<TimeoutProtect> timeoutCallback;
 
-    public TimeoutProtect(long timeRestrict, ExecutorService service) {
+    public TimeoutProtect(long timeRestrict, @NotNull ExecutorService service) {
         this.timeRestrict = timeRestrict;
         this.service = service;
     }
 
-    public TimeoutProtect(long timeRestrict, ExecutorService service, Consumer<TimeoutProtect> timeoutCallback) {
+    public TimeoutProtect(long timeRestrict, @NotNull ExecutorService service, @NotNull Consumer<TimeoutProtect> timeoutCallback) {
         this.timeRestrict = timeRestrict;
         this.service = service;
         this.timeoutCallback = timeoutCallback;
     }
 
-    public TimeoutProtect(long timeRestrict, Consumer<TimeoutProtect> timeoutCallback) {
+    public TimeoutProtect(long timeRestrict, @NotNull Consumer<TimeoutProtect> timeoutCallback) {
         this.timeRestrict = timeRestrict;
         this.service = Executors.newVirtualThreadPerTaskExecutor();
         this.timeoutCallback = timeoutCallback;
@@ -43,7 +44,7 @@ public class TimeoutProtect implements AutoCloseable {
         return unfinishedTasks.isEmpty();
     }
 
-    public void runIfTimeout(Consumer<TimeoutProtect> timeout) {
+    public void runIfTimeout(@NotNull Consumer<TimeoutProtect> timeout) {
         if (this.timeout) {
             timeout.accept(this);
         }

@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @Data
 @NoArgsConstructor
@@ -19,7 +20,7 @@ public class PeerWrapper {
     private double progress;
     private String flags;
 
-    public PeerWrapper(Peer peer) {
+    public PeerWrapper(@NotNull Peer peer) {
         this.id = peer.getPeerId();
         this.address = new PeerAddressWrapper(peer.getPeerAddress());
         this.clientName = peer.getClientName();

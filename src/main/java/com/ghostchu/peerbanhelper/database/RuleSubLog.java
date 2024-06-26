@@ -1,11 +1,12 @@
 package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
+import org.jetbrains.annotations.NotNull;
 
 public record RuleSubLog(
-        String ruleId,
+        @NotNull String ruleId,
         long updateTime,
         int count,
-        IPBanRuleUpdateType updateType
+        @NotNull IPBanRuleUpdateType updateType
 ) {
 }

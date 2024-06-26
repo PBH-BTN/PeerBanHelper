@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.torrent;
 
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
+import org.jetbrains.annotations.NotNull;
 
 public interface Torrent {
     /**
@@ -8,6 +9,7 @@ public interface Torrent {
      *
      * @return 唯一标识符值，具体因下载器实现而异
      */
+    @NotNull
     String getId();
 
     /**
@@ -15,6 +17,7 @@ public interface Torrent {
      *
      * @return Torrent 名称
      */
+    @NotNull
     String getName();
 
     /**
@@ -22,6 +25,7 @@ public interface Torrent {
      *
      * @return 首选哈希值
      */
+    @NotNull
     String getHash();
 
     /**
@@ -57,6 +61,7 @@ public interface Torrent {
      *
      * @return 不可逆匿名识别符
      */
+    @NotNull
     default String getHashedIdentifier() {
         return InfoHashUtil.getHashedIdentifier(getHash());
     }

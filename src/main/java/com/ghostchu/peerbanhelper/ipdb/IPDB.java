@@ -11,6 +11,7 @@ import com.maxmind.geoip2.DatabaseReader;
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.Authenticator;
@@ -31,7 +32,6 @@ import java.util.zip.GZIPInputStream;
 
 @Slf4j
 public class IPDB implements AutoCloseable {
-    private final File dataFolder;
     private final long updateInterval = 86400000L; // 30天
     private final String accountId;
     private final String licenseKey;
@@ -45,8 +45,7 @@ public class IPDB implements AutoCloseable {
     @Getter
     private DatabaseReader mmdbASN;
 
-    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate) throws IllegalArgumentException, IOException {
-        this.dataFolder = dataFolder;
+    public IPDB(@NotNull File dataFolder, @NotNull String accountId, @NotNull String licenseKey, @NotNull String databaseCity, @NotNull String databaseASN, boolean autoUpdate) throws IllegalArgumentException, IOException {
         this.accountId = accountId;
         this.licenseKey = licenseKey;
         this.directory = new File(dataFolder, "geoip");
@@ -71,7 +70,7 @@ public class IPDB implements AutoCloseable {
                 .locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
     }
 
-    private void updateMMDB(String databaseName, File target) throws IOException {
+    private void updateMMDB(@NotNull String databaseName, @NotNull File target) throws IOException {
         log.info(Lang.IPDB_UPDATING, databaseName);
         MutableRequest request = MutableRequest.GET("https://download.maxmind.com/geoip/databases/" + databaseName + "/download?suffix=tar.gz");
         Path tmp = Files.createTempFile("ipdb-mmdb-archive", ".tar.gz");
@@ -129,7 +128,7 @@ public class IPDB implements AutoCloseable {
     }
 
 
-    private boolean needUpdateMMDB(File target) {
+    private boolean needUpdateMMDB(@NotNull File target) {
         if (!target.exists()) {
             return true;
         }
@@ -140,7 +139,7 @@ public class IPDB implements AutoCloseable {
     }
 
 
-    private CompletableFuture<Void> downloadFile(MutableRequest req, Path path, String databaseName) {
+    private CompletableFuture<Void> downloadFile(@NotNull MutableRequest req, @NotNull Path path, @NotNull String databaseName) {
         return HTTPUtil.retryableSendProgressTracking(httpClient, req, HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {

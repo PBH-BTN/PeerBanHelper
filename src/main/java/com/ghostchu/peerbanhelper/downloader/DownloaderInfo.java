@@ -1,4 +1,9 @@
 package com.ghostchu.peerbanhelper.downloader;
 
-public record DownloaderInfo(String type, String endpoint, String version, String rpcVersion) {
+import org.jetbrains.annotations.NotNull;
+
+public record DownloaderInfo(@NotNull String type,
+                             @NotNull String endpoint,
+                             @NotNull String version,
+                             @NotNull String rpcVersion) {
 }

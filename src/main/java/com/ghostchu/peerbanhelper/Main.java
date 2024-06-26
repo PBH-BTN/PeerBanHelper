@@ -41,7 +41,6 @@ public class Main {
     @Getter
     private static File configDirectory;
     private static File pluginDirectory;
-    private static File libraryDirectory;
     @Getter
     private static BuildMeta meta = new BuildMeta();
     @Getter
@@ -116,7 +115,6 @@ public class Main {
         logsDirectory = new File(dataDirectory, "logs");
         configDirectory = new File(dataDirectory, "config");
         pluginDirectory = new File(dataDirectory, "plugins");
-        libraryDirectory = new File(dataDirectory, "libraries");
     }
 
     private static void setupLog4j2() {

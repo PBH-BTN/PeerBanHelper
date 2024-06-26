@@ -23,7 +23,7 @@ public class WatchDog {
     @Getter
     private String lastOperation = "N/A";
 
-    public WatchDog(String name, long timeout, @NotNull Runnable hungry, @Nullable Runnable good) {
+    public WatchDog(@NotNull String name, long timeout, @NotNull Runnable hungry, @Nullable Runnable good) {
         this.name = name;
         this.timeout = timeout;
         this.hungry = hungry;

@@ -264,7 +264,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         });
     }
 
-    public boolean openWebpage(URI uri) {
+    public boolean openWebpage(@NotNull URI uri) {
         Desktop desktop = Desktop.getDesktop();
         if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
             try {
@@ -320,7 +320,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
+    public void createDialog(@NotNull Level level, @NotNull String title, @NotNull String description) {
         Alert.AlertType alertType = Alert.AlertType.CONFIRMATION;
         if (level.equals(Level.WARNING)) {
             alertType = Alert.AlertType.WARNING;
@@ -339,7 +339,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createNotification(Level level, String title, String description) {
+    public void createNotification(@NotNull Level level, @NotNull String title, @NotNull String description) {
         Alert.AlertType alertType = Alert.AlertType.NONE;
         if (level.equals(Level.WARNING)) {
             alertType = Alert.AlertType.WARNING;

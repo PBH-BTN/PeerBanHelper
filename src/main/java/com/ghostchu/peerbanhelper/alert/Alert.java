@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.alert;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * 警告信息
  *
@@ -9,5 +11,9 @@ package com.ghostchu.peerbanhelper.alert;
  * @param level       警告等级
  * @param timestamp   时间戳
  */
-public record Alert(String id, String title, String description, AlertLevel level, long timestamp) {
+public record Alert(@NotNull String id,
+                    @NotNull String title,
+                    @NotNull String description,
+                    @NotNull AlertLevel level,
+                    long timestamp) {
 }

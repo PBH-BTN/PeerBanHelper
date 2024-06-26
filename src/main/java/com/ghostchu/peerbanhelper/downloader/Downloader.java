@@ -7,19 +7,23 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.gson.JsonObject;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
 public interface Downloader extends AutoCloseable {
-
+    @NotNull
     YamlConfiguration saveDownloader();
 
+    @NotNull
     JsonObject saveDownloaderJson();
 
+    @NotNull
     String getEndpoint();
 
+    @Nullable
     String getWebUIEndpoint();
 
     @Nullable
@@ -35,6 +39,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 用户定义名称
      */
+    @NotNull
     String getName();
 
     /**
@@ -42,6 +47,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 类型
      */
+    @NotNull
     String getType();
 
     /**
@@ -56,6 +62,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 返回所有活动的 Torrents
      */
+    @NotNull
     List<Torrent> getTorrents();
 
     /**
@@ -64,7 +71,8 @@ public interface Downloader extends AutoCloseable {
      * @param torrent Torrent
      * @return 对等体列表
      */
-    List<Peer> getPeers(Torrent torrent);
+    @NotNull
+    List<Peer> getPeers(@NotNull Torrent torrent);
 
 
     /**
@@ -74,7 +82,9 @@ public interface Downloader extends AutoCloseable {
      * @param added    新增列表
      * @param removed  移除列表
      */
-    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed);
+    void setBanList(@NotNull Collection<PeerAddress> fullList,
+                    @Nullable Collection<BanMetadata> added,
+                    @Nullable Collection<BanMetadata> removed);
 
     /**
      * 如有需要，重启 Torrent 任务
@@ -82,7 +92,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @param torrents Torrent 任务列表
      */
-    void relaunchTorrentIfNeeded(Collection<Torrent> torrents);
+    void relaunchTorrentIfNeeded(@NotNull Collection<Torrent> torrents);
 
     /**
      * 如有需要，重启 Torrent 任务
@@ -90,13 +100,14 @@ public interface Downloader extends AutoCloseable {
      *
      * @param torrents Torrent 任务列表
      */
-    void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents);
+    void relaunchTorrentIfNeededByTorrentWrapper(@NotNull Collection<TorrentWrapper> torrents);
 
     /**
      * 获取客户端最后一次请求的状态
      *
      * @return 最后请求状态
      */
+    @NotNull
     DownloaderLastStatus getLastStatus();
 
     /**
@@ -104,12 +115,13 @@ public interface Downloader extends AutoCloseable {
      *
      * @param lastStatus 最后请求状态
      */
-    void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage);
+    void setLastStatus(@NotNull DownloaderLastStatus lastStatus, @NotNull String statusMessage);
 
     /**
      * 获取客户端状态描述说明
      *
      * @return 状态描述说明
      */
+    @Nullable
     String getLastStatusMessage();
 }

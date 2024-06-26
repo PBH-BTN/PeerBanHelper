@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.maven.GeoUtil;
 import com.ghostchu.peerbanhelper.util.maven.MavenCentralMirror;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.nio.file.Files;
@@ -56,7 +57,7 @@ public class PBHLibrariesLoader {
         }
     }
 
-    public void loadLibraries(List<String> libraries, Map<String, String> env) throws RuntimeException {
+    public void loadLibraries(@NotNull List<String> libraries, @NotNull Map<String, String> env) throws RuntimeException {
         FlatIntelliJLaf.setup();
         CrossDownloaderDialog downloaderDialog = new CrossDownloaderDialog();
         downloaderDialog.setTitle(Lang.LIBRARIES_DOWNLOAD_DIALOG_TITLE);
@@ -80,7 +81,9 @@ public class PBHLibrariesLoader {
         }
     }
 
-    private void loadLibraries0(List<String> libraries, Map<String, String> env, ProgressCallback callbackConsumer) throws RuntimeException {
+    private void loadLibraries0(@NotNull List<String> libraries,
+                                @NotNull Map<String, String> env,
+                                @NotNull ProgressCallback callbackConsumer) throws RuntimeException {
         List<Library> libraryList = new ArrayList<>();
         int skipped = 0;
         for (String library : libraries) {

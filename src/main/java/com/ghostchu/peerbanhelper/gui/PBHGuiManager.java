@@ -2,10 +2,13 @@ package com.ghostchu.peerbanhelper.gui;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.logging.Level;
 
+@Slf4j
 public class PBHGuiManager implements GuiManager {
     private final GuiImpl gui;
 
@@ -49,13 +52,14 @@ public class PBHGuiManager implements GuiManager {
         gui.onPBHFullyStarted(server);
     }
 
+
     @Override
-    public void createNotification(Level level, String title, String description) {
+    public void createNotification(@NotNull Level level, @NotNull String title, @NotNull String description) {
         gui.createNotification(level, title, description);
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
+    public void createDialog(@NotNull Level level, @NotNull String title, @NotNull String description) {
         gui.createDialog(level, title, description);
     }
 }

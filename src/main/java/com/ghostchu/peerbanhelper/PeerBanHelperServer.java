@@ -161,7 +161,8 @@ public class PeerBanHelperServer {
         }
     }
 
-    public Downloader createDownloader(String client, ConfigurationSection downloaderSection) {
+    @Nullable
+    public Downloader createDownloader(@NotNull String client, @NotNull ConfigurationSection downloaderSection) {
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
@@ -173,7 +174,8 @@ public class PeerBanHelperServer {
 
     }
 
-    public Downloader createDownloader(String client, JsonObject downloaderSection) {
+    @Nullable
+    public Downloader createDownloader(@NotNull String client, @NotNull JsonObject downloaderSection) {
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
@@ -194,7 +196,7 @@ public class PeerBanHelperServer {
         mainConfig.save(Main.getMainConfigFile());
     }
 
-    public boolean registerDownloader(Downloader downloader) {
+    public boolean registerDownloader(@NotNull Downloader downloader) {
         if (this.downloaders.stream().anyMatch(d -> d.getName().equals(downloader.getName()))) {
             return false;
         }
@@ -202,7 +204,7 @@ public class PeerBanHelperServer {
         return true;
     }
 
-    public void unregisterDownloader(Downloader downloader) {
+    public void unregisterDownloader(@NotNull Downloader downloader) {
         this.downloaders.remove(downloader);
     }
 
@@ -461,8 +463,9 @@ public class PeerBanHelperServer {
         }
     }
 
-    private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided) {
-        List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
+    @NotNull
+    private List<BanDetail> checkBans(@NotNull Map<Torrent, List<Peer>> provided) {
+        List<BanDetail> details = new CopyOnWriteArrayList<>();
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
             log.warn(Lang.TIMING_CHECK_BANS);
         })) {
@@ -479,7 +482,7 @@ public class PeerBanHelperServer {
         return details;
     }
 
-    private void updateLivePeers(Map<Downloader, Map<Torrent, List<Peer>>> peers) {
+    private void updateLivePeers(@NotNull Map<Downloader, Map<Torrent, List<Peer>>> peers) {
         Map<PeerAddress, PeerMetadata> livePeers = new ConcurrentHashMap<>();
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.UPDATE_LIVE_PEERS.getTimeout(), (t) -> {
         })) {
@@ -528,6 +531,7 @@ public class PeerBanHelperServer {
      *
      * @return 当封禁条目过期时，移除它们（解封禁）
      */
+    @NotNull
     public Collection<BanMetadata> removeExpiredBans() {
         List<PeerAddress> removeBan = new ArrayList<>();
         List<BanMetadata> metadata = new ArrayList<>();
@@ -569,8 +573,9 @@ public class PeerBanHelperServer {
         moduleManager.register(new PBHLogsController(this, profile));
     }
 
+    @NotNull
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
-        Map<Downloader, Map<Torrent, List<Peer>>> peers = new HashMap<>();
+        Map<Downloader, Map<Torrent, List<Peer>>> peers = new ConcurrentHashMap<>();
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
             downloaders.forEach(downloader -> service.submit(() -> {
                 Map<Torrent, List<Peer>> p = collectPeers(downloader);
@@ -580,7 +585,8 @@ public class PeerBanHelperServer {
         return peers;
     }
 
-    public Map<Torrent, List<Peer>> collectPeers(Downloader downloader) {
+    @NotNull
+    public Map<Torrent, List<Peer>> collectPeers(@NotNull Downloader downloader) {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         if (!downloader.login()) {
             log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
@@ -608,7 +614,8 @@ public class PeerBanHelperServer {
         return peers;
     }
 
-    public IPDBResponse queryIPDB(PeerAddress address) {
+    @NotNull
+    public IPDBResponse queryIPDB(@NotNull PeerAddress address) {
         try {
             return geoIpCache.get(address.getIp(), () -> {
                 if (ipdb == null) {
@@ -637,7 +644,7 @@ public class PeerBanHelperServer {
         }
     }
 
-    private boolean isHandshaking(Peer peer) {
+    private boolean isHandshaking(@NotNull Peer peer) {
         if (peer.getPeerId() == null || peer.getPeerId().isEmpty()) {
             // 跳过此 Peer，PeerId 不能为空，此时只建立了连接，但还没有完成交换
             return true;
@@ -724,10 +731,12 @@ public class PeerBanHelperServer {
         Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
     }
 
+    @NotNull
     public String getWebUiUrl() {
         return "http://localhost:" + Main.getServer().getHttpdPort() + "/?token=" + UrlEncoderDecoder.encodePath(getWebContainer().getToken());
     }
 
+    @NotNull
     public List<Downloader> getDownloaders() {
         return ImmutableList.copyOf(downloaders);
     }

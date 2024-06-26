@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,7 +53,7 @@ public class ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createNotification(Level level, String title, String description) {
+    public void createNotification(@NotNull Level level, @NotNull String title, @NotNull String description) {
         if (level.equals(Level.INFO)) {
             log.info("{}: {}", title, description);
         }
@@ -65,7 +66,7 @@ public class ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
+    public void createDialog(@NotNull Level level, @NotNull String title, @NotNull String description) {
         if (level.equals(Level.INFO)) {
             log.info("{}: {}", title, description);
         }

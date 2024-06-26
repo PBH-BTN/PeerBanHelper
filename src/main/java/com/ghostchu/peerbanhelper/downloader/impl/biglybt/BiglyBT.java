@@ -55,7 +55,7 @@ public class BiglyBT implements Downloader {
     private String name;
     private String statusMessage;
 
-    public BiglyBT(String name, Config config) {
+    public BiglyBT(@NotNull String name, @NotNull Config config) {
         this.name = name;
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
@@ -80,23 +80,23 @@ public class BiglyBT implements Downloader {
         this.httpClient = builder.build();
     }
 
-    public static BiglyBT loadFromConfig(String name, JsonObject section) {
+    public static BiglyBT loadFromConfig(@NotNull String name, @NotNull JsonObject section) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
         return new BiglyBT(name, config);
     }
 
-    public static BiglyBT loadFromConfig(String name, ConfigurationSection section) {
+    public static BiglyBT loadFromConfig(@NotNull String name, @NotNull ConfigurationSection section) {
         Config config = Config.readFromYaml(section);
         return new BiglyBT(name, config);
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
@@ -105,7 +105,7 @@ public class BiglyBT implements Downloader {
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return apiEndpoint;
     }
 
@@ -130,12 +130,12 @@ public class BiglyBT implements Downloader {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "BiglyBT";
     }
 
@@ -159,7 +159,7 @@ public class BiglyBT implements Downloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         HttpResponse<String> request;
         try {
             request = httpClient.send(MutableRequest.GET(apiEndpoint + "/downloads?filter="
@@ -190,17 +190,17 @@ public class BiglyBT implements Downloader {
     }
 
     @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+    public void relaunchTorrentIfNeeded(@NotNull Collection<Torrent> torrents) {
 
     }
 
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
+    public void relaunchTorrentIfNeededByTorrentWrapper(@NotNull Collection<TorrentWrapper> torrents) {
 
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         HttpResponse<String> resp;
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/download/" + torrent.getId() + "/peers"),
@@ -264,12 +264,12 @@ public class BiglyBT implements Downloader {
     }
 
     @Override
-    public DownloaderLastStatus getLastStatus() {
+    public @NotNull DownloaderLastStatus getLastStatus() {
         return lastStatus;
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
+    public void setLastStatus(@NotNull DownloaderLastStatus lastStatus, @NotNull String statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }

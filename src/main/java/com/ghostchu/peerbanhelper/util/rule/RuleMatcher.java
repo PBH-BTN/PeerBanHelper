@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -23,13 +24,14 @@ public abstract class RuleMatcher<T> extends AbstractMatcher {
     @Setter
     private String ruleName;
 
-    public RuleMatcher(String ruleId, String ruleName, List<T> ruleData) {
+    public RuleMatcher(@NotNull String ruleId, @NotNull String ruleName, @NotNull List<T> ruleData) {
         this.ruleId = ruleId;
         setData(ruleName, ruleData);
     }
 
-    public abstract void setData(String ruleName, List<T> ruleData);
+    public abstract void setData(@NotNull String ruleName, @NotNull List<T> ruleData);
 
+    @NotNull
     public Map<String, Object> metadata() {
         return Map.of("id", ruleId, "rule", ruleName);
     }

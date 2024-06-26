@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.peer;
 
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface Peer extends Comparable<Peer> {
     /**
@@ -8,6 +10,7 @@ public interface Peer extends Comparable<Peer> {
      *
      * @return 地址包装器
      */
+    @NotNull
     PeerAddress getPeerAddress();
 
     /**
@@ -15,6 +18,7 @@ public interface Peer extends Comparable<Peer> {
      *
      * @return PeerId，示例：-qB4250-
      */
+    @Nullable
     String getPeerId();
 
     /**
@@ -22,7 +26,7 @@ public interface Peer extends Comparable<Peer> {
      *
      * @return 客户端名称，示例：qBittorrent/4.2.5
      */
-
+    @Nullable
     String getClientName();
 
     /**
@@ -67,6 +71,7 @@ public interface Peer extends Comparable<Peer> {
      *
      * @return Flag
      */
+    @Nullable
     String getFlags();
 
     @Override

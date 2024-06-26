@@ -1,4 +1,9 @@
 package com.ghostchu.peerbanhelper.downloader;
 
-public record DownloaderBasicAuth(String urlPrefix, String username, String password) {
+import org.jetbrains.annotations.NotNull;
+
+public record DownloaderBasicAuth(
+        @NotNull String urlPrefix,
+        @NotNull String username,
+        @NotNull String password) {
 }

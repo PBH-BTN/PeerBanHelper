@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Date;
 import java.sql.*;
@@ -18,7 +19,7 @@ public class DatabaseHelper {
     private final DatabaseManager manager;
     private final PeerBanHelperServer server;
 
-    public DatabaseHelper(PeerBanHelperServer server, DatabaseManager manager) throws SQLException {
+    public DatabaseHelper(@NotNull PeerBanHelperServer server, @NotNull DatabaseManager manager) throws SQLException {
         this.server = server;
         this.manager = manager;
         try {
@@ -56,7 +57,7 @@ public class DatabaseHelper {
 
     }
 
-    public int setMetadata(String key, String value) throws SQLException {
+    public int setMetadata(@NotNull String key, @NotNull String value) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             @Cleanup
             PreparedStatement ps = connection.prepareStatement("REPLACE INTO metadata (key, value) VALUES (?,?)");
@@ -66,7 +67,8 @@ public class DatabaseHelper {
         }
     }
 
-    public String getMetadata(String key) throws SQLException {
+    @NotNull
+    public String getMetadata(@NotNull String key) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             @Cleanup
             PreparedStatement ps = connection.prepareStatement("SELECT * FROM metadata WHERE `key` = ? LIMIT 1");
@@ -88,7 +90,8 @@ public class DatabaseHelper {
         }
     }
 
-    public List<BanLog> queryBanLogs(Date from, Date to, int pageIndex, int pageSize) throws SQLException {
+    @NotNull
+    public List<BanLog> queryBanLogs(@Nullable Date from, @Nullable Date to, int pageIndex, int pageSize) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
             if (from == null && to == null) {
@@ -132,6 +135,7 @@ public class DatabaseHelper {
         }
     }
 
+    @NotNull
     public Map<String, Long> findMaxBans(int n) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             @Cleanup
@@ -163,7 +167,7 @@ public class DatabaseHelper {
         }
     }
 
-    public int insertBanLogs(BanLog banLog) throws SQLException {
+    public int insertBanLogs(@NotNull BanLog banLog) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             @Cleanup
             PreparedStatement ps = connection.prepareStatement("INSERT INTO ban_logs (ban_at, unban_at, peer_ip, peer_port, peer_id, peer_clientname," +
@@ -326,7 +330,7 @@ public class DatabaseHelper {
      * @return 日志数量
      * @throws SQLException SQL异常
      */
-    public int countRuleSubLogs(String ruleId) throws SQLException {
+    public int countRuleSubLogs(@Nullable String ruleId) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
             boolean idNotEmpty = null != ruleId && !ruleId.isEmpty();
@@ -357,7 +361,8 @@ public class DatabaseHelper {
      * @return 日志列表
      * @throws SQLException SQL异常
      */
-    public List<RuleSubLog> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
+    @NotNull
+    public List<RuleSubLog> queryRuleSubLogs(@Nullable String ruleId, int pageIndex, int pageSize) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
             boolean idNotEmpty = null != ruleId && !ruleId.isEmpty();
@@ -393,7 +398,7 @@ public class DatabaseHelper {
      * @param updateType 更新类型
      * @throws SQLException SQL异常
      */
-    public void insertRuleSubLog(String ruleId, int count, IPBanRuleUpdateType updateType) throws SQLException {
+    public void insertRuleSubLog(@NotNull String ruleId, int count, @NotNull IPBanRuleUpdateType updateType) throws SQLException {
         try (Connection connection = manager.getConnection()) {
             PreparedStatement ps;
             ps = connection.prepareStatement("INSERT INTO rule_sub_logs (rule_id, update_time, ent_count, update_type) VALUES (?,?,?,?)");

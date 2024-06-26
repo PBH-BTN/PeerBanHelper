@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,7 +47,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         initLoggerRedirection();
     }
 
-    public boolean openWebpage(URI uri) {
+    public boolean openWebpage(@NotNull URI uri) {
         Desktop desktop = Desktop.getDesktop();
         if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
             try {
@@ -83,22 +84,10 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         });
     }
 
-
     @Override
     public void sync() {
         mainWindow.sync();
         super.sync();
-    }
-
-    public void setColorTheme(Class<?> clazz) {
-        if (clazz.getName().equals(UIManager.getLookAndFeel().getClass().getName()))
-            return;
-        try {
-            UIManager.setLookAndFeel(clazz.getName());
-        } catch (Exception ex) {
-            log.info("Failed to setup UI theme", ex);
-        }
-        // FlatLaf.updateUI();
     }
 
     @Override
@@ -106,7 +95,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
+    public void createDialog(@NotNull Level level, @NotNull String title, @NotNull String description) {
         int msgType = JOptionPane.PLAIN_MESSAGE;
         if (level == Level.INFO) {
             msgType = JOptionPane.INFORMATION_MESSAGE;
@@ -121,7 +110,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createNotification(Level level, String title, String description) {
+    public void createNotification(@NotNull Level level, @NotNull String title, @NotNull String description) {
         if (mainWindow.getTrayIcon() != null) {
             if (level.equals(Level.INFO)) {
                 mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.INFO);

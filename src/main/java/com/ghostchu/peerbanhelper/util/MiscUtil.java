@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util;
 import com.ghostchu.peerbanhelper.Main;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.net.URI;
@@ -26,7 +27,8 @@ public class MiscUtil {
         }
     }
 
-    public static List<File> recursiveReadFile(File fileOrDir) {
+    @NotNull
+    public static List<File> recursiveReadFile(@Nullable File fileOrDir) {
         List<File> files = new ArrayList<>();
         if (fileOrDir == null) {
             return files;
@@ -43,7 +45,8 @@ public class MiscUtil {
     }
 
     @SneakyThrows
-    public static List<File> readAllResFiles(String path) {
+    @NotNull
+    public static List<File> readAllResFiles(@NotNull String path) {
         List<File> files = new ArrayList<>();
         var urlEnumeration = Main.class.getClassLoader().getResources(path);
         while (urlEnumeration.hasMoreElements()) {
@@ -55,7 +58,8 @@ public class MiscUtil {
     }
 
     @SneakyThrows
-    public static File readResFile(String path) {
+    @Nullable
+    public static File readResFile(@NotNull String path) {
         var urlEnumeration = Main.class.getClassLoader().getResources(path);
         if (urlEnumeration.hasMoreElements()) {
             var url = urlEnumeration.nextElement();

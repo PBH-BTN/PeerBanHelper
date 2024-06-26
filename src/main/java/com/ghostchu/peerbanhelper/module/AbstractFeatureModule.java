@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +22,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Getter
     private boolean register;
 
-    public AbstractFeatureModule(PeerBanHelperServer server, YamlConfiguration profile) {
+    public AbstractFeatureModule(@NotNull PeerBanHelperServer server, @NotNull YamlConfiguration profile) {
         this.server = server;
         this.profile = profile;
     }
@@ -43,6 +45,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     public abstract boolean isConfigurable();
 
     @Override
+    @Nullable
     public ConfigurationSection getConfig() {
         if (!isConfigurable()) return null;
         ConfigurationSection section = Objects.requireNonNull(profile.getConfigurationSection("module")).getConfigurationSection(getConfigName());

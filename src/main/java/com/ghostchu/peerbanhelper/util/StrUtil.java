@@ -1,21 +1,27 @@
 package com.ghostchu.peerbanhelper.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Locale;
 
 public class StrUtil {
-    public static String toLowerCaseRoot(String str) {
+    @Nullable
+    public static String toLowerCaseRoot(@Nullable String str) {
+        if (str == null) return null;
         return str.toLowerCase(Locale.ROOT);
     }
 
-    public static String toUpperCaseRoot(String str) {
+    @Nullable
+    public static String toUpperCaseRoot(@Nullable String str) {
+        if (str == null) return null;
         return str.toUpperCase(Locale.ROOT);
     }
 
-    public static boolean isEmpty(String str) {
+    public static boolean isEmpty(@Nullable String str) {
         return str == null || str.isEmpty();
     }
 
-    public static boolean isBlank(String str) {
+    public static boolean isBlank(@Nullable String str) {
         return str == null || str.trim().isEmpty();
     }
 }

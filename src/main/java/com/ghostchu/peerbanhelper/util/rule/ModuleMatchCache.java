@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.eventbus.Subscribe;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +23,7 @@ public class ModuleMatchCache {
         Main.getEventBus().register(this);
     }
 
-    public boolean shouldSkipCheck(RuleFeatureModule module, Torrent torrent, PeerAddress peerAddress, boolean writeCache) {
+    public boolean shouldSkipCheck(@NotNull RuleFeatureModule module, @NotNull Torrent torrent, @NotNull PeerAddress peerAddress, boolean writeCache) {
         Wrapper wrapper = new Wrapper(torrent.getId(), peerAddress);
         Cache<Wrapper, Boolean> ruleCacheZone = CACHE_POOL.get(module);
         if (ruleCacheZone == null) {

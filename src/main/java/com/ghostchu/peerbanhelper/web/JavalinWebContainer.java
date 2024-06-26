@@ -22,7 +22,7 @@ public class JavalinWebContainer {
     @Getter
     private final String token;
 
-    public JavalinWebContainer(String host, int port, String token) {
+    public JavalinWebContainer(@NotNull String host, int port, @NotNull String token) {
         this.token = token;
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
@@ -91,6 +91,7 @@ public class JavalinWebContainer {
                 .start(host, port);
     }
 
+    @NotNull
     public Javalin javalin() {
         return javalin;
     }

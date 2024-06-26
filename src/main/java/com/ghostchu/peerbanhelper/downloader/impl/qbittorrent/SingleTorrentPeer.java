@@ -48,7 +48,7 @@ public class SingleTorrentPeer implements Peer {
     }
 
     @Override
-    public PeerAddress getPeerAddress() {
+    public @NotNull PeerAddress getPeerAddress() {
         if (this.peerAddress == null) {
             this.peerAddress = new PeerAddress(ip, port);
         }
