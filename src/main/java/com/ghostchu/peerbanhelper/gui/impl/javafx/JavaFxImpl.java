@@ -98,20 +98,22 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                         javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
                         selectionModel.select(webuiTab);
                         log.info(Lang.WEBVIEW_ENABLED);
-                        for (Downloader downloader : Main.getServer().getDownloaders()) {
-                            if (!downloader.isSupportWebview()) {
-                                continue;
+                        if (System.getProperty("pbh.enableDownloadWebView") != null) {
+                            for (Downloader downloader : Main.getServer().getDownloaders()) {
+                                if (!downloader.isSupportWebview()) {
+                                    continue;
+                                }
+                                DownloaderBasicAuth basicAuth = downloader.getDownloaderBasicAuth();
+                                Map<String, String> headers = new HashMap<>();
+                                if (basicAuth != null) {
+                                    String cred = Base64.getEncoder().encodeToString((basicAuth.username() + ":" + basicAuth.password()).getBytes(StandardCharsets.UTF_8));
+                                    headers.put("Authorization", "Basic " + cred);
+                                }
+                                JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(),
+                                        downloader.getName(),
+                                        downloader.getWebUIEndpoint(),
+                                        headers, downloader.getWebViewJavaScript());
                             }
-                            DownloaderBasicAuth basicAuth = downloader.getDownloaderBasicAuth();
-                            Map<String, String> headers = new HashMap<>();
-                            if (basicAuth != null) {
-                                String cred = Base64.getEncoder().encodeToString((basicAuth.username() + ":" + basicAuth.password()).getBytes(StandardCharsets.UTF_8));
-                                headers.put("Authorization", "Basic " + cred);
-                            }
-                            JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(),
-                                    downloader.getName(),
-                                    downloader.getWebUIEndpoint(),
-                                    headers, downloader.getWebViewJavaScript());
                         }
                     } else {
                         log.info(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED);

@@ -30,6 +30,7 @@
 
 * qBittorrent
 * Transmission **(3.00-20 或更高版本)**
+* BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
   
 ## 功能介绍
 
