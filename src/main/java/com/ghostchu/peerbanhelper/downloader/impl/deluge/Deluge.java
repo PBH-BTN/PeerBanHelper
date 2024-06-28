@@ -27,10 +27,7 @@ import raccoonfink.deluge.responses.PBHActiveTorrentsResponse;
 
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class Deluge implements Downloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Deluge.class);
@@ -148,7 +145,7 @@ public class Deluge implements Downloader {
                             peer.getTotalUpload(),
                             peer.getPayloadUpSpeed(),
                             peer.getProgress() / 100.0d,
-                            null
+                            parseFlag(peer.getFlags(), peer.getSource())
                     );
                     peers.add(delugePeer);
                 }
@@ -233,6 +230,135 @@ public class Deluge implements Downloader {
     @Override
     public void close() {
 
+    }
+
+    private String parseFlag(int peerFlag, int sourceFlag) {
+//        static constexpr peer_flags_t interesting  = 0_bit;
+//        static constexpr peer_flags_t choked  = 1_bit;
+//        static constexpr peer_flags_t remote_interested  = 2_bit;
+//        static constexpr peer_flags_t remote_choked  = 3_bit;
+//        static constexpr peer_flags_t supports_extensions  = 4_bit;
+//        static constexpr peer_flags_t outgoing_connection  = 5_bit;
+//        static constexpr peer_flags_t local_connection  = 5_bit;
+//        static constexpr peer_flags_t handshake  = 6_bit;
+//        static constexpr peer_flags_t connecting  = 7_bit;
+//        static constexpr peer_flags_t on_parole  = 9_bit;
+//        static constexpr peer_flags_t seed  = 10_bit;
+//        static constexpr peer_flags_t optimistic_unchoke  = 11_bit;
+//        static constexpr peer_flags_t snubbed  = 12_bit;
+//        static constexpr peer_flags_t upload_only  = 13_bit;
+//        static constexpr peer_flags_t endgame_mode  = 14_bit;
+//        static constexpr peer_flags_t holepunched  = 15_bit;
+//        static constexpr peer_flags_t i2p_socket  = 16_bit;
+//        static constexpr peer_flags_t utp_socket  = 17_bit;
+//        static constexpr peer_flags_t ssl_socket  = 18_bit;
+//        static constexpr peer_flags_t rc4_encrypted  = 19_bit;
+//        static constexpr peer_flags_t plaintext_encrypted  = 20_bit;
+//        static constexpr peer_source_flags_t tracker  = 0_bit;
+//        static constexpr peer_source_flags_t dht  = 1_bit;
+//        static constexpr peer_source_flags_t pex  = 2_bit;
+//        static constexpr peer_source_flags_t lsd  = 3_bit;
+//        static constexpr peer_source_flags_t resume_data  = 4_bit;
+//        static constexpr peer_source_flags_t incoming  = 5_bit;
+        String binPeerFlag = Integer.toBinaryString(peerFlag);
+        String binSourceFlag = Integer.toBinaryString(sourceFlag);
+        char[] peerFlags = binPeerFlag.toCharArray();
+        char[] sourceFlags = binSourceFlag.toCharArray();
+        boolean interesting = c2b(peerFlags[0]);
+        boolean choked = c2b(peerFlags[1]);
+        boolean remoteInterested = c2b(peerFlags[2]);
+        boolean remoteChoked = c2b(peerFlags[3]);
+        boolean supportsExtensions = c2b(peerFlags[4]);
+        boolean outgoingConnection = c2b(peerFlags[5]);
+        boolean localConnection = c2b(peerFlags[6]);
+        boolean handshake = c2b(peerFlags[7]);
+        boolean connecting = c2b(peerFlags[8]);
+        boolean onParole = c2b(peerFlags[9]);
+        boolean seed = c2b(peerFlags[10]);
+        boolean optimisticUnchoke = c2b(peerFlags[11]);
+        boolean snubbed = c2b(peerFlags[12]);
+        boolean uploadOnly = c2b(peerFlags[13]);
+        boolean endGameMode = c2b(peerFlags[14]);
+        boolean holePunched = c2b(peerFlags[15]);
+        boolean i2pSocket = c2b(peerFlags[16]);
+        boolean utpSocket = c2b(peerFlags[17]);
+        boolean sslSocket = c2b(peerFlags[18]);
+        boolean rc4Encrypted = c2b(peerFlags[19]);
+        boolean plainTextEncrypted = c2b(peerFlags[20]);
+        boolean tracker = c2b(sourceFlags[0]);
+        boolean dht = c2b(sourceFlags[1]);
+        boolean pex = c2b(sourceFlags[2]);
+        boolean lsd = c2b(sourceFlags[3]);
+        boolean resumeData = c2b(sourceFlags[4]);
+        boolean incoming = c2b(sourceFlags[5]);
+        StringJoiner joiner = new StringJoiner(" ");
+
+        if (interesting) {
+            if (remoteChoked) {
+                // d = Your client wants to download, but peer doesn't want to send (interested and choked)
+                joiner.add("d");
+            } else {
+                // D = Currently downloading (interested and not choked)
+                joiner.add("D");
+            }
+        }
+        if (remoteInterested) {
+            if (choked) {
+                // u = Peer wants your client to upload, but your client doesn't want to (interested and choked)
+                joiner.add("u");
+            } else {
+                // U = Currently uploading (interested and not choked)
+                joiner.add("U");
+            }
+        }
+        // K = Peer is unchoking your client, but your client is not interested
+        if (!remoteChoked && !interesting)
+            joiner.add("K");
+
+        // ? = Your client unchoked the peer but the peer is not interested
+        if (!choked && !remoteInterested)
+            joiner.add("?");
+
+        // O = Optimistic unchoke
+        if (optimisticUnchoke)
+            joiner.add("O");
+
+        // S = Peer is snubbed
+        if (snubbed)
+            joiner.add("S");
+
+        // I = Peer is an incoming connection
+        if (!localConnection)
+            joiner.add("I");
+
+        // H = Peer was obtained through DHT
+        if (dht)
+            joiner.add("H");
+
+        // X = Peer was included in peerlists obtained through Peer Exchange (PEX)
+        if (pex)
+            joiner.add("X");
+
+        // L = Peer is local
+        if (lsd)
+            joiner.add("L");
+
+        // E = Peer is using Protocol Encryption (all traffic)
+        if (rc4Encrypted)
+            joiner.add("E");
+
+        // e = Peer is using Protocol Encryption (handshake)
+        if (plainTextEncrypted)
+            joiner.add("e");
+
+        // P = Peer is using uTorrent uTP
+        if (utpSocket)
+            joiner.add("P");
+        return joiner.toString();
+    }
+
+    private boolean c2b(char c) {
+        return c == '1';
     }
 
     @NoArgsConstructor
