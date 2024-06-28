@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.downloader.impl.deluge.transmission;
+package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
