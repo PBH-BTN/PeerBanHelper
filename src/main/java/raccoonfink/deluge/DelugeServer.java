@@ -94,6 +94,9 @@ public class DelugeServer {
                                 java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             }
             connectionResponseCode = resp.statusCode();
+            if (connectionResponseCode != 200) {
+                throw new DelugeException(resp.statusCode() + " - " + resp.body());
+            }
             jsonResponse = new JSONObject(resp.body());
 //				List<String> setCookie = resp.headers().allValues("Set-Cookie");
 //				if(!setCookie.isEmpty()){

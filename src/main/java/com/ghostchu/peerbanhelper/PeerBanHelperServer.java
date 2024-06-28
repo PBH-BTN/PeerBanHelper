@@ -576,8 +576,12 @@ public class PeerBanHelperServer {
         Map<Downloader, Map<Torrent, List<Peer>>> peers = new HashMap<>();
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
             downloaders.forEach(downloader -> service.submit(() -> {
-                Map<Torrent, List<Peer>> p = collectPeers(downloader);
-                peers.put(downloader, p);
+                try {
+                    Map<Torrent, List<Peer>> p = collectPeers(downloader);
+                    peers.put(downloader, p);
+                } catch (Exception e) {
+                    log.warn(Lang.DOWNLOADER_UNHANDLED_EXCEPTION, e);
+                }
             }));
         }
         return peers;

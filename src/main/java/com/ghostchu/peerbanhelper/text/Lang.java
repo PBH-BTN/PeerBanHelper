@@ -272,8 +272,7 @@ public class Lang {
     public static final String COMMAND_EXECUTOR = "[CommandExecutor] 命令执行器正在执行系统终端命令：{}";
     public static final String COMMAND_EXECUTOR_FAILED = "[CommandExecutor] 系统终端命令执行失败：{}";
     public static final String COMMAND_EXECUTOR_FAILED_TIMEOUT = "[CommandExecutor] 系统终端命令执行超时：{}";
-
     public static final String DOWNLOADER_DELUGE_PLUGIN_NOT_INSTALLED = "无法登录到下载器 {}，此 Deluge 下载器必须正确加载 PeerBanHelper Deluge Adapter 扩展插件：https://github.com/PBH-BTN/PBH-Adapter-Deluge";
     public static final String DOWNLOADER_DELUGE_API_ERROR = "执行 Deluge RPC 调用失败，操作被忽略";
-
+    public static final String DOWNLOADER_UNHANDLED_EXCEPTION = "发生了一个未处理的异常，请反馈给 PeerBanHelper 开发者，此错误已被跳过……";
 }

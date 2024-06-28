@@ -260,8 +260,8 @@ public class Deluge implements Downloader {
 //        static constexpr peer_source_flags_t lsd  = 3_bit;
 //        static constexpr peer_source_flags_t resume_data  = 4_bit;
 //        static constexpr peer_source_flags_t incoming  = 5_bit;
-        String binPeerFlag = Integer.toBinaryString(peerFlag);
-        String binSourceFlag = Integer.toBinaryString(sourceFlag);
+        String binPeerFlag = readBits(peerFlag, 21);
+        String binSourceFlag = readBits(sourceFlag, 6);
         char[] peerFlags = binPeerFlag.toCharArray();
         char[] sourceFlags = binSourceFlag.toCharArray();
         boolean interesting = c2b(peerFlags[0]);
@@ -359,6 +359,15 @@ public class Deluge implements Downloader {
 
     private boolean c2b(char c) {
         return c == '1';
+    }
+
+    private String readBits(int i, int bitLength) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Integer.toBinaryString(i));
+        while (builder.length() < bitLength) {
+            builder.append("0");
+        }
+        return builder.toString();
     }
 
     @NoArgsConstructor
