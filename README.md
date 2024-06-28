@@ -351,6 +351,11 @@ server:
 * API 设置黑名单只能让 Transmission 请求 URL 更新，因此 PBH 需要打开一个 API 端点，且您需要保证 Transmission 能够访问到它（可在 config.yml 中配置细节）
 * API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。PBH 会短暂的暂停您的 Torrent 然后恢复它。
 
+### 为什么有些应该封禁的 Peers 没有封禁
+
+部分规则模块只会在对方和你有速度的时候才会封禁。如果速度为 0，PBH 可能会跳过一些检查以避免误判。  
+如果是 XunLei 0.0.1.9，新版迅雷下载过程中现在会正常上传，所以在配置文件中默认排除了。
+
 ## Install4j
 
 PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) 打包多平台安装程序。感谢 ej-technolgies 的开放源代码许可证。点击链接或者下面的图片下载 install4j。
