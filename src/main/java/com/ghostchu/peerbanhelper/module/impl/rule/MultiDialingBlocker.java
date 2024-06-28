@@ -92,7 +92,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
 
     @Override
     public boolean needCheckHandshake() {
-        return false;
+        return true;
     }
 
     @Override
