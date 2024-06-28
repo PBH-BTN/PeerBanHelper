@@ -485,5 +485,11 @@
             <artifactId>libby-standalone</artifactId> <!-- Replace bukkit if you're using another platform -->
             <version>2.0.2-SNAPSHOT</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
     </dependencies>
 </project>

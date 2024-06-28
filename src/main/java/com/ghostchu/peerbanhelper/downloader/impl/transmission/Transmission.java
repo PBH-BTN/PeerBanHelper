@@ -235,7 +235,7 @@ public class Transmission implements Downloader {
             }
             config.setUsername(section.getString("username"));
             config.setPassword(section.getString("password"));
-            config.setRpcUrl(section.getString("rpc-url", "transmission/rpc"));
+            config.setRpcUrl(section.getString("rpc-url", "/transmission/rpc"));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             return config;

@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
+import com.ghostchu.peerbanhelper.downloader.impl.deluge.transmission.Deluge;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
@@ -168,6 +169,7 @@ public class PeerBanHelperServer {
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
+            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
         }
         return downloader;
 
@@ -180,6 +182,7 @@ public class PeerBanHelperServer {
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
+            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
         }
         return downloader;
 
@@ -433,7 +436,7 @@ public class PeerBanHelperServer {
                             });
                         });
 
-                    needRelaunched.put(downloader, relaunch);
+                        needRelaunched.put(downloader, relaunch);
                     } catch (Exception e) {
                         log.error("Unable to complete peer ban task, report to PBH developer!!!");
                     }

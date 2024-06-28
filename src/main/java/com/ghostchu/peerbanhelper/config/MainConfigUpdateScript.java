@@ -26,6 +26,12 @@ public class MainConfigUpdateScript {
         }
     }
 
+    @UpdateScript(version = 9)
+    public void firewallIntegration() {
+        conf.set("firewall-integration", null);
+        conf.set("firewall-integration.windows-adv-firewall", true);
+    }
+
     @UpdateScript(version = 8)
     public void webToken() {
         conf.set("server.token", UUID.randomUUID().toString());
