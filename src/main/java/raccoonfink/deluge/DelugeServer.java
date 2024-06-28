@@ -105,7 +105,8 @@ public class DelugeServer {
         } catch (final IOException | JSONException e) {
             throw new DelugeException(e);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new DelugeException(e);
         }
         try {
             if (jsonResponse.has("error") && !jsonResponse.isNull("error")) {
