@@ -43,6 +43,8 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * 虚假进度检查器（提供启发式客户端检测功能）（Transmission不支持过量下载检测）
 * 主动探测
 * 自动 IP 段封禁
+* 多拨追猎
+* Peer ID/Client Name 伪装检查
 * WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP）
 
 ### PeerID 黑名单
