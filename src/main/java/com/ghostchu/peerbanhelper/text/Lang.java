@@ -269,4 +269,10 @@ public class Lang {
     public static final String DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED = "[错误] 向下载器请求增量封禁对等体时出现错误，请尝试在配置文件中关闭增量封禁(increment-ban)配置项";
     public static final String DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST = "无法保存 {} ({}) 的 Banlist！{} - {}\n{}";
     public static final String ALERT_INCORRECT_PROXY_SETTING = "警告！通过 HTTP_PROXY 环境变量无法为 Java 应用程序设置代理服务器！您的代理设置可能并不会生效。";
+    public static final String COMMAND_EXECUTOR = "[CommandExecutor] 命令执行器正在执行系统终端命令：{}";
+    public static final String COMMAND_EXECUTOR_FAILED = "[CommandExecutor] 系统终端命令执行失败：{}";
+    public static final String COMMAND_EXECUTOR_FAILED_TIMEOUT = "[CommandExecutor] 系统终端命令执行超时：{}";
+    public static final String DOWNLOADER_DELUGE_PLUGIN_NOT_INSTALLED = "无法登录到下载器 {}，此 Deluge 下载器必须正确加载 PeerBanHelper Deluge Adapter 扩展插件：https://github.com/PBH-BTN/PBH-Adapter-Deluge";
+    public static final String DOWNLOADER_DELUGE_API_ERROR = "执行 Deluge RPC 调用失败，操作被忽略";
+    public static final String DOWNLOADER_UNHANDLED_EXCEPTION = "发生了一个未处理的异常，请反馈给 PeerBanHelper 开发者，此错误已被跳过……";
 }

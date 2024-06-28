@@ -18,6 +18,7 @@ public class RestrictedExecutor {
             return new RestrictedExecResult<>(true, null);
         } catch (InterruptedException e) {
             log.warn("Thread Interrupted", e);
+            Thread.currentThread().interrupt();
             return new RestrictedExecResult<>(false, null);
         } catch (ExecutionException e) {
             throw new RuntimeException(e);

@@ -1,4 +1,4 @@
-config-version: 8
+config-version: 9
 # 客户端设置
 client:
   # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
@@ -135,11 +135,8 @@ ip-database:
   database-city: 'GeoLite2-City'
   # GeoIP-City 的数据库名称，默认使用免费版（GeoLite2-ASN），如果您购买了付费的数据库，可以自行替换
   database-asn: 'GeoLite2-ASN'
+# 系统防火墙集成设定
+# 允许不支持 WebAPI 封禁 Peers 的客户端，通过系统防火墙阻断 IP 地址
 firewall-integration:
-  order:
-    - "wf" # Windows Firewall
-    - "ipset" # ipset (Linux)
-    - "ufw" # ufw (Linux)
-    - "firewalld" # firewalld (Linux)
-    - "iptables" # iptables (Linux)
-
+  # 高级 Windows 防火墙（基于动态关键字），需要 Windows 10 或更高版本
+  windows-adv-firewall: true

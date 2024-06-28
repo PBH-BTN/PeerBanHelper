@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
+import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
@@ -168,6 +169,7 @@ public class PeerBanHelperServer {
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
+            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
         }
         return downloader;
 
@@ -180,6 +182,7 @@ public class PeerBanHelperServer {
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
+            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
         }
         return downloader;
 
@@ -433,7 +436,7 @@ public class PeerBanHelperServer {
                             });
                         });
 
-                    needRelaunched.put(downloader, relaunch);
+                        needRelaunched.put(downloader, relaunch);
                     } catch (Exception e) {
                         log.error("Unable to complete peer ban task, report to PBH developer!!!");
                     }
@@ -573,8 +576,12 @@ public class PeerBanHelperServer {
         Map<Downloader, Map<Torrent, List<Peer>>> peers = new HashMap<>();
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
             downloaders.forEach(downloader -> service.submit(() -> {
-                Map<Torrent, List<Peer>> p = collectPeers(downloader);
-                peers.put(downloader, p);
+                try {
+                    Map<Torrent, List<Peer>> p = collectPeers(downloader);
+                    peers.put(downloader, p);
+                } catch (Exception e) {
+                    log.warn(Lang.DOWNLOADER_UNHANDLED_EXCEPTION, e);
+                }
             }));
         }
         return peers;

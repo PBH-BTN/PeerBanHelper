@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>4.2.4</version>
+    <version>4.3.0</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -14,7 +14,7 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>com.ghostchu.peerbanhelper.Main</mainClass>
+        <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.4.1</flatlafVersion>
         <hutool.version>5.8.27</hutool.version>
@@ -484,6 +484,12 @@
             <groupId>com.ghostchu.lib.unofficial.com.alessiodp.libby</groupId>
             <artifactId>libby-standalone</artifactId> <!-- Replace bukkit if you're using another platform -->
             <version>2.0.2-SNAPSHOT</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
         </dependency>
     </dependencies>
 </project>
