@@ -18,7 +18,7 @@
 请选择您心仪的安装方式：
 
 | Docker/Docker Compose | Windows | Linux | 群晖DSM（Container Manager） |
-| --- | ---- | ---- |
+| --- | ---- | ---- | ---- |
 |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    | [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/%E7%BE%A4%E6%99%96%EF%BC%88Synology%EF%BC%89%E9%83%A8%E7%BD%B2) |
 
 ## 支持的客户端
