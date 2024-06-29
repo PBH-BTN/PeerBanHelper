@@ -4,7 +4,7 @@
 
 > [!NOTE]
 > PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知  
-> QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
+> QQ 交流群：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
 
 > [!TIP]
 > ❤ PeerBanHelper 是一个社区项目，由贡献者们共同建设。点击[此处](https://github.com/PBH-BTN/PeerBanHelper/graphs/contributors)查看所有一同共建 PeerBanHelper 社区的人们。
@@ -17,9 +17,9 @@
 
 请选择您心仪的安装方式：
 
-| Docker/Docker Compose | Windows | Linux |
+| Docker/Docker Compose | Windows | Linux | 群晖DSM（Container Manager） |
 | --- | ---- | ---- |
-|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |
+|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    | [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/%E7%BE%A4%E6%99%96%EF%BC%88Synology%EF%BC%89%E9%83%A8%E7%BD%B2) |
 
 ## 支持的客户端
 
