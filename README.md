@@ -339,7 +339,7 @@ server:
 
 ### Transmission 的有限支持
 
-由于 Transmission 有以下问题，因此支持是有限的
+由于 Transmission 有以下局限性，因此部分功能不可用
 
 * API 无法获取 PeerID，因此 PeerID 黑名单模块不起作用
 * API 无法获取客户端累计上传下载量，因此 ProgressCheatBlocker 的过量下载检测不起作用
