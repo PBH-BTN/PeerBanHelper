@@ -59,9 +59,6 @@ module:
       - '{"method":"STARTS_WITH","content":"-nx"}'
       - '{"method":"CONTAINS","content":"cacao"}'
 
-    # 排除列表
-    # 这些规则优先级更高，一旦匹配到任何一条，则直接跳过其他所有规则检查，并放行此 Peer
-    exclude-peer-id: [ ]
   # 客户端名称封禁
   client-name-blacklist:
     enabled: true
