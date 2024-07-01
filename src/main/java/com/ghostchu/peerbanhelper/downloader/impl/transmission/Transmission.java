@@ -243,7 +243,7 @@ public class Transmission implements Downloader {
 
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
-            section.set("type", "qbittorrent");
+            section.set("type", "transmission");
             section.set("endpoint", endpoint);
             section.set("username", username);
             section.set("password", password);
