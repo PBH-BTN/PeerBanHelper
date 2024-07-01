@@ -4,7 +4,7 @@
 
 > [!NOTE]
 > PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知  
-> QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
+> QQ 交流群：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
 
 > [!TIP]
 > ❤ PeerBanHelper 是一个社区项目，由贡献者们共同建设。点击[此处](https://github.com/PBH-BTN/PeerBanHelper/graphs/contributors)查看所有一同共建 PeerBanHelper 社区的人们。
@@ -17,20 +17,16 @@
 
 请选择您心仪的安装方式：
 
-| Docker/Docker Compose | Windows | Linux |
-| --- | ---- | ---- |
-|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |
-
-## 运行环境要求
-
-* 一台支持 OpenJDK 的设备，可为 JVM 预留 200MB 内存，PBH（无GUI模式）至少需要 72MB Heap 内存来运行（-Xmx72M），长期稳定运行建议分配 128MB~256MB Heap RAM
-* 由于 SQLite 数据库支持，CPU 架构需要是其中之一：aarch64, arm, armv6, armv7, ppc64, x86, x86_64，因此 riscv 等新兴 CPU 架构暂不兼容
+| Docker/Docker Compose | Windows | Linux | 群晖DSM（Container Manager） |
+| --- | ---- | ---- | ---- |
+|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    | [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/%E7%BE%A4%E6%99%96%EF%BC%88Synology%EF%BC%89%E9%83%A8%E7%BD%B2) |
 
 ## 支持的客户端
 
 * qBittorrent
 * Transmission **(3.00-20 或更高版本)**
 * BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
+* Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
   
 ## 功能介绍
 
@@ -42,6 +38,8 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * 虚假进度检查器（提供启发式客户端检测功能）（Transmission不支持过量下载检测）
 * 主动探测
 * 自动 IP 段封禁
+* 多拨追猎
+* Peer ID/Client Name 伪装检查
 * WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP）
 
 ### PeerID 黑名单
@@ -341,12 +339,17 @@ server:
 
 ### Transmission 的有限支持
 
-由于 Transmission 有以下问题，因此支持是有限的
+由于 Transmission 有以下局限性，因此部分功能不可用
 
 * API 无法获取 PeerID，因此 PeerID 黑名单模块不起作用
 * API 无法获取客户端累计上传下载量，因此 ProgressCheatBlocker 的过量下载检测不起作用
 * API 设置黑名单只能让 Transmission 请求 URL 更新，因此 PBH 需要打开一个 API 端点，且您需要保证 Transmission 能够访问到它（可在 config.yml 中配置细节）
 * API 设置黑名单时不会实时生效，必须使用某种手段使种子上已连接的对等体断开。PBH 会短暂的暂停您的 Torrent 然后恢复它。
+
+### 为什么有些应该封禁的 Peers 没有封禁
+
+部分规则模块只会在对方和你有速度的时候才会封禁。如果速度为 0，PBH 可能会跳过一些检查以避免误判。  
+如果是 XunLei 0.0.1.9，新版迅雷下载过程中现在会正常上传，所以在配置文件中默认排除了。
 
 ## Install4j
 
@@ -359,8 +362,7 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 * [Cordelia](https://github.com/bochkov/cordelia)
 * [IPAddress](https://github.com/seancfoley/IPAddress)
 * [YamlConfiguration](https://github.com/bspfsystems/YamlConfiguration)
-* [Guava](https://github.com/google/guava)
-* [Gson](https://github.com/google/gson)
-* [NanoHttpd](https://github.com/NanoHttpd/nanohttpd)
-* [Apache Commons Lang3](https://commons.apache.org/proper/commons-lang/)
-* [Slf4j](https://github.com/qos-ch/slf4j)
+* [libby](https://github.com/AlessioDP/libby)
+* [AviatorScript](https://github.com/killme2008/aviatorscript)
+* [javalin](https://javalin.io/)
+* [deluge-java](https://github.com/RangerRick/deluge-java)

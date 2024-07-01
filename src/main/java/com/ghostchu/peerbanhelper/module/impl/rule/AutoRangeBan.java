@@ -44,7 +44,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
 
     @Override
     public boolean needCheckHandshake() {
-        return false;
+        return true;
     }
 
     @Override
