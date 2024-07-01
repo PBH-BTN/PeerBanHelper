@@ -4,7 +4,7 @@
 
 > [!NOTE]
 > PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知  
-> QQ 交流群（临时）：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
+> QQ 交流群：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
 
 > [!TIP]
 > ❤ PeerBanHelper 是一个社区项目，由贡献者们共同建设。点击[此处](https://github.com/PBH-BTN/PeerBanHelper/graphs/contributors)查看所有一同共建 PeerBanHelper 社区的人们。
@@ -17,14 +17,9 @@
 
 请选择您心仪的安装方式：
 
-| Docker/Docker Compose | Windows | Linux |
-| --- | ---- | ---- |
-|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |
-
-## 运行环境要求
-
-* 一台支持 OpenJDK 的设备，可为 JVM 预留 200MB 内存，PBH（无GUI模式）至少需要 72MB Heap 内存来运行（-Xmx72M），长期稳定运行建议分配 128MB~256MB Heap RAM
-* 由于 SQLite 数据库支持，CPU 架构需要是其中之一：aarch64, arm, armv6, armv7, ppc64, x86, x86_64，因此 riscv 等新兴 CPU 架构暂不兼容
+| Docker/Docker Compose | Windows | Linux | 群晖DSM（Container Manager） |
+| --- | ---- | ---- | ---- |
+|  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Docker-%E9%83%A8%E7%BD%B2)   |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Windows-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    |  [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/Linux-%E6%89%8B%E5%8A%A8%E9%83%A8%E7%BD%B2)    | [查看](https://github.com/PBH-BTN/PeerBanHelper/wiki/%E7%BE%A4%E6%99%96%EF%BC%88Synology%EF%BC%89%E9%83%A8%E7%BD%B2) |
 
 ## 支持的客户端
 
@@ -344,7 +339,7 @@ server:
 
 ### Transmission 的有限支持
 
-由于 Transmission 有以下问题，因此支持是有限的
+由于 Transmission 有以下局限性，因此部分功能不可用
 
 * API 无法获取 PeerID，因此 PeerID 黑名单模块不起作用
 * API 无法获取客户端累计上传下载量，因此 ProgressCheatBlocker 的过量下载检测不起作用
@@ -367,8 +362,7 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 * [Cordelia](https://github.com/bochkov/cordelia)
 * [IPAddress](https://github.com/seancfoley/IPAddress)
 * [YamlConfiguration](https://github.com/bspfsystems/YamlConfiguration)
-* [Guava](https://github.com/google/guava)
-* [Gson](https://github.com/google/gson)
-* [NanoHttpd](https://github.com/NanoHttpd/nanohttpd)
-* [Apache Commons Lang3](https://commons.apache.org/proper/commons-lang/)
-* [Slf4j](https://github.com/qos-ch/slf4j)
+* [libby](https://github.com/AlessioDP/libby)
+* [AviatorScript](https://github.com/killme2008/aviatorscript)
+* [javalin](https://javalin.io/)
+* [deluge-java](https://github.com/RangerRick/deluge-java)
