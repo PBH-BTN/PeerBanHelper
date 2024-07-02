@@ -72,8 +72,7 @@ body:
   - type: 'textarea'
     attributes:
       label: '截图/日志文件'
-      description: |-
-        如果你有一些截图或者日志能够更好的解释你所提出的问题，你可以在这里上传。
+      description: '如果你有一些截图或者日志能够更好的解释你所提出的问题，你可以在这里上传。'
       placeholder: '<截图文件>'
     validations:
       required: false
