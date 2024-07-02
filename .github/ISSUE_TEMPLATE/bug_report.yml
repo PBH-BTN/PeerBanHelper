@@ -80,7 +80,7 @@ body:
     attributes:
       label: '额外信息'
       description: '如果你还有其他觉得可能对排查和解决此问题有帮助的更多信息，可以在这里告诉我们'
-      placeholder: ''
+      placeholder: '在此填写可能有用的额外信息...'
   - type: checkboxes
     id: check-list
     attributes:
