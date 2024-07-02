@@ -4,7 +4,6 @@ description: '报告与 PeerBanHelper 有关的程序错误'
 title: '[BUG] '
 labels:
   - 'Bug'
-
 body:
   - type: 'markdown'
     attributes:
