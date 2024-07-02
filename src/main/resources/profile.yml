@@ -160,7 +160,7 @@ module:
     subnet-mask-v6-length: 64
     # 容许同一网段下载同一种子的IP数量，正整数
     # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
-    tolerate-num: 3
+    tolerate-num: 6
     # 缓存持续时间（秒）
     # 所有连接过的peer会记入缓存，DHCP服务会定期重新分配IP，缓存时间过长会导致误杀
     cache-lifespan: 86400
