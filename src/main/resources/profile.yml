@@ -45,6 +45,7 @@ module:
       - '{"method":"STARTS_WITH","content":"-xl0019", hit: "FALSE"}' # 排除新版迅雷（会提供上传）
       - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"-hp"}'
+      - '{"method":"STARTS_WITH","content":"-xm"}'
       - '{"method":"STARTS_WITH","content":"-dt"}'
       - '{"method":"STARTS_WITH","content":"-gt0002"}'
       - '{"method":"STARTS_WITH","content":"-gt0003"}'
@@ -71,6 +72,7 @@ module:
       - '{"method":"STARTS_WITH","content":"hp"}'
       - '{"method":"STARTS_WITH","content":"dt/torrent"}'
       - '{"method":"STARTS_WITH","content":"dt"}'
+      - '{"method":"STARTS_WITH","content":"xm/torrent"}'
       - '{"method":"STARTS_WITH","content":"go.torrent"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"STARTS_WITH","content":"xfplay"}'
