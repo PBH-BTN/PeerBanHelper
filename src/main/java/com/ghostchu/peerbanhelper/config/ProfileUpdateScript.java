@@ -22,6 +22,15 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 9)
+    public void updateXmRules() {
+        List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
+        bannedPeerIds.add("{\"method\":\"STARTS_WITH\",\"content\":\"-xm\"}");
+        conf.set("module.peer-id-blacklist.banned-peer-id", bannedPeerIds);
+        List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");
+        bannedClientNames.add("{\"method\":\"STARTS_WITH\",\"content\":\"xm/torrent\"}");
+        conf.set("module.client-name-blacklist.banned-client-name", bannedClientNames);
+    }
     @UpdateScript(version = 8)
     public void bigUpdate() {
         conf.set("ignore-peers-from-addresses", List.of(

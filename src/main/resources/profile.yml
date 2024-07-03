@@ -1,4 +1,4 @@
-config-version: 8
+config-version: 9
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 更新 Peers UI 频率（单位：毫秒），此项仅用于显示数据，不影响封禁，建议设置一个不会给下载器增加太多压力的值
@@ -45,6 +45,7 @@ module:
       - '{"method":"STARTS_WITH","content":"-xl0019", hit: "FALSE"}' # 排除新版迅雷（会提供上传）
       - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"-hp"}'
+      - '{"method":"STARTS_WITH","content":"-xm"}'
       - '{"method":"STARTS_WITH","content":"-dt"}'
       - '{"method":"STARTS_WITH","content":"-gt0002"}'
       - '{"method":"STARTS_WITH","content":"-gt0003"}'
@@ -59,9 +60,6 @@ module:
       - '{"method":"STARTS_WITH","content":"-nx"}'
       - '{"method":"CONTAINS","content":"cacao"}'
 
-    # 排除列表
-    # 这些规则优先级更高，一旦匹配到任何一条，则直接跳过其他所有规则检查，并放行此 Peer
-    exclude-peer-id: [ ]
   # 客户端名称封禁
   client-name-blacklist:
     enabled: true
@@ -74,6 +72,7 @@ module:
       - '{"method":"STARTS_WITH","content":"hp"}'
       - '{"method":"STARTS_WITH","content":"dt/torrent"}'
       - '{"method":"STARTS_WITH","content":"dt"}'
+      - '{"method":"STARTS_WITH","content":"xm/torrent"}'
       - '{"method":"STARTS_WITH","content":"go.torrent"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"STARTS_WITH","content":"xfplay"}'
@@ -89,7 +88,6 @@ module:
       - '{"method":"STARTS_WITH","content":"ljyun.cn/hangzhou/monitoring"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"STARTS_WITH","content":"-XL"}'
-      #- "startsWith@aria2" # 冒充 Transmission 的 PeerId
   # 假进度检查
   # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。
   progress-cheat-blocker:
@@ -164,7 +162,7 @@ module:
     subnet-mask-v6-length: 64
     # 容许同一网段下载同一种子的IP数量，正整数
     # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
-    tolerate-num: 3
+    tolerate-num: 5
     # 缓存持续时间（秒）
     # 所有连接过的peer会记入缓存，DHCP服务会定期重新分配IP，缓存时间过长会导致误杀
     cache-lifespan: 86400
