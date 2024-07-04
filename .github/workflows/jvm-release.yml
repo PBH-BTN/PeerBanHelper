@@ -28,6 +28,7 @@ jobs:
           java-version: '21'
           cache: 'maven'
       - uses: luangong/setup-install4j@v1
+        name: Setup Install4j
         with:
           version: 10.0.8
           license: ${{ secrets.INSTALL4J_LICENSE }}
@@ -41,6 +42,12 @@ jobs:
             target/*.jar
             target/peerbanhelper-binary
             target/media/*.exe
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.4.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*"]'
         id: project
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
