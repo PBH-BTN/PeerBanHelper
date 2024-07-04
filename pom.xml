@@ -17,13 +17,16 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.4.1</flatlafVersion>
-        <hutool.version>5.8.27</hutool.version>
         <javafx.version>22.0.1</javafx.version>
         <javafx.scope>provided</javafx.scope>
-        <chromium.version>126.2.0</chromium.version>
-        <chromium.platform.version>126.2.0</chromium.platform.version>
-
+        <install4j.home>/opt/install4j</install4j.home>
     </properties>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>ej-technologies</id>
+            <url>https://maven.ej-technologies.com/repository</url>
+        </pluginRepository>
+    </pluginRepositories>
     <build>
         <pluginManagement>
             <plugins>
@@ -220,6 +223,42 @@
                 <groupId>io.takari.maven.plugins</groupId>
                 <artifactId>takari-lifecycle-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.install4j</groupId>
+                <artifactId>install4j-maven</artifactId>
+                <version>10.0.8</version>
+                <executions>
+                    <execution>
+                        <id>compile-installers</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <installDir>${install4j.home}</installDir>
+                            <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
+                            <variables>
+                                <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
+                            </variables>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                        <configuration>
+                            <outputProperty>pbh.classpath</outputProperty>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -304,6 +343,31 @@
             <id>include-javafx-jars</id>
             <properties>
                 <javafx.scope>compile</javafx.scope>
+            </properties>
+        </profile>
+        <profile>
+            <id>install4j-ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>install4j-dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <install4j.home>C:\Program Files\install4j10</install4j.home>
             </properties>
         </profile>
     </profiles>

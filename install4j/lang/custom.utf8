@@ -1,0 +1,6 @@
+launcher.peerbanhelper.gui=PeerBanHelper
+launcher.peerbanhelper.gui.swing=PeerBanHelper(兼容模式)
+launcher.peerbanhelper.nogui=PeerBanHelper(无GUI, 控制台)
+launcher.peerbanhelper.service=PeerBanHelper(服务)
+checkbox.followsystemstartup=登录时自动启动到系统托盘
+peerbanhelper.description=PeerBanHelper

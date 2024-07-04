@@ -1,0 +1,6 @@
+launcher.peerbanhelper.gui=PeerBanHelper
+launcher.peerbanhelper.gui.swing=PeerBanHelper(兼容模式)
+launcher.peerbanhelper.nogui=PeerBanHelper(无GUI, 控制台)
+launcher.peerbanhelper.service=PeerBanHelper(服务)
+checkbox.followsystemstartup=登录到桌面时自动启动
+peerbanhelper.description=一个能够自动封禁不受欢迎、吸血和异常的 Peers，并支持自定义规则的 BT 客户端辅助工具
