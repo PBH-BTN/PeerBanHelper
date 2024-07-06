@@ -458,19 +458,17 @@ public class PeerBanHelperServer {
     }
 
     private void updateLivePeers(Map<Downloader, Map<Torrent, List<Peer>>> peers) {
-        Map<PeerAddress, PeerMetadata> livePeers = new ConcurrentHashMap<>();
-        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.UPDATE_LIVE_PEERS.getTimeout(), (t) -> {
-        })) {
-            peers.forEach((downloader, tasks) ->
-                    tasks.forEach((torrent, peer) ->
-                            peer.forEach(p -> protect.getService().submit(() -> {
-                                PeerAddress address = p.getPeerAddress();
-                                PeerMetadata metadata = new PeerMetadata(
-                                        downloader.getName(),
-                                        torrent, p);
-                                livePeers.put(address, metadata);
-                            }))));
-        }
+        Map<PeerAddress, PeerMetadata> livePeers = new HashMap<>(128);
+        peers.forEach((downloader, tasks) ->
+                tasks.forEach((torrent, peer) ->
+                        peer.forEach(p -> {
+                                    PeerAddress address = p.getPeerAddress();
+                                    PeerMetadata metadata = new PeerMetadata(
+                                            downloader.getName(),
+                                            torrent, p);
+                                    livePeers.put(address, metadata);
+                                }
+                        )));
         LIVE_PEERS = ImmutableMap.copyOf(livePeers);
         Main.getEventBus().post(new LivePeersUpdatedEvent(LIVE_PEERS));
     }
