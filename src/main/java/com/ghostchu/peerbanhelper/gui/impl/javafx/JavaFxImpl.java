@@ -37,6 +37,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,14 +53,19 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private final boolean silentStart;
     private final String[] args;
     private final LinkedList<String> lines = new LinkedList<>();
+    private final ScheduledExecutorService LOGS_UPDATE_SERVICE = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
     private TrayIcon trayIcon;
+    private AtomicBoolean needUpdate = new AtomicBoolean(false);
+    private String logsBuffer;
 
     public JavaFxImpl(String[] args) {
         super(args);
         this.args = args;
         this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
         Main.getEventBus().register(this);
+        LOGS_UPDATE_SERVICE.scheduleWithFixedDelay(this::updateLogsContentPeriod, 0, 500, TimeUnit.MILLISECONDS);
     }
+
 
     private boolean isWebViewSupported() {
         try {
@@ -250,10 +259,27 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         for (String line : lines) {
             limitedText.append(line).append("\n");
         }
+        this.logsBuffer = limitedText.toString();
+        needUpdate.set(true);
+        updateLogsContent();
+    }
+
+    private void updateLogsContentPeriod() {
+        if (needUpdate.get()) {
+            updateLogsContent();
+        }
+    }
+
+
+    private void updateLogsContent() {
         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
         javafx.scene.control.TextArea textArea = controller.getLogsTextArea();
-        textArea.setText(String.join("\n", limitedText));
-        textArea.positionCaret(limitedText.length());
+        if (textArea.getSelection().getLength() < 1) {
+            textArea.setText(this.logsBuffer);
+            textArea.positionCaret(textArea.getLength());
+            textArea.setScrollTop(Double.MAX_VALUE);
+            needUpdate.set(false);
+        }
     }
 
     private void initLoggerRedirection() {
