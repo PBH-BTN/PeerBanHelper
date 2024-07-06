@@ -275,9 +275,11 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
         javafx.scene.control.TextArea textArea = controller.getLogsTextArea();
         if (textArea.getSelection().getLength() < 1) {
-            textArea.setText(this.logsBuffer);
-            textArea.positionCaret(textArea.getLength());
-            textArea.setScrollTop(Double.MAX_VALUE);
+            Platform.runLater(() -> {
+                textArea.setText(this.logsBuffer);
+                textArea.positionCaret(textArea.getLength());
+                textArea.setScrollTop(Double.MAX_VALUE);
+            });
             needUpdate.set(false);
         }
     }
