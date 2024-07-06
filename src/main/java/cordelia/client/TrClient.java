@@ -1,6 +1,5 @@
 package cordelia.client;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
@@ -64,7 +63,6 @@ public final class TrClient {
                 .newBuilder()
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(Main.getUserAgent())
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))

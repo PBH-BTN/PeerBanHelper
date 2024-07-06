@@ -45,7 +45,7 @@ public class BtnAbilityReconfigure implements BtnAbility {
         JsonObject reconfigure = ability.get("reconfigure").getAsJsonObject();
         if (!reconfigure.get("version").getAsString().equals(this.version)) {
             log.info(Lang.BTN_RECONFIGURING);
-            btnNetwork.getServer().setupBtn();
+            btnNetwork.configBtnNetwork();
         }
     }
 

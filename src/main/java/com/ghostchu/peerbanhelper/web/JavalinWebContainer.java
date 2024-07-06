@@ -12,18 +12,19 @@ import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 
 @Slf4j
+@Component
 public class JavalinWebContainer {
     private final Javalin javalin;
     @Getter
-    private final String token;
+    private String token;
 
-    public JavalinWebContainer(String host, int port, String token) {
-        this.token = token;
+    public JavalinWebContainer() {
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
             public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
@@ -87,8 +88,13 @@ public class JavalinWebContainer {
                     }
                     throw new NotLoggedInException();
                 })
-                .options("/*", ctx -> ctx.status(200))
-                .start(host, port);
+                .options("/*", ctx -> ctx.status(200));
+
+    }
+
+    public void start(String host, int port, String token) {
+        this.token = token;
+        javalin.start(host, port);
     }
 
     public Javalin javalin() {

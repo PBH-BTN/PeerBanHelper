@@ -44,12 +44,12 @@ import java.util.regex.Pattern;
 @Getter
 @Slf4j
 public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
+    private static final int MAX_LINES = 300;
     @Getter
     private final boolean silentStart;
     private final String[] args;
-    private TrayIcon trayIcon;
-    private static final int MAX_LINES = 300;
     private final LinkedList<String> lines = new LinkedList<>();
+    private TrayIcon trayIcon;
 
     public JavaFxImpl(String[] args) {
         super(args);
@@ -209,10 +209,12 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         controller.getMenuProgramCopyWebuiToken().setText(Lang.GUI_COPY_WEBUI_TOKEN);
         controller.getMenuProgramCopyWebuiToken().setOnAction(e -> {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            String content = Main.getServer().getWebContainer().getToken();
-            Transferable ts = new StringSelection(content);
-            clipboard.setContents(ts, null);
-            createDialog(Level.INFO, Lang.GUI_COPY_TO_CLIPBOARD_TITLE, String.format(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content));
+            if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
+                String content = Main.getServer().getWebContainer().getToken();
+                Transferable ts = new StringSelection(content);
+                clipboard.setContents(ts, null);
+                createDialog(Level.INFO, Lang.GUI_COPY_TO_CLIPBOARD_TITLE, String.format(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content));
+            }
         });
         controller.getMenuProgramOpenDataDirectory().setText(Lang.GUI_MENU_OPEN_DATA_DIRECTORY);
         controller.getMenuProgramOpenDataDirectory().setOnAction(e -> {

@@ -1,22 +1,42 @@
 package com.ghostchu.peerbanhelper.module;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@Component
 public class ModuleManager {
     private final List<FeatureModule> modules = new ArrayList<>();
 
     /**
      * 注册一个功能模块并启用它
      *
+     * @param moduleClass 功能模块
+     */
+    public void register(@NotNull Class<? extends FeatureModule> moduleClass) {
+        Main.registerBean(moduleClass, null);
+        FeatureModule module = Main.getApplicationContext().getBean(moduleClass);
+        if (module.isModuleEnabled()) {
+            synchronized (modules) {
+                this.modules.add(module);
+                module.enable();
+            }
+        }
+    }
+
+    /**
+     * 注册一个功能模块并启用它
+     *
      * @param module 功能模块
      */
-    public void register(@NotNull FeatureModule module) {
+    public void register(@NotNull FeatureModule module, String beanName) {
+        Main.registerBean(module.getClass(), beanName);
         if (module.isModuleEnabled()) {
             synchronized (modules) {
                 this.modules.add(module);

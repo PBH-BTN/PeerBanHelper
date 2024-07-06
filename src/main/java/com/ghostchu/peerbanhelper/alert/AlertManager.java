@@ -3,11 +3,13 @@ package com.ghostchu.peerbanhelper.alert;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.NewAlertCreated;
 import com.google.common.collect.ImmutableList;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class AlertManager {
     private Map<String, Alert> alerts = new ConcurrentHashMap<>();
 

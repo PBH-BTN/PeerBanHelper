@@ -3,16 +3,15 @@ package com.ghostchu.peerbanhelper.database;
 import com.ghostchu.peerbanhelper.Main;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
+@Component
 public class DatabaseManager {
     private HikariDataSource ds;
-    private final ScheduledExecutorService cleanupService = Executors.newScheduledThreadPool(1);
 
     public DatabaseManager() {
         File databaseDirectory = new File(Main.getDataDirectory(), "persist");

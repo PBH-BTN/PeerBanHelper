@@ -1,13 +1,13 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -15,8 +15,9 @@ import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,7 +29,9 @@ import java.util.concurrent.TimeUnit;
  * 同一网段集中下载同一个种子视为多拨，因为多拨和PCDN强相关所以可以直接封禁
  */
 @Slf4j
+@Component
 public class MultiDialingBlocker extends AbstractRuleFeatureModule {
+    private static final CheckResult CHECK_RESULT_NO_BAN_LIST_CHANGES = new CheckResult(AutoRangeBan.class, PeerAction.NO_ACTION, "N/A", "Banned peers list had no changes since last time check");
     // 计算缓存容量
     private static final int TORRENT_PEER_MAX_NUM = 1024;
     private static final int PEER_MAX_NUM_PER_SUBNET = 16;
@@ -39,15 +42,12 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     private long cacheLifespan;
     private boolean keepHunting;
     private long keepHuntingTime;
-
-    public MultiDialingBlocker(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
-
+    @Autowired
+    private JavalinWebContainer webContainer;
     @Override
     public void onEnable() {
         reloadConfig();
-        getServer().getWebContainer().javalin()
+        webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
                 .get("/api/modules/" + getConfigName() + "/status", this::handleStatus, Role.USER_READ);
     }
@@ -83,16 +83,6 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     @Override
     public @NotNull String getConfigName() {
         return "multi-dialing-blocker";
-    }
-
-    @Override
-    public boolean isCheckCacheable() {
-        return false;
-    }
-
-    @Override
-    public boolean needCheckHandshake() {
-        return true;
     }
 
     @Override
@@ -133,8 +123,11 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     }
 
     @Override
-    public @NotNull BanResult shouldBanPeer(
+    public @NotNull CheckResult shouldBanPeer(
             @NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+        if (isHandShaking(peer)) {
+            return handshaking();
+        }
         String torrentName = torrent.getName();
         String torrentId = torrent.getId();
         IPAddress peerAddress = peer.getPeerAddress().getAddress();
@@ -154,7 +147,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                 // 落库
                 huntingList.put(torrentSubnetStr, currentTimestamp);
                 // 返回当前IP即可，其他IP会在下一周期被封禁
-                return new BanResult(this, PeerAction.BAN, "Multi-dialing download detected",
+                return new CheckResult(getClass(), PeerAction.BAN, "Multi-dialing download detected",
                         String.format(Lang.MODULE_MDB_MULTI_DIALING_DETECTED,
                                 peerSubnet, peerIpStr));
             }
@@ -167,7 +160,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                         if (currentTimestamp - huntingTimestamp < keepHuntingTime) {
                             // 落库
                             huntingList.put(torrentSubnetStr, currentTimestamp);
-                            return new BanResult(this, PeerAction.BAN, "Multi-dialing hunting",
+                            return new CheckResult(getClass(), PeerAction.BAN, "Multi-dialing hunting",
                                     String.format(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED,
                                             peerSubnet, peerIpStr));
                         } else {
@@ -181,7 +174,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
             log.error("shouldBanPeer exception", e);
         }
 
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A",
+        return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A",
                 String.format(Lang.MODULE_MDB_MULTI_DIALING_NOT_DETECTED, torrentName));
     }
 

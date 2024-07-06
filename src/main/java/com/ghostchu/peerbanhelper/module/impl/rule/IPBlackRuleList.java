@@ -1,12 +1,11 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.RuleSubInfo;
 import com.ghostchu.peerbanhelper.database.RuleSubLog;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
@@ -25,8 +24,9 @@ import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,33 +47,19 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * IP黑名单远程订阅模块
  */
-@Getter
 @Slf4j
+@Component
+@Getter
 public class IPBlackRuleList extends AbstractRuleFeatureModule {
-
-    final private DatabaseHelper db;
+    @Autowired
+    private DatabaseHelper db;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private ScheduledExecutorService scheduledExecutorService;
 
-    public IPBlackRuleList(PeerBanHelperServer server, YamlConfiguration profile, DatabaseHelper db) {
-        super(server, profile);
-        this.db = db;
-    }
-
     @Override
     public boolean isConfigurable() {
         return true;
-    }
-
-    @Override
-    public boolean isCheckCacheable() {
-        return true;
-    }
-
-    @Override
-    public boolean needCheckHandshake() {
-        return false;
     }
 
     @Override
@@ -100,34 +86,36 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
     }
 
     @Override
-    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        long t1 = System.currentTimeMillis();
-        String ip = peer.getPeerAddress().getIp();
-        List<IPBanResult> results = new ArrayList<>();
-        try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
-            ipBanMatchers.forEach(rule -> service.submit(() -> {
-                results.add(new IPBanResult(rule.getRuleName(), rule.match(ip)));
-            }));
-        }
-        AtomicReference<IPBanResult> matchRule = new AtomicReference<>();
-        boolean mr = results.stream().anyMatch(ipBanResult -> {
-            try {
-                boolean match = ipBanResult.matchResult() == MatchResult.TRUE;
-                if (match) {
-                    matchRule.set(ipBanResult);
-                }
-                return match;
-            } catch (Exception e) {
-                log.error(Lang.IP_BAN_RULE_MATCH_ERROR, e);
-                return false;
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+        return (CheckResult) getCache().readCache(this, peer.getPeerAddress().getIp(), () -> {
+            long t1 = System.currentTimeMillis();
+            String ip = peer.getPeerAddress().getIp();
+            List<IPBanResult> results = new ArrayList<>();
+            try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
+                ipBanMatchers.forEach(rule -> service.submit(() -> {
+                    results.add(new IPBanResult(rule.getRuleName(), rule.match(ip)));
+                }));
             }
-        });
-        long t2 = System.currentTimeMillis();
-        log.debug(Lang.IP_BAN_RULE_MATCH_TIME, t2 - t1);
-        if (mr) {
-            return new BanResult(this, PeerAction.BAN, ip, String.format(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName()));
-        }
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "No matches");
+            AtomicReference<IPBanResult> matchRule = new AtomicReference<>();
+            boolean mr = results.stream().anyMatch(ipBanResult -> {
+                try {
+                    boolean match = ipBanResult.matchResult() == MatchResult.TRUE;
+                    if (match) {
+                        matchRule.set(ipBanResult);
+                    }
+                    return match;
+                } catch (Exception e) {
+                    log.error(Lang.IP_BAN_RULE_MATCH_ERROR, e);
+                    return false;
+                }
+            });
+            long t2 = System.currentTimeMillis();
+            log.debug(Lang.IP_BAN_RULE_MATCH_TIME, t2 - t1);
+            if (mr) {
+                return new CheckResult(getClass(), PeerAction.BAN, ip, String.format(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName()));
+            }
+            return pass();
+        }, true);
     }
 
     /**

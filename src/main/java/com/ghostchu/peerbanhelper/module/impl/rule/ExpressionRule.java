@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -26,10 +26,9 @@ import com.googlecode.aviator.exception.TimeoutException;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -50,40 +49,26 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
+@Component
 public class ExpressionRule extends AbstractRuleFeatureModule {
     private final long maxScriptExecuteTime = 1500;
     private Map<Expression, ExpressionMetadata> expressions = new HashMap<>();
-    private Cache<String, Map<String, Optional<BanResult>>> cacheMap = CacheBuilder.newBuilder()
+    private Cache<String, Map<String, Optional<CheckResult>>> cacheMap = CacheBuilder.newBuilder()
             .expireAfterAccess(3, TimeUnit.MINUTES)
             .maximumSize(2000)
             .softValues()
             .build();
-
-    public ExpressionRule(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
 
     @Override
     public boolean isConfigurable() {
         return true;
     }
 
-    @Override
-    public boolean isCheckCacheable() {
-        return false;
-    }
-
-    @Override
-    public boolean needCheckHandshake() {
-        return true;
-    }
-
-
     @Nullable
-    public BanResult handleResult(Expression expression, Object returns) {
+    public CheckResult handleResult(Expression expression, Object returns) {
         if (returns instanceof Boolean status) {
             if (status) {
-                return new BanResult(this, PeerAction.BAN, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.BAN, "User Rule", expressions.get(expression).name());
             }
             return null;
         }
@@ -92,19 +77,19 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             if (i == 0) {
                 return null;
             } else if (i == 1) {
-                return new BanResult(this, PeerAction.BAN, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.BAN, "User Rule", expressions.get(expression).name());
             } else if (i == 2) {
-                return new BanResult(this, PeerAction.SKIP, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.SKIP, "User Rule", expressions.get(expression).name());
             } else {
                 log.warn(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
                 return null;
             }
         }
         if (returns instanceof PeerAction action) {
-            return new BanResult(this, action, "User Rule", expressions.get(expression).name());
+            return new CheckResult(getClass(), action, "User Rule", expressions.get(expression).name());
         }
-        if (returns instanceof BanResult banResult) {
-            return banResult;
+        if (returns instanceof CheckResult checkResult) {
+            return checkResult;
         }
         log.warn(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
         return null;
@@ -131,13 +116,13 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
 
     @SneakyThrows
     @Override
-    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         String cacheKey = peer.getCacheKey();
 
         for (Expression expression : expressions.keySet()) {
             ExpressionMetadata expressionMetadata = expressions.get(expression);
-            Map<String, Optional<BanResult>> cached = cacheMap.get(cacheKey, HashMap::new);
-            BanResult result;
+            Map<String, Optional<CheckResult>> cached = cacheMap.get(cacheKey, HashMap::new);
+            CheckResult result;
             if (cached.containsKey(expressionMetadata.name())) {
                 result = cached.get(expressionMetadata.name()).orElse(null);
             } else {
@@ -166,7 +151,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                 return result;
             }
         }
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "All ok!");
+        return pass();
     }
 
     @Override
@@ -210,7 +195,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         expressions.clear();
         initScripts();
         log.info(Lang.MODULE_EXPRESSION_RULE_COMPILING);
-        ConfigurationSection section = getConfig().getConfigurationSection("rules");
         long start = System.currentTimeMillis();
         Map<Expression, ExpressionMetadata> userRules = new ConcurrentHashMap<>();
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -235,8 +219,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                     });
                 }
             }
-
-
         }
         expressions = ImmutableMap.copyOf(userRules);
         log.info(Lang.MODULE_EXPRESSION_RULE_COMPILED, expressions.size(), System.currentTimeMillis() - start);
@@ -246,6 +228,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         try (BufferedReader reader = new BufferedReader(new StringReader(scriptContent))) {
             String name = fallbackName;
             String author = "Unknown";
+            String version = "null";
             boolean cacheable = true;
             while (true) {
                 String line = reader.readLine();
@@ -260,16 +243,18 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                         author = line.substring(7).trim();
                     } else if (line.startsWith("@CACHEABLE")) {
                         cacheable = Boolean.parseBoolean(line.substring(10).trim());
+                    } else if (line.startsWith("@VERSION")) {
+                        version = line.substring(8).trim();
                     }
                 }
             }
-            return new ExpressionMetadata(name, author, cacheable, scriptContent);
+            return new ExpressionMetadata(name, author, cacheable, version, scriptContent);
         } catch (IOException e) {
-            return new ExpressionMetadata("Failed to parse name", "Unknown", true, scriptContent);
+            return new ExpressionMetadata("Failed to parse name", "Unknown", true, "null", scriptContent);
         }
     }
 
-    private void initScripts() throws IOException, URISyntaxException {
+    private void initScripts() throws IOException {
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
         if (scriptDir.exists()) {
             return;
@@ -290,6 +275,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
 
     }
 
-    record ExpressionMetadata(String name, String author, boolean cacheable, String script) {
+    record ExpressionMetadata(String name, String author, boolean cacheable, String version, String script) {
     }
 }

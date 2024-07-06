@@ -1,10 +1,10 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -13,8 +13,9 @@ import com.google.gson.JsonParser;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,11 +23,10 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
+@Component
 public class PBHDownloaderController extends AbstractFeatureModule {
-    public PBHDownloaderController(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
-
+    @Autowired
+    private JavalinWebContainer webContainer;
     @Override
     public boolean isConfigurable() {
         return false;
@@ -44,7 +44,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getWebContainer().javalin()
+        webContainer.javalin()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
                 .put("/api/downloaders", this::handleDownloaderPut, Role.USER_WRITE)
                 .patch("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPatch(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)

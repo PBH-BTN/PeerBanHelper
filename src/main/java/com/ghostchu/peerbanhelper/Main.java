@@ -20,6 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.core.config.plugins.util.PluginManager;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.awt.*;
 import java.io.File;
@@ -35,6 +40,8 @@ import java.util.logging.Level;
 @Slf4j
 public class Main {
     @Getter
+    private static final EventBus eventBus = new EventBus();
+    @Getter
     private static File dataDirectory;
     @Getter
     private static File logsDirectory;
@@ -43,13 +50,9 @@ public class Main {
     private static File pluginDirectory;
     private static File libraryDirectory;
     @Getter
-    private static BuildMeta meta = new BuildMeta();
-    @Getter
     private static PeerBanHelperServer server;
     @Getter
     private static PBHGuiManager guiManager;
-    @Getter
-    private static final EventBus eventBus = new EventBus();
     @Getter
     private static File mainConfigFile;
     @Getter
@@ -58,32 +61,49 @@ public class Main {
     private static LibraryManager libraryManager;
     @Getter
     private static PBHLibrariesLoader librariesLoader;
+    @Getter
+    private static AnnotationConfigApplicationContext applicationContext;
+    @Getter
+    private static String pbhServerAddress;
+    @Getter
+    private static YamlConfiguration mainConfig;
+    @Getter
+    private static YamlConfiguration profileConfig;
+    @Getter
+    private static BuildMeta meta;
 
     public static void main(String[] args) {
         setupConfDirectory(args);
         setupLog4j2();
         setupProxySettings();
+        Path librariesPath = dataDirectory.toPath().toAbsolutePath().resolve("libraries");
         libraryManager = new PBHLibraryManager(
                 new Slf4jLogAppender(),
-                dataDirectory.toPath(), "libraries"
+                Main.getDataDirectory().toPath(), "libraries"
         );
-        Path librariesPath = dataDirectory.toPath().toAbsolutePath().resolve("libraries");
         libraryManager.setLogLevel(LogLevel.ERROR);
         librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath);
-        initBuildMeta();
+        meta = buildMeta();
         initGUI(args);
         setupConfiguration();
         guiManager.createMainWindow();
-
         mainConfigFile = new File(configDirectory, "config.yml");
-        YamlConfiguration mainConfig = loadConfiguration(mainConfigFile);
+        mainConfig = loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));
         profileConfigFile = new File(configDirectory, "profile.yml");
-        YamlConfiguration profileConfig = loadConfiguration(profileConfigFile);
+        profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
-        String pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
+        pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         try {
-            server = new PeerBanHelperServer(pbhServerAddress, profileConfig, mainConfig);
+            applicationContext = new AnnotationConfigApplicationContext();
+            applicationContext.register(AppConfig.class);
+            applicationContext.refresh();
+            registerBean(File.class, mainConfigFile, "mainConfigFile");
+            registerBean(File.class, profileConfigFile, "profileConfigFile");
+            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
+            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
+            server = applicationContext.getBean(PeerBanHelperServer.class);
+            server.start();
         } catch (Exception e) {
             log.error(Lang.BOOTSTRAP_FAILED, e);
             throw new RuntimeException(e);
@@ -151,6 +171,23 @@ public class Main {
         }
     }
 
+    private static BuildMeta buildMeta() {
+        var meta = new BuildMeta();
+        try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
+            if (stream == null) {
+                log.error(Lang.ERR_BUILD_NO_INFO_FILE);
+            } else {
+                String str = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+                YamlConfiguration configuration = new YamlConfiguration();
+                configuration.loadFromString(str);
+                meta.loadBuildMeta(configuration);
+            }
+        } catch (IOException | InvalidConfigurationException e) {
+            log.error(Lang.ERR_CANNOT_LOAD_BUILD_INFO, e);
+        }
+        return meta;
+    }
+
     private static void setupShutdownHook() {
         Thread shutdownThread = new Thread(() -> {
             try {
@@ -192,6 +229,10 @@ public class Main {
         guiManager.setup();
     }
 
+    public static String getUserAgent() {
+        return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.0-dev";
+    }
+
     private static boolean loadJavaFxDependencies() throws IOException {
         try (var is = Main.class.getResourceAsStream("/libraries/javafx.maven")) {
             String str = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
@@ -204,32 +245,17 @@ public class Main {
                 sysArch = "mac";
             }
             try {
-                librariesLoader.loadLibraries(Arrays.stream(libraries).toList(), Map.of("system.platform", sysArch, "javafx.version", meta.getJavafx()));
+                librariesLoader.loadLibraries(Arrays.stream(libraries).toList(),
+                        Map.of("system.platform", sysArch, "javafx.version",
+                                Main.getMeta().getJavafx()));
                 return true;
             } catch (Exception e) {
                 log.warn("Unable to load JavaFx dependencies", e);
                 return false;
             }
         }
-
     }
 
-    private static void initBuildMeta() {
-        meta = new BuildMeta();
-        try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
-            if (stream == null) {
-                log.error(Lang.ERR_BUILD_NO_INFO_FILE);
-            } else {
-                String str = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-                YamlConfiguration configuration = new YamlConfiguration();
-                configuration.loadFromString(str);
-                meta.loadBuildMeta(configuration);
-            }
-        } catch (IOException | InvalidConfigurationException e) {
-            log.error(Lang.ERR_CANNOT_LOAD_BUILD_INFO, e);
-        }
-        log.info(Lang.MOTD, meta.getVersion());
-    }
 
     private static void handleCommand(String input) {
 
@@ -263,9 +289,59 @@ public class Main {
         return exists;
     }
 
+    public static String decapitalize(String name) {
+        if (name == null || name.isEmpty()) {
+            return name;
+        }
+        if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
+                Character.isUpperCase(name.charAt(0))) {
+            return name;
+        }
+        char chars[] = name.toCharArray();
+        chars[0] = Character.toLowerCase(chars[0]);
+        return new String(chars);
+    }
 
-    public static String getUserAgent() {
-        return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.0-dev";
+    public static <T> void registerBean(Class<T> clazz, @Nullable String beanName) {
+        if (beanName == null) {
+            beanName = decapitalize(clazz.getSimpleName());
+        }
+        if (applicationContext.containsBean(beanName)) {
+            return;
+        } else {
+            String bn = decapitalize(clazz.getSimpleName());
+            if (applicationContext.containsBean(bn)) {
+                return;
+            }
+        }
+        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
+        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
+        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
+    }
+
+    public static <T> void registerBean(Class<T> clazz, T instance, @Nullable String beanName) {
+        if (beanName == null) {
+            beanName = decapitalize(clazz.getSimpleName());
+        }
+        if (applicationContext.containsBean(beanName)) {
+            return;
+        } else {
+            String bn = decapitalize(clazz.getSimpleName());
+            if (applicationContext.containsBean(bn)) {
+                return;
+            }
+        }
+        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance);
+        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
+    }
+
+    public static void unregisterBean(String beanName) {
+        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
+        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
+        defaultListableBeanFactory.removeBeanDefinition(beanName);
+
     }
 
 }

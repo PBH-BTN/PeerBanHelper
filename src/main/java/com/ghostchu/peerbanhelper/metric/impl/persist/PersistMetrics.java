@@ -8,17 +8,18 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 
 @Slf4j
+@Component("persistMetrics")
 public class PersistMetrics implements BasicMetrics {
-    private final DatabaseHelper db;
-    private final BasicMetrics inMemory = new InMemoryMetrics();
-
-    public PersistMetrics(DatabaseHelper db) {
-        this.db = db;
-    }
+    @Autowired
+    private DatabaseHelper db;
+    @Autowired
+    private InMemoryMetrics inMemory;
 
     @Override
     public long getCheckCounter() {

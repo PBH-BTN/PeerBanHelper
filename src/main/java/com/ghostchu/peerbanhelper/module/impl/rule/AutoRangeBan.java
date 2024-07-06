@@ -2,20 +2,22 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Map;
@@ -23,15 +25,17 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
+@Component
 public class AutoRangeBan extends AbstractRuleFeatureModule {
+    private static final CheckResult CHECK_RESULT_NO_BAN_LIST_CHANGES = new CheckResult(AutoRangeBan.class, PeerAction.NO_ACTION, "N/A", "Banned peers list had no changes since last time check");
+    private final Map<PeerAddress, IPAddress> banListMappingCache = Collections.synchronizedMap(new WeakHashMap<>());
+    @Autowired
+    private PeerBanHelperServer peerBanHelperServer;
     private int ipv4Prefix;
     private int ipv6Prefix;
-    private final Map<PeerAddress, IPAddress> banListMappingCache = Collections.synchronizedMap(new WeakHashMap<>());
-
-    public AutoRangeBan(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
-
+    private int cachedHashCode = -1;
+    @Autowired
+    private JavalinWebContainer webContainer;
     @Override
     public @NotNull String getName() {
         return "Auto Range Ban";
@@ -43,11 +47,6 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     }
 
     @Override
-    public boolean needCheckHandshake() {
-        return true;
-    }
-
-    @Override
     public boolean isConfigurable() {
         return true;
     }
@@ -55,7 +54,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         reloadConfig();
-        getServer().getWebContainer().javalin()
+        webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
     }
 
@@ -76,15 +75,13 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     }
 
     @Override
-    public boolean isCheckCacheable() {
-        return false;
-    }
-
-    @Override
-    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        if (peer.getPeerId() == null || peer.getPeerId().isEmpty()) {
-            return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Waiting for Bittorrent handshaking.");
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+        int bannedPeersHashcode = peerBanHelperServer.getBannedPeers().hashCode();
+        if (bannedPeersHashcode == cachedHashCode) {
+            return CHECK_RESULT_NO_BAN_LIST_CHANGES;
         }
+        // 更新缓存的 HashCode
+        cachedHashCode = bannedPeersHashcode;
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
         for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
             IPAddress bannedPeerAddress = banListMappingCache.get(bannedPeer);
@@ -99,10 +96,10 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
                 banListMappingCache.put(bannedPeer, bannedPeerAddress);
             }
             if (bannedPeerAddress.contains(peerAddress)) {
-                return new BanResult(this, PeerAction.BAN, bannedPeerAddress.toString(), String.format(Lang.ARB_BANNED, peerAddress, bannedPeer.getAddress()));
+                return new CheckResult(getClass(), PeerAction.BAN, bannedPeerAddress.toString(), String.format(Lang.ARB_BANNED, peerAddress, bannedPeer.getAddress()));
             }
         }
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "All ok!");
+        return pass();
     }
 
 

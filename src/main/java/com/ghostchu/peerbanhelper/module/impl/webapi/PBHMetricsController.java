@@ -1,10 +1,10 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import io.javalin.http.Context;
@@ -12,30 +12,31 @@ import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class PBHMetricsController extends AbstractFeatureModule {
-
+    @Autowired
+    @Qualifier("persistMetrics")
     private BasicMetrics metrics;
-
-    public PBHMetricsController(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
-
     @Override
     public boolean isConfigurable() {
         return false;
     }
 
+    @Autowired
+    private JavalinWebContainer webContainer;
+
     @Override
     public void onEnable() {
-        this.metrics = getServer().getMetrics();
-        getServer().getWebContainer().javalin()
+        webContainer.javalin()
                 .get("/api/statistic/counter", this::handleBasicCounter, Role.USER_READ)
                 .get("/api/statistic/rules", this::handleRules, Role.USER_READ);
     }

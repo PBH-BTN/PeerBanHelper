@@ -3,8 +3,10 @@ package com.ghostchu.peerbanhelper.metric.impl.inmemory;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import org.springframework.stereotype.Component;
 
 // 简易记录，后续看情况添加 SQLite 数据库记录更详细的信息
+@Component("inMemoryMetrics")
 public class InMemoryMetrics implements BasicMetrics {
     private long checks = 0;
     private long bans = 0;

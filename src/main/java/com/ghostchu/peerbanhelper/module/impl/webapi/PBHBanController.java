@@ -1,10 +1,10 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
-import com.ghostchu.peerbanhelper.metric.impl.persist.PersistMetrics;
+import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -14,22 +14,25 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Stream;
 
 @Slf4j
+@Component
 public class PBHBanController extends AbstractFeatureModule {
-    private final DatabaseHelper db;
-
-    public PBHBanController(PeerBanHelperServer server, YamlConfiguration profile, DatabaseHelper db) {
-        super(server, profile);
-        this.db = db;
-    }
-
+    @Autowired
+    private DatabaseHelper db;
+    @Autowired
+    @Qualifier("persistMetrics")
+    private BasicMetrics persistMetrics;
+    @Autowired
+    private JavalinWebContainer webContainer;
     @Override
     public boolean isConfigurable() {
         return false;
@@ -47,7 +50,7 @@ public class PBHBanController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getWebContainer().javalin()
+        webContainer.javalin()
                 .get("/api/bans", this::handleBans, Role.USER_READ)
                 .get("/api/bans/logs", this::handleLogs, Role.USER_READ)
                 .get("/api/bans/ranks", this::handleRanks, Role.USER_READ)
@@ -92,9 +95,7 @@ public class PBHBanController extends AbstractFeatureModule {
             ctx.json(Map.of("message", "Database not initialized on this PeerBanHelper server"));
             return;
         }
-        if (getServer().getMetrics() instanceof PersistMetrics persistMetrics) {
-            persistMetrics.flush();
-        }
+        persistMetrics.flush();
         int pageIndex = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0"));
         int pageSize = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100"));
         try {

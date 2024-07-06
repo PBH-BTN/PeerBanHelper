@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.ipdb;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
@@ -39,13 +38,14 @@ public class IPDB implements AutoCloseable {
     private final File mmdbCityFile;
     private final File mmdbASNFile;
     private final boolean autoUpdate;
+    private final String userAgent;
     private Methanol httpClient;
     @Getter
     private DatabaseReader mmdbCity;
     @Getter
     private DatabaseReader mmdbASN;
 
-    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate) throws IllegalArgumentException, IOException {
+    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent) throws IllegalArgumentException, IOException {
         this.dataFolder = dataFolder;
         this.accountId = accountId;
         this.licenseKey = licenseKey;
@@ -54,6 +54,7 @@ public class IPDB implements AutoCloseable {
         this.mmdbCityFile = new File(directory, "GeoIP-City.mmdb");
         this.mmdbASNFile = new File(directory, "GeoIP-ASN.mmdb");
         this.autoUpdate = autoUpdate;
+        this.userAgent = userAgent;
         setupHttpClient();
         if (needUpdateMMDB(mmdbCityFile)) {
             updateMMDB(databaseCity, mmdbCityFile);
@@ -116,7 +117,7 @@ public class IPDB implements AutoCloseable {
                 .newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(Main.getUserAgent())
+                .userAgent(userAgent)
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {

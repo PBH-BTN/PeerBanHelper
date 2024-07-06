@@ -95,13 +95,6 @@ public class MainWindow extends JFrame {
         setVisible(!swingGUI.isSilentStart());
     }
 
-    private void minimizeToTray() {
-        if (trayIcon != null) {
-            setVisible(false);
-            trayIcon.displayMessage(Lang.GUI_TRAY_MESSAGE_CAPTION, Lang.GUI_TRAY_MESSAGE_DESCRIPTION, TrayIcon.MessageType.INFO);
-        }
-    }
-
     public static void setTabTitle(JPanel tab, String title) {
         JTabbedPane tabbedPane = (JTabbedPane) SwingUtilities.getAncestorOfClass(JTabbedPane.class, tab);
         for (int tabIndex = 0; tabIndex < tabbedPane.getTabCount(); tabIndex++) {
@@ -109,6 +102,13 @@ public class MainWindow extends JFrame {
                 tabbedPane.setTitleAt(tabIndex, title);
                 break;
             }
+        }
+    }
+
+    private void minimizeToTray() {
+        if (trayIcon != null) {
+            setVisible(false);
+            trayIcon.displayMessage(Lang.GUI_TRAY_MESSAGE_CAPTION, Lang.GUI_TRAY_MESSAGE_DESCRIPTION, TrayIcon.MessageType.INFO);
         }
     }
 
@@ -158,7 +158,12 @@ public class MainWindow extends JFrame {
     private JMenu generateWebUIMenu() {
         JMenu webUIMenu = new JMenu(Lang.GUI_MENU_WEBUI);
         JMenuItem openWebUIMenuItem = new JMenuItem(Lang.GUI_MENU_WEBUI_OPEN);
-        openWebUIMenuItem.addActionListener(e -> swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port())));
+
+        openWebUIMenuItem.addActionListener(e -> {
+            if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
+                swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port()));
+            }
+        });
         webUIMenu.add(openWebUIMenuItem);
         return webUIMenu;
     }

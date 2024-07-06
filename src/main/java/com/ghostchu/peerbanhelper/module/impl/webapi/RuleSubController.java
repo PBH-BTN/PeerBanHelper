@@ -1,21 +1,23 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.RuleSubInfo;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
+import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
 import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
 import com.ghostchu.peerbanhelper.module.impl.webapi.common.StdMsg;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -23,14 +25,14 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
+@Component
 public class RuleSubController extends AbstractFeatureModule {
-
+    @Autowired
+    private JavalinWebContainer webContainer;
     IPBlackRuleList ipBlackRuleList;
 
-    public RuleSubController(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
-
+    @Autowired
+    private ModuleManager moduleManager;
     @Override
     public boolean isConfigurable() {
         return false;
@@ -48,9 +50,9 @@ public class RuleSubController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getModuleManager().getModules().stream().filter(ele -> ele.getConfigName().equals("ip-address-blocker-rules")).findFirst().ifPresent(ele -> {
+        moduleManager.getModules().stream().filter(ele -> ele.getConfigName().equals("ip-address-blocker-rules")).findFirst().ifPresent(ele -> {
             ipBlackRuleList = (IPBlackRuleList) ele;
-            getServer().getWebContainer().javalin()
+            webContainer.javalin()
                     // 查询检查间隔
                     .get("/api/sub/interval", this::getCheckInterval, Role.USER_READ)
                     // 修改检查间隔

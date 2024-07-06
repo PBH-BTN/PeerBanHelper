@@ -6,6 +6,8 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Date;
 import java.sql.*;
@@ -14,13 +16,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Slf4j
+@Component
 public class DatabaseHelper {
-    private final DatabaseManager manager;
-    private final PeerBanHelperServer server;
+    @Autowired
+    private DatabaseManager manager;
+    @Autowired
+    private PeerBanHelperServer server;
 
-    public DatabaseHelper(PeerBanHelperServer server, DatabaseManager manager) throws SQLException {
-        this.server = server;
-        this.manager = manager;
+    public void init() throws SQLException {
         try {
             createTables();
             performUpgrade();
