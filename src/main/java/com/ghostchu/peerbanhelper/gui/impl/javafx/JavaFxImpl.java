@@ -55,7 +55,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private final LinkedList<String> lines = new LinkedList<>();
     private final ScheduledExecutorService LOGS_UPDATE_SERVICE = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
     private TrayIcon trayIcon;
-    private AtomicBoolean needUpdate = new AtomicBoolean(false);
+    private final AtomicBoolean needUpdate = new AtomicBoolean(false);
     private String logsBuffer;
 
     public JavaFxImpl(String[] args) {
