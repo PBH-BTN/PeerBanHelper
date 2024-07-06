@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.util.rule;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
+import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.RuleFeatureModule;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -16,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class ModuleMatchCache {
-    public final Cache<String, Object> CACHE_POOL = CacheBuilder
+    public final Cache<String, CheckResult> CACHE_POOL = CacheBuilder
             .newBuilder()
             .maximumSize(8000)
             .softValues()
@@ -27,11 +28,11 @@ public class ModuleMatchCache {
         Main.getEventBus().register(this);
     }
 
-    public Object readCache(RuleFeatureModule module, String cacheKey, Callable<Object> resultSupplier, boolean writeCache) {
+    public CheckResult readCache(RuleFeatureModule module, String cacheKey, Callable<CheckResult> resultSupplier, boolean writeCache) {
         String _cacheKey = module.getConfigName() + "@" + cacheKey;
         if (writeCache) {
             try {
-                return CACHE_POOL.get(_cacheKey, () -> resultSupplier);
+                return CACHE_POOL.get(_cacheKey, resultSupplier);
             } catch (ExecutionException e) {
                 log.warn("Unable to get cache value from cache, the resultSupplier throws unexpected exception", e);
                 return null;

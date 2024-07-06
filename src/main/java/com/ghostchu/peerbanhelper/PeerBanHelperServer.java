@@ -71,9 +71,15 @@ import java.util.logging.Level;
 @Component
 public class PeerBanHelperServer {
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
+    private final List<Downloader> downloaders = new ArrayList<>();
+    @Getter
+    private final List<IPAddress> ignoreAddresses = new ArrayList<>();
+    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    @Getter
+    private final List<BanListInvoker> banListInvoker = new ArrayList<>();
+    private final String pbhServerAddress;
     @Getter
     private YamlConfiguration profileConfig;
-    private final List<Downloader> downloaders = new ArrayList<>();
     @Getter
     private long banDuration;
     @Getter
@@ -81,15 +87,9 @@ public class PeerBanHelperServer {
     @Getter
     private boolean hideFinishLogs;
     @Getter
-    private final List<IPAddress> ignoreAddresses = new ArrayList<>();
-    @Getter
     private YamlConfiguration mainConfig;
     @Autowired
     private ModuleMatchCache moduleMatchCache;
-    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-    @Getter
-    private final List<BanListInvoker> banListInvoker = new ArrayList<>();
-    private final String pbhServerAddress;
     @Autowired
     @Qualifier("banListFile")
     private File banListFile;
@@ -629,33 +629,42 @@ public class PeerBanHelperServer {
      */
     @NotNull
     public CheckResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
-        List<CheckResult> results = new ArrayList<>();
-        if (peer.getPeerAddress().getAddress().isAnyLocal()) {
-            return new CheckResult(getClass(), PeerAction.SKIP, "local access", "skip local network peers");
-        }
-        for (IPAddress ignoreAddress : ignoreAddresses) {
-            if (ignoreAddress.contains(peer.getPeerAddress().getAddress())) {
-                return new CheckResult(getClass(), PeerAction.SKIP, "ignored addresses", "skip peers from ignored addresses");
+        try {
+            List<CheckResult> results = new ArrayList<>();
+            if (peer.getPeerAddress().getAddress().isAnyLocal()) {
+                return new CheckResult(getClass(), PeerAction.SKIP, "local access", "skip local network peers");
             }
-        }
-        for (FeatureModule registeredModule : moduleManager.getModules()) {
-            if (!(registeredModule instanceof RuleFeatureModule module)) {
-                continue;
+            for (IPAddress ignoreAddress : ignoreAddresses) {
+                if (ignoreAddress.contains(peer.getPeerAddress().getAddress())) {
+                    return new CheckResult(getClass(), PeerAction.SKIP, "ignored addresses", "skip peers from ignored addresses");
+                }
             }
-            CheckResult checkResult = module.shouldBanPeer(torrent, peer, executor);
-            if (checkResult.action() == PeerAction.SKIP) {
-                return checkResult;
+            for (FeatureModule registeredModule : moduleManager.getModules()) {
+                if (!(registeredModule instanceof RuleFeatureModule module)) {
+                    continue;
+                }
+                try {
+                    CheckResult checkResult = module.shouldBanPeer(torrent, peer, executor);
+                    if (checkResult.action() == PeerAction.SKIP) {
+                        return checkResult;
+                    }
+                    results.add(checkResult);
+                } catch (Exception e) {
+                    log.warn("Unable to execute module {}, report to PeerBanHelper developer!", module.getName(), e);
+                }
             }
-            results.add(checkResult);
-        }
-        CheckResult result = new CheckResult(null, PeerAction.NO_ACTION, "No matches", "No matches");
-        for (CheckResult r : results) {
-            if (r.action() == PeerAction.BAN) {
-                result = r;
-                break;
+            CheckResult result = new CheckResult(getClass(), PeerAction.NO_ACTION, "No matches", "No matches");
+            for (CheckResult r : results) {
+                if (r.action() == PeerAction.BAN) {
+                    result = r;
+                    break;
+                }
             }
+            return result;
+        } catch (Exception e) {
+            log.warn("Failed to execute modules", e);
+            return new CheckResult(getClass(), PeerAction.NO_ACTION, "ERROR", "ERROR");
         }
-        return result;
     }
 
     /**
