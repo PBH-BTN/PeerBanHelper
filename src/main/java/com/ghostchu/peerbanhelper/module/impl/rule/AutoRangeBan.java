@@ -27,13 +27,11 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @Component
 public class AutoRangeBan extends AbstractRuleFeatureModule {
-    private static final CheckResult CHECK_RESULT_NO_BAN_LIST_CHANGES = new CheckResult(AutoRangeBan.class, PeerAction.NO_ACTION, "N/A", "Banned peers list had no changes since last time check");
     private final Map<PeerAddress, IPAddress> banListMappingCache = Collections.synchronizedMap(new WeakHashMap<>());
     @Autowired
     private PeerBanHelperServer peerBanHelperServer;
     private int ipv4Prefix;
     private int ipv6Prefix;
-    private int cachedHashCode = -1;
     @Autowired
     private JavalinWebContainer webContainer;
     @Override
@@ -81,12 +79,6 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        int bannedPeersHashcode = peerBanHelperServer.getBannedPeers().hashCode();
-        if (bannedPeersHashcode == cachedHashCode) {
-            return CHECK_RESULT_NO_BAN_LIST_CHANGES;
-        }
-        // 更新缓存的 HashCode
-        cachedHashCode = bannedPeersHashcode;
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
         for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
             IPAddress bannedPeerAddress = banListMappingCache.get(bannedPeer);
