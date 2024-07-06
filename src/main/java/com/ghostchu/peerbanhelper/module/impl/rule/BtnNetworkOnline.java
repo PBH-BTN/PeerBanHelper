@@ -60,6 +60,11 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
     }
 
     @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
+
+    @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         if (manager == null) {
             return BTN_MANAGER_NOT_INITIALIZED;
@@ -75,7 +80,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
         if (isHandShaking(peer)) {
             return handshaking();
         }
-        return (CheckResult) getCache().readCache(this, "peer-" + peer.getCacheKey(), () -> {
+        return getCache().readCache(this, "peer-" + peer.getCacheKey(), () -> {
             CheckResult r = null;
             if (rule.getPeerIdRules() != null) {
                 r = NullUtil.anyNotNull(r, checkPeerIdRule(rule, torrent, peer, ruleExecuteExecutor));

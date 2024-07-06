@@ -19,10 +19,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -76,6 +76,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         ctx.json(config);
     }
 
+    @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
 
     @Override
     public boolean isConfigurable() {
@@ -118,7 +122,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         String peerIpString = peerIp.toString();
         // 从缓存取数据
         List<ClientTask> lastRecordedProgress = progressRecorder.getIfPresent(peerIpString);
-        if (lastRecordedProgress == null) lastRecordedProgress = new ArrayList<>();
+        if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = null;
         for (ClientTask recordedProgress : lastRecordedProgress) {
             if (recordedProgress.getTorrentId().equals(torrent.getId())) {

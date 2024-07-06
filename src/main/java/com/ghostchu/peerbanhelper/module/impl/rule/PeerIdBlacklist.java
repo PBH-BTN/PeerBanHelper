@@ -50,6 +50,11 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
     }
 
+    @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
+
     private void handleWebAPI(Context ctx) {
         ctx.status(HttpStatus.OK);
         ctx.json(Map.of("peerId", bannedPeers.stream().map(Rule::toPrintableText).toList()));
@@ -70,7 +75,7 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
         if (isHandShaking(peer) && (peer.getPeerId() == null || peer.getPeerId().isBlank())) {
             return handshaking();
         }
-        return (CheckResult) getCache().readCache(this, peer.getPeerId(), () -> {
+        return getCache().readCache(this, peer.getPeerId(), () -> {
             RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getPeerId());
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_PID_MATCH_PEER_ID, matchResult.rule()));

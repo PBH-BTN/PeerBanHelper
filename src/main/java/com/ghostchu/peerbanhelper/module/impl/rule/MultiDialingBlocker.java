@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class MultiDialingBlocker extends AbstractRuleFeatureModule {
-    private static final CheckResult CHECK_RESULT_NO_BAN_LIST_CHANGES = new CheckResult(AutoRangeBan.class, PeerAction.NO_ACTION, "N/A", "Banned peers list had no changes since last time check");
     // 计算缓存容量
     private static final int TORRENT_PEER_MAX_NUM = 1024;
     private static final int PEER_MAX_NUM_PER_SUBNET = 16;
@@ -53,10 +52,10 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     }
 
     private void handleStatus(Context ctx) {
-        Map<String, Object> status = new LinkedHashMap<>();
+        Map<String, Object> status = new HashMap<>();
         status.put("huntingList", huntingList.asMap());
         status.put("cache", cache.asMap());
-        Map<String, Map<String, Long>> mapSubnetCounter = new LinkedHashMap<>();
+        Map<String, Map<String, Long>> mapSubnetCounter = new HashMap<>();
         subnetCounter.asMap().forEach((k, v) -> mapSubnetCounter.put(k, v.asMap()));
         status.put("subnetCounter", mapSubnetCounter);
         ctx.status(HttpStatus.OK);
@@ -64,7 +63,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     }
 
     private void handleConfig(Context ctx) {
-        Map<String, Object> config = new LinkedHashMap<>();
+        Map<String, Object> config = new HashMap<>();
         config.put("subnetMaskLength", subnetMaskLength);
         config.put("subnetMaskV6Length", subnetMaskV6Length);
         config.put("tolerateNum", tolerateNum);

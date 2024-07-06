@@ -105,7 +105,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         return "expression-engine";
     }
 
-
     private void registerFunctions(Class<?> clazz) {
         try {
             AviatorEvaluator.addInstanceFunctions(clazz.getSimpleName(), clazz);

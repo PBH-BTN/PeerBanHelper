@@ -57,6 +57,11 @@ public class IPBlackList extends AbstractRuleFeatureModule {
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
     }
 
+    @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
+
     private void handleWebAPI(Context ctx) {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("ip", ips.stream().map(Address::toString).toList());
@@ -86,7 +91,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        return (CheckResult) getCache().readCache(this, peer.getPeerAddress().getIp(), () -> {
+        return getCache().readCache(this, peer.getPeerAddress().getIp(), () -> {
             PeerAddress peerAddress = peer.getPeerAddress();
             if (ports.contains(peerAddress.getPort())) {
                 return new CheckResult(getClass(), PeerAction.BAN, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));

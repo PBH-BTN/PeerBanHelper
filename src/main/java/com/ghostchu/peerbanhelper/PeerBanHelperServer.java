@@ -644,8 +644,12 @@ public class PeerBanHelperServer {
                 }
                 try {
                     CheckResult checkResult;
-                    synchronized (registeredModule.getConfigName()) {
+                    if (module.isThreadSafe()) {
                         checkResult = module.shouldBanPeer(torrent, peer, executor);
+                    } else {
+                        synchronized (registeredModule.getConfigName()) {
+                            checkResult = module.shouldBanPeer(torrent, peer, executor);
+                        }
                     }
                     if (checkResult.action() == PeerAction.SKIP) {
                         return checkResult;

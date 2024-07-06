@@ -58,6 +58,11 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
     }
 
+    @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
+
     private void handleWebAPI(Context ctx) {
         ctx.status(HttpStatus.OK);
         ctx.json(Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix));
