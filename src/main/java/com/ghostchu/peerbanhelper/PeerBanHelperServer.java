@@ -118,7 +118,6 @@ public class PeerBanHelperServer {
             .build();
     @Getter
     private HitRateMetric hitRateMetric = new HitRateMetric();
-
     @Autowired
     private DatabaseHelper databaseHelper;
 
@@ -644,7 +643,10 @@ public class PeerBanHelperServer {
                     continue;
                 }
                 try {
-                    CheckResult checkResult = module.shouldBanPeer(torrent, peer, executor);
+                    CheckResult checkResult;
+                    synchronized (registeredModule.getConfigName()) {
+                        checkResult = module.shouldBanPeer(torrent, peer, executor);
+                    }
                     if (checkResult.action() == PeerAction.SKIP) {
                         return checkResult;
                     }
