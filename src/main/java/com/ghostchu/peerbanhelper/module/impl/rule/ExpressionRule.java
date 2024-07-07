@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.MathContext;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -180,17 +179,16 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         // EVAL 性能优先
         AviatorEvaluator.getInstance().setOption(Options.OPTIMIZE_LEVEL, AviatorEvaluator.EVAL);
         // 降低浮点计算精度
-        AviatorEvaluator.getInstance().setOption(Options.MATH_CONTEXT, MathContext.DECIMAL128);
+        AviatorEvaluator.getInstance().setOption(Options.MATH_CONTEXT, MathContext.DECIMAL32);
         // 启用变量语法糖
         AviatorEvaluator.getInstance().setOption(Options.ENABLE_PROPERTY_SYNTAX_SUGAR, true);
-        // 表达式允许序列化和反序列化
-        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
+//        // 表达式允许序列化和反序列化
+//        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
         // 用户规则写糊保护
         AviatorEvaluator.getInstance().setOption(Options.MAX_LOOP_COUNT, 5000);
         AviatorEvaluator.getInstance().setOption(Options.EVAL_TIMEOUT_MS, maxScriptExecuteTime);
         // 启用反射方法查找
         AviatorEvaluator.getInstance().setFunctionMissing(JavaMethodReflectionFunctionMissing.getInstance());
-
         // 注册反射调用
         registerFunctions(IPAddressUtil.class);
         registerFunctions(HTTPUtil.class);
@@ -208,7 +206,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         }
     }
 
-    private void reloadConfig() throws IOException, URISyntaxException {
+    private void reloadConfig() throws IOException {
         expressions.clear();
         threadLocks.clear();
         initScripts();
@@ -228,7 +226,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                     executor.submit(() -> {
                         try {
                             AviatorEvaluator.getInstance().validate(expressionMetadata.script());
-                            Expression expression = AviatorEvaluator.getInstance().compile(expressionMetadata.script());
+                            Expression expression = AviatorEvaluator.getInstance().compile(expressionMetadata.script(), false);
                             expression.newEnv("peerbanhelper", getServer(), "moduleConfig", getConfig(), "ipdb", getServer().getIpdb());
                             userRules.put(expression, expressionMetadata);
                             if (!expressionMetadata.threadSafe()) {
