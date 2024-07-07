@@ -102,6 +102,9 @@ public class IPDB implements AutoCloseable {
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
         try {
             CNLookupResult cnLookupResult = geoCN.get(address, CNLookupResult.class);
+            if (cnLookupResult == null) {
+                return;
+            }
             // City Data
             IPGeoData.CityData cityResponse = Objects.requireNonNullElse(geoData.getCity(), new IPGeoData.CityData());
             String cityName = (cnLookupResult.getProvince() + " " + cnLookupResult.getCity() + " " + cnLookupResult.getDistricts()).trim();
@@ -110,13 +113,13 @@ public class IPDB implements AutoCloseable {
             }
             Integer code = null;
             if (cnLookupResult.getProvinceCode() != null) {
-                code = cnLookupResult.getProvinceCode();
+                code = cnLookupResult.getProvinceCode().intValue();
             }
             if (cnLookupResult.getCityCode() != null) {
-                code = cnLookupResult.getCityCode();
+                code = cnLookupResult.getCityCode().intValue();
             }
             if (cnLookupResult.getDistrictsCode() != null) {
-                code = cnLookupResult.getDistrictsCode();
+                code = cnLookupResult.getDistrictsCode().intValue();
             }
             cityResponse.setIso(Long.parseLong("86" + code));
             geoData.setCity(cityResponse);
@@ -331,31 +334,31 @@ public class IPDB implements AutoCloseable {
         private final String isp;
         private final String net;
         private final String province;
-        private final Integer provinceCode;
+        private final Long provinceCode;
         private final String city;
-        private final Integer cityCode;
+        private final Long cityCode;
         private final String districts;
-        private final Integer districtsCode;
+        private final Long districtsCode;
 
         @MaxMindDbConstructor
         public CNLookupResult(
                 @MaxMindDbParameter(name = "isp") String isp,
                 @MaxMindDbParameter(name = "net") String net,
                 @MaxMindDbParameter(name = "province") String province,
-                @MaxMindDbParameter(name = "provinceCode") Integer provinceCode,
+                @MaxMindDbParameter(name = "provinceCode") Object provinceCode,
                 @MaxMindDbParameter(name = "city") String city,
-                @MaxMindDbParameter(name = "cityCode") Integer cityCode,
+                @MaxMindDbParameter(name = "cityCode") Object cityCode,
                 @MaxMindDbParameter(name = "districts") String districts,
-                @MaxMindDbParameter(name = "districtsCode") Integer districtsCode
+                @MaxMindDbParameter(name = "districtsCode") Object districtsCode
         ) {
             this.isp = isp;
             this.net = net;
             this.province = province;
-            this.provinceCode = provinceCode;
+            this.provinceCode = Long.parseLong(provinceCode.toString());
             this.city = city;
-            this.cityCode = cityCode;
+            this.cityCode = Long.parseLong(cityCode.toString());
             this.districts = districts;
-            this.districtsCode = districtsCode;
+            this.districtsCode = Long.parseLong(districtsCode.toString());
         }
     }
 
