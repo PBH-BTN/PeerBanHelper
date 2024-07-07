@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 @Component
@@ -22,6 +23,8 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     private PeerBanHelperServer server;
     @Getter
     private boolean register;
+    @Getter
+    private final ReentrantLock lock = new ReentrantLock();
 
     @Override
     public boolean isModuleEnabled() {
@@ -31,6 +34,11 @@ public abstract class AbstractFeatureModule implements FeatureModule {
             log.warn(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName());
             return false;
         }
+    }
+
+    @Override
+    public ReentrantLock getThreadLock() {
+        return lock;
     }
 
     /**
