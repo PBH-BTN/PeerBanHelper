@@ -116,16 +116,20 @@ public class IPBlackList extends AbstractRuleFeatureModule {
 
     private CheckResult checkIPDB(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
         if (regions.isEmpty() && asns.isEmpty()) {
-            return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", "No feature enabled");
+            return pass();
         }
-        if (!asns.isEmpty()) {
-            long asn = getServer().queryIPDB(peer.getPeerAddress()).asnResponse().get().getAutonomousSystemNumber();
+        var geoData = getServer().queryIPDB(peer.getPeerAddress()).geoData().get();
+        if (geoData == null) {
+            return pass();
+        }
+        if (!asns.isEmpty() && geoData.getAs() != null) {
+            Long asn = geoData.getAs().getNumber();
             if (asns.contains(asn)) {
                 return new CheckResult(getClass(), PeerAction.BAN, String.valueOf(asn), String.format(Lang.MODULE_IBL_MATCH_ASN, asn));
             }
         }
-        if (!regions.isEmpty()) {
-            String iso = getServer().queryIPDB(peer.getPeerAddress()).cityResponse().get().getCountry().getIsoCode();
+        if (!regions.isEmpty() && geoData.getCountry() != null) {
+            String iso = geoData.getCountry().getIso();
             if (regions.contains(iso)) {
                 return new CheckResult(getClass(), PeerAction.BAN, String.valueOf(iso), String.format(Lang.MODULE_IBL_MATCH_REGION, iso));
             }

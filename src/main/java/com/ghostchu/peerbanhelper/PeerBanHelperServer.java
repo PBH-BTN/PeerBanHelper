@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
+import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetric;
 import com.ghostchu.peerbanhelper.module.*;
@@ -38,9 +39,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
-import com.maxmind.geoip2.model.AsnResponse;
-import com.maxmind.geoip2.model.CityResponse;
 import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -608,28 +606,19 @@ public class PeerBanHelperServer {
         try {
             return geoIpCache.get(address.getIp(), () -> {
                 if (ipdb == null) {
-                    return new IPDBResponse(new LazyLoad<>(() -> null), new LazyLoad<>(() -> null));
+                    return new IPDBResponse(new LazyLoad<>(() -> null));
+                } else {
+                    return new IPDBResponse(new LazyLoad<>(() -> {
+                        try {
+                            return ipdb.query(address.getAddress().toInetAddress());
+                        } catch (Exception ignored) {
+                            return null;
+                        }
+                    }));
                 }
-                return new IPDBResponse(new LazyLoad<>(() -> {
-                    if (ipdb.getMmdbCity() != null) {
-                        try {
-                            return ipdb.getMmdbCity().city(address.getAddress().toInetAddress());
-                        } catch (IOException | GeoIp2Exception ignored) {
-                        }
-                    }
-                    return null;
-                }), new LazyLoad<>(() -> {
-                    if (ipdb.getMmdbCity() != null) {
-                        try {
-                            return ipdb.getMmdbASN().asn(address.getAddress().toInetAddress());
-                        } catch (IOException | GeoIp2Exception ignored) {
-                        }
-                    }
-                    return null;
-                }));
             });
         } catch (ExecutionException e) {
-            return new IPDBResponse(null, null);
+            return new IPDBResponse(null);
         }
     }
 
@@ -782,8 +771,7 @@ public class PeerBanHelperServer {
     }
 
     public record IPDBResponse(
-            LazyLoad<CityResponse> cityResponse,
-            LazyLoad<AsnResponse> asnResponse
+            LazyLoad<IPGeoData> geoData
     ) {
     }
 

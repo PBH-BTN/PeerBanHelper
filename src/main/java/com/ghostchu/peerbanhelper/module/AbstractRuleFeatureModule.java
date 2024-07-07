@@ -25,7 +25,6 @@ public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule im
         return peer.getDownloadSpeed() <= 0 && peer.getUploadSpeed() <= 0;
     }
 
-
     /**
      * 标记此模块不处理 Peer 封禁
      *

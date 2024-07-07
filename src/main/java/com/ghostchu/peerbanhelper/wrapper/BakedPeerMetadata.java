@@ -2,23 +2,18 @@ package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class BakedPeerMetadata extends PeerMetadata {
-    private GeoWrapper geo;
-    private ASNWrapper asn;
+    private IPGeoData geo;
 
     public BakedPeerMetadata(PeerMetadata banMetadata) {
         super(banMetadata.getDownloader(), banMetadata.getTorrent(), banMetadata.getPeer());
         PeerBanHelperServer.IPDBResponse resp = Main.getServer().queryIPDB(new PeerAddress(banMetadata.getPeer().getAddress().getIp(), banMetadata.getPeer().getAddress().getPort()));
-        if (resp.cityResponse().get() != null) {
-            this.geo = new GeoWrapper(resp.cityResponse().get());
-        }
-        if (resp.asnResponse().get() != null) {
-            this.asn = new ASNWrapper(resp.asnResponse().get());
-        }
+        this.geo = resp.geoData().get();
     }
 }

@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
+import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.wrapper.BakedPeerMetadata;
@@ -258,16 +259,30 @@ public class MainWindow extends JFrame {
             String asn = "N/A";
             String asOrg = "N/A";
             String asNetwork = "N/A";
+            String isp = "N/A";
+            String netType = "N/A";
             BakedPeerMetadata bakedBanMetadata = new BakedPeerMetadata(entry.getValue());
-            if (bakedBanMetadata.getGeo() != null) {
-                countryRegion = bakedBanMetadata.getGeo().getCountryRegion();
-                city = bakedBanMetadata.getGeo().getCity();
+            IPGeoData ipGeoData = bakedBanMetadata.getGeo();
+            if (ipGeoData != null) {
+                if (ipGeoData.getCountry() != null) {
+                    countryRegion = ipGeoData.getCountry().getIso();
+                }
+                if (ipGeoData.getCity() != null) {
+                    city = ipGeoData.getCity().getName();
+                }
+                if (ipGeoData.getAs() != null) {
+                    asn = "AS" + ipGeoData.getAs().getNumber();
+                    asOrg = ipGeoData.getAs().getOrganization();
+                    if (ipGeoData.getAs().getNetwork() != null) {
+                        asNetwork = ipGeoData.getAs().getNetwork().getIpAddress();
+                    }
+                }
+                if (ipGeoData.getNetwork() != null) {
+                    isp = ipGeoData.getNetwork().getIsp();
+                    netType = ipGeoData.getNetwork().getNetType();
+                }
             }
-            if (bakedBanMetadata.getAsn() != null) {
-                asn = "AS" + bakedBanMetadata.getAsn().getAsn();
-                asOrg = bakedBanMetadata.getAsn().getAsOrganization();
-                asNetwork = bakedBanMetadata.getAsn().getAsNetwork();
-            }
+
             List<String> array = new ArrayList<>(); // 这里用 List，这样动态创建 array 就不用指定位置了
             array.add(countryRegion);
             array.add(ip);
@@ -283,6 +298,8 @@ public class MainWindow extends JFrame {
             array.add(asn);
             array.add(asOrg);
             array.add(asNetwork);
+            array.add(isp);
+            array.add(netType);
             System.arraycopy(array.toArray(new String[0]), 0, data[i], 0, array.size());
         }
         updateLivePeersTable(data);
