@@ -23,7 +23,6 @@ public class PeerAddress implements Comparable<PeerAddress> {
     public PeerAddress(String ip, int port) {
         this.ip = ip;
         this.port = port;
-        this.address = IPAddressUtil.getIPAddress(ip);
     }
 
     public IPAddress getAddress() {
