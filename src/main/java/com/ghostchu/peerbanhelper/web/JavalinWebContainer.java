@@ -50,6 +50,7 @@ public class JavalinWebContainer {
                         staticFiles.precompress = false;
                         staticFiles.aliasCheck = null;
                         staticFiles.skipFileFunction = req -> false;
+                        staticFiles.headers.put("Cache-Control", "no-cache");
                     });
                     c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                 })
