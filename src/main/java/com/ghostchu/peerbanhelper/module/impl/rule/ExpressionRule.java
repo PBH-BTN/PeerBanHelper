@@ -125,7 +125,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                 result = cached.get(expressionMetadata.name()).orElse(null);
             } else {
                 try {
-                    Map<String, Object> env = new HashMap<>();
+                    Map<String, Object> env = expression.newEnv();
                     env.put("torrent", torrent);
                     env.put("peer", peer);
                     env.put("cacheable", new AtomicBoolean(false));

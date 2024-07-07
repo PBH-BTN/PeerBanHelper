@@ -80,7 +80,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
-        for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
+        for (PeerAddress bannedPeer : getServer().getBannedPeersDirect().keySet()) {
             IPAddress bannedPeerAddress = banListMappingCache.get(bannedPeer);
             if (bannedPeerAddress == null) {
                 IPAddress bannedAddress = bannedPeer.getAddress();
