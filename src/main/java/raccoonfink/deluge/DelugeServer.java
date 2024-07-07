@@ -46,7 +46,7 @@ public class DelugeServer {
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .requestTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .defaultHeader("Accept", "application/json")
-                .defaultHeader("Accept-Encoding", "compress;q=0.5, gzip;q=1.0")
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .defaultHeader("Content-Type", "application/json")
                 .authenticator(new Authenticator() {
                     @Override

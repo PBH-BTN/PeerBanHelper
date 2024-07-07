@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.maven;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.github.mizosoft.methanol.Methanol;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -37,7 +38,8 @@ public class GeoUtil {
     }
 
     private static long sendGetTest(String urlStr) {
-        try (HttpClient client = HttpClient.newBuilder()
+        try (HttpClient client = Methanol.newBuilder()
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(5, ChronoUnit.SECONDS))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .build()) {

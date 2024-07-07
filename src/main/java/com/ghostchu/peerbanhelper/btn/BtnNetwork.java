@@ -108,6 +108,7 @@ public class BtnNetwork {
                 .newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(userAgent)
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("BTN-AppID", appId)
                 .defaultHeader("BTN-AppSecret", appSecret)

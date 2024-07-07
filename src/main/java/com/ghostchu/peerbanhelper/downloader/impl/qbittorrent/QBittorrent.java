@@ -57,6 +57,7 @@ public class QBittorrent implements Downloader {
         Methanol.Builder builder = Methanol
                 .newBuilder()
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
@@ -105,7 +106,6 @@ public class QBittorrent implements Downloader {
                                                     .query("password", config.getPassword()).build())
                                     .header("Content-Type", "application/x-www-form-urlencoded")
                             , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-
             if (request.statusCode() != 200) {
                 log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, request.statusCode(), "HTTP ERROR", request.body());
             }
