@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class ModuleMatchCache {
     public final Cache<String, CheckResult> CACHE_POOL = CacheBuilder
             .newBuilder()
-            .maximumSize(8000)
+            .maximumSize(15000)
             .softValues()
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build();
