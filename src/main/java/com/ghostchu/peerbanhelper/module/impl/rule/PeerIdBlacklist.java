@@ -26,6 +26,7 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
     private List<Rule> bannedPeers;
     @Autowired
     private JavalinWebContainer webContainer;
+
     @Override
     public @NotNull String getName() {
         return "PeerId Blacklist";
@@ -75,13 +76,13 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule {
         if (isHandShaking(peer) && (peer.getPeerId() == null || peer.getPeerId().isBlank())) {
             return handshaking();
         }
-        return getCache().readCache(this, peer.getPeerId(), () -> {
-            RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getPeerId());
-            if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_PID_MATCH_PEER_ID, matchResult.rule()));
-            }
-            return pass();
-        }, true);
+        //return getCache().readCache(this, peer.getPeerId(), () -> {
+        RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getPeerId());
+        if (matchResult.hit()) {
+            return new CheckResult(getClass(), PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_PID_MATCH_PEER_ID, matchResult.rule()));
+        }
+        return pass();
+        //}, true);
 
     }
 

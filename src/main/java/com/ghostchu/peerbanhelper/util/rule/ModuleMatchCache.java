@@ -2,7 +2,9 @@ package com.ghostchu.peerbanhelper.util.rule;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
+import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.module.RuleFeatureModule;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -19,7 +21,15 @@ import java.util.concurrent.TimeUnit;
 public class ModuleMatchCache {
     public final Cache<String, CheckResult> CACHE_POOL = CacheBuilder
             .newBuilder()
-            .maximumSize(15000)
+            .maximumWeight(50000L)
+            .weigher((key, value) -> {
+                if (value == AbstractRuleFeatureModule.HANDSHAKING_CHECK_RESULT
+                        || value == AbstractRuleFeatureModule.TEAPOT_CHECK_RESULT
+                        || value == AbstractRuleFeatureModule.OK_CHECK_RESULT) {
+                    return 1;
+                }
+                return 5;
+            })
             .softValues()
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build();
@@ -29,7 +39,7 @@ public class ModuleMatchCache {
     }
 
     public CheckResult readCache(RuleFeatureModule module, String cacheKey, Callable<CheckResult> resultSupplier, boolean writeCache) {
-        String _cacheKey = module.getConfigName() + "@" + cacheKey;
+        String _cacheKey = module.getConfigName() + '@' + cacheKey;
         if (writeCache) {
             try {
                 return CACHE_POOL.get(_cacheKey, resultSupplier);
@@ -40,6 +50,23 @@ public class ModuleMatchCache {
         } else {
             return CACHE_POOL.getIfPresent(_cacheKey);
         }
+    }
+
+    public CheckResult readCachePassOnly(RuleFeatureModule module, String cacheKey, Callable<CheckResult> resultSupplier, boolean writeCache) {
+        String _cacheKey = module.getConfigName() + '@' + cacheKey;
+        var cached = CACHE_POOL.getIfPresent(_cacheKey);
+        if (cached == null) {
+            try {
+                cached = resultSupplier.call();
+            } catch (Exception e) {
+                log.warn("Unable to compute result", e);
+            }
+        }
+        if (writeCache && cached != null && cached.action() != PeerAction.BAN) {
+            CACHE_POOL.put(_cacheKey, cached);
+        }
+        return cached;
+
     }
 
     @Subscribe

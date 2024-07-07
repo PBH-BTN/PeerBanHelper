@@ -91,7 +91,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        return getCache().readCache(this, peer.getPeerAddress().getIp(), () -> {
+        return getCache().readCachePassOnly(this, peer.getPeerAddress().getIp(), () -> {
             PeerAddress peerAddress = peer.getPeerAddress();
             if (ports.contains(peerAddress.getPort())) {
                 return new CheckResult(getClass(), PeerAction.BAN, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));

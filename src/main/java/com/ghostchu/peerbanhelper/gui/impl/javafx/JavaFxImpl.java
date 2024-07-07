@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.gui.impl.javafx;
 
-import com.alessiodp.libby.Library;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.MainJavaFx;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -12,8 +11,6 @@ import com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow.JFXWindowController
 import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.collection.CircularArrayList;
-import com.ghostchu.peerbanhelper.util.maven.GeoUtil;
-import com.ghostchu.peerbanhelper.util.maven.MavenCentralMirror;
 import com.google.common.eventbus.Subscribe;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -37,7 +34,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -99,13 +95,6 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
             return;
         }
         CompletableFuture.runAsync(() -> {
-            if (!isWebViewSupported()) {
-                try {
-                    tryLoadWebViewLibraries();
-                } catch (Exception e) {
-                    log.error("Unable to load webviews", e);
-                }
-            }
             if (isWebViewSupported()) {
                 Platform.runLater(() -> {
                     MainJavaFx.getStage().setTitle(String.format(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
@@ -138,46 +127,6 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 });
             }
         });
-
-
-    }
-
-
-    private void tryLoadWebViewLibraries() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        String sysArch = "win";
-        if (osName.contains("linux")) {
-            sysArch = "linux";
-        } else if (osName.contains("mac")) {
-            sysArch = "mac";
-        }
-        List<MavenCentralMirror> server = GeoUtil.determineBestMirrorServer(log);
-        if (!server.isEmpty()) {
-            MavenCentralMirror mirror = server.getFirst();
-            if (mirror != null) {
-                Main.getLibraryManager().addRepository(mirror.getRepoUrl());
-            }
-        }
-        String javafx = Main.getMeta().getJavafx().replace("${javafx.version}", "22.0.1");
-        Main.getLibraryManager().loadLibraries(Library.builder()
-                .groupId("org{}openjfx") // "{}" is replaced with ".", useful to avoid unwanted changes made by maven-shade-plugin
-                .artifactId("javafx-media")
-                .version(javafx)
-                .classifier(sysArch)
-                .resolveTransitiveDependencies(false)
-                .build(), Library.builder()
-                .groupId("org{}openjfx") // "{}" is replaced with ".", useful to avoid unwanted changes made by maven-shade-plugin
-                .artifactId("javafx-graphics")
-                .version(javafx)
-                .classifier(sysArch)
-                .resolveTransitiveDependencies(false)
-                .build(), Library.builder()
-                .groupId("org{}openjfx") // "{}" is replaced with ".", useful to avoid unwanted changes made by maven-shade-plugin
-                .artifactId("javafx-web")
-                .version(javafx)
-                .classifier(sysArch)
-                .resolveTransitiveDependencies(false)
-                .build());
     }
 
     @SneakyThrows

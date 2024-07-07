@@ -28,6 +28,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
     private List<Rule> bannedPeers;
     @Autowired
     private JavalinWebContainer webContainer;
+
     @Override
     public @NotNull String getName() {
         return "ClientName Blacklist";
@@ -74,13 +75,13 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
         if (isHandShaking(peer) && (peer.getClientName() == null || peer.getClientName().isBlank())) {
             return handshaking();
         }
-        return getCache().readCache(this, peer.getClientName(), () -> {
-            RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
-            if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.rule()));
-            }
-            return pass();
-        }, true);
+        //return getCache().readCache(this, peer.getClientName(), () -> {
+        RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
+        if (matchResult.hit()) {
+            return new CheckResult(getClass(), PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.rule()));
+        }
+        return pass();
+        //}, true);
     }
 
 

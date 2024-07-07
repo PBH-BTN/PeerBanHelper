@@ -75,6 +75,7 @@ public interface Peer extends Comparable<Peer> {
     }
 
     default String getCacheKey() {
-        return "pa=" + this.getPeerAddress().toString() + ",pid=" + this.getPeerId() + ",pname=" + this.getClientName();
+        //return "pa=" + this.getPeerAddress().toString() + ",pid=" + this.getPeerId() + ",pname=" + this.getClientName();
+        return getPeerAddress().getIp() + ':' + getPeerAddress().getPort();
     }
 }

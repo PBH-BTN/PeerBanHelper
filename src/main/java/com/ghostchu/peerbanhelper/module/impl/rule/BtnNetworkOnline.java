@@ -80,7 +80,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
         if (isHandShaking(peer)) {
             return handshaking();
         }
-        return getCache().readCache(this, "peer-" + peer.getCacheKey(), () -> {
+        return getCache().readCachePassOnly(this, "peer-" + peer.getCacheKey(), () -> {
             CheckResult r = null;
             if (rule.getPeerIdRules() != null) {
                 r = NullUtil.anyNotNull(r, checkPeerIdRule(rule, torrent, peer, ruleExecuteExecutor));

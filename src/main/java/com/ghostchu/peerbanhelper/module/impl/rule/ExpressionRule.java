@@ -135,7 +135,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
 
     public CheckResult runExpression(Expression expression, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         ExpressionMetadata expressionMetadata = expressions.get(expression);
-        return getCache().readCache(this, expression.hashCode() + peer.getCacheKey(), () -> {
+        return getCache().readCachePassOnly(this, expression.hashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
                 Map<String, Object> env = expression.newEnv();
