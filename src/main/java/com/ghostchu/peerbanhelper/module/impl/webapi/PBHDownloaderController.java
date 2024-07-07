@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
+import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -165,10 +166,11 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             return;
         }
         Downloader downloader = selected.get();
-        List<PeerMetadata> peerWrappers = getServer().getLivePeersSnapshot().values()
+        List<PeerWrapper> peerWrappers = getServer().getLivePeersSnapshot().values()
                 .stream()
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .filter(p -> p.getTorrent().getHash().equals(torrentId))
+                .map(PeerMetadata::getPeer)
                 .toList();
         ctx.status(HttpStatus.OK);
         ctx.json(peerWrappers);
