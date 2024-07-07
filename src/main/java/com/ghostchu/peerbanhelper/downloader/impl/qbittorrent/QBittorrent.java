@@ -107,11 +107,11 @@ public class QBittorrent implements Downloader {
                                     .header("Content-Type", "application/x-www-form-urlencoded")
                             , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, request.statusCode(), "HTTP ERROR", request.body());
+                log.error(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, request.statusCode(), "HTTP ERROR", request.body());
             }
             return request.statusCode() == 200;
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage());
+            log.error(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage());
             return false;
         }
     }
@@ -323,11 +323,11 @@ public class QBittorrent implements Downloader {
                                 .header("Content-Type", "application/x-www-form-urlencoded")
                         , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
                 if (request.statusCode() != 200) {
-                    log.warn(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
+                    log.error(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
                     throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
                 }
             } catch (Exception e) {
-                log.warn(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+                log.error(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
                 throw new IllegalStateException(e);
             }
         });
@@ -343,11 +343,11 @@ public class QBittorrent implements Downloader {
                             .header("Content-Type", "application/x-www-form-urlencoded")
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.warn(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
+                log.error(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
                 throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+            log.error(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
             throw new IllegalStateException(e);
         }
     }

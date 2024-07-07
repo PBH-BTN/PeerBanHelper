@@ -60,7 +60,7 @@ public class PBHConfigUpdater {
         try {
             yaml.save(file);
         } catch (IOException e) {
-            log.warn(Lang.CONFIG_SAVE_ERROR, e);
+            log.error(Lang.CONFIG_SAVE_ERROR, e);
         }
     }
 

@@ -120,7 +120,7 @@ public class Deluge implements Downloader {
             }
             DelugeListMethodsResponse listMethodsResponse = this.client.listMethods();
             if (!new HashSet<>(listMethodsResponse.getDelugeSupportedMethods()).containsAll(MUST_HAVE_METHODS)) {
-                log.warn(Lang.DOWNLOADER_DELUGE_PLUGIN_NOT_INSTALLED, getName());
+                log.error(Lang.DOWNLOADER_DELUGE_PLUGIN_NOT_INSTALLED, getName());
                 return false;
             }
         } catch (DelugeException e) {
@@ -162,7 +162,7 @@ public class Deluge implements Downloader {
                 torrents.add(torrent);
             }
         } catch (DelugeException e) {
-            log.warn(Lang.DOWNLOADER_DELUGE_API_ERROR, e);
+            log.error(Lang.DOWNLOADER_DELUGE_API_ERROR, e);
         }
         return torrents;
     }
@@ -189,7 +189,7 @@ public class Deluge implements Downloader {
         try {
             this.client.replaceBannedPeers(fullList.stream().map(PeerAddress::getIp).toList());
         } catch (DelugeException e) {
-            log.warn(Lang.DOWNLOADER_DELUGE_API_ERROR, e);
+            log.error(Lang.DOWNLOADER_DELUGE_API_ERROR, e);
         }
     }
 
@@ -197,7 +197,7 @@ public class Deluge implements Downloader {
         try {
             this.client.banPeers(added.stream().map(bm -> bm.getPeer().getAddress().getIp()).toList());
         } catch (DelugeException e) {
-            log.warn(Lang.DOWNLOADER_DELUGE_API_ERROR, e);
+            log.error(Lang.DOWNLOADER_DELUGE_API_ERROR, e);
         }
     }
 

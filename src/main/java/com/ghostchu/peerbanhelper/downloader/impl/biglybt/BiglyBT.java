@@ -234,11 +234,11 @@ public class BiglyBT implements Downloader {
                             .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.warn(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
+                log.error(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+            log.error(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
             throw new IllegalStateException(e);
         }
     }
@@ -252,11 +252,11 @@ public class BiglyBT implements Downloader {
                             .build()
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.warn(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
+                log.error(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+            log.error(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
             throw new IllegalStateException(e);
         }
     }

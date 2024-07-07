@@ -73,7 +73,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             } else if (i == 2) {
                 return new CheckResult(getClass(), PeerAction.SKIP, "User Rule", expressions.get(expression).name());
             } else {
-                log.warn(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
+                log.error(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
                 return null;
             }
         }
@@ -83,7 +83,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         if (returns instanceof CheckResult checkResult) {
             return checkResult;
         }
-        log.warn(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
+        log.error(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
         return null;
     }
 
@@ -156,10 +156,10 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                 }
                 result = handleResult(expression, returns);
             } catch (TimeoutException timeoutException) {
-                log.warn(Lang.MODULE_EXPRESSION_RULE_TIMEOUT, maxScriptExecuteTime, timeoutException);
+                log.error(Lang.MODULE_EXPRESSION_RULE_TIMEOUT, maxScriptExecuteTime, timeoutException);
                 return pass();
             } catch (Exception ex) {
-                log.warn(Lang.MODULE_EXPRESSION_RULE_ERROR, expressionMetadata.name(), ex);
+                log.error(Lang.MODULE_EXPRESSION_RULE_ERROR, expressionMetadata.name(), ex);
                 return pass();
             }
             if (result != null && result.action() != PeerAction.NO_ACTION) {
@@ -233,7 +233,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                                 threadLocks.put(expressionMetadata, new ReentrantLock());
                             }
                         } catch (ExpressionSyntaxErrorException err) {
-                            log.warn(Lang.MODULE_EXPRESSION_RULE_BAD_EXPRESSION, err);
+                            log.error(Lang.MODULE_EXPRESSION_RULE_BAD_EXPRESSION, err);
                         }
                     });
                 }

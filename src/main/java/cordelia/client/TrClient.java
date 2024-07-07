@@ -103,10 +103,10 @@ public final class TrClient {
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
         } catch (JsonSyntaxException jsonSyntaxException) {
-            log.warn(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException);
+            log.error(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException);
             throw new IllegalStateException(jsonSyntaxException);
         } catch (IOException | InterruptedException e) {
-            log.warn("Request Transmission JsonRPC failure", e);
+            log.error("Request Transmission JsonRPC failure", e);
             throw new IllegalStateException(e);
         }
     }
@@ -123,7 +123,7 @@ public final class TrClient {
                 String sessionId = resp.headers().firstValue(Session.SESSION_ID).orElseThrow();
                 sessionStore.set(new Session(sessionId));
             } catch (IOException | InterruptedException e) {
-                log.warn(Lang.TRCLIENT_API_ERROR, e.getClass().getName(), e.getMessage());
+                log.error(Lang.TRCLIENT_API_ERROR, e.getClass().getName(), e.getMessage());
                 throw new IllegalStateException(e);
             }
         }

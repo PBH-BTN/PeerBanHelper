@@ -280,7 +280,7 @@ public class RuleSubController extends AbstractFeatureModule {
             }
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_URL_WRONG.replace("{}", ruleName), HttpStatus.BAD_REQUEST.getCode()));
-            log.warn("Unable to retrieve the sub from given URL", e);
+            log.error("Unable to retrieve the sub from given URL", e);
         }
     }
 

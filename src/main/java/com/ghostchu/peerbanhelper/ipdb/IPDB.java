@@ -289,13 +289,13 @@ public class IPDB implements AutoCloseable {
         return HTTPUtil.retryableSendProgressTracking(httpClient, req, HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
-                        log.warn(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body());
+                        log.error(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body());
                     } else {
-                        log.info(Lang.IPDB_UPDATE_SUCCESS, databaseName);
+                        log.error(Lang.IPDB_UPDATE_SUCCESS, databaseName);
                     }
                 })
                 .exceptionally(e -> {
-                    log.warn(Lang.IPDB_UPDATE_FAILED, "Java Exception", e);
+                    log.error(Lang.IPDB_UPDATE_FAILED, "Java Exception", e);
                     File file = path.toFile();
                     if (file.exists()) {
                         file.delete(); // 删除下载不完整的文件

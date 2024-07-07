@@ -32,7 +32,7 @@ public class DatabaseHelper {
                 log.info(Lang.DATABASE_OUTDATED_LOGS_CLEANED_UP, cleaned);
             }
         } catch (SQLException e) {
-            log.warn(Lang.DATABASE_SETUP_FAILED, e);
+            log.error(Lang.DATABASE_SETUP_FAILED, e);
             throw e;
         }
     }

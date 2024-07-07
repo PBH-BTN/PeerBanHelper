@@ -65,7 +65,7 @@ public class JavalinWebContainer {
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
                     ctx.json(Map.of("message", Lang.WEBAPI_INTERNAL_ERROR));
-                    log.warn("500 Internal Server Error", e);
+                    log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
                     if (ctx.routeRoles().isEmpty()) {

@@ -9,6 +9,7 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
+import org.slf4j.event.Level;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -53,9 +54,16 @@ public class SwingLoggerAppender extends AbstractAppender {
     @Override
     public void append(LogEvent event) {
         String message = new String(this.getLayout().toByteArray(event));
-        listeners.forEach(c -> c.accept(new LoggerEvent(message, event, maxLinesSetting)));
+        Level lvl = switch (event.getLevel().getStandardLevel()) {
+            case FATAL, ERROR -> Level.ERROR;
+            case WARN -> Level.WARN;
+            case DEBUG -> Level.DEBUG;
+            case TRACE -> Level.TRACE;
+            default -> Level.INFO;
+        };
+        listeners.forEach(c -> c.accept(new LoggerEvent(message.trim(), event, lvl, maxLinesSetting)));
     }
 
-    public record LoggerEvent(String message, LogEvent event, int maxLines) {
+    public record LoggerEvent(String message, LogEvent event, Level level, int maxLines) {
     }
 }

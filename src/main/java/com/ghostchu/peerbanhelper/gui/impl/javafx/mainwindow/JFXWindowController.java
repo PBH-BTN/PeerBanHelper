@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow;
 
+import com.ghostchu.peerbanhelper.gui.impl.javafx.ListLogEntry;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -17,7 +18,7 @@ public class JFXWindowController implements Initializable {
     private Tab tabLogs;
     @FXML
     @Getter
-    private TextArea logsTextArea;
+    private ListView<ListLogEntry> logsListView;
     @FXML
     @Getter
     private Menu menuProgram;

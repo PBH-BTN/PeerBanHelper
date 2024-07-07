@@ -34,7 +34,7 @@ public class ModuleMatchCache {
             try {
                 return CACHE_POOL.get(_cacheKey, resultSupplier);
             } catch (ExecutionException e) {
-                log.warn("Unable to get cache value from cache, the resultSupplier throws unexpected exception", e);
+                log.error("Unable to get cache value from cache, the resultSupplier throws unexpected exception", e);
                 return null;
             }
         } else {

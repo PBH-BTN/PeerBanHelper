@@ -220,7 +220,7 @@ public class Main {
                     guiType = "swing";
                 }
             } catch (IOException e) {
-                log.warn("Failed to load JavaFx dependencies", e);
+                log.error("Failed to load JavaFx dependencies", e);
                 guiType = "swing";
             }
         }
@@ -253,7 +253,7 @@ public class Main {
                                 Main.getMeta().getJavafx()));
                 return true;
             } catch (Exception e) {
-                log.warn("Unable to load JavaFx dependencies", e);
+                log.error("Unable to load JavaFx dependencies", e);
                 return false;
             }
         }

@@ -81,7 +81,7 @@ public class BtnAbilityRules implements BtnAbility {
                         return;
                     }
                     if (r.statusCode() != 200) {
-                        log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                        log.error(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
                     } else {
                         BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
                         this.btnRule = new BtnRuleParsed(btr);
@@ -94,7 +94,7 @@ public class BtnAbilityRules implements BtnAbility {
                     }
                 })
                 .exceptionally((e) -> {
-                    log.warn(Lang.BTN_REQUEST_FAILS, e);
+                    log.error(Lang.BTN_REQUEST_FAILS, e);
                     return null;
                 });
     }

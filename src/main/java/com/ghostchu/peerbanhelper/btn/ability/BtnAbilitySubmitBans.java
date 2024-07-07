@@ -70,7 +70,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
         HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
-                        log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                        log.error(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
                     } else {
                         log.info(Lang.BTN_SUBMITTED_BANS, btnPeers.size());
                     }

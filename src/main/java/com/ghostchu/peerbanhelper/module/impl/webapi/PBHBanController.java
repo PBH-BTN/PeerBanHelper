@@ -83,7 +83,7 @@ public class PBHBanController extends AbstractFeatureModule {
             ctx.status(HttpStatus.OK);
             ctx.json(list);
         } catch (SQLException e) {
-            log.warn("Error on handling Web API request", e);
+            log.error("Error on handling Web API request", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", "Internal server error"));
         }

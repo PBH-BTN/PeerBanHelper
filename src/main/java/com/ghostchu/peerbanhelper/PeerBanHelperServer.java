@@ -231,7 +231,7 @@ public class PeerBanHelperServer {
                 downloader.setBanList(Collections.emptyList(), null, null);
             }
         } catch (Exception e) {
-            log.warn(Lang.RESET_DOWNLOADER_FAILED, e);
+            log.error(Lang.RESET_DOWNLOADER_FAILED, e);
         }
     }
 
@@ -332,7 +332,7 @@ public class PeerBanHelperServer {
 
     private void registerBanWaveTimer() {
         if (BAN_WAVE_SERVICE != null && (!BAN_WAVE_SERVICE.isShutdown() || !BAN_WAVE_SERVICE.isTerminated())) {
-            BAN_WAVE_SERVICE.shutdownNow().forEach(r -> log.warn("Unfinished runnable: {}", r));
+            BAN_WAVE_SERVICE.shutdownNow().forEach(r -> log.error("Unfinished runnable: {}", r));
         }
         BAN_WAVE_SERVICE = Executors.newScheduledThreadPool(1, r -> {
             Thread thread = new Thread(r);
@@ -385,14 +385,14 @@ public class PeerBanHelperServer {
             Map<Downloader, List<BanDetail>> downloaderBanDetailMap = new ConcurrentHashMap<>();
             banWaveWatchDog.setLastOperation("Check Bans");
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
-                log.warn(Lang.TIMING_CHECK_BANS);
+                log.error(Lang.TIMING_CHECK_BANS);
             })) {
                 downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader)))));
             }
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist");
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> {
-                log.warn(Lang.TIMING_ADD_BANS);
+                log.error(Lang.TIMING_ADD_BANS);
             })) {
                 downloaderBanDetailMap.forEach((downloader, details) -> {
                     try {
@@ -420,7 +420,7 @@ public class PeerBanHelperServer {
             banWaveWatchDog.setLastOperation("Apply banlist");
             // 如果需要，则应用更改封禁列表到下载器
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> {
-                log.warn(Lang.TIMING_APPLY_BAN_LIST);
+                log.error(Lang.TIMING_APPLY_BAN_LIST);
             })) {
                 downloaders.forEach(downloader -> protect.getService().submit(() -> updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
                         needRelaunched.getOrDefault(downloader, Collections.emptyList()),
@@ -458,7 +458,7 @@ public class PeerBanHelperServer {
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
-        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.warn(Lang.TIMING_CHECK_BANS))) {
+        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(Lang.TIMING_CHECK_BANS))) {
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
@@ -500,7 +500,7 @@ public class PeerBanHelperServer {
         if (!updateBanList && needToRelaunch.isEmpty()) return;
         try {
             if (!downloader.login()) {
-                log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+                log.error(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
                 downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_LOGIN_FAILED);
                 return;
             } else {
@@ -509,7 +509,7 @@ public class PeerBanHelperServer {
             downloader.setBanList(BAN_LIST.keySet(), added, removed);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
-            log.warn(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
+            log.error(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
             downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_EXCEPTION);
         }
     }
@@ -567,7 +567,7 @@ public class PeerBanHelperServer {
                     Map<Torrent, List<Peer>> p = collectPeers(downloader);
                     peers.put(downloader, p);
                 } catch (Exception e) {
-                    log.warn(Lang.DOWNLOADER_UNHANDLED_EXCEPTION, e);
+                    log.error(Lang.DOWNLOADER_UNHANDLED_EXCEPTION, e);
                 }
             }));
         }
@@ -577,14 +577,14 @@ public class PeerBanHelperServer {
     public Map<Torrent, List<Peer>> collectPeers(Downloader downloader) {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         if (!downloader.login()) {
-            log.warn(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+            log.error(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
             downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_LOGIN_FAILED);
             return Collections.emptyMap();
         }
         List<Torrent> torrents = downloader.getTorrents();
         Semaphore parallelReqRestrict = new Semaphore(16);
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.COLLECT_PEERS.getTimeout(), (t) -> {
-            log.warn(Lang.TIMING_COLLECT_PEERS);
+            log.error(Lang.TIMING_COLLECT_PEERS);
         })) {
             torrents.forEach(torrent -> protect.getService().submit(() -> {
                 try {
@@ -663,7 +663,7 @@ public class PeerBanHelperServer {
                     }
                     results.add(checkResult);
                 } catch (Exception e) {
-                    log.warn("Unable to execute module {}, report to PeerBanHelper developer!", module.getName(), e);
+                    log.error("Unable to execute module {}, report to PeerBanHelper developer!", module.getName(), e);
                 }
             }
             CheckResult result = NO_MATCHES_CHECK_RESULT;
@@ -678,7 +678,7 @@ public class PeerBanHelperServer {
             }
             return result;
         } catch (Exception e) {
-            log.warn("Failed to execute modules", e);
+            log.error("Failed to execute modules", e);
             return new CheckResult(getClass(), PeerAction.NO_ACTION, "ERROR", "ERROR");
         }
     }

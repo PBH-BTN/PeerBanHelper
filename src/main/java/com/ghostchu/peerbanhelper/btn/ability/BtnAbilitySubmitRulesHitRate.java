@@ -59,13 +59,13 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
         HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
-                        log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                        log.error(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
                     } else {
                         log.info(Lang.BTN_SUBMITTED_HITRATE, dat.size());
                     }
                 })
                 .exceptionally(e -> {
-                    log.warn(Lang.BTN_REQUEST_FAILS, e);
+                    log.error(Lang.BTN_REQUEST_FAILS, e);
                     return null;
                 });
     }

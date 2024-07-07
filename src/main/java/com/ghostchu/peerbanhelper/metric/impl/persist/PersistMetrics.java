@@ -62,7 +62,7 @@ public class PersistMetrics implements BasicMetrics {
                     metadata.getDescription()
             ));
         } catch (SQLException e) {
-            log.warn(Lang.DATABASE_SAVE_BUFFER_FAILED, e);
+            log.error(Lang.DATABASE_SAVE_BUFFER_FAILED, e);
         }
     }
 

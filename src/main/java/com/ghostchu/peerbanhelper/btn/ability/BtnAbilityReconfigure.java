@@ -34,7 +34,7 @@ public class BtnAbilityReconfigure implements BtnAbility {
     private void checkIfReconfigure() {
         HttpResponse<String> resp = HTTPUtil.retryableSend(btnNetwork.getHttpClient(), MutableRequest.GET(btnNetwork.getConfigUrl()), HttpResponse.BodyHandlers.ofString()).join();
         if (resp.statusCode() != 200) {
-            log.warn(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.statusCode() + " - " + resp.body());
+            log.error(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.statusCode() + " - " + resp.body());
             return;
         }
         JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();

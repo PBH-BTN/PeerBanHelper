@@ -149,13 +149,13 @@ public class Transmission implements Downloader {
                 .build();
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
         if (!sessionSetResp.isSuccess()) {
-            log.warn(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, sessionSetResp.getResult());
+            log.error(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, sessionSetResp.getResult());
         }
         Thread.sleep(3000); // Transmission 在这里疑似有崩溃问题？
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
-            log.warn(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP);
+            log.error(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP);
         } else {
             log.info(Lang.DOWNLOADER_TR_UPDATED_BLOCKLIST, updateBlockListResp.getArgs().getBlockListSize());
         }

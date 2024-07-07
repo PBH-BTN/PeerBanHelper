@@ -27,7 +27,7 @@ public class CommandBasedImpl {
         Process process = p.onExit().get(10, TimeUnit.SECONDS);
         if (process.isAlive()) {
             process.destroy();
-            log.warn(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT, command);
+            log.error(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT, command);
             return -9999;
         }
         return process.exitValue();

@@ -76,7 +76,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         try {
             getServer().saveDownloaders();
         } catch (IOException e) {
-            log.warn("Internal server error, unable to create downloader due an I/O exception", e);
+            log.error("Internal server error, unable to create downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION));
         }
@@ -106,7 +106,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         try {
             getServer().saveDownloaders();
         } catch (IOException e) {
-            log.warn("Internal server error, unable to update downloader due an I/O exception", e);
+            log.error("Internal server error, unable to update downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION));
         }

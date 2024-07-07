@@ -79,7 +79,7 @@ public class HTTPUtil {
             sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
             ignoreSslContext = sslContext;
         } catch (Exception e) {
-            log.warn(Lang.MODULE_AP_SSL_CONTEXT_FAILURE, e);
+            log.error(Lang.MODULE_AP_SSL_CONTEXT_FAILURE, e);
         }
     }
 

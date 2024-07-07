@@ -47,7 +47,7 @@ public class IPFilterInvoker implements BanListInvoker {
             fileWriter.write("");
             fileWriter.flush();
         } catch (IOException e) {
-            log.warn(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
+            log.error(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
         }
     }
 
@@ -60,7 +60,7 @@ public class IPFilterInvoker implements BanListInvoker {
             fileWriter.write(generateIpFilterLine(peer) + "\n");
             fileWriter.flush();
         } catch (IOException e) {
-            log.warn(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
+            log.error(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
         }
     }
 
@@ -75,7 +75,7 @@ public class IPFilterInvoker implements BanListInvoker {
             }
             fileWriter.flush();
         } catch (IOException e) {
-            log.warn(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
+            log.error(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
         }
     }
 

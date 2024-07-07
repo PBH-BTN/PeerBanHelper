@@ -67,13 +67,12 @@
                             <content>
                                 <AnchorPane>
                                     <children>
-                                        <TextArea fx:id="logsTextArea"
+                                        <ListView fx:id="logsListView"
                                                   prefHeight="345.3333333333333"
                                                   prefWidth="640.0"
                                                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-                                                  wrapText="true"
-                                                  editable="false"/>
+                                        />
                                     </children>
                                 </AnchorPane>
                             </content>

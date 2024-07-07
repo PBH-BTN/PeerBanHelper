@@ -116,7 +116,7 @@ public class ProfileUpdateScript {
             oldRule = oldRule.toLowerCase(Locale.ROOT);
             String[] ruleExploded = oldRule.split("@", 2);
             if (ruleExploded.length != 2) {
-                log.warn(Lang.ERR_INVALID_RULE_SYNTAX, oldRule);
+                log.error(Lang.ERR_INVALID_RULE_SYNTAX, oldRule);
                 continue;
             }
             String matchMethod = ruleExploded[0];
@@ -180,7 +180,7 @@ public class ProfileUpdateScript {
             oldRule = oldRule.toLowerCase(Locale.ROOT);
             String[] ruleExploded = oldRule.split("@", 2);
             if (ruleExploded.length != 2) {
-                log.warn(Lang.ERR_INVALID_RULE_SYNTAX, oldRule);
+                log.error(Lang.ERR_INVALID_RULE_SYNTAX, oldRule);
                 continue;
             }
             String matchMethod = ruleExploded[0];

@@ -42,7 +42,7 @@ public class CommandExec implements BanListInvoker {
             try {
                 invokeCommand(c, Collections.emptyMap());
             } catch (IOException | ExecutionException | InterruptedException | TimeoutException e) {
-                log.warn(Lang.COMMAND_EXECUTOR_FAILED, e);
+                log.error(Lang.COMMAND_EXECUTOR_FAILED, e);
             }
         }
     }
@@ -60,7 +60,7 @@ public class CommandExec implements BanListInvoker {
             try {
                 invokeCommand(c, map);
             } catch (IOException | ExecutionException | InterruptedException | TimeoutException e) {
-                log.warn(Lang.COMMAND_EXECUTOR_FAILED, e);
+                log.error(Lang.COMMAND_EXECUTOR_FAILED, e);
             }
         }
     }
@@ -78,7 +78,7 @@ public class CommandExec implements BanListInvoker {
             try {
                 invokeCommand(c, map);
             } catch (IOException | ExecutionException | InterruptedException | TimeoutException e) {
-                log.warn(Lang.COMMAND_EXECUTOR_FAILED, e);
+                log.error(Lang.COMMAND_EXECUTOR_FAILED, e);
             }
         }
     }
@@ -97,7 +97,7 @@ public class CommandExec implements BanListInvoker {
         Process process = p.onExit().get(10, TimeUnit.SECONDS);
         if (process.isAlive()) {
             process.destroy();
-            log.warn(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT, command);
+            log.error(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT, command);
             return -9999;
         }
         return process.exitValue();

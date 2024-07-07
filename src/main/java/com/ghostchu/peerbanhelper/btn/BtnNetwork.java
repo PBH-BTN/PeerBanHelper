@@ -58,7 +58,7 @@ public class BtnNetwork {
         try {
             HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
-                log.warn(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body());
+                log.error(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body());
                 return;
             }
             JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
@@ -97,7 +97,7 @@ public class BtnNetwork {
                 }
             });
         } catch (Throwable e) {
-            log.warn(Lang.BTN_CONFIG_FAILS, e);
+            log.error(Lang.BTN_CONFIG_FAILS, e);
         }
     }
 
