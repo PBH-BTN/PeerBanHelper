@@ -15,7 +15,6 @@ import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
@@ -219,7 +218,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                 }
             }
         }
-        expressions = ImmutableMap.copyOf(userRules);
+        expressions = Map.copyOf(userRules);
         log.info(Lang.MODULE_EXPRESSION_RULE_COMPILED, expressions.size(), System.currentTimeMillis() - start);
     }
 

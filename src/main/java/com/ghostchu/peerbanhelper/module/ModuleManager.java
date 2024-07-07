@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.module;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -79,7 +78,7 @@ public class ModuleManager {
      * 解注册所有的功能模块
      */
     public void unregisterAll() {
-        ImmutableList.copyOf(this.modules).forEach(this::unregister);
+        List.copyOf(this.modules).forEach(this::unregister);
     }
 
     /**
@@ -89,7 +88,7 @@ public class ModuleManager {
      */
     @NotNull
     public List<FeatureModule> getModules() {
-        return ImmutableList.copyOf(modules);
+        return List.copyOf(modules);
     }
 
     /**

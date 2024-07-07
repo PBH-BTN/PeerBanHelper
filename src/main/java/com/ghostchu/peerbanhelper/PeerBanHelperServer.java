@@ -36,8 +36,6 @@ import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
@@ -95,7 +93,7 @@ public class PeerBanHelperServer {
     private File banListFile;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
     @Getter
-    private ImmutableMap<PeerAddress, PeerMetadata> LIVE_PEERS = ImmutableMap.of();
+    private Map<PeerAddress, PeerMetadata> LIVE_PEERS = new HashMap<>();
     @Autowired
     @Qualifier("persistMetrics")
     private BasicMetrics metrics;
@@ -441,9 +439,7 @@ public class PeerBanHelperServer {
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
-        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
-            log.warn(Lang.TIMING_CHECK_BANS);
-        })) {
+        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.warn(Lang.TIMING_CHECK_BANS))) {
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
@@ -469,7 +465,7 @@ public class PeerBanHelperServer {
                                     livePeers.put(address, metadata);
                                 }
                         )));
-        LIVE_PEERS = ImmutableMap.copyOf(livePeers);
+        LIVE_PEERS = Map.copyOf(livePeers);
         Main.getEventBus().post(new LivePeersUpdatedEvent(LIVE_PEERS));
     }
 
@@ -678,7 +674,7 @@ public class PeerBanHelperServer {
      */
     @NotNull
     public Map<PeerAddress, BanMetadata> getBannedPeers() {
-        return ImmutableMap.copyOf(BAN_LIST);
+        return Map.copyOf(BAN_LIST);
     }
 
     /**
@@ -704,7 +700,7 @@ public class PeerBanHelperServer {
     }
 
     public List<Downloader> getDownloaders() {
-        return ImmutableList.copyOf(downloaders);
+        return List.copyOf(downloaders);
     }
 
     /**
@@ -724,7 +720,7 @@ public class PeerBanHelperServer {
         return metadata;
     }
 
-    public ImmutableMap<PeerAddress, PeerMetadata> getLivePeersSnapshot() {
+    public Map<PeerAddress, PeerMetadata> getLivePeersSnapshot() {
         return LIVE_PEERS;
     }
 

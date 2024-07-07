@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.alert;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.NewAlertCreated;
-import com.google.common.collect.ImmutableList;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,6 +30,6 @@ public class AlertManager {
     }
 
     public List<Alert> getAlerts() {
-        return ImmutableList.copyOf(alerts.values());
+        return List.copyOf(alerts.values());
     }
 }
