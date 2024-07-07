@@ -653,29 +653,25 @@ public class PeerBanHelperServer {
             }
         }
         try {
-            try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
-                for (FeatureModule registeredModule : moduleManager.getModules()) {
-                    if (!(registeredModule instanceof RuleFeatureModule module)) {
-                        continue;
-                    }
-                    exec.submit(() -> {
-                        try {
-                            CheckResult checkResult;
-                            if (module.isThreadSafe()) {
-                                checkResult = module.shouldBanPeer(torrent, peer, executor);
-                            } else {
-                                synchronized (registeredModule.getConfigName()) {
-                                    checkResult = module.shouldBanPeer(torrent, peer, executor);
-                                }
-                            }
-                            if (checkResult.action() == PeerAction.SKIP) {
-                                results.add(checkResult);
-                            }
-                            results.add(checkResult);
-                        } catch (Exception e) {
-                            log.warn("Unable to execute module {}, report to PeerBanHelper developer!", module.getName(), e);
+            for (FeatureModule registeredModule : moduleManager.getModules()) {
+                if (!(registeredModule instanceof RuleFeatureModule module)) {
+                    continue;
+                }
+                try {
+                    CheckResult checkResult;
+                    if (module.isThreadSafe()) {
+                        checkResult = module.shouldBanPeer(torrent, peer, executor);
+                    } else {
+                        synchronized (registeredModule.getConfigName()) {
+                            checkResult = module.shouldBanPeer(torrent, peer, executor);
                         }
-                    });
+                    }
+                    if (checkResult.action() == PeerAction.SKIP) {
+                        results.add(checkResult);
+                    }
+                    results.add(checkResult);
+                } catch (Exception e) {
+                    log.warn("Unable to execute module {}, report to PeerBanHelper developer!", module.getName(), e);
                 }
             }
             CheckResult result = NO_MATCHES_CHECK_RESULT;
