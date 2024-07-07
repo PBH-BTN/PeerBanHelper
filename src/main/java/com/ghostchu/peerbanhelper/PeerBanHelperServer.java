@@ -318,7 +318,7 @@ public class PeerBanHelperServer {
             token = getMainConfig().getString("server.token");
         }
         String host = getMainConfig().getString("server.address");
-        if (host.equals("0.0.0.0") || host.equals("::")) {
+        if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
             host = null;
         }
         webContainer.start(host, httpdPort, token);
