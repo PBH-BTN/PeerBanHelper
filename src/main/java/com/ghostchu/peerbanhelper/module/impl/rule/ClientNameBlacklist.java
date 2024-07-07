@@ -74,7 +74,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
         if (isHandShaking(peer) && (peer.getClientName() == null || peer.getClientName().isBlank())) {
             return handshaking();
         }
-        return (CheckResult) getCache().readCache(this, peer.getClientName(), () -> {
+        return getCache().readCache(this, peer.getClientName(), () -> {
             RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.rule()));
