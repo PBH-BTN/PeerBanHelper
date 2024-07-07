@@ -118,6 +118,8 @@ public class PeerBanHelperServer {
     private HitRateMetric hitRateMetric = new HitRateMetric();
     @Autowired
     private DatabaseHelper databaseHelper;
+    private final Set<ScheduledPeerBanning> scheduledPeerBannings = new CopyOnWriteArraySet<>();
+    private final Set<PeerAddress> scheduledPeerUnBannings = new CopyOnWriteArraySet<>();
 
     public PeerBanHelperServer() {
         this.pbhServerAddress = Main.getPbhServerAddress();
@@ -371,8 +373,9 @@ public class PeerBanHelperServer {
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
+            unbannedPeers.addAll(fetchScheduledUnbans());
             // 被新封禁的对等体列表
-            Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>();
+            Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>(fetchScheduledBans());
             // 当前所有活跃的对等体列表
             banWaveWatchDog.setLastOperation("Collect peers");
             Map<Downloader, Map<Torrent, List<Peer>>> peers = collectPeers();
@@ -398,7 +401,7 @@ public class PeerBanHelperServer {
                         details.forEach(detail -> {
                             protect.getService().submit(() -> {
                                 if (detail.result().action() == PeerAction.BAN) {
-                                    BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext() == null ? "Unknown" : detail.result().moduleContext().getClass().getName(), downloader.getName(),
+                                    BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloader.getName(),
                                             System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
                                             detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                     bannedPeers.add(banMetadata);
@@ -435,6 +438,23 @@ public class PeerBanHelperServer {
             banWaveWatchDog.feed();
             metrics.recordCheck();
         }
+    }
+
+    private Collection<? extends BanMetadata> fetchScheduledBans() {
+        return scheduledPeerBannings.stream().map(ScheduledPeerBanning::banMetadata).toList();
+    }
+
+    private Collection<? extends BanMetadata> fetchScheduledUnbans() {
+        List<BanMetadata> banMetadata = new ArrayList<>();
+        var it = scheduledPeerUnBannings.iterator();
+        while (it.hasNext()) {
+            BanMetadata meta = BAN_LIST.get(it.next());
+            if (meta != null) {
+                banMetadata.add(meta);
+            }
+            it.remove();
+        }
+        return banMetadata;
     }
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided) {
@@ -678,12 +698,22 @@ public class PeerBanHelperServer {
     }
 
     /**
+     * 获取目前所有被封禁的对等体的集合的拷贝
+     *
+     * @return 不可修改的集合拷贝
+     */
+    @NotNull
+    public Map<PeerAddress, BanMetadata> getBannedPeersDirect() {
+        return BAN_LIST;
+    }
+
+    /**
      * 以指定元数据封禁一个特定的对等体
      *
      * @param peer        对等体 IP 地址
      * @param banMetadata 封禁元数据
      */
-    public void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
+    private void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
         BAN_LIST.put(peer.getPeerAddress(), banMetadata);
         metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
         banListInvoker.forEach(i -> i.add(peer.getPeerAddress(), banMetadata));
@@ -693,6 +723,15 @@ public class PeerBanHelperServer {
             banMetadata.setReverseLookup("N/A");
         }
         Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
+    }
+
+    public void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
+        scheduledPeerBannings.add(new ScheduledPeerBanning(banMetadata, torrent, peer));
+    }
+
+    public void scheduleUnBanPeer(@NotNull PeerAddress peer) {
+        scheduledPeerBannings.removeIf(s -> s.banMetadata().getPeer().getAddress().getIp().equals(peer.getIp()));
+        scheduledPeerUnBannings.add(peer);
     }
 
     public String getWebUiUrl() {
@@ -710,7 +749,7 @@ public class PeerBanHelperServer {
      * @return 此对等体的封禁元数据；返回 null 代表此对等体没有被封禁
      */
     @Nullable
-    public BanMetadata unbanPeer(@NotNull PeerAddress address) {
+    private BanMetadata unbanPeer(@NotNull PeerAddress address) {
         BanMetadata metadata = BAN_LIST.remove(address);
         if (metadata != null) {
             metrics.recordPeerUnban(address, metadata);
@@ -745,6 +784,13 @@ public class PeerBanHelperServer {
             Torrent torrent,
             Peer peer,
             CheckResult result
+    ) {
+    }
+
+    public record ScheduledPeerBanning(
+            BanMetadata banMetadata,
+            Torrent torrent,
+            Peer peer
     ) {
     }
 }

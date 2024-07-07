@@ -65,7 +65,7 @@ public class PBHBanController extends AbstractFeatureModule {
                 pendingRemovals.add(address);
             }
         }
-        pendingRemovals.forEach(pa -> getServer().unbanPeer(pa));
+        pendingRemovals.forEach(pa -> getServer().scheduleUnBanPeer(pa));
         context.status(HttpStatus.OK);
         context.json(Map.of("count", pendingRemovals.size()));
     }
