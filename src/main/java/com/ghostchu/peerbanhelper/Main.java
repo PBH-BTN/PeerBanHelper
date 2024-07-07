@@ -71,8 +71,11 @@ public class Main {
     private static YamlConfiguration profileConfig;
     @Getter
     private static BuildMeta meta;
+    @Getter
+    private static String[] startupArgs;
 
     public static void main(String[] args) {
+        startupArgs = args;
         setupConfDirectory(args);
         setupLog4j2();
         setupProxySettings();

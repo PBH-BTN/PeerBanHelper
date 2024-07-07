@@ -561,6 +561,25 @@
             <artifactId>spring-context</artifactId>
             <version>6.1.10</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
+        <!--        <dependency>-->
+        <!--            <groupId>org.jfxtras</groupId>-->
+        <!--            <artifactId>jmetro</artifactId>-->
+        <!--            <version>11.6.16</version>-->
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                <groupId>org.openjfx</groupId>-->
+        <!--                <artifactId>javafx-graphics</artifactId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>org.openjfx</groupId>-->
+        <!--                    <artifactId>javafx-controls</artifactId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>org.openjfx</groupId>-->
+        <!--                    <artifactId>javafx-base</artifactId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+        <!--        </dependency>-->
     </dependencies>
 </project>

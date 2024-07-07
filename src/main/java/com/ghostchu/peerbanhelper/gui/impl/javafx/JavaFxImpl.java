@@ -90,6 +90,9 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Subscribe
     public void onPBHServerStarted(PBHServerStartedEvent event) {
+        if (Arrays.stream(Main.getStartupArgs()).anyMatch(s -> s.equalsIgnoreCase("nowebuitab"))) {
+            return;
+        }
         CompletableFuture.runAsync(() -> {
             if (!isWebViewSupported()) {
                 try {
@@ -181,7 +184,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
             Thread.sleep(50);
             Thread.yield();
         }
-        Platform.runLater(() -> setupJFXWindow());
+        Platform.runLater(this::setupJFXWindow);
     }
 
     private void setupJFXWindow() {
