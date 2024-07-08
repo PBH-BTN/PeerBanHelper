@@ -245,6 +245,12 @@ public class QBittorrent implements Downloader {
             if (singleTorrentPeer.getPeerId().equals("Unknown") || singleTorrentPeer.getPeerId().equals("未知")) {
                 singleTorrentPeer.setPeerIdClient(null);
             }
+            if (singleTorrentPeer.getClientName() != null) {
+                if (singleTorrentPeer.getClientName().startsWith("Unknown [") && singleTorrentPeer.getClientName().endsWith("]")) {
+                    String mid = singleTorrentPeer.getClientName().substring("Unknown [".length(), singleTorrentPeer.getClientName().length() - 1);
+                    singleTorrentPeer.setClient(mid);
+                }
+            }
             peersList.add(singleTorrentPeer);
         }
         return peersList;
