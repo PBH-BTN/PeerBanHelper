@@ -187,7 +187,7 @@ public class PBHBanController extends AbstractFeatureModule {
             this.torrentSize = history.getTorrent().getSize();
             this.module = history.getRule().getModule().getName();
             this.rule = history.getRule().getRule();
-            this.description = history.getRule().getRule();
+            this.description = history.getDescription();
         }
     }
 
