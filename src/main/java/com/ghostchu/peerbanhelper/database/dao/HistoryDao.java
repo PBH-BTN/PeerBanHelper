@@ -35,8 +35,8 @@ public class HistoryDao extends BaseDaoImpl<HistoryEntity, Long> {
     public Map<String, Long> getBannedIps(int n) throws Exception {
         Timestamp twoWeeksAgo = new Timestamp(Instant.now().minus(14, ChronoUnit.DAYS).toEpochMilli());
 
-        String sql = "SELECT peer_ip, COUNT(*) AS count FROM " + getTableName() + " WHERE ban_at >= ? " +
-                "GROUP BY peer_ip ORDER BY count DESC LIMIT " + n;
+        String sql = "SELECT ip, COUNT(*) AS count FROM " + getTableName() + " WHERE banAt >= ? " +
+                "GROUP BY ip ORDER BY count DESC LIMIT " + n;
 
         Map<String, Long> result = new HashMap<>();
         var banLogs = super.queryRaw(sql, twoWeeksAgo.toString());

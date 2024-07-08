@@ -68,6 +68,7 @@ public class PersistMetrics implements BasicMetrics {
                     metadata.getPeer().getClientName()
             ));
             TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
+                    null,
                     metadata.getTorrent().getHash(),
                     metadata.getTorrent().getName(),
                     metadata.getTorrent().getSize()
