@@ -83,10 +83,10 @@ public class PBHConfigUpdater {
             var inlineYaml = yaml.getInLineComments(key);
             var stdBundled = bundle.getComments(key);
             var stdYaml = yaml.getComments(key);
-            if (inlineYaml.isEmpty()) {
+            if (inlineYaml.isEmpty() && !inlineBundled.isEmpty()) {
                 yaml.setInLineComments(key, inlineBundled);
             }
-            if (stdYaml.isEmpty()) {
+            if (stdYaml.isEmpty() && !stdBundled.isEmpty()) {
                 yaml.setComments(key, stdBundled);
             }
         }
