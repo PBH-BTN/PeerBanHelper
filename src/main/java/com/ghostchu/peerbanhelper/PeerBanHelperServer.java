@@ -66,7 +66,7 @@ import java.util.logging.Level;
 @Slf4j
 @Component
 public class PeerBanHelperServer {
-    private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, "No matches", "No matches");
+    private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "No matches", "No matches");
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final List<Downloader> downloaders = new ArrayList<>();
     @Getter
@@ -400,8 +400,12 @@ public class PeerBanHelperServer {
                         details.forEach(detail -> {
                             protect.getService().submit(() -> {
                                 if (detail.result().action() == PeerAction.BAN) {
+                                    long actualBanDuration = banDuration;
+                                    if (detail.banDuration() > 0) {
+                                        actualBanDuration = detail.banDuration();
+                                    }
                                     BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloader.getName(),
-                                            System.currentTimeMillis(), System.currentTimeMillis() + banDuration,
+                                            System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration,
                                             detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                     bannedPeers.add(banMetadata);
                                     relaunch.add(detail.torrent());
@@ -464,7 +468,7 @@ public class PeerBanHelperServer {
                 for (Peer peer : peers) {
                     protect.getService().submit(() -> {
                         CheckResult checkResult = checkBan(torrent, peer);
-                        details.add(new BanDetail(torrent, peer, checkResult));
+                        details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
                     });
                 }
             }
@@ -634,11 +638,11 @@ public class PeerBanHelperServer {
     public CheckResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
         List<CheckResult> results = new ArrayList<>();
         if (peer.getPeerAddress().getAddress().isAnyLocal()) {
-            return new CheckResult(getClass(), PeerAction.SKIP, "local access", "skip local network peers");
+            return new CheckResult(getClass(), PeerAction.SKIP, 0, "local access", "skip local network peers");
         }
         for (IPAddress ignoreAddress : ignoreAddresses) {
             if (ignoreAddress.contains(peer.getPeerAddress().getAddress())) {
-                return new CheckResult(getClass(), PeerAction.SKIP, "ignored addresses", "skip peers from ignored addresses");
+                return new CheckResult(getClass(), PeerAction.SKIP, 0, "ignored addresses", "skip peers from ignored addresses");
             }
         }
         try {
@@ -679,7 +683,7 @@ public class PeerBanHelperServer {
             return result;
         } catch (Exception e) {
             log.error("Failed to execute modules", e);
-            return new CheckResult(getClass(), PeerAction.NO_ACTION, "ERROR", "ERROR");
+            return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "ERROR", "ERROR");
         }
     }
 
@@ -778,7 +782,8 @@ public class PeerBanHelperServer {
     public record BanDetail(
             Torrent torrent,
             Peer peer,
-            CheckResult result
+            CheckResult result,
+            long banDuration
     ) {
     }
 

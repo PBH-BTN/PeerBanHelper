@@ -28,6 +28,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
     private List<Rule> bannedPeers;
     @Autowired
     private JavalinWebContainer webContainer;
+    private long banDuration;
 
     @Override
     public @NotNull String getName() {
@@ -68,6 +69,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
 
     private void reloadConfig() {
         this.bannedPeers = RuleParser.parse(getConfig().getStringList("banned-client-name"));
+        this.banDuration = getConfig().getLong("ban-duration", 0);
     }
 
     @Override
@@ -78,7 +80,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
         //return getCache().readCache(this, peer.getClientName(), () -> {
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
         if (matchResult.hit()) {
-            return new CheckResult(getClass(), PeerAction.BAN, matchResult.rule().toString(), String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.rule()));
+            return new CheckResult(getClass(), PeerAction.BAN, banDuration, matchResult.rule().toString(), String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.rule()));
         }
         return pass();
         //}, true);

@@ -43,6 +43,8 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     private long keepHuntingTime;
     @Autowired
     private JavalinWebContainer webContainer;
+    private long banDuration;
+
     @Override
     public void onEnable() {
         reloadConfig();
@@ -95,6 +97,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     }
 
     private void reloadConfig() {
+        this.banDuration = getConfig().getLong("ban-duration", 0);
         subnetMaskLength = getConfig().getInt("subnet-mask-length");
         subnetMaskV6Length = getConfig().getInt("subnet-mask-v6-length");
         tolerateNum = getConfig().getInt("tolerate-num");
@@ -146,7 +149,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                 // 落库
                 huntingList.put(torrentSubnetStr, currentTimestamp);
                 // 返回当前IP即可，其他IP会在下一周期被封禁
-                return new CheckResult(getClass(), PeerAction.BAN, "Multi-dialing download detected",
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "Multi-dialing download detected",
                         String.format(Lang.MODULE_MDB_MULTI_DIALING_DETECTED,
                                 peerSubnet, peerIpStr));
             }
@@ -159,7 +162,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                         if (currentTimestamp - huntingTimestamp < keepHuntingTime) {
                             // 落库
                             huntingList.put(torrentSubnetStr, currentTimestamp);
-                            return new CheckResult(getClass(), PeerAction.BAN, "Multi-dialing hunting",
+                            return new CheckResult(getClass(), PeerAction.BAN, banDuration, "Multi-dialing hunting",
                                     String.format(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED,
                                             peerSubnet, peerIpStr));
                         } else {
@@ -173,8 +176,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
             log.error("shouldBanPeer exception", e);
         }
 
-        return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A",
-                String.format(Lang.MODULE_MDB_MULTI_DIALING_NOT_DETECTED, torrentName));
+        return pass();
     }
 
     // 是否已从数据库恢复追猎名单，持久化用的，目前没用

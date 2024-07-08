@@ -92,10 +92,10 @@ public class Main {
         guiManager.createMainWindow();
         mainConfigFile = new File(configDirectory, "config.yml");
         mainConfig = loadConfiguration(mainConfigFile);
-        new PBHConfigUpdater(mainConfigFile, mainConfig).update(new MainConfigUpdateScript(mainConfig));
+        new PBHConfigUpdater(mainConfigFile, mainConfig, Main.class.getResourceAsStream("/config.yml")).update(new MainConfigUpdateScript(mainConfig));
         profileConfigFile = new File(configDirectory, "profile.yml");
         profileConfig = loadConfiguration(profileConfigFile);
-        new PBHConfigUpdater(profileConfigFile, profileConfig).update(new ProfileUpdateScript(profileConfig));
+        new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         try {
             applicationContext = new AnnotationConfigApplicationContext();

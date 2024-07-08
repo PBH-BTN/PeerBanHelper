@@ -34,6 +34,8 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     private int ipv6Prefix;
     @Autowired
     private JavalinWebContainer webContainer;
+    private long banDuration;
+
     @Override
     public @NotNull String getName() {
         return "Auto Range Ban";
@@ -74,6 +76,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     private void reloadConfig() {
         this.ipv4Prefix = getConfig().getInt("ipv4");
         this.ipv6Prefix = getConfig().getInt("ipv6");
+        this.banDuration = getConfig().getLong("ban-duration", 0);
         banListMappingCache.clear();
     }
 
@@ -93,7 +96,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
                 banListMappingCache.put(bannedPeer, bannedPeerAddress);
             }
             if (bannedPeerAddress.contains(peerAddress)) {
-                return new CheckResult(getClass(), PeerAction.BAN, peer.getPeerAddress().getIp(), String.format(Lang.ARB_BANNED, peerAddress, bannedPeer.getAddress()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, peer.getPeerAddress().getIp(), String.format(Lang.ARB_BANNED, peerAddress, bannedPeer.getAddress()));
             }
         }
         return pass();

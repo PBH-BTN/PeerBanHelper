@@ -1,13 +1,18 @@
 package com.ghostchu.peerbanhelper.config;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.google.common.io.CharStreams;
 import lombok.extern.slf4j.Slf4j;
+import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -16,11 +21,18 @@ import java.util.List;
 public class PBHConfigUpdater {
     private static final String CONFIG_VERSION_KEY = "config-version";
     private final YamlConfiguration yaml;
+    private final YamlConfiguration bundle;
     private final File file;
 
-    public PBHConfigUpdater(File file, YamlConfiguration yaml) {
+    public PBHConfigUpdater(File file, YamlConfiguration yaml, InputStream resourceAsStream) {
         this.yaml = yaml;
         this.file = file;
+        this.bundle = new YamlConfiguration();
+        try (resourceAsStream; InputStreamReader reader = new InputStreamReader(resourceAsStream, StandardCharsets.UTF_8)) {
+            this.bundle.loadFromString(CharStreams.toString(reader));
+        } catch (IOException | InvalidConfigurationException e) {
+            log.error("Unable to load the bundled config from classloader resource", e);
+        }
     }
 
     public void update(@NotNull Object configUpdateScript) {
@@ -58,9 +70,25 @@ public class PBHConfigUpdater {
         }
         log.info(Lang.CONFIG_SAVE_CHANGES);
         try {
+            migrateComments(yaml, bundle);
             yaml.save(file);
         } catch (IOException e) {
             log.error(Lang.CONFIG_SAVE_ERROR, e);
+        }
+    }
+
+    private void migrateComments(YamlConfiguration yaml, YamlConfiguration bundle) {
+        for (String key : yaml.getKeys(true)) {
+            var inlineBundled = bundle.getInLineComments(key);
+            var inlineYaml = yaml.getInLineComments(key);
+            var stdBundled = bundle.getComments(key);
+            var stdYaml = yaml.getComments(key);
+            if (inlineYaml.isEmpty()) {
+                yaml.setInLineComments(key, inlineBundled);
+            }
+            if (stdYaml.isEmpty()) {
+                yaml.setComments(key, stdBundled);
+            }
         }
     }
 

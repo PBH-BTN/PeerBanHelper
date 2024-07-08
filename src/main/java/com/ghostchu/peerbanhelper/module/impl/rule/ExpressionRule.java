@@ -50,6 +50,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
     private final long maxScriptExecuteTime = 1500;
     private final Map<ExpressionMetadata, ReentrantLock> threadLocks = new HashMap<>();
     private Map<Expression, ExpressionMetadata> expressions = new HashMap<>();
+    private long banDuration;
 
     @Override
     public boolean isConfigurable() {
@@ -60,7 +61,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
     public CheckResult handleResult(Expression expression, Object returns) {
         if (returns instanceof Boolean status) {
             if (status) {
-                return new CheckResult(getClass(), PeerAction.BAN, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "User Rule", expressions.get(expression).name());
             }
             return null;
         }
@@ -69,16 +70,16 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             if (i == 0) {
                 return null;
             } else if (i == 1) {
-                return new CheckResult(getClass(), PeerAction.BAN, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "User Rule", expressions.get(expression).name());
             } else if (i == 2) {
-                return new CheckResult(getClass(), PeerAction.SKIP, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, "User Rule", expressions.get(expression).name());
             } else {
                 log.error(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
                 return null;
             }
         }
         if (returns instanceof PeerAction action) {
-            return new CheckResult(getClass(), action, "User Rule", expressions.get(expression).name());
+            return new CheckResult(getClass(), action, banDuration, "User Rule", expressions.get(expression).name());
         }
         if (returns instanceof CheckResult checkResult) {
             return checkResult;
@@ -209,6 +210,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
     private void reloadConfig() throws IOException {
         expressions.clear();
         threadLocks.clear();
+        this.banDuration = getConfig().getLong("ban-duration", 0);
         initScripts();
         log.info(Lang.MODULE_EXPRESSION_RULE_COMPILING);
         long start = System.currentTimeMillis();

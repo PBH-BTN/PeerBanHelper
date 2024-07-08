@@ -22,6 +22,18 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 10)
+    public void addBanDuration() {
+        var module = conf.getConfigurationSection("module");
+        if (module != null) {
+            for (String key : module.getKeys(false)) {
+                var mSec = module.getConfigurationSection(key);
+                if (mSec != null) {
+                    mSec.set("ban-duration", "default");
+                }
+            }
+        }
+    }
     @UpdateScript(version = 9)
     public void updateXmRules() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");

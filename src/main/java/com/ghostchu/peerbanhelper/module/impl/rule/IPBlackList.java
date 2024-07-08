@@ -34,6 +34,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     private List<String> regions;
     @Autowired
     private JavalinWebContainer webContainer;
+    private long banDuration;
 
     @Override
     public @NotNull String getName() {
@@ -78,6 +79,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     }
 
     private void reloadConfig() {
+        this.banDuration = getConfig().getLong("ban-duration", 0);
         this.ips = new ArrayList<>();
         for (String s : getConfig().getStringList("ips")) {
             IPAddress ipAddress = IPAddressUtil.getIPAddress(s);
@@ -94,12 +96,12 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         return getCache().readCachePassOnly(this, peer.getPeerAddress().getIp(), () -> {
             PeerAddress peerAddress = peer.getPeerAddress();
             if (ports.contains(peerAddress.getPort())) {
-                return new CheckResult(getClass(), PeerAction.BAN, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
             }
             IPAddress pa = IPAddressUtil.getIPAddress(peerAddress.getIp());
             for (IPAddress ra : ips) {
                 if (ra.equals(pa) || ra.contains(pa)) {
-                    return new CheckResult(getClass(), PeerAction.BAN, ra.toString(), String.format(Lang.MODULE_IBL_MATCH_IP, ra));
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, ra.toString(), String.format(Lang.MODULE_IBL_MATCH_IP, ra));
                 }
             }
             try {
@@ -125,16 +127,16 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         if (!asns.isEmpty() && geoData.getAs() != null) {
             Long asn = geoData.getAs().getNumber();
             if (asns.contains(asn)) {
-                return new CheckResult(getClass(), PeerAction.BAN, String.valueOf(asn), String.format(Lang.MODULE_IBL_MATCH_ASN, asn));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, String.valueOf(asn), String.format(Lang.MODULE_IBL_MATCH_ASN, asn));
             }
         }
         if (!regions.isEmpty() && geoData.getCountry() != null) {
             String iso = geoData.getCountry().getIso();
             if (regions.contains(iso)) {
-                return new CheckResult(getClass(), PeerAction.BAN, String.valueOf(iso), String.format(Lang.MODULE_IBL_MATCH_REGION, iso));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, String.valueOf(iso), String.format(Lang.MODULE_IBL_MATCH_REGION, iso));
             }
         }
-        return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", "N/A");
+        return pass();
     }
 
 }

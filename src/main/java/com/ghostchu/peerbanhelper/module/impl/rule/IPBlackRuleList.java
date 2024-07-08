@@ -56,6 +56,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private ScheduledExecutorService scheduledExecutorService;
+    private long banDuration;
 
     @Override
     public boolean isConfigurable() {
@@ -112,7 +113,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             long t2 = System.currentTimeMillis();
             log.debug(Lang.IP_BAN_RULE_MATCH_TIME, t2 - t1);
             if (mr) {
-                return new CheckResult(getClass(), PeerAction.BAN, ip, String.format(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, ip, String.format(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName()));
             }
             return pass();
         }, true);
@@ -122,6 +123,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * Reload the configuration for this module.
      */
     private void reloadConfig() {
+        this.banDuration = getConfig().getLong("ban-duration", 0);
         if (null == ipBanMatchers) {
             ipBanMatchers = new ArrayList<>();
         }

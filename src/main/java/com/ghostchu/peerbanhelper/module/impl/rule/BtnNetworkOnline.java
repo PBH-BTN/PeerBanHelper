@@ -26,9 +26,10 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @Component
 public class BtnNetworkOnline extends AbstractRuleFeatureModule {
-    private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", "BtnManager not initialized");
+    private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "N/A", "BtnManager not initialized");
     @Autowired(required = false)
     private BtnNetwork manager;
+    private long banDuration;
 
     @Override
     public @NotNull String getName() {
@@ -56,7 +57,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
     }
 
     public void reloadConfig() {
-
+        this.banDuration = getConfig().getLong("ban-duration", 0);
     }
 
     @Override
@@ -71,11 +72,11 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
         }
         BtnAbilityRules ruleAbility = (BtnAbilityRules) manager.getAbilities().get(BtnAbilityRules.class);
         if (ruleAbility == null) {
-            return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", "BtnRulesAbility not get ready yet");
+            return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "N/A", "BtnRulesAbility not get ready yet");
         }
         BtnRuleParsed rule = ruleAbility.getBtnRule();
         if (rule == null) {
-            return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", "BtnRules not get ready yet");
+            return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "N/A", "BtnRules not get ready yet");
         }
         if (isHandShaking(peer)) {
             return handshaking();
@@ -105,7 +106,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
         for (String category : rule.getPortRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getPortRules().get(category), peer.getPeerId());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule()));
             }
         }
         return null;
@@ -117,7 +118,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
             List<Rule> rules = rule.getClientNameRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule()));
             }
         }
         return null;
@@ -129,7 +130,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
             List<Rule> rules = rule.getPeerIdRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule()));
             }
         }
         return null;
@@ -145,7 +146,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
         for (String category : rule.getIpRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getIpRules().get(category), pa.toString());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "IP", category, pa));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "BTN-" + category + "-" + matchResult.rule(), String.format(Lang.MODULE_BTN_BAN, "IP", category, pa));
             }
         }
         return null;
