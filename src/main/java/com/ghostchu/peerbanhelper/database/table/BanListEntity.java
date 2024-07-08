@@ -14,8 +14,6 @@ import lombok.NoArgsConstructor;
 @Data
 @DatabaseTable(tableName = "banlist")
 public class BanListEntity {
-    @DatabaseField(generatedId = true)
-    private Long id;
     @DatabaseField(canBeNull = false, dataType = DataType.SERIALIZABLE)
     private PeerAddress address;
     @DatabaseField(canBeNull = false, dataType = DataType.SERIALIZABLE)

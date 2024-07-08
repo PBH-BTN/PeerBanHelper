@@ -34,10 +34,11 @@ public class BanListDao extends BaseDaoImpl<BanListEntity, Long> {
     }
 
     public int saveBanList(Map<PeerAddress, BanMetadata> banlist) throws SQLException {
-        TableUtils.dropTable(this, true);
-        TableUtils.createTableIfNotExists(getConnectionSource(), BanListEntity.class);
+//        TableUtils.dropTable(this, true);
+//        TableUtils.createTableIfNotExists(getConnectionSource(), BanListEntity.class);
+        TableUtils.clearTable(getConnectionSource(), BanListEntity.class);
         List<BanListEntity> entityList = new ArrayList<>();
-        banlist.forEach((key, value) -> entityList.add(new BanListEntity(null, key, value)));
+        banlist.forEach((key, value) -> entityList.add(new BanListEntity(key, value)));
         return create(entityList);
     }
 }
