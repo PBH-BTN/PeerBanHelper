@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata> {
+public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata>, Serializable {
     private String context;
     private long banAt;
     private long unbanAt;

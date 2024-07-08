@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.database;
 import com.ghostchu.peerbanhelper.database.table.*;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.logger.Level;
+import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.support.BaseConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import lombok.Getter;
@@ -18,12 +20,14 @@ public class DatabaseHelper {
 
     public DatabaseHelper(@Autowired Database database) throws SQLException {
         this.database = database;
+        Logger.setGlobalLogLevel(Level.WARNING);
         TableUtils.createTableIfNotExists(database.getDataSource(), MetadataEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), PeerIdentityEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), TorrentEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), ModuleEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), RuleEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), HistoryEntity.class);
+        TableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class);
     }
 
     private void performUpgrade() throws SQLException {

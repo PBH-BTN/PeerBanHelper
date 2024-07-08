@@ -110,8 +110,8 @@ public class Lang {
     public static final String SHUTDOWN_CLOSE_DATABASE = "[退出] 正在安全关闭并保存持久化数据库……";
     public static final String SHUTDOWN_CLEANUP_RESOURCES = "[退出] 清理资源……";
     public static final String SHUTDOWN_DONE = "[退出] 全部完成！";
-    public static final String SHUTDOWN_SAVE_BANLIST = "[退出] 正在保存封禁列表到本地缓存文件……";
-    public static final String SHUTDOWN_SAVE_BANLIST_FAILED = "[退出] 保存封禁列表到文件失败";
+    public static final String SAVED_BANLIST = "[保存] 已成功保存 {} 条封禁数据到数据库";
+    public static final String SAVE_BANLIST_FAILED = "[保存] 保存封禁列表到文件失败";
     public static final String LOAD_BANLIST_FROM_FILE = "[封禁] 已从保存的封禁列表缓存文件中恢复了 {} 个封禁项";
     public static final String LOAD_BANLIST_FAIL = "[封禁] 加载封禁列表过程出现错误";
     public static final String GUI_MENU_PROGRAM = "程序";

@@ -7,11 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
-public class PeerAddress implements Comparable<PeerAddress> {
+public class PeerAddress implements Comparable<PeerAddress>, Serializable {
 
     private String ip;
     private transient IPAddress address;
