@@ -61,46 +61,49 @@ public class PersistMetrics implements BasicMetrics {
     @Override
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
         inMemory.recordPeerBan(address, metadata);
-        try {
-            PeerIdentityEntity peerIdentityEntity = peerIdentityDao.createIfNotExists(new PeerIdentityEntity(
-                    null,
-                    metadata.getPeer().getId(),
-                    metadata.getPeer().getClientName()
-            ));
-            TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
-                    null,
-                    metadata.getTorrent().getHash(),
-                    metadata.getTorrent().getName(),
-                    metadata.getTorrent().getSize()
-            ));
-            ModuleEntity module = moduleDao.createIfNotExists(new ModuleEntity(
-                    null,
-                    metadata.getContext()
-            ));
-            RuleEntity rule = ruleDao.createIfNotExists(new RuleEntity(
-                    null,
-                    module,
-                    metadata.getRule()
-            ));
-            Dao<HistoryEntity, Long> historyDao = DaoManager.createDao(db.getDataSource(), HistoryEntity.class);
-            historyDao.create(new HistoryEntity(
-                    null,
-                    new Timestamp(metadata.getBanAt()),
-                    new Timestamp(metadata.getUnbanAt()),
-                    address.getIp(),
-                    address.getPort(),
-                    peerIdentityEntity,
-                    metadata.getPeer().getUploaded(),
-                    metadata.getPeer().getDownloaded(),
-                    metadata.getPeer().getProgress(),
-                    torrentEntity,
-                    rule,
-                    metadata.getDescription(),
-                    metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString()
-            ));
-        } catch (SQLException e) {
-            log.error(Lang.DATABASE_SAVE_BUFFER_FAILED, e);
-        }
+        // 将数据库 IO 移动到虚拟线程上
+        Thread.ofVirtual().start(() -> {
+            try {
+                PeerIdentityEntity peerIdentityEntity = peerIdentityDao.createIfNotExists(new PeerIdentityEntity(
+                        null,
+                        metadata.getPeer().getId(),
+                        metadata.getPeer().getClientName()
+                ));
+                TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
+                        null,
+                        metadata.getTorrent().getHash(),
+                        metadata.getTorrent().getName(),
+                        metadata.getTorrent().getSize()
+                ));
+                ModuleEntity module = moduleDao.createIfNotExists(new ModuleEntity(
+                        null,
+                        metadata.getContext()
+                ));
+                RuleEntity rule = ruleDao.createIfNotExists(new RuleEntity(
+                        null,
+                        module,
+                        metadata.getRule()
+                ));
+                Dao<HistoryEntity, Long> historyDao = DaoManager.createDao(db.getDataSource(), HistoryEntity.class);
+                historyDao.create(new HistoryEntity(
+                        null,
+                        new Timestamp(metadata.getBanAt()),
+                        new Timestamp(metadata.getUnbanAt()),
+                        address.getIp(),
+                        address.getPort(),
+                        peerIdentityEntity,
+                        metadata.getPeer().getUploaded(),
+                        metadata.getPeer().getDownloaded(),
+                        metadata.getPeer().getProgress(),
+                        torrentEntity,
+                        rule,
+                        metadata.getDescription(),
+                        metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString()
+                ));
+            } catch (SQLException e) {
+                log.error(Lang.DATABASE_SAVE_BUFFER_FAILED, e);
+            }
+        });
     }
 
     @Override
