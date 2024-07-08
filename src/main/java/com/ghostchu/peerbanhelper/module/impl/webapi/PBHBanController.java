@@ -6,7 +6,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -131,7 +131,7 @@ public class PBHBanController extends AbstractFeatureModule {
         var banResponseList = getServer().getBannedPeers()
                 .entrySet()
                 .stream()
-                .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), new BakedBanMetadata(entry.getValue())))
+                .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), entry.getValue()))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
             banResponseList = banResponseList.filter(b -> b.getBanMetadata().getBanAt() < lastBanTime);
@@ -150,7 +150,7 @@ public class PBHBanController extends AbstractFeatureModule {
     @Data
     static class BanResponse {
         private String address;
-        private BakedBanMetadata banMetadata;
+        private BanMetadata banMetadata;
     }
 
     @AllArgsConstructor
