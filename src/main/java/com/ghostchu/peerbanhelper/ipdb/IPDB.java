@@ -4,13 +4,14 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 import com.maxmind.db.MaxMindDbConstructor;
 import com.maxmind.db.MaxMindDbParameter;
 import com.maxmind.db.Reader;
 import com.maxmind.geoip2.DatabaseReader;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.model.CountryResponse;
@@ -38,10 +39,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 @Slf4j
 public class IPDB implements AutoCloseable {
+    private final Cache<InetAddress, IPGeoData> MINI_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .expireAfterAccess(5, TimeUnit.SECONDS)
+            .build();
     private final File dataFolder;
     private final long updateInterval = 86400000L; // 30天
     private final String accountId;
@@ -83,20 +90,27 @@ public class IPDB implements AutoCloseable {
         loadMMDB();
     }
 
-    public IPGeoData query(InetAddress address) throws IOException, GeoIp2Exception {
-        IPGeoData geoData = new IPGeoData();
-        geoData.setAs(queryAS(address));
-        geoData.setCountry(queryCountry(address));
-        geoData.setCity(queryCity(address));
-        geoData.setNetwork(queryNetwork(address));
-        if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
-            String iso = geoData.getCountry().getIso();
-            if (iso.equalsIgnoreCase("CN") || iso.equalsIgnoreCase("TW")
-                    || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
-                queryGeoCN(address, geoData);
-            }
+    public IPGeoData query(InetAddress address) {
+        try {
+            return MINI_CACHE.get(address, () -> {
+                IPGeoData geoData = new IPGeoData();
+                geoData.setAs(queryAS(address));
+                geoData.setCountry(queryCountry(address));
+                geoData.setCity(queryCity(address));
+                geoData.setNetwork(queryNetwork(address));
+                if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
+                    String iso = geoData.getCountry().getIso();
+                    if (iso.equalsIgnoreCase("CN") || iso.equalsIgnoreCase("TW")
+                            || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
+                        queryGeoCN(address, geoData);
+                    }
+                }
+                return geoData;
+            });
+        } catch (ExecutionException e) {
+            return new IPGeoData();
         }
-        return geoData;
+
     }
 
     private void queryGeoCN(InetAddress address, IPGeoData geoData) {
@@ -142,7 +156,7 @@ public class IPDB implements AutoCloseable {
         try {
             AsnResponse asnResponse = mmdbASN.asn(address);
             networkData.setIsp(asnResponse.getAutonomousSystemOrganization());
-            networkData.setNetType("Unknown");
+            networkData.setNetType(null);
         } catch (Exception ignored) {
         }
         return networkData;

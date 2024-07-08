@@ -30,4 +30,8 @@ public class PeerWrapper {
         this.progress = peer.getProgress();
         this.flags = peer.getFlags();
     }
+
+    public PeerAddress toPeerAddress() {
+        return new PeerAddress(address.getIp(), address.getPort());
+    }
 }

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
+import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ public class PeerMetadata implements Comparable<PeerMetadata> {
     private UUID randomId;
     private TorrentWrapper torrent;
     private PeerWrapper peer;
+    private IPGeoData geo;
     private String reverseLookup = "N/A";
 
 

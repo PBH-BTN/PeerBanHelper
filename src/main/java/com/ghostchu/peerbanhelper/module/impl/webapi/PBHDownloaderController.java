@@ -1,13 +1,15 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -166,14 +168,24 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             return;
         }
         Downloader downloader = selected.get();
-        List<PeerWrapper> peerWrappers = getServer().getLivePeersSnapshot().values()
+        List<PopulatedPeerDTO> peerWrappers = getServer().getLivePeersSnapshot().values()
                 .stream()
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .filter(p -> p.getTorrent().getHash().equals(torrentId))
-                .map(PeerMetadata::getPeer)
+                .map(this::populatePeerDTO)
                 .toList();
         ctx.status(HttpStatus.OK);
         ctx.json(peerWrappers);
+    }
+
+    private PopulatedPeerDTO populatePeerDTO(PeerMetadata p) {
+        PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null);
+        PeerBanHelperServer.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
+        IPGeoData geoData = response.geoData().get();
+        if (geoData != null) {
+            dto.setGeo(geoData);
+        }
+        return dto;
     }
 
     private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderName) {
