@@ -95,7 +95,7 @@ public class PersistMetrics implements BasicMetrics {
                     torrentEntity,
                     rule,
                     metadata.getDescription(),
-                    metadata.getPeer().getFlags()
+                    metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString()
             ));
         } catch (SQLException e) {
             log.error(Lang.DATABASE_SAVE_BUFFER_FAILED, e);

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
+import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +18,7 @@ public class PeerWrapper {
     private long uploaded;
     private long uploadSpeed;
     private double progress;
-    private String flags;
+    private PeerFlag flags;
 
     public PeerWrapper(Peer peer) {
         this.id = peer.getPeerId();

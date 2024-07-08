@@ -221,7 +221,7 @@ public class BiglyBT implements Downloader {
                     peer.getStats().getRtUploadSpeed(),
                     peer.getStats().getTotalSent(),
                     peer.getPercentDoneInThousandNotation() / 1000d,
-                    "unsupported"
+                    null
             ));
         }
         return peersList;
