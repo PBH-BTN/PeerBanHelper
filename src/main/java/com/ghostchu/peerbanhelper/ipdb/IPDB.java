@@ -65,6 +65,7 @@ public class IPDB implements AutoCloseable {
     @Getter
     private DatabaseReader mmdbASN;
     private Reader geoCN;
+    private List<String> languageTag;
 
     public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent) throws IllegalArgumentException, IOException {
         this.dataFolder = dataFolder;
@@ -188,7 +189,12 @@ public class IPDB implements AutoCloseable {
             CountryResponse countryResponse = mmdbCity.country(address);
             Country country = countryResponse.getCountry();
             countryData.setIso(country.getIsoCode());
-            countryData.setName(country.getName());
+            String countryRegionName = country.getName();
+            // 对 TW,HK,MO 后处理，偷个懒
+            if (languageTag.getFirst().equals("zh-CN") && (country.getIsoCode().equals("TW") || country.getIsoCode().equals("HK") || country.getIsoCode().equalsIgnoreCase("MO"))) {
+                countryRegionName = "中国" + countryRegionName;
+            }
+            countryData.setName(countryRegionName);
         } catch (Exception ignored) {
         }
         return countryData;
@@ -223,6 +229,7 @@ public class IPDB implements AutoCloseable {
     }
 
     private void loadMMDB() throws IOException {
+        this.languageTag = List.of(Locale.getDefault().toLanguageTag(), "en");
         this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
                 .locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
         this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)

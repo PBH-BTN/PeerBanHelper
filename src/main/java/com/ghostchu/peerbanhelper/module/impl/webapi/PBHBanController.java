@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
@@ -146,6 +147,13 @@ public class PBHBanController extends AbstractFeatureModule {
         if (limit > 0) {
             banResponseList = banResponseList.limit(limit);
         }
+        banResponseList = banResponseList.peek(meta -> {
+            PeerWrapper peerWrapper = meta.getBanMetadata().getPeer();
+            if (peerWrapper != null) {
+                var nullableGeoData = getServer().queryIPDB(peerWrapper.toPeerAddress()).geoData().get();
+                meta.getBanMetadata().setGeo(nullableGeoData);
+            }
+        });
         return banResponseList;
     }
 
