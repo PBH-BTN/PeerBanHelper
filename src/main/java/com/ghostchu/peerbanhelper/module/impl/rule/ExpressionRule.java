@@ -81,6 +81,15 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         if (returns instanceof PeerAction action) {
             return new CheckResult(getClass(), action, banDuration, expressions.get(expression).name(), expressions.get(expression).name() + "=>" + action.name());
         }
+        if (returns instanceof String string) {
+            if (string.isBlank()) {
+                return pass();
+            } else if (string.startsWith("@")) {
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, expressions.get(expression).name(), string.substring(1));
+            } else {
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, expressions.get(expression).name(), string);
+            }
+        }
         if (returns instanceof CheckResult checkResult) {
             return checkResult;
         }

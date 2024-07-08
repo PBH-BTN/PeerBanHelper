@@ -32,7 +32,7 @@ for tableName in seq.keys(table) {
           return false;
       }else{
           ## p('peerId='+peerIdLowercase+', clientName='+clientNameLowercase + ', excepted='+ seq.get(table, tableName));
-          return true;
+          return 'Peer reporting: PeerId='+peerIdLowercase+', ClientName='+clientNameLowercase + ', But PBH excepted='+ seq.get(table, tableName);
       }
   }
 }

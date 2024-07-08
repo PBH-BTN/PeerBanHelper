@@ -241,6 +241,10 @@ public class QBittorrent implements Downloader {
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
             SingleTorrentPeer singleTorrentPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), SingleTorrentPeer.class);
+            // 一个 QB 本地化问题的 Workaround
+            if (singleTorrentPeer.getPeerId().equals("Unknown") || singleTorrentPeer.getPeerId().equals("未知")) {
+                singleTorrentPeer.setPeerIdClient(null);
+            }
             peersList.add(singleTorrentPeer);
         }
         return peersList;
