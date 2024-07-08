@@ -36,7 +36,6 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * Client Name 黑名单
 * IP 黑名单
 * 虚假进度检查器（提供启发式客户端检测功能）（Transmission不支持过量下载检测）
-* 主动探测
 * 自动 IP 段封禁
 * 多拨追猎
 * Peer ID/Client Name 伪装检查
