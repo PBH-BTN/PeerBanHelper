@@ -96,12 +96,12 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         return getCache().readCachePassOnly(this, peer.getPeerAddress().getIp(), () -> {
             PeerAddress peerAddress = peer.getPeerAddress();
             if (ports.contains(peerAddress.getPort())) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, String.valueOf(peerAddress.getPort()), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "Port Rule: " + peerAddress.getPort(), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
             }
             IPAddress pa = IPAddressUtil.getIPAddress(peerAddress.getIp());
             for (IPAddress ra : ips) {
                 if (ra.equals(pa) || ra.contains(pa)) {
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, ra.toString(), String.format(Lang.MODULE_IBL_MATCH_IP, ra));
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, "CIDR Rule: " + ra, String.format(Lang.MODULE_IBL_MATCH_IP, ra));
                 }
             }
             try {
@@ -127,13 +127,13 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         if (!asns.isEmpty() && geoData.getAs() != null) {
             Long asn = geoData.getAs().getNumber();
             if (asns.contains(asn)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, String.valueOf(asn), String.format(Lang.MODULE_IBL_MATCH_ASN, asn));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "ASN Rule: " + asn, String.format(Lang.MODULE_IBL_MATCH_ASN, asn));
             }
         }
         if (!regions.isEmpty() && geoData.getCountry() != null) {
             String iso = geoData.getCountry().getIso();
             if (regions.contains(iso)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, String.valueOf(iso), String.format(Lang.MODULE_IBL_MATCH_REGION, iso));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "C/R ISO Code Rule: " + iso, String.format(Lang.MODULE_IBL_MATCH_REGION, iso));
             }
         }
         return pass();

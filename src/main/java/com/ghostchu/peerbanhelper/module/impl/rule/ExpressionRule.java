@@ -61,7 +61,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
     public CheckResult handleResult(Expression expression, Object returns) {
         if (returns instanceof Boolean status) {
             if (status) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, expressions.get(expression).name(), expressions.get(expression).name() + "=>" + true);
             }
             return null;
         }
@@ -70,16 +70,16 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             if (i == 0) {
                 return null;
             } else if (i == 1) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, expressions.get(expression).name(), expressions.get(expression).name() + "=>" + number);
             } else if (i == 2) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, "User Rule", expressions.get(expression).name());
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, expressions.get(expression).name(), expressions.get(expression).name() + "=>" + number);
             } else {
                 log.error(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
                 return null;
             }
         }
         if (returns instanceof PeerAction action) {
-            return new CheckResult(getClass(), action, banDuration, "User Rule", expressions.get(expression).name());
+            return new CheckResult(getClass(), action, banDuration, expressions.get(expression).name(), expressions.get(expression).name() + "=>" + action.name());
         }
         if (returns instanceof CheckResult checkResult) {
             return checkResult;
