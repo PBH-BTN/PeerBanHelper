@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.RuleSubInfo;
+import com.ghostchu.peerbanhelper.database.old.RuleSubInfo;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.ModuleManager;

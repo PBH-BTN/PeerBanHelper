@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.DatabaseHelper;
+import com.ghostchu.peerbanhelper.database.Database;
+import com.ghostchu.peerbanhelper.database.dao.HistoryDao;
+import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -19,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -27,12 +28,15 @@ import java.util.stream.Stream;
 @Component
 public class PBHBanController extends AbstractFeatureModule {
     @Autowired
-    private DatabaseHelper db;
+    private Database db;
     @Autowired
     @Qualifier("persistMetrics")
     private BasicMetrics persistMetrics;
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private HistoryDao historyDao;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -70,10 +74,11 @@ public class PBHBanController extends AbstractFeatureModule {
         context.json(Map.of("count", pendingRemovals.size()));
     }
 
+
     private void handleRanks(Context ctx) {
         int number = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("limit"), "50"));
         try {
-            Map<String, Long> countMap = db.findMaxBans(number);
+            Map<String, Long> countMap = historyDao.getBannedIps(number);
             List<HistoryEntry> list = new ArrayList<>(countMap.size());
             countMap.forEach((k, v) -> {
                 if (v >= 2) {
@@ -82,7 +87,7 @@ public class PBHBanController extends AbstractFeatureModule {
             });
             ctx.status(HttpStatus.OK);
             ctx.json(list);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error("Error on handling Web API request", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", "Internal server error"));
@@ -99,14 +104,16 @@ public class PBHBanController extends AbstractFeatureModule {
         int pageIndex = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0"));
         int pageSize = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100"));
         try {
+
             Map<String, Object> map = new HashMap<>();
             map.put("pageIndex", pageIndex);
             map.put("pageSize", pageSize);
-            map.put("results", db.queryBanLogs(null, null, pageIndex, pageSize));
-            map.put("total", db.queryBanLogsCount());
+            map.put("results", historyDao.queryBuilder().offset((long) pageIndex).limit((long) pageSize).query()
+                    .stream().map(BanLogResponse::new).toList());
+            map.put("total", historyDao.countOf());
             ctx.status(HttpStatus.OK);
             ctx.json(map);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error(Lang.WEB_BANLOGS_INTERNAL_ERROR, e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", "Internal server error"));
@@ -143,6 +150,45 @@ public class PBHBanController extends AbstractFeatureModule {
     }
 
     public record UnbanRequest(List<String> ips) {
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    static class BanLogResponse {
+        private long banAt;
+        private long unbanAt;
+        private String peerIp;
+        private int peerPort;
+        private String peerId;
+        private String peerClientName;
+        private long peerUploaded;
+        private long peerDownloaded;
+        private double peerProgress;
+        private String torrentInfoHash;
+        private String torrentName;
+        private long torrentSize;
+        private String module;
+        private String rule;
+        private String description;
+
+        public BanLogResponse(HistoryEntity history) {
+            this.banAt = history.getBanAt().getTime();
+            this.unbanAt = history.getUnbanAt().getTime();
+            this.peerIp = history.getIp();
+            this.peerPort = history.getPort();
+            this.peerId = history.getPeerIdentity().getPeerId();
+            this.peerClientName = history.getPeerIdentity().getClientName();
+            this.peerUploaded = history.getPeerUploaded();
+            this.peerDownloaded = history.getPeerDownloaded();
+            this.peerProgress = history.getPeerProgress();
+            this.torrentInfoHash = history.getTorrent().getInfoHash();
+            this.torrentName = history.getTorrent().getName();
+            this.torrentSize = history.getTorrent().getSize();
+            this.module = history.getRule().getModule().getName();
+            this.rule = history.getRule().getRule();
+            this.description = history.getRule().getRule();
+        }
     }
 
     @AllArgsConstructor

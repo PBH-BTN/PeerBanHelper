@@ -20,6 +20,7 @@
         <javafx.version>22.0.1</javafx.version>
         <javafx.scope>provided</javafx.scope>
         <install4j.home>/opt/install4j</install4j.home>
+        <ormlite.version>6.1</ormlite.version>
     </properties>
     <pluginRepositories>
         <pluginRepository>
@@ -561,6 +562,19 @@
             <artifactId>spring-context</artifactId>
             <version>6.1.10</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
+        <dependency>
+            <groupId>com.j256.ormlite</groupId>
+            <artifactId>ormlite-core</artifactId>
+            <version>${ormlite.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-jdbc -->
+        <dependency>
+            <groupId>com.j256.ormlite</groupId>
+            <artifactId>ormlite-jdbc</artifactId>
+            <version>${ormlite.version}</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
         <!--        <dependency>-->
         <!--            <groupId>org.jfxtras</groupId>-->

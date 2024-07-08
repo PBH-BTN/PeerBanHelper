@@ -50,7 +50,7 @@ public class IPDB implements AutoCloseable {
             .expireAfterAccess(5, TimeUnit.SECONDS)
             .build();
     private final File dataFolder;
-    private final long updateInterval = 86400000L; // 30天
+    private final long updateInterval = 2592000000L; // 30天
     private final String accountId;
     private final String licenseKey;
     private final File directory;
@@ -305,7 +305,7 @@ public class IPDB implements AutoCloseable {
                     if (r.statusCode() != 200) {
                         log.error(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body());
                     } else {
-                        log.error(Lang.IPDB_UPDATE_SUCCESS, databaseName);
+                        log.info(Lang.IPDB_UPDATE_SUCCESS, databaseName);
                     }
                 })
                 .exceptionally(e -> {

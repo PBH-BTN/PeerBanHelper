@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
-import com.ghostchu.peerbanhelper.database.DatabaseManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
@@ -99,7 +99,7 @@ public class PeerBanHelperServer {
     @Qualifier("persistMetrics")
     private BasicMetrics metrics;
     @Autowired
-    private DatabaseManager databaseManager;
+    private Database databaseManager;
     @Autowired
     private ModuleManager moduleManager;
     @Getter
@@ -134,7 +134,6 @@ public class PeerBanHelperServer {
     }
 
     public void start() throws SQLException {
-        databaseHelper.init();
         loadDownloaders();
         registerHttpServer();
         setupIPDB();
@@ -289,8 +288,6 @@ public class PeerBanHelperServer {
             downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
         } catch (Exception e) {
             log.error(Lang.LOAD_BANLIST_FAIL, e);
-        } finally {
-            banListFile.delete();
         }
     }
 

@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.database.DatabaseHelper;
-import com.ghostchu.peerbanhelper.database.RuleSubInfo;
-import com.ghostchu.peerbanhelper.database.RuleSubLog;
+import com.ghostchu.peerbanhelper.database.old.DatabaseHelper;
+import com.ghostchu.peerbanhelper.database.old.RuleSubInfo;
+import com.ghostchu.peerbanhelper.database.old.RuleSubLog;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
