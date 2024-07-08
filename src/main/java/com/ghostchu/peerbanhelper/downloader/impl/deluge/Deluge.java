@@ -1,9 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
-import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
-import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
+import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -27,7 +24,10 @@ import raccoonfink.deluge.responses.PBHActiveTorrentsResponse;
 
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 public class Deluge implements Downloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Deluge.class);
@@ -145,7 +145,7 @@ public class Deluge implements Downloader {
                             peer.getTotalUpload(),
                             peer.getPayloadUpSpeed(),
                             peer.getProgress() / 100.0d,
-                            parseFlag(peer.getFlags(), peer.getSource())
+                            parsePeerFlag(peer.getFlags(), peer.getSource())
                     );
                     peers.add(delugePeer);
                 }
@@ -231,7 +231,8 @@ public class Deluge implements Downloader {
     public void close() {
 
     }
-    private String parseFlag(int peerFlag, int sourceFlag) {
+
+    private PeerFlag parsePeerFlag(int peerFlag, int sourceFlag) {
         boolean interesting = (peerFlag & (1 << 0)) != 0;
         boolean choked = (peerFlag & (1 << 1)) != 0;
         boolean remoteInterested = (peerFlag & (1 << 2)) != 0;
@@ -261,61 +262,96 @@ public class Deluge implements Downloader {
         boolean resumeData = (sourceFlag & (1 << 4)) != 0;
         boolean incoming = (sourceFlag & (1 << 5)) != 0;
 
-        StringJoiner joiner = new StringJoiner(" ");
-
-        if (interesting) {
-            if (remoteChoked) {
-                joiner.add("d");
-            } else {
-                joiner.add("D");
-            }
-        }
-        if (remoteInterested) {
-            if (choked) {
-                joiner.add("u");
-            } else {
-                joiner.add("U");
-            }
-        }
-        if (!remoteChoked && !interesting)
-            joiner.add("K");
-        if (!choked && !remoteInterested)
-            joiner.add("?");
-        if (optimisticUnchoke)
-            joiner.add("O");
-        if (snubbed)
-            joiner.add("S");
-        if (!localConnection)
-            joiner.add("I");
-        if (dht)
-            joiner.add("H");
-        if (pex)
-            joiner.add("X");
-        if (lsd)
-            joiner.add("L");
-        if (rc4Encrypted)
-            joiner.add("E");
-        if (plainTextEncrypted)
-            joiner.add("e");
-        if (utpSocket)
-            joiner.add("P");
-
-        return joiner.toString();
+        return new PeerFlag(interesting, choked, remoteInterested, remoteChoked, supportsExtensions, outgoingConnection, localConnection, handshake,
+                connecting, onParole, seed, optimisticUnchoke, snubbed, uploadOnly, endGameMode, holePunched, i2pSocket, utpSocket, sslSocket,
+                rc4Encrypted, plainTextEncrypted, tracker, dht, pex, lsd, resumeData, incoming);
     }
 
-
-    private boolean c2b(char c) {
-        return c == '1';
-    }
-
-    private String readBits(int i, int bitLength) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(Integer.toBinaryString(i));
-        while (builder.length() < bitLength) {
-            builder.append("0");
-        }
-        return builder.toString();
-    }
+//    private String parseFlag(int peerFlag, int sourceFlag) {
+//        boolean interesting = (peerFlag & (1 << 0)) != 0;
+//        boolean choked = (peerFlag & (1 << 1)) != 0;
+//        boolean remoteInterested = (peerFlag & (1 << 2)) != 0;
+//        boolean remoteChoked = (peerFlag & (1 << 3)) != 0;
+//        boolean supportsExtensions = (peerFlag & (1 << 4)) != 0;
+//        boolean outgoingConnection = (peerFlag & (1 << 5)) != 0;
+//        boolean localConnection = (peerFlag & (1 << 6)) != 0;
+//        boolean handshake = (peerFlag & (1 << 7)) != 0;
+//        boolean connecting = (peerFlag & (1 << 8)) != 0;
+//        boolean onParole = (peerFlag & (1 << 9)) != 0;
+//        boolean seed = (peerFlag & (1 << 10)) != 0;
+//        boolean optimisticUnchoke = (peerFlag & (1 << 11)) != 0;
+//        boolean snubbed = (peerFlag & (1 << 12)) != 0;
+//        boolean uploadOnly = (peerFlag & (1 << 13)) != 0;
+//        boolean endGameMode = (peerFlag & (1 << 14)) != 0;
+//        boolean holePunched = (peerFlag & (1 << 15)) != 0;
+//        boolean i2pSocket = (peerFlag & (1 << 16)) != 0;
+//        boolean utpSocket = (peerFlag & (1 << 17)) != 0;
+//        boolean sslSocket = (peerFlag & (1 << 18)) != 0;
+//        boolean rc4Encrypted = (peerFlag & (1 << 19)) != 0;
+//        boolean plainTextEncrypted = (peerFlag & (1 << 20)) != 0;
+//
+//        boolean tracker = (sourceFlag & (1 << 0)) != 0;
+//        boolean dht = (sourceFlag & (1 << 1)) != 0;
+//        boolean pex = (sourceFlag & (1 << 2)) != 0;
+//        boolean lsd = (sourceFlag & (1 << 3)) != 0;
+//        boolean resumeData = (sourceFlag & (1 << 4)) != 0;
+//        boolean incoming = (sourceFlag & (1 << 5)) != 0;
+//
+//        StringJoiner joiner = new StringJoiner(" ");
+//
+//        if (interesting) {
+//            if (remoteChoked) {
+//                joiner.add("d");
+//            } else {
+//                joiner.add("D");
+//            }
+//        }
+//        if (remoteInterested) {
+//            if (choked) {
+//                joiner.add("u");
+//            } else {
+//                joiner.add("U");
+//            }
+//        }
+//        if (!remoteChoked && !interesting)
+//            joiner.add("K");
+//        if (!choked && !remoteInterested)
+//            joiner.add("?");
+//        if (optimisticUnchoke)
+//            joiner.add("O");
+//        if (snubbed)
+//            joiner.add("S");
+//        if (!localConnection)
+//            joiner.add("I");
+//        if (dht)
+//            joiner.add("H");
+//        if (pex)
+//            joiner.add("X");
+//        if (lsd)
+//            joiner.add("L");
+//        if (rc4Encrypted)
+//            joiner.add("E");
+//        if (plainTextEncrypted)
+//            joiner.add("e");
+//        if (utpSocket)
+//            joiner.add("P");
+//
+//        return joiner.toString();
+//    }
+//
+//
+//    private boolean c2b(char c) {
+//        return c == '1';
+//    }
+//
+//    private String readBits(int i, int bitLength) {
+//        StringBuilder builder = new StringBuilder();
+//        builder.append(Integer.toBinaryString(i));
+//        while (builder.length() < bitLength) {
+//            builder.append("0");
+//        }
+//        return builder.toString();
+//    }
 
     @NoArgsConstructor
     @Data

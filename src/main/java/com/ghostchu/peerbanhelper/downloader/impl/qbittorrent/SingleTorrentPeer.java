@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 
+import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
@@ -93,8 +94,8 @@ public class SingleTorrentPeer implements Peer {
     }
 
     @Override
-    public String getFlags() {
-        return flags;
+    public PeerFlag getFlags() {
+        return new PeerFlag(flags);
     }
 
     @Override
