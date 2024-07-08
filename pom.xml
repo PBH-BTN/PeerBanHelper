@@ -94,7 +94,6 @@
                                             <!--                                            <exclude>META-INF/versions/9/*</exclude>-->
                                             <!--                                            <exclude>*License*</exclude>-->
                                             <!--                                            <exclude>*LICENSE*</exclude>-->
-                                            <exclude>org/sqlite/native/Linux-Android/**</exclude>
                                         </excludes>
                                     </filter>
                                 </filters>
@@ -275,6 +274,9 @@
             </resource>
             <resource>
                 <directory>src/main/resources/static</directory>
+                <excludes>
+                    <exclude>.git/</exclude>
+                </excludes>
                 <targetPath>static</targetPath>
                 <filtering>false</filtering>
             </resource>
