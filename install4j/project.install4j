@@ -8,7 +8,7 @@
         <language id="en" customLocalizationFile="./lang/en-US.utf8" />
       </additionalLanguages>
     </languages>
-    <jreBundles jdkProviderId="JBR" release="21/21.0.3-b509.1" />
+    <jreBundles jdkProviderId="Zulu" release="21/21.0.3" />
   </application>
   <files>
     <mountPoints>

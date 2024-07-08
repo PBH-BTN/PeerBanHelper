@@ -373,6 +373,55 @@
                 <install4j.home>C:\Program Files\install4j10</install4j.home>
             </properties>
         </profile>
+        <profile>
+            <!--精简打包，排除不受支持的平台-->
+            <id>thin-sqlite-packaging</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.5.1</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.logging.log4j</groupId>
+                                <artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>
+                                <version>0.1.0</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <exclude>org/sqlite/native/Linux-Android/**</exclude>
+                                                <exclude>org/sqlite/native/Linux/x86/**</exclude>
+                                                <exclude>org/sqlite/native/Linux/arm/**</exclude>
+                                                <exclude>org/sqlite/native/Linux/armv7/**</exclude>
+                                                <exclude>org/sqlite/native/Linux/armv6/**</exclude>
+                                                <exclude>org/sqlite/native/Windows/armv7/**</exclude>
+                                                <exclude>org/sqlite/native/Windows/x86/**</exclude>
+                                                <exclude>org/sqlite/native/Linux-Musl/x86/**</exclude>
+                                                <exclude>org/sqlite/native/FreeBSD/x86/**</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <repositories>
