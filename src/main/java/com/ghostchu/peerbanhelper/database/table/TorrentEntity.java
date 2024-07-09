@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 public final class TorrentEntity {
     @DatabaseField(generatedId = true)
     private Long id;
-    @DatabaseField(canBeNull = false, uniqueIndex = true)
+    @DatabaseField(canBeNull = false, uniqueIndex = true, uniqueCombo = true)
     private String infoHash;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, uniqueCombo = true)
     private String name;
     @DatabaseField(canBeNull = false)
     private Long size;
