@@ -162,7 +162,14 @@ public class Transmission implements Downloader {
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-        relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
+        relaunchTorrents(torrents.stream().filter(t -> {
+            try {
+                Long.parseLong(t.getId());
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }).map(t -> Long.parseLong(t.getId())).toList());
     }
 
     private void relaunchTorrents(Collection<Long> ids) {
@@ -187,7 +194,14 @@ public class Transmission implements Downloader {
 
     @Override
     public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-        relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
+        relaunchTorrents(torrents.stream().filter(t -> {
+            try {
+                Long.parseLong(t.getId());
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }).map(t -> Long.parseLong(t.getId())).toList());
     }
 
     @Override
