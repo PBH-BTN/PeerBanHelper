@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.wrapper.BakedPeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.google.common.eventbus.Subscribe;
@@ -261,8 +260,7 @@ public class MainWindow extends JFrame {
             String asNetwork = "N/A";
             String isp = "N/A";
             String netType = "N/A";
-            BakedPeerMetadata bakedBanMetadata = new BakedPeerMetadata(entry.getValue());
-            IPGeoData ipGeoData = bakedBanMetadata.getGeo();
+            IPGeoData ipGeoData = entry.getValue().getGeo();
             if (ipGeoData != null) {
                 if (ipGeoData.getCountry() != null) {
                     countryRegion = ipGeoData.getCountry().getIso();
