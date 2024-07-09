@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
 @Data
 @DatabaseTable(tableName = "rule_sub_log")
 public class RuleSubLogEntity {
-    @DatabaseField(id = true)
+    @DatabaseField(generatedId = true)
+    private Long id;
+    @DatabaseField
     private String ruleId;
     @DatabaseField
     private long updateTime;

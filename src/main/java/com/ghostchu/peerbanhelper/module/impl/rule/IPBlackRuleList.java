@@ -230,7 +230,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         });
                         // 更新日志
                         try {
-                            ruleSubLogsDao.create(new RuleSubLogEntity(ruleId, System.currentTimeMillis(), ent_count, updateType));
+                            ruleSubLogsDao.create(new RuleSubLogEntity(null, ruleId, System.currentTimeMillis(), ent_count, updateType));
                             result.set(new SlimMsg(true, Lang.IP_BAN_RULE_UPDATED.replace("{}", name), 200));
                         } catch (SQLException e) {
                             log.error(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId, e);
@@ -290,7 +290,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             return null;
         }
 
-        Optional<RuleSubLogEntity> first = ruleSubLogsDao.queryByPaging(ruleId, 0, 1).stream().findFirst();
+        Optional<RuleSubLogEntity> first = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().where().eq("ruleId", ruleId).queryBuilder(), 0, 1).stream().findFirst();
         long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
         int count = first.map(RuleSubLogEntity::getCount).orElse(0);
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
@@ -335,7 +335,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @throws SQLException 查询异常
      */
     public List<RuleSubLogEntity> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
-        return ruleSubLogsDao.queryByPaging(ruleId, pageIndex, pageSize);
+        return ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().where().eq("ruleId", ruleId).queryBuilder(), pageIndex, pageSize);
     }
 
     /**
@@ -346,7 +346,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @throws SQLException 查询异常
      */
     public long countRuleSubLogs(String ruleId) throws SQLException {
-        return ruleSubLogsDao.countOf(ruleSubLogsDao.queryBuilder().where().idEq(ruleId).prepare());
+        return ruleSubLogsDao.countOf(ruleSubLogsDao.queryBuilder().where().eq("ruleId", ruleId).prepare());
     }
 
     /**

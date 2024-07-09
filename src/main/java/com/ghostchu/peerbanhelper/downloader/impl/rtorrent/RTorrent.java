@@ -11,12 +11,15 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
-import com.google.common.primitives.Bytes;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import de.timroes.axmlrpc.Call;
 import de.timroes.axmlrpc.ResponseParser;
 import de.timroes.axmlrpc.serializer.SerializerHandler;
+import io.github.szabogabriel.jscgi.Mode;
+import io.github.szabogabriel.jscgi.SCGIMessage;
+import io.github.szabogabriel.jscgi.client.SCGIClient;
+import io.github.szabogabriel.jscgi.client.SCGIUnixSocketClient;
 import lombok.Cleanup;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,18 +31,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 public class RTorrent implements Downloader {
@@ -57,11 +60,18 @@ public class RTorrent implements Downloader {
         this.name = name;
         this.config = config;
         if (config.getEndpoint().startsWith("http")) {
-            this.apiEndpoint = config.getEndpoint() + "/RPC2";
-            this.connector = new XMLRPCOverHTTPConnector(serializerHandler, this.apiEndpoint, HttpClient.Version.valueOf(config.getHttpVersion()), config.getBasicAuth().getUser(), config.getBasicAuth().getPass(), config.isVerifySsl());
+            this.apiEndpoint = config.getEndpoint();
+            this.connector = new XMLRPCOverHTTPConnector(serializerHandler, config.endpoint, HttpClient.Version.HTTP_1_1, "", "", false);
+            //this.connector = new XMLRPCOverHTTPConnector(serializerHandler, this.apiEndpoint, HttpClient.Version.valueOf(config.getHttpVersion()), config.getBasicAuth().getUser(), config.getBasicAuth().getPass(), config.isVerifySsl());
         } else {
             this.apiEndpoint = config.getEndpoint();
-            this.connector = new XMLRPCUnixSocketConnector(serializerHandler, Path.of(this.apiEndpoint));
+
+            throw new RuntimeException("Not implemented yet");
+//            try {
+//                this.connector = new XMLRPCUnixSocketSCGIConnector(serializerHandler, Path.of(this.apiEndpoint));
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
         }
     }
 
@@ -234,13 +244,14 @@ public class RTorrent implements Downloader {
         }
     }
 
-    public static class XMLRPCUnixSocketConnector implements Connector {
-        private final UnixDomainSocketAddress socketAddress;
-        private final SerializerHandler serializerHandler;
 
-        public XMLRPCUnixSocketConnector(SerializerHandler serializerHandler, Path socketPath) {
+    public static class XMLRPCTCPSCGIConnector implements Connector {
+        private final SerializerHandler serializerHandler;
+        private final SCGIClient client;
+
+        public XMLRPCTCPSCGIConnector(SerializerHandler serializerHandler, String host, int port) throws IOException {
             this.serializerHandler = serializerHandler;
-            this.socketAddress = UnixDomainSocketAddress.of(socketPath);
+            this.client = new SCGIClient(host, port, Mode.STANDARD);
         }
 
         @Override
@@ -248,45 +259,37 @@ public class RTorrent implements Downloader {
             String xml = payload.getXML(debug);
             byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
             @Cleanup
-            SocketChannel channel = SocketChannel.open(StandardProtocolFamily.UNIX);
-            channel.connect(socketAddress);
-            sendBytes(channel, bytes);
-            byte[] resp = readBytes(channel);
+            var stream = new ByteArrayInputStream(bytes);
+
+            var msg = this.client.sendAndReceiveAsScgiMessage(new SCGIMessage(stream));
             @Cleanup
-            InputStream stream = new ByteArrayInputStream(resp);
-            return new ResponseParser().parse(serializerHandler, stream, debug);
+            var bodyStream = msg.getBodyStream();
+            return new ResponseParser().parse(serializerHandler, bodyStream, debug);
+        }
+    }
+
+    public static class XMLRPCUnixSocketSCGIConnector implements Connector {
+        private final UnixDomainSocketAddress socketAddress;
+        private final SerializerHandler serializerHandler;
+        private final SCGIUnixSocketClient client;
+
+        public XMLRPCUnixSocketSCGIConnector(SerializerHandler serializerHandler, Path socketPath) throws IOException {
+            this.serializerHandler = serializerHandler;
+            this.socketAddress = UnixDomainSocketAddress.of(socketPath);
+            this.client = new SCGIUnixSocketClient(this.socketAddress, Mode.STANDARD);
         }
 
-        private byte[] readBytes(SocketChannel channel) throws IOException {
-            List<byte[]> readBytes = new LinkedList<>();
-            while (true) {
-                ByteBuffer buffer = ByteBuffer.allocate(1024);
-                buffer.clear();
-                int bytesRead = channel.read(buffer);
-                if (bytesRead < 0) {
-                    break;
-                }
-                buffer.flip();
-                byte[] bytes = new byte[bytesRead];
-                buffer.get(bytes);
-                readBytes.add(bytes);
-            }
-            var it = readBytes.iterator();
-            byte[] bytes = it.next();
-            while (it.hasNext()) {
-                bytes = Bytes.concat(bytes, it.next());
-            }
-            return bytes;
-        }
+        @Override
+        public Object sendPayload(Call payload, boolean debug) throws Exception {
+            String xml = payload.getXML(debug);
+            byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
+            @Cleanup
+            var stream = new ByteArrayInputStream(bytes);
 
-        private void sendBytes(SocketChannel channel, byte[] bytes) throws IOException {
-            ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-            buffer.clear();
-            buffer.put(bytes);
-            buffer.flip();
-            while (buffer.hasRemaining()) {
-                channel.write(buffer);
-            }
+            var msg = this.client.sendAndReceiveAsScgiMessage(new SCGIMessage(stream));
+            @Cleanup
+            var bodyStream = msg.getBodyStream();
+            return new ResponseParser().parse(serializerHandler, bodyStream, debug);
         }
     }
 
@@ -333,6 +336,7 @@ public class RTorrent implements Downloader {
             if (body.statusCode() != 200) {
                 log.warn("XML-RPC over HTTP returns un-excepted statusCode: {}. The function may work properly", body.statusCode());
             }
+            System.out.println(body.body());
             return new ResponseParser().parse(serializerHandler, body.body(), debug);
         }
     }
