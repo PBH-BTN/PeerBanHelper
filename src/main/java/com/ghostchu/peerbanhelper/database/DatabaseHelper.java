@@ -28,6 +28,8 @@ public class DatabaseHelper {
         TableUtils.createTableIfNotExists(database.getDataSource(), RuleEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), HistoryEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class);
+        TableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class);
+        TableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class);
     }
 
     private void performUpgrade() throws SQLException {

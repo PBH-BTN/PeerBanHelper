@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.DatabaseHelper;
+import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
@@ -38,7 +39,6 @@ import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -56,8 +56,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -66,6 +64,7 @@ import java.util.logging.Level;
 @Slf4j
 @Component
 public class PeerBanHelperServer {
+    private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "No matches", "No matches");
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
     private final List<Downloader> downloaders = new ArrayList<>();
@@ -93,6 +92,7 @@ public class PeerBanHelperServer {
     @Qualifier("banListFile")
     private File banListFile;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
+    private ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofVirtual().factory());
     @Getter
     private Map<PeerAddress, PeerMetadata> LIVE_PEERS = new HashMap<>();
     @Autowired
@@ -119,6 +119,8 @@ public class PeerBanHelperServer {
     private HitRateMetric hitRateMetric = new HitRateMetric();
     @Autowired
     private DatabaseHelper databaseHelper;
+    @Autowired
+    private BanListDao banListDao;
 
     public PeerBanHelperServer() {
         this.pbhServerAddress = Main.getPbhServerAddress();
@@ -143,6 +145,7 @@ public class PeerBanHelperServer {
         loadBanListToMemory();
         registerTimer();
         banListInvoker.forEach(BanListInvoker::reset);
+        GENERAL_SCHEDULER.scheduleWithFixedDelay(this::saveBanList, 10 * 1000, BANLIST_SAVE_INTERVAL, TimeUnit.MILLISECONDS);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
     }
 
@@ -242,7 +245,7 @@ public class PeerBanHelperServer {
 
     public void shutdown() {
         // place some clean code here
-        dumpBanListToFile();
+        saveBanList();
         log.info(Lang.SHUTDOWN_CLOSE_METRICS);
         this.metrics.close();
         log.info(Lang.SHUTDOWN_UNREGISTER_MODULES);
@@ -269,15 +272,7 @@ public class PeerBanHelperServer {
             return;
         }
         try {
-            if (!banListFile.exists()) {
-                return;
-            }
-            String json = Files.readString(banListFile.toPath(), StandardCharsets.UTF_8);
-            Map<PeerAddress, BanMetadata> data = JsonUtil.getGson().fromJson(json, new TypeToken<Map<PeerAddress, BanMetadata>>() {
-            }.getType());
-            if (data == null) {
-                return;
-            }
+            Map<PeerAddress, BanMetadata> data = banListDao.readBanList();
             this.BAN_LIST.putAll(data);
             log.info(Lang.LOAD_BANLIST_FROM_FILE, data.size());
             downloaders.forEach(downloader -> {
@@ -291,18 +286,15 @@ public class PeerBanHelperServer {
         }
     }
 
-    private void dumpBanListToFile() {
+    private void saveBanList() {
         if (!mainConfig.getBoolean("persist.banlist")) {
             return;
         }
-        log.info(Lang.SHUTDOWN_SAVE_BANLIST);
         try {
-            if (!banListFile.exists()) {
-                banListFile.createNewFile();
-            }
-            Files.writeString(banListFile.toPath(), JsonUtil.getGson().toJson(BAN_LIST));
-        } catch (IOException e) {
-            log.error(Lang.SHUTDOWN_SAVE_BANLIST_FAILED);
+            int count = banListDao.saveBanList(BAN_LIST);
+            log.info(Lang.SAVED_BANLIST, count);
+        } catch (Exception e) {
+            log.error(Lang.SAVE_BANLIST_FAILED, e);
         }
     }
 
@@ -551,6 +543,7 @@ public class PeerBanHelperServer {
         moduleManager.register(AutoRangeBan.class);
         moduleManager.register(BtnNetworkOnline.class);
         moduleManager.register(DownloaderCIDRBlockList.class);
+        moduleManager.register(IPBlackRuleList.class);
         moduleManager.register(PBHMetricsController.class);
         moduleManager.register(PBHBanController.class);
         moduleManager.register(PBHMetadataController.class);
