@@ -15,6 +15,15 @@ on:
       - published
 jobs:
   build:
+    permissions:
+      contents: write
+      checks: write
+      actions: read
+      issues: read
+      packages: write
+      pull-requests: read
+      repository-projects: read
+      statuses: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
