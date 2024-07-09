@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.database.Database;
-import com.ghostchu.peerbanhelper.database.dao.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -109,8 +109,7 @@ public class PBHBanController extends AbstractFeatureModule {
             Map<String, Object> map = new HashMap<>();
             map.put("pageIndex", pageIndex);
             map.put("pageSize", pageSize);
-            map.put("results", historyDao.queryBuilder().offset((long) pageIndex).limit((long) pageSize).query()
-                    .stream().map(BanLogResponse::new).toList());
+            map.put("results", historyDao.queryByPaging(pageIndex, pageSize).stream().map(BanLogResponse::new).toList());
             map.put("total", historyDao.countOf());
             ctx.status(HttpStatus.OK);
             ctx.json(map);

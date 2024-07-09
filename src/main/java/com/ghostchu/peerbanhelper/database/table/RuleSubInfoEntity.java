@@ -9,10 +9,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "metadata")
-public final class MetadataEntity {
+@DatabaseTable(tableName = "rule_sub_info")
+public class RuleSubInfoEntity {
     @DatabaseField(id = true)
-    private String key;
+    private String ruleId;
     @DatabaseField
-    private String value;
+    private boolean enabled;
+    @DatabaseField
+    private String ruleName;
+    @DatabaseField
+    private String subUrl;
+    @DatabaseField
+    private long lastUpdate;
+    @DatabaseField
+    private int entCount;
 }

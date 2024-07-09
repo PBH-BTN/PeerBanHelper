@@ -1,18 +1,12 @@
 package com.ghostchu.peerbanhelper.metric.impl.persist;
 
-import com.ghostchu.peerbanhelper.database.DatabaseHelper;
-import com.ghostchu.peerbanhelper.database.dao.ModuleDao;
-import com.ghostchu.peerbanhelper.database.dao.PeerIdentityDao;
-import com.ghostchu.peerbanhelper.database.dao.RuleDao;
-import com.ghostchu.peerbanhelper.database.dao.TorrentDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.*;
 import com.ghostchu.peerbanhelper.database.table.*;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,11 +18,7 @@ import java.sql.Timestamp;
 @Component("persistMetrics")
 public class PersistMetrics implements BasicMetrics {
     @Autowired
-    private DatabaseHelper db;
-    @Autowired
     private InMemoryMetrics inMemory;
-    @Autowired
-    private TorrentDao dao;
     @Autowired
     private PeerIdentityDao peerIdentityDao;
     @Autowired
@@ -37,6 +27,8 @@ public class PersistMetrics implements BasicMetrics {
     private ModuleDao moduleDao;
     @Autowired
     private RuleDao ruleDao;
+    @Autowired
+    private HistoryDao historyDao;
 
     @Override
     public long getCheckCounter() {
@@ -84,7 +76,6 @@ public class PersistMetrics implements BasicMetrics {
                         module,
                         metadata.getRule()
                 ));
-                Dao<HistoryEntity, Long> historyDao = DaoManager.createDao(db.getDataSource(), HistoryEntity.class);
                 historyDao.create(new HistoryEntity(
                         null,
                         new Timestamp(metadata.getBanAt()),

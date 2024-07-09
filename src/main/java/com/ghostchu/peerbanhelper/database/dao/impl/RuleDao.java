@@ -1,8 +1,8 @@
-package com.ghostchu.peerbanhelper.database.dao;
+package com.ghostchu.peerbanhelper.database.dao.impl;
 
 import com.ghostchu.peerbanhelper.database.Database;
+import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.RuleEntity;
-import com.j256.ormlite.dao.BaseDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Component
-public class RuleDao extends BaseDaoImpl<RuleEntity, Long> {
+public class RuleDao extends AbstractPBHDao<RuleEntity, Long> {
     public RuleDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), RuleEntity.class);
     }

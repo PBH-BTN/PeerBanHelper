@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.old.RuleSubInfo;
+import com.ghostchu.peerbanhelper.database.table.RuleSubInfoEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
@@ -177,15 +177,15 @@ public class RuleSubController extends AbstractFeatureModule {
             ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_ENABLED_WRONG_PARAM, HttpStatus.BAD_REQUEST.getCode()));
             return;
         }
-        RuleSubInfo ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
+        RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId), HttpStatus.BAD_REQUEST.getCode()));
             return;
         }
-        String msg = (enabled ? Lang.IP_BAN_RULE_ENABLED : Lang.IP_BAN_RULE_DISABLED).replace("{}", ruleSubInfo.ruleName());
-        if (enabled != ruleSubInfo.enabled()) {
-            ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, enabled, ruleSubInfo.ruleName(), ruleSubInfo.subUrl(), 0, 0));
+        String msg = (enabled ? Lang.IP_BAN_RULE_ENABLED : Lang.IP_BAN_RULE_DISABLED).replace("{}", ruleSubInfo.getRuleName());
+        if (enabled != ruleSubInfo.isEnabled()) {
+            ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, enabled, ruleSubInfo.getRuleName(), ruleSubInfo.getSubUrl(), 0, 0));
             ipBlackRuleList.updateRule(configurationSection, IPBanRuleUpdateType.MANUAL);
             log.info(msg);
             ctx.json(new SlimMsg(true, msg, 200));
@@ -202,7 +202,7 @@ public class RuleSubController extends AbstractFeatureModule {
      */
     private void delete(Context ctx) throws IOException, SQLException {
         String ruleId = ctx.pathParam("ruleId");
-        RuleSubInfo ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
+        RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId), HttpStatus.BAD_REQUEST.getCode()));
@@ -210,7 +210,7 @@ public class RuleSubController extends AbstractFeatureModule {
         }
         ipBlackRuleList.deleteRuleSubInfo(ruleId);
         ipBlackRuleList.getIpBanMatchers().removeIf(ele -> ele.getRuleId().equals(ruleId));
-        String msg = Lang.IP_BAN_RULE_DELETED.replace("{}", ruleSubInfo.ruleName());
+        String msg = Lang.IP_BAN_RULE_DELETED.replace("{}", ruleSubInfo.getRuleName());
         log.info(msg);
         ctx.json(new SlimMsg(true, msg, 200));
     }
@@ -232,7 +232,7 @@ public class RuleSubController extends AbstractFeatureModule {
             ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_NO_ID, HttpStatus.BAD_REQUEST.getCode()));
             return;
         }
-        RuleSubInfo ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
+        RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (isAdd && ruleSubInfo != null) {
             // 新增时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
@@ -255,13 +255,13 @@ public class RuleSubController extends AbstractFeatureModule {
             }
         } else {
             if (ruleName == null) {
-                ruleName = ruleSubInfo.ruleName();
+                ruleName = ruleSubInfo.getRuleName();
             }
             if (subUrl == null) {
-                subUrl = ruleSubInfo.subUrl();
+                subUrl = ruleSubInfo.getSubUrl();
             }
         }
-        ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfo(ruleId, isAdd || ruleSubInfo.enabled(), ruleName, subUrl, 0, 0));
+        ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, 0, 0));
         assert configurationSection != null;
         try {
             SlimMsg msg = ipBlackRuleList.updateRule(configurationSection, IPBanRuleUpdateType.MANUAL);
@@ -301,7 +301,7 @@ public class RuleSubController extends AbstractFeatureModule {
      */
     private StdMsg list() throws SQLException {
         List<String> list = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();
-        List<RuleSubInfo> data = new ArrayList<>(list.size());
+        List<RuleSubInfoEntity> data = new ArrayList<>(list.size());
         for (String s : list) {
             data.add(ipBlackRuleList.getRuleSubInfo(s));
         }

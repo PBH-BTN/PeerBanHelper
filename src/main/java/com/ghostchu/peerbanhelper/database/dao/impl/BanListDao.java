@@ -1,11 +1,11 @@
-package com.ghostchu.peerbanhelper.database.dao;
+package com.ghostchu.peerbanhelper.database.dao.impl;
 
 import com.ghostchu.peerbanhelper.database.Database;
+import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.BanListEntity;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.table.TableUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class BanListDao extends BaseDaoImpl<BanListEntity, Long> {
+public class BanListDao extends AbstractPBHDao<BanListEntity, String> {
     public BanListDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), BanListEntity.class);
     }

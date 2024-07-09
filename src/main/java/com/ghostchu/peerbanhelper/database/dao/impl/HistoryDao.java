@@ -1,8 +1,8 @@
-package com.ghostchu.peerbanhelper.database.dao;
+package com.ghostchu.peerbanhelper.database.dao.impl;
 
 import com.ghostchu.peerbanhelper.database.Database;
+import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
-import com.j256.ormlite.dao.BaseDaoImpl;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class HistoryDao extends BaseDaoImpl<HistoryEntity, Long> {
+public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
     public HistoryDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), HistoryEntity.class);
     }

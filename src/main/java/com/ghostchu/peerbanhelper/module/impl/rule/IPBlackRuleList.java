@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.database.old.DatabaseHelper;
-import com.ghostchu.peerbanhelper.database.old.RuleSubInfo;
-import com.ghostchu.peerbanhelper.database.old.RuleSubLog;
+import com.ghostchu.peerbanhelper.database.dao.impl.RuleSubLogsDao;
+import com.ghostchu.peerbanhelper.database.table.RuleSubInfoEntity;
+import com.ghostchu.peerbanhelper.database.table.RuleSubLogEntity;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
@@ -25,7 +25,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -51,12 +50,16 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 @Getter
 public class IPBlackRuleList extends AbstractRuleFeatureModule {
-    @Autowired
-    private DatabaseHelper db;
+    private final RuleSubLogsDao ruleSubLogsDao;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private ScheduledExecutorService scheduledExecutorService;
     private long banDuration;
+
+    public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao) {
+        super();
+        this.ruleSubLogsDao = ruleSubLogsDao;
+    }
 
     @Override
     public boolean isConfigurable() {
@@ -227,7 +230,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         });
                         // 更新日志
                         try {
-                            db.insertRuleSubLog(ruleId, ent_count, updateType);
+                            ruleSubLogsDao.create(new RuleSubLogEntity(ruleId, System.currentTimeMillis(), ent_count, updateType));
                             result.set(new SlimMsg(true, Lang.IP_BAN_RULE_UPDATED.replace("{}", name), 200));
                         } catch (SQLException e) {
                             log.error(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId, e);
@@ -277,7 +280,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @param ruleId 规则ID
      * @return 规则订阅信息
      */
-    public RuleSubInfo getRuleSubInfo(String ruleId) throws SQLException {
+    public RuleSubInfoEntity getRuleSubInfo(String ruleId) throws SQLException {
         ConfigurationSection rules = getRuleSubsConfig();
         if (rules == null) {
             return null;
@@ -286,10 +289,11 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         if (rule == null) {
             return null;
         }
-        Optional<RuleSubLog> first = db.queryRuleSubLogs(ruleId, 0, 1).stream().findFirst();
-        long lastUpdate = first.map(RuleSubLog::updateTime).orElse(0L);
-        int count = first.map(RuleSubLog::count).orElse(0);
-        return new RuleSubInfo(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
+
+        Optional<RuleSubLogEntity> first = ruleSubLogsDao.queryByPaging(ruleId, 0, 1).stream().findFirst();
+        long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
+        int count = first.map(RuleSubLogEntity::getCount).orElse(0);
+        return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
     }
 
     /**
@@ -299,12 +303,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @return 保存后的规则订阅信息
      * @throws IOException 保存异常
      */
-    public ConfigurationSection saveRuleSubInfo(@NotNull RuleSubInfo ruleSubInfo) throws IOException {
+    public ConfigurationSection saveRuleSubInfo(@NotNull RuleSubInfoEntity ruleSubInfo) throws IOException {
         ConfigurationSection rules = getRuleSubsConfig();
-        String ruleId = ruleSubInfo.ruleId();
-        rules.set(ruleId + ".enabled", ruleSubInfo.enabled());
-        rules.set(ruleId + ".name", ruleSubInfo.ruleName());
-        rules.set(ruleId + ".url", ruleSubInfo.subUrl());
+        String ruleId = ruleSubInfo.getRuleId();
+        rules.set(ruleId + ".enabled", ruleSubInfo.isEnabled());
+        rules.set(ruleId + ".name", ruleSubInfo.getRuleName());
+        rules.set(ruleId + ".url", ruleSubInfo.getSubUrl());
         saveConfig();
         return rules.getConfigurationSection(ruleId);
     }
@@ -330,8 +334,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @return 规则订阅日志
      * @throws SQLException 查询异常
      */
-    public List<RuleSubLog> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
-        return db.queryRuleSubLogs(ruleId, pageIndex, pageSize);
+    public List<RuleSubLogEntity> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
+        return ruleSubLogsDao.queryByPaging(ruleId, pageIndex, pageSize);
     }
 
     /**
@@ -341,8 +345,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @return 规则订阅日志数量
      * @throws SQLException 查询异常
      */
-    public int countRuleSubLogs(String ruleId) throws SQLException {
-        return db.countRuleSubLogs(ruleId);
+    public long countRuleSubLogs(String ruleId) throws SQLException {
+        return ruleSubLogsDao.countOf(ruleSubLogsDao.queryBuilder().where().idEq(ruleId).prepare());
     }
 
     /**

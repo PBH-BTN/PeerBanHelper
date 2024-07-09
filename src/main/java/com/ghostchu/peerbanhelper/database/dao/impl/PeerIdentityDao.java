@@ -1,8 +1,8 @@
-package com.ghostchu.peerbanhelper.database.dao;
+package com.ghostchu.peerbanhelper.database.dao.impl;
 
 import com.ghostchu.peerbanhelper.database.Database;
+import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.PeerIdentityEntity;
-import com.j256.ormlite.dao.BaseDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Component
-public class PeerIdentityDao extends BaseDaoImpl<PeerIdentityEntity, Long> {
+public class PeerIdentityDao extends AbstractPBHDao<PeerIdentityEntity, Long> {
     public PeerIdentityDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), PeerIdentityEntity.class);
     }
