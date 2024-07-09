@@ -137,11 +137,11 @@ public class PeerBanHelperServer {
 
     public void start() throws SQLException {
         loadDownloaders();
+        registerBanListInvokers();
+        registerModules();
         registerHttpServer();
         setupIPDB();
-        registerModules();
         resetKnownDownloaders();
-        registerBanListInvokers();
         loadBanListToMemory();
         registerTimer();
         banListInvoker.forEach(BanListInvoker::reset);
