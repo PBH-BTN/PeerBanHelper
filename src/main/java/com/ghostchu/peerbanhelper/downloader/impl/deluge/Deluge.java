@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -25,7 +26,6 @@ import raccoonfink.deluge.responses.DelugeListMethodsResponse;
 import raccoonfink.deluge.responses.PBHActiveTorrentsResponse;
 
 import java.net.http.HttpClient;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,13 +61,7 @@ public class Deluge implements Downloader {
         return new Deluge(name, config);
     }
 
-    private static String toStringHex(String s) {
-        byte[] baKeyword = new byte[s.length() / 2];
-        for (int i = 0; i < baKeyword.length; i++) {
-            baKeyword[i] = (byte) (0xff & Integer.parseInt(s.substring(i * 2, i * 2 + 2), 16));
-        }
-        return new String(baKeyword, StandardCharsets.ISO_8859_1);
-    }
+
 
     @Override
     public JsonObject saveDownloaderJson() {
@@ -140,7 +134,7 @@ public class Deluge implements Downloader {
                 for (PBHActiveTorrentsResponse.ActiveTorrentsResponseDTO.PeersDTO peer : activeTorrent.getPeers()) {
                     DelugePeer delugePeer = new DelugePeer(
                             new PeerAddress(peer.getIp(), peer.getPort()),
-                            toStringHex(peer.getPeerId()),
+                            StrUtil.toStringHex(peer.getPeerId()),
                             peer.getClientName(),
                             peer.getTotalDownload(),
                             peer.getPayloadDownSpeed(),
