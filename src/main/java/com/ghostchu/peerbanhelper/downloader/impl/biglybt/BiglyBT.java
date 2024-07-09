@@ -1,9 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
-import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
@@ -107,25 +105,25 @@ public class BiglyBT implements Downloader {
         return apiEndpoint;
     }
 
-    @Override
-    public String getWebUIEndpoint() {
-        return config.getEndpoint();
-    }
+//    @Override
+//    public String getWebUIEndpoint() {
+//        return config.getEndpoint();
+//    }
 
-    @Override
-    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
-        return null;
-    }
-
-    @Override
-    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
-        return null;
-    }
-
-    @Override
-    public boolean isSupportWebview() {
-        return false;
-    }
+//    @Override
+//    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
+//        return null;
+//    }
+//
+//    @Override
+//    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
+//        return null;
+//    }
+//
+//    @Override
+//    public boolean isSupportWebview() {
+//        return false;
+//    }
 
     @Override
     public String getName() {

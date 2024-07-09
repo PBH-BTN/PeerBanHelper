@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
-import com.ghostchu.peerbanhelper.downloader.*;
+import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -82,25 +84,25 @@ public class Deluge implements Downloader {
         return config.getEndpoint();
     }
 
-    @Override
-    public String getWebUIEndpoint() {
-        return config.getEndpoint();
-    }
+//    @Override
+//    public String getWebUIEndpoint() {
+//        return config.getEndpoint();
+//    }
 
-    @Override
-    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
-        return null;
-    }
-
-    @Override
-    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
-        return null;
-    }
-
-    @Override
-    public boolean isSupportWebview() {
-        return true;
-    }
+//    @Override
+//    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
+//        return null;
+//    }
+//
+//    @Override
+//    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
+//        return null;
+//    }
+//
+//    @Override
+//    public boolean isSupportWebview() {
+//        return true;
+//    }
 
     @Override
     public String getName() {

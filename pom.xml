@@ -588,6 +588,11 @@
             <version>${javafx.version}</version>
             <scope>${javafx.scope}</scope>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.dlsc.preferencesfx</groupId>-->
+        <!--            <artifactId>preferencesfx-core</artifactId>-->
+        <!--            <version>11.8.0</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>com.googlecode.aviator</groupId>
             <artifactId>aviator</artifactId>
@@ -627,7 +632,11 @@
             <artifactId>ormlite-jdbc</artifactId>
             <version>${ormlite.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>fr.turri</groupId>
+            <artifactId>aXMLRPC</artifactId>
+            <version>1.14.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
         <!--        <dependency>-->
         <!--            <groupId>org.jfxtras</groupId>-->

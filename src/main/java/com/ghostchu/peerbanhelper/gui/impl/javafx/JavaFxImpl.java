@@ -2,8 +2,6 @@ package com.ghostchu.peerbanhelper.gui.impl.javafx;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.MainJavaFx;
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
@@ -33,7 +31,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -104,23 +101,23 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                         javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
                         selectionModel.select(webuiTab);
                         log.info(Lang.WEBVIEW_ENABLED);
-                        if (System.getProperty("pbh.enableDownloadWebView") != null) {
-                            for (Downloader downloader : Main.getServer().getDownloaders()) {
-                                if (!downloader.isSupportWebview()) {
-                                    continue;
-                                }
-                                DownloaderBasicAuth basicAuth = downloader.getDownloaderBasicAuth();
-                                Map<String, String> headers = new HashMap<>();
-                                if (basicAuth != null) {
-                                    String cred = Base64.getEncoder().encodeToString((basicAuth.username() + ":" + basicAuth.password()).getBytes(StandardCharsets.UTF_8));
-                                    headers.put("Authorization", "Basic " + cred);
-                                }
-                                JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(),
-                                        downloader.getName(),
-                                        downloader.getWebUIEndpoint(),
-                                        headers, downloader.getWebViewJavaScript());
-                            }
-                        }
+//                        if (System.getProperty("pbh.enableDownloadWebView") != null) {
+//                            for (Downloader downloader : Main.getServer().getDownloaders()) {
+//                                if (!downloader.isSupportWebview()) {
+//                                    continue;
+//                                }
+//                                DownloaderBasicAuth basicAuth = downloader.getDownloaderBasicAuth();
+//                                Map<String, String> headers = new HashMap<>();
+//                                if (basicAuth != null) {
+//                                    String cred = Base64.getEncoder().encodeToString((basicAuth.username() + ":" + basicAuth.password()).getBytes(StandardCharsets.UTF_8));
+//                                    headers.put("Authorization", "Basic " + cred);
+//                                }
+//                                JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(),
+//                                        downloader.getName(),
+//                                        downloader.getWebUIEndpoint(),
+//                                        headers, downloader.getWebViewJavaScript());
+//                            }
+//                        }
                     } else {
                         log.info(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED);
                     }
