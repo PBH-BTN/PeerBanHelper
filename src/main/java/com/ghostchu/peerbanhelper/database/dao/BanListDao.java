@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.database.dao;
 
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.table.BanListEntity;
+import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.j256.ormlite.dao.BaseDaoImpl;
@@ -26,7 +27,9 @@ public class BanListDao extends BaseDaoImpl<BanListEntity, Long> {
     public Map<PeerAddress, BanMetadata> readBanList() {
         Map<PeerAddress, BanMetadata> map = new HashMap<>();
         try {
-            queryForAll().forEach(e -> map.put(e.getAddress(), e.getMetadata()));
+            queryForAll().forEach(e -> map.put(
+                    JsonUtil.standard().fromJson(e.getAddress(), PeerAddress.class)
+                    , JsonUtil.standard().fromJson(e.getMetadata(), BanMetadata.class)));
         } catch (Exception e) {
             log.error("Unable to read stored banlist, skipping...", e);
         }
@@ -38,7 +41,9 @@ public class BanListDao extends BaseDaoImpl<BanListEntity, Long> {
 //        TableUtils.createTableIfNotExists(getConnectionSource(), BanListEntity.class);
         TableUtils.clearTable(getConnectionSource(), BanListEntity.class);
         List<BanListEntity> entityList = new ArrayList<>();
-        banlist.forEach((key, value) -> entityList.add(new BanListEntity(key, value)));
+        banlist.forEach((key, value) -> entityList.add(new BanListEntity(
+                JsonUtil.standard().toJson(key)
+                , JsonUtil.standard().toJson(value))));
         return create(entityList);
     }
 }
