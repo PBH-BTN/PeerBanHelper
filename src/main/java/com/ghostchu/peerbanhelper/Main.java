@@ -164,10 +164,9 @@ public class Main {
     private static void setupConfiguration() {
         log.info(Lang.LOADING_CONFIG);
         try {
-            if (!initConfiguration()) {
-                guiManager.showConfigurationSetupDialog();
-                System.exit(0);
-            }
+            initConfiguration();
+            //guiManager.showConfigurationSetupDialog();
+            //System.exit(0);
         } catch (IOException e) {
             log.error(Lang.ERR_SETUP_CONFIGURATION, e);
             System.exit(0);

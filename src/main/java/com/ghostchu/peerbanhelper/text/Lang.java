@@ -274,4 +274,5 @@ public final class Lang {
     public static String RULE_ENGINE_INVALID_RULE = "规则 {} 的参数 {} 无效，仅接受以下值：{}";
     public static String RULE_ENGINE_NOT_A_RULE = "[规则引擎] 表达式 {} 不是一个有效规则";
     public static String RULE_MATCHER_STRING_EQUALS = "匹配相同";
+    public static String NEW_SETUP_NO_DOWNLOADERS = "PeerBanHelper 现在还未连接到任何下载器！请打开 WebUI 并添加下载器";
 }

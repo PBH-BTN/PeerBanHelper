@@ -67,7 +67,7 @@ public class PeerBanHelperServer {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "No matches", "No matches");
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
-    private final List<Downloader> downloaders = new ArrayList<>();
+    private final List<Downloader> downloaders = new CopyOnWriteArrayList<>();
     @Getter
     private final List<IPAddress> ignoreAddresses = new ArrayList<>();
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -147,11 +147,19 @@ public class PeerBanHelperServer {
         banListInvoker.forEach(BanListInvoker::reset);
         GENERAL_SCHEDULER.scheduleWithFixedDelay(this::saveBanList, 10 * 1000, BANLIST_SAVE_INTERVAL, TimeUnit.MILLISECONDS);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
+        if (downloaders.isEmpty()) {
+            for (int i = 0; i < 50; i++) {
+                log.error(Lang.NEW_SETUP_NO_DOWNLOADERS);
+            }
+        }
     }
 
     public void loadDownloaders() {
         this.downloaders.clear();
         ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
+        if (clientSection == null) {
+            return;
+        }
         for (String client : clientSection.getKeys(false)) {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
             String endpoint = downloaderSection.getString("endpoint");
@@ -352,6 +360,7 @@ public class PeerBanHelperServer {
      * 启动新的一轮封禁序列
      */
     public void banWave() {
+
         banWaveWatchDog.setLastOperation("Ban wave - start");
         long startTimer = System.currentTimeMillis();
         try {
@@ -421,7 +430,7 @@ public class PeerBanHelperServer {
                         needRelaunched.getOrDefault(downloader, Collections.emptyList()),
                         bannedPeers, unbannedPeers)));
             }
-            if (!hideFinishLogs) {
+            if (!hideFinishLogs && !downloaders.isEmpty()) {
                 long downloadersCount = peers.keySet().size();
                 long torrentsCount = peers.values().stream().mapToLong(e -> e.keySet().size()).sum();
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
