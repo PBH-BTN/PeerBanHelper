@@ -149,7 +149,7 @@ public class PeerBanHelperServer {
         Main.getEventBus().post(new PBHServerStartedEvent(this));
         if (downloaders.isEmpty()) {
             for (int i = 0; i < 50; i++) {
-                log.error(Lang.NEW_SETUP_NO_DOWNLOADERS);
+                log.error(Lang.NEW_SETUP_NO_DOWNLOADERS, getWebContainer() == null ? "ERROR" : getWebContainer().getToken());
             }
         }
     }
