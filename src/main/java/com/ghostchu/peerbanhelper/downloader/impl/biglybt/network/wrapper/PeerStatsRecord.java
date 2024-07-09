@@ -10,7 +10,7 @@ com.biglybt.pif.peers.PeerStats.java
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class PeerStatsRecord {
+public final class PeerStatsRecord {
     private long rtDownloadSpeed;
     private long reception;
     private long rtUploadSpeed;

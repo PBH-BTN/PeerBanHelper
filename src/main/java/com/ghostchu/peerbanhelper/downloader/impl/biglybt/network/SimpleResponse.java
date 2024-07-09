@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class SimpleResponse {
+public final class SimpleResponse {
     private String msg;
 }

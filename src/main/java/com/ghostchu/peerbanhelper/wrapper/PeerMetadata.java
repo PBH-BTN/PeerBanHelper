@@ -20,7 +20,6 @@ public class PeerMetadata implements Comparable<PeerMetadata> {
     private IPGeoData geo;
     private String reverseLookup = "N/A";
 
-
     public PeerMetadata(String downloader, Torrent torrent, Peer peer) {
         this.randomId = UUID.randomUUID();
         this.downloader = downloader;

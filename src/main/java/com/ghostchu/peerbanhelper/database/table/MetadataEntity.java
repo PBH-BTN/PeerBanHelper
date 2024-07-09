@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @DatabaseTable(tableName = "metadata")
-public class MetadataEntity {
+public final class MetadataEntity {
     @DatabaseField(id = true, uniqueIndex = true)
     private String key;
     @DatabaseField

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @DatabaseTable(tableName = "peer_identity")
-public class PeerIdentityEntity {
+public final class PeerIdentityEntity {
     @DatabaseField(generatedId = true)
     private Long id;
     @DatabaseField(uniqueCombo = true)

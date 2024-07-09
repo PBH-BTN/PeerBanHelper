@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Data
 @DatabaseTable(tableName = "history")
-public class HistoryEntity {
+public final class HistoryEntity {
     @DatabaseField(generatedId = true)
     private Long id;
     @DatabaseField(canBeNull = false)

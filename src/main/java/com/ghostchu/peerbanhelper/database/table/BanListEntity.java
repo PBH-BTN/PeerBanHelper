@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @DatabaseTable(tableName = "banlist")
-public class BanListEntity {
+public final class BanListEntity {
     @DatabaseField(canBeNull = false, dataType = DataType.SERIALIZABLE)
     private PeerAddress address;
     @DatabaseField(canBeNull = false, dataType = DataType.SERIALIZABLE)

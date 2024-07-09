@@ -203,10 +203,10 @@ public class QBittorrent implements Downloader {
         if (request.statusCode() != 200) {
             throw new IllegalStateException(String.format(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
         }
-        List<TorrentDetail> torrentDetail = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<TorrentDetail>>() {
+        List<QBTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBTorrent>>() {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
-        for (TorrentDetail detail : torrentDetail) {
+        for (QBTorrent detail : qbTorrent) {
             torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(), detail.getDlspeed()));
         }
         return torrents;
@@ -240,18 +240,18 @@ public class QBittorrent implements Downloader {
         List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
-            SingleTorrentPeer singleTorrentPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), SingleTorrentPeer.class);
+            QBPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBPeer.class);
             // 一个 QB 本地化问题的 Workaround
-            if (singleTorrentPeer.getPeerId().equals("Unknown") || singleTorrentPeer.getPeerId().equals("未知")) {
-                singleTorrentPeer.setPeerIdClient("");
+            if (qbPeer.getPeerId().equals("Unknown") || qbPeer.getPeerId().equals("未知")) {
+                qbPeer.setPeerIdClient("");
             }
-            if (singleTorrentPeer.getClientName() != null) {
-                if (singleTorrentPeer.getClientName().startsWith("Unknown [") && singleTorrentPeer.getClientName().endsWith("]")) {
-                    String mid = singleTorrentPeer.getClientName().substring("Unknown [".length(), singleTorrentPeer.getClientName().length() - 1);
-                    singleTorrentPeer.setClient(mid);
+            if (qbPeer.getClientName() != null) {
+                if (qbPeer.getClientName().startsWith("Unknown [") && qbPeer.getClientName().endsWith("]")) {
+                    String mid = qbPeer.getClientName().substring("Unknown [".length(), qbPeer.getClientName().length() - 1);
+                    qbPeer.setClient(mid);
                 }
             }
-            peersList.add(singleTorrentPeer);
+            peersList.add(qbPeer);
         }
         return peersList;
     }

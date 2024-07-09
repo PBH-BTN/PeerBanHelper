@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Preferences {
+public final class Preferences {
 
     @SerializedName("banned_IPs")
     private String bannedIps;

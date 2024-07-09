@@ -10,7 +10,7 @@ com.biglybt.pif.peers.Peer.java
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PeerRecord {
+public final class PeerRecord {
     private boolean myPeer;
     private int state;
     private String peerIdBase64;

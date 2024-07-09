@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @AllArgsConstructor
 @Data
-public class PopulatedPeerDTO {
+public final class PopulatedPeerDTO {
     private PeerWrapper peer;
     private IPGeoData geo;
 }

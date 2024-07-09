@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @DatabaseTable(tableName = "torrents")
-public class TorrentEntity {
+public final class TorrentEntity {
     @DatabaseField(generatedId = true)
     private Long id;
     @DatabaseField(canBeNull = false, uniqueIndex = true)

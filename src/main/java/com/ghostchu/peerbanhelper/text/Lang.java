@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.text;
 import lombok.Getter;
 
 @Getter
-public class Lang {
+public final class Lang {
     public static final String ERR_BUILD_NO_INFO_FILE = "错误：构建信息文件不存在";
     public static final String ERR_CANNOT_LOAD_BUILD_INFO = "错误：无法加载构建信息文件";
     public static final String MOTD = "PeerBanHelper v{} - by PBH-BTN Community, Made with ❤";

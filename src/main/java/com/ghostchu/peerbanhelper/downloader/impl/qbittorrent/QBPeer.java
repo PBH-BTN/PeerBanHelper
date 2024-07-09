@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Setter
-public class SingleTorrentPeer implements Peer {
+public final class QBPeer implements Peer {
     @SerializedName("client")
     private String client;
     @SerializedName("connection")
@@ -45,7 +45,7 @@ public class SingleTorrentPeer implements Peer {
     private Long uploaded;
     private transient PeerAddress peerAddress;
 
-    public SingleTorrentPeer() {
+    public QBPeer() {
     }
 
     @Override

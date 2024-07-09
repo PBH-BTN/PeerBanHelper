@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class IPGeoData {
+public final class IPGeoData {
     @Nullable
     private CityData city;
     @Nullable

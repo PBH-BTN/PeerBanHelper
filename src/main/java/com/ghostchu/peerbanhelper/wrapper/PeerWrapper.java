@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PeerWrapper {
+public final class PeerWrapper {
     private PeerAddressWrapper address;
     private String id;
     private String clientName;

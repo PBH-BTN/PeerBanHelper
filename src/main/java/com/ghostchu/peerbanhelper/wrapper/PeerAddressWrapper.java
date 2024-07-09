@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PeerAddressWrapper {
+public final class PeerAddressWrapper {
     private int port;
     private String ip;
 

@@ -13,7 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
-public class PeerAddress implements Comparable<PeerAddress>, Serializable {
+public final class PeerAddress implements Comparable<PeerAddress>, Serializable {
 
     private String ip;
     private transient IPAddress address;

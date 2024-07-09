@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
 
-public class TRPeer implements Peer {
+public final class TRPeer implements Peer {
 
     private final Peers backend;
     private transient PeerAddress peerAddress;

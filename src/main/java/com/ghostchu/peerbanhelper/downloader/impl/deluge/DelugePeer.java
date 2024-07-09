@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class DelugePeer implements Peer {
+public final class DelugePeer implements Peer {
     private PeerAddress peerAddress;
     private String peerId;
     private String clientName;

@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.StringJoiner;
 
 @Data
-public class PeerFlag {
+public final class PeerFlag {
     private boolean interesting;
     private boolean choked;
     private boolean remoteInterested;

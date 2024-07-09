@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @DatabaseTable(tableName = "modules")
-public class ModuleEntity {
+public final class ModuleEntity {
     @DatabaseField(generatedId = true)
     private Long id;
     @DatabaseField(unique = true)
