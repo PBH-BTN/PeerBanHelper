@@ -89,4 +89,6 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         server.getProfileConfig().set("module." + getConfigName(), getConfig());
         server.getProfileConfig().save(new File(Main.getConfigDirectory(), "profile.yml"));
     }
+
+
 }

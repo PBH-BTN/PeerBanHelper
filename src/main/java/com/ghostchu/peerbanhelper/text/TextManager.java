@@ -27,7 +27,7 @@ import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
 
 @Slf4j
 public class TextManager implements Reloadable {
-    private static TextManager INSTANCE_HOLDER = new TextManager();
+    public static TextManager INSTANCE_HOLDER = new TextManager();
     public final Set<PostProcessor> postProcessors = new LinkedHashSet<>();
     // <File <Locale, Section>>
     private final LanguageFilesManager languageFilesManager = new LanguageFilesManager();

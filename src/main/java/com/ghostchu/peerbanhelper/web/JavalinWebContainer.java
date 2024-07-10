@@ -1,10 +1,13 @@
 package com.ghostchu.peerbanhelper.web;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
@@ -15,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -100,5 +103,48 @@ public class JavalinWebContainer {
 
     public Javalin javalin() {
         return javalin;
+    }
+
+    public String reqLocale(Context context) {
+        for (AcceptLanguages requestLocale : requestLocales(context)) {
+            String pbhCode = requestLocale.code.toLowerCase(Locale.ROOT).replace("-", "_");
+            if (TextManager.INSTANCE_HOLDER.getAvailableLanguages().contains(pbhCode)) {
+                return pbhCode;
+            }
+        }
+        return Main.DEF_LOCALE;
+    }
+
+    public List<AcceptLanguages> requestLocales(Context context) {
+        String headerLocale = context.header("Accept-Language");
+        if (headerLocale == null) {
+            return List.of(new AcceptLanguages(Main.DEF_LOCALE, 1.0f));
+        }
+        // zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+        // zh
+        List<AcceptLanguages> preferLocales = new ArrayList<>();
+        String[] browserRequested = headerLocale.split(",");
+        for (String s : browserRequested) {
+            String[] localeSettings = s.split(";");
+            String localeCode = localeSettings[0];
+            float prefer = 1.0f;
+            try {
+                if (localeSettings.length > 1) {
+                    prefer = Float.parseFloat(localeSettings[1].substring(2));
+                }
+            } catch (Exception ignored) {
+            }
+            preferLocales.add(new AcceptLanguages(localeCode, prefer));
+        }
+        preferLocales.sort(Comparator.reverseOrder());
+        return preferLocales;
+    }
+
+
+    public record AcceptLanguages(String code, float prefer) implements Comparable<AcceptLanguages> {
+        @Override
+        public int compareTo(@NotNull JavalinWebContainer.AcceptLanguages o) {
+            return Float.compare(prefer, o.prefer);
+        }
     }
 }
