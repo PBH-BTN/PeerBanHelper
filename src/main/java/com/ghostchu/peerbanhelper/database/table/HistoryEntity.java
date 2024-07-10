@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.database.table;
 
+import com.ghostchu.peerbanhelper.database.TranslationComponentPersistener;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -35,8 +37,8 @@ public final class HistoryEntity {
     private TorrentEntity torrent;
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
     private RuleEntity rule;
-    @DatabaseField(canBeNull = false)
-    private String description;
+    @DatabaseField(canBeNull = false, persisterClass = TranslationComponentPersistener.class)
+    private TranslationComponent description;
     @DatabaseField
     private String flags;
 }

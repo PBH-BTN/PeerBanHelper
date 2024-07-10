@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -37,7 +38,7 @@ public class Transmission implements Downloader {
     private final String blocklistUrl;
     private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
-    private String statusMessage;
+    private TranslationComponent statusMessage;
 
     /*
             API 受限，实际实现起来意义不大
@@ -210,13 +211,13 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
+    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }
 
     @Override
-    public String getLastStatusMessage() {
+    public TranslationComponent getLastStatusMessage() {
         return statusMessage;
     }
 

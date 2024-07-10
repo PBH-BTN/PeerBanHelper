@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
@@ -247,7 +248,8 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     record DraftDownloader(String name, JsonObject config) {
     }
 
-    record DownloaderStatus(DownloaderLastStatus lastStatus, String lastStatusMessage, long activeTorrents,
+    record DownloaderStatus(DownloaderLastStatus lastStatus, TranslationComponent lastStatusMessage,
+                            long activeTorrents,
                             long activePeers, JsonObject config) {
 
     }

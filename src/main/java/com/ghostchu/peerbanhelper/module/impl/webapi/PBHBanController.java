@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -176,8 +177,8 @@ public class PBHBanController extends AbstractFeatureModule {
         private String torrentName;
         private long torrentSize;
         private String module;
-        private String rule;
-        private String description;
+        private TranslationComponent rule;
+        private TranslationComponent description;
 
         public BanLogResponse(HistoryEntity history) {
             this.banAt = history.getBanAt().getTime();

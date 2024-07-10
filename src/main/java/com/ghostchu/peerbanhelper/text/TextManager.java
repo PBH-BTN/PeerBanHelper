@@ -61,15 +61,15 @@ public class TextManager implements Reloadable {
         if (yamlConfiguration == null) {
             return "Unsupported locale: " + locale;
         }
-        String str = yamlConfiguration.getString(translationComponent.key());
+        String str = yamlConfiguration.getString(translationComponent.getKey());
         if (str == null) {
-            return translationComponent.key() + "@" + locale;
+            return translationComponent.getKey() + "@" + locale;
         }
         for (PostProcessor postProcessor : INSTANCE_HOLDER.postProcessors) {
             try {
-                str = postProcessor.process(str, locale, translationComponent.params());
+                str = postProcessor.process(str, locale, translationComponent.getParams());
             } catch (Exception e) {
-                log.warn("Unable to process post processor: key={}, locale={}, params={}", translationComponent.key(), locale, translationComponent.params());
+                log.warn("Unable to process post processor: key={}, locale={}, params={}", translationComponent.getKey(), locale, translationComponent.getParams());
             }
         }
         return str;

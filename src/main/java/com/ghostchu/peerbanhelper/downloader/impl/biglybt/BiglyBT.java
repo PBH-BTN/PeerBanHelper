@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerRe
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -50,7 +51,7 @@ public class BiglyBT implements Downloader {
     private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private String name;
-    private String statusMessage;
+    private TranslationComponent statusMessage;
 
     public BiglyBT(String name, Config config) {
         this.name = name;
@@ -265,13 +266,13 @@ public class BiglyBT implements Downloader {
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
+    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }
 
     @Override
-    public String getLastStatusMessage() {
+    public TranslationComponent getLastStatusMessage() {
         return statusMessage;
     }
 

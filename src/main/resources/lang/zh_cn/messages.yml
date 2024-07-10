@@ -39,3 +39,13 @@ gui-tabbed-connected-peers: "已连接的Peers"
 
 gui-tray-message-caption: "PeerBanHelper 正在后台运行"
 gui-tray-message-description: "点击托盘图标重新打开窗口；右键托盘图标可完全退出"
+
+status-text-ok: "一切正常"
+status-text-login-failed: "登陆失败"
+status-text-exception: "出现运行时错误"
+
+general-rule-local-address: "本地地址"
+general-rule-ignored-address: "用户排除的地址"
+general-reason-skip-local-peers: "跳过本地网络上的 Peers"
+general-reason-skip-ignored-peers: "跳过来自排除地址的 Peers"
+general-rule: "N/A"

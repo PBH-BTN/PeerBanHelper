@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,11 +16,11 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
     private String context;
     private long banAt;
     private long unbanAt;
-    private String rule;
-    private String description;
+    private TranslationComponent rule;
+    private TranslationComponent description;
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, Torrent torrent, Peer peer, String rule,
-                       String description) {
+    public BanMetadata(String context, String downloader, long banAt, long unbanAt, Torrent torrent, Peer peer, TranslationComponent rule,
+                       TranslationComponent description) {
         super(downloader, torrent, peer);
         this.context = context;
         this.banAt = banAt;
@@ -28,8 +29,8 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
         this.description = description;
     }
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, TorrentWrapper torrent, PeerWrapper peer, String rule,
-                       String description) {
+    public BanMetadata(String context, String downloader, long banAt, long unbanAt, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
+                       TranslationComponent description) {
         super(downloader, torrent, peer);
         this.context = context;
         this.banAt = banAt;

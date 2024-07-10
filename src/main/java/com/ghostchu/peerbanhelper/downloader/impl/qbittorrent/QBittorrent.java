@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -43,7 +44,7 @@ public class QBittorrent implements Downloader {
     private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private String name;
-    private String statusMessage;
+    private TranslationComponent statusMessage;
 
     public QBittorrent(String name, Config config) {
         this.name = name;
@@ -365,13 +366,13 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
+    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }
 
     @Override
-    public String getLastStatusMessage() {
+    public TranslationComponent getLastStatusMessage() {
         return statusMessage;
     }
 

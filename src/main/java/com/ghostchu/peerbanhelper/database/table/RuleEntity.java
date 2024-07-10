@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.database.table;
 
+import com.ghostchu.peerbanhelper.database.TranslationComponentPersistener;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -15,6 +17,6 @@ public final class RuleEntity {
     private Long id;
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true, uniqueCombo = true)
     private ModuleEntity module;
-    @DatabaseField(canBeNull = false, uniqueCombo = true)
-    private String rule;
+    @DatabaseField(canBeNull = false, uniqueCombo = true, persisterClass = TranslationComponentPersistener.class)
+    private TranslationComponent rule;
 }

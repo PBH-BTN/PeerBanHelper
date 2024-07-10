@@ -26,6 +26,7 @@ import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -507,16 +508,16 @@ public class PeerBanHelperServer {
         try {
             if (!downloader.login()) {
                 log.error(tlUI("downloader-login-failed", downloader.getName(), downloader.getEndpoint()));
-                downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_LOGIN_FAILED);
+                downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent("status-text-login-failed"));
                 return;
             } else {
-                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, Lang.STATUS_TEXT_OK);
+                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent("status-text-ok"));
             }
             downloader.setBanList(BAN_LIST.keySet(), added, removed);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
             log.error(tlUI("error-update-ban-list", downloader.getName(), downloader.getEndpoint()), th);
-            downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_EXCEPTION);
+            downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent("status-text-exception"));
         }
     }
 
@@ -585,7 +586,7 @@ public class PeerBanHelperServer {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         if (!downloader.login()) {
             log.error(tlUI("downloader-login-failed", downloader.getName(), downloader.getEndpoint()));
-            downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_LOGIN_FAILED);
+            downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent("status-text-login-failed"));
             return Collections.emptyMap();
         }
         List<Torrent> torrents = downloader.getTorrents();
@@ -603,7 +604,7 @@ public class PeerBanHelperServer {
                     parallelReqRestrict.release();
                 }
             }));
-            downloader.setLastStatus(DownloaderLastStatus.HEALTHY, Lang.STATUS_TEXT_OK);
+            downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent("status-text-ok"));
         }
 
         return peers;
@@ -641,11 +642,11 @@ public class PeerBanHelperServer {
     public CheckResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
         List<CheckResult> results = new ArrayList<>();
         if (peer.getPeerAddress().getAddress().isAnyLocal()) {
-            return new CheckResult(getClass(), PeerAction.SKIP, 0, "local access", "skip local network peers");
+            return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-local-address"), new TranslationComponent("general-reason-skip-local-peers"));
         }
         for (IPAddress ignoreAddress : ignoreAddresses) {
             if (ignoreAddress.contains(peer.getPeerAddress().getAddress())) {
-                return new CheckResult(getClass(), PeerAction.SKIP, 0, "ignored addresses", "skip peers from ignored addresses");
+                return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
             }
         }
         try {
