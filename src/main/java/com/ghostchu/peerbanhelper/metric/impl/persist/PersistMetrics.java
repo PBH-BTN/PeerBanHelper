@@ -1,7 +1,13 @@
 package com.ghostchu.peerbanhelper.metric.impl.persist;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.*;
-import com.ghostchu.peerbanhelper.database.table.*;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.ModuleDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.RuleDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
+import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.database.table.ModuleEntity;
+import com.ghostchu.peerbanhelper.database.table.RuleEntity;
+import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -21,8 +27,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class PersistMetrics implements BasicMetrics {
     @Autowired
     private InMemoryMetrics inMemory;
-    @Autowired
-    private PeerIdentityDao peerIdentityDao;
     @Autowired
     private TorrentDao torrentDao;
     @Autowired
@@ -58,11 +62,6 @@ public class PersistMetrics implements BasicMetrics {
         // 将数据库 IO 移动到虚拟线程上
         Thread.ofVirtual().start(() -> {
             try {
-                PeerIdentityEntity peerIdentityEntity = peerIdentityDao.createIfNotExists(new PeerIdentityEntity(
-                        null,
-                        metadata.getPeer().getId(),
-                        metadata.getPeer().getClientName()
-                ));
                 TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                         null,
                         metadata.getTorrent().getHash(),
@@ -84,7 +83,8 @@ public class PersistMetrics implements BasicMetrics {
                         new Timestamp(metadata.getUnbanAt()),
                         address.getIp(),
                         address.getPort(),
-                        peerIdentityEntity,
+                        metadata.getPeer().getId(),
+                        metadata.getPeer().getClientName(),
                         metadata.getPeer().getUploaded(),
                         metadata.getPeer().getDownloaded(),
                         metadata.getPeer().getProgress(),

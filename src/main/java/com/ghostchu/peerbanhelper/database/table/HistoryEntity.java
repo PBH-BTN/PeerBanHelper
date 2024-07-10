@@ -25,8 +25,10 @@ public final class HistoryEntity {
     private String ip;
     @DatabaseField(canBeNull = false)
     private Integer port;
-    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
-    private PeerIdentityEntity peerIdentity;
+    @DatabaseField
+    private String peerId;
+    @DatabaseField
+    private String peerClientName;
     @DatabaseField
     private Long peerUploaded;
     @DatabaseField
