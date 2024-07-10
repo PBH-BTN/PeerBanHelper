@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class StringContainsMatcher extends AbstractJsonMatcher {
@@ -41,7 +43,7 @@ public class StringContainsMatcher extends AbstractJsonMatcher {
 
     @Override
     public @NotNull String matcherName() {
-        return Lang.RULE_MATCHER_STRING_CONTAINS;
+        return tlUI(Lang.RULE_MATCHER_STRING_CONTAINS);
     }
 
     @Override

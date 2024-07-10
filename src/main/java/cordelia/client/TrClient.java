@@ -27,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public final class TrClient {
 
@@ -103,7 +105,7 @@ public final class TrClient {
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
         } catch (JsonSyntaxException jsonSyntaxException) {
-            log.error(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException);
+            log.error(tlUI(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException));
             throw new IllegalStateException(jsonSyntaxException);
         } catch (IOException | InterruptedException e) {
             log.error("Request Transmission JsonRPC failure", e);
@@ -123,7 +125,7 @@ public final class TrClient {
                 String sessionId = resp.headers().firstValue(Session.SESSION_ID).orElseThrow();
                 sessionStore.set(new Session(sessionId));
             } catch (IOException | InterruptedException e) {
-                log.error(Lang.TRCLIENT_API_ERROR, e.getClass().getName(), e.getMessage());
+                log.error(tlUI(Lang.TRCLIENT_API_ERROR, e.getClass().getName()), e.getMessage());
                 throw new IllegalStateException(e);
             }
         }

@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class CommandBasedImpl {
 
@@ -27,7 +29,7 @@ public class CommandBasedImpl {
         Process process = p.onExit().get(10, TimeUnit.SECONDS);
         if (process.isAlive()) {
             process.destroy();
-            log.error(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT, command);
+            log.error(tlUI(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT, command));
             return -9999;
         }
         return process.exitValue();

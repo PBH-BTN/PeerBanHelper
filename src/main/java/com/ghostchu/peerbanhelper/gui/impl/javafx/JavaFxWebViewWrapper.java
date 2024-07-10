@@ -23,6 +23,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class JavaFxWebViewWrapper {
     public static Tab installWebViewTab(TabPane tabPane, String tabName, String webuiPath, Map<String, String> headers, @Nullable WebViewScriptCallback initScript) {
@@ -58,13 +60,13 @@ public class JavaFxWebViewWrapper {
                             Node bridge = popup.lookup(".context-menu");
                             ContextMenuContent cmc = (ContextMenuContent) ((Parent) bridge).getChildrenUnmodifiable().get(0);
                             ContextMenu contextMenu = new ContextMenu();
-                            MenuItem reload = new MenuItem(Lang.WEBVIEW_RELOAD_PAGE);
+                            MenuItem reload = new MenuItem(tlUI(Lang.WEBVIEW_RELOAD_PAGE));
                             reload.setOnAction(e -> webView.getEngine().reload());
-                            MenuItem reset = new MenuItem(Lang.WEBVIEW_RESET_PAGE);
+                            MenuItem reset = new MenuItem(tlUI(Lang.WEBVIEW_RESET_PAGE));
                             reset.setOnAction(e -> webView.getEngine().load(webuiPath));
-                            MenuItem back = new MenuItem(Lang.WEBVIEW_BACK);
+                            MenuItem back = new MenuItem(tlUI(Lang.WEBVIEW_BACK));
                             back.setOnAction(e -> webView.getEngine().executeScript("history.back()"));
-                            MenuItem forward = new MenuItem(Lang.WEBVIEW_FORWARD);
+                            MenuItem forward = new MenuItem(tlUI(Lang.WEBVIEW_FORWARD));
                             forward.setOnAction(e -> webView.getEngine().executeScript("history.forward()"));
                             contextMenu.getItems().addAll(back, forward, new SeparatorMenuItem(), reset);
                             // add new item:

@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 public class GeoUtil {
     private static volatile Boolean inChinaRegion = null;
 
@@ -61,7 +63,7 @@ public class GeoUtil {
 
     @NotNull
     public static List<MavenCentralMirror> determineBestMirrorServer(Logger logger) {
-        logger.info(Lang.LIBRARIES_LOADER_DETERMINE_BEST_MIRROR);
+        logger.info(tlUI(Lang.LIBRARIES_LOADER_DETERMINE_BEST_MIRROR));
         List<CompletableFuture<Void>> testEntry = new ArrayList<>();
         Map<MavenCentralMirror, Long> mirrorPingMap = new ConcurrentSkipListMap<>();
         for (MavenCentralMirror value : MavenCentralMirror.values()) {
@@ -73,7 +75,7 @@ public class GeoUtil {
         testEntry.forEach(CompletableFuture::join);
         List<Map.Entry<MavenCentralMirror, Long>> list = new ArrayList<>(mirrorPingMap.entrySet());
         list.sort(Map.Entry.comparingByValue());
-        logger.info(Lang.LIBRARIES_LOADER_DETERMINE_TEST_RESULT);
+        logger.info(tlUI(Lang.LIBRARIES_LOADER_DETERMINE_TEST_RESULT));
         list.forEach(e -> {
             String cost = "DNF";
             if (e.getValue() != Long.MAX_VALUE) {

@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class PBHConfigUpdater {
     private static final String CONFIG_VERSION_KEY = "config-version";
@@ -36,7 +38,7 @@ public class PBHConfigUpdater {
     }
 
     public void update(@NotNull Object configUpdateScript) {
-        log.info(Lang.CONFIG_CHECKING);
+        log.info(tlUI(Lang.CONFIG_CHECKING));
         int selectedVersion = yaml.getInt(CONFIG_VERSION_KEY, -1);
         for (Method method : getUpdateScripts(configUpdateScript)) {
             try {
@@ -45,12 +47,12 @@ public class PBHConfigUpdater {
                 if (current >= updateScript.version()) {
                     continue;
                 }
-                log.info(Lang.CONFIG_MIGRATING, current, updateScript.version());
+                log.info(tlUI(Lang.CONFIG_MIGRATING, current, updateScript.version()));
                 String scriptName = updateScript.description();
                 if (scriptName == null || scriptName.isEmpty()) {
                     scriptName = method.getName();
                 }
-                log.info(Lang.CONFIG_EXECUTE_MIGRATE, scriptName);
+                log.info(tlUI(Lang.CONFIG_EXECUTE_MIGRATE, scriptName));
                 try {
                     if (method.getParameterCount() == 0) {
                         method.invoke(configUpdateScript);
@@ -60,20 +62,20 @@ public class PBHConfigUpdater {
                         }
                     }
                 } catch (Exception e) {
-                    log.info(Lang.CONFIG_MIGRATE_FAILED, method.getName(), updateScript.version(), e.getMessage(), e);
+                    log.info(tlUI(Lang.CONFIG_MIGRATE_FAILED, method.getName(), updateScript.version(), e.getMessage()), e);
                 }
                 yaml.set(CONFIG_VERSION_KEY, updateScript.version());
-                log.info(Lang.CONFIG_UPGRADED, updateScript.version());
+                log.info(tlUI(Lang.CONFIG_UPGRADED, updateScript.version()));
             } catch (Throwable throwable) {
-                log.info(Lang.CONFIG_MIGRATE_FAILED, method.getName(), method.getAnnotation(UpdateScript.class).version(), throwable);
+                log.info(tlUI(Lang.CONFIG_MIGRATE_FAILED, method.getName(), method.getAnnotation(UpdateScript.class).version()), throwable);
             }
         }
-        log.info(Lang.CONFIG_SAVE_CHANGES);
+        log.info(tlUI(Lang.CONFIG_SAVE_CHANGES));
         try {
             migrateComments(yaml, bundle);
             yaml.save(file);
         } catch (IOException e) {
-            log.error(Lang.CONFIG_SAVE_ERROR, e);
+            log.error(tlUI(Lang.CONFIG_SAVE_ERROR), e);
         }
     }
 

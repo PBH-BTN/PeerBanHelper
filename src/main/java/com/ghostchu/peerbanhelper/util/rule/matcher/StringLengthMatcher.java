@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class StringLengthMatcher extends AbstractJsonMatcher {
@@ -38,7 +40,7 @@ public class StringLengthMatcher extends AbstractJsonMatcher {
 
     @Override
     public @NotNull String matcherName() {
-        return Lang.RULE_MATCHER_STRING_LENGTH;
+        return tlUI(Lang.RULE_MATCHER_STRING_LENGTH);
     }
 
     @Override

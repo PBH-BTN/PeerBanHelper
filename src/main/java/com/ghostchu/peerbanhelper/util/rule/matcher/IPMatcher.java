@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -50,7 +52,7 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
                     ipAddress.nonZeroHostIterator().forEachRemaining(ipsList::add);
                 } else {
                     this.subnets.add(ipAddress);
-                    log.debug(Lang.IP_BAN_RULE_LOAD_CIDR, ruleName, ipAddress);
+                    log.debug(tlUI(Lang.IP_BAN_RULE_LOAD_CIDR, ruleName, ipAddress));
                 }
             } else {
                 ipsList.add(ipAddress);
@@ -58,7 +60,7 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
             ipsList.forEach(ip -> {
                 ip = ip.withoutPrefixLength();
                 this.ips.add(ip);
-                log.debug(Lang.IP_BAN_RULE_LOAD_IP, ruleName, ip);
+                log.debug(tlUI(Lang.IP_BAN_RULE_LOAD_IP, ruleName, ip));
             });
         });
         bloomFilter = BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8), this.ips.size(), 0.01);
@@ -84,7 +86,7 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
 
     @Override
     public @NotNull String matcherName() {
-        return Lang.RULE_MATCHER_SUB_RULE;
+        return tlUI(Lang.RULE_MATCHER_SUB_RULE);
     }
 
     @Override

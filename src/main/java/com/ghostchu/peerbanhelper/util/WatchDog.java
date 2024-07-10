@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class WatchDog {
     private final String name;
@@ -54,7 +56,7 @@ public class WatchDog {
                 }
             }, executor).get(3, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.error(Lang.WATCH_DOG_CALLBACK_BLOCKED, e);
+            log.error(tlUI(Lang.WATCH_DOG_CALLBACK_BLOCKED), e);
         }
 
     }
@@ -66,7 +68,7 @@ public class WatchDog {
     }
 
     private void hungry() {
-        log.info(Lang.WATCH_DOG_HUNGRY, name, timeout + "ms", lastOperation);
+        log.info(tlUI(Lang.WATCH_DOG_HUNGRY, name, timeout + "ms", lastOperation));
         if (hungry != null) {
             hungry.run();
         }

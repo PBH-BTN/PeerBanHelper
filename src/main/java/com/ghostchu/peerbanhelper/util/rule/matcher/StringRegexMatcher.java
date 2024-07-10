@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class StringRegexMatcher extends AbstractJsonMatcher {
@@ -45,7 +47,7 @@ public class StringRegexMatcher extends AbstractJsonMatcher {
 
     @Override
     public @NotNull String matcherName() {
-        return Lang.RULE_MATCHER_STRING_REGEX;
+        return tlUI(Lang.RULE_MATCHER_STRING_REGEX);
     }
 
     @Override

@@ -9,6 +9,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class TimeoutProtect implements AutoCloseable {
     @Getter
@@ -53,7 +55,7 @@ public class TimeoutProtect implements AutoCloseable {
     public void printUnfinishedTasks() {
         if (this.unfinishedTasks != null) {
             this.unfinishedTasks.forEach(r -> {
-                log.warn(Lang.TIMING_UNFINISHED_TASK, r);
+                log.warn(tlUI(Lang.TIMING_UNFINISHED_TASK, r));
             });
         }
     }

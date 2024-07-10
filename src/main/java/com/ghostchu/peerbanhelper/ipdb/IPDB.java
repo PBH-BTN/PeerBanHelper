@@ -43,6 +43,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class IPDB implements AutoCloseable {
     private final Cache<InetAddress, IPGeoData> MINI_CACHE = CacheBuilder.newBuilder()
@@ -218,7 +220,7 @@ public class IPDB implements AutoCloseable {
     }
 
     private void updateGeoCN(File mmdbGeoCNFile) throws IOException {
-        log.info(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)");
+        log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
         MutableRequest request = MutableRequest.GET("https://github.com/ljxi/GeoCN/releases/download/Latest/GeoCN.mmdb");
         Path tmp = Files.createTempFile("GeoCN", ".mmdb");
         downloadFile(request, tmp, "GeoCN").join();
@@ -238,7 +240,7 @@ public class IPDB implements AutoCloseable {
     }
 
     private void updateMMDB(String databaseName, File target) throws IOException {
-        log.info(Lang.IPDB_UPDATING, databaseName);
+        log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
         MutableRequest request = MutableRequest.GET("https://download.maxmind.com/geoip/databases/" + databaseName + "/download?suffix=tar.gz");
         Path tmp = Files.createTempFile("ipdb-mmdb-archive", ".tar.gz");
         downloadFile(request, tmp, databaseName).join();
@@ -310,13 +312,13 @@ public class IPDB implements AutoCloseable {
         return HTTPUtil.retryableSendProgressTracking(httpClient, req, HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
-                        log.error(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body());
+                        log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body()));
                     } else {
-                        log.info(Lang.IPDB_UPDATE_SUCCESS, databaseName);
+                        log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                     }
                 })
                 .exceptionally(e -> {
-                    log.error(Lang.IPDB_UPDATE_FAILED, "Java Exception", e);
+                    log.error(tlUI(Lang.IPDB_UPDATE_FAILED, "Java Exception"), e);
                     File file = path.toFile();
                     if (file.exists()) {
                         file.delete(); // 删除下载不完整的文件

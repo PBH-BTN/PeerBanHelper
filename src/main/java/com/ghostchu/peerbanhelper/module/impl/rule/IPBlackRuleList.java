@@ -116,7 +116,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                 }
             });
             long t2 = System.currentTimeMillis();
-            log.debug(Lang.IP_BAN_RULE_MATCH_TIME, t2 - t1);
+            log.debug(tlUI(Lang.IP_BAN_RULE_MATCH_TIME, t2 - t1));
             if (mr) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration, ip, String.format(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName()));
             }
@@ -181,10 +181,10 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             try {
                                 fileToIPList(ruleFile, ipAddresses);
                                 ipBanMatchers.add(new IPMatcher(ruleId, name, ipAddresses));
-                                log.warn(Lang.IP_BAN_RULE_USE_CACHE, name);
+                                log.warn(tlUI(Lang.IP_BAN_RULE_USE_CACHE, name));
                                 result.set(new SlimMsg(false, Lang.IP_BAN_RULE_USE_CACHE.replace("{}", name), 500));
                             } catch (IOException ex) {
-                                log.error(Lang.IP_BAN_RULE_LOAD_FAILED, name, ex);
+                                log.error(tlUI(Lang.IP_BAN_RULE_LOAD_FAILED, name), ex);
                                 result.set(new SlimMsg(false, Lang.IP_BAN_RULE_LOAD_FAILED.replace("{}", name), 500));
                             }
                         } else {
@@ -214,7 +214,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
                             ent_count = fileToIPList(tempFile, ipAddresses);
                         } else {
-                            log.info(Lang.IP_BAN_RULE_NO_UPDATE, name);
+                            log.info(tlUI(Lang.IP_BAN_RULE_NO_UPDATE, name));
                             result.set(new SlimMsg(true, Lang.IP_BAN_RULE_NO_UPDATE.replace("{}", name), 200));
                         }
                         tempFile.delete();
@@ -223,11 +223,11 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         // 如果已经存在则更新，否则添加
                         ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                             ele.setData(name, ipAddresses);
-                            log.info(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name);
+                            log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name));
                             result.set(new SlimMsg(true, Lang.IP_BAN_RULE_UPDATE_SUCCESS.replace("{}", name), 200));
                         }, () -> {
                             ipBanMatchers.add(new IPMatcher(ruleId, name, ipAddresses));
-                            log.info(Lang.IP_BAN_RULE_LOAD_SUCCESS, name);
+                            log.info(tlUI(Lang.IP_BAN_RULE_LOAD_SUCCESS, name));
                             result.set(new SlimMsg(true, Lang.IP_BAN_RULE_LOAD_SUCCESS.replace("{}", name), 200));
                         });
                         // 更新日志
@@ -235,7 +235,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             ruleSubLogsDao.create(new RuleSubLogEntity(null, ruleId, System.currentTimeMillis(), ent_count, updateType));
                             result.set(new SlimMsg(true, Lang.IP_BAN_RULE_UPDATED.replace("{}", name), 200));
                         } catch (SQLException e) {
-                            log.error(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId, e);
+                            log.error(tlUI(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId), e);
                             result.set(new SlimMsg(false, Lang.IP_BAN_RULE_UPDATE_LOG_ERROR.replace("{}", name), 500));
                         }
                     } else {

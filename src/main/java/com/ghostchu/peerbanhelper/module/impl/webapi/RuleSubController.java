@@ -130,7 +130,7 @@ public class RuleSubController extends AbstractFeatureModule {
             map.put("total", ipBlackRuleList.countRuleSubLogs(ruleId));
             ctx.json(new StdMsg(true, Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS, map));
         } catch (Exception e) {
-            log.error(Lang.IP_BAN_RULE_LOG_QUERY_ERROR, e);
+            log.error(tlUI(Lang.IP_BAN_RULE_LOG_QUERY_ERROR), e);
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new SlimMsg(false, Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM, HttpStatus.BAD_REQUEST.getCode()));
         }
@@ -255,7 +255,7 @@ public class RuleSubController extends AbstractFeatureModule {
         if (isAdd) {
             if (ruleName == null || subUrl == null || ruleName.isEmpty() || subUrl.isEmpty()) {
                 ctx.status(HttpStatus.BAD_REQUEST);
-                ctx.json(new SlimMsg(false, tlUI("ip-ban-rule-param-wrong"), HttpStatus.BAD_REQUEST.getCode()));
+                ctx.json(new SlimMsg(false, tlUI(Lang.IP_BAN_RULE_PARAM_WRONG), HttpStatus.BAD_REQUEST.getCode()));
                 return;
             }
         } else {
@@ -275,7 +275,7 @@ public class RuleSubController extends AbstractFeatureModule {
                 ctx.json(msg);
                 return;
             }
-            ctx.json(new SlimMsg(true, tlUI("ip-ban-rule-saved"), HttpStatus.CREATED.getCode()));
+            ctx.json(new SlimMsg(true, tlUI(Lang.IP_BAN_RULE_SAVED), HttpStatus.CREATED.getCode()));
         } catch (Exception e) {
             // 更新失败时回滚
             if (isAdd) {

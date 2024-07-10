@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class ProfileUpdateScript {
     private final YamlConfiguration conf;
@@ -128,7 +130,7 @@ public class ProfileUpdateScript {
             oldRule = oldRule.toLowerCase(Locale.ROOT);
             String[] ruleExploded = oldRule.split("@", 2);
             if (ruleExploded.length != 2) {
-                log.error(Lang.ERR_INVALID_RULE_SYNTAX, oldRule);
+                log.error(tlUI(Lang.ERR_INVALID_RULE_SYNTAX, oldRule));
                 continue;
             }
             String matchMethod = ruleExploded[0];
@@ -192,7 +194,7 @@ public class ProfileUpdateScript {
             oldRule = oldRule.toLowerCase(Locale.ROOT);
             String[] ruleExploded = oldRule.split("@", 2);
             if (ruleExploded.length != 2) {
-                log.error(Lang.ERR_INVALID_RULE_SYNTAX, oldRule);
+                log.error(tlUI(Lang.ERR_INVALID_RULE_SYNTAX, oldRule));
                 continue;
             }
             String matchMethod = ruleExploded[0];

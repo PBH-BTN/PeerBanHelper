@@ -25,6 +25,9 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class BtnAbilitySubmitBans implements BtnAbility {
     private final BtnNetwork btnNetwork;
@@ -58,7 +61,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
     }
 
     private void submit() {
-        log.info(Lang.BTN_SUBMITTING_BANS);
+        log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
         List<BtnBan> btnPeers = generateBans();
         BtnBanPing ping = new BtnBanPing(
                 System.currentTimeMillis(),
@@ -70,13 +73,13 @@ public class BtnAbilitySubmitBans implements BtnAbility {
         HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
-                        log.error(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                        log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                     } else {
-                        log.info(Lang.BTN_SUBMITTED_BANS, btnPeers.size());
+                        log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
                     }
                 })
                 .exceptionally(e -> {
-                    log.warn(Lang.BTN_REQUEST_FAILS, e);
+                    log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
                     return null;
                 });
     }
@@ -91,7 +94,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
             btnBan.setBtnBan(e.getValue().getContext().equals(BtnNetworkOnline.class.getName()));
             btnBan.setPeer(e.getKey());
             btnBan.setModule(e.getValue().getContext());
-            btnBan.setRule(e.getValue().getDescription());
+            btnBan.setRule(tl(Main.DEF_LOCALE, e.getValue().getDescription()));
             btnBan.setBanUniqueId(e.getValue().getRandomId().toString());
             list.add(btnBan);
         }
