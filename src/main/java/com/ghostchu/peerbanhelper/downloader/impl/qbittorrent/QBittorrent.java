@@ -260,10 +260,10 @@ public class QBittorrent implements Downloader {
         added.forEach(meta -> {
             IPAddress ipAddress = IPAddressUtil.getIPAddress(meta.getPeer().getAddress().getIp());
             String peers;
-            if (ipAddress.isIPv4Convertible()) {
-                peers = ipAddress.toIPv4().toString() + ":" + meta.getPeer().getAddress().getPort();
+            if (ipAddress.isIPv4()) {
+                peers = meta.getPeer().getAddress().getIp() + ":" + meta.getPeer().getAddress().getPort();
             } else {
-                peers = "[" + ipAddress.toIPv6().toString() + "]" + ":" + meta.getPeer().getAddress().getPort();
+                peers = "[" + meta.getPeer().getAddress().getIp() + "]" + ":" + meta.getPeer().getAddress().getPort();
             }
             try {
                 HttpResponse<String> request = httpClient.send(MutableRequest

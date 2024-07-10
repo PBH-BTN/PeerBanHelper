@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -20,15 +19,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
 public class AutoRangeBan extends AbstractRuleFeatureModule {
-    private final Map<PeerAddress, IPAddress> banListMappingCache = Collections.synchronizedMap(new WeakHashMap<>());
     @Autowired
     private PeerBanHelperServer peerBanHelperServer;
     private int ipv4Prefix;
@@ -78,32 +74,36 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
         this.ipv4Prefix = getConfig().getInt("ipv4");
         this.ipv6Prefix = getConfig().getInt("ipv6");
         this.banDuration = getConfig().getLong("ban-duration", 0);
-        banListMappingCache.clear();
     }
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        IPAddress peerAddress = peer.getPeerAddress().getAddress();
-        for (PeerAddress bannedPeer : getServer().getBannedPeersDirect().keySet()) {
-            IPAddress bannedPeerAddress = banListMappingCache.get(bannedPeer);
-            if (bannedPeerAddress == null) {
-                IPAddress bannedAddress = bannedPeer.getAddress();
-                if (bannedPeer.getAddress().isIPv4()) {
-                    bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress.withoutPrefixLength(), ipv4Prefix);
-                } else {
-                    bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress.withoutPrefixLength(), ipv6Prefix);
-                }
-                bannedPeerAddress = bannedAddress;
-                banListMappingCache.put(bannedPeer, bannedPeerAddress);
+        if (isHandShaking(peer)) {
+            return pass();
+        }
+        IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
+        if (peerAddress.isIPv4Convertible()) {
+            peerAddress = peerAddress.toIPv4();
+        }
+        for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
+            IPAddress bannedAddress = bannedPeer.getAddress().withoutPrefixLength();
+            if (bannedAddress.isIPv4Convertible()) {
+                bannedAddress = bannedAddress.toIPv4();
             }
-            if (bannedPeerAddress.contains(peerAddress)) {
-                TranslationComponent component;
-                if (bannedPeerAddress.isIPv4Convertible()) {
-                    component = new TranslationComponent(Lang.AUTO_RANGE_BAN_IPV4_RULE, String.valueOf(ipv4Prefix));
-                } else {
-                    component = new TranslationComponent(Lang.AUTO_RANGE_BAN_IPV6_RULE, String.valueOf(ipv6Prefix));
-                }
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, component, new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString()));
+            if (peerAddress.isIPv4() != bannedAddress.isIPv4()) {
+                continue;
+            }
+            String addressType = "UNKNOWN";
+            if (bannedAddress.isIPv4()) {
+                addressType = "IPv4/" + ipv4Prefix;
+                bannedAddress = bannedAddress.toPrefixBlock(ipv4Prefix);
+            }
+            if (bannedAddress.isIPv6()) {
+                addressType = "IPv6/" + ipv6Prefix;
+                bannedAddress = bannedAddress.toPrefixBlock(ipv6Prefix);
+            }
+            if (bannedAddress.contains(peerAddress)) {
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), addressType));
             }
         }
         return pass();

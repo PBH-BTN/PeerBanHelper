@@ -721,7 +721,7 @@ public class PeerBanHelperServer {
      */
     private void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
         if (BAN_LIST.containsKey(peer.getPeerAddress())) {
-            log.error(tlUI(Lang.DUPLICATE_BAN, peer.getPeerAddress()));
+            log.error(tlUI(Lang.DUPLICATE_BAN, banMetadata));
         }
         BAN_LIST.put(peer.getPeerAddress(), banMetadata);
         metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
