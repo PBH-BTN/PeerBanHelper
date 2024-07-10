@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Setter
@@ -57,7 +56,7 @@ public final class QBPeer implements Peer {
     }
 
     @Override
-    @NotNull
+    @Nullable
     public String getPeerId() {
         return peerIdClient;
     }
