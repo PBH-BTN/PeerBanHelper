@@ -46,6 +46,7 @@ public class BtnNetwork {
 
     public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret) {
         this.server = server;
+        this.userAgent = userAgent;
         this.configUrl = configUrl;
         this.submit = submit;
         this.appId = appId;

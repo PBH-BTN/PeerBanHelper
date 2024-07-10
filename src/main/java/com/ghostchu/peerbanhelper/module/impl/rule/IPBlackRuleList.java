@@ -359,7 +359,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         if (ruleId != null) {
             builder = builder.where().eq("ruleId", ruleId).queryBuilder();
         }
-        return ruleSubLogsDao.countOf(builder.prepare());
+        return ruleSubLogsDao.countOf(builder.setCountOf(true).prepare());
     }
 
     /**

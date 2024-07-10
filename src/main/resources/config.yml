@@ -1,4 +1,6 @@
-config-version: 9
+config-version: 10
+# 设置程序语言
+language: default
 # Http 服务器设置
 server:
   # WebUI 监听端口

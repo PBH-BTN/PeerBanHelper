@@ -28,6 +28,12 @@ public class MainConfigUpdateScript {
         }
     }
 
+
+    @UpdateScript(version = 10)
+    public void languageSetting() {
+        conf.set("language", "default");
+    }
+
     @UpdateScript(version = 9)
     public void firewallIntegration() {
         conf.set("firewall-integration", null);
