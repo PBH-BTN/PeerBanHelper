@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.rule.matcher;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatcher;
@@ -85,8 +86,8 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
     }
 
     @Override
-    public @NotNull String matcherName() {
-        return tlUI(Lang.RULE_MATCHER_SUB_RULE);
+    public TranslationComponent matcherName() {
+        return new TranslationComponent(Lang.RULE_MATCHER_SUB_RULE, getRuleName());
     }
 
     @Override

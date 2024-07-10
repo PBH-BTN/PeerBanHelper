@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.j256.ormlite.field.DataPersisterManager;
 import com.j256.ormlite.jdbc.JdbcSingleConnectionSource;
 import com.j256.ormlite.jdbc.db.SqliteDatabaseType;
 import com.zaxxer.hikari.HikariConfig;
@@ -23,7 +24,12 @@ public class Database {
             databaseDirectory.mkdirs();
         }
         File sqliteDb = new File(databaseDirectory, "peerbanhelper.db");
+        registerPersisters();
         setupDatabase(sqliteDb);
+    }
+
+    private void registerPersisters() {
+        DataPersisterManager.registerDataPersisters(TranslationComponentPersistener.getSingleton());
     }
 
     public void setupDatabase(File file) throws SQLException {

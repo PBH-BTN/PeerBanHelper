@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 public class PBHMetricsController extends AbstractFeatureModule {
@@ -42,15 +45,16 @@ public class PBHMetricsController extends AbstractFeatureModule {
     }
 
     private void handleRules(Context ctx) {
+        String locale = locale(ctx);
         Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(getServer().getHitRateMetric().getHitRateMetric());
         Map<String, String> dict = new HashMap<>();
         List<RuleData> dat = metric.entrySet().stream()
                 .map(obj -> {
-                    String ruleType = obj.getKey().getClass().getName();
+                    TranslationComponent ruleType = new TranslationComponent(obj.getKey().getClass().getName());
                     if (obj.getKey().matcherName() != null) {
                         ruleType = obj.getKey().matcherName();
                     }
-                    dict.put(obj.getKey().matcherIdentifier(), ruleType);
+                    dict.put(obj.getKey().matcherIdentifier(), tl(locale, ruleType));
                     return new RuleData(obj.getKey().matcherIdentifier(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata());
                 })
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))

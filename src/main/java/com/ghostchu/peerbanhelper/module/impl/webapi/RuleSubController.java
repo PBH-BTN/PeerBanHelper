@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -76,7 +75,7 @@ public class RuleSubController extends AbstractFeatureModule {
                     // 查询订阅规则列表
                     .get("/api/sub/rules", ctx -> ctx.json(list(locale(ctx))), Role.USER_READ)
                     // 手动更新全部订阅规则
-                    .post("/api/sub/rules/update", ctx -> ctx.json(updateAll()), Role.USER_WRITE)
+                    .post("/api/sub/rules/update", ctx -> ctx.json(updateAll(locale(ctx))), Role.USER_WRITE)
                     // 查询全部订阅规则更新日志
                     .get("/api/sub/logs", ctx -> logs(ctx, null), Role.USER_READ)
                     // 查询订阅规则更新日志
@@ -143,12 +142,12 @@ public class RuleSubController extends AbstractFeatureModule {
      *
      * @return 响应
      */
-    private SlimMsg updateAll() {
+    private SlimMsg updateAll(String locale) {
         AtomicReference<SlimMsg> result = new AtomicReference<>();
-        ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().map(k -> update(DEF_LOCALE, k)).filter(ele -> !ele.success())
+        ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().map(k -> update(locale, k)).filter(ele -> !ele.success())
                 .findFirst()
                 .ifPresentOrElse(result::set, () ->
-                        result.set(new SlimMsg(true, tlUI(Lang.IP_BAN_RULE_ALL_UPDATED), 200)));
+                        result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_ALL_UPDATED), 200)));
         return result.get();
     }
 

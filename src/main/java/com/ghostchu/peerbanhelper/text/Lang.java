@@ -272,6 +272,8 @@ public enum Lang {
     PCB_RULE_PROGRESS_REWIND,
     MDB_MULTI_DIALING_DETECTED,
     MDB_MULTI_HUNTING,
+    BTN_PORT_RULE,
+    BTN_IP_RULE,
     BTN_BTN_RULE;
 
     public String getKey() {

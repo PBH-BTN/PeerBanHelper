@@ -60,7 +60,8 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
 
     private void handleWebAPI(Context ctx) {
         ctx.status(HttpStatus.OK);
-        ctx.json(Map.of("clientName", bannedPeers.stream().map(Rule::toPrintableText).toList()));
+        String locale = locale(ctx);
+        ctx.json(Map.of("clientName", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList()));
     }
 
     @Override

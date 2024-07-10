@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
 @Slf4j
 @Component
 public class JavalinWebContainer {
@@ -59,15 +61,15 @@ public class JavalinWebContainer {
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);
-                    ctx.json(Map.of("message", Lang.WEBAPI_AUTH_BANNED_TOO_FREQ));
+                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ)));
                 })
                 .exception(NotLoggedInException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.FORBIDDEN);
-                    ctx.json(Map.of("message", Lang.WEBAPI_NOT_LOGGED));
+                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED)));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                    ctx.json(Map.of("message", Lang.WEBAPI_INTERNAL_ERROR));
+                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR)));
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {

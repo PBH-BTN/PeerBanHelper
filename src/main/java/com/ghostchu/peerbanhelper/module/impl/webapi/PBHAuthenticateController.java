@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
 @Component
 @Slf4j
 public class PBHAuthenticateController extends AbstractFeatureModule {
@@ -52,12 +54,12 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
         if (loginRequest == null || !webContainer.getToken().equals(loginRequest.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
-            ctx.json(Map.of("message", Lang.WEBAPI_AUTH_INVALID_TOKEN));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN)));
             return;
         }
         ctx.sessionAttribute("authenticated", webContainer.getToken());
         ctx.status(HttpStatus.OK);
-        ctx.json(Map.of("message", Lang.WEBAPI_AUTH_OK));
+        ctx.json(Map.of("message", tl(locale(ctx), Lang.WEBAPI_AUTH_OK)));
     }
 
 

@@ -340,7 +340,11 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @throws SQLException 查询异常
      */
     public List<RuleSubLogEntity> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
-        return ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().where().eq("ruleId", ruleId).queryBuilder(), pageIndex, pageSize);
+        var builder = ruleSubLogsDao.queryBuilder();
+        if (ruleId != null) {
+            builder = builder.where().eq("ruleId", ruleId).queryBuilder();
+        }
+        return ruleSubLogsDao.queryByPaging(builder, pageIndex, pageSize);
     }
 
     /**
@@ -351,7 +355,11 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @throws SQLException 查询异常
      */
     public long countRuleSubLogs(String ruleId) throws SQLException {
-        return ruleSubLogsDao.countOf(ruleSubLogsDao.queryBuilder().where().eq("ruleId", ruleId).prepare());
+        var builder = ruleSubLogsDao.queryBuilder();
+        if (ruleId != null) {
+            builder = builder.where().eq("ruleId", ruleId).queryBuilder();
+        }
+        return ruleSubLogsDao.countOf(builder.prepare());
     }
 
     /**

@@ -6,10 +6,9 @@ import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import io.javalin.http.Context;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
@@ -112,7 +112,7 @@ public class PBHBanController extends AbstractFeatureModule {
             Map<String, Object> map = new HashMap<>();
             map.put("pageIndex", pageIndex);
             map.put("pageSize", pageSize);
-            map.put("results", historyDao.queryByPaging(pageIndex, pageSize).stream().map(BanLogResponse::new).toList());
+            map.put("results", historyDao.queryByPaging(pageIndex, pageSize).stream().map(r -> new BanLogResponse(locale(ctx), r)).toList());
             map.put("total", historyDao.countOf());
             ctx.status(HttpStatus.OK);
             ctx.json(map);
@@ -126,7 +126,7 @@ public class PBHBanController extends AbstractFeatureModule {
     private void handleBans(Context ctx) {
         long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
         long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
-        var banResponseList = getBanResponseStream(lastBanTime, limit);
+        var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit);
         ctx.status(HttpStatus.OK);
         ctx.json(banResponseList.toList());
     }
@@ -137,11 +137,11 @@ public class PBHBanController extends AbstractFeatureModule {
     }
 
 
-    private @NotNull Stream<BanResponse> getBanResponseStream(long lastBanTime, long limit) {
+    private @NotNull Stream<BanResponse> getBanResponseStream(String locale, long lastBanTime, long limit) {
         var banResponseList = getServer().getBannedPeers()
                 .entrySet()
                 .stream()
-                .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), entry.getValue()))
+                .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue())))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
             banResponseList = banResponseList.filter(b -> b.getBanMetadata().getBanAt() < lastBanTime);
@@ -179,10 +179,10 @@ public class PBHBanController extends AbstractFeatureModule {
         private String torrentName;
         private long torrentSize;
         private String module;
-        private TranslationComponent rule;
-        private TranslationComponent description;
+        private String rule;
+        private String description;
 
-        public BanLogResponse(HistoryEntity history) {
+        public BanLogResponse(String locale, HistoryEntity history) {
             this.banAt = history.getBanAt().getTime();
             this.unbanAt = history.getUnbanAt().getTime();
             this.peerIp = history.getIp();
@@ -196,8 +196,8 @@ public class PBHBanController extends AbstractFeatureModule {
             this.torrentName = history.getTorrent().getName();
             this.torrentSize = history.getTorrent().getSize();
             this.module = history.getRule().getModule().getName();
-            this.rule = history.getRule().getRule();
-            this.description = history.getDescription();
+            this.rule = tl(locale, history.getRule().getRule());
+            this.description = tl(locale, history.getDescription());
         }
     }
 
@@ -206,7 +206,7 @@ public class PBHBanController extends AbstractFeatureModule {
     @Data
     static class BanResponse {
         private String address;
-        private BanMetadata banMetadata;
+        private BakedBanMetadata banMetadata;
     }
 
     @AllArgsConstructor

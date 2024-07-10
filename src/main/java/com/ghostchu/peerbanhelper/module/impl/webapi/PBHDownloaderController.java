@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
@@ -26,11 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
 @Slf4j
 @Component
 public class PBHDownloaderController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -66,22 +68,22 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_ADD_FAILURE));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE)));
             return;
         }
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.CREATED);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATED, "code", HttpStatus.CREATED.getCode()));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_CREATED), "code", HttpStatus.CREATED.getCode()));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS)));
         }
         try {
             getServer().saveDownloaders();
         } catch (IOException e) {
             log.error("Internal server error, unable to create downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION)));
         }
     }
 
@@ -92,7 +94,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATE_FAILURE));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_UPDATE_FAILURE)));
             return;
         }
         // 可能重命名了？
@@ -101,17 +103,17 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .forEach(d -> getServer().unregisterDownloader(d));
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATED, "code", HttpStatus.OK.getCode()));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_UPDATED), "code", HttpStatus.OK.getCode()));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_UPDATE_FAILURE_ALREADY_EXISTS));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_UPDATE_FAILURE_ALREADY_EXISTS)));
         }
         try {
             getServer().saveDownloaders();
         } catch (IOException e) {
             log.error("Internal server error, unable to update downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_IO_EXCEPTION)));
         }
     }
 
@@ -127,13 +129,13 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_ADD_FAILURE));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE)));
             return;
         }
         try {
             boolean testResult = downloader.login();
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_OK, "valid", testResult));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), "valid", testResult));
             downloader.close();
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -145,7 +147,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_REMOVE_NOT_EXISTS));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_NOT_EXISTS)));
             return;
         }
         Downloader downloader = selected.get();
@@ -153,7 +155,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         try {
             getServer().saveDownloaders();
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_REMOVE_SAVED, "code", HttpStatus.OK.getCode()));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_SAVED), "code", HttpStatus.OK.getCode()));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", e.getClass().getName() + ": " + e.getMessage()));
@@ -165,7 +167,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS)));
             return;
         }
         Downloader downloader = selected.get();
@@ -195,7 +197,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS));
+            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS)));
             return;
         }
         Downloader downloader = selected.get();
@@ -208,12 +210,13 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     }
 
     private void handleDownloaderStatus(@NotNull Context ctx, String downloaderName) {
+        String locale = locale(ctx);
         Optional<Downloader> selected = getServer().getDownloaders().stream()
                 .filter(d -> d.getName().equals(downloaderName))
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(Map.of("message", Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS));
+            ctx.json(Map.of("message", tl(locale, Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS)));
             return;
         }
         Downloader downloader = selected.get();
@@ -230,7 +233,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
         JsonObject config = downloader.saveDownloaderJson();
         ctx.status(HttpStatus.OK);
-        ctx.json(new DownloaderStatus(lastStatus, downloader.getLastStatusMessage(), activeTorrents, activePeers, config));
+        ctx.json(new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage()), activeTorrents, activePeers, config));
     }
 
     private void handleDownloaderList(@NotNull Context ctx) {
@@ -248,7 +251,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     record DraftDownloader(String name, JsonObject config) {
     }
 
-    record DownloaderStatus(DownloaderLastStatus lastStatus, TranslationComponent lastStatusMessage,
+    record DownloaderStatus(DownloaderLastStatus lastStatus, String lastStatusMessage,
                             long activeTorrents,
                             long activePeers, JsonObject config) {
 

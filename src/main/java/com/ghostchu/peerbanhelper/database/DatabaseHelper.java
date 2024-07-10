@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.database;
 import com.ghostchu.peerbanhelper.database.table.*;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.field.DataPersisterManager;
 import com.j256.ormlite.logger.Level;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.support.BaseConnectionSource;
@@ -22,14 +21,10 @@ public class DatabaseHelper {
     public DatabaseHelper(@Autowired Database database) throws SQLException {
         this.database = database;
         Logger.setGlobalLogLevel(Level.WARNING);
-        registerDataTypes();
         createTables();
 
     }
 
-    private void registerDataTypes() {
-        DataPersisterManager.registerDataPersisters(TranslationComponentPersistener.getSingleton());
-    }
 
     private void createTables() throws SQLException {
         TableUtils.createTableIfNotExists(database.getDataSource(), MetadataEntity.class);
