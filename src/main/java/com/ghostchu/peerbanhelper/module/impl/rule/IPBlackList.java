@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -98,12 +99,12 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         return getCache().readCachePassOnly(this, peer.getPeerAddress().getIp(), () -> {
             PeerAddress peerAddress = peer.getPeerAddress();
             if (ports.contains(peerAddress.getPort())) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "Port Rule: " + peerAddress.getPort(), String.format(Lang.MODULE_IBL_MATCH_PORT, peerAddress.getPort()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_PORT_RULE), new TranslationComponent(Lang.MODULE_IBL_MATCH_PORT, String.valueOf(peerAddress.getPort())));
             }
             IPAddress pa = IPAddressUtil.getIPAddress(peerAddress.getIp());
             for (IPAddress ra : ips) {
                 if (ra.equals(pa) || ra.contains(pa)) {
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, "CIDR Rule: " + ra, String.format(Lang.MODULE_IBL_MATCH_IP, ra));
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_CIDR_RULE, ra.toString()), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, ra.toString()));
                 }
             }
             try {
@@ -129,13 +130,13 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         if (!asns.isEmpty() && geoData.getAs() != null) {
             Long asn = geoData.getAs().getNumber();
             if (asns.contains(asn)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "ASN Rule: " + asn, String.format(Lang.MODULE_IBL_MATCH_ASN, asn));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_ASN_RULE, String.valueOf(asn)), new TranslationComponent(Lang.MODULE_IBL_MATCH_ASN, String.valueOf(asn)));
             }
         }
         if (!regions.isEmpty() && geoData.getCountry() != null) {
             String iso = geoData.getCountry().getIso();
             if (regions.contains(iso)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "C/R ISO Code Rule: " + iso, String.format(Lang.MODULE_IBL_MATCH_REGION, iso));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_REGION_RULE, iso), new TranslationComponent(Lang.MODULE_IBL_MATCH_REGION, iso));
             }
         }
         return pass();

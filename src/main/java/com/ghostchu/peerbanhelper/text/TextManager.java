@@ -71,7 +71,7 @@ public class TextManager implements Reloadable {
         }
         String str = yamlConfiguration.getString(translationComponent.getKey());
         if (str == null) {
-            return translationComponent.getKey() + "@" + locale;
+            return translationComponent.getKey();
         }
         for (PostProcessor postProcessor : INSTANCE_HOLDER.postProcessors) {
             try {

@@ -115,7 +115,7 @@ public class JavalinWebContainer {
         return Main.DEF_LOCALE;
     }
 
-    public List<AcceptLanguages> requestLocales(Context context) {
+    private List<AcceptLanguages> requestLocales(Context context) {
         String headerLocale = context.header("Accept-Language");
         if (headerLocale == null) {
             return List.of(new AcceptLanguages(Main.DEF_LOCALE, 1.0f));

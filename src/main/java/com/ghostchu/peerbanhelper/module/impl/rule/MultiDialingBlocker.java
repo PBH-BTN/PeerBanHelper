@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -149,9 +150,8 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                 // 落库
                 huntingList.put(torrentSubnetStr, currentTimestamp);
                 // 返回当前IP即可，其他IP会在下一周期被封禁
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "Multi-dialing download detected",
-                        String.format(Lang.MODULE_MDB_MULTI_DIALING_DETECTED,
-                                peerSubnet, peerIpStr));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MDB_MULTI_DIALING_DETECTED),
+                        new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_DETECTED, peerSubnet.toString(), peerIpStr));
             }
 
             if (keepHunting) {
@@ -162,9 +162,8 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
                         if (currentTimestamp - huntingTimestamp < keepHuntingTime) {
                             // 落库
                             huntingList.put(torrentSubnetStr, currentTimestamp);
-                            return new CheckResult(getClass(), PeerAction.BAN, banDuration, "Multi-dialing hunting",
-                                    String.format(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED,
-                                            peerSubnet, peerIpStr));
+                            return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MDB_MULTI_HUNTING),
+                                    new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED, peerSubnet.toString(), peerIpStr));
                         } else {
                             huntingList.invalidate(torrentSubnetStr);
                         }

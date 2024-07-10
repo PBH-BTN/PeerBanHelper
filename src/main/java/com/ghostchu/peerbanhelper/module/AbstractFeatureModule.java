@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.module;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
+import io.javalin.http.Context;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -27,6 +29,8 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     private boolean register;
     @Getter
     private final ReentrantLock lock = new ReentrantLock();
+    @Autowired
+    private JavalinWebContainer javalinWebContainer;
 
     @Override
     public boolean isModuleEnabled() {
@@ -90,5 +94,8 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         server.getProfileConfig().save(new File(Main.getConfigDirectory(), "profile.yml"));
     }
 
+    public String locale(Context ctx) {
+        return javalinWebContainer.reqLocale(ctx);
+    }
 
 }

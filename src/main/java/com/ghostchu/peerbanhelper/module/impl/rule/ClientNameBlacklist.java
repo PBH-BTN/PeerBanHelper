@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
@@ -80,7 +81,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
         //return getCache().readCache(this, peer.getClientName(), () -> {
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
         if (matchResult.hit()) {
-            return new CheckResult(getClass(), PeerAction.BAN, banDuration, matchResult.rule().toString(), String.format(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.rule()));
+            return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(matchResult.rule().toString()), new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME, String.valueOf(matchResult.rule())));
         }
         return pass();
         //}, true);

@@ -18,7 +18,7 @@ CHECK_COMPLETED: "[完成] 已检查 {} 的 {} 个活跃 Torrent 和 {} 个对�
 ERR_INVALID_RULE_SYNTAX: "规则 {} 的表达式无效，请检查是否存在拼写错误"
 MODULE_CNB_MATCH_CLIENT_NAME: "匹配 ClientName (UserAgent): {}"
 MODULE_IBL_MATCH_IP: "匹配 IP 规则: {}"
-MODULE_IBL_MATCH_IP_RULE: "匹配 IP黑名单订阅 规则: {}"
+MODULE_IBL_MATCH_IP_RULE: "匹配 IP黑名单订阅 规则: {}, IP 地址: {}"
 MODULE_IBL_MATCH_ASN: "匹配 ASN 规则: {}"
 MODULE_IBL_MATCH_REGION: "匹配国家或地区 ISO 代码规则: {}"
 MODULE_IBL_EXCEPTION_GEOIP: "匹配 GeoIP 信息时出现异常，请反馈错误给开发者"
@@ -266,3 +266,20 @@ MODULE_EXPRESSION_RULE_INVALID_RETURNS: |
   Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它规则]
   com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
   com.ghostchu.peerbanhelper.module.BanResult
+IP_BLACKLIST_PORT_RULE: "端口规则: {}"
+IP_BLACKLIST_CIDR_RULE: "IP/CIDR 规则: {}"
+IP_BLACKLIST_ASN_RULE: "ASN 规则: {}"
+IP_BLACKLIST_REGION_RULE: "国家/地区 ISO 代码规则: {}"
+
+AUTO_RANGE_BAN_IPV4_RULE: "IPv4 区间封禁规则: /{}"
+AUTO_RANGE_BAN_IPV6_RULE: "IPv6 区间封禁规则: /{}"
+
+PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD: "已达到下载过量最大限制"
+PCB_RULE_REACHED_MAX_DIFFERENCE: "已超过允许的进度差异最大值"
+PCB_RULE_PROGRESS_REWIND: "已超过允许的进度倒退最大值"
+
+MDB_MULTI_DIALING_DETECTED: "检测到多拨下载"
+MDB_MULTI_HUNTING: "多拨持续追踪"
+
+BTN_BTN_RULE: "BTN-{}-{}"
+GENERAL_NA: "N/A";

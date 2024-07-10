@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
@@ -40,7 +41,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     private int ipv6PrefixLength;
     @Autowired
     private JavalinWebContainer webContainer;
-    private final CheckResult CHECK_RESULT_SKIP_SIZE = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "N/A", "Skip due the torrent size");
     private long banDuration;
 
     @Override
@@ -154,10 +154,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             final long torrentSize = torrent.getSize();
             // 过滤
             if (torrentSize <= 0) {
-                return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "N/A", Lang.MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT);
+                return pass();
             }
             if (torrentSize < torrentMinimumSize) {
-                return CHECK_RESULT_SKIP_SIZE;
+                return pass();
             }
             // 计算进度信息
             final double actualProgress = (double) actualUploaded / torrentSize; // 实际进度
@@ -167,18 +167,18 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
                 // 下载过量，检查
                 long maxAllowedExcessiveThreshold = (long) (torrentSize * excessiveThreshold);
                 if (actualUploaded > maxAllowedExcessiveThreshold) {
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, "Max allowed excessive threshold", String.format(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, torrentSize, actualUploaded, maxAllowedExcessiveThreshold));
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD), new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD, String.valueOf(torrentSize), String.valueOf(actualUploaded), String.valueOf(maxAllowedExcessiveThreshold)));
                 }
             }
             // 如果客户端报告自己进度更多，则跳过检查
             if (actualProgress <= clientProgress) {
-                return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, "N/A", String.format(Lang.MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP, percent(clientProgress), percent(actualProgress)));
+                return pass();
             }
             // 计算进度差异
             double difference = Math.abs(actualProgress - clientProgress);
             if (difference > maximumDifference) {
                 clientTask.setProgressDifferenceCounter(clientTask.getProgressDifferenceCounter() + 1);
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, "Over max difference", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE), new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
             }
             if (rewindMaximumDifference > 0) {
                 double lastRecord = clientTask.getLastReportProgress();
@@ -187,7 +187,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
                 if (ban) {
                     clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
                 }
-                return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, "Progress rewind", String.format(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindMaximumDifference)));
+                return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND), new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindMaximumDifference)));
             }
             //return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
             return pass();

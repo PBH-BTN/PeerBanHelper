@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -96,7 +97,13 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
                 banListMappingCache.put(bannedPeer, bannedPeerAddress);
             }
             if (bannedPeerAddress.contains(peerAddress)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, bannedPeerAddress.isIPv4Convertible() ? "IPv4(RangeBan)" : "IPv6(RangeBan)" + "/" + bannedPeerAddress.getNetworkPrefixLength(), String.format(Lang.ARB_BANNED, peerAddress, bannedPeer.getAddress()));
+                TranslationComponent component;
+                if (bannedPeerAddress.isIPv4Convertible()) {
+                    component = new TranslationComponent(Lang.AUTO_RANGE_BAN_IPV4_RULE, String.valueOf(ipv4Prefix));
+                } else {
+                    component = new TranslationComponent(Lang.AUTO_RANGE_BAN_IPV6_RULE, String.valueOf(ipv6Prefix));
+                }
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, component, new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString()));
             }
         }
         return pass();
