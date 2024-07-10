@@ -67,6 +67,7 @@ public class TextManager implements Reloadable {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
         YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
         if (yamlConfiguration == null) {
+            new Exception("Unsupported locale").printStackTrace();
             return "Unsupported locale: " + locale;
         }
         String str = yamlConfiguration.getString(translationComponent.getKey());

@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.config;
 
-import com.ghostchu.peerbanhelper.text.Lang;
 import com.google.common.io.CharStreams;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
@@ -16,8 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class PBHConfigUpdater {
@@ -38,7 +35,7 @@ public class PBHConfigUpdater {
     }
 
     public void update(@NotNull Object configUpdateScript) {
-        log.info(tlUI(Lang.CONFIG_CHECKING));
+        log.info("Checking configuration...");
         int selectedVersion = yaml.getInt(CONFIG_VERSION_KEY, -1);
         for (Method method : getUpdateScripts(configUpdateScript)) {
             try {
@@ -47,12 +44,12 @@ public class PBHConfigUpdater {
                 if (current >= updateScript.version()) {
                     continue;
                 }
-                log.info(tlUI(Lang.CONFIG_MIGRATING, current, updateScript.version()));
+                log.info("Upgrading configuration from {} to {}...", current, updateScript.version());
                 String scriptName = updateScript.description();
                 if (scriptName == null || scriptName.isEmpty()) {
                     scriptName = method.getName();
                 }
-                log.info(tlUI(Lang.CONFIG_EXECUTE_MIGRATE, scriptName));
+                log.info("Executing upgrade script: {}", scriptName);
                 try {
                     if (method.getParameterCount() == 0) {
                         method.invoke(configUpdateScript);
@@ -62,20 +59,20 @@ public class PBHConfigUpdater {
                         }
                     }
                 } catch (Exception e) {
-                    log.info(tlUI(Lang.CONFIG_MIGRATE_FAILED, method.getName(), updateScript.version(), e.getMessage()), e);
+                    log.info("Error while executing upgrade script: method={}, target_ver={}", method.getName(), updateScript.version(), e);
                 }
                 yaml.set(CONFIG_VERSION_KEY, updateScript.version());
-                log.info(tlUI(Lang.CONFIG_UPGRADED, updateScript.version()));
+                log.info("Configuration successfully updated");
             } catch (Throwable throwable) {
-                log.info(tlUI(Lang.CONFIG_MIGRATE_FAILED, method.getName(), method.getAnnotation(UpdateScript.class).version()), throwable);
+                log.error("Error while updating configuration, method={}, target_ver={}", method.getName(), method.getAnnotation(UpdateScript.class).version(), throwable);
             }
         }
-        log.info(tlUI(Lang.CONFIG_SAVE_CHANGES));
+        log.info("Saving configuration changes...");
         try {
             migrateComments(yaml, bundle);
             yaml.save(file);
         } catch (IOException e) {
-            log.error(tlUI(Lang.CONFIG_SAVE_ERROR), e);
+            log.error("Failed to save configuration!", e);
         }
     }
 

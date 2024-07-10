@@ -44,7 +44,7 @@ public class Main {
     private static final EventBus eventBus = new EventBus();
     @Getter
     private static final ReloadManager reloadManager = new ReloadManager();
-    public static String DEF_LOCALE = System.getProperty("user.language");
+    public static String DEF_LOCALE = Locale.getDefault().toLanguageTag();
     @Getter
     private static File dataDirectory;
     @Getter
@@ -98,6 +98,7 @@ public class Main {
         profileConfigFile = new File(configDirectory, "profile.yml");
         profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
+        log.info("Current system language tag: {}", Locale.getDefault().toLanguageTag());
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
             DEF_LOCALE = Locale.getDefault().toLanguageTag();
