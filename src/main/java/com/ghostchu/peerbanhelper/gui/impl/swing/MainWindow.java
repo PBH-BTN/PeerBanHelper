@@ -140,7 +140,7 @@ public class MainWindow extends JFrame {
     private Component generateAboutMenu() {
         JMenu aboutMenu = new JMenu(tlUI(Lang.GUI_MENU_ABOUT));
         JMenuItem viewOnGithub = new JMenuItem(tlUI(Lang.ABOUT_VIEW_GITHUB));
-        viewOnGithub.addActionListener(e -> swingGUI.openWebpage(URI.create(Lang.GITHUB_PAGE)));
+        viewOnGithub.addActionListener(e -> swingGUI.openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
         aboutMenu.add(viewOnGithub);
         return aboutMenu;
     }

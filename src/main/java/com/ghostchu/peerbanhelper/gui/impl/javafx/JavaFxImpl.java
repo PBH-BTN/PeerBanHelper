@@ -225,7 +225,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         controller.getMenuProgramQuit().setText(tlUI(Lang.GUI_MENU_QUIT));
         controller.getMenuProgramQuit().setOnAction(e -> System.exit(0));
         controller.getMenuProgramOpenInGithub().setText(tlUI(Lang.ABOUT_VIEW_GITHUB));
-        controller.getMenuProgramOpenInGithub().setOnAction(e -> openWebpage(URI.create(Lang.GITHUB_PAGE)));
+        controller.getMenuProgramOpenInGithub().setOnAction(e -> openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
         controller.getMenuProgramOpenInBrowser().setText(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
         controller.getMenuProgramOpenInBrowser().setOnAction(e -> openWebpage(URI.create(Main.getServer().getWebUiUrl())));
         controller.getMenuProgramCopyWebuiToken().setText(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
