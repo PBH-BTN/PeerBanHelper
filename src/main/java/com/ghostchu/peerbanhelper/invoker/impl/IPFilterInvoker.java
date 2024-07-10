@@ -15,6 +15,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.UUID;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class IPFilterInvoker implements BanListInvoker {
     private final PeerBanHelperServer server;
@@ -35,7 +37,7 @@ public class IPFilterInvoker implements BanListInvoker {
             }
             ipFilterDat.createNewFile();
         }
-        log.info(Lang.BANLIST_INVOKER_REGISTERED, getClass().getName());
+        log.info(tlUI(Lang.BANLIST_INVOKER_REGISTERED, getClass().getName()));
     }
 
     @Override
@@ -47,7 +49,7 @@ public class IPFilterInvoker implements BanListInvoker {
             fileWriter.write("");
             fileWriter.flush();
         } catch (IOException e) {
-            log.error(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
+            log.error(tlUI(Lang.BANLIST_INVOKER_IPFILTER_FAIL), e);
         }
     }
 
@@ -60,7 +62,7 @@ public class IPFilterInvoker implements BanListInvoker {
             fileWriter.write(generateIpFilterLine(peer) + "\n");
             fileWriter.flush();
         } catch (IOException e) {
-            log.error(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
+            log.error(tlUI(Lang.BANLIST_INVOKER_IPFILTER_FAIL), e);
         }
     }
 
@@ -75,7 +77,7 @@ public class IPFilterInvoker implements BanListInvoker {
             }
             fileWriter.flush();
         } catch (IOException e) {
-            log.error(Lang.BANLIST_INVOKER_IPFILTER_FAIL, e);
+            log.error(tlUI(Lang.BANLIST_INVOKER_IPFILTER_FAIL), e);
         }
     }
 

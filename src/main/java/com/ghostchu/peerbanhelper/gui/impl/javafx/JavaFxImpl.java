@@ -90,13 +90,13 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         CompletableFuture.runAsync(() -> {
             if (isWebViewSupported()) {
                 Platform.runLater(() -> {
-                    MainJavaFx.getStage().setTitle(String.format(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+                    MainJavaFx.getStage().setTitle(tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
                     if (isWebViewSupported()) {
                         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
-                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), tlUI("gui-menu-webui"), Main.getServer().getWebUiUrl(), Collections.emptyMap(), null);
+                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), tlUI(Lang.GUI_MENU_WEBUI), Main.getServer().getWebUiUrl(), Collections.emptyMap(), null);
                         javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
                         selectionModel.select(webuiTab);
-                        log.info(Lang.WEBVIEW_ENABLED);
+                        log.info(tlUI(Lang.WEBVIEW_ENABLED));
 //                        if (System.getProperty("pbh.enableDownloadWebView") != null) {
 //                            for (Downloader downloader : Main.getServer().getDownloaders()) {
 //                                if (!downloader.isSupportWebview()) {
@@ -115,7 +115,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 //                            }
 //                        }
                     } else {
-                        log.info(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED);
+                        log.info(tlUI(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED));
                     }
                 });
             }
@@ -215,28 +215,28 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 }
                 String cont = stringBuilder.toString();
                 JFXUtil.copyText(cont);
-                createDialog(Level.INFO, Lang.GUI_COPY_TO_CLIPBOARD_TITLE, String.format(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, cont));
+                createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, cont));
             }
         });
         initLoggerRedirection();
-        controller.getMenuProgram().setText(tlUI("gui-menu-program"));
-        controller.getMenuWebui().setText(tlUI("gui-menu-webui"));
-        controller.getTabLogs().setText(tlUI("gui-tabbed-logs"));
-        controller.getMenuProgramQuit().setText(tlUI("gui-menu-quit"));
+        controller.getMenuProgram().setText(tlUI(Lang.GUI_MENU_PROGRAM));
+        controller.getMenuWebui().setText(tlUI(Lang.GUI_MENU_WEBUI));
+        controller.getTabLogs().setText(tlUI(Lang.GUI_TABBED_LOGS));
+        controller.getMenuProgramQuit().setText(tlUI(Lang.GUI_MENU_QUIT));
         controller.getMenuProgramQuit().setOnAction(e -> System.exit(0));
-        controller.getMenuProgramOpenInGithub().setText(tlUI("gui-menu-view-github"));
+        controller.getMenuProgramOpenInGithub().setText(tlUI(Lang.ABOUT_VIEW_GITHUB));
         controller.getMenuProgramOpenInGithub().setOnAction(e -> openWebpage(URI.create(Lang.GITHUB_PAGE)));
-        controller.getMenuProgramOpenInBrowser().setText(tlUI("gui-menu-open-webui"));
+        controller.getMenuProgramOpenInBrowser().setText(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
         controller.getMenuProgramOpenInBrowser().setOnAction(e -> openWebpage(URI.create(Main.getServer().getWebUiUrl())));
-        controller.getMenuProgramCopyWebuiToken().setText(tlUI("gui-menu-copy-token"));
+        controller.getMenuProgramCopyWebuiToken().setText(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
         controller.getMenuProgramCopyWebuiToken().setOnAction(e -> {
             if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
                 String content = Main.getServer().getWebContainer().getToken();
                 JFXUtil.copyText(content);
-                createDialog(Level.INFO, Lang.GUI_COPY_TO_CLIPBOARD_TITLE, String.format(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content));
+                createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)));
             }
         });
-        controller.getMenuProgramOpenDataDirectory().setText(Lang.GUI_MENU_OPEN_DATA_DIRECTORY);
+        controller.getMenuProgramOpenDataDirectory().setText(tlUI(Lang.GUI_MENU_OPEN_DATA_DIRECTORY));
         controller.getMenuProgramOpenDataDirectory().setOnAction(e -> {
             try {
                 Desktop.getDesktop().open(Main.getDataDirectory());
@@ -256,7 +256,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private void minimizeToTray() {
         if (trayIcon != null) {
             setVisible(false);
-            trayIcon.displayMessage(tlUI("gui-tray-message-caption"), tlUI("gui-tray-message-description"), TrayIcon.MessageType.INFO);
+            trayIcon.displayMessage(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION), TrayIcon.MessageType.INFO);
         }
     }
 

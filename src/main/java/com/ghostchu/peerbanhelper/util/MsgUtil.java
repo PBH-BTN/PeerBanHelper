@@ -120,15 +120,25 @@ public class MsgUtil {
         if (raw == null || raw.isEmpty()) {
             return "";
         }
-        if (args != null) {
-            for (int i = 0; i < args.length; i++) {
-                String arg = args[i];
-                if (arg == null) {
-                    arg = "";
-                }
-                raw = raw.replace("{" + i + "}", arg);
+        StringBuilder result = new StringBuilder();
+        int start = 0;
+        int argIndex = 0;
+
+        while (start < raw.length()) {
+            int placeholderIndex = raw.indexOf("{}", start);
+            if (placeholderIndex == -1) {
+                result.append(raw.substring(start));
+                break;
             }
+            result.append(raw, start, placeholderIndex);
+            if (args != null && argIndex < args.length) {
+                result.append(args[argIndex] != null ? args[argIndex] : "");
+                argIndex++;
+            } else {
+                result.append("{}");
+            }
+            start = placeholderIndex + 2;
         }
-        return raw;
+        return result.toString();
     }
 }

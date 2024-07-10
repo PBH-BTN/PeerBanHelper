@@ -26,6 +26,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 @Component
 public class PBHBanController extends AbstractFeatureModule {
@@ -115,7 +117,7 @@ public class PBHBanController extends AbstractFeatureModule {
             ctx.status(HttpStatus.OK);
             ctx.json(map);
         } catch (Exception e) {
-            log.error(Lang.WEB_BANLOGS_INTERNAL_ERROR, e);
+            log.error(tlUI(Lang.WEB_BANLOGS_INTERNAL_ERROR), e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", "Internal server error"));
         }

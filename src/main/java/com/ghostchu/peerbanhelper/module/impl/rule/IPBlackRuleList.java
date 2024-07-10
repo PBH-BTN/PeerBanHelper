@@ -111,7 +111,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                     }
                     return match;
                 } catch (Exception e) {
-                    log.error(tlUI("ip-ban-rule-match-error"), e);
+                    log.error(tlUI(Lang.IP_BAN_RULE_MATCH_ERROR), e);
                     return false;
                 }
             });
@@ -143,7 +143,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                 assert rule != null;
                 updateRule(rule, IPBanRuleUpdateType.AUTO);
             }
-            log.info(tlUI("ip-ban-rule-update-finish"));
+            log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
         }
     }
 

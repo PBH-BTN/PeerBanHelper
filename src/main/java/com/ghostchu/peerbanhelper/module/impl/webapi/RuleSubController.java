@@ -143,7 +143,10 @@ public class RuleSubController extends AbstractFeatureModule {
      */
     private SlimMsg updateAll() {
         AtomicReference<SlimMsg> result = new AtomicReference<>();
-        ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().map(this::update).filter(ele -> !ele.success()).findFirst().ifPresentOrElse(result::set, () -> result.set(new SlimMsg(true, tlUI("ip-ban-rule-all-updated"), 200)));
+        ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().map(this::update).filter(ele -> !ele.success())
+                .findFirst()
+                .ifPresentOrElse(result::set, () ->
+                        result.set(new SlimMsg(true, tlUI(Lang.IP_BAN_RULE_ALL_UPDATED), 200)));
         return result.get();
     }
 
@@ -155,11 +158,11 @@ public class RuleSubController extends AbstractFeatureModule {
      */
     private SlimMsg update(String ruleId) {
         if (ruleId == null || ruleId.isEmpty()) {
-            return new SlimMsg(false, tlUI("ip-ban-rule-no-id"), HttpStatus.NOT_FOUND.getCode());
+            return new SlimMsg(false, tlUI(Lang.IP_BAN_RULE_NO_ID), HttpStatus.NOT_FOUND.getCode());
         }
         ConfigurationSection configurationSection = ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ruleId);
         if (null == configurationSection) {
-            return new SlimMsg(false, Lang.IP_BAN_RULE_CANT_FIND.replace("{}", ruleId), HttpStatus.NOT_FOUND.getCode());
+            return new SlimMsg(false, tlUI(Lang.IP_BAN_RULE_CANT_FIND, ruleId), HttpStatus.NOT_FOUND.getCode());
         }
         return ipBlackRuleList.updateRule(configurationSection, IPBanRuleUpdateType.MANUAL);
     }
@@ -231,7 +234,7 @@ public class RuleSubController extends AbstractFeatureModule {
         }
         if (ruleId == null || ruleId.isEmpty()) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tlUI("ip-ban-rule-no-id"), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new SlimMsg(false, tlUI(Lang.IP_BAN_RULE_NO_ID), HttpStatus.BAD_REQUEST.getCode()));
             return;
         }
         RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);

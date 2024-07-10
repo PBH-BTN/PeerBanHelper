@@ -31,6 +31,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 public class Transmission implements Downloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Transmission.class);
     private final String name;
@@ -49,7 +51,7 @@ public class Transmission implements Downloader {
         this.config = config;
         this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
-        log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);
+        log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
 
     private static String generateBlocklistUrl(String pbhServerAddress) {
@@ -118,7 +120,7 @@ public class Transmission implements Downloader {
         TypedResponse<RsSessionGet> resp = client.execute(get); // 执行任意 RPC 操作以刷新 session
         String version = resp.getArgs().getVersion();
         if (version.startsWith("0.") || version.startsWith("1.") || version.startsWith("2.")) {
-            throw new IllegalStateException(String.format(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, Lang.DOWNLOADER_TR_INCOMPATIBILITY_BANAPI));
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, Lang.DOWNLOADER_TR_INCOMPATIBILITY_BANAPI));
         }
         return true;
     }
@@ -148,15 +150,15 @@ public class Transmission implements Downloader {
                 .build();
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
         if (!sessionSetResp.isSuccess()) {
-            log.error(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, sessionSetResp.getResult());
+            log.error(tlUI(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP), sessionSetResp.getResult());
         }
         Thread.sleep(3000); // Transmission 在这里疑似有崩溃问题？
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
-            log.error(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP);
+            log.error(tlUI(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP));
         } else {
-            log.info(Lang.DOWNLOADER_TR_UPDATED_BLOCKLIST, updateBlockListResp.getArgs().getBlockListSize());
+            log.info(tlUI(Lang.DOWNLOADER_TR_UPDATED_BLOCKLIST), updateBlockListResp.getArgs().getBlockListSize());
         }
     }
 
@@ -175,7 +177,7 @@ public class Transmission implements Downloader {
 
     private void relaunchTorrents(Collection<Long> ids) {
         if (ids.isEmpty()) return;
-        log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, ids.size());
+        log.info(tlUI(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, ids.size()));
         RqTorrent stop = new RqTorrent(TorrentAction.STOP, new ArrayList<>());
         for (long torrent : ids) {
             stop.add(torrent);

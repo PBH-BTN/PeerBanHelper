@@ -44,6 +44,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 @Component
 public class ExpressionRule extends AbstractRuleFeatureModule {
@@ -74,7 +76,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             } else if (i == 2) {
                 return new CheckResult(getClass(), PeerAction.SKIP, banDuration, expressions.get(expression).name(), expressions.get(expression).name() + "=>" + number);
             } else {
-                log.error(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
+                log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression)));
                 return null;
             }
         }
@@ -93,7 +95,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         if (returns instanceof CheckResult checkResult) {
             return checkResult;
         }
-        log.error(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression));
+        log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression)));
         return null;
     }
 
@@ -166,10 +168,10 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                 }
                 result = handleResult(expression, returns);
             } catch (TimeoutException timeoutException) {
-                log.error(Lang.MODULE_EXPRESSION_RULE_TIMEOUT, maxScriptExecuteTime, timeoutException);
+                log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_TIMEOUT, maxScriptExecuteTime), timeoutException);
                 return pass();
             } catch (Exception ex) {
-                log.error(Lang.MODULE_EXPRESSION_RULE_ERROR, expressionMetadata.name(), ex);
+                log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_ERROR, expressionMetadata.name()), ex);
                 return pass();
             }
             if (result != null && result.action() != PeerAction.NO_ACTION) {
@@ -221,7 +223,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         threadLocks.clear();
         this.banDuration = getConfig().getLong("ban-duration", 0);
         initScripts();
-        log.info(Lang.MODULE_EXPRESSION_RULE_COMPILING);
+        log.info(tlUI(Lang.MODULE_EXPRESSION_RULE_COMPILING));
         long start = System.currentTimeMillis();
         Map<Expression, ExpressionMetadata> userRules = new ConcurrentHashMap<>();
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -244,14 +246,14 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
                                 threadLocks.put(expressionMetadata, new ReentrantLock());
                             }
                         } catch (ExpressionSyntaxErrorException err) {
-                            log.error(Lang.MODULE_EXPRESSION_RULE_BAD_EXPRESSION, err);
+                            log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_BAD_EXPRESSION), err);
                         }
                     });
                 }
             }
         }
         expressions = Map.copyOf(userRules);
-        log.info(Lang.MODULE_EXPRESSION_RULE_COMPILED, expressions.size(), System.currentTimeMillis() - start);
+        log.info(tlUI(Lang.MODULE_EXPRESSION_RULE_COMPILED, expressions.size(), System.currentTimeMillis() - start));
     }
 
     private ExpressionMetadata parseScriptMetadata(String fallbackName, String scriptContent) {

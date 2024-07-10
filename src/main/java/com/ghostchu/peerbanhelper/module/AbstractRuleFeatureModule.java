@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,9 +14,9 @@ import org.springframework.stereotype.Component;
 public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule implements RuleFeatureModule {
     @Getter
     private boolean register;
-    public static final CheckResult TEAPOT_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, "N/A", "I'm a teapot");
-    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, "N/A", "Check passed");
-    public static final CheckResult HANDSHAKING_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, "N/A", "Peer handshaking");
+    public static final CheckResult TEAPOT_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("I'm a teapot"));
+    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"));
+    public static final CheckResult HANDSHAKING_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Peer handshaking"));
     @Autowired
     @Getter
     private ModuleMatchCache cache;

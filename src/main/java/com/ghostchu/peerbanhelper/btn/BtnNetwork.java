@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 @Getter
 public class BtnNetwork {
@@ -58,7 +60,7 @@ public class BtnNetwork {
         try {
             HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
-                log.error(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body());
+                log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body()));
                 return;
             }
             JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
@@ -67,11 +69,11 @@ public class BtnNetwork {
             }
             int min_protocol_version = json.get("min_protocol_version").getAsInt();
             if (min_protocol_version > BTN_PROTOCOL_VERSION) {
-                throw new IllegalStateException(String.format(Lang.BTN_INCOMPATIBLE_SERVER));
+                throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             int max_protocol_version = json.get("max_protocol_version").getAsInt();
             if (max_protocol_version > BTN_PROTOCOL_VERSION) {
-                throw new IllegalStateException(String.format(Lang.BTN_INCOMPATIBLE_SERVER));
+                throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             JsonObject ability = json.get("ability").getAsJsonObject();
             if (ability.has("submit_peers") && submit) {
@@ -97,7 +99,7 @@ public class BtnNetwork {
                 }
             });
         } catch (Throwable e) {
-            log.error(Lang.BTN_CONFIG_FAILS, e);
+            log.error(tlUI(Lang.BTN_CONFIG_FAILS), e);
         }
     }
 
@@ -121,7 +123,7 @@ public class BtnNetwork {
     }
 
     public void close() {
-        log.info(Lang.BTN_SHUTTING_DOWN);
+        log.info(tlUI(Lang.BTN_SHUTTING_DOWN));
         executeService.shutdown();
         abilities.values().forEach(BtnAbility::unload);
         abilities.clear();

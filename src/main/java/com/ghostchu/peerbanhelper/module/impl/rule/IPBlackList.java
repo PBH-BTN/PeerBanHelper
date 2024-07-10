@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 @Component
 public class IPBlackList extends AbstractRuleFeatureModule {
@@ -110,7 +112,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
                     return ipdbResult;
                 }
             } catch (Exception e) {
-                log.error(Lang.MODULE_IBL_EXCEPTION_GEOIP, e);
+                log.error(tlUI(Lang.MODULE_IBL_EXCEPTION_GEOIP), e);
             }
             return pass();
         }, true);

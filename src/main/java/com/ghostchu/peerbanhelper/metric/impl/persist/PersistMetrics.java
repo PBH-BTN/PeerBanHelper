@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 @Component("persistMetrics")
 public class PersistMetrics implements BasicMetrics {
@@ -92,7 +94,7 @@ public class PersistMetrics implements BasicMetrics {
                         metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString()
                 ));
             } catch (SQLException e) {
-                log.error(Lang.DATABASE_SAVE_BUFFER_FAILED, e);
+                log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);
             }
         });
     }

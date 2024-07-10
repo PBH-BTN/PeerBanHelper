@@ -33,7 +33,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         try {
             return !isConfigurable() || getConfig().getBoolean("enabled");
         } catch (Exception e) {
-            log.warn(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName());
+            log.warn(tlUI(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName()));
             return false;
         }
     }
@@ -55,7 +55,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         if (!isConfigurable()) return null;
         ConfigurationSection section = Objects.requireNonNull(server.getProfileConfig().getConfigurationSection("module")).getConfigurationSection(getConfigName());
         if (section == null) {
-            log.warn(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName());
+            log.warn(tlUI(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName()));
             YamlConfiguration configuration = new YamlConfiguration();
             configuration.set("enabled", false);
             return configuration;
@@ -68,7 +68,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         if (register) {
             onDisable();
             cleanupResources();
-            log.info(tlUI("module-unregistered", getName()));
+            log.info(tlUI(Lang.MODULE_UNREGISTER, getName()));
         }
     }
 
@@ -80,7 +80,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     public void enable() {
         register = true;
         onEnable();
-        log.info(tlUI("module-registered", getName()));
+        log.info(tlUI(Lang.MODULE_REGISTER, getName()));
     }
 
     @Override

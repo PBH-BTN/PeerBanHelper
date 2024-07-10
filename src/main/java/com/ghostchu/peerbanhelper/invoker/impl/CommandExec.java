@@ -14,6 +14,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class CommandExec implements BanListInvoker {
     private List<String> resetCommands;
@@ -29,7 +33,7 @@ public class CommandExec implements BanListInvoker {
         this.resetCommands = server.getMainConfig().getStringList("banlist-invoker.command-exec.reset");
         this.banCommands = server.getMainConfig().getStringList("banlist-invoker.command-exec.ban");
         this.unbanCommands = server.getMainConfig().getStringList("banlist-invoker.command-exec.unban");
-        log.info(Lang.BANLIST_INVOKER_REGISTERED, getClass().getName());
+        log.info(tlUI(Lang.BANLIST_INVOKER_REGISTERED, getClass().getName()));
     }
 
 
@@ -42,7 +46,7 @@ public class CommandExec implements BanListInvoker {
             try {
                 invokeCommand(c, Collections.emptyMap());
             } catch (IOException | ExecutionException | InterruptedException | TimeoutException e) {
-                log.error(Lang.COMMAND_EXECUTOR_FAILED, e);
+                log.error(tlUI(Lang.COMMAND_EXECUTOR_FAILED), e);
             }
         }
     }
@@ -60,7 +64,7 @@ public class CommandExec implements BanListInvoker {
             try {
                 invokeCommand(c, map);
             } catch (IOException | ExecutionException | InterruptedException | TimeoutException e) {
-                log.error(Lang.COMMAND_EXECUTOR_FAILED, e);
+                log.error(tlUI(Lang.COMMAND_EXECUTOR_FAILED), e);
             }
         }
     }
@@ -78,7 +82,7 @@ public class CommandExec implements BanListInvoker {
             try {
                 invokeCommand(c, map);
             } catch (IOException | ExecutionException | InterruptedException | TimeoutException e) {
-                log.error(Lang.COMMAND_EXECUTOR_FAILED, e);
+                log.error(tlUI(Lang.COMMAND_EXECUTOR_FAILED), e);
             }
         }
     }
@@ -97,7 +101,7 @@ public class CommandExec implements BanListInvoker {
         Process process = p.onExit().get(10, TimeUnit.SECONDS);
         if (process.isAlive()) {
             process.destroy();
-            log.error(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT, command);
+            log.error(tlUI(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT), command);
             return -9999;
         }
         return process.exitValue();
@@ -108,7 +112,7 @@ public class CommandExec implements BanListInvoker {
         argMap.put("peer.ip", peer.getIp());
         argMap.put("peer.port", String.valueOf(peer.getPort()));
         argMap.put("meta.context", banMetadata.getContext());
-        argMap.put("meta.description", banMetadata.getDescription());
+        argMap.put("meta.description", tl(DEF_LOCALE, banMetadata.getDescription()));
         argMap.put("meta.banAt", String.valueOf(banMetadata.getBanAt()));
         argMap.put("meta.unbanAt", String.valueOf(banMetadata.getUnbanAt()));
         argMap.put("meta.peer.id", banMetadata.getPeer().getId());

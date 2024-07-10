@@ -44,6 +44,8 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 public class BiglyBT implements Downloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(BiglyBT.class);
     private final String apiEndpoint;
@@ -168,7 +170,7 @@ public class BiglyBT implements Downloader {
             throw new IllegalStateException(e);
         }
         if (request.statusCode() != 200) {
-            throw new IllegalStateException(String.format(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, request.statusCode(), request.body()));
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, request.statusCode(), request.body()));
         }
         List<DownloadRecord> torrentDetail = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<DownloadRecord>>() {
         }.getType());
@@ -206,7 +208,7 @@ public class BiglyBT implements Downloader {
             throw new IllegalStateException(e);
         }
         if (resp.statusCode() != 200) {
-            throw new IllegalStateException(String.format(Lang.DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
         PeerManagerRecord peerManagerRecord = JsonUtil.getGson().fromJson(resp.body(), PeerManagerRecord.class);
         List<Peer> peersList = new ArrayList<>();
@@ -233,11 +235,11 @@ public class BiglyBT implements Downloader {
                             .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -251,11 +253,11 @@ public class BiglyBT implements Downloader {
                             .build()
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }

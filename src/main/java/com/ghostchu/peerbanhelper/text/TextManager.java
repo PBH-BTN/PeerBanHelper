@@ -47,12 +47,20 @@ public class TextManager implements Reloadable {
         load();
     }
 
-    public static String tlUI(String key, Object... params) {
-        return tl(DEF_LOCALE, new TranslationComponent(key, INSTANCE_HOLDER.convert(params)));
+    public static String tlUI(Lang key, Object... params) {
+        return tl(DEF_LOCALE, new TranslationComponent(key.getKey(), INSTANCE_HOLDER.convert(params)));
     }
+
+//    public static String tlUI(String key, Object... params) {
+//        return tl(DEF_LOCALE, new TranslationComponent(key, INSTANCE_HOLDER.convert(params)));
+//    }
 
     public static String tl(String locale, String key, Object... params) {
         return tl(locale, new TranslationComponent(key, INSTANCE_HOLDER.convert(params)));
+    }
+
+    public static String tl(String locale, Lang key, Object... params) {
+        return tl(locale, new TranslationComponent(key.getKey(), INSTANCE_HOLDER.convert(params)));
     }
 
     public static String tl(String locale, TranslationComponent translationComponent) {

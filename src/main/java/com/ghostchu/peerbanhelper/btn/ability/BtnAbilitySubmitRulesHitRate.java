@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
     private final BtnNetwork btnNetwork;
@@ -47,7 +49,7 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
 
 
     private void submit() {
-        log.info(Lang.BTN_SUBMITTING_HITRATE);
+        log.info(tlUI(Lang.BTN_SUBMITTING_HITRATE));
         Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(btnNetwork.getServer().getHitRateMetric().getHitRateMetric());
         List<RuleData> dat = metric.entrySet().stream()
                 .map(obj -> new RuleData(obj.getKey().getClass().getSimpleName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
@@ -59,13 +61,13 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
         HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
-                        log.error(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                        log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                     } else {
-                        log.info(Lang.BTN_SUBMITTED_HITRATE, dat.size());
+                        log.info(tlUI(Lang.BTN_SUBMITTED_HITRATE, dat.size()));
                     }
                 })
                 .exceptionally(e -> {
-                    log.error(Lang.BTN_REQUEST_FAILS, e);
+                    log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
                     return null;
                 });
     }

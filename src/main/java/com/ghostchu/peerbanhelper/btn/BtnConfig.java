@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Configuration
 @Slf4j
 public class BtnConfig {
@@ -22,16 +24,16 @@ public class BtnConfig {
     public BtnNetwork btnNetwork() {
         ConfigurationSection section = server.getMainConfig().getConfigurationSection("btn");
         if (section.getBoolean("enabled")) {
-            log.info(Lang.BTN_NETWORK_CONNECTING);
+            log.info(tlUI(Lang.BTN_NETWORK_CONNECTING));
             var configUrl = server.getMainConfig().getString("btn.config-url");
             var submit = server.getMainConfig().getBoolean("btn.submit");
             var appId = server.getMainConfig().getString("btn.app-id");
             var appSecret = server.getMainConfig().getString("btn.app-secret");
             BtnNetwork btnNetwork = new BtnNetwork(server, userAgent, configUrl, submit, appId, appSecret);
-            log.info(Lang.BTN_NETWORK_ENABLED);
+            log.info(tlUI(Lang.BTN_NETWORK_ENABLED));
             return btnNetwork;
         } else {
-            log.info(Lang.BTN_NETWORK_NOT_ENABLED);
+            log.info(tlUI(Lang.BTN_NETWORK_NOT_ENABLED));
             return null;
         }
     }
