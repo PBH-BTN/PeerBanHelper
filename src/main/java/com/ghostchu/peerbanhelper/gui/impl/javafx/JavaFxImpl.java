@@ -27,13 +27,14 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
@@ -74,11 +75,6 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         }
     }
 
-    @Override
-    public void showConfigurationSetupDialog() {
-        log.info(Lang.CONFIG_PEERBANHELPER);
-        JOptionPane.showMessageDialog(null, Lang.CONFIG_PEERBANHELPER, "Dialog", JOptionPane.INFORMATION_MESSAGE);
-    }
 
     @Override
     public void setup() {
@@ -97,7 +93,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                     MainJavaFx.getStage().setTitle(String.format(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
                     if (isWebViewSupported()) {
                         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
-                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), Lang.GUI_MENU_WEBUI, Main.getServer().getWebUiUrl(), Collections.emptyMap(), null);
+                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), tlUI("gui-menu-webui"), Main.getServer().getWebUiUrl(), Collections.emptyMap(), null);
                         javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
                         selectionModel.select(webuiTab);
                         log.info(Lang.WEBVIEW_ENABLED);
@@ -223,16 +219,16 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
             }
         });
         initLoggerRedirection();
-        controller.getMenuProgram().setText(Lang.GUI_MENU_PROGRAM);
-        controller.getMenuWebui().setText(Lang.GUI_MENU_WEBUI);
-        controller.getTabLogs().setText(Lang.GUI_TABBED_LOGS);
-        controller.getMenuProgramQuit().setText(Lang.GUI_MENU_QUIT);
+        controller.getMenuProgram().setText(tlUI("gui-menu-program"));
+        controller.getMenuWebui().setText(tlUI("gui-menu-webui"));
+        controller.getTabLogs().setText(tlUI("gui-tabbed-logs"));
+        controller.getMenuProgramQuit().setText(tlUI("gui-menu-quit"));
         controller.getMenuProgramQuit().setOnAction(e -> System.exit(0));
-        controller.getMenuProgramOpenInGithub().setText(Lang.ABOUT_VIEW_GITHUB);
+        controller.getMenuProgramOpenInGithub().setText(tlUI("gui-menu-view-github"));
         controller.getMenuProgramOpenInGithub().setOnAction(e -> openWebpage(URI.create(Lang.GITHUB_PAGE)));
-        controller.getMenuProgramOpenInBrowser().setText(Lang.GUI_MENU_WEBUI_OPEN);
+        controller.getMenuProgramOpenInBrowser().setText(tlUI("gui-menu-open-webui"));
         controller.getMenuProgramOpenInBrowser().setOnAction(e -> openWebpage(URI.create(Main.getServer().getWebUiUrl())));
-        controller.getMenuProgramCopyWebuiToken().setText(Lang.GUI_COPY_WEBUI_TOKEN);
+        controller.getMenuProgramCopyWebuiToken().setText(tlUI("gui-menu-copy-token"));
         controller.getMenuProgramCopyWebuiToken().setOnAction(e -> {
             if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
                 String content = Main.getServer().getWebContainer().getToken();
@@ -260,7 +256,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private void minimizeToTray() {
         if (trayIcon != null) {
             setVisible(false);
-            trayIcon.displayMessage(Lang.GUI_TRAY_MESSAGE_CAPTION, Lang.GUI_TRAY_MESSAGE_DESCRIPTION, TrayIcon.MessageType.INFO);
+            trayIcon.displayMessage(tlUI("gui-tray-message-caption"), tlUI("gui-tray-message-description"), TrayIcon.MessageType.INFO);
         }
     }
 

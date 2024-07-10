@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.management.LockInfo;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
@@ -102,5 +105,30 @@ public class MsgUtil {
 
     public static DecimalFormat getPercentageFormatter() {
         return df;
+    }
+
+
+    /**
+     * Replace args in raw to args
+     *
+     * @param raw  text
+     * @param args args
+     * @return filled text
+     */
+    @NotNull
+    public static String fillArgs(@Nullable String raw, @Nullable String... args) {
+        if (raw == null || raw.isEmpty()) {
+            return "";
+        }
+        if (args != null) {
+            for (int i = 0; i < args.length; i++) {
+                String arg = args[i];
+                if (arg == null) {
+                    arg = "";
+                }
+                raw = raw.replace("{" + i + "}", arg);
+            }
+        }
+        return raw;
     }
 }

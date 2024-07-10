@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
-import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,11 +27,6 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
     }
 
-    @Override
-    public void showConfigurationSetupDialog() {
-        log.info(Lang.CONFIG_PEERBANHELPER);
-        JOptionPane.showMessageDialog(null, Lang.CONFIG_PEERBANHELPER, "Dialog", JOptionPane.INFORMATION_MESSAGE);
-    }
 
     @Override
     public void setup() {

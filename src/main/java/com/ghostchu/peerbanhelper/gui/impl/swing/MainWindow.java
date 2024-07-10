@@ -25,6 +25,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.*;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class MainWindow extends JFrame {
     private final SwingGuiImpl swingGUI;
@@ -108,7 +110,7 @@ public class MainWindow extends JFrame {
     private void minimizeToTray() {
         if (trayIcon != null) {
             setVisible(false);
-            trayIcon.displayMessage(Lang.GUI_TRAY_MESSAGE_CAPTION, Lang.GUI_TRAY_MESSAGE_DESCRIPTION, TrayIcon.MessageType.INFO);
+            trayIcon.displayMessage(tlUI("gui-tray-message-caption"), tlUI("gui-tray-message-description"), TrayIcon.MessageType.INFO);
         }
     }
 
@@ -148,16 +150,16 @@ public class MainWindow extends JFrame {
     }
 
     private Component generateAboutMenu() {
-        JMenu aboutMenu = new JMenu(Lang.GUI_MENU_ABOUT);
-        JMenuItem viewOnGithub = new JMenuItem(Lang.ABOUT_VIEW_GITHUB);
+        JMenu aboutMenu = new JMenu(tlUI("gui-menu-about"));
+        JMenuItem viewOnGithub = new JMenuItem(tlUI("gui-menu-view-github"));
         viewOnGithub.addActionListener(e -> swingGUI.openWebpage(URI.create(Lang.GITHUB_PAGE)));
         aboutMenu.add(viewOnGithub);
         return aboutMenu;
     }
 
     private JMenu generateWebUIMenu() {
-        JMenu webUIMenu = new JMenu(Lang.GUI_MENU_WEBUI);
-        JMenuItem openWebUIMenuItem = new JMenuItem(Lang.GUI_MENU_WEBUI_OPEN);
+        JMenu webUIMenu = new JMenu(tlUI("gui-menu-webui"));
+        JMenuItem openWebUIMenuItem = new JMenuItem(tlUI("gui-menu-open-webui"));
 
         openWebUIMenuItem.addActionListener(e -> {
             if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
@@ -173,8 +175,8 @@ public class MainWindow extends JFrame {
     }
 
     private void setupTabbedPane() {
-        setTabTitle(tabbedPaneLogs, Lang.GUI_TABBED_LOGS);
-        setTabTitle(tabbedPaneLivePeers, Lang.GUI_TABBED_PEERS);
+        setTabTitle(tabbedPaneLogs, tlUI("gui-tabbed-logs"));
+        setTabTitle(tabbedPaneLivePeers, tlUI("gui-tabbed-connected-peers"));
     }
 
     private void setLivePeersTable() {

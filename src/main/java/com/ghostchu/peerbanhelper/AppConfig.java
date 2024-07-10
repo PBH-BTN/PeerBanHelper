@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.simplereloadlib.ReloadManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -26,4 +27,7 @@ public class AppConfig {
         return Main.getUserAgent();
     }
 
+    public ReloadManager reloadManager() {
+        return Main.getReloadManager();
+    }
 }

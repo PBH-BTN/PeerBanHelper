@@ -25,11 +25,6 @@ public class PBHGuiManager implements GuiManager {
     }
 
     @Override
-    public void showConfigurationSetupDialog() {
-        gui.showConfigurationSetupDialog();
-    }
-
-    @Override
     public void createMainWindow() {
         gui.createMainWindow();
     }

@@ -10,9 +10,9 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
-import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.PBHLibrariesLoader;
 import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
+import com.ghostchu.simplereloadlib.ReloadManager;
 import com.google.common.eventbus.EventBus;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -41,6 +42,9 @@ import java.util.logging.Level;
 public class Main {
     @Getter
     private static final EventBus eventBus = new EventBus();
+    @Getter
+    private static final ReloadManager reloadManager = new ReloadManager();
+    public static String DEF_LOCALE = System.getProperty("user.language");
     @Getter
     private static File dataDirectory;
     @Getter
@@ -78,7 +82,6 @@ public class Main {
         startupArgs = args;
         setupConfDirectory(args);
         setupLog4j2();
-        setupProxySettings();
         Path librariesPath = dataDirectory.toPath().toAbsolutePath().resolve("libraries");
         libraryManager = new PBHLibraryManager(
                 new Slf4jLogAppender(),
@@ -86,16 +89,22 @@ public class Main {
         );
         libraryManager.setLogLevel(LogLevel.ERROR);
         librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath);
+        setupProxySettings();
         meta = buildMeta();
-        initGUI(args);
         setupConfiguration();
-        guiManager.createMainWindow();
         mainConfigFile = new File(configDirectory, "config.yml");
         mainConfig = loadConfiguration(mainConfigFile);
         new PBHConfigUpdater(mainConfigFile, mainConfig, Main.class.getResourceAsStream("/config.yml")).update(new MainConfigUpdateScript(mainConfig));
         profileConfigFile = new File(configDirectory, "profile.yml");
         profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
+        DEF_LOCALE = mainConfig.getString("language");
+        if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
+            DEF_LOCALE = Locale.getDefault().toLanguageTag();
+        }
+        DEF_LOCALE = DEF_LOCALE.toLowerCase(Locale.ROOT).replace("-", "_");
+        initGUI(args);
+        guiManager.createMainWindow();
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         try {
             applicationContext = new AnnotationConfigApplicationContext();
@@ -108,7 +117,7 @@ public class Main {
             server = applicationContext.getBean(PeerBanHelperServer.class);
             server.start();
         } catch (Exception e) {
-            log.error(Lang.BOOTSTRAP_FAILED, e);
+            log.error("Failed to startup PeerBanHelper, FATAL ERROR", e);
             throw new RuntimeException(e);
         }
         guiManager.onPBHFullyStarted(server);
@@ -118,7 +127,7 @@ public class Main {
 
     private static void setupProxySettings() {
         if (System.getenv("http_proxy") != null || System.getenv("HTTP_PROXY") != null) {
-            log.warn(Lang.ALERT_INCORRECT_PROXY_SETTING);
+            log.warn("Java application doesn't apply the proxy settings from HTTP_PROXY, DO NOT USE IT, it won't work.");
         }
     }
 
@@ -154,21 +163,21 @@ public class Main {
         try {
             configuration.load(file);
         } catch (IOException | InvalidConfigurationException e) {
-            log.error(Lang.CONFIGURATION_INVALID, file);
-            guiManager.createDialog(Level.SEVERE, Lang.CONFIGURATION_INVALID_TITLE, String.format(Lang.CONFIGURATION_INVALID_DESCRIPTION, file));
+            log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
+            guiManager.createDialog(Level.SEVERE, "Invalid YAML configuration | 无效 YAML 配置文件", String.format("Failed to read configuration: %s", file));
             System.exit(1);
         }
         return configuration;
     }
 
     private static void setupConfiguration() {
-        log.info(Lang.LOADING_CONFIG);
+        log.info("Loading configuration...");
         try {
             initConfiguration();
             //guiManager.showConfigurationSetupDialog();
             //System.exit(0);
         } catch (IOException e) {
-            log.error(Lang.ERR_SETUP_CONFIGURATION, e);
+            log.error("Unable to load configuration, something went wrong!", e);
             System.exit(0);
         }
     }
@@ -177,7 +186,7 @@ public class Main {
         var meta = new BuildMeta();
         try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
             if (stream == null) {
-                log.error(Lang.ERR_BUILD_NO_INFO_FILE);
+                log.error("Error: Unable to load build metadata from JAR/build-info.yml: Bundled resources not exists");
             } else {
                 String str = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
                 YamlConfiguration configuration = new YamlConfiguration();
@@ -185,7 +194,7 @@ public class Main {
                 meta.loadBuildMeta(configuration);
             }
         } catch (IOException | InvalidConfigurationException e) {
-            log.error(Lang.ERR_CANNOT_LOAD_BUILD_INFO, e);
+            log.error("Error: Unable to load build metadata from JAR/build-info.yml", e);
         }
         return meta;
     }
@@ -193,7 +202,7 @@ public class Main {
     private static void setupShutdownHook() {
         Thread shutdownThread = new Thread(() -> {
             try {
-                log.info(Lang.PBH_SHUTTING_DOWN);
+                log.info("Shutting down...");
                 eventBus.post(new PBHShutdownEvent());
                 server.shutdown();
                 guiManager.close();
@@ -272,7 +281,7 @@ public class Main {
             configDirectory.mkdirs();
         }
         if (!configDirectory.isDirectory()) {
-            throw new IllegalStateException(Lang.ERR_CONFIG_DIRECTORY_INCORRECT);
+            throw new IllegalStateException("The path " + configDirectory.getAbsolutePath() + " should be a directory but found a file.");
         }
         if (!pluginDirectory.exists()) {
             pluginDirectory.mkdirs();

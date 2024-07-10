@@ -61,6 +61,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 @Component
 public class PeerBanHelperServer {
@@ -165,7 +167,7 @@ public class PeerBanHelperServer {
             String endpoint = downloaderSection.getString("endpoint");
             Downloader downloader = createDownloader(client, downloaderSection);
             registerDownloader(downloader);
-            log.info(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), client, endpoint);
+            log.info(tlUI("discover-new-client", downloader.getType(), client, endpoint));
         }
     }
 
@@ -256,13 +258,13 @@ public class PeerBanHelperServer {
     public void shutdown() {
         // place some clean code here
         saveBanList();
-        log.info(Lang.SHUTDOWN_CLOSE_METRICS);
+        log.info(tlUI("shutdown-metrics"));
         this.metrics.close();
-        log.info(Lang.SHUTDOWN_UNREGISTER_MODULES);
+        log.info(tlUI("shutdown-unregister-modules"));
         this.moduleManager.unregisterAll();
-        log.info(Lang.SHUTDOWN_CLOSE_DATABASE);
+        log.info(tlUI("shutdown-close-databases"));
         this.databaseManager.close();
-        log.info(Lang.SHUTDOWN_CLEANUP_RESOURCES);
+        log.info(tlUI("shutdown-cleanup-resources"));
         this.moduleMatchCache.close();
         if (this.ipdb != null) {
             this.ipdb.close();
@@ -274,7 +276,7 @@ public class PeerBanHelperServer {
                 log.error("Failed to close download {}", d.getName(), e);
             }
         });
-        log.info(Lang.SHUTDOWN_DONE);
+        log.info(tlUI("shutdown-completed"));
     }
 
     private void loadBanListToMemory() {
@@ -292,7 +294,7 @@ public class PeerBanHelperServer {
             Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
             downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
         } catch (Exception e) {
-            log.error(Lang.LOAD_BANLIST_FAIL, e);
+            log.error(tlUI("load-banlist-failed"), e);
         }
     }
 
@@ -304,7 +306,7 @@ public class PeerBanHelperServer {
             int count = banListDao.saveBanList(BAN_LIST);
             log.info(Lang.SAVED_BANLIST, count);
         } catch (Exception e) {
-            log.error(Lang.SAVE_BANLIST_FAILED, e);
+            log.error(tlUI("save-banlist-failed"), e);
         }
     }
 
@@ -385,14 +387,14 @@ public class PeerBanHelperServer {
             Map<Downloader, List<BanDetail>> downloaderBanDetailMap = new ConcurrentHashMap<>();
             banWaveWatchDog.setLastOperation("Check Bans");
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
-                log.error(Lang.TIMING_CHECK_BANS);
+                log.error(tlUI("timing-check-bans"));
             })) {
                 downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader)))));
             }
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist");
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> {
-                log.error(Lang.TIMING_ADD_BANS);
+                log.error(tlUI("timing-add-ban"));
             })) {
                 downloaderBanDetailMap.forEach((downloader, details) -> {
                     try {
@@ -410,7 +412,7 @@ public class PeerBanHelperServer {
                                     bannedPeers.add(banMetadata);
                                     relaunch.add(detail.torrent());
                                     banPeer(banMetadata, detail.torrent(), detail.peer());
-                                    log.warn(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason());
+                                    log.warn(tlUI("peer-ban-wave", detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason()));
                                 }
                             });
                         });
@@ -424,7 +426,7 @@ public class PeerBanHelperServer {
             banWaveWatchDog.setLastOperation("Apply banlist");
             // 如果需要，则应用更改封禁列表到下载器
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> {
-                log.error(Lang.TIMING_APPLY_BAN_LIST);
+                log.error(tlUI("timing-apply-banlist"));
             })) {
                 downloaders.forEach(downloader -> protect.getService().submit(() -> updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
                         needRelaunched.getOrDefault(downloader, Collections.emptyList()),
@@ -462,7 +464,7 @@ public class PeerBanHelperServer {
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
-        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(Lang.TIMING_CHECK_BANS))) {
+        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI("timing-check-bans")))) {
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
@@ -504,7 +506,7 @@ public class PeerBanHelperServer {
         if (!updateBanList && needToRelaunch.isEmpty()) return;
         try {
             if (!downloader.login()) {
-                log.error(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+                log.error(tlUI("downloader-login-failed", downloader.getName(), downloader.getEndpoint()));
                 downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_LOGIN_FAILED);
                 return;
             } else {
@@ -513,7 +515,7 @@ public class PeerBanHelperServer {
             downloader.setBanList(BAN_LIST.keySet(), added, removed);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
-            log.error(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint(), th);
+            log.error(tlUI("error-update-ban-list", downloader.getName(), downloader.getEndpoint()), th);
             downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_EXCEPTION);
         }
     }
@@ -534,7 +536,7 @@ public class PeerBanHelperServer {
         }
         removeBan.forEach(this::unbanPeer);
         if (!removeBan.isEmpty()) {
-            log.info(Lang.PEER_UNBAN_WAVE, removeBan.size());
+            log.info(tlUI("peer-unban-wave", removeBan.size()));
         }
         return metadata;
     }
@@ -543,7 +545,7 @@ public class PeerBanHelperServer {
      * 注册 Modules
      */
     private void registerModules() {
-        log.info(Lang.WAIT_FOR_MODULES_STARTUP);
+        log.info(tlUI("waiting-module-startup"));
         moduleManager.register(IPBlackList.class);
         moduleManager.register(PeerIdBlacklist.class);
         moduleManager.register(ClientNameBlacklist.class);
@@ -582,14 +584,14 @@ public class PeerBanHelperServer {
     public Map<Torrent, List<Peer>> collectPeers(Downloader downloader) {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         if (!downloader.login()) {
-            log.error(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint());
+            log.error(tlUI("downloader-login-failed", downloader.getName(), downloader.getEndpoint()));
             downloader.setLastStatus(DownloaderLastStatus.ERROR, Lang.STATUS_TEXT_LOGIN_FAILED);
             return Collections.emptyMap();
         }
         List<Torrent> torrents = downloader.getTorrents();
         Semaphore parallelReqRestrict = new Semaphore(16);
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.COLLECT_PEERS.getTimeout(), (t) -> {
-            log.error(Lang.TIMING_COLLECT_PEERS);
+            log.error(tlUI("timing-collect-peers"));
         })) {
             torrents.forEach(torrent -> protect.getService().submit(() -> {
                 try {

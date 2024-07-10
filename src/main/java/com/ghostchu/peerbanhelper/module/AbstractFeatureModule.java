@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 @Component
 public abstract class AbstractFeatureModule implements FeatureModule {
@@ -66,7 +68,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         if (register) {
             onDisable();
             cleanupResources();
-            log.info(Lang.MODULE_UNREGISTER, getName());
+            log.info(tlUI("module-unregistered", getName()));
         }
     }
 
@@ -78,7 +80,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     public void enable() {
         register = true;
         onEnable();
-        log.info(Lang.MODULE_REGISTER, getName());
+        log.info(tlUI("module-registered", getName()));
     }
 
     @Override

@@ -43,6 +43,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 /**
  * IP黑名单远程订阅模块
  */
@@ -109,7 +111,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                     }
                     return match;
                 } catch (Exception e) {
-                    log.error(Lang.IP_BAN_RULE_MATCH_ERROR, e);
+                    log.error(tlUI("ip-ban-rule-match-error"), e);
                     return false;
                 }
             });
@@ -141,7 +143,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                 assert rule != null;
                 updateRule(rule, IPBanRuleUpdateType.AUTO);
             }
-            log.info(Lang.IP_BAN_RULE_UPDATE_FINISH);
+            log.info(tlUI("ip-ban-rule-update-finish"));
         }
     }
 
