@@ -28,7 +28,6 @@ public class DatabaseHelper {
 
     private void createTables() throws SQLException {
         TableUtils.createTableIfNotExists(database.getDataSource(), MetadataEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), PeerIdentityEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), TorrentEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), ModuleEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), RuleEntity.class);

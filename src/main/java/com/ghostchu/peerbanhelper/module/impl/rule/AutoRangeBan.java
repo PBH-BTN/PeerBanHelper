@@ -89,9 +89,9 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
             if (bannedPeerAddress == null) {
                 IPAddress bannedAddress = bannedPeer.getAddress();
                 if (bannedPeer.getAddress().isIPv4()) {
-                    bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress, ipv4Prefix);
+                    bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress.withoutPrefixLength(), ipv4Prefix);
                 } else {
-                    bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress, ipv6Prefix);
+                    bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress.withoutPrefixLength(), ipv6Prefix);
                 }
                 bannedPeerAddress = bannedAddress;
                 banListMappingCache.put(bannedPeer, bannedPeerAddress);

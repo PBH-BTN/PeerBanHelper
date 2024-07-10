@@ -274,7 +274,8 @@ public enum Lang {
     MDB_MULTI_HUNTING,
     BTN_PORT_RULE,
     BTN_IP_RULE,
-    BTN_BTN_RULE;
+    BTN_BTN_RULE,
+    DUPLICATE_BAN;
 
     public String getKey() {
         return name();

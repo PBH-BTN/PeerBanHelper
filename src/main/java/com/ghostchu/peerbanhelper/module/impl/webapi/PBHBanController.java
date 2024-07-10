@@ -187,8 +187,8 @@ public class PBHBanController extends AbstractFeatureModule {
             this.unbanAt = history.getUnbanAt().getTime();
             this.peerIp = history.getIp();
             this.peerPort = history.getPort();
-            this.peerId = history.getPeerIdentity().getPeerId();
-            this.peerClientName = history.getPeerIdentity().getClientName();
+            this.peerId = history.getPeerId();
+            this.peerClientName = history.getPeerClientName();
             this.peerUploaded = history.getPeerUploaded();
             this.peerDownloaded = history.getPeerDownloaded();
             this.peerProgress = history.getPeerProgress();

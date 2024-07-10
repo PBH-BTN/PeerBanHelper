@@ -108,6 +108,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             AtomicReference<IPBanResult> matchRule = new AtomicReference<>();
             boolean mr = results.stream().anyMatch(ipBanResult -> {
                 try {
+                    if (ipBanResult == null) return false;
                     boolean match = ipBanResult.matchResult() == MatchResult.TRUE;
                     if (match) {
                         matchRule.set(ipBanResult);

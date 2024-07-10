@@ -62,6 +62,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
+import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
@@ -413,7 +415,7 @@ public class PeerBanHelperServer {
                                     bannedPeers.add(banMetadata);
                                     relaunch.add(detail.torrent());
                                     banPeer(banMetadata, detail.torrent(), detail.peer());
-                                    log.warn(tlUI(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), detail.result().reason()));
+                                    log.warn(tlUI(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), tl(DEF_LOCALE, detail.result().reason())));
                                 }
                             });
                         });
@@ -718,6 +720,9 @@ public class PeerBanHelperServer {
      * @param banMetadata 封禁元数据
      */
     private void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
+        if (BAN_LIST.containsKey(peer.getPeerAddress())) {
+            log.error(tlUI(Lang.DUPLICATE_BAN, peer.getPeerAddress()));
+        }
         BAN_LIST.put(peer.getPeerAddress(), banMetadata);
         metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
         banListInvoker.forEach(i -> i.add(peer.getPeerAddress(), banMetadata));
