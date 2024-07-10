@@ -61,7 +61,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
 
     @Override
     public boolean isThreadSafe() {
-        return true;
+        return super.isThreadSafe();
     }
 
     private void handleWebAPI(Context ctx) {

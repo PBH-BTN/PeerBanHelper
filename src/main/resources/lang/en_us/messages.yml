@@ -285,3 +285,5 @@ BTN_BTN_RULE: "BTN-{}-{}"
 BTN_PORT_RULE: "BTN Port Rule"
 BTN_IP_RULE: "BTN IP Rule"
 GENERAL_NA: "N/A"
+
+DUPLICATE_BAN: "Warning: The Peer being blocked is in the block list! This may be due to a program error, or you have manually cleaned the downloader's block list. If this problem persists, try restarting PBH and contact the developers!"
