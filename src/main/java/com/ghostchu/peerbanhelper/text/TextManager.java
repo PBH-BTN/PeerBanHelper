@@ -148,7 +148,7 @@ public class TextManager implements Reloadable {
     @NotNull
     private YamlConfiguration loadBuiltInFallback() {
         YamlConfiguration configuration = new YamlConfiguration();
-        try (InputStream inputStream = Main.class.getResourceAsStream("lang/messages.yml")) {
+        try (InputStream inputStream = Main.class.getResourceAsStream("/lang/messages_fallback.yml")) {
             if (inputStream == null) {
                 log.warn("Failed to load built-in fallback translation, fallback file not exists in jar.");
                 return configuration;
@@ -227,7 +227,7 @@ public class TextManager implements Reloadable {
                 // custom language
                 newPool.add(file.getName());
                 // create the paired file
-                File localeFile = new File(file, "messages.yml");
+                File localeFile = new File(file, "messages_fallback.yml");
                 if (!localeFile.exists()) {
                     localeFile.getParentFile().mkdirs();
                     localeFile.createNewFile();
@@ -250,7 +250,7 @@ public class TextManager implements Reloadable {
             file.delete();
         }
         file = new File(overrideDirectory, locale);
-        file = new File(file, "messages.yml");
+        file = new File(file, "messages_fallback.yml");
         return file;
     }
 

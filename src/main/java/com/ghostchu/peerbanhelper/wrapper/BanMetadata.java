@@ -9,9 +9,12 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
 @EqualsAndHashCode(callSuper = true)
-@Data
 @NoArgsConstructor
+@Data
 public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata>, Serializable {
     private String context;
     private long banAt;
@@ -37,5 +40,16 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
         this.unbanAt = unbanAt;
         this.rule = rule;
         this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return "BanMetadata{" +
+                "context='" + context + '\'' +
+                ", banAt=" + banAt +
+                ", unbanAt=" + unbanAt +
+                ", rule=" + tl(DEF_LOCALE, rule) +
+                ", description=" + tl(DEF_LOCALE, description) +
+                '}';
     }
 }

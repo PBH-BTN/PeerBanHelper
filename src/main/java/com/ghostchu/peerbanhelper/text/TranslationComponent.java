@@ -2,6 +2,8 @@ package com.ghostchu.peerbanhelper.text;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 public class TranslationComponent {
     private final String key;
@@ -23,5 +25,13 @@ public class TranslationComponent {
 
     public TranslationComponent(Lang key, String... params) {
         this(key.getKey(), params);
+    }
+
+    @Override
+    public String toString() {
+        return "TranslationComponent{" +
+                "key='" + key + '\'' +
+                ", params=" + Arrays.toString(params) +
+                '}';
     }
 }

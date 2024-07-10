@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-// No to-do anymore! This used for not only messages.yml! Keep the extent ability!
+// No to-do anymore! This used for not only messages_fallback.yml! Keep the extent ability!
 public class LanguageFilesManager {
     //distributionPath->[localeCode->OTA files]
     private final Map<String, YamlConfiguration> locale2ContentMapping = new ConcurrentHashMap<>();
