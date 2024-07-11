@@ -1,4 +1,4 @@
-config-version: 10
+config-version: 11
 # 设置程序语言
 language: default
 # Http 服务器设置
@@ -11,6 +11,8 @@ server:
   prefix: "http://127.0.0.1:9898"
   # 要访问 WebUI 端点，则必须输入此 Token 以进行身份验证
   token: ""
+  # 允许 CORS 跨站，仅在使用外部 PBH WebUI 时才应该启用
+  allow-cors: false
 # 日志记录器配置
 logger:
   # 是否隐藏 [完成] 已检查 XX 的 X 个活跃 Torrent 和 X 个对等体 的日志消息？

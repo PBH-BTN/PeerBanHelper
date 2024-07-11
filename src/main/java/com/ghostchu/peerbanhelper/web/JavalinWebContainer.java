@@ -56,7 +56,9 @@ public class JavalinWebContainer {
                     c.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
-                    c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
+                    if (Main.getMainConfig().getBoolean("server.allow-cors")) {
+                        c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
+                    }
                     c.staticFiles.add(staticFiles -> {
                         staticFiles.hostedPath = "/";
                         staticFiles.directory = "/static";

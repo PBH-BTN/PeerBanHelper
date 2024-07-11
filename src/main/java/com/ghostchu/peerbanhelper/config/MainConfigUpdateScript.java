@@ -28,6 +28,10 @@ public class MainConfigUpdateScript {
         }
     }
 
+    @UpdateScript(version = 10)
+    public void corsSetting() {
+        conf.set("server.allow-cors", false);
+    }
 
     @UpdateScript(version = 10)
     public void languageSetting() {
