@@ -76,6 +76,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
                         log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                     } else {
                         log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
+                        lastReport = System.currentTimeMillis();
                     }
                 })
                 .exceptionally(e -> {
@@ -98,7 +99,6 @@ public class BtnAbilitySubmitBans implements BtnAbility {
             btnBan.setBanUniqueId(e.getValue().getRandomId().toString());
             list.add(btnBan);
         }
-        lastReport = System.currentTimeMillis();
         return list;
     }
 
