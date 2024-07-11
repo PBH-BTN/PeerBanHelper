@@ -297,3 +297,5 @@ NET_TYPE_IP_PRIVATE_NETWORK: "IP Private Network"
 NET_TYPE_INTERNET_CAFE: "Internet Cafe"
 NET_TYPE_IOT: "IoT"
 NET_TYPE_DATACENTER: "Data Center"
+
+WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED: "Can't connect to download with given config, please check the console"

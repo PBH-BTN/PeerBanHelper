@@ -135,7 +135,11 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         try {
             boolean testResult = downloader.login();
             ctx.status(HttpStatus.OK);
-            ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), "valid", testResult));
+            if (testResult) {
+                ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), "valid", testResult));
+            } else {
+                ctx.json(Map.of("message", tl(locale(ctx), Lang.WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED), "valid", testResult));
+            }
             downloader.close();
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);

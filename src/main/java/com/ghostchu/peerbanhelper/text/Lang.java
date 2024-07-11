@@ -284,7 +284,11 @@ public enum Lang {
     NET_TYPE_IP_PRIVATE_NETWORK,
     NET_TYPE_INTERNET_CAFE,
     NET_TYPE_IOT,
-    NET_TYPE_DATACENTER;
+    NET_TYPE_DATACENTER,
+    WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED,
+
+
+    ;
 
     public String getKey() {
         return name();
