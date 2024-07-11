@@ -105,12 +105,12 @@ module:
     # 默认值为：8%
     # 即：假设我们上传了 50% 的数据量给对方，对方汇报自己的下载进度只有 41%，差值大于 8%，进行封禁
     # 对于自动识别迅雷、QQ旋风的变种非常有效，能够在不更新规则的情况下自动封禁报假进度的吸血客户端
-    maximum-difference: 0.08
+    maximum-difference: 0.1
     # 进度倒退检测
     # 默认：最多允许倒退 5% 的进度
     # (考虑到有时文件片段在传输时可能因损坏而未通过校验被丢弃，我们允许客户端出现合理的进度倒退)
     # 设置为 -1 以禁用此检测
-    rewind-maximum-difference: 0.05
+    rewind-maximum-difference: 0.07
     # 过量下载：禁止那些在同一个种子的累计下载量超过种子本身大小的客户端
     # 此模块对 Transmission 不起效
     block-excessive-clients: true
