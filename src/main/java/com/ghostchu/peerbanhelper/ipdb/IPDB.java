@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.ipdb;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -146,11 +147,23 @@ public class IPDB implements AutoCloseable {
                 networkData.setIsp(cnLookupResult.getIsp());
             }
             if (cnLookupResult.getNet() != null && !cnLookupResult.getNet().isBlank()) {
-                networkData.setNetType(cnLookupResult.getNet());
+                TranslationComponent component = new TranslationComponent(cnLookupResult.getNet());
+                switch (cnLookupResult.getNet()) {
+                    case "宽带" -> new TranslationComponent(Lang.NET_TYPE_WIDEBAND);
+                    case "基站" -> new TranslationComponent(Lang.NET_TYPE_BASE_STATION);
+                    case "政企专线" -> new TranslationComponent(Lang.NET_TYPE_GOVERNMENT_AND_ENTERPRISE_LINE);
+                    case "业务平台" -> new TranslationComponent(Lang.NET_TYPE_BUSINESS_PLATFORM);
+                    case "骨干网" -> new TranslationComponent(Lang.NET_TYPE_BACKBONE_NETWORK);
+                    case "IP专网" -> new TranslationComponent(Lang.NET_TYPE_IP_PRIVATE_NETWORK);
+                    case "网吧" -> new TranslationComponent(Lang.NET_TYPE_INTERNET_CAFE);
+                    case "物联网" -> new TranslationComponent(Lang.NET_TYPE_IOT);
+                    case "数据中心" -> new TranslationComponent(Lang.NET_TYPE_DATACENTER);
+                }
+                networkData.setNetType(component);
             }
             geoData.setNetwork(networkData);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Unable to execute IPDB query", e);
         }
     }
 

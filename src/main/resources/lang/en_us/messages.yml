@@ -287,3 +287,13 @@ BTN_IP_RULE: "BTN IP Rule"
 GENERAL_NA: "N/A"
 
 DUPLICATE_BAN: "Warning: The Peer being blocked is in the block list! This may be due to a program error, or you have manually cleaned the downloader's block list. If this problem persists, try restarting PBH and contact the developers: {}"
+
+NET_TYPE_WIDEBAND: "Wide Band"
+NET_TYPE_BASE_STATION: "Mobile Base Station"
+NET_TYPE_GOVERNMENT_AND_ENTERPRISE_LINE: "Government/Enterprise Line"
+NET_TYPE_BUSINESS_PLATFORM: "Business Platform"
+NET_TYPE_BACKBONE_NETWORK: "Backbone Network"
+NET_TYPE_IP_PRIVATE_NETWORK: "IP Private Network"
+NET_TYPE_INTERNET_CAFE: "Internet Cafe"
+NET_TYPE_IOT: "IoT"
+NET_TYPE_DATACENTER: "Data Center"

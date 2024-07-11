@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.ipdb;
 
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -88,6 +89,6 @@ public final class IPGeoData {
         @Nullable
         private String isp;
         @Nullable
-        private String netType;
+        private TranslationComponent netType;
     }
 }
