@@ -51,6 +51,9 @@ public class TextManager implements Reloadable {
         return tl(DEF_LOCALE, new TranslationComponent(key.getKey(), INSTANCE_HOLDER.convert(params)));
     }
 
+    public static String tlUI(TranslationComponent translationComponent) {
+        return tl(DEF_LOCALE, translationComponent);
+    }
 //    public static String tlUI(String key, Object... params) {
 //        return tl(DEF_LOCALE, new TranslationComponent(key, INSTANCE_HOLDER.convert(params)));
 //    }

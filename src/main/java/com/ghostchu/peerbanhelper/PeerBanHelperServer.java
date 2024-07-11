@@ -508,12 +508,13 @@ public class PeerBanHelperServer {
     public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
         if (!updateBanList && needToRelaunch.isEmpty()) return;
         try {
-            if (!downloader.login()) {
-                log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint()));
-                downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent(Lang.STATUS_TEXT_LOGIN_FAILED));
+            var loginResult = downloader.login();
+            if (!loginResult.success()) {
+                log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
+                downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
                 return;
             } else {
-                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent(Lang.STATUS_TEXT_OK));
+                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.getMessage());
             }
             downloader.setBanList(BAN_LIST.keySet(), added, removed);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
@@ -586,9 +587,10 @@ public class PeerBanHelperServer {
 
     public Map<Torrent, List<Peer>> collectPeers(Downloader downloader) {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
-        if (!downloader.login()) {
-            log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint()));
-            downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent(Lang.STATUS_TEXT_LOGIN_FAILED));
+        var loginResult = downloader.login();
+        if (!loginResult.success()) {
+            log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
+            downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
             return Collections.emptyMap();
         }
         List<Torrent> torrents = downloader.getTorrents();

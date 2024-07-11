@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
@@ -133,12 +134,12 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             return;
         }
         try {
-            boolean testResult = downloader.login();
+            var testResult = downloader.login();
             ctx.status(HttpStatus.OK);
-            if (testResult) {
-                ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), "valid", testResult));
+            if (testResult.success()) {
+                ctx.json(Map.of("message", tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), "valid", testResult.success()));
             } else {
-                ctx.json(Map.of("message", tl(locale(ctx), Lang.WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED), "valid", testResult));
+                ctx.json(Map.of("message", tl(locale(ctx), testResult.getMessage()), "valid", testResult.success()));
             }
             downloader.close();
         } catch (Exception e) {
@@ -237,7 +238,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
         JsonObject config = downloader.saveDownloaderJson();
         ctx.status(HttpStatus.OK);
-        ctx.json(new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage()), activeTorrents, activePeers, config));
+        ctx.json(new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config));
     }
 
     private void handleDownloaderList(@NotNull Context ctx) {

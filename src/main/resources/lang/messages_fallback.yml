@@ -9,7 +9,7 @@ ERR_INITIALIZE_BAN_PROVIDER_ENDPOINT_FAILURE: "错误：无法初始化 API 提�
 WAIT_FOR_MODULES_STARTUP: "请等待功能模块初始化……"
 MODULE_REGISTER: "[注册] {}"
 MODULE_UNREGISTER: "[解注册] {}"
-ERR_CLIENT_LOGIN_FAILURE_SKIP: "登录到 {} ({}) 失败，跳过……"
+ERR_CLIENT_LOGIN_FAILURE_SKIP: "登录到 {} ({}) 失败：{}"
 ERR_UNEXPECTED_API_ERROR: "在处理 {} ({}) 的 API 操作时出现了一个非预期的错误"
 PEER_UNBAN_WAVE: "[解封] 解除了 {} 个过期的对等体封禁"
 ERR_UPDATE_BAN_LIST: "在更新 {} ({}) 的封禁列表时出现了一个非预期的错误"
@@ -298,4 +298,8 @@ NET_TYPE_INTERNET_CAFE: "网吧"
 NET_TYPE_IOT: "物联网"
 NET_TYPE_DATACENTER: "数据中心"
 
-WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED: "无法使用给定配置连接到下载器，请检查日志"
+WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED: "配置有效，但无法连接到下载器，请检查日志"
+
+STATUS_TEXT_UNKNOWN: "PeerBanHelper 暂时还未获取到此下载器的信息"
+DOWNLOADER_LOGIN_EXCEPTION: "无法连接到下载器，登录时出现错误：{}"
+DOWNLOADER_LOGIN_INCORRECT_CRED: "鉴权失败，错误的登录凭据。请检查用户名、密码或 Token 是否正确。"

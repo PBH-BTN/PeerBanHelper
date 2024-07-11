@@ -299,3 +299,7 @@ NET_TYPE_IOT: "IoT"
 NET_TYPE_DATACENTER: "Data Center"
 
 WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED: "Can't connect to download with given config, please check the console"
+
+STATUS_TEXT_UNKNOWN: "PeerBanHelper not connected to this downloader yet"
+DOWNLOADER_LOGIN_EXCEPTION: "Unable connect to downloader：{}"
+DOWNLOADER_LOGIN_INCORRECT_CRED: "Unable to authenticate to downloader, check the username, password or token."

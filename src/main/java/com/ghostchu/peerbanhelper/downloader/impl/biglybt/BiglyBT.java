@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
@@ -99,8 +100,22 @@ public class BiglyBT implements Downloader {
         return config.saveToYaml();
     }
 
-    public boolean login() {
-        return isLoggedIn();
+    public DownloaderLoginResult login() {
+        HttpResponse<Void> resp;
+        try {
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
+            if (resp.statusCode() == 200) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+            }
+            if (resp.statusCode() == 403) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
+            }
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, "statusCode=" + resp.statusCode()));
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_LOGIN_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()), e);
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.NETWORK_ERROR, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
+        }
+
     }
 
     @Override
@@ -136,16 +151,6 @@ public class BiglyBT implements Downloader {
     @Override
     public String getType() {
         return "BiglyBT";
-    }
-
-    public boolean isLoggedIn() {
-        HttpResponse<Void> resp;
-        try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
-        } catch (Exception e) {
-            return false;
-        }
-        return resp.statusCode() == 200;
     }
 
     @Override

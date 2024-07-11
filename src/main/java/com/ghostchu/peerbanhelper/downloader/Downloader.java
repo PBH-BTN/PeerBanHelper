@@ -50,7 +50,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 登陆是否成功
      */
-    boolean login();
+    DownloaderLoginResult login();
 
     /**
      * 获取此下载器的所有目前正在活动的 Torrent 列表

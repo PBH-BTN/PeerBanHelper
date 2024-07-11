@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -96,8 +97,9 @@ public class QBittorrent implements Downloader {
         return config.saveToYaml();
     }
 
-    public boolean login() {
-        if (isLoggedIn()) return true; // 重用 Session 会话
+    public DownloaderLoginResult login() {
+        if (isLoggedIn())
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
         try {
             HttpResponse<String> request = httpClient
                     .send(MutableRequest.POST(apiEndpoint + "/auth/login",
@@ -106,13 +108,17 @@ public class QBittorrent implements Downloader {
                                                     .query("password", config.getPassword()).build())
                                     .header("Content-Type", "application/x-www-form-urlencoded")
                             , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, request.statusCode(), "HTTP ERROR", request.body()));
+            if (request.statusCode() == 200) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             }
-            return request.statusCode() == 200;
+            if (request.statusCode() == 403) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
+            }
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
+            // return request.statusCode() == 200;
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_QB_LOGIN_FAILED, name, "N/A", e.getClass().getName(), e.getMessage()));
-            return false;
+            log.error(tlUI(Lang.DOWNLOADER_LOGIN_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()), e);
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 

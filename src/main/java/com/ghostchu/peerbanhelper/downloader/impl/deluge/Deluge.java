@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -112,20 +113,19 @@ public class Deluge implements Downloader {
     }
 
     @Override
-    public boolean login() {
+    public DownloaderLoginResult login() {
         try {
             if (!this.client.login().isLoggedIn()) {
-                return false;
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
             }
             DelugeListMethodsResponse listMethodsResponse = this.client.listMethods();
             if (!new HashSet<>(listMethodsResponse.getDelugeSupportedMethods()).containsAll(MUST_HAVE_METHODS)) {
-                log.error(tlUI(Lang.DOWNLOADER_DELUGE_PLUGIN_NOT_INSTALLED, getName()));
-                return false;
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.MISSING_COMPONENTS, new TranslationComponent(Lang.DOWNLOADER_DELUGE_PLUGIN_NOT_INSTALLED));
             }
         } catch (DelugeException e) {
-            throw new RuntimeException(e);
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
         }
-        return true;
+        return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
     }
 
     @Override
