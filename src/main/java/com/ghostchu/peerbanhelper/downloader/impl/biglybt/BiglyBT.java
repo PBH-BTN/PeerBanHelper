@@ -301,8 +301,8 @@ public class BiglyBT implements Downloader {
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
             }
-            config.setToken(section.getString("token"));
-            config.setIncrementBan(section.getBoolean("increment-ban"));
+            config.setToken(section.getString("token", ""));
+            config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             return config;

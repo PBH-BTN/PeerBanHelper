@@ -367,15 +367,15 @@ public class Deluge implements Downloader {
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
             config.setType("deluge");
-            config.setEndpoint(section.getString("endpoint"));
+            config.setEndpoint(section.getString("endpoint", ""));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
             }
-            config.setPassword(section.getString("password"));
+            config.setPassword(section.getString("password", ""));
             config.setRpcUrl(section.getString("rpc-url", "/json"));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
-            config.setIncrementBan(section.getBoolean("increment-ban"));
+            config.setIncrementBan(section.getBoolean("increment-ban", true));
             return config;
         }
 

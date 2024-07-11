@@ -11,7 +11,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.collection.CircularArrayList;
 import com.google.common.eventbus.Subscribe;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
 import javafx.geometry.Insets;
@@ -142,11 +141,11 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         this.logsView = controller.getLogsListView();
         this.logsView.setStyle("-fx-font-family: Consolas, Monospace");
         this.logsView.setItems(FXCollections.observableList(new CircularArrayList<>(SwingLoggerAppender.maxLinesSetting + 1)));
-        this.logsView.getItems().addListener((InvalidationListener) observable -> {
-            if (!logsView.getItems().isEmpty()) {
-                logsView.scrollTo(logsView.getItems().size() - 1);
-            }
-        });
+//        this.logsView.getItems().addListener((InvalidationListener) observable -> {
+//            if (!logsView.getItems().isEmpty()) {
+//                 logsView.scrollTo(logsView.getItems().size() - 1);
+//            }
+//        });
         Holder<Object> lastCell = new Holder<>();
         this.logsView.setCellFactory(x -> new ListCell<>() {
             {
@@ -264,7 +263,12 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private void initLoggerRedirection() {
         SwingLoggerAppender.registerListener(loggerEvent -> {
             try {
-                Platform.runLater(() -> logsView.getItems().add(new ListLogEntry(loggerEvent.message(), loggerEvent.level())));
+                Platform.runLater(() -> {
+                    logsView.getItems().add(new ListLogEntry(loggerEvent.message(), loggerEvent.level()));
+                    if (!logsView.getItems().isEmpty()) {
+                        logsView.scrollTo(logsView.getItems().size() - 1);
+                    }
+                });
             } catch (IllegalStateException exception) {
                 exception.printStackTrace();
             }

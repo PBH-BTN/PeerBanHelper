@@ -368,14 +368,14 @@ public class QBittorrent implements Downloader {
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
             }
-            config.setUsername(section.getString("username"));
-            config.setPassword(section.getString("password"));
+            config.setUsername(section.getString("username", ""));
+            config.setPassword(section.getString("password", ""));
             Config.BasicauthDTO basicauthDTO = new BasicauthDTO();
             basicauthDTO.setUser(section.getString("basic-auth.user"));
             basicauthDTO.setPass(section.getString("basic-auth.pass"));
             config.setBasicAuth(basicauthDTO);
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
-            config.setIncrementBan(section.getBoolean("increment-ban"));
+            config.setIncrementBan(section.getBoolean("increment-ban", false));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             return config;
         }
