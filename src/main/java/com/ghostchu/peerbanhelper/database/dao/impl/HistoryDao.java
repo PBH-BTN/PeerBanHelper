@@ -16,11 +16,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 @Component
 public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
+    private final Pattern sqlSafePattern;
+
     public HistoryDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), HistoryEntity.class);
+        this.sqlSafePattern = Pattern.compile("^[A-Za-z0-9]+$");
     }
 
     @Override
@@ -48,6 +52,10 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
     }
 
     public List<UniversalFieldNumResult> sumField(String field, double percentFilter) throws Exception {
+        // SQL 无 PreparedStatement 防注入；这绝对不是最佳实践，但在这个场景下足够用了
+        if (!sqlSafePattern.matcher(field).matches()) {
+            throw new IllegalArgumentException("Invalid field: " + field + ", only A-Z a-z 0-9 is allowed.");
+        }
         List<UniversalFieldNumResult> results = new ArrayList<>();
         var sql = """
                 SELECT %field%,
@@ -70,7 +78,12 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
     }
 
     public List<UniversalFieldNumResult> countField(String field, double percentFilter) throws Exception {
+        // SQL 无 PreparedStatement 防注入；这绝对不是最佳实践，但在这个场景下足够用了
+        if (!sqlSafePattern.matcher(field).matches()) {
+            throw new IllegalArgumentException("Invalid field: " + field + ", only A-Z a-z 0-9 is allowed.");
+        }
         List<UniversalFieldNumResult> results = new ArrayList<>();
+        queryBuilder().selectRaw(field, "COUNT(%field%) AS ct", "COUNT(%field%) * 1.0 / (SELECT COUNT(%field%) FROM %table%) AS percent");
         var sql = """
                 SELECT %field%,
                        COUNT(%field%) AS ct,
@@ -80,6 +93,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 HAVING percent > %percent%
                 ORDER BY ct DESC;
                 """;
+
         sql = sql.replace("%field%", field)
                 .replace("%table%", getTableName())
                 .replace("%percent%", String.valueOf(percentFilter));
