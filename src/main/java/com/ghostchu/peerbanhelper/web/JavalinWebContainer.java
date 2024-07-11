@@ -78,6 +78,10 @@ public class JavalinWebContainer {
                     ctx.status(HttpStatus.FORBIDDEN);
                     ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED)));
                 })
+                .exception(IllegalArgumentException.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.BAD_REQUEST);
+                    ctx.json(Map.of("message", e.getMessage()));
+                })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
                     ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR)));

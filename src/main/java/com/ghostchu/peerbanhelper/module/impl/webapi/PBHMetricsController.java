@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -18,9 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.function.Function;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -29,20 +31,129 @@ public class PBHMetricsController extends AbstractFeatureModule {
     @Autowired
     @Qualifier("persistMetrics")
     private BasicMetrics metrics;
+    @Autowired
+    private HistoryDao historyDao;
+    @Autowired
+    private JavalinWebContainer webContainer;
+
     @Override
     public boolean isConfigurable() {
         return false;
     }
 
-    @Autowired
-    private JavalinWebContainer webContainer;
-
     @Override
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/statistic/counter", this::handleBasicCounter, Role.USER_READ)
-                .get("/api/statistic/rules", this::handleRules, Role.USER_READ);
+                .get("/api/statistic/rules", this::handleRules, Role.USER_READ)
+                .get("/api/statistic/historyNumberAccess", this::handleHistoryNumberAccess, Role.USER_READ)
+                .get("/api/statistic/historyDateAccess", this::handleHistoryDateAccess, Role.USER_READ);
     }
+
+    private void handleHistoryDateAccess(Context ctx) throws Exception {
+        String startAtArg = ctx.queryParam("startAt");
+        String endAtArg = ctx.queryParam("endAt");
+        String filter = Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0");
+        String type = ctx.queryParam("type");
+        String field = ctx.queryParam("field");
+        if (startAtArg == null) {
+            throw new IllegalArgumentException("startAt cannot be null");
+        }
+        if (endAtArg == null) {
+            throw new IllegalArgumentException("startAt cannot be null");
+        }
+        if (field == null) {
+            throw new IllegalArgumentException("startAt cannot be null");
+        }
+        Function<Calendar, Calendar> trimmer = switch (type) {
+            case "year" -> (time) -> {
+                Calendar calendar = getZeroCalender();
+                calendar.set(Calendar.YEAR, time.get(Calendar.YEAR));
+                return calendar;
+            };
+            case "month" -> (time) -> {
+                Calendar calendar = getZeroCalender();
+                calendar.set(Calendar.YEAR, time.get(Calendar.YEAR));
+                calendar.set(Calendar.MONTH, time.get(Calendar.MONTH));
+                return calendar;
+            };
+            case "day" -> (time) -> {
+                Calendar calendar = getZeroCalender();
+                calendar.set(Calendar.YEAR, time.get(Calendar.YEAR));
+                calendar.set(Calendar.MONTH, time.get(Calendar.MONTH));
+                calendar.set(Calendar.DAY_OF_MONTH, time.get(Calendar.DAY_OF_MONTH));
+                return calendar;
+            };
+            case "hour" -> (time) -> {
+                Calendar calendar = getZeroCalender();
+                calendar.set(Calendar.YEAR, time.get(Calendar.YEAR));
+                calendar.set(Calendar.MONTH, time.get(Calendar.MONTH));
+                calendar.set(Calendar.DAY_OF_MONTH, time.get(Calendar.DAY_OF_MONTH));
+                calendar.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+                return calendar;
+            };
+            case "minute" -> (time) -> {
+                Calendar calendar = getZeroCalender();
+                calendar.set(Calendar.YEAR, time.get(Calendar.YEAR));
+                calendar.set(Calendar.MONTH, time.get(Calendar.MONTH));
+                calendar.set(Calendar.DAY_OF_MONTH, time.get(Calendar.DAY_OF_MONTH));
+                calendar.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+                calendar.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
+                return calendar;
+            };
+            case "second" -> (time) -> {
+                Calendar calendar = getZeroCalender();
+                calendar.set(Calendar.YEAR, time.get(Calendar.YEAR));
+                calendar.set(Calendar.MONTH, time.get(Calendar.MONTH));
+                calendar.set(Calendar.DAY_OF_MONTH, time.get(Calendar.DAY_OF_MONTH));
+                calendar.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+                calendar.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
+                calendar.set(Calendar.SECOND, time.get(Calendar.SECOND));
+                return calendar;
+            };
+            case null, default -> throw new IllegalArgumentException("Unexpected value: " + type);
+        };
+
+        Function<HistoryEntity, Timestamp> timestampGetter = switch (field) {
+            case "banAt" -> HistoryEntity::getBanAt;
+            case "unbanAt" -> HistoryEntity::getUnbanAt;
+            case null, default -> throw new IllegalArgumentException("Unexpected value: " + field);
+        };
+        long startAt = Long.parseLong(startAtArg);
+        long endAt = Long.parseLong(endAtArg);
+        double pctFilter = Double.parseDouble(filter);
+
+        var results = historyDao.countDateField(startAt, endAt, timestampGetter, trimmer, pctFilter);
+        ctx.status(HttpStatus.OK);
+        ctx.json(results);
+    }
+
+    private Calendar getZeroCalender() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, 0);
+        calendar.set(Calendar.MONTH, 0);
+        calendar.set(Calendar.DAY_OF_MONTH, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar;
+    }
+
+    private void handleHistoryNumberAccess(Context ctx) throws Exception {
+        // 过滤 X% 以下的数据
+        String type = ctx.queryParam("type");
+        String field = ctx.queryParam("field");
+        double filter = Double.parseDouble(Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0"));
+        List<HistoryDao.UniversalFieldNumResult> results = switch (type) {
+            case "count" -> historyDao.countField(field, filter);
+            case "sum" -> historyDao.sumField(field, filter);
+            case null, default -> throw new IllegalArgumentException("type invalid");
+        };
+        ctx.status(HttpStatus.OK);
+        ctx.json(results);
+    }
+
 
     private void handleRules(Context ctx) {
         String locale = locale(ctx);
