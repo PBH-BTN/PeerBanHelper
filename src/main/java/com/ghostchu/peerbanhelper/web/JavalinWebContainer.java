@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -57,15 +58,27 @@ public class JavalinWebContainer {
                     if (Main.getMainConfig().getBoolean("server.allow-cors")) {
                         c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
                     }
-                    c.staticFiles.add(staticFiles -> {
-                        staticFiles.hostedPath = "/";
-                        staticFiles.directory = "/static";
-                        staticFiles.location = Location.CLASSPATH;
-                        staticFiles.precompress = false;
-                        staticFiles.aliasCheck = null;
-                        staticFiles.skipFileFunction = req -> false;
-                        staticFiles.headers.put("Cache-Control", "no-cache");
-                    });
+                    if (Main.getMainConfig().getBoolean("server.external-webui", false)) {
+                        c.staticFiles.add(staticFiles -> {
+                            staticFiles.hostedPath = "/";
+                            staticFiles.directory = new File(Main.getDataDirectory(), "static").getPath();
+                            staticFiles.location = Location.EXTERNAL;
+                            staticFiles.precompress = false;
+                            staticFiles.aliasCheck = null;
+                            staticFiles.skipFileFunction = req -> false;
+                            staticFiles.headers.put("Cache-Control", "no-cache");
+                        });
+                    } else {
+                        c.staticFiles.add(staticFiles -> {
+                            staticFiles.hostedPath = "/";
+                            staticFiles.directory = "/static";
+                            staticFiles.location = Location.CLASSPATH;
+                            staticFiles.precompress = false;
+                            staticFiles.aliasCheck = null;
+                            staticFiles.skipFileFunction = req -> false;
+                            staticFiles.headers.put("Cache-Control", "no-cache");
+                        });
+                    }
                     c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {

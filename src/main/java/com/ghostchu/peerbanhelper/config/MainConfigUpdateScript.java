@@ -28,6 +28,11 @@ public class MainConfigUpdateScript {
         }
     }
 
+    @UpdateScript(version = 12)
+    public void externalWebUI() {
+        conf.set("server.external-webui", false);
+    }
+
     @UpdateScript(version = 11)
     public void corsSetting() {
         conf.set("server.allow-cors", false);
