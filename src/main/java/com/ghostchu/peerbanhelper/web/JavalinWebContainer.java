@@ -68,6 +68,7 @@ public class JavalinWebContainer {
                             staticFiles.skipFileFunction = req -> false;
                             staticFiles.headers.put("Cache-Control", "no-cache");
                         });
+                        c.spaRoot.addFile("/", new File(new File(Main.getDataDirectory(), "static"), "index.html").getPath(), Location.EXTERNAL);
                     } else {
                         c.staticFiles.add(staticFiles -> {
                             staticFiles.hostedPath = "/";
@@ -78,8 +79,9 @@ public class JavalinWebContainer {
                             staticFiles.skipFileFunction = req -> false;
                             staticFiles.headers.put("Cache-Control", "no-cache");
                         });
+                        c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                     }
-                    c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
+
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);

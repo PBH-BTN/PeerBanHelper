@@ -43,6 +43,4 @@ public class BakedBanMetadata implements Comparable<BakedBanMetadata>, Serializa
     public int compareTo(@NotNull BakedBanMetadata o) {
         return this.randomId.compareTo(o.randomId);
     }
-
-    public
 }
