@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class BanListReplacementBean {
+public final class BanListReplacementBean {
     private List<String> replaceWith;
     private boolean includeNonPBHEntries;
 }

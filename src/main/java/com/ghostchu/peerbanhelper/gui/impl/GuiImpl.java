@@ -5,8 +5,6 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import java.util.logging.Level;
 
 public interface GuiImpl {
-    void showConfigurationSetupDialog();
-
     void setup();
 
     void createMainWindow();

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class BtnAbilityRules implements BtnAbility {
     private final BtnNetwork btnNetwork;
@@ -81,7 +83,7 @@ public class BtnAbilityRules implements BtnAbility {
                         return;
                     }
                     if (r.statusCode() != 200) {
-                        log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                        log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                     } else {
                         BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
                         this.btnRule = new BtnRuleParsed(btr);
@@ -90,11 +92,11 @@ public class BtnAbilityRules implements BtnAbility {
                             Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
                         } catch (IOException ignored) {
                         }
-                        log.info(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion());
+                        log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
                     }
                 })
                 .exceptionally((e) -> {
-                    log.warn(Lang.BTN_REQUEST_FAILS, e);
+                    log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
                     return null;
                 });
     }

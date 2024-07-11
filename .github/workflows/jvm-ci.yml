@@ -10,9 +10,9 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master", "release" ]
+    branches: [ "master", "major-refactor", "release" ]
   pull_request:
-    branches: [ "master", "release" ]
+    branches: [ "master", "major-refactor", "release" ]
   workflow_dispatch:
   release:
     types:
@@ -37,7 +37,7 @@ jobs:
           version: 10.0.8
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Build with Maven
-        run: mvn -B clean package --file pom.xml -P install4j-ci
+        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:

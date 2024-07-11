@@ -1,4 +1,4 @@
-config-version: 9
+config-version: 10
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 更新 Peers UI 频率（单位：毫秒），此项仅用于显示数据，不影响封禁，建议设置一个不会给下载器增加太多压力的值
@@ -22,6 +22,8 @@ module:
   # 此模块对 Transmission 不起效
   peer-id-blacklist:
     enabled: true
+    # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
+    ban-duration: default
     # method = 匹配方式
     #  + STARTS_WITH = 匹配开头
     #  + ENDS_WITH = 匹配结尾
@@ -63,6 +65,8 @@ module:
   # 客户端名称封禁
   client-name-blacklist:
     enabled: true
+    # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
+    ban-duration: default
     banned-client-name:
       - '{"method":"CONTAINS","content":"xunlei 0019", "hit": "FALSE"}' # 排除新版迅雷（会提供上传）
       - '{"method":"CONTAINS","content":"xunlei 0.0.1.9", "hit": "FALSE"}' # 排除新版迅雷（会提供上传）
@@ -122,6 +126,8 @@ module:
   # IP 地址/端口 封禁
   ip-address-blocker:
     enabled: true
+    # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
+    ban-duration: default
     # 按 IP 封禁，支持 CIDR，其语法大致如下：
     # ::/64
     # a:b:c:d::a:b/64
@@ -145,6 +151,8 @@ module:
   auto-range-ban:
     # 是否启用
     enabled: true
+    # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
+    ban-duration: default
     # IPV4 前缀长度
     ipv4: 30 # /32 = 单个 IP，/24 = 整个 ?.?.?.x 段
     # IPV6 前缀长度
@@ -152,9 +160,13 @@ module:
   # 启用来自 BTN 网络的规则
   btn:
     enabled: true
+    # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
+    ban-duration: default
   # 多拨封禁（实验性功能）
   multi-dialing-blocker:
     enabled: true
+    # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
+    ban-duration: default
     # 子网掩码长度
     # IP地址前多少位相同的视为同一个子网，位数越少范围越大，一般不需要修改
     subnet-mask-length: 24
@@ -215,9 +227,13 @@ module:
     # 所有的脚本文件默认放置在 data/scripts 目录内，您也可以修改已有的、或者新建新的脚本文件
     # 是否启用
     enabled: true
+    # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
+    ban-duration: default
   # 订阅规则
   ip-address-blocker-rules:
     enabled: true
+    # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
+    ban-duration: default
     # 检查间隔
     check-interval: 86400000 # 24小时检查一次 毫秒
     # 规则列表

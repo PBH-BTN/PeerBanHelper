@@ -1,24 +1,40 @@
 package com.ghostchu.peerbanhelper.metric.impl.persist;
 
-import com.ghostchu.peerbanhelper.database.BanLog;
-import com.ghostchu.peerbanhelper.database.DatabaseHelper;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.ModuleDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.RuleDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
+import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.database.table.ModuleEntity;
+import com.ghostchu.peerbanhelper.database.table.RuleEntity;
+import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
+@Component("persistMetrics")
 public class PersistMetrics implements BasicMetrics {
-    private final DatabaseHelper db;
-    private final BasicMetrics inMemory = new InMemoryMetrics();
-
-    public PersistMetrics(DatabaseHelper db) {
-        this.db = db;
-    }
+    @Autowired
+    private InMemoryMetrics inMemory;
+    @Autowired
+    private TorrentDao torrentDao;
+    @Autowired
+    private ModuleDao moduleDao;
+    @Autowired
+    private RuleDao ruleDao;
+    @Autowired
+    private HistoryDao historyDao;
 
     @Override
     public long getCheckCounter() {
@@ -43,26 +59,44 @@ public class PersistMetrics implements BasicMetrics {
     @Override
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
         inMemory.recordPeerBan(address, metadata);
-        try {
-            db.insertBanLogs(new BanLog(
-                    metadata.getBanAt(),
-                    metadata.getUnbanAt(),
-                    address.getIp(),
-                    address.getPort(),
-                    metadata.getPeer().getId(),
-                    metadata.getPeer().getClientName(),
-                    metadata.getPeer().getUploaded(),
-                    metadata.getPeer().getDownloaded(),
-                    metadata.getPeer().getProgress(),
-                    metadata.getTorrent().getHash(),
-                    metadata.getTorrent().getName(),
-                    metadata.getTorrent().getSize(),
-                    metadata.getContext(),
-                    metadata.getDescription()
-            ));
-        } catch (SQLException e) {
-            log.warn(Lang.DATABASE_SAVE_BUFFER_FAILED, e);
-        }
+        // 将数据库 IO 移动到虚拟线程上
+        Thread.ofVirtual().start(() -> {
+            try {
+                TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
+                        null,
+                        metadata.getTorrent().getHash(),
+                        metadata.getTorrent().getName(),
+                        metadata.getTorrent().getSize()
+                ));
+                ModuleEntity module = moduleDao.createIfNotExists(new ModuleEntity(
+                        null,
+                        metadata.getContext()
+                ));
+                RuleEntity rule = ruleDao.createIfNotExists(new RuleEntity(
+                        null,
+                        module,
+                        metadata.getRule()
+                ));
+                historyDao.create(new HistoryEntity(
+                        null,
+                        new Timestamp(metadata.getBanAt()),
+                        new Timestamp(metadata.getUnbanAt()),
+                        address.getIp(),
+                        address.getPort(),
+                        metadata.getPeer().getId(),
+                        metadata.getPeer().getClientName(),
+                        metadata.getPeer().getUploaded(),
+                        metadata.getPeer().getDownloaded(),
+                        metadata.getPeer().getProgress(),
+                        torrentEntity,
+                        rule,
+                        metadata.getDescription(),
+                        metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString()
+                ));
+            } catch (SQLException e) {
+                log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);
+            }
+        });
     }
 
     @Override

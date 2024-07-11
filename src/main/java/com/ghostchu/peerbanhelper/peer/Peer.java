@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.peer;
 
+import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import org.jetbrains.annotations.Nullable;
 
 public interface Peer extends Comparable<Peer> {
     /**
@@ -67,7 +69,8 @@ public interface Peer extends Comparable<Peer> {
      *
      * @return Flag
      */
-    String getFlags();
+    @Nullable
+    PeerFlag getFlags();
 
     @Override
     default int compareTo(Peer o) {
@@ -75,6 +78,7 @@ public interface Peer extends Comparable<Peer> {
     }
 
     default String getCacheKey() {
-        return "pa=" + this.getPeerAddress().toString() + ",pid=" + this.getPeerId() + ",pname=" + this.getClientName();
+        //return "pa=" + this.getPeerAddress().toString() + ",pid=" + this.getPeerId() + ",pname=" + this.getClientName();
+        return getPeerAddress().getIp() + ':' + getPeerAddress().getPort();
     }
 }

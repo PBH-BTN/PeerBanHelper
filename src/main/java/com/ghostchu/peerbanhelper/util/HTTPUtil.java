@@ -31,6 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class HTTPUtil {
     private static final int MAX_RESEND = 5;
@@ -79,7 +81,7 @@ public class HTTPUtil {
             sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
             ignoreSslContext = sslContext;
         } catch (Exception e) {
-            log.warn(Lang.MODULE_AP_SSL_CONTEXT_FAILURE, e);
+            log.error(tlUI(Lang.MODULE_AP_SSL_CONTEXT_FAILURE), e);
         }
     }
 
@@ -87,6 +89,7 @@ public class HTTPUtil {
         Methanol.Builder builder = Methanol
                 .newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
@@ -126,12 +129,12 @@ public class HTTPUtil {
     public static void onProgress(ProgressTracker.Progress progress) {
         if (progress.determinate()) { // Overall progress can be measured
             var percent = 100 * progress.value();
-            log.info(Lang.DOWNLOAD_PROGRESS_DETERMINED, progress.totalBytesTransferred(), progress.contentLength(), String.format("%.2f", percent));
+            log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, progress.totalBytesTransferred(), progress.contentLength(), String.format("%.2f", percent)));
         } else {
-            log.info(Lang.DOWNLOAD_PROGRESS, progress.totalBytesTransferred());
+            log.info(tlUI(Lang.DOWNLOAD_PROGRESS, progress.totalBytesTransferred()));
         }
         if (progress.done()) {
-            log.info(Lang.DOWNLOAD_COMPLETED, progress.totalBytesTransferred());
+            log.info(tlUI(Lang.DOWNLOAD_COMPLETED, progress.totalBytesTransferred()));
         }
     }
 

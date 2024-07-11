@@ -1,22 +1,28 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.BuildMeta;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
+import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class PBHMetadataController extends AbstractFeatureModule {
-    public PBHMetadataController(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
+    @Autowired
+    private JavalinWebContainer webContainer;
+    @Autowired
+    private BuildMeta buildMeta;
+    @Autowired
+    private ModuleManager moduleManager;
 
     @Override
     public boolean isConfigurable() {
@@ -35,14 +41,14 @@ public class PBHMetadataController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getWebContainer().javalin().get("/api/metadata/manifest", this::handleManifest, Role.ANYONE);
+        webContainer.javalin().get("/api/metadata/manifest", this::handleManifest, Role.ANYONE);
     }
 
     private void handleManifest(Context ctx) {
         ctx.status(HttpStatus.OK);
         Map<String, Object> data = new HashMap<>();
-        data.put("version", Main.getMeta());
-        data.put("modules", getServer().getModuleManager().getModules().stream()
+        data.put("version", buildMeta);
+        data.put("modules", moduleManager.getModules().stream()
                 .filter(FeatureModule::isModuleEnabled)
                 .map(f -> new ModuleRecord(f.getClass().getName(), f.getConfigName())).toList());
         ctx.json(data);

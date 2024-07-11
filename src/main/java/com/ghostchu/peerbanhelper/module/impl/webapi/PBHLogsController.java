@@ -1,21 +1,21 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.log4j2.MemoryLoggerAppender;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import io.javalin.http.Context;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.StringJoiner;
 
+@Component
 public class PBHLogsController extends AbstractFeatureModule {
-    public PBHLogsController(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
-
+    @Autowired
+    private JavalinWebContainer webContainer;
     @Override
     public boolean isConfigurable() {
         return false;
@@ -33,7 +33,7 @@ public class PBHLogsController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getWebContainer().javalin().get("/api/logs/main", this::handleLogs, Role.USER_READ);
+        webContainer.javalin().get("/api/logs/main", this::handleLogs, Role.USER_READ);
     }
 
     private void handleLogs(Context ctx) {

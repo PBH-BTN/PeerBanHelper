@@ -9,6 +9,8 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import java.io.File;
 import java.util.UUID;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class MainConfigUpdateScript {
     private final YamlConfiguration conf;
@@ -22,8 +24,18 @@ public class MainConfigUpdateScript {
         String token = conf.getString("server.token");
         if (token == null || token.isBlank() || token.length() < 8) {
             conf.set("server.token", UUID.randomUUID().toString());
-            log.info(Lang.TOO_WEAK_TOKEN);
+            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
         }
+    }
+
+    @UpdateScript(version = 10)
+    public void corsSetting() {
+        conf.set("server.allow-cors", false);
+    }
+
+    @UpdateScript(version = 10)
+    public void languageSetting() {
+        conf.set("language", "default");
     }
 
     @UpdateScript(version = 9)

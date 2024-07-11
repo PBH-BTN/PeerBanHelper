@@ -2,60 +2,84 @@ package com.ghostchu.peerbanhelper.util.rule;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
-import com.ghostchu.peerbanhelper.module.FeatureModule;
+import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
+import com.ghostchu.peerbanhelper.module.CheckResult;
+import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.module.RuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.rule.BtnNetworkOnline;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.eventbus.Subscribe;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+@Component
+@Slf4j
 public class ModuleMatchCache {
-    public final Map<RuleFeatureModule, Cache<Wrapper, Boolean>> CACHE_POOL = new ConcurrentHashMap<>();
+    public final Cache<String, CheckResult> CACHE_POOL = CacheBuilder
+            .newBuilder()
+            .maximumWeight(50000L)
+            .weigher((key, value) -> {
+                if (value == AbstractRuleFeatureModule.HANDSHAKING_CHECK_RESULT
+                        || value == AbstractRuleFeatureModule.TEAPOT_CHECK_RESULT
+                        || value == AbstractRuleFeatureModule.OK_CHECK_RESULT) {
+                    return 1;
+                }
+                return 5;
+            })
+            .softValues()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .build();
 
     public ModuleMatchCache() {
         Main.getEventBus().register(this);
     }
 
-    public boolean shouldSkipCheck(RuleFeatureModule module, Torrent torrent, PeerAddress peerAddress, boolean writeCache) {
-        Wrapper wrapper = new Wrapper(torrent.getId(), peerAddress);
-        Cache<Wrapper, Boolean> ruleCacheZone = CACHE_POOL.get(module);
-        if (ruleCacheZone == null) {
-            ruleCacheZone = CacheBuilder.newBuilder()
-                    .expireAfterAccess(30, TimeUnit.MINUTES)
-                    .maximumSize(3000)
-                    .softValues()
-                    .build();
-            CACHE_POOL.put(module, ruleCacheZone);
-        }
-        Boolean cached = ruleCacheZone.getIfPresent(wrapper);
-        boolean result = cached != null;
+    public CheckResult readCache(RuleFeatureModule module, String cacheKey, Callable<CheckResult> resultSupplier, boolean writeCache) {
+        String _cacheKey = module.getConfigName() + '@' + cacheKey;
         if (writeCache) {
-            ruleCacheZone.put(wrapper, result);
+            try {
+                return CACHE_POOL.get(_cacheKey, resultSupplier);
+            } catch (ExecutionException e) {
+                log.error("Unable to get cache value from cache, the resultSupplier throws unexpected exception", e);
+                return null;
+            }
+        } else {
+            return CACHE_POOL.getIfPresent(_cacheKey);
         }
-        return result;
+    }
+
+    public CheckResult readCachePassOnly(RuleFeatureModule module, String cacheKey, Callable<CheckResult> resultSupplier, boolean writeCache) {
+        String _cacheKey = module.getConfigName() + '@' + cacheKey;
+        var cached = CACHE_POOL.getIfPresent(_cacheKey);
+        if (cached == null) {
+            try {
+                cached = resultSupplier.call();
+            } catch (Exception e) {
+                log.warn("Unable to compute result", e);
+            }
+        }
+        if (writeCache && cached != null && cached.action() != PeerAction.BAN) {
+            CACHE_POOL.put(_cacheKey, cached);
+        }
+        return cached;
+
     }
 
     @Subscribe
     public void onBtnRuleUpdated(BtnRuleUpdateEvent event) {
-        for (FeatureModule featureModule : CACHE_POOL.keySet()) {
-            if (featureModule.getClass().equals(BtnNetworkOnline.class)) {
-                CACHE_POOL.remove(featureModule);
-                return;
-            }
-        }
+        CACHE_POOL.invalidateAll();
+    }
+
+    public void invalidateAll() {
+        CACHE_POOL.invalidateAll();
     }
 
     public void close() {
         Main.getEventBus().unregister(this);
     }
 
-    public record Wrapper(String torrentId, PeerAddress address) {
-
-    }
 }

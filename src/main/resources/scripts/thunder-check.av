@@ -22,6 +22,6 @@ if(string.startsWith(peer.peerId, '-XL0012')){
           return false; ## 不封禁非吸血迅雷
        }
     }
-    return true;
+    return "-XL0012- with port 15000/15001 and progress equals zero";
 }
-return true; ## 其它的全部封禁
+return "Not whitelisted thunder client"; ## 其它的全部封禁

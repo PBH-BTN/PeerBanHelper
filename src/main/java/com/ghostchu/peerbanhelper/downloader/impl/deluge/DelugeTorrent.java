@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class DelugeTorrent implements Torrent {
+public final class DelugeTorrent implements Torrent {
     private String id;
     private String name;
     private String hash;

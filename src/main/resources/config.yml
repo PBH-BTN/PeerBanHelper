@@ -1,48 +1,6 @@
-config-version: 9
-# 客户端设置
-client:
-  # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
-  qbittorrent-001:
-    # 客户端类型
-    # 支持的客户端列表：
-    # qBittorrent
-    # Transmission
-    # BiglyBT
-    # 其它也许以后会加
-    type: qBittorrent
-    # 客户端地址
-    endpoint: "http://ip:8085"
-    # 登录信息（暂不支持 Basic Auth）
-    # 用户名
-    username: "username"
-    # 密码
-    password: "password"
-    # Basic Auth - 不知道这是什么的话，请保持默认
-    basic-auth:
-      user: ""
-      pass: ""
-    # 验证 SSL 证书有效性
-    verify-ssl: true
-    # Http 协议版本
-    http-version: "HTTP_1_1"
-    # 增量封禁（有助于缓解保存封禁列表时的下载器压力，但可能不稳定，可能在部分下载器上会导致无法封禁Peers）
-    increment-ban: false
-  transmission-002:
-    type: Transmission
-    endpoint: "http://127.0.0.1:9091"
-    username: "admin"
-    password: "admin"
-    verify-ssl: true
-    http-version: "HTTP_1_1"
-    rpc-url: "/transmission/rpc"
-  biglybt-003:
-    type: BiglyBT
-    # 填写 PeerBanHelper 提供的 BiglyBT 适配插件的 IP+端口
-    endpoint: "http://127.0.0.1:55667"
-    # 填写 PeerBanHelper 提供的 BiglyBT 适配插件的 Token
-    token: ""
-    # 是否使用增量封禁，在 BiglyBT 上这是推荐的选项
-    increment-ban: true
+config-version: 11
+# 设置程序语言
+language: default
 # Http 服务器设置
 server:
   # WebUI 监听端口
@@ -53,6 +11,8 @@ server:
   prefix: "http://127.0.0.1:9898"
   # 要访问 WebUI 端点，则必须输入此 Token 以进行身份验证
   token: ""
+  # 允许 CORS 跨站，仅在使用外部 PBH WebUI 时才应该启用
+  allow-cors: false
 # 日志记录器配置
 logger:
   # 是否隐藏 [完成] 已检查 XX 的 X 个活跃 Torrent 和 X 个对等体 的日志消息？

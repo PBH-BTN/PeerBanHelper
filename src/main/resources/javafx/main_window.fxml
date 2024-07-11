@@ -35,7 +35,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21"
-      fx:controller="com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow.JFXWindowController">
+      fx:controller="com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow.JFXWindowController"
+      style="-fx-font-family: 'Henti SC',STHenti,'Microsoft YaHei UI','Microsoft JhengHei UI','Helvetica Neue',Helvetica,Arial,SimSun-ExtB, SimSun">
     <children>
         <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
             <menus>
@@ -66,13 +67,12 @@
                             <content>
                                 <AnchorPane>
                                     <children>
-                                        <TextArea fx:id="logsTextArea"
+                                        <ListView fx:id="logsListView"
                                                   prefHeight="345.3333333333333"
                                                   prefWidth="640.0"
                                                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-                                                  wrapText="true"
-                                                  editable="false"/>
+                                        />
                                     </children>
                                 </AnchorPane>
                             </content>

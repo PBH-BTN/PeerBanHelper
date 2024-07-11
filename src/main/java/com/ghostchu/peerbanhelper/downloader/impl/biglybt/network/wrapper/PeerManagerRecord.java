@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PeerManagerRecord {
+public final class PeerManagerRecord {
     private List<PeerRecord> peers;
     private List<PeerDescriptorRecord> pendingPeers;
     private PeerManagerStatsRecord peerStats;

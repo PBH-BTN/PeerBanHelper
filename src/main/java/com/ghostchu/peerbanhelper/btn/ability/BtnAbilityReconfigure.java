@@ -12,6 +12,8 @@ import java.net.http.HttpResponse;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class BtnAbilityReconfigure implements BtnAbility {
     private final BtnNetwork btnNetwork;
@@ -34,7 +36,7 @@ public class BtnAbilityReconfigure implements BtnAbility {
     private void checkIfReconfigure() {
         HttpResponse<String> resp = HTTPUtil.retryableSend(btnNetwork.getHttpClient(), MutableRequest.GET(btnNetwork.getConfigUrl()), HttpResponse.BodyHandlers.ofString()).join();
         if (resp.statusCode() != 200) {
-            log.warn(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.statusCode() + " - " + resp.body());
+            log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.statusCode() + " - " + resp.body()));
             return;
         }
         JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
@@ -44,8 +46,8 @@ public class BtnAbilityReconfigure implements BtnAbility {
         }
         JsonObject reconfigure = ability.get("reconfigure").getAsJsonObject();
         if (!reconfigure.get("version").getAsString().equals(this.version)) {
-            log.info(Lang.BTN_RECONFIGURING);
-            btnNetwork.getServer().setupBtn();
+            log.info(tlUI(Lang.BTN_RECONFIGURING));
+            btnNetwork.configBtnNetwork();
         }
     }
 

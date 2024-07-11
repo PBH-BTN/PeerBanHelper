@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -20,15 +21,15 @@ public interface Downloader extends AutoCloseable {
 
     String getEndpoint();
 
-    String getWebUIEndpoint();
+//    String getWebUIEndpoint();
 
-    @Nullable
-    DownloaderBasicAuth getDownloaderBasicAuth();
-
-    @Nullable
-    WebViewScriptCallback getWebViewJavaScript();
-
-    boolean isSupportWebview();
+//    @Nullable
+//    DownloaderBasicAuth getDownloaderBasicAuth();
+//
+//    @Nullable
+//    WebViewScriptCallback getWebViewJavaScript();
+//
+//    boolean isSupportWebview();
 
     /**
      * 下载器用户定义名称
@@ -104,12 +105,12 @@ public interface Downloader extends AutoCloseable {
      *
      * @param lastStatus 最后请求状态
      */
-    void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage);
+    void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage);
 
     /**
      * 获取客户端状态描述说明
      *
      * @return 状态描述说明
      */
-    String getLastStatusMessage();
+    TranslationComponent getLastStatusMessage();
 }

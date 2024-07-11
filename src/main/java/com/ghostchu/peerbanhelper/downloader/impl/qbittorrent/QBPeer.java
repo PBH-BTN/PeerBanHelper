@@ -1,15 +1,15 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 
+import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Setter
-public class SingleTorrentPeer implements Peer {
+public final class QBPeer implements Peer {
     @SerializedName("client")
     private String client;
     @SerializedName("connection")
@@ -44,7 +44,7 @@ public class SingleTorrentPeer implements Peer {
     private Long uploaded;
     private transient PeerAddress peerAddress;
 
-    public SingleTorrentPeer() {
+    public QBPeer() {
     }
 
     @Override
@@ -56,7 +56,7 @@ public class SingleTorrentPeer implements Peer {
     }
 
     @Override
-    @NotNull
+    @Nullable
     public String getPeerId() {
         return peerIdClient;
     }
@@ -93,8 +93,8 @@ public class SingleTorrentPeer implements Peer {
     }
 
     @Override
-    public String getFlags() {
-        return flags;
+    public PeerFlag getFlags() {
+        return new PeerFlag(flags);
     }
 
     @Override

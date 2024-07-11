@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class BtnAbilitySubmitPeers implements BtnAbility {
     private final BtnNetwork btnNetwork;
@@ -38,7 +40,7 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
     }
 
     private void submit() {
-        log.info(Lang.BTN_SUBMITTING_PEERS);
+        log.info(tlUI(Lang.BTN_SUBMITTING_PEERS));
         List<BtnPeer> btnPeers = generatePing();
         BtnPeerPing ping = new BtnPeerPing(
                 System.currentTimeMillis(),
@@ -50,13 +52,13 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
         HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
-                        log.warn(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body());
+                        log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                     } else {
-                        log.info(Lang.BTN_SUBMITTED_PEERS, btnPeers.size());
+                        log.info(tlUI(Lang.BTN_SUBMITTED_PEERS, btnPeers.size()));
                     }
                 })
                 .exceptionally(e -> {
-                    log.warn(Lang.BTN_REQUEST_FAILS, e);
+                    log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
                     return null;
                 });
     }

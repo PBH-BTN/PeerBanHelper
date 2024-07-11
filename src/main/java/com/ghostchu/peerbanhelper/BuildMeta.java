@@ -8,7 +8,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BuildMeta {
+public final class BuildMeta {
     private String version = "unknown";
     private String os;
     private String branch;

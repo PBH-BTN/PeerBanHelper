@@ -1,11 +1,10 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
-import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -32,6 +31,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 public class Transmission implements Downloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Transmission.class);
     private final String name;
@@ -39,7 +40,7 @@ public class Transmission implements Downloader {
     private final String blocklistUrl;
     private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
-    private String statusMessage;
+    private TranslationComponent statusMessage;
 
     /*
             API 受限，实际实现起来意义不大
@@ -50,7 +51,7 @@ public class Transmission implements Downloader {
         this.config = config;
         this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
-        log.warn(Lang.DOWNLOADER_TR_MOTD_WARNING);
+        log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
 
     private static String generateBlocklistUrl(String pbhServerAddress) {
@@ -82,25 +83,25 @@ public class Transmission implements Downloader {
         return config.getEndpoint();
     }
 
-    @Override
-    public String getWebUIEndpoint() {
-        return config.getEndpoint();
-    }
+//    @Override
+//    public String getWebUIEndpoint() {
+//        return config.getEndpoint();
+//    }
 
-    @Override
-    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
-        return new DownloaderBasicAuth(config.getEndpoint(), config.getUsername(), config.getPassword());
-    }
-
-    @Override
-    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
-        return null;
-    }
-
-    @Override
-    public boolean isSupportWebview() {
-        return true;
-    }
+//    @Override
+//    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
+//        return new DownloaderBasicAuth(config.getEndpoint(), config.getUsername(), config.getPassword());
+//    }
+//
+//    @Override
+//    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
+//        return null;
+//    }
+//
+//    @Override
+//    public boolean isSupportWebview() {
+//        return true;
+//    }
 
 
     @Override
@@ -119,7 +120,7 @@ public class Transmission implements Downloader {
         TypedResponse<RsSessionGet> resp = client.execute(get); // 执行任意 RPC 操作以刷新 session
         String version = resp.getArgs().getVersion();
         if (version.startsWith("0.") || version.startsWith("1.") || version.startsWith("2.")) {
-            throw new IllegalStateException(String.format(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, Lang.DOWNLOADER_TR_INCOMPATIBILITY_BANAPI));
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, Lang.DOWNLOADER_TR_INCOMPATIBILITY_BANAPI));
         }
         return true;
     }
@@ -149,27 +150,34 @@ public class Transmission implements Downloader {
                 .build();
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
         if (!sessionSetResp.isSuccess()) {
-            log.warn(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, sessionSetResp.getResult());
+            log.error(tlUI(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP), sessionSetResp.getResult());
         }
         Thread.sleep(3000); // Transmission 在这里疑似有崩溃问题？
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
-            log.warn(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP);
+            log.error(tlUI(Lang.DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP));
         } else {
-            log.info(Lang.DOWNLOADER_TR_UPDATED_BLOCKLIST, updateBlockListResp.getArgs().getBlockListSize());
+            log.info(tlUI(Lang.DOWNLOADER_TR_UPDATED_BLOCKLIST), updateBlockListResp.getArgs().getBlockListSize());
         }
     }
 
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-        relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
+        relaunchTorrents(torrents.stream().filter(t -> {
+            try {
+                Long.parseLong(t.getId());
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }).map(t -> Long.parseLong(t.getId())).toList());
     }
 
     private void relaunchTorrents(Collection<Long> ids) {
         if (ids.isEmpty()) return;
-        log.info(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, ids.size());
+        log.info(tlUI(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, ids.size()));
         RqTorrent stop = new RqTorrent(TorrentAction.STOP, new ArrayList<>());
         for (long torrent : ids) {
             stop.add(torrent);
@@ -189,7 +197,14 @@ public class Transmission implements Downloader {
 
     @Override
     public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-        relaunchTorrents(torrents.stream().map(t -> Long.parseLong(t.getId())).toList());
+        relaunchTorrents(torrents.stream().filter(t -> {
+            try {
+                Long.parseLong(t.getId());
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }).map(t -> Long.parseLong(t.getId())).toList());
     }
 
     @Override
@@ -198,13 +213,13 @@ public class Transmission implements Downloader {
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
+    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }
 
     @Override
-    public String getLastStatusMessage() {
+    public TranslationComponent getLastStatusMessage() {
         return statusMessage;
     }
 
@@ -233,8 +248,8 @@ public class Transmission implements Downloader {
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
             }
-            config.setUsername(section.getString("username"));
-            config.setPassword(section.getString("password"));
+            config.setUsername(section.getString("username", ""));
+            config.setPassword(section.getString("password", ""));
             config.setRpcUrl(section.getString("rpc-url", "/transmission/rpc"));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));

@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow.JFXWindowController;
-import com.ghostchu.peerbanhelper.text.Lang;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -36,7 +35,7 @@ public class MainJavaFx extends Application {
         stage = st;
         FXMLLoader fxmlLoader = new FXMLLoader(MainJavaFx.class.getResource("/javafx/main_window.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 600, 400);
-        st.setTitle(String.format(Lang.GUI_TITLE_LOADING, "JavaFx"));
+        st.setTitle(String.format("PeerBanHelper (JavaFx) - Loading..."));
         st.setScene(scene);
         st.setWidth(1000);
         st.setHeight(600);

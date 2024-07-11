@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.peer;
 
+import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.Setter;
 
@@ -13,9 +14,9 @@ public class PeerImpl implements Peer {
     private long uploadSpeed;
     private long uploaded;
     private double progress;
-    private String flags;
+    private PeerFlag flags;
 
-    public PeerImpl(PeerAddress peerAddress, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, String flags) {
+    public PeerImpl(PeerAddress peerAddress, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags) {
         this.peerAddress = peerAddress;
         this.peerId = peerId;
         this.clientName = clientName;
@@ -68,7 +69,7 @@ public class PeerImpl implements Peer {
     }
 
     @Override
-    public String getFlags() {
+    public PeerFlag getFlags() {
         return flags;
     }
 }

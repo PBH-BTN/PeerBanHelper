@@ -1,6 +1,5 @@
 package cordelia.client;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
@@ -27,6 +26,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public final class TrClient {
@@ -64,7 +65,7 @@ public final class TrClient {
                 .newBuilder()
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(Main.getUserAgent())
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
@@ -104,10 +105,10 @@ public final class TrClient {
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
         } catch (JsonSyntaxException jsonSyntaxException) {
-            log.warn(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException);
+            log.error(tlUI(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException));
             throw new IllegalStateException(jsonSyntaxException);
         } catch (IOException | InterruptedException e) {
-            log.warn("Request Transmission JsonRPC failure", e);
+            log.error("Request Transmission JsonRPC failure", e);
             throw new IllegalStateException(e);
         }
     }
@@ -124,7 +125,7 @@ public final class TrClient {
                 String sessionId = resp.headers().firstValue(Session.SESSION_ID).orElseThrow();
                 sessionStore.set(new Session(sessionId));
             } catch (IOException | InterruptedException e) {
-                log.warn(Lang.TRCLIENT_API_ERROR, e.getClass().getName(), e.getMessage());
+                log.error(tlUI(Lang.TRCLIENT_API_ERROR, e.getClass().getName()), e.getMessage());
                 throw new IllegalStateException(e);
             }
         }

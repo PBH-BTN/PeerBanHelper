@@ -1,17 +1,12 @@
 package com.ghostchu.peerbanhelper.gui.impl.javafx;
 
-import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.sun.javafx.scene.control.ContextMenuContent;
-import javafx.concurrent.Worker;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.PopupWindow;
 import javafx.stage.Window;
@@ -25,10 +20,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
 import java.util.Map;
 import java.util.StringJoiner;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class JavaFxWebViewWrapper {
@@ -40,7 +35,7 @@ public class JavaFxWebViewWrapper {
         }
         headers.forEach((key, value) -> joiner.add(key + ": " + value));
         webView.getEngine().setUserAgent(joiner.toString());
-        installWebViewEventListeners(webView, initScript);
+        //installWebViewEventListeners(webView, initScript);
         AnchorPane anchorPane = new AnchorPane();
         anchorPane.setMinHeight(0);
         anchorPane.getChildren().add(webView);
@@ -65,13 +60,13 @@ public class JavaFxWebViewWrapper {
                             Node bridge = popup.lookup(".context-menu");
                             ContextMenuContent cmc = (ContextMenuContent) ((Parent) bridge).getChildrenUnmodifiable().get(0);
                             ContextMenu contextMenu = new ContextMenu();
-                            MenuItem reload = new MenuItem(Lang.WEBVIEW_RELOAD_PAGE);
+                            MenuItem reload = new MenuItem(tlUI(Lang.WEBVIEW_RELOAD_PAGE));
                             reload.setOnAction(e -> webView.getEngine().reload());
-                            MenuItem reset = new MenuItem(Lang.WEBVIEW_RESET_PAGE);
+                            MenuItem reset = new MenuItem(tlUI(Lang.WEBVIEW_RESET_PAGE));
                             reset.setOnAction(e -> webView.getEngine().load(webuiPath));
-                            MenuItem back = new MenuItem(Lang.WEBVIEW_BACK);
+                            MenuItem back = new MenuItem(tlUI(Lang.WEBVIEW_BACK));
                             back.setOnAction(e -> webView.getEngine().executeScript("history.back()"));
-                            MenuItem forward = new MenuItem(Lang.WEBVIEW_FORWARD);
+                            MenuItem forward = new MenuItem(tlUI(Lang.WEBVIEW_FORWARD));
                             forward.setOnAction(e -> webView.getEngine().executeScript("history.forward()"));
                             contextMenu.getItems().addAll(back, forward, new SeparatorMenuItem(), reset);
                             // add new item:
@@ -111,44 +106,44 @@ public class JavaFxWebViewWrapper {
         }
         return xmlStr;
     }
-
-
-    public static void installWebViewEventListeners(WebView webView, @Nullable WebViewScriptCallback callback) {
-        System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
-        System.setProperty("jdk.http.auth.proxying.disabledSchemes", "");
-        if (callback != null) {
-            webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-                if (newState == Worker.State.SUCCEEDED) {
-                    String js = callback.pageLoaded(webView.getEngine().getLocation(), docToString(webView.getEngine().getDocument()));
-                    if (js != null) {
-                        webView.getEngine().executeScript(js);
-                    }
-                }
-            });
-        }
-        webView.getEngine().setOnError(event -> log.warn("[WebView] {}", event.getMessage(), event.getException()));
-
-        Authenticator.setDefault(new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                String prefix = getRequestingScheme() + "://" + getRequestingHost() + ":" + getRequestingPort();
-                for (Downloader downloader : Main.getServer().getDownloaders()) {
-                    DownloaderBasicAuth dba = downloader.getDownloaderBasicAuth();
-                    if (dba != null) {
-                        if (prefix.startsWith(dba.urlPrefix())) {
-                            return new PasswordAuthentication(dba.username(), dba.password().toCharArray());
-                        }
-                    }
-                }
-                return null;
-            }
-        });
-        webView.getEngine().setOnAlert((WebEvent<String> wEvent) -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle(Lang.JFX_WEBVIEW_ALERT);
-            alert.setHeaderText(Lang.JFX_WEBVIEW_ALERT);
-            alert.setContentText(wEvent.getData());
-        });
-    }
+//
+//
+//    public static void installWebViewEventListeners(WebView webView, @Nullable WebViewScriptCallback callback) {
+//        System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
+//        System.setProperty("jdk.http.auth.proxying.disabledSchemes", "");
+//        if (callback != null) {
+//            webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+//                if (newState == Worker.State.SUCCEEDED) {
+//                    String js = callback.pageLoaded(webView.getEngine().getLocation(), docToString(webView.getEngine().getDocument()));
+//                    if (js != null) {
+//                        webView.getEngine().executeScript(js);
+//                    }
+//                }
+//            });
+//        }
+//        webView.getEngine().setOnError(event -> log.warn("[WebView] {}", event.getMessage(), event.getException()));
+//
+//        Authenticator.setDefault(new Authenticator() {
+//            @Override
+//            protected PasswordAuthentication getPasswordAuthentication() {
+//                String prefix = getRequestingScheme() + "://" + getRequestingHost() + ":" + getRequestingPort();
+//                for (Downloader downloader : Main.getServer().getDownloaders()) {
+//                    DownloaderBasicAuth dba = downloader.getDownloaderBasicAuth();
+//                    if (dba != null) {
+//                        if (prefix.startsWith(dba.urlPrefix())) {
+//                            return new PasswordAuthentication(dba.username(), dba.password().toCharArray());
+//                        }
+//                    }
+//                }
+//                return null;
+//            }
+//        });
+//        webView.getEngine().setOnAlert((WebEvent<String> wEvent) -> {
+//            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//            alert.setTitle(Lang.JFX_WEBVIEW_ALERT);
+//            alert.setHeaderText(Lang.JFX_WEBVIEW_ALERT);
+//            alert.setContentText(wEvent.getData());
+//        });
+//    }
 
 }

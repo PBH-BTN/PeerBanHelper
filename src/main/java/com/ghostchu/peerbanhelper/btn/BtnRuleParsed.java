@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.btn;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
@@ -53,8 +55,8 @@ public class BtnRuleParsed {
                     }
 
                     @Override
-                    public String matcherName() {
-                        return "BTN-Port";
+                    public TranslationComponent matcherName() {
+                        return new TranslationComponent(Lang.BTN_PORT_RULE);
                     }
 
                     @Override
@@ -87,8 +89,8 @@ public class BtnRuleParsed {
         }
 
         @Override
-        public @NotNull String matcherName() {
-            return "BTN-IP";
+        public @NotNull TranslationComponent matcherName() {
+            return new TranslationComponent(Lang.BTN_IP_RULE);
         }
 
         @Override

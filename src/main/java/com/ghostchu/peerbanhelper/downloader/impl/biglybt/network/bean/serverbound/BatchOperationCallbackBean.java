@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class BatchOperationCallbackBean {
+public final class BatchOperationCallbackBean {
     private int success;
     private int failed;
 }

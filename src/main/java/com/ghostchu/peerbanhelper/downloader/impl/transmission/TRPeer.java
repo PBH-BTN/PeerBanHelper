@@ -1,10 +1,11 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
+import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
 
-public class TRPeer implements Peer {
+public final class TRPeer implements Peer {
 
     private final Peers backend;
     private transient PeerAddress peerAddress;
@@ -57,8 +58,8 @@ public class TRPeer implements Peer {
     }
 
     @Override
-    public String getFlags() {
-        return backend.getFlagStr();
+    public PeerFlag getFlags() {
+        return new PeerFlag(backend.getFlagStr());
     }
 
 }

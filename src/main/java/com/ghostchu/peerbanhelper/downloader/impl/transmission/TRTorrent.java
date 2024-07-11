@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TRTorrent implements Torrent {
+public final class TRTorrent implements Torrent {
     private final Torrents backend;
 
     public TRTorrent(Torrents backend) {
