@@ -159,7 +159,7 @@ public class IPDB implements AutoCloseable {
                     case "物联网" -> new TranslationComponent(Lang.NET_TYPE_IOT);
                     case "数据中心" -> new TranslationComponent(Lang.NET_TYPE_DATACENTER);
                 }
-                networkData.setNetType(component);
+                networkData.setNetType(tlUI(component));
             }
             geoData.setNetwork(networkData);
         } catch (Exception e) {
