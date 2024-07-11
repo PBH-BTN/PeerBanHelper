@@ -3,9 +3,13 @@ package com.ghostchu.peerbanhelper.web;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import inet.ipaddr.IPAddress;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -19,6 +23,8 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -28,6 +34,9 @@ public class JavalinWebContainer {
     private final Javalin javalin;
     @Getter
     private String token;
+    private Cache<IPAddress, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
+            .expireAfterWrite(15, TimeUnit.MINUTES)
+            .build();
 
     public JavalinWebContainer() {
         JsonMapper gsonMapper = new JsonMapper() {
@@ -83,23 +92,39 @@ public class JavalinWebContainer {
                     if (authenticated != null && authenticated.equals(token)) {
                         return;
                     }
+                    var ip = IPAddressUtil.getIPAddress(ctx.ip()).withoutPrefixLength();
+                    if (ip.isIPv4Convertible()) {
+                        ip = IPAddressUtil.toPrefixBlock(ip, 24);
+                    } else {
+                        ip = IPAddressUtil.toPrefixBlock(ip, 64);
+                    }
+                    // 开始登陆验证
+                    var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
+                    if (counter.get() > 10) {
+                        throw new IPAddressBannedException();
+                    }
                     String authToken = ctx.header("Authorization");
                     if (authToken != null) {
                         if (authToken.startsWith("Bearer ")) {
                             String tk = authToken.substring(7);
                             if (tk.equals(token)) {
+                                counter.set(0);
                                 return;
                             }
                         }
                     }
+                    counter.incrementAndGet();
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200));
 
     }
 
-    public void start(String host, int port, String token) {
+    public void start(String host, int port, String token, boolean enableCORS) {
         this.token = token;
+        if (enableCORS) {
+            javalin.unsafeConfig().bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
+        }
         javalin.start(host, port);
     }
 
