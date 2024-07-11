@@ -120,11 +120,8 @@ public class JavalinWebContainer {
 
     }
 
-    public void start(String host, int port, String token, boolean enableCORS) {
+    public void start(String host, int port, String token) {
         this.token = token;
-        if (enableCORS) {
-            javalin.unsafeConfig().bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
-        }
         javalin.start(host, port);
     }
 
