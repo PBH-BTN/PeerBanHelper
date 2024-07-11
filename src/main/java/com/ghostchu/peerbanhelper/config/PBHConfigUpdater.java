@@ -78,12 +78,12 @@ public class PBHConfigUpdater {
 
     private void migrateComments(YamlConfiguration yaml, YamlConfiguration bundle) {
         for (String key : yaml.getKeys(true)) {
-            var inlineBundled = bundle.getInLineComments(key);
-            var inlineYaml = yaml.getInLineComments(key);
+            var inlineBundled = bundle.getInlineComments(key);
+            var inlineYaml = yaml.getInlineComments(key);
             var stdBundled = bundle.getComments(key);
             var stdYaml = yaml.getComments(key);
             if (inlineYaml.isEmpty() && !inlineBundled.isEmpty()) {
-                yaml.setInLineComments(key, inlineBundled);
+                yaml.setInlineComments(key, inlineBundled);
             }
             if (stdYaml.isEmpty() && !stdBundled.isEmpty()) {
                 yaml.setComments(key, stdBundled);
