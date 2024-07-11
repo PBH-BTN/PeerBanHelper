@@ -28,7 +28,7 @@ public class MainConfigUpdateScript {
         }
     }
 
-    @UpdateScript(version = 10)
+    @UpdateScript(version = 11)
     public void corsSetting() {
         conf.set("server.allow-cors", false);
     }

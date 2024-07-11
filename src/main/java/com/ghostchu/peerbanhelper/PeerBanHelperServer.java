@@ -510,16 +510,16 @@ public class PeerBanHelperServer {
         try {
             if (!downloader.login()) {
                 log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint()));
-                downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent("status-text-login-failed"));
+                downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent(Lang.STATUS_TEXT_LOGIN_FAILED));
                 return;
             } else {
-                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent("status-text-ok"));
+                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent(Lang.STATUS_TEXT_OK));
             }
             downloader.setBanList(BAN_LIST.keySet(), added, removed);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint()), th);
-            downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent("status-text-exception"));
+            downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent(Lang.STATUS_TEXT_EXCEPTION, th.getClass().getName() + ": " + th.getMessage()));
         }
     }
 
@@ -588,7 +588,7 @@ public class PeerBanHelperServer {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         if (!downloader.login()) {
             log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint()));
-            downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent("status-text-login-failed"));
+            downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent(Lang.STATUS_TEXT_LOGIN_FAILED));
             return Collections.emptyMap();
         }
         List<Torrent> torrents = downloader.getTorrents();
@@ -606,7 +606,7 @@ public class PeerBanHelperServer {
                     parallelReqRestrict.release();
                 }
             }));
-            downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent("status-text-ok"));
+            downloader.setLastStatus(DownloaderLastStatus.HEALTHY, new TranslationComponent(Lang.STATUS_TEXT_OK));
         }
 
         return peers;

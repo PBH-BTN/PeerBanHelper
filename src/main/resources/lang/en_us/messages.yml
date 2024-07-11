@@ -193,7 +193,7 @@ WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED: "JavaFx Web module not found, you are usin
 WEBVIEW_ENABLED: "JavaFx Web found, WebUI tab enabled"
 STATUS_TEXT_OK: "Currently working normally"
 STATUS_TEXT_LOGIN_FAILED: "Attempt to log in to downloader failed"
-STATUS_TEXT_EXCEPTION: "An exception occurred, please check PeerBanHelper console"
+STATUS_TEXT_EXCEPTION: "An exception occurred, please check PeerBanHelper console: {}"
 STATUS_TEXT_NEED_PRIVILEGE: "Insufficient privileges, request privilege escalation (run as administrator/root)"
 SUGGEST_FIREWALL_IPTABLES: "Native iptables are not recommended, may cause network performance degradation. Consider installing ipset instead of using iptables"
 SUGGEST_FIREWALL_FIREWALLD: "Native firewalld is not recommended, may cause network performance degradation. Consider installing ipset instead of using firewalld"

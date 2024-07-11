@@ -3,13 +3,11 @@ package com.ghostchu.peerbanhelper.web;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import inet.ipaddr.IPAddress;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -34,7 +32,7 @@ public class JavalinWebContainer {
     private final Javalin javalin;
     @Getter
     private String token;
-    private Cache<IPAddress, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
+    private Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
 
@@ -98,12 +96,8 @@ public class JavalinWebContainer {
                     if (authenticated != null && authenticated.equals(token)) {
                         return;
                     }
-                    var ip = IPAddressUtil.getIPAddress(ctx.ip()).withoutPrefixLength();
-                    if (ip.isIPv6Convertible()) {
-                        ip = IPAddressUtil.toPrefixBlock(ip.toIPv6(), 64);
-                    }
                     // 开始登陆验证
-                    var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
+                    var counter = FAIL2BAN.get(ctx.ip(), () -> new AtomicInteger(0));
                     if (counter.get() > 10) {
                         throw new IPAddressBannedException();
                     }
