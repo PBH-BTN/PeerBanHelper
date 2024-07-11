@@ -1,0 +1,7 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 'WebUI 错误报告 - WebUI Bug Report'
+    about: |-
+      报告与 PBH WebUI 有关的错误
+      Report the errors that related to PBH WebUI.
+    url: 'https://github.com/PBH-BTN/pbh-fe/issues/new'
