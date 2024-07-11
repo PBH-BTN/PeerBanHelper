@@ -117,8 +117,7 @@ public class QBittorrent implements Downloader {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
             // return request.statusCode() == 200;
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_LOGIN_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()), e);
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 
