@@ -93,10 +93,8 @@ public class JavalinWebContainer {
                         return;
                     }
                     var ip = IPAddressUtil.getIPAddress(ctx.ip()).withoutPrefixLength();
-                    if (ip.isIPv4Convertible()) {
-                        ip = IPAddressUtil.toPrefixBlock(ip, 24);
-                    } else {
-                        ip = IPAddressUtil.toPrefixBlock(ip, 64);
+                    if (ip.isIPv6Convertible()) {
+                        ip = IPAddressUtil.toPrefixBlock(ip.toIPv6(), 64);
                     }
                     // 开始登陆验证
                     var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
