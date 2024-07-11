@@ -56,6 +56,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private final Set<ListCell<ListLogEntry>> selected = new HashSet<>();
     private TrayIcon trayIcon;
     private ListView<ListLogEntry> logsView;
+    private boolean persistFlagTrayMessageSent = false;
 
     public JavaFxImpl(String[] args) {
         super(args);
@@ -255,7 +256,10 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private void minimizeToTray() {
         if (trayIcon != null) {
             setVisible(false);
-            trayIcon.displayMessage(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION), TrayIcon.MessageType.INFO);
+            if (!persistFlagTrayMessageSent) {
+                persistFlagTrayMessageSent = true;
+                trayIcon.displayMessage(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION), TrayIcon.MessageType.INFO);
+            }
         }
     }
 

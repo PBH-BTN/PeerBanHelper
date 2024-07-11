@@ -32,6 +32,7 @@ public class MainWindow extends JFrame {
     @Nullable
     @Getter
     private TrayIcon trayIcon;
+    private boolean persistFlagTrayMessageSent;
 
     public MainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
@@ -98,7 +99,10 @@ public class MainWindow extends JFrame {
     private void minimizeToTray() {
         if (trayIcon != null) {
             setVisible(false);
-            trayIcon.displayMessage(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION), TrayIcon.MessageType.INFO);
+            if (!persistFlagTrayMessageSent) {
+                persistFlagTrayMessageSent = true;
+                trayIcon.displayMessage(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION), TrayIcon.MessageType.INFO);
+            }
         }
     }
 
