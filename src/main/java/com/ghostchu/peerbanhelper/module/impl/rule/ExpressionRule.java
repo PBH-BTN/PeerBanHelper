@@ -14,7 +14,6 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
-import com.google.common.io.ByteStreams;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Expression;
@@ -26,6 +25,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -36,7 +37,6 @@ import java.math.MathContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -310,10 +310,15 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             return;
         }
         scriptDir.mkdirs();
-        for (String s : List.of("name-id-verify.av", "thunder-check.av", "peer-ids.av.example")) {
-            try (var is = Main.class.getResourceAsStream("/scripts/" + s)) {
-                String content = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
-                File file = new File(scriptDir, s);
+        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+        var res = resourcePatternResolver.getResources("scripts/*");
+        for (Resource re : res) {
+            if (re.isFile()) {
+                if (re.getFilename() == null)
+                    continue;
+                File f = re.getFile();
+                String content = new String(re.getContentAsByteArray(), StandardCharsets.UTF_8);
+                File file = new File(scriptDir, f.getName());
                 file.createNewFile();
                 Files.writeString(file.toPath(), content);
             }
