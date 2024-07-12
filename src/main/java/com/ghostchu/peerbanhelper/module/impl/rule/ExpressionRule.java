@@ -62,9 +62,13 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
 
     @Nullable
     public CheckResult handleResult(Expression expression, Object returns) {
+        ExpressionMetadata meta = expressions.get(expression);
         if (returns instanceof Boolean status) {
             if (status) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(expressions.get(expression).name()), new TranslationComponent(expressions.get(expression).name() + "=>" + true));
+
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                        new TranslationComponent(Lang.USER_SCRIPT_RULE),
+                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, meta.name(), "true"));
             }
             return null;
         }
@@ -73,30 +77,40 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             if (i == 0) {
                 return null;
             } else if (i == 1) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(expressions.get(expression).name()), new TranslationComponent(expressions.get(expression).name() + "=>" + number));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                        new TranslationComponent(Lang.USER_SCRIPT_RULE),
+                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, meta.name(), String.valueOf(number)));
             } else if (i == 2) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, new TranslationComponent(expressions.get(expression).name()), new TranslationComponent(expressions.get(expression).name() + "=>" + number));
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
+                        new TranslationComponent(Lang.USER_SCRIPT_RULE),
+                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, meta.name(), String.valueOf(number)));
             } else {
-                log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression)));
+                log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, meta));
                 return null;
             }
         }
         if (returns instanceof PeerAction action) {
-            return new CheckResult(getClass(), action, banDuration, new TranslationComponent(expressions.get(expression).name()), new TranslationComponent(expressions.get(expression).name() + "=>" + action.name()));
+            return new CheckResult(getClass(), action, banDuration,
+                    new TranslationComponent(Lang.USER_SCRIPT_RULE),
+                    new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, meta.name(), action.name()));
         }
         if (returns instanceof String string) {
             if (string.isBlank()) {
                 return pass();
             } else if (string.startsWith("@")) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, new TranslationComponent(expressions.get(expression).name()), new TranslationComponent(string.substring(1)));
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
+                        new TranslationComponent(Lang.USER_SCRIPT_RULE),
+                        new TranslationComponent(string.substring(1)));
             } else {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(expressions.get(expression).name()), new TranslationComponent(string));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                        new TranslationComponent(Lang.USER_SCRIPT_RULE),
+                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, meta.name(), string));
             }
         }
         if (returns instanceof CheckResult checkResult) {
             return checkResult;
         }
-        log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, expressions.get(expression)));
+        log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_INVALID_RETURNS, meta));
         return null;
     }
 

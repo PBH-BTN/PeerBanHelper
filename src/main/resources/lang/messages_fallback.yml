@@ -304,3 +304,6 @@ STATUS_TEXT_UNKNOWN: "PeerBanHelper 暂时还未获取到此下载器的信息"
 DOWNLOADER_LOGIN_EXCEPTION: "无法连接到下载器，登录时出现错误：{}"
 DOWNLOADER_LOGIN_IO_EXCEPTION: "无法连接到下载器，登录时出现网络错误：{}"
 DOWNLOADER_LOGIN_INCORRECT_CRED: "鉴权失败，错误的登录凭据。请检查用户名、密码或 Token 是否正确。"
+
+USER_SCRIPT_RULE: "用户 Aviator Script 自定脚本规则"
+USER_SCRIPT_RUN_RESULT: "用户脚本 {}: {}"

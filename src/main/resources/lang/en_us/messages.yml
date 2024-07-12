@@ -304,3 +304,6 @@ STATUS_TEXT_UNKNOWN: "PeerBanHelper not connected to this downloader yet"
 DOWNLOADER_LOGIN_EXCEPTION: "Unable connect to downloader: {}"
 DOWNLOADER_LOGIN_IO_EXCEPTION: "Unable connect to downloader, network error: {}"
 DOWNLOADER_LOGIN_INCORRECT_CRED: "Unable to authenticate to downloader, check the username, password or token."
+
+USER_SCRIPT_RULE: "User Aviator Script Custom Rule"
+USER_SCRIPT_RUN_RESULT: "UserScript {}: {}"
