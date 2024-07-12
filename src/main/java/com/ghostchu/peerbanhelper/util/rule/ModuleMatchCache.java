@@ -52,7 +52,8 @@ public class ModuleMatchCache {
         }
     }
 
-    public CheckResult readCachePassOnly(RuleFeatureModule module, String cacheKey, Callable<CheckResult> resultSupplier, boolean writeCache) {
+    // 只缓存 PeerAction 为 BAN 以外的结果
+    public CheckResult readCacheButWritePassOnly(RuleFeatureModule module, String cacheKey, Callable<CheckResult> resultSupplier, boolean writeCache) {
         String _cacheKey = module.getConfigName() + '@' + cacheKey;
         var cached = CACHE_POOL.getIfPresent(_cacheKey);
         if (cached == null) {
