@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.peer;
 
-import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import org.jetbrains.annotations.Nullable;
 

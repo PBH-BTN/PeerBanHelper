@@ -1,6 +1,6 @@
 //package com.ghostchu.peerbanhelper.downloader.impl.rtorrent.bean;
 //
-//import com.ghostchu.peerbanhelper.downloader.PeerFlag;
+//import com.ghostchu.peerbanhelper.peer.PeerFlag;
 //import com.ghostchu.peerbanhelper.peer.Peer;
 //import com.ghostchu.peerbanhelper.util.StrUtil;
 //import com.ghostchu.peerbanhelper.wrapper.PeerAddress;

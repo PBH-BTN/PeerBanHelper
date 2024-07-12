@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
-import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
 

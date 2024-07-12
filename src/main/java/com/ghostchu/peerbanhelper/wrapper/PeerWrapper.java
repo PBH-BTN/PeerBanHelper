@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
-import com.ghostchu.peerbanhelper.downloader.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.peer.PeerFlag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

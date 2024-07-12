@@ -1,43 +1,68 @@
-package com.ghostchu.peerbanhelper.downloader;
+package com.ghostchu.peerbanhelper.peer;
 
 import lombok.Builder;
 import lombok.Data;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.StringJoiner;
 
 @Data
 public final class PeerFlag {
-    private boolean interesting;
-    private boolean choked;
-    private boolean remoteInterested;
-    private boolean remoteChoked;
-    private boolean supportsExtensions;
-    private boolean outgoingConnection;
-    private boolean localConnection;
-    private boolean handshake;
-    private boolean connecting;
-    private boolean onParole;
-    private boolean seed;
-    private boolean optimisticUnchoke;
-    private boolean snubbed;
-    private boolean uploadOnly;
-    private boolean endGameMode;
-    private boolean holePunched;
-    private boolean i2pSocket;
-    private boolean utpSocket;
-    private boolean sslSocket;
-    private boolean rc4Encrypted;
-    private boolean plainTextEncrypted;
-
-    private boolean fromTracker;
-    private boolean fromDHT;
-    private boolean fromPEX;
-    private boolean fromLSD;
-
-    private boolean fromResumeData;
-    private boolean fromIncoming;
-
     private final String ltStdString;
+    @Nullable
+    private Boolean interesting;
+    @Nullable
+    private Boolean choked;
+    @Nullable
+    private Boolean remoteInterested;
+    @Nullable
+    private Boolean remoteChoked;
+    @Nullable
+    private Boolean supportsExtensions;
+    @Nullable
+    private Boolean outgoingConnection;
+    @Nullable
+    private Boolean localConnection;
+    @Nullable
+    private Boolean handshake;
+    @Nullable
+    private Boolean connecting;
+    @Nullable
+    private Boolean onParole;
+    @Nullable
+    private Boolean seed;
+    @Nullable
+    private Boolean optimisticUnchoke;
+    @Nullable
+    private Boolean snubbed;
+    @Nullable
+    private Boolean uploadOnly;
+    @Nullable
+    private Boolean endGameMode;
+    @Nullable
+    private Boolean holePunched;
+    @Nullable
+    private Boolean i2pSocket;
+    @Nullable
+    private Boolean utpSocket;
+    @Nullable
+    private Boolean sslSocket;
+    @Nullable
+    private Boolean rc4Encrypted;
+    @Nullable
+    private Boolean plainTextEncrypted;
+    @Nullable
+    private Boolean fromTracker;
+    @Nullable
+    private Boolean fromDHT;
+    @Nullable
+    private Boolean fromPEX;
+    @Nullable
+    private Boolean fromLSD;
+    @Nullable
+    private Boolean fromResumeData;
+    @Nullable
+    private Boolean fromIncoming;
 
     public PeerFlag(String flags) {
         parseLibTorrent(flags);
@@ -79,42 +104,55 @@ public final class PeerFlag {
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(" ");
-        if (interesting) {
-            if (remoteChoked) {
+        if (interesting != null && interesting) {
+            if (remoteChoked != null && remoteChoked) {
                 joiner.add("d");
             } else {
                 joiner.add("D");
             }
         }
-        if (remoteInterested) {
-            if (choked) {
+        if (remoteInterested != null && remoteInterested) {
+            if (choked != null && choked) {
                 joiner.add("u");
             } else {
                 joiner.add("U");
             }
         }
-        if (!remoteChoked && !interesting)
-            joiner.add("K");
-        if (!choked && !remoteInterested)
-            joiner.add("?");
-        if (optimisticUnchoke)
+        if (remoteChoked != null && interesting != null) {
+            if (!remoteChoked && !interesting)
+                joiner.add("K");
+        }
+        if (choked != null && remoteInterested != null) {
+            if (!choked && !remoteInterested)
+                joiner.add("?");
+        }
+        if (optimisticUnchoke != null && optimisticUnchoke) {
             joiner.add("O");
-        if (snubbed)
+        }
+        if (snubbed != null && snubbed) {
             joiner.add("S");
-        if (!localConnection)
+        }
+        if (localConnection != null && !localConnection) {
             joiner.add("I");
-        if (fromDHT)
+        }
+        if (fromDHT != null && fromDHT) {
             joiner.add("H");
-        if (fromPEX)
+        }
+        if (fromPEX != null && fromPEX) {
             joiner.add("X");
-        if (fromLSD)
+        }
+        if (fromLSD != null && fromLSD) {
             joiner.add("L");
-        if (rc4Encrypted)
+        }
+        if (rc4Encrypted != null && rc4Encrypted) {
             joiner.add("E");
-        if (plainTextEncrypted)
+        }
+        if (plainTextEncrypted != null && plainTextEncrypted) {
             joiner.add("e");
-        if (utpSocket)
+        }
+        if (utpSocket != null && utpSocket) {
             joiner.add("P");
+        }
         return joiner.toString();
     }
 
