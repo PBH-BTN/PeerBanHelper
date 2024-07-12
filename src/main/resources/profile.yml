@@ -96,7 +96,7 @@ module:
       - '{"method":"STARTS_WITH", "content": "github.com/boypt/simple-torrent", "hit": "FALSE"}' # 自托管的远程 BT 客户端，下载文件到服务器本地磁盘，然后通过 HTTP 方式进行检索和传输（和下面那个一样）
       - '{"method":"STARTS_WITH", "content": "github.com/jpillora/cloud-torrent", "hit": "FALSE"}' # 自托管的远程 BT 客户端，下载文件到服务器本地磁盘，然后通过 HTTP 方式进行检索和传输（和上面那个一样）
       - '{"method":"STARTS_WITH", "content": "github.com/webtor-io/torrent-web-seeder", "hit": "FALSE"}' # 自托管的 Golang 包装器，支持 GRPC
-      - '{"method":"CONTAINS","content":"anacrolix/torrent"}'
+      - '{"method":"CONTAINS","content":"anacrolix/torrent"}' # 封禁任何不在白名单中的 anacrolix/torrent 客户端
       - '{"method":"STARTS_WITH","content":"qbittorrent/3.3.15"}'
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ljyun.cn/hangzhou/monitoring"}'
