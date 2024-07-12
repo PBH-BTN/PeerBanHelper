@@ -264,9 +264,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      */
     private int fileToIPList(File ruleFile, List<IPAddress> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
-        Files.readLines(ruleFile, StandardCharsets.UTF_8).forEach(ele -> {
+        Files.readLines(ruleFile, StandardCharsets.UTF_8).stream().filter(s -> !s.isBlank()).forEach(ele -> {
+            if (ele.startsWith("#")) {
+                return; // 注释
+            }
             count.getAndIncrement();
-            ips.add(IPAddressUtil.getIPAddress(ele));
+            var ip = IPAddressUtil.getIPAddress(ele);
+            if (ip != null) {
+                ips.add(IPAddressUtil.getIPAddress(ele));
+            }
         });
         return count.get();
     }
