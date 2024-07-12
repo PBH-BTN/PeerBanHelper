@@ -180,6 +180,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .stream()
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .filter(p -> p.getTorrent().getHash().equals(torrentId))
+                .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploaded(), o1.getPeer().getUploaded()))
                 .map(this::populatePeerDTO)
                 .toList();
         ctx.status(HttpStatus.OK);
@@ -206,9 +207,10 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             return;
         }
         Downloader downloader = selected.get();
-        List<TorrentWrapper> torrentWrappers = getServer().getLivePeersSnapshot().values().stream().filter(p -> p.getDownloader().equals(downloader.getName()))
+        List<TorrentWrapper> torrentWrappers = getServer().getLivePeersSnapshot()
+                .values().stream().filter(p -> p.getDownloader().equals(downloader.getName()))
                 .map(PeerMetadata::getTorrent)
-                .distinct()
+                .sorted((o1, o2) -> Long.compare(o2.getRtUploadSpeed(), o1.getRtUploadSpeed()))
                 .toList();
         ctx.status(HttpStatus.OK);
         ctx.json(torrentWrappers);
