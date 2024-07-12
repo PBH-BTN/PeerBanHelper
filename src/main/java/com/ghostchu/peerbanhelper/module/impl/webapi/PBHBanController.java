@@ -112,7 +112,7 @@ public class PBHBanController extends AbstractFeatureModule {
             Map<String, Object> map = new HashMap<>();
             map.put("pageIndex", pageIndex);
             map.put("pageSize", pageSize);
-            map.put("results", historyDao.queryByPaging(pageIndex, pageSize).stream().map(r -> new BanLogResponse(locale(ctx), r)).toList());
+            map.put("results", historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageIndex, pageSize).stream().map(r -> new BanLogResponse(locale(ctx), r)).toList());
             map.put("total", historyDao.countOf());
             ctx.status(HttpStatus.OK);
             ctx.json(map);
