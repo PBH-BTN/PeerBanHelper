@@ -226,27 +226,6 @@
                 <artifactId>takari-lifecycle-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>com.install4j</groupId>
-                <artifactId>install4j-maven</artifactId>
-                <version>10.0.8</version>
-                <executions>
-                    <execution>
-                        <id>compile-installers</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <installDir>${install4j.home}</installDir>
-                            <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
-                            <variables>
-                                <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
-                            </variables>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.7.1</version>
                 <executions>
@@ -357,6 +336,23 @@
                     <plugin>
                         <groupId>com.install4j</groupId>
                         <artifactId>install4j-maven</artifactId>
+                        <version>10.0.8</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
+                                    </variables>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -368,6 +364,23 @@
                     <plugin>
                         <groupId>com.install4j</groupId>
                         <artifactId>install4j-maven</artifactId>
+                        <version>10.0.8</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
+                                    </variables>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
