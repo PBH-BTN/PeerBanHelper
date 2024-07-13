@@ -154,7 +154,7 @@ public class Main {
             if (osName.contains("Windows")) {
                 root = new File(System.getenv("LOCALAPPDATA"), "PeerBanHelper").getAbsolutePath();
             } else {
-                root = new File(System.getProperty("user.home"), ".config/PeerBanHelper").getAbsolutePath();
+                root = new File(new File(System.getProperty("user.home"), ".config"), "PeerBanHelper").getAbsolutePath();
             }
         }
         if (System.getProperty("pbh.datadir") != null) {
