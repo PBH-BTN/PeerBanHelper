@@ -307,3 +307,7 @@ DOWNLOADER_LOGIN_INCORRECT_CRED: "鉴权失败，错误的登录凭据。请检�
 
 USER_SCRIPT_RULE: "用户 Aviator Script 自定脚本规则"
 USER_SCRIPT_RUN_RESULT: "用户脚本 {}: {}"
+
+USER_MANUALLY_BAN_RULE: "手动操作"
+USER_MANUALLY_BAN_REASON: "用户手动封禁"
+SCHEDULED_OPERATIONS: "[计划] 已处理 {} 个封禁列表的外部计划更改"

@@ -72,6 +72,7 @@ public class PeerBanHelperServer {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
+    private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
     private final List<Downloader> downloaders = new CopyOnWriteArrayList<>();
     @Getter
     private final List<IPAddress> ignoreAddresses = new ArrayList<>();
@@ -79,8 +80,7 @@ public class PeerBanHelperServer {
     @Getter
     private final List<BanListInvoker> banListInvoker = new ArrayList<>();
     private final String pbhServerAddress;
-    private final Set<ScheduledPeerBanning> scheduledPeerBannings = new CopyOnWriteArraySet<>();
-    private final Set<PeerAddress> scheduledPeerUnBannings = new CopyOnWriteArraySet<>();
+    private final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofVirtual().factory());
     @Getter
     private YamlConfiguration profileConfig;
     @Getter
@@ -97,7 +97,6 @@ public class PeerBanHelperServer {
     @Qualifier("banListFile")
     private File banListFile;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
-    private ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofVirtual().factory());
     @Getter
     private Map<PeerAddress, PeerMetadata> LIVE_PEERS = new HashMap<>();
     @Autowired
@@ -377,9 +376,8 @@ public class PeerBanHelperServer {
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
-            unbannedPeers.addAll(fetchScheduledUnbans());
             // 被新封禁的对等体列表
-            Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>(fetchScheduledBans());
+            Collection<BanMetadata> bannedPeers = new CopyOnWriteArrayList<>();
             // 当前所有活跃的对等体列表
             banWaveWatchDog.setLastOperation("Collect peers");
             Map<Downloader, Map<Torrent, List<Peer>>> peers = collectPeers();
@@ -394,6 +392,31 @@ public class PeerBanHelperServer {
             })) {
                 downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader)))));
             }
+
+
+            // 处理计划操作
+            int scheduled = 0;
+            while (!scheduledBanListOperations.isEmpty()) {
+                ScheduledBanListOperation ops = scheduledBanListOperations.poll();
+                scheduled++;
+                if (ops.ban()) {
+                    ScheduledPeerBanning banning = (ScheduledPeerBanning) ops.object();
+                    List<BanDetail> banDetails = downloaderBanDetailMap.getOrDefault(banning.downloader(), new CopyOnWriteArrayList<>());
+                    banDetails.add(banning.detail());
+                    downloaderBanDetailMap.put(banning.downloader(), banDetails);
+                } else {
+                    PeerAddress address = (PeerAddress) ops.object();
+                    BanMetadata banMetadata = BAN_LIST.get(address);
+                    if (banMetadata != null) {
+                        unbannedPeers.add(banMetadata);
+                    }
+                }
+            }
+
+            if (scheduled > 0) {
+                log.info(tlUI(Lang.SCHEDULED_OPERATIONS, scheduled));
+            }
+
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist");
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> {
@@ -431,9 +454,10 @@ public class PeerBanHelperServer {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST));
             })) {
-                downloaders.forEach(downloader -> protect.getService().submit(() -> updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
-                        needRelaunched.getOrDefault(downloader, Collections.emptyList()),
-                        bannedPeers, unbannedPeers)));
+                downloaders.forEach(downloader -> protect.getService().submit(() ->
+                        updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
+                                needRelaunched.getOrDefault(downloader, Collections.emptyList()),
+                                bannedPeers, unbannedPeers)));
             }
             if (!hideFinishLogs && !downloaders.isEmpty()) {
                 long downloadersCount = peers.keySet().size();
@@ -446,23 +470,6 @@ public class PeerBanHelperServer {
             banWaveWatchDog.feed();
             metrics.recordCheck();
         }
-    }
-
-    private Collection<? extends BanMetadata> fetchScheduledBans() {
-        return scheduledPeerBannings.stream().map(ScheduledPeerBanning::banMetadata).toList();
-    }
-
-    private Collection<? extends BanMetadata> fetchScheduledUnbans() {
-        List<BanMetadata> banMetadata = new ArrayList<>();
-        var it = scheduledPeerUnBannings.iterator();
-        while (it.hasNext()) {
-            BanMetadata meta = BAN_LIST.get(it.next());
-            if (meta != null) {
-                banMetadata.add(meta);
-            }
-            it.remove();
-        }
-        return banMetadata;
     }
 
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided) {
@@ -737,12 +744,21 @@ public class PeerBanHelperServer {
     }
 
     public void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
-        scheduledPeerBannings.add(new ScheduledPeerBanning(banMetadata, torrent, peer));
+        Downloader downloader = getDownloaders().stream().filter(d -> d.getName().equals(banMetadata.getDownloader()))
+                .findFirst().orElseThrow();
+        banPeer(banMetadata, torrent, peer);
+        scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
+                downloader,
+                new BanDetail(torrent,
+                        peer,
+                        new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE), new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON))
+                        , banDuration)
+        )));
     }
 
     public void scheduleUnBanPeer(@NotNull PeerAddress peer) {
-        scheduledPeerBannings.removeIf(s -> s.banMetadata().getPeer().getAddress().getIp().equals(peer.getIp()));
-        scheduledPeerUnBannings.add(peer);
+        unbanPeer(peer);
+        scheduledBanListOperations.add(new ScheduledBanListOperation(false, peer));
     }
 
     public String getWebUiUrl() {
@@ -799,9 +815,11 @@ public class PeerBanHelperServer {
     }
 
     public record ScheduledPeerBanning(
-            BanMetadata banMetadata,
-            Torrent torrent,
-            Peer peer
+            Downloader downloader,
+            BanDetail detail
     ) {
+    }
+
+    private record ScheduledBanListOperation(boolean ban, Object object) {
     }
 }

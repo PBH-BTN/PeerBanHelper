@@ -86,7 +86,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         ConfigurationSection config = getConfig();
         // 读取检查间隔
         checkInterval = config.getLong("check-interval", checkInterval);
-        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
         scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
