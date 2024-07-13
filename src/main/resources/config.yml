@@ -1,5 +1,8 @@
 config-version: 11
 # 设置程序语言
+# default 跟随操作系统 (Follow the operating system)
+# en_us English (US)
+# zh_cn Chinese Simplified (简体中文)
 language: default
 # Http 服务器设置
 server:
