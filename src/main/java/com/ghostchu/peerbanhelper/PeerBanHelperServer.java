@@ -735,10 +735,14 @@ public class PeerBanHelperServer {
         BAN_LIST.put(peer.getPeerAddress(), banMetadata);
         metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
         banListInvoker.forEach(i -> i.add(peer.getPeerAddress(), banMetadata));
+        banMetadata.setReverseLookup("N/A");
         if (mainConfig.getBoolean("lookup.dns-reverse-lookup")) {
-            executor.submit(() -> banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toReverseDNSLookupString()));
-        } else {
-            banMetadata.setReverseLookup("N/A");
+            executor.submit(() -> {
+                String hostName = peer.getPeerAddress().getAddress().toInetAddress().getHostName();
+                if (!peer.getPeerAddress().getIp().equals(hostName)) {
+                    banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toInetAddress().getHostName());
+                }
+            });
         }
         Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
     }
