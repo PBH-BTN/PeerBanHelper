@@ -64,7 +64,7 @@ CONFIGURATION_OUTDATED_MODULE_DISABLED: "[Warning] Unable to confirm configurati
 BTN_DOWNLOADER_GENERAL_FAILURE: "[BTN Network] Failed to obtain current torrent task information from downloader {}, skipping..."
 BTN_UPDATE_RULES_SUCCESSES: "[BTN Network] Rule data update successful, current data version: {}"
 BTN_REQUEST_FAILS: "[BTN Network] Error occurred while requesting, operation canceled {}"
-BTN_CONFIG_FAILS: "[BTN Network] Connected BTN network instance did not return valid configuration response, BTN network functionality may not work properly {}"
+BTN_CONFIG_FAILS: "[BTN Network] Connected BTN network instance did not return valid configuration response, BTN network functionality may not work properly: {}, will re-try in {} seconds"
 MODULE_BTN_BAN: "[BTN Ban] Match {} ruleset ({}): {}"
 BTN_NETWORK_CONNECTING: "[BTN Network] Please wait while we connect to the BTN network..."
 BTN_NETWORK_NOT_ENABLED: "[BTN Network] BTN functionality not enabled: this PeerBanHelper client is not joined to the BTN network"

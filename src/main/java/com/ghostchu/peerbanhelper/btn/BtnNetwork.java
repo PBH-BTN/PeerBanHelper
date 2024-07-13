@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -43,6 +45,7 @@ public class BtnNetwork {
     @Qualifier("userAgent")
     private String userAgent;
     private PeerBanHelperServer server;
+    private final AtomicBoolean configSuccess = new AtomicBoolean(false);
 
     public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret) {
         this.server = server;
@@ -52,7 +55,7 @@ public class BtnNetwork {
         this.appId = appId;
         this.appSecret = appSecret;
         setupHttpClient();
-        configBtnNetwork();
+        executeService.scheduleAtFixedRate(this::checkIfNeedRetryConfig, 600, 600, TimeUnit.SECONDS);
     }
 
     public void configBtnNetwork() {
@@ -61,7 +64,7 @@ public class BtnNetwork {
         try {
             HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
-                log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body()));
+                log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body(), 600));
                 return;
             }
             JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
@@ -95,12 +98,19 @@ public class BtnNetwork {
             abilities.values().forEach(a -> {
                 try {
                     a.load();
+                    configSuccess.set(true);
                 } catch (Exception e) {
                     log.error("Failed to load BTN ability", e);
                 }
             });
         } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_CONFIG_FAILS), e);
+            log.error(tlUI(Lang.BTN_CONFIG_FAILS, 600), e);
+        }
+    }
+
+    private void checkIfNeedRetryConfig() {
+        if (!configSuccess.get()) {
+            configBtnNetwork();
         }
     }
 
