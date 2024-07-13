@@ -37,6 +37,7 @@ public class PBHConfigUpdater {
     public void update(@NotNull Object configUpdateScript) {
         log.info("Checking configuration...");
         int selectedVersion = yaml.getInt(CONFIG_VERSION_KEY, -1);
+        String oldContent = yaml.saveToString();
         for (Method method : getUpdateScripts(configUpdateScript)) {
             try {
                 UpdateScript updateScript = method.getAnnotation(UpdateScript.class);
@@ -70,7 +71,10 @@ public class PBHConfigUpdater {
         log.info("Saving configuration changes...");
         try {
             migrateComments(yaml, bundle);
-            yaml.save(file);
+            String newContent = yaml.saveToString();
+            if (!newContent.equals(oldContent)) {
+                yaml.save(file);
+            }
         } catch (IOException e) {
             log.error("Failed to save configuration!", e);
         }
