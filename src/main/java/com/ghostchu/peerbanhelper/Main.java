@@ -143,6 +143,7 @@ public class Main {
                 System.setProperty("socksProxyHost", host);
                 System.setProperty("socksProxyPort", port);
             }
+            default -> System.setProperty("java.net.useSystemProxies", "false");
         }
     }
 
