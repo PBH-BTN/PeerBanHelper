@@ -310,4 +310,4 @@ USER_SCRIPT_RUN_RESULT: "用户脚本 {}: {}"
 
 USER_MANUALLY_BAN_RULE: "手动操作"
 USER_MANUALLY_BAN_REASON: "用户手动封禁"
-SCHEDULED_OPERATIONS: "[计划] 已处理 {} 个封禁列表的外部计划更改"
+SCHEDULED_OPERATIONS: "[计划任务] 已处理 {} 个封禁列表的外部计划更改"

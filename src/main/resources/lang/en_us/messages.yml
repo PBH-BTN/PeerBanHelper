@@ -307,3 +307,4 @@ DOWNLOADER_LOGIN_INCORRECT_CRED: "Unable to authenticate to downloader, check th
 
 USER_SCRIPT_RULE: "User Aviator Script Custom Rule"
 USER_SCRIPT_RUN_RESULT: "UserScript {}: {}"
+SCHEDULED_OPERATIONS: "[Scheduled Tasks] Processed {} ban list external changes"
