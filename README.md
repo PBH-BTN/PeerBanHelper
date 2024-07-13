@@ -42,6 +42,10 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * Peer ID/Client Name 伪装检查
 * WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP，规则订阅管理，图表查看，Peer 列表查看）
 
+如果配置了 Maxmind IP 库，则还支持以下内容：
+
+* 在封禁列表中查看 IP 归属地
+
 ### PeerID 黑名单
 
 顾名思义，它根据客户端交换的 Peer ID 来封禁客户端。  
