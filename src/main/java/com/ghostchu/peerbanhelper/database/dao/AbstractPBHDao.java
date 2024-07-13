@@ -16,19 +16,19 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
         super(connectionSource, dataClass);
     }
 
-    public List<T> queryByPaging(QueryBuilder<T, ID> qb, long offset, long limit) throws SQLException {
-        return query(qb.offset(offset).limit(limit).prepare());
+    public List<T> queryByPaging(QueryBuilder<T, ID> qb, long pageIndex, long pageSize) throws SQLException {
+        return query(qb.offset(pageIndex * pageSize).limit(pageSize).prepare());
     }
 
-    public List<T> queryByPaging(ID id, long offset, long limit) throws SQLException {
-        return query(queryBuilder().offset(offset).limit(limit).prepare());
+    public List<T> queryByPaging(ID id, long pageIndex, long pageSize) throws SQLException {
+        return query(queryBuilder().offset(pageIndex * pageSize).limit(pageSize).prepare());
     }
 
-    public List<T> queryByPaging(long offset, long limit) throws SQLException {
-        return query(queryBuilder().offset(offset).limit(limit).prepare());
+    public List<T> queryByPaging(long pageIndex, long pageSize) throws SQLException {
+        return query(queryBuilder().offset(pageIndex * pageSize).limit(pageSize).prepare());
     }
 
-    public List<T> queryByPagingMatchArgs(T matchObject, long offset, long limit) throws SQLException {
+    public List<T> queryByPagingMatchArgs(T matchObject, long pageIndex, long pageSize) throws SQLException {
         checkForInitialized();
         QueryBuilder<T, ID> qb = queryBuilder();
         Where<T, ID> where = qb.where();
@@ -45,7 +45,7 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
             return Collections.emptyList();
         } else {
             where.and(fieldC);
-            return qb.offset(offset).limit(limit).query();
+            return qb.offset(pageIndex * pageSize).limit(pageSize).query();
         }
     }
 }
