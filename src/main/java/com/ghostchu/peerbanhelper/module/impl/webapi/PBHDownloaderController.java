@@ -180,7 +180,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .stream()
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .filter(p -> p.getTorrent().getHash().equals(torrentId))
-                .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploaded(), o1.getPeer().getUploaded()))
+                .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
                 .map(this::populatePeerDTO)
                 .toList();
         ctx.status(HttpStatus.OK);
