@@ -302,7 +302,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             return null;
         }
 
-        Optional<RuleSubLogEntity> first = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().where().eq("ruleId", ruleId).queryBuilder(), 0, 1).stream().findFirst();
+        Optional<RuleSubLogEntity> first = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), 0, 1).stream().findFirst();
         long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
         int count = first.map(RuleSubLogEntity::getCount).orElse(0);
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
