@@ -186,7 +186,9 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
                 boolean ban = rewind > rewindMaximumDifference;
                 if (ban) {
                     clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
+                    progressRecorder.invalidate(peerIpString); // 封禁时，移除缓存
                 }
+
                 return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND), new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND, percent(clientProgress), percent(actualProgress), percent(lastRecord), percent(rewind), percent(rewindMaximumDifference)));
             }
             //return new CheckResult(getClass(), PeerAction.NO_ACTION, "N/A", String.format(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS, percent(clientProgress), percent(actualProgress), percent(difference)));
