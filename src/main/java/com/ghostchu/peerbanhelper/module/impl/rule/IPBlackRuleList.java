@@ -122,7 +122,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             long t2 = System.currentTimeMillis();
             log.debug(tlUI(Lang.IP_BAN_RULE_MATCH_TIME, t2 - t1));
             if (mr) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(ip), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName(), ip));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(matchRule.get().ruleName()), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName(), ip));
             }
             return pass();
         }, true);
