@@ -346,11 +346,14 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         if (level.equals(Level.INFO)) {
             alertType = Alert.AlertType.INFORMATION;
         }
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(title);
-        alert.setContentText(description);
-        alert.show();
+        Alert.AlertType finalAlertType = alertType;
+        Platform.runLater(() -> {
+            Alert alert = new Alert(finalAlertType);
+            alert.setTitle(title);
+            alert.setHeaderText(title);
+            alert.setContentText(description);
+            alert.show();
+        });
     }
 
     @Override
@@ -365,10 +368,13 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         if (level.equals(Level.INFO)) {
             alertType = Alert.AlertType.INFORMATION;
         }
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(title);
-        alert.setContentText(description);
-        alert.show();
+        Alert.AlertType finalAlertType = alertType;
+        Platform.runLater(() -> {
+            Alert alert = new Alert(finalAlertType);
+            alert.setTitle(title);
+            alert.setHeaderText(title);
+            alert.setContentText(description);
+            alert.show();
+        });
     }
 }

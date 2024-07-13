@@ -66,10 +66,10 @@ public class PBHBanController extends AbstractFeatureModule {
     }
 
     private void handleBanDelete(Context context) {
-        UnbanRequest request = context.bodyAsClass(UnbanRequest.class);
+        List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
         List<PeerAddress> pendingRemovals = new ArrayList<>();
         for (PeerAddress address : getServer().getBannedPeers().keySet()) {
-            if (request.ips().contains(address.getIp())) {
+            if (request.contains(address.getIp())) {
                 pendingRemovals.add(address);
             }
         }

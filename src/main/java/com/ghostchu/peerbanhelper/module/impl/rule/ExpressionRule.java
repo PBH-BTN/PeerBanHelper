@@ -310,18 +310,13 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             return;
         }
         scriptDir.mkdirs();
-        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-        var res = resourcePatternResolver.getResources("scripts/*");
+        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
+        var res = resourcePatternResolver.getResources("classpath:scripts/**/*.*");
         for (Resource re : res) {
-            if (re.isFile()) {
-                if (re.getFilename() == null)
-                    continue;
-                File f = re.getFile();
-                String content = new String(re.getContentAsByteArray(), StandardCharsets.UTF_8);
-                File file = new File(scriptDir, f.getName());
-                file.createNewFile();
-                Files.writeString(file.toPath(), content);
-            }
+            String content = new String(re.getContentAsByteArray(), StandardCharsets.UTF_8);
+            File file = new File(scriptDir, re.getFilename());
+            file.createNewFile();
+            Files.writeString(file.toPath(), content);
         }
     }
 

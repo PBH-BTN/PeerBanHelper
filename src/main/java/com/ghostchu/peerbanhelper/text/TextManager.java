@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.text;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.postprocessor.PostProcessor;
 import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
+import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -179,25 +180,16 @@ public class TextManager implements Reloadable {
         if (url == null) {
             return availableLang;
         }
-        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-        var res = resourcePatternResolver.getResources("lang/*/*.yml");
+        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
+        var res = resourcePatternResolver.getResources("classpath:lang/**/*.yml");
         for (Resource re : res) {
-            if (re.isFile()) {
-                if (re.getFilename() == null)
-                    continue;
-                if (!re.getFilename().endsWith(".yml")) {
-                    continue;
-                }
-                File f = re.getFile();
-                var parent = f.getParentFile();
-                String langName = parent.getName();
-                try {
-                    YamlConfiguration configuration = new YamlConfiguration();
-                    configuration.loadFromString(Files.readString(f.toPath()));
-                    availableLang.put(langName.toLowerCase(Locale.ROOT).replace("-", "_"), configuration);
-                } catch (IOException | InvalidConfigurationException e) {
-                    log.warn("Failed to load bundled translation.", e);
-                }
+            String langName = URLUtil.getParentName(re.getURI());
+            try {
+                YamlConfiguration configuration = new YamlConfiguration();
+                configuration.loadFromString(new String(re.getContentAsByteArray(), StandardCharsets.UTF_8));
+                availableLang.put(langName.toLowerCase(Locale.ROOT).replace("-", "_"), configuration);
+            } catch (IOException | InvalidConfigurationException e) {
+                log.warn("Failed to load bundled translation.", e);
             }
         }
         return availableLang;
