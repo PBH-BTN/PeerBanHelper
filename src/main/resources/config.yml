@@ -1,4 +1,4 @@
-config-version: 11
+config-version: 12
 # 设置程序语言
 # default 跟随操作系统 (Follow the operating system)
 # en_us English (US)
@@ -103,3 +103,16 @@ ip-database:
 firewall-integration:
   # 高级 Windows 防火墙（基于动态关键字），需要 Windows 10 或更高版本
   windows-adv-firewall: true
+# 代理服务器设定
+proxy:
+  # 代理服务器设置
+  # 注意：不支持需要密码验证的代理服务器
+  # 0 = 不使用代理
+  # 1 = 使用系统代理
+  # 2 = 使用 HTTP(s) 代理
+  # 3 = 使用 socks5 代理
+  setting: 0
+  # 代理服务器地址
+  host: "127.0.0.1"
+  # 代理服务器端口号
+  port: 7890

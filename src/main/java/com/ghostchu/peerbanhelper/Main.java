@@ -89,7 +89,6 @@ public class Main {
         );
         libraryManager.setLogLevel(LogLevel.ERROR);
         librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath);
-        setupProxySettings();
         meta = buildMeta();
         setupConfiguration();
         mainConfigFile = new File(configDirectory, "config.yml");
@@ -107,6 +106,7 @@ public class Main {
         initGUI(args);
         guiManager.createMainWindow();
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
+        setupProxySettings();
         try {
             applicationContext = new AnnotationConfigApplicationContext();
             applicationContext.register(AppConfig.class);
@@ -127,8 +127,22 @@ public class Main {
     }
 
     private static void setupProxySettings() {
-        if (System.getenv("http_proxy") != null || System.getenv("HTTP_PROXY") != null) {
-            log.warn("Java application doesn't apply the proxy settings from HTTP_PROXY, DO NOT USE IT, it won't work.");
+        var proxySection = mainConfig.getConfigurationSection("proxy");
+        if (proxySection == null) return;
+        String host = proxySection.getString("host");
+        String port = String.valueOf(proxySection.getInt("port"));
+        switch (proxySection.getInt("setting")) {
+            case 1 -> System.setProperty("java.net.useSystemProxies", "true");
+            case 2 -> {
+                System.setProperty("http.proxyHost", host);
+                System.setProperty("http.proxyPort", port);
+                System.setProperty("https.proxyHost", host);
+                System.setProperty("https.proxyPort", port);
+            }
+            case 3 -> {
+                System.setProperty("socksProxyHost", host);
+                System.setProperty("socksProxyPort", port);
+            }
         }
     }
 

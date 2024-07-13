@@ -28,6 +28,13 @@ public class MainConfigUpdateScript {
         }
     }
 
+    @UpdateScript(version = 13)
+    public void proxyServerConfigSection() {
+        conf.set("proxy.setting", 0);
+        conf.set("proxy.host", "127.0.0.1");
+        conf.set("proxy.port", 7890);
+    }
+
     @UpdateScript(version = 12)
     public void externalWebUI() {
         conf.set("server.external-webui", false);
