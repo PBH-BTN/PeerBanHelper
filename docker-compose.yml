@@ -12,3 +12,4 @@ services:
       - PUID=0
       - PGID=0
       - TZ=UTC
+    stop_grace_period: 30s
