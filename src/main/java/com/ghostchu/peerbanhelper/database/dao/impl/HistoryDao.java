@@ -58,16 +58,34 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         }
         List<UniversalFieldNumResult> results = new ArrayList<>();
         var sql = """
-                SELECT %field%,
-                       SUM(%field%) AS ct,
-                       SUM(%field%) / (SELECT SUM(%field%) FROM %table%) AS percent
-                FROM %table%
-                GROUP BY %field%
-                HAVING percent > %percent%
-                ORDER BY ct DESC;
+                SELECT
+                                                 	%field%,
+                                                 	SUM( %field% ) AS ct,
+                                                 	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history ) AS percent ,
+                                                 	torrentName,
+                                                 	torrentInfoHash,
+                                                 	moduleName
+                                                 FROM
+                                                 	(
+                                                 	SELECT
+                                                 		*,
+                                                 		torrents.infoHash AS torrentInfoHash,
+                                                 		torrents.name AS torrentName,
+                                                 		modules.name AS moduleName\s
+                                                 	FROM
+                                                 		(
+                                                 			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
+                                                 		)
+                                                 		INNER JOIN modules ON modules.id = rules.module_id\s
+                                                 	)\s
+                                                 GROUP BY
+                                                 	%field%\s
+                                                 HAVING
+                                                 	percent > %percent%\s
+                                                 ORDER BY
+                                                 	ct DESC;
                 """;
         sql = sql.replace("%field%", field)
-                .replace("%table%", getTableName())
                 .replace("%percent%", String.valueOf(percentFilter));
         try (var resultSet = queryRaw(sql)) {
             for (String[] result : resultSet.getResults()) {
@@ -83,19 +101,36 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
             throw new IllegalArgumentException("Invalid field: " + field + ", only A-Z a-z 0-9 is allowed.");
         }
         List<UniversalFieldNumResult> results = new ArrayList<>();
-        queryBuilder().selectRaw(field, "COUNT(%field%) AS ct", "COUNT(%field%) * 1.0 / (SELECT COUNT(%field%) FROM %table%) AS percent");
         var sql = """
-                SELECT %field%,
-                       COUNT(%field%) AS ct,
-                       COUNT(%field%) * 1.0 / (SELECT COUNT(%field%) FROM %table%) AS percent
-                FROM %table%
-                GROUP BY %field%
-                HAVING percent > %percent%
-                ORDER BY ct DESC;
+                SELECT
+                                                 	%field%,
+                                                 	COUNT( %field% ) AS ct,
+                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( %field% ) FROM history ) AS percent ,
+                                                 	torrentName,
+                                                 	torrentInfoHash,
+                                                 	moduleName
+                                                 FROM
+                                                 	(
+                                                 	SELECT
+                                                 		*,
+                                                 		torrents.infoHash AS torrentInfoHash,
+                                                 		torrents.name AS torrentName,
+                                                 		modules.name AS moduleName\s
+                                                 	FROM
+                                                 		(
+                                                 			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
+                                                 		)
+                                                 		INNER JOIN modules ON modules.id = rules.module_id\s
+                                                 	)\s
+                                                 GROUP BY
+                                                 	%field%\s
+                                                 HAVING
+                                                 	percent > %percent%\s
+                                                 ORDER BY
+                                                 	ct DESC;
                 """;
 
         sql = sql.replace("%field%", field)
-                .replace("%table%", getTableName())
                 .replace("%percent%", String.valueOf(percentFilter));
         try (var resultSet = queryRaw(sql)) {
             for (String[] result : resultSet.getResults()) {
