@@ -62,7 +62,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	%field%,
                                                  	SUM( %field% ) AS ct,
                                                  	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history ) AS percent ,
-                                                 	torrent,
+                                                 	torrentName,
                                                  	torrentInfoHash,
                                                  	module
                                                  FROM
@@ -70,7 +70,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	SELECT
                                                  		*,
                                                  		torrents.infoHash AS torrentInfoHash,
-                                                 		torrents.name AS torrent,
+                                                 		torrents.name AS torrentName,
                                                  		modules.name AS module\s
                                                  	FROM
                                                  		(
@@ -106,7 +106,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	%field%,
                                                  	COUNT( %field% ) AS ct,
                                                  	COUNT( %field% ) * 1.0 / ( SELECT COUNT( %field% ) FROM history ) AS percent ,
-                                                 	torrent,
+                                                 	torrentName,
                                                  	torrentInfoHash,
                                                  	module
                                                  FROM
@@ -114,7 +114,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	SELECT
                                                  		*,
                                                  		torrents.infoHash AS torrentInfoHash,
-                                                 		torrents.name AS torrent,
+                                                 		torrents.name AS torrentName,
                                                  		modules.name AS module\s
                                                  	FROM
                                                  		(
