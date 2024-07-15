@@ -2,35 +2,36 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.BanResult;
+import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
+@Component
 public class AutoRangeBan extends AbstractRuleFeatureModule {
+    @Autowired
+    private PeerBanHelperServer peerBanHelperServer;
     private int ipv4Prefix;
     private int ipv6Prefix;
-    private final Map<PeerAddress, IPAddress> banListMappingCache = Collections.synchronizedMap(new WeakHashMap<>());
-
-    public AutoRangeBan(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
+    @Autowired
+    private JavalinWebContainer webContainer;
+    private long banDuration;
 
     @Override
     public @NotNull String getName() {
@@ -43,11 +44,6 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     }
 
     @Override
-    public boolean needCheckHandshake() {
-        return true;
-    }
-
-    @Override
     public boolean isConfigurable() {
         return true;
     }
@@ -55,8 +51,13 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         reloadConfig();
-        getServer().getWebContainer().javalin()
+        webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
+    }
+
+    @Override
+    public boolean isThreadSafe() {
+        return super.isThreadSafe();
     }
 
     private void handleWebAPI(Context ctx) {
@@ -72,37 +73,40 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
     private void reloadConfig() {
         this.ipv4Prefix = getConfig().getInt("ipv4");
         this.ipv6Prefix = getConfig().getInt("ipv6");
-        banListMappingCache.clear();
+        this.banDuration = getConfig().getLong("ban-duration", 0);
     }
 
     @Override
-    public boolean isCheckCacheable() {
-        return false;
-    }
-
-    @Override
-    public @NotNull BanResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
-        if (peer.getPeerId() == null || peer.getPeerId().isEmpty()) {
-            return new BanResult(this, PeerAction.NO_ACTION, "N/A", "Waiting for Bittorrent handshaking.");
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+        if (isHandShaking(peer)) {
+            return pass();
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
+        if (peerAddress.isIPv4Convertible()) {
+            peerAddress = peerAddress.toIPv4();
+        }
         for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
-            IPAddress bannedPeerAddress = banListMappingCache.get(bannedPeer);
-            if (bannedPeerAddress == null) {
-                IPAddress bannedAddress = bannedPeer.getAddress();
-                if (bannedPeer.getAddress().isIPv4()) {
-                    bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress, ipv4Prefix);
-                } else {
-                    bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress, ipv6Prefix);
-                }
-                bannedPeerAddress = bannedAddress;
-                banListMappingCache.put(bannedPeer, bannedPeerAddress);
+            IPAddress bannedAddress = bannedPeer.getAddress().withoutPrefixLength();
+            if (bannedAddress.isIPv4Convertible()) {
+                bannedAddress = bannedAddress.toIPv4();
             }
-            if (bannedPeerAddress.contains(peerAddress)) {
-                return new BanResult(this, PeerAction.BAN, bannedPeerAddress.toString(), String.format(Lang.ARB_BANNED, peerAddress, bannedPeer.getAddress()));
+            if (peerAddress.isIPv4() != bannedAddress.isIPv4()) {
+                continue;
+            }
+            String addressType = "UNKNOWN";
+            if (bannedAddress.isIPv4()) {
+                addressType = "IPv4/" + ipv4Prefix;
+                bannedAddress = bannedAddress.toPrefixBlock(ipv4Prefix);
+            }
+            if (bannedAddress.isIPv6()) {
+                addressType = "IPv6/" + ipv6Prefix;
+                bannedAddress = bannedAddress.toPrefixBlock(ipv6Prefix);
+            }
+            if (bannedAddress.contains(peerAddress)) {
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), addressType));
             }
         }
-        return new BanResult(this, PeerAction.NO_ACTION, "N/A", "All ok!");
+        return pass();
     }
 
 

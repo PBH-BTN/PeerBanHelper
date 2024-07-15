@@ -7,11 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
-public class PeerAddress implements Comparable<PeerAddress> {
+public final class PeerAddress implements Comparable<PeerAddress>, Serializable {
 
     private String ip;
     private transient IPAddress address;
@@ -23,7 +25,6 @@ public class PeerAddress implements Comparable<PeerAddress> {
     public PeerAddress(String ip, int port) {
         this.ip = ip;
         this.port = port;
-        this.address = IPAddressUtil.getIPAddress(ip);
     }
 
     public IPAddress getAddress() {
@@ -33,6 +34,13 @@ public class PeerAddress implements Comparable<PeerAddress> {
         return address;
     }
 
+    @Override
+    public String toString() {
+        return "PeerAddress{" +
+                "ip='" + ip + '\'' +
+                ", port=" + port +
+                '}';
+    }
 
     @Override
     public int compareTo(PeerAddress o) {

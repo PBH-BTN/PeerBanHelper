@@ -15,6 +15,15 @@ on:
       - published
 jobs:
   build:
+    permissions:
+      contents: write
+      checks: write
+      actions: read
+      issues: read
+      packages: write
+      pull-requests: read
+      repository-projects: read
+      statuses: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +36,13 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
+      - uses: luangong/setup-install4j@v1
+        name: Setup Install4j
+        with:
+          version: 10.0.8
+          license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Build with Maven
-        run: mvn -B clean package --file pom.xml
+        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -36,6 +50,13 @@ jobs:
           path: |
             target/*.jar
             target/peerbanhelper-binary
+            target/media/*.exe
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.4.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*"]'
         id: project
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
@@ -61,7 +82,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5.3.0
+        uses: docker/build-push-action@v6.4.0
         with:
           context: .
           file: ./Dockerfile
@@ -93,7 +114,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Aliyun ACR
-        uses: docker/build-push-action@v5.3.0
+        uses: docker/build-push-action@v6.4.0
         with:
           context: .
           file: ./Dockerfile

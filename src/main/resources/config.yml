@@ -1,48 +1,9 @@
-config-version: 9
-# 客户端设置
-client:
-  # 名字，可以自己起，会在日志中显示，只能由字母数字横线组成，数字不能打头
-  qbittorrent-001:
-    # 客户端类型
-    # 支持的客户端列表：
-    # qBittorrent
-    # Transmission
-    # BiglyBT
-    # 其它也许以后会加
-    type: qBittorrent
-    # 客户端地址
-    endpoint: "http://ip:8085"
-    # 登录信息（暂不支持 Basic Auth）
-    # 用户名
-    username: "username"
-    # 密码
-    password: "password"
-    # Basic Auth - 不知道这是什么的话，请保持默认
-    basic-auth:
-      user: ""
-      pass: ""
-    # 验证 SSL 证书有效性
-    verify-ssl: true
-    # Http 协议版本
-    http-version: "HTTP_1_1"
-    # 增量封禁（有助于缓解保存封禁列表时的下载器压力，但可能不稳定，可能在部分下载器上会导致无法封禁Peers）
-    increment-ban: false
-  transmission-002:
-    type: Transmission
-    endpoint: "http://127.0.0.1:9091"
-    username: "admin"
-    password: "admin"
-    verify-ssl: true
-    http-version: "HTTP_1_1"
-    rpc-url: "/transmission/rpc"
-  biglybt-003:
-    type: BiglyBT
-    # 填写 PeerBanHelper 提供的 BiglyBT 适配插件的 IP+端口
-    endpoint: "http://127.0.0.1:55667"
-    # 填写 PeerBanHelper 提供的 BiglyBT 适配插件的 Token
-    token: ""
-    # 是否使用增量封禁，在 BiglyBT 上这是推荐的选项
-    increment-ban: true
+config-version: 12
+# 设置程序语言
+# default 跟随操作系统 (Follow the operating system)
+# en_us English (US)
+# zh_cn Chinese Simplified (简体中文)
+language: default
 # Http 服务器设置
 server:
   # WebUI 监听端口
@@ -53,6 +14,8 @@ server:
   prefix: "http://127.0.0.1:9898"
   # 要访问 WebUI 端点，则必须输入此 Token 以进行身份验证
   token: ""
+  # 允许 CORS 跨站，仅在使用外部 PBH WebUI 时才应该启用
+  allow-cors: false
 # 日志记录器配置
 logger:
   # 是否隐藏 [完成] 已检查 XX 的 X 个活跃 Torrent 和 X 个对等体 的日志消息？
@@ -71,6 +34,7 @@ persist:
 btn:
   # 启用 BTN 模块
   # 启用后，才可以使用由 BTN 提供的云规则功能
+  # 为了隐私起见，此功能需要您手动启用
   enabled: false
   # 启用数据提交（匿名）
   # BTN 网络基于所有启用此功能的用户提交的数据，对 Peers 进行可信度验证
@@ -84,7 +48,8 @@ btn:
   app-id: "example-app-id"
   app-secret: "example-app-secret"
   # 填写实例 URL，您需要自行寻找一个 BTN 实例服务器
-  config-url: "http://127.0.0.1:9988/ping/config"
+  # 默认使用 PBH-BTN 社区 BTN 服务器，请前往 https://btn-prod.ghostchu-services.top 注册并获取一个账号
+  config-url: "https://btn-prod.ghostchu-services.top/ping/config"
 # 封禁列表处理
 # PBH 能够除了调用 BT 客户端的封禁 API 外，还能够进行如下操作，以便适配更多其它客户端
 banlist-invoker:
@@ -140,3 +105,16 @@ ip-database:
 firewall-integration:
   # 高级 Windows 防火墙（基于动态关键字），需要 Windows 10 或更高版本
   windows-adv-firewall: true
+# 代理服务器设定
+proxy:
+  # 代理服务器设置
+  # 注意：不支持需要密码验证的代理服务器
+  # 0 = 不使用代理
+  # 1 = 使用系统代理
+  # 2 = 使用 HTTP(s) 代理
+  # 3 = 使用 socks5 代理
+  setting: 0
+  # 代理服务器地址
+  host: "127.0.0.1"
+  # 代理服务器端口号
+  port: 7890

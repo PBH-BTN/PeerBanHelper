@@ -1,6 +1,5 @@
 package raccoonfink.deluge;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -42,13 +41,12 @@ public class DelugeServer {
                 .newBuilder()
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(Main.getUserAgent())
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .requestTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .defaultHeader("Accept", "application/json")
-                .defaultHeader("Accept-Encoding", "compress;q=0.5, gzip;q=1.0")
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .defaultHeader("Content-Type", "application/json")
                 .authenticator(new Authenticator() {
                     @Override

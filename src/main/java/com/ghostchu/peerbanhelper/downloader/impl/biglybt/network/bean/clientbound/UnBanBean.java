@@ -9,6 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UnBanBean {
+public final class UnBanBean {
     private List<String> ips;
 }

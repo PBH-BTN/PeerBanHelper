@@ -27,6 +27,7 @@
 * Transmission **(3.00-20 或更高版本)**
 * BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
 * Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
+* Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
   
 ## 功能介绍
 
@@ -36,11 +37,14 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * Client Name 黑名单
 * IP 黑名单
 * 虚假进度检查器（提供启发式客户端检测功能）（Transmission不支持过量下载检测）
-* 主动探测
 * 自动 IP 段封禁
 * 多拨追猎
 * Peer ID/Client Name 伪装检查
-* WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP）
+* WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP，规则订阅管理，图表查看，Peer 列表查看）
+
+如果配置了 Maxmind IP 库，则还支持以下内容：
+
+* 在封禁列表中查看 IP 归属地
 
 ### PeerID 黑名单
 

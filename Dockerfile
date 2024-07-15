@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.6-eclipse-temurin-21 as build
+FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.8-eclipse-temurin-21 as build
 
 COPY . /build
 WORKDIR /build
@@ -12,4 +12,4 @@ WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
-ENTRYPOINT ["java","-Xmx256M","-XX:+UseG1GC", "-XX:+UseStringDeduplication","-XX:+ShrinkHeapInSteps","-jar","PeerBanHelper.jar"]
+ENTRYPOINT ["java","-Xmx386M","-XX:+UseG1GC", "-XX:+UseStringDeduplication","-XX:+ShrinkHeapInSteps","-jar","PeerBanHelper.jar"]

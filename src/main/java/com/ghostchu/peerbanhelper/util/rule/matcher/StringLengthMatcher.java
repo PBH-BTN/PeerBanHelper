@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.rule.matcher;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.AbstractJsonMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.google.gson.JsonObject;
@@ -13,6 +14,7 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class StringLengthMatcher extends AbstractJsonMatcher {
+    private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_LENGTH);
     private final int min;
     private final int max;
     private MatchResult hit = MatchResult.TRUE;
@@ -37,8 +39,8 @@ public class StringLengthMatcher extends AbstractJsonMatcher {
     }
 
     @Override
-    public @NotNull String matcherName() {
-        return Lang.RULE_MATCHER_STRING_LENGTH;
+    public TranslationComponent matcherName() {
+        return nameComponent;
     }
 
     @Override

@@ -1,12 +1,17 @@
 package com.ghostchu.peerbanhelper.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.management.LockInfo;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.text.CharacterIterator;
+import java.text.DecimalFormat;
 import java.text.StringCharacterIterator;
 
 public class MsgUtil {
+    private static final DecimalFormat df = new DecimalFormat("0.00%");
     public static String humanReadableByteCountBin(long bytes) {
         long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
         if (absB < 1024) {
@@ -96,5 +101,44 @@ public class MsgUtil {
         }
         sb.append('\n');
         return sb.toString();
+    }
+
+    public static DecimalFormat getPercentageFormatter() {
+        return df;
+    }
+
+
+    /**
+     * Replace args in raw to args
+     *
+     * @param raw  text
+     * @param args args
+     * @return filled text
+     */
+    @NotNull
+    public static String fillArgs(@Nullable String raw, @Nullable String... args) {
+        if (raw == null || raw.isEmpty()) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
+        int start = 0;
+        int argIndex = 0;
+
+        while (start < raw.length()) {
+            int placeholderIndex = raw.indexOf("{}", start);
+            if (placeholderIndex == -1) {
+                result.append(raw.substring(start));
+                break;
+            }
+            result.append(raw, start, placeholderIndex);
+            if (args != null && argIndex < args.length) {
+                result.append(args[argIndex] != null ? args[argIndex] : "");
+                argIndex++;
+            } else {
+                result.append("{}");
+            }
+            start = placeholderIndex + 2;
+        }
+        return result.toString();
     }
 }

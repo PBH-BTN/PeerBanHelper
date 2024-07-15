@@ -1,10 +1,8 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderBasicAuth;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
-import com.ghostchu.peerbanhelper.downloader.WebViewScriptCallback;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
@@ -13,6 +11,7 @@ import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerRe
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -46,6 +45,8 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 public class BiglyBT implements Downloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(BiglyBT.class);
     private final String apiEndpoint;
@@ -53,7 +54,7 @@ public class BiglyBT implements Downloader {
     private final Config config;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private String name;
-    private String statusMessage;
+    private TranslationComponent statusMessage;
 
     public BiglyBT(String name, Config config) {
         this.name = name;
@@ -65,14 +66,13 @@ public class BiglyBT implements Downloader {
                 .newBuilder()
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(Main.getUserAgent())
                 .defaultHeader("Authorization", "Bearer " + config.getToken())
                 .defaultHeader("Content-Type", "application/json")
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
-
                 .cookieHandler(cm);
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
@@ -100,8 +100,21 @@ public class BiglyBT implements Downloader {
         return config.saveToYaml();
     }
 
-    public boolean login() {
-        return isLoggedIn();
+    public DownloaderLoginResult login() {
+        HttpResponse<Void> resp;
+        try {
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
+            if (resp.statusCode() == 200) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+            }
+            if (resp.statusCode() == 403) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
+            }
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, "statusCode=" + resp.statusCode()));
+        } catch (Exception e) {
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.NETWORK_ERROR, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
+        }
+
     }
 
     @Override
@@ -109,25 +122,25 @@ public class BiglyBT implements Downloader {
         return apiEndpoint;
     }
 
-    @Override
-    public String getWebUIEndpoint() {
-        return config.getEndpoint();
-    }
+//    @Override
+//    public String getWebUIEndpoint() {
+//        return config.getEndpoint();
+//    }
 
-    @Override
-    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
-        return null;
-    }
-
-    @Override
-    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
-        return null;
-    }
-
-    @Override
-    public boolean isSupportWebview() {
-        return false;
-    }
+//    @Override
+//    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
+//        return null;
+//    }
+//
+//    @Override
+//    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
+//        return null;
+//    }
+//
+//    @Override
+//    public boolean isSupportWebview() {
+//        return false;
+//    }
 
     @Override
     public String getName() {
@@ -137,16 +150,6 @@ public class BiglyBT implements Downloader {
     @Override
     public String getType() {
         return "BiglyBT";
-    }
-
-    public boolean isLoggedIn() {
-        HttpResponse<Void> resp;
-        try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
-        } catch (Exception e) {
-            return false;
-        }
-        return resp.statusCode() == 200;
     }
 
     @Override
@@ -171,7 +174,7 @@ public class BiglyBT implements Downloader {
             throw new IllegalStateException(e);
         }
         if (request.statusCode() != 200) {
-            throw new IllegalStateException(String.format(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, request.statusCode(), request.body()));
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, request.statusCode(), request.body()));
         }
         List<DownloadRecord> torrentDetail = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<DownloadRecord>>() {
         }.getType());
@@ -209,7 +212,7 @@ public class BiglyBT implements Downloader {
             throw new IllegalStateException(e);
         }
         if (resp.statusCode() != 200) {
-            throw new IllegalStateException(String.format(Lang.DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
         PeerManagerRecord peerManagerRecord = JsonUtil.getGson().fromJson(resp.body(), PeerManagerRecord.class);
         List<Peer> peersList = new ArrayList<>();
@@ -223,7 +226,7 @@ public class BiglyBT implements Downloader {
                     peer.getStats().getRtUploadSpeed(),
                     peer.getStats().getTotalSent(),
                     peer.getPercentDoneInThousandNotation() / 1000d,
-                    "unsupported"
+                    null
             ));
         }
         return peersList;
@@ -236,11 +239,11 @@ public class BiglyBT implements Downloader {
                             .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.warn(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -254,11 +257,11 @@ public class BiglyBT implements Downloader {
                             .build()
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.warn(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body());
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.warn(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage(), e);
+            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -269,13 +272,13 @@ public class BiglyBT implements Downloader {
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, String statusMessage) {
+    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }
 
     @Override
-    public String getLastStatusMessage() {
+    public TranslationComponent getLastStatusMessage() {
         return statusMessage;
     }
 
@@ -302,8 +305,8 @@ public class BiglyBT implements Downloader {
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
             }
-            config.setToken(section.getString("token"));
-            config.setIncrementBan(section.getBoolean("increment-ban"));
+            config.setToken(section.getString("token", ""));
+            config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             return config;

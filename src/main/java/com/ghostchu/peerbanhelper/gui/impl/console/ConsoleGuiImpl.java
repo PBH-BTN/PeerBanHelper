@@ -1,11 +1,9 @@
 package com.ghostchu.peerbanhelper.gui.impl.console;
 
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
-import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
@@ -14,13 +12,6 @@ public class ConsoleGuiImpl implements GuiImpl {
     private final AtomicBoolean wakeLock = new AtomicBoolean(false);
 
     public ConsoleGuiImpl(String[] args) {
-    }
-
-    @Override
-    public void showConfigurationSetupDialog() {
-        log.info(Lang.CONFIG_PEERBANHELPER);
-        Scanner scanner = new Scanner(System.in);
-        scanner.nextLine();
     }
 
     @Override

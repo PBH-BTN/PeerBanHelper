@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +45,20 @@ public class URLUtil {
             return m.group(0).split("=")[1].replace("&", "");
         } else {
             return null;
+        }
+    }
+
+    public static String getParentName(URI uri) {
+        try {
+            // 查找文件路径中的上一级目录
+            String[] pathSegments = uri.toString().split("/");
+            if (pathSegments.length > 1) {
+                return pathSegments[pathSegments.length - 2];
+            } else {
+                return "";
+            }
+        } catch (Exception e) {
+            return "";
         }
     }
 }

@@ -1,0 +1,40 @@
+.root {
+}
+
+.log-window-list-cell {
+    -fx-text-fill: black;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #dddddd;
+}
+
+.log-window-list-cell:empty {
+    -fx-border-width: 0;
+}
+
+.log-window-list-cell:fatal {
+    -fx-background-color: #F7A699;
+}
+
+.log-window-list-cell:error {
+    -fx-background-color: #FFCCBB;
+}
+
+.log-window-list-cell:warn {
+    -fx-background-color: #FFEECC;
+}
+
+.log-window-list-cell:info {
+    -fx-background-color: #FFFFFF;
+}
+
+.log-window-list-cell:debug {
+    -fx-background-color: #EEE9E0;
+}
+
+.log-window-list-cell:trace {
+    -fx-background-color: #EEE9E0;
+}
+
+.log-window-list-cell:selected {
+    -fx-background-color: #C4C4C4;
+}

@@ -10,9 +10,9 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master", "release" ]
+    branches: [ "master", "major-refactor", "release" ]
   pull_request:
-    branches: [ "master", "release" ]
+    branches: [ "master", "major-refactor", "release" ]
   workflow_dispatch:
   release:
     types:
@@ -31,8 +31,13 @@ jobs:
           distribution: "temurin"
           java-version: "21"
           cache: "maven"
+      - uses: luangong/setup-install4j@v1
+        name: Setup Install4j
+        with:
+          version: 10.0.8
+          license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Build with Maven
-        run: mvn -B clean package --file pom.xml
+        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -40,6 +45,7 @@ jobs:
           path: |
             target/*.jar
             target/peerbanhelper-binary
+            target/media/*.exe
         id: project
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
@@ -65,7 +71,7 @@ jobs:
             type=raw,ci
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5.3.0
+        uses: docker/build-push-action@v6.4.0
         with:
           context: .
           file: ./Dockerfile-CI
@@ -75,3 +81,4 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+

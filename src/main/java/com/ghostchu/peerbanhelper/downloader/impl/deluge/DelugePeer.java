@@ -1,13 +1,14 @@
 package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class DelugePeer implements Peer {
+public final class DelugePeer implements Peer {
     private PeerAddress peerAddress;
     private String peerId;
     private String clientName;
@@ -16,5 +17,5 @@ public class DelugePeer implements Peer {
     private long uploaded;
     private long uploadSpeed;
     private double progress;
-    private String flags;
+    private PeerFlag flags;
 }

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class PeerManagerStatsRecord {
+public final class PeerManagerStatsRecord {
     private int connectedSeeds;
     private int connectedLeechers;
     private long downloaded;

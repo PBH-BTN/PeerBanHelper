@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class DownloadStatsRecord {
+public final class DownloadStatsRecord {
     private String status;
     private int completedInThousandNotation;
     private int checkingDoneInThousandNotation;

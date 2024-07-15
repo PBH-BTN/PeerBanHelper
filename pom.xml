@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>4.4.0</version>
+    <version>5.0.0</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -17,20 +17,24 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.4.1</flatlafVersion>
-        <hutool.version>5.8.27</hutool.version>
         <javafx.version>22.0.1</javafx.version>
         <javafx.scope>provided</javafx.scope>
-        <chromium.version>126.2.0</chromium.version>
-        <chromium.platform.version>126.2.0</chromium.platform.version>
-
+        <install4j.home>/opt/install4j</install4j.home>
+        <ormlite.version>6.1</ormlite.version>
     </properties>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>ej-technologies</id>
+            <url>https://maven.ej-technologies.com/repository</url>
+        </pluginRepository>
+    </pluginRepositories>
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.12.1</version>
+                    <version>3.13.0</version>
                     <configuration>
                         <skip>true</skip>
                         <skipMain>true</skipMain>
@@ -41,7 +45,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.5.1</version>
+                    <version>3.6.0</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.logging.log4j</groupId>
@@ -78,17 +82,18 @@
                                 </transformers>
                                 <filters>
                                     <filter>
+                                        <artifact>*:*</artifact>
                                         <excludes>
-                                            <exclude>META-INF/*.SF</exclude>
-                                            <exclude>META-INF/*.DSA</exclude>
-                                            <exclude>META-INF/*.RSA</exclude>
-                                            <exclude>META-INF/*.kotlin_module</exclude>
-                                            <exclude>META-INF/*.txt</exclude>
-                                            <exclude>META-INF/proguard/*</exclude>
-                                            <exclude>META-INF/services/*</exclude>
-                                            <exclude>META-INF/versions/9/*</exclude>
-                                            <exclude>*License*</exclude>
-                                            <exclude>*LICENSE*</exclude>
+                                            <!--                                            <exclude>META-INF/*.SF</exclude>-->
+                                            <!--                                            <exclude>META-INF/*.DSA</exclude>-->
+                                            <!--                                            <exclude>META-INF/*.RSA</exclude>-->
+                                            <!--                                            <exclude>META-INF/*.kotlin_module</exclude>-->
+                                            <!--                                            <exclude>META-INF/*.txt</exclude>-->
+                                            <!--                                            <exclude>META-INF/proguard/*</exclude>-->
+                                            <!--                                            <exclude>META-INF/services/*</exclude>-->
+                                            <!--                                            <exclude>META-INF/versions/9/*</exclude>-->
+                                            <!--                                            <exclude>*License*</exclude>-->
+                                            <!--                                            <exclude>*LICENSE*</exclude>-->
                                         </excludes>
                                     </filter>
                                 </filters>
@@ -103,7 +108,7 @@
                 <plugin>
                     <groupId>io.github.git-commit-id</groupId>
                     <artifactId>git-commit-id-maven-plugin</artifactId>
-                    <version>5.0.0</version>
+                    <version>5.0.1</version>
                     <executions>
                         <execution>
                             <id>get-the-git-infos</id>
@@ -137,7 +142,7 @@
                 <plugin>
                     <groupId>io.takari.maven.plugins</groupId>
                     <artifactId>takari-lifecycle-plugin</artifactId>
-                    <version>2.1.5</version>
+                    <version>2.1.6</version>
                     <extensions>true</extensions>
                     <configuration>
                         <proc>proc</proc>
@@ -155,7 +160,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.6.0</version>
             </plugin>
             <!--            <plugin>-->
             <!--                <groupId>org.apache.maven.plugins</groupId>-->
@@ -187,7 +192,7 @@
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>5.0.0</version>
+                <version>5.0.1</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -220,6 +225,21 @@
                 <groupId>io.takari.maven.plugins</groupId>
                 <artifactId>takari-lifecycle-plugin</artifactId>
             </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.7.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                        <configuration>
+                            <outputProperty>pbh.classpath</outputProperty>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -233,6 +253,9 @@
             </resource>
             <resource>
                 <directory>src/main/resources/static</directory>
+                <excludes>
+                    <exclude>.git/</exclude>
+                </excludes>
                 <targetPath>static</targetPath>
                 <filtering>false</filtering>
             </resource>
@@ -306,6 +329,114 @@
                 <javafx.scope>compile</javafx.scope>
             </properties>
         </profile>
+        <profile>
+            <id>install4j-ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                        <version>10.0.8</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
+                                    </variables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>install4j-dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                        <version>10.0.8</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
+                                    </variables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <install4j.home>C:\Program Files\install4j10</install4j.home>
+            </properties>
+        </profile>
+        <profile>
+            <!--精简打包，排除不受支持的平台-->
+            <id>thin-sqlite-packaging</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.logging.log4j</groupId>
+                                <artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>
+                                <version>0.1.0</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <exclude>org/sqlite/native/Linux-Android/**</exclude>
+                                                <exclude>org/sqlite/native/Linux/x86/**</exclude>
+                                                <exclude>org/sqlite/native/Linux/arm/**</exclude>
+                                                <exclude>org/sqlite/native/Linux/armv7/**</exclude>
+                                                <exclude>org/sqlite/native/Linux/armv6/**</exclude>
+                                                <exclude>org/sqlite/native/Windows/armv7/**</exclude>
+                                                <exclude>org/sqlite/native/Windows/x86/**</exclude>
+                                                <exclude>org/sqlite/native/Linux-Musl/x86/**</exclude>
+                                                <exclude>org/sqlite/native/FreeBSD/x86/**</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <repositories>
@@ -337,25 +468,25 @@
         <dependency>
             <groupId>org.bspfsystems</groupId>
             <artifactId>yamlconfiguration</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.34</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <version>2.11.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.0.0-jre</version>
+            <version>33.2.1-jre</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -367,17 +498,17 @@
         <dependency>
             <groupId>com.github.seancfoley</groupId>
             <artifactId>ipaddress</artifactId>
-            <version>5.4.2</version>
+            <version>5.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.12</version>
+            <version>2.0.13</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.45.2.0</version>
+            <version>3.46.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -408,7 +539,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.2</version>
+            <version>5.10.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -425,7 +556,7 @@
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
-            <version>6.1.3</version>
+            <version>6.1.6</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
         <dependency>
@@ -470,6 +601,11 @@
             <version>${javafx.version}</version>
             <scope>${javafx.scope}</scope>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.dlsc.preferencesfx</groupId>-->
+        <!--            <artifactId>preferencesfx-core</artifactId>-->
+        <!--            <version>11.8.0</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>com.googlecode.aviator</groupId>
             <artifactId>aviator</artifactId>
@@ -491,5 +627,53 @@
             <artifactId>json</artifactId>
             <version>20240303</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>6.1.11</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
+        <dependency>
+            <groupId>com.j256.ormlite</groupId>
+            <artifactId>ormlite-core</artifactId>
+            <version>${ormlite.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-jdbc -->
+        <dependency>
+            <groupId>com.j256.ormlite</groupId>
+            <artifactId>ormlite-jdbc</artifactId>
+            <version>${ormlite.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.turri</groupId>
+            <artifactId>aXMLRPC</artifactId>
+            <version>1.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ghostchu</groupId>
+            <artifactId>simplereloadlib</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
+        <!--        <dependency>-->
+        <!--            <groupId>org.jfxtras</groupId>-->
+        <!--            <artifactId>jmetro</artifactId>-->
+        <!--            <version>11.6.16</version>-->
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                <groupId>org.openjfx</groupId>-->
+        <!--                <artifactId>javafx-graphics</artifactId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>org.openjfx</groupId>-->
+        <!--                    <artifactId>javafx-controls</artifactId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>org.openjfx</groupId>-->
+        <!--                    <artifactId>javafx-base</artifactId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+        <!--        </dependency>-->
     </dependencies>
 </project>

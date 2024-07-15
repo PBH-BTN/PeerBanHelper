@@ -1,0 +1,6 @@
+launcher.peerbanhelper.gui=PeerBanHelper
+launcher.peerbanhelper.gui.swing=PeerBanHelper(Compatibility Mode)
+launcher.peerbanhelper.nogui=PeerBanHelper(NoGUI, Console)
+launcher.peerbanhelper.service=PeerBanHelper(Service)
+checkbox.followsystemstartup=Boot automatically to the system tray when logged in
+peerbanhelper.description=PeerBanHelper

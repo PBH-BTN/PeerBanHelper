@@ -3,36 +3,48 @@ package com.ghostchu.peerbanhelper.module;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
+import io.javalin.http.Context;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
+@Component
 public abstract class AbstractFeatureModule implements FeatureModule {
-    private final YamlConfiguration profile;
     @Getter
-    private final PeerBanHelperServer server;
+    @Autowired
+    private PeerBanHelperServer server;
     @Getter
     private boolean register;
-
-    public AbstractFeatureModule(PeerBanHelperServer server, YamlConfiguration profile) {
-        this.server = server;
-        this.profile = profile;
-    }
+    @Getter
+    private final ReentrantLock lock = new ReentrantLock();
+    @Autowired
+    private JavalinWebContainer javalinWebContainer;
 
     @Override
     public boolean isModuleEnabled() {
         try {
             return !isConfigurable() || getConfig().getBoolean("enabled");
         } catch (Exception e) {
-            log.warn(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName());
+            log.warn(tlUI(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName()));
             return false;
         }
+    }
+
+    @Override
+    public ReentrantLock getThreadLock() {
+        return lock;
     }
 
     /**
@@ -45,9 +57,9 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Override
     public ConfigurationSection getConfig() {
         if (!isConfigurable()) return null;
-        ConfigurationSection section = Objects.requireNonNull(profile.getConfigurationSection("module")).getConfigurationSection(getConfigName());
+        ConfigurationSection section = Objects.requireNonNull(server.getProfileConfig().getConfigurationSection("module")).getConfigurationSection(getConfigName());
         if (section == null) {
-            log.warn(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName());
+            log.warn(tlUI(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName()));
             YamlConfiguration configuration = new YamlConfiguration();
             configuration.set("enabled", false);
             return configuration;
@@ -60,7 +72,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         if (register) {
             onDisable();
             cleanupResources();
-            log.info(Lang.MODULE_UNREGISTER, getName());
+            log.info(tlUI(Lang.MODULE_UNREGISTER, getName()));
         }
     }
 
@@ -72,13 +84,18 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     public void enable() {
         register = true;
         onEnable();
-        log.info(Lang.MODULE_REGISTER, getName());
+        log.info(tlUI(Lang.MODULE_REGISTER, getName()));
     }
 
     @Override
     public void saveConfig() throws IOException {
         if (!isConfigurable()) return;
-        profile.set("module." + getConfigName(), getConfig());
-        profile.save(new File(Main.getConfigDirectory(), "profile.yml"));
+        server.getProfileConfig().set("module." + getConfigName(), getConfig());
+        server.getProfileConfig().save(new File(Main.getConfigDirectory(), "profile.yml"));
     }
+
+    public String locale(Context ctx) {
+        return javalinWebContainer.reqLocale(ctx);
+    }
+
 }

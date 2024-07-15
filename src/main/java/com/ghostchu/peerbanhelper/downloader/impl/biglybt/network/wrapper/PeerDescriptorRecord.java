@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PeerDescriptorRecord {
+public final class PeerDescriptorRecord {
     private String ip;
     private int tcpPort;
     private int udpPort;

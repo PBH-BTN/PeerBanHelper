@@ -4,6 +4,7 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantLock;
 
 public interface FeatureModule {
     /**
@@ -25,6 +26,8 @@ public interface FeatureModule {
     boolean isModuleEnabled();
 
     ConfigurationSection getConfig();
+
+    ReentrantLock getThreadLock();
 
     /**
      * 功能模块启用回调

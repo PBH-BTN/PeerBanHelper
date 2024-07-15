@@ -5,7 +5,6 @@ import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ExecutionException;
@@ -33,7 +32,6 @@ public class IPAddressUtil {
      * @param ip
      * @return
      */
-    @Contract("_ -> !null")
     public static IPAddress getIPAddress(String ip) {
         try {
             return IP_ADDRESS_CACHE.get(ip, () -> {

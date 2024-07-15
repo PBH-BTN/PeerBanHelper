@@ -10,7 +10,7 @@ com.biglybt.pif.torrent.Torrent.java
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TorrentRecord {
+public final class TorrentRecord {
     private String name;
     private String hashBase64;
     private long size;

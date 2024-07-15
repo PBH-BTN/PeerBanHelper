@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class TorrentDetail {
+public final class QBTorrent {
 
     @SerializedName("added_on")
     private Long addedOn;

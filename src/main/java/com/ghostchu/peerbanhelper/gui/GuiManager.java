@@ -9,8 +9,6 @@ public interface GuiManager {
 
     boolean isGuiAvailable();
 
-    void showConfigurationSetupDialog();
-
     void createMainWindow();
 
     void sync();

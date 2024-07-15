@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TorrentWrapper {
+public final class TorrentWrapper {
     private String id;
     private long size;
     private String name;

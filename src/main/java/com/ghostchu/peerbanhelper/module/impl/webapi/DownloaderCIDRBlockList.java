@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -9,17 +9,17 @@ import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.UUID;
 
+@Component
 public class DownloaderCIDRBlockList extends AbstractFeatureModule {
-    public DownloaderCIDRBlockList(PeerBanHelperServer server, YamlConfiguration profile) {
-        super(server, profile);
-    }
-
+    @Autowired
+    private JavalinWebContainer webContainer;
     @Override
     public boolean isConfigurable() {
         return false;
@@ -27,7 +27,7 @@ public class DownloaderCIDRBlockList extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        getServer().getWebContainer().javalin()
+        webContainer.javalin()
                 .get("/blocklist/transmission", ctx -> {
                     StringBuilder builder = new StringBuilder();
                     for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {

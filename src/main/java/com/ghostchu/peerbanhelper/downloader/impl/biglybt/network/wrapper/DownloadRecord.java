@@ -12,7 +12,7 @@ com.biglybt.pif.download.Download.java
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class DownloadRecord {
+public final class DownloadRecord {
     private int state;
     private int subState;
     private long flags;
