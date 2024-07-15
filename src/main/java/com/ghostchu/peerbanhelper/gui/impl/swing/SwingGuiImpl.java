@@ -59,7 +59,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 invokeLater(() -> {
                     JTextArea textArea = mainWindow.getLoggerTextArea();
                     try {
-                        textArea.append(event.message());
+                        textArea.append(event.message() + "\n");
                         int linesToCut = (textArea.getLineCount() - event.maxLines()) + (event.maxLines() / 5);
                         linesToCut = Math.min(linesToCut, textArea.getLineCount());
                         if (linesToCut > 0) {
