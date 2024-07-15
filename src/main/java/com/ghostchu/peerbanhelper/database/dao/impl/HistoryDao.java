@@ -153,9 +153,10 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 Calendar fuckCal = Calendar.getInstance();
                 fuckCal.setTime(field);
                 Calendar trimmed = timestampTrimmer.apply(fuckCal);
-                AtomicLong atomicLong = counterMap.getOrDefault(trimmed.getTime().getTime(), new AtomicLong(0));
+                long time = trimmed.getTime().getTime();
+                AtomicLong atomicLong = counterMap.getOrDefault(time, new AtomicLong(0));
                 atomicLong.incrementAndGet();
-                counterMap.put(trimmed.getTime().getTime(), atomicLong);
+                counterMap.put(time, atomicLong);
             }
         }
         // 计算总量
