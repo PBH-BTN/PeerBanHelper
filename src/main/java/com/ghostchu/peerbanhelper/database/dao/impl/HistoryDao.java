@@ -62,16 +62,16 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	%field%,
                                                  	SUM( %field% ) AS ct,
                                                  	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history ) AS percent ,
-                                                 	torrentName,
+                                                 	torrent,
                                                  	torrentInfoHash,
-                                                 	moduleName
+                                                 	module
                                                  FROM
                                                  	(
                                                  	SELECT
                                                  		*,
                                                  		torrents.infoHash AS torrentInfoHash,
-                                                 		torrents.name AS torrentName,
-                                                 		modules.name AS moduleName\s
+                                                 		torrents.name AS torrent,
+                                                 		modules.name AS module\s
                                                  	FROM
                                                  		(
                                                  			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
@@ -106,16 +106,16 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	%field%,
                                                  	COUNT( %field% ) AS ct,
                                                  	COUNT( %field% ) * 1.0 / ( SELECT COUNT( %field% ) FROM history ) AS percent ,
-                                                 	torrentName,
+                                                 	torrent,
                                                  	torrentInfoHash,
-                                                 	moduleName
+                                                 	module
                                                  FROM
                                                  	(
                                                  	SELECT
                                                  		*,
                                                  		torrents.infoHash AS torrentInfoHash,
-                                                 		torrents.name AS torrentName,
-                                                 		modules.name AS moduleName\s
+                                                 		torrents.name AS torrent,
+                                                 		modules.name AS module\s
                                                  	FROM
                                                  		(
                                                  			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
