@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.common.StdMsg;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -125,7 +126,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
 
         var results = historyDao.countDateField(startAt, endAt, timestampGetter, trimmer, pctFilter);
         ctx.status(HttpStatus.OK);
-        ctx.json(results);
+        ctx.json(new StdMsg(true, "ok", results));
     }
 
     private Calendar getZeroCalender() {
@@ -151,7 +152,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
             case null, default -> throw new IllegalArgumentException("type invalid");
         };
         ctx.status(HttpStatus.OK);
-        ctx.json(results);
+        ctx.json(new StdMsg(true, "ok", results));
     }
 
 
