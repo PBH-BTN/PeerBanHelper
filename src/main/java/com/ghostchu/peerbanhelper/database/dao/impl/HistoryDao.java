@@ -141,7 +141,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
     }
 
     public List<UniversalFieldDateResult> countDateField(long startAt, long endAt, Function<HistoryEntity, Timestamp> timestampGetter, Function<Calendar, Calendar> timestampTrimmer, double percentFilter) throws Exception {
-        Map<DateMapping, AtomicLong> counterMap = new HashMap<>();
+        Map<Long, AtomicLong> counterMap = new HashMap<>();
         try (var it = iterator()) {
             while (it.hasNext()) {
                 var row = it.next();
@@ -153,19 +153,15 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 Calendar fuckCal = Calendar.getInstance();
                 fuckCal.setTime(field);
                 Calendar trimmed = timestampTrimmer.apply(fuckCal);
-                DateMapping dateMapping = new DateMapping(trimmed.get(Calendar.YEAR),
-                        trimmed.get(Calendar.MONTH) + 1,
-                        trimmed.get(Calendar.DAY_OF_MONTH),
-                        trimmed.get(Calendar.HOUR_OF_DAY), trimmed.get(Calendar.MINUTE), trimmed.get(Calendar.MINUTE));
-                AtomicLong atomicLong = counterMap.getOrDefault(dateMapping, new AtomicLong(0));
+                AtomicLong atomicLong = counterMap.getOrDefault(trimmed.getTime().getTime(), new AtomicLong(0));
                 atomicLong.incrementAndGet();
-                counterMap.put(dateMapping, atomicLong);
+                counterMap.put(trimmed.getTime().getTime(), atomicLong);
             }
         }
         // 计算总量
         long total = counterMap.values().stream().mapToLong(AtomicLong::get).sum();
         List<UniversalFieldDateResult> results = new ArrayList<>();
-        for (Map.Entry<DateMapping, AtomicLong> dateMappingAtomicLongEntry : counterMap.entrySet()) {
+        for (Map.Entry<Long, AtomicLong> dateMappingAtomicLongEntry : counterMap.entrySet()) {
             results.add(new UniversalFieldDateResult(dateMappingAtomicLongEntry.getKey(),
                     dateMappingAtomicLongEntry.getValue().get(),
                     (double) dateMappingAtomicLongEntry.getValue().get() / total
@@ -175,15 +171,12 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         return results;
     }
 
-    public record DateMapping(int year, int month, int day, int hour, int minute, int second) {
-
-    }
 
     public record UniversalFieldNumResult(String data, long count, double percent) {
 
     }
 
-    public record UniversalFieldDateResult(DateMapping dateMapping, long count,
+    public record UniversalFieldDateResult(long timestamp, long count,
                                            double percent) {
 
     }
