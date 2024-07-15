@@ -34,6 +34,7 @@ persist:
 btn:
   # 启用 BTN 模块
   # 启用后，才可以使用由 BTN 提供的云规则功能
+  # 为了隐私起见，此功能需要您手动启用
   enabled: false
   # 启用数据提交（匿名）
   # BTN 网络基于所有启用此功能的用户提交的数据，对 Peers 进行可信度验证
@@ -47,7 +48,8 @@ btn:
   app-id: "example-app-id"
   app-secret: "example-app-secret"
   # 填写实例 URL，您需要自行寻找一个 BTN 实例服务器
-  config-url: "http://127.0.0.1:9988/ping/config"
+  # 默认使用 PBH-BTN 社区 BTN 服务器，请前往 https://btn-prod.ghostchu-services.top 注册并获取一个账号
+  config-url: "https://btn-prod.ghostchu-services.top/ping/config"
 # 封禁列表处理
 # PBH 能够除了调用 BT 客户端的封禁 API 外，还能够进行如下操作，以便适配更多其它客户端
 banlist-invoker:

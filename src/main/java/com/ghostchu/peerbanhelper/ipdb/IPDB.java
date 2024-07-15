@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.ipdb;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -37,7 +38,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -244,11 +244,11 @@ public class IPDB implements AutoCloseable {
     }
 
     private void loadMMDB() throws IOException {
-        this.languageTag = List.of(Locale.getDefault().toLanguageTag(), "en");
+        this.languageTag = List.of(Main.DEF_LOCALE, "en");
         this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
-                .locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
+                .locales(List.of(Main.DEF_LOCALE, "en")).build();
         this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
-                .locales(List.of(Locale.getDefault().toLanguageTag(), "en")).build();
+                .locales(List.of(Main.DEF_LOCALE, "en")).build();
         this.geoCN = new Reader(mmdbGeoCNFile);
     }
 
