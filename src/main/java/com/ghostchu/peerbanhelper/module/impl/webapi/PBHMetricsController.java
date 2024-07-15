@@ -46,7 +46,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/api/statistic/counter", this::handleBasicCounter, Role.USER_READ)
                 .get("/api/statistic/rules", this::handleRules, Role.USER_READ)
-                .get("/api/statistic/analysis/general", this::handleHistoryNumberAccess, Role.USER_READ)
+                .get("/api/statistic/analysis/field", this::handleHistoryNumberAccess, Role.USER_READ)
                 .get("/api/statistic/analysis/date", this::handleHistoryDateAccess, Role.USER_READ);
     }
 
