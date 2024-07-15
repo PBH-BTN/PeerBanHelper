@@ -1,4 +1,4 @@
-FROM docker.io/eclipse-temurin:22-jre-alpine
+FROM docker.io/eclipse-temurin:21-jre-alpine
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 COPY target/PeerBanHelper.jar /app/PeerBanHelper.jar
 USER 0
