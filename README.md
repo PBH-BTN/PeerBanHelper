@@ -9,6 +9,9 @@
 > [!TIP]
 > 您只需要正确连接 PBH 到下载器就可以正常工作，大多数情况下，并不需要额外配置
 
+> [!TIP]
+> 为获得最佳效果，建议配合我们维护的 IP 规则库 [PBH-BTN/BTN-Collected-Rules](https://github.com/PBH-BTN/BTN-Collected-Rules) 和 [BTN 网络](https://github.com/PBH-BTN/PeerBanHelper/wiki/BTN-%E7%BD%91%E7%BB%9C) 一起食用，不过这是完全可选的。
+
 | 主界面                                                                                                                                   | 封禁列表                                                                                                                                 | 封禁日志                                                                                                                                 | 封禁统计                                                                                                                                | 规则统计                                                                                                                                    | 规则订阅                                                                                                                                    |
 |---------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | <img width="1280" alt="homepage" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/d7f7ea9f-70df-40f1-a782-260450972bc9"> | <img width="1280" alt="banlist" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/c3e139e6-eb82-423f-b083-1839713ec801"> | <img width="1280" alt="banlogs" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/00d8efcc-0dd7-4e05-bdeb-9444e14739d6"> | <img width="1280" alt="maxban" src="https://github.com/PBH-BTN/PeerBanHelper/assets/30802565/ae78ebb9-67f7-481a-9afc-7ced2c6a2534"> | <img width="1280" alt="banMetrics" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/9e4cd7b7-aaff-4b66-8d1d-ad4ef3466b1f"> | <img width="1280" alt="banMetrics" src="https://github.com/PBH-BTN/PeerBanHelper/assets/19235246/dc312186-9643-4f23-9d53-7b8e0852f228"> |
@@ -318,26 +321,16 @@ client:
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/20d49093-bf99-41f6-971f-c0c574d493af)
 
-### 非本机（例如：NAS上、Docker里）的 PBH 的 WebUI 打不开怎么办？
-
-打开 `config.yml`，找到 `address`，它的默认值是 `127.0.0.1`（只有PBH所在机器可以访问），请更改为 `0.0.0.0` 开启外部访问。  
-**对于下面的 prefix 选项，除非你知道那是干什么的，否则请保持默认，或者询问其它用户**
-
 ### 管理 Token 在哪里？
 
-在 config.yml 中：
+您可以从 GUI 界面的 WebUI->复制Token 获得 Token。通过 GUI 唤起浏览器打开的 WebUI 将自动填写 Token。如果是首次使用，也会在日志中显示您的 Token。  
+除此之外，您还可以从 config.yml 中找到 Token ↓
 
 ```yaml
 # Http 服务器设置
 server:
-  # 监听端口
   http: 9898
-  # 客户端远程 URL 设置
-  # Docker 网络请改 host 模式使用或者设置容器端口暴露
-  # 当客户端需要与 PBH 通信时，客户端的 URL 会被更改为 http://<address>:<http-port>/<client-api-route>
-  address: 127.0.0.1
-  # 在 PBH 需要给下载器传递地址时，将使用此地址传递，请确保此地址最终可被下载器访问，请【不要】以 / 结尾
-  prefix: http://127.0.0.1:9898
+  ...<省略>...
   token: "*************************" # <-- 你的管理 Token
 ```
 
