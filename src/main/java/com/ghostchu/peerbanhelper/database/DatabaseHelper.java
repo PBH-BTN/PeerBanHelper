@@ -43,7 +43,7 @@ public class DatabaseHelper {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
         MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "2"));
         int v = Integer.parseInt(version.getValue());
-        if (v < 2) {
+        if (v < 3) {
             try {
                 // so something
                 var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
@@ -51,7 +51,7 @@ public class DatabaseHelper {
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
             }
-            v = 2;
+            v = 3;
         }
         version.setValue(String.valueOf(v));
         metadata.update(version);
