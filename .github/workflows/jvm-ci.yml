@@ -71,7 +71,7 @@ jobs:
             type=raw,ci
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6.4.0
+        uses: docker/build-push-action@v6.4.1
         with:
           context: .
           file: ./Dockerfile-CI
