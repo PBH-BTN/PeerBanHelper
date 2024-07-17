@@ -321,26 +321,16 @@ client:
 
 ![image](https://github.com/Ghost-chu/PeerBanHelper/assets/30802565/20d49093-bf99-41f6-971f-c0c574d493af)
 
-### 非本机（例如：NAS上、Docker里）的 PBH 的 WebUI 打不开怎么办？
-
-打开 `config.yml`，找到 `address`，它的默认值是 `127.0.0.1`（只有PBH所在机器可以访问），请更改为 `0.0.0.0` 开启外部访问。  
-**对于下面的 prefix 选项，除非你知道那是干什么的，否则请保持默认，或者询问其它用户**
-
 ### 管理 Token 在哪里？
 
-在 config.yml 中：
+您可以从 GUI 界面的 WebUI->复制Token 获得 Token。通过 GUI 唤起浏览器打开的 WebUI 将自动填写 Token。如果是首次使用，也会在日志中显示您的 Token。  
+除此之外，您还可以从 config.yml 中找到 Token ↓
 
 ```yaml
 # Http 服务器设置
 server:
-  # 监听端口
   http: 9898
-  # 客户端远程 URL 设置
-  # Docker 网络请改 host 模式使用或者设置容器端口暴露
-  # 当客户端需要与 PBH 通信时，客户端的 URL 会被更改为 http://<address>:<http-port>/<client-api-route>
-  address: 127.0.0.1
-  # 在 PBH 需要给下载器传递地址时，将使用此地址传递，请确保此地址最终可被下载器访问，请【不要】以 / 结尾
-  prefix: http://127.0.0.1:9898
+  ...<省略>...
   token: "*************************" # <-- 你的管理 Token
 ```
 
