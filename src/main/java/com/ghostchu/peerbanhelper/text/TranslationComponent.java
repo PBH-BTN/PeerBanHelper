@@ -7,14 +7,14 @@ import java.util.Arrays;
 @Getter
 public class TranslationComponent {
     private final String key;
-    private final String[] params;
+    private final Object[] params;
 
     public TranslationComponent(String key) {
         this.key = key;
         this.params = new String[0];
     }
 
-    public TranslationComponent(String key, String... params) {
+    public TranslationComponent(String key, Object... params) {
         this.key = key;
         this.params = params;
     }
