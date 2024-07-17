@@ -1,4 +1,4 @@
-config-version: 10
+config-version: 11
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 更新 Peers UI 频率（单位：毫秒），此项仅用于显示数据，不影响封禁，建议设置一个不会给下载器增加太多压力的值
@@ -44,7 +44,7 @@ module:
     # miss = 匹配失败返回的行为代码（与上相同）
     # 规则从上到下执行
     banned-peer-id:
-      - '{"method":"STARTS_WITH","content":"-xl0019", hit: "FALSE"}' # 排除新版迅雷（会提供上传）
+      #- '{"method":"STARTS_WITH","content":"-xl0019", hit: "FALSE"}' # 排除新版迅雷（会提供上传，但上传比十分感人 1:2000）
       - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"-hp"}'
       - '{"method":"STARTS_WITH","content":"-xm"}'
@@ -68,8 +68,8 @@ module:
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
     ban-duration: default
     banned-client-name:
-      - '{"method":"CONTAINS","content":"xunlei 0019", "hit": "FALSE"}' # 排除新版迅雷（会提供上传）
-      - '{"method":"CONTAINS","content":"xunlei 0.0.1.9", "hit": "FALSE"}' # 排除新版迅雷（会提供上传）
+      #- '{"method":"CONTAINS","content":"xunlei 0019", "hit": "FALSE"}' # 排除新版迅雷（会提供上传，但上传比十分感人 1:2000）
+      #- '{"method":"CONTAINS","content":"xunlei 0.0.1.9", "hit": "FALSE"}' # 排除新版迅雷（会提供上传，但上传比十分感人 1:2000）
       - '{"method":"CONTAINS","content":"xunlei"}'
       - '{"method":"STARTS_WITH","content":"-xl"}'
       - '{"method":"STARTS_WITH","content":"hp/torrent"}'

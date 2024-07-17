@@ -43,4 +43,6 @@ public final class HistoryEntity {
     private TranslationComponent description;
     @DatabaseField
     private String flags;
+    @DatabaseField(canBeNull = false)
+    private String downloader;
 }

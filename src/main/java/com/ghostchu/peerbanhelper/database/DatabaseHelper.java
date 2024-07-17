@@ -8,6 +8,7 @@ import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.support.BaseConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 
 @Component
 @Getter
+@Slf4j
 public class DatabaseHelper {
     private final Database database;
 
@@ -22,7 +24,7 @@ public class DatabaseHelper {
         this.database = database;
         Logger.setGlobalLogLevel(Level.WARNING);
         createTables();
-
+        performUpgrade();
     }
 
 
@@ -39,14 +41,17 @@ public class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "1"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "2"));
         int v = Integer.parseInt(version.getValue());
-        if (v == 0) {
+        if (v < 2) {
             try {
                 // so something
-            } catch (Exception ignored) {
+                var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
+                historyDao.executeRaw("ALTER TABLE " + historyDao.getTableName() + " ADD COLUMN downloader VARCHAR DEFAULT ''");
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
             }
-            v++;
+            v = 2;
         }
         version.setValue(String.valueOf(v));
         metadata.update(version);

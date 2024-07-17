@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -24,6 +25,20 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 11)
+    public void reAddXL0019() {
+        List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
+        bannedPeerIds.removeIf(s -> s.contains("-xl0019"));
+        conf.set("module.peer-id-blacklist.banned-peer-id", bannedPeerIds);
+        List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");
+        bannedClientNames.removeIf(s -> s.contains("xunlei 0019") || s.contains("xunlei 0.0.1.9"));
+        conf.set("module.client-name-blacklist.banned-client-name", bannedClientNames);
+        File scripts = new File(Main.getDataDirectory(), "scripts");
+        File thunderCheckScript = new File(scripts, "thunder-check.av");
+        if (thunderCheckScript.exists()) {
+            thunderCheckScript.delete();
+        }
+    }
     @UpdateScript(version = 10)
     public void addBanDuration() {
         var module = conf.getConfigurationSection("module");

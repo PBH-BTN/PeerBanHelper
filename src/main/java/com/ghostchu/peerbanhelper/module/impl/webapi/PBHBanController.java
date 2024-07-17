@@ -181,6 +181,7 @@ public class PBHBanController extends AbstractFeatureModule {
         private String module;
         private String rule;
         private String description;
+        private String downloader;
 
         public BanLogResponse(String locale, HistoryEntity history) {
             this.banAt = history.getBanAt().getTime();
@@ -198,6 +199,7 @@ public class PBHBanController extends AbstractFeatureModule {
             this.module = history.getRule().getModule().getName();
             this.rule = tl(locale, history.getRule().getRule());
             this.description = tl(locale, history.getDescription());
+            this.downloader = history.getDownloader();
         }
     }
 
