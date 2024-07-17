@@ -355,6 +355,10 @@ server:
 部分规则模块只会在对方和你有速度的时候才会封禁。如果速度为 0，PBH 可能会跳过一些检查以避免误判。  
 如果是 XunLei 0.0.1.9，新版迅雷下载过程中现在会正常上传，所以在配置文件中默认排除了。
 
+### 反吸血进度检查器为什么显示预期进度超过 100% (例如：102%)，是不是出错了？怎么还能超过 100% 的？
+
+不是的，进度检查器会累加此 IP 地址在特定种子上的下载进度。如果对方出现进度回退、断开更换端口重连、更换 PeerID、更换 Client name 重新下载时，下载器会认为这是一个新客户端，并从头开始计算下载数据（吸血者也使用此手段绕过吸血检查）。但对于 PBH 来说，只要对方 IP 地址未改变（或者处于特定区间内），并且下载的种子未更换的情况下，下载进度会持续增量累积，避免对方欺骗反吸血检查。
+
 ## Install4j
 
 PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) 打包多平台安装程序。感谢 ej-technolgies 的开放源代码许可证。点击链接或者下面的图片下载 install4j。
