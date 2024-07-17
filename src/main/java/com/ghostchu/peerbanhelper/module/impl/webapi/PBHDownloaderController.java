@@ -210,6 +210,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         List<TorrentWrapper> torrentWrappers = getServer().getLivePeersSnapshot()
                 .values().stream().filter(p -> p.getDownloader().equals(downloader.getName()))
                 .map(PeerMetadata::getTorrent)
+                .distinct()
                 .sorted((o1, o2) -> Long.compare(o2.getRtUploadSpeed(), o1.getRtUploadSpeed()))
                 .toList();
         ctx.status(HttpStatus.OK);
