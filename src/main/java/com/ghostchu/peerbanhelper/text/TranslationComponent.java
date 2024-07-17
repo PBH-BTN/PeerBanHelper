@@ -23,7 +23,7 @@ public class TranslationComponent {
         this(key.getKey());
     }
 
-    public TranslationComponent(Lang key, String... params) {
+    public TranslationComponent(Lang key, Object... params) {
         this(key.getKey(), params);
     }
 
