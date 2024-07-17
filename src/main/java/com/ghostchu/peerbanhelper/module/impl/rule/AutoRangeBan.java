@@ -105,7 +105,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
                 bannedAddress = bannedAddress.toPrefixBlock(ipv6Prefix);
             }
             if (bannedAddress.contains(peerAddress)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED_REASON, peerAddress.toString(), bannedPeer.getAddress().toString(), addressType, bannedPeerEntry.getValue().getRule(), bannedPeerEntry.getValue().getDescription()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), addressType));
             }
         }
         return pass();
