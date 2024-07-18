@@ -266,15 +266,20 @@ public class QBittorrent implements Downloader {
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
             IPAddress ipAddress = IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp());
-            if (ipAddress.isIPv6()) {
-                joiner.add("[" + p.getPeer().getAddress().getIp() + "]" + ":" + p.getPeer().getAddress().getPort());
-                if (ipAddress.isIPv4Convertible()) {
-                    joiner.add(ipAddress.toIPv4().toString() + ":" + p.getPeer().getAddress().getPort());
+            if (ipAddress != null) {
+                if (ipAddress.isIPv6()) {
+                    joiner.add("[" + p.getPeer().getAddress().getIp() + "]" + ":" + p.getPeer().getAddress().getPort());
+                    if (ipAddress.isIPv4Convertible()) {
+                        joiner.add(ipAddress.toIPv4().toString() + ":" + p.getPeer().getAddress().getPort());
+                    }
+                } else {
+                    joiner.add(p.getPeer().getAddress().getIp() + ":" + p.getPeer().getAddress().getPort());
+                    if (ipAddress.isIPv6Convertible()) {
+                        joiner.add("[" + ipAddress.toIPv6().toString() + "]" + ":" + p.getPeer().getAddress().getPort());
+                    }
                 }
-            } else {
-                joiner.add(p.getPeer().getAddress().getIp() + ":" + p.getPeer().getAddress().getPort());
+                banTasks.put(p.getTorrent().getHash(), joiner);
             }
-            banTasks.put(p.getTorrent().getHash(), joiner);
         });
         banTasks.forEach((hash, peers) -> {
             try {
