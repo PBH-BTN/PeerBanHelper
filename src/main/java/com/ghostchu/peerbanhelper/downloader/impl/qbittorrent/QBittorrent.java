@@ -267,6 +267,10 @@ public class QBittorrent implements Downloader {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
             IPAddress ipAddress = IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp());
             if (ipAddress != null) {
+                /*
+                这是一个临时 workaround，用于解决增量封禁有时候封不掉 IP 的问题（特别是 4in6 的写法 IP）
+                此 workaround 为每个 IP 地址都生成一个原始 IP 地址，一个转换 IP 地址，同时进行封禁。
+                 */
                 if (ipAddress.isIPv6()) {
                     joiner.add("[" + p.getPeer().getAddress().getIp() + "]" + ":" + p.getPeer().getAddress().getPort());
                     if (ipAddress.isIPv4Convertible()) {

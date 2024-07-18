@@ -166,8 +166,9 @@ public class PBHMetricsController extends AbstractFeatureModule {
                     if (obj.getKey().matcherName() != null) {
                         ruleType = obj.getKey().matcherName();
                     }
-                    dict.put(obj.getKey().matcherIdentifier(), tl(locale, ruleType));
-                    return new RuleData(obj.getKey().matcherIdentifier(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata());
+                    // 返回特定计算值作为字典键，这样不需要修改前端
+                    dict.put(tl(locale, ruleType), tl(locale, ruleType));
+                    return new RuleData(tl(locale, ruleType), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata());
                 })
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
                 .toList();
