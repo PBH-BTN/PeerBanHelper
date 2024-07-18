@@ -262,19 +262,26 @@ public class QBittorrent implements Downloader {
     }
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
-        added.forEach(meta -> {
-            IPAddress ipAddress = IPAddressUtil.getIPAddress(meta.getPeer().getAddress().getIp());
-            String peers;
-            if (ipAddress.isIPv4()) {
-                peers = meta.getPeer().getAddress().getIp() + ":" + meta.getPeer().getAddress().getPort();
+        Map<String, StringJoiner> banTasks = new HashMap<>();
+        added.forEach(p -> {
+            StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
+            IPAddress ipAddress = IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp());
+            if (ipAddress.isIPv6()) {
+                joiner.add("[" + p.getPeer().getAddress().getIp() + "]" + ":" + p.getPeer().getAddress().getPort());
+                if (ipAddress.isIPv4Convertible()) {
+                    joiner.add(ipAddress.toIPv4().toString() + ":" + p.getPeer().getAddress().getPort());
+                }
             } else {
-                peers = "[" + meta.getPeer().getAddress().getIp() + "]" + ":" + meta.getPeer().getAddress().getPort();
+                joiner.add(p.getPeer().getAddress().getIp() + ":" + p.getPeer().getAddress().getPort());
             }
+            banTasks.put(p.getTorrent().getHash(), joiner);
+        });
+        banTasks.forEach((hash, peers) -> {
             try {
                 HttpResponse<String> request = httpClient.send(MutableRequest
                                 .POST(apiEndpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
-                                        .query("hash", meta.getTorrent().getHash())
-                                        .query("peers", peers).build())
+                                        .query("hash", hash)
+                                        .query("peers", peers.toString()).build())
                                 .header("Content-Type", "application/x-www-form-urlencoded")
                         , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
                 if (request.statusCode() != 200) {
