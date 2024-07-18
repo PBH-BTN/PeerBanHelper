@@ -6,6 +6,7 @@ import lombok.Setter;
 @Setter
 public class PeerImpl implements Peer {
     private PeerAddress peerAddress;
+    private String rawIp;
     private String peerId;
     private String clientName;
     private long downloadSpeed;
@@ -15,8 +16,9 @@ public class PeerImpl implements Peer {
     private double progress;
     private PeerFlag flags;
 
-    public PeerImpl(PeerAddress peerAddress, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags) {
+    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags) {
         this.peerAddress = peerAddress;
+        this.rawIp = rawIp;
         this.peerId = peerId;
         this.clientName = clientName;
         this.downloadSpeed = downloadSpeed;
@@ -70,5 +72,10 @@ public class PeerImpl implements Peer {
     @Override
     public PeerFlag getFlags() {
         return flags;
+    }
+
+    @Override
+    public String getRawIp() {
+        return rawIp;
     }
 }

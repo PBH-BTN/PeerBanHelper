@@ -43,6 +43,7 @@ public final class QBPeer implements Peer {
     @SerializedName("uploaded")
     private Long uploaded;
     private transient PeerAddress peerAddress;
+    private String rawIp;
 
     public QBPeer() {
     }
@@ -95,6 +96,11 @@ public final class QBPeer implements Peer {
     @Override
     public PeerFlag getFlags() {
         return new PeerFlag(flags);
+    }
+
+    @Override
+    public String getRawIp() {
+        return rawIp == null ? ip : rawIp;
     }
 
     @Override

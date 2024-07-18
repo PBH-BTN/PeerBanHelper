@@ -219,6 +219,7 @@ public class BiglyBT implements Downloader {
         for (PeerRecord peer : peerManagerRecord.getPeers()) {
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
+                    peer.getIp(),
                     new String(Base64.getDecoder().decode(peer.getPeerIdBase64()), StandardCharsets.ISO_8859_1),
                     peer.getClient(),
                     peer.getStats().getRtDownloadSpeed(),

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public final class PeerWrapper {
     private PeerAddressWrapper address;
+    private String rawIp;
     private String id;
     private String clientName;
     private long downloaded;
@@ -22,6 +23,7 @@ public final class PeerWrapper {
 
     public PeerWrapper(Peer peer) {
         this.id = peer.getPeerId();
+        this.rawIp = peer.getRawIp();
         this.address = new PeerAddressWrapper(peer.getPeerAddress());
         this.clientName = peer.getClientName();
         this.downloaded = peer.getDownloaded();

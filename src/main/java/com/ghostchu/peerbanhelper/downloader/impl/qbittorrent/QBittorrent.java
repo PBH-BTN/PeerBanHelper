@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -21,7 +20,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
-import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -256,6 +254,7 @@ public class QBittorrent implements Downloader {
                     qbPeer.setClient(mid);
                 }
             }
+            qbPeer.setRawIp(s);
             peersList.add(qbPeer);
         }
         return peersList;
@@ -265,25 +264,8 @@ public class QBittorrent implements Downloader {
         Map<String, StringJoiner> banTasks = new HashMap<>();
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
-            IPAddress ipAddress = IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp());
-            if (ipAddress != null) {
-                /*
-                这是一个临时 workaround，用于解决增量封禁有时候封不掉 IP 的问题（特别是 4in6 的写法 IP）
-                此 workaround 为每个 IP 地址都生成一个原始 IP 地址，一个转换 IP 地址，同时进行封禁。
-                 */
-                if (ipAddress.isIPv6()) {
-                    joiner.add("[" + p.getPeer().getAddress().getIp() + "]" + ":" + p.getPeer().getAddress().getPort());
-                    if (ipAddress.isIPv4Convertible()) {
-                        joiner.add(ipAddress.toIPv4().toString() + ":" + p.getPeer().getAddress().getPort());
-                    }
-                } else {
-                    joiner.add(p.getPeer().getAddress().getIp() + ":" + p.getPeer().getAddress().getPort());
-                    if (ipAddress.isIPv6Convertible()) {
-                        joiner.add("[" + ipAddress.toIPv6().toString() + "]" + ":" + p.getPeer().getAddress().getPort());
-                    }
-                }
-                banTasks.put(p.getTorrent().getHash(), joiner);
-            }
+            joiner.add(p.getPeer().getRawIp());
+            banTasks.put(p.getTorrent().getHash(), joiner);
         });
         banTasks.forEach((hash, peers) -> {
             try {

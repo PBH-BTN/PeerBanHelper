@@ -18,4 +18,9 @@ public final class DelugePeer implements Peer {
     private long uploadSpeed;
     private double progress;
     private PeerFlag flags;
+
+    @Override
+    public String getRawIp() {
+        return peerAddress.getIp();
+    }
 }
