@@ -62,4 +62,9 @@ public final class TRPeer implements Peer {
         return new PeerFlag(backend.getFlagStr());
     }
 
+    @Override
+    public String getRawIp() {
+        return backend.getAddress();
+    }
+
 }

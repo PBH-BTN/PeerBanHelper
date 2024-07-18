@@ -56,7 +56,7 @@ public class Transmission implements Downloader {
     }
 
     private static String generateBlocklistUrl(String pbhServerAddress) {
-        return pbhServerAddress + "/blocklist/transmission";
+        return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
     public static Transmission loadFromConfig(String name, String pbhServerAddress, ConfigurationSection section) {
@@ -115,6 +115,7 @@ public class Transmission implements Downloader {
         return "Transmission";
     }
 
+    @SneakyThrows(InterruptedException.class)
     @Override
     public DownloaderLoginResult login() {
         RqSessionGet get = new RqSessionGet();
@@ -122,6 +123,17 @@ public class Transmission implements Downloader {
         String version = resp.getArgs().getVersion();
         if (version.startsWith("0.") || version.startsWith("1.") || version.startsWith("2.")) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, "API Version"));
+        }
+        if (!resp.getArgs().getBlocklistEnabled() || !resp.getArgs().getBlocklistUrl().startsWith(blocklistUrl)) {
+            RqSessionSet set = RqSessionSet.builder()
+                    .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
+                    .blocklistEnabled(true)
+                    .build();
+            TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
+            if (!sessionSetResp.isSuccess()) {
+                log.error(tlUI(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP), sessionSetResp.getResult());
+            }
+            Thread.sleep(3000);
         }
         return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
     }
@@ -145,15 +157,6 @@ public class Transmission implements Downloader {
     @SneakyThrows
     @Override
     public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
-        RqSessionSet set = RqSessionSet.builder()
-                .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
-                .blocklistEnabled(true)
-                .build();
-        TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
-        if (!sessionSetResp.isSuccess()) {
-            log.error(tlUI(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP), sessionSetResp.getResult());
-        }
-        Thread.sleep(3000); // Transmission 在这里疑似有崩溃问题？
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {

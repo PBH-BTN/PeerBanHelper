@@ -49,7 +49,7 @@ public class TextManager implements Reloadable {
     }
 
     public static String tlUI(Lang key, Object... params) {
-        return tl(DEF_LOCALE, new TranslationComponent(key.getKey(), INSTANCE_HOLDER.convert(params)));
+        return tl(DEF_LOCALE, new TranslationComponent(key.getKey(), (Object[]) TextManager.convert(DEF_LOCALE, params)));
     }
 
     public static String tlUI(TranslationComponent translationComponent) {
@@ -60,7 +60,7 @@ public class TextManager implements Reloadable {
 //    }
 
     public static String tl(String locale, Lang key, Object... params) {
-        return tl(locale, new TranslationComponent(key.getKey(), INSTANCE_HOLDER.convert(params)));
+        return tl(locale, new TranslationComponent(key.getKey(), (Object[]) TextManager.convert(locale, params)));
     }
 
     public static String tl(String locale, TranslationComponent translationComponent) {
@@ -74,14 +74,46 @@ public class TextManager implements Reloadable {
         if (str == null) {
             return translationComponent.getKey();
         }
+        String[] params = convert(locale, translationComponent.getParams());
         for (PostProcessor postProcessor : INSTANCE_HOLDER.postProcessors) {
             try {
-                str = postProcessor.process(str, locale, translationComponent.getParams());
+                str = postProcessor.process(str, locale, params);
             } catch (Exception e) {
                 log.warn("Unable to process post processor: key={}, locale={}, params={}", translationComponent.getKey(), locale, translationComponent.getParams());
             }
         }
         return str;
+    }
+
+    @NotNull
+    public static String[] convert(String locale, @Nullable Object... args) {
+        if (args == null || args.length == 0) {
+            return new String[0];
+        }
+        String[] components = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            Object obj = args[i];
+            if (obj == null) {
+                components[i] = "null";
+                continue;
+            }
+            //     Class<?> clazz = obj.getClass();
+            // Check
+
+            try {
+                if (obj instanceof TranslationComponent translationComponent) {
+                    components[i] = tl(locale, translationComponent);
+                    continue;
+                }
+                components[i] = obj.toString();
+            } catch (Exception exception) {
+                log.debug("Failed to process the object: {}", obj);
+                components[i] = String.valueOf(obj); // null safe
+            }
+            // undefined
+
+        }
+        return components;
     }
 
     /**
@@ -292,32 +324,6 @@ public class TextManager implements Reloadable {
         }
         configuration.set(path, text);
         languageFilesManager.deploy(locale, configuration);
-    }
-
-    @NotNull
-    public String[] convert(@Nullable Object... args) {
-        if (args == null || args.length == 0) {
-            return new String[0];
-        }
-        String[] components = new String[args.length];
-        for (int i = 0; i < args.length; i++) {
-            Object obj = args[i];
-            if (obj == null) {
-                components[i] = "null";
-                continue;
-            }
-            //     Class<?> clazz = obj.getClass();
-            // Check
-            try {
-                components[i] = obj.toString();
-            } catch (Exception exception) {
-                log.debug("Failed to process the object: {}", obj);
-                components[i] = String.valueOf(obj); // null safe
-            }
-            // undefined
-
-        }
-        return components;
     }
 
     /**

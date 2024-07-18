@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -21,7 +20,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
-import inet.ipaddr.IPAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -256,25 +254,25 @@ public class QBittorrent implements Downloader {
                     qbPeer.setClient(mid);
                 }
             }
+            qbPeer.setRawIp(s);
             peersList.add(qbPeer);
         }
         return peersList;
     }
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
-        added.forEach(meta -> {
-            IPAddress ipAddress = IPAddressUtil.getIPAddress(meta.getPeer().getAddress().getIp());
-            String peers;
-            if (ipAddress.isIPv4()) {
-                peers = meta.getPeer().getAddress().getIp() + ":" + meta.getPeer().getAddress().getPort();
-            } else {
-                peers = "[" + meta.getPeer().getAddress().getIp() + "]" + ":" + meta.getPeer().getAddress().getPort();
-            }
+        Map<String, StringJoiner> banTasks = new HashMap<>();
+        added.forEach(p -> {
+            StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
+            joiner.add(p.getPeer().getRawIp());
+            banTasks.put(p.getTorrent().getHash(), joiner);
+        });
+        banTasks.forEach((hash, peers) -> {
             try {
                 HttpResponse<String> request = httpClient.send(MutableRequest
                                 .POST(apiEndpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
-                                        .query("hash", meta.getTorrent().getHash())
-                                        .query("peers", peers).build())
+                                        .query("hash", hash)
+                                        .query("peers", peers.toString()).build())
                                 .header("Content-Type", "application/x-www-form-urlencoded")
                         , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
                 if (request.statusCode() != 200) {

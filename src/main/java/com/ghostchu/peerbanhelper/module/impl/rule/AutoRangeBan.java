@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -85,7 +86,8 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
-        for (PeerAddress bannedPeer : getServer().getBannedPeers().keySet()) {
+        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : getServer().getBannedPeers().entrySet()) {
+            PeerAddress bannedPeer = bannedPeerEntry.getKey();
             IPAddress bannedAddress = bannedPeer.getAddress().withoutPrefixLength();
             if (bannedAddress.isIPv4Convertible()) {
                 bannedAddress = bannedAddress.toIPv4();

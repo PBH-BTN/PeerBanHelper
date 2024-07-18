@@ -566,7 +566,7 @@ public class PeerBanHelperServer {
         //moduleManager.register(new ActiveProbing(this, profile));
         moduleManager.register(AutoRangeBan.class);
         moduleManager.register(BtnNetworkOnline.class);
-        moduleManager.register(DownloaderCIDRBlockList.class);
+        moduleManager.register(BlockListController.class);
         moduleManager.register(IPBlackRuleList.class);
         moduleManager.register(PBHMetricsController.class);
         moduleManager.register(PBHBanController.class);
