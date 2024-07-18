@@ -6,6 +6,7 @@ import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,7 @@ public class IPAddressUtil {
      * @param ip
      * @return
      */
+    @Nullable
     public static IPAddress getIPAddress(String ip) {
         try {
             return IP_ADDRESS_CACHE.get(ip, () -> {

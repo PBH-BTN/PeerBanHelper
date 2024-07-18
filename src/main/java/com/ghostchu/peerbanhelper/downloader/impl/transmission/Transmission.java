@@ -56,7 +56,7 @@ public class Transmission implements Downloader {
     }
 
     private static String generateBlocklistUrl(String pbhServerAddress) {
-        return pbhServerAddress + "/blocklist/transmission";
+        return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
     public static Transmission loadFromConfig(String name, String pbhServerAddress, ConfigurationSection section) {
