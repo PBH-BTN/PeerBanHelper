@@ -172,8 +172,8 @@ module:
     # 子网掩码长度
     # IP地址前多少位相同的视为同一个子网，位数越少范围越大，一般不需要修改
     subnet-mask-length: 24
-    # 对于同小区IPv6地址应该取多少位掩码没有调查过，64位是不会误杀的保险值
-    subnet-mask-v6-length: 64
+    # IPv6 地址前缀长度
+    subnet-mask-v6-length: 60
     # 容许同一网段下载同一种子的IP数量，正整数
     # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
     tolerate-num: 5
@@ -241,25 +241,10 @@ module:
     # 规则列表
     rules:
       # 规则ID（任意）
-      dt_torrents:
+      all-in-one:
         # 是否启用
         enabled: true
         # 显示名称
-        name: dt_torrents_示例规则
+        name: all-in-one
         # 规则文件订阅地址
-        url: https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/dt_torrent.txt
-      # 规则ID（任意）
-      hp_torrents:
-        # 是否启用
-        enabled: true
-        # 显示名称
-        name: hp_torrents_示例规则
-        # 规则文件订阅地址
-        url: https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/hp_torrent.txt
-      multi-dial:
-        # 是否启用
-        enabled: true
-        # 显示名称
-        name: dt_torrents_示例规则
-        # 规则文件订阅地址
-        url: https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/multi-dial.txt
+        url: https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt
