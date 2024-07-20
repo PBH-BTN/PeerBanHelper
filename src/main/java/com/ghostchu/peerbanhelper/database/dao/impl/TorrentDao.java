@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
@@ -23,6 +24,19 @@ public class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
             data.setId(id);
             return data;
         }
-        return list.getFirst();
+        TorrentEntity entity = list.getFirst();
+        boolean anyUpdated = false;
+        if (!entity.getName().equals(data.getName())) {
+            entity.setName(data.getName());
+            anyUpdated = true;
+        }
+        if (!(Objects.equals(entity.getSize(), data.getSize()))) {
+            entity.setSize(data.getSize());
+            anyUpdated = true;
+        }
+        if (anyUpdated) {
+            update(entity);
+        }
+        return entity;
     }
 }
