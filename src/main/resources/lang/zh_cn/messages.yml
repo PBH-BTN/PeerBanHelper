@@ -118,9 +118,9 @@ GUI_TRAY_MESSAGE_DESCRIPTION: "点击托盘图标重新打开窗口；右键托�
 GUI_TABBED_LOGS: "运行日志"
 GUI_TABBED_PEERS: "已连接的Peers"
 ABOUT_VIEW_GITHUB: "查看 Github 页面..."
-IPDB_UPDATING: "{} 数据库已过期且需要更新，请等待 PBH 连接到 Maxmind 服务器更新数据……"
-IPDB_UPDATE_FAILED: "从 Maxmind 下载数据库 {} 时出现错误：{}"
-IPDB_UPDATE_SUCCESS: "从 Maxmind 更新数据库 {} 成功！"
+IPDB_UPDATING: "{} 数据库已过期且需要更新，请等待 PBH 连接到服务器更新数据……"
+IPDB_UPDATE_FAILED: "下载数据库 {} 时出现错误：{}"
+IPDB_UPDATE_SUCCESS: "更新数据库 {} 成功！"
 IPDB_INVALID: "由于在初始化过程中出现错误，IPDB 功能已被自动禁用。请检查日志文件以修复问题"
 IPDB_NEED_CONFIG: "IPDB 功能需要配置才能使用，请在 config.yml 的 ip-database 中填写相关配置信息"
 DOWNLOAD_PROGRESS_DETERMINED: "下载进度：已下载 {}/{} 字节，进度：{}%"
@@ -310,3 +310,5 @@ USER_SCRIPT_RUN_RESULT: "用户脚本 {}: {}"
 SCHEDULED_OPERATIONS: "[计划任务] 已处理 {} 个封禁列表的外部计划更改"
 
 ARB_BANNED_REASON: "IP 地址 {} 与另一个已封禁的 IP 地址 {} 处于同一封禁区间内，执行连锁封禁操作：{}@{}"
+
+TOO_MANY_FAILED_ATTEMPT: "连接此下载器时连续多次错误，已暂停登录尝试，请检查用户名密码和网络连接。暂停状态将于 {} 恢复"

@@ -17,9 +17,11 @@ public class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
 
     @Override
     public synchronized TorrentEntity createIfNotExists(TorrentEntity data) throws SQLException {
-        List<TorrentEntity> list = queryForMatchingArgs(data);
+        List<TorrentEntity> list = queryForEq("infoHash", data.getInfoHash());
         if (list.isEmpty()) {
-            return super.createIfNotExists(data);
+            long id = create(data);
+            data.setId(id);
+            return data;
         }
         return list.getFirst();
     }

@@ -1,4 +1,4 @@
-config-version: 12
+config-version: 13
 # 设置程序语言
 # default 跟随操作系统 (Follow the operating system)
 # en_us English (US)
@@ -118,3 +118,5 @@ proxy:
   host: "127.0.0.1"
   # 代理服务器端口号
   port: 7890
+  # 代理例外地址，使用 | 分隔不同条目
+  non-proxy-host: "127.0.0.1|localhost"

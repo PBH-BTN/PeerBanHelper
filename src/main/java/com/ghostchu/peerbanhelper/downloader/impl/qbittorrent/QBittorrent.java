@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -39,16 +38,12 @@ import java.util.*;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class QBittorrent implements Downloader {
+public class QBittorrent extends AbstractDownloader {
     private final String apiEndpoint;
     private final HttpClient httpClient;
     private final Config config;
-    private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
-    private String name;
-    private TranslationComponent statusMessage;
-
     public QBittorrent(String name, Config config) {
-        this.name = name;
+        super(name);
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
         CookieManager cm = new CookieManager();
@@ -95,7 +90,7 @@ public class QBittorrent implements Downloader {
         return config.saveToYaml();
     }
 
-    public DownloaderLoginResult login() {
+    public DownloaderLoginResult login0() {
         if (isLoggedIn())
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
         try {
@@ -124,52 +119,6 @@ public class QBittorrent implements Downloader {
         return apiEndpoint;
     }
 
-//    @Override
-//    public String getWebUIEndpoint() {
-//        return config.getEndpoint();
-//    }
-//
-//    @Override
-//    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
-//        if (config.getBasicAuth() != null) {
-//            return new DownloaderBasicAuth(config.getEndpoint(), config.getBasicAuth().getUser(), config.getBasicAuth().getPass());
-//        }
-//        return null;
-//    }
-//
-//    @Override
-//    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
-//        return (url, content) -> {
-//            if (content.contains("loginform")) {
-//                return String.format("""
-//                            const xhr = new XMLHttpRequest();
-//                            xhr.open('POST', 'api/v2/auth/login', true);
-//                            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
-//                            xhr.addEventListener('readystatechange', function() {
-//                                    if (xhr.readyState === 4) { // DONE state
-//                                        if ((xhr.status === 200) && (xhr.responseText === "Ok."))
-//                                            location.reload(true);
-//                                    }
-//                                }
-//                            );
-//                            const queryString = "username=%s&password=%s";
-//                            xhr.send(queryString);
-//                        """, UrlEncoderDecoder.encodePath(config.getUsername()), UrlEncoderDecoder.encodePath(config.getPassword()));
-//            } else {
-//                return null;
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public boolean isSupportWebview() {
-//        return true;
-//    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
 
     @Override
     public String getType() {
@@ -331,25 +280,10 @@ public class QBittorrent implements Downloader {
     }
 
     @Override
-    public DownloaderLastStatus getLastStatus() {
-        return lastStatus;
-    }
-
-    @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
-        this.lastStatus = lastStatus;
-        this.statusMessage = statusMessage;
-    }
-
-    @Override
-    public TranslationComponent getLastStatusMessage() {
-        return statusMessage;
-    }
-
-    @Override
-    public void close() {
+    public void close() throws Exception {
 
     }
+
 
     @NoArgsConstructor
     @Data

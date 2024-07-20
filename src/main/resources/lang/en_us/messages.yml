@@ -118,9 +118,9 @@ GUI_TRAY_MESSAGE_DESCRIPTION: "Click the tray icon to reopen the window; right-c
 GUI_TABBED_LOGS: "Run Logs"
 GUI_TABBED_PEERS: "Connected Peers"
 ABOUT_VIEW_GITHUB: "View GitHub page..."
-IPDB_UPDATING: "{} database is outdated and needs updating, please wait while PBH connects to Maxmind servers to update data..."
-IPDB_UPDATE_FAILED: "Error downloading database {} from Maxmind: {}"
-IPDB_UPDATE_SUCCESS: "Successfully updated database {} from Maxmind!"
+IPDB_UPDATING: "{} database is outdated and needs updating, please wait while PBH connects to the server to update data..."
+IPDB_UPDATE_FAILED: "Error downloading database {} from server: {}"
+IPDB_UPDATE_SUCCESS: "Successfully updated database {} from server!"
 IPDB_INVALID: "IPDB feature automatically disabled due to an error during initialization. Please check the log file to fix the issue"
 IPDB_NEED_CONFIG: "IPDB feature requires configuration, please fill in the relevant information in ip-database in config.yml"
 DOWNLOAD_PROGRESS_DETERMINED: "Download progress: downloaded {}/{} bytes, progress: {}%"
@@ -310,3 +310,5 @@ USER_SCRIPT_RUN_RESULT: "UserScript {}: {}"
 SCHEDULED_OPERATIONS: "[Scheduled Tasks] Processed {} ban list external changes"
 
 ARB_BANNED_REASON: "IP address {} is in the same ban range as another banned IP address {}, performing chain ban operation: {}@{}"
+
+TOO_MANY_FAILED_ATTEMPT: "Too many failed login attempts. We paused attempt until {}."

@@ -358,23 +358,17 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createNotification(Level level, String title, String description) {
-        Alert.AlertType alertType = Alert.AlertType.NONE;
-        if (level.equals(Level.WARNING)) {
-            alertType = Alert.AlertType.WARNING;
+        if (trayIcon != null) {
+            TrayIcon.MessageType messageType = TrayIcon.MessageType.INFO;
+            if (level.equals(Level.WARNING)) {
+                messageType = TrayIcon.MessageType.WARNING;
+            }
+            if (level.equals(Level.SEVERE)) {
+                messageType = TrayIcon.MessageType.ERROR;
+            }
+            trayIcon.displayMessage(title, description, messageType);
+            return;
         }
-        if (level.equals(Level.SEVERE)) {
-            alertType = Alert.AlertType.ERROR;
-        }
-        if (level.equals(Level.INFO)) {
-            alertType = Alert.AlertType.INFORMATION;
-        }
-        Alert.AlertType finalAlertType = alertType;
-        Platform.runLater(() -> {
-            Alert alert = new Alert(finalAlertType);
-            alert.setTitle(title);
-            alert.setHeaderText(title);
-            alert.setContentText(description);
-            alert.show();
-        });
+        createDialog(level, title, description);
     }
 }

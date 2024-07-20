@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerFlag;
@@ -35,7 +34,7 @@ import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class Deluge implements Downloader {
+public class Deluge extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Deluge.class);
     private static final List<String> MUST_HAVE_METHODS = ImmutableList.of(
             "peerbanhelperadapter.replace_blocklist",
@@ -43,13 +42,11 @@ public class Deluge implements Downloader {
             "peerbanhelperadapter.get_active_torrents_info",
             "peerbanhelperadapter.ban_ips"
     );
-    private final String name;
     private final DelugeServer client;
     private final Config config;
-    private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
-    private TranslationComponent statusMessage;
 
     public Deluge(String name, Config config) {
+        super(name);
         this.name = name;
         this.config = config;
         this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
@@ -64,8 +61,6 @@ public class Deluge implements Downloader {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
         return new Deluge(name, config);
     }
-
-
 
     @Override
     public JsonObject saveDownloaderJson() {
@@ -82,38 +77,13 @@ public class Deluge implements Downloader {
         return config.getEndpoint();
     }
 
-//    @Override
-//    public String getWebUIEndpoint() {
-//        return config.getEndpoint();
-//    }
-
-//    @Override
-//    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
-//        return null;
-//    }
-//
-//    @Override
-//    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
-//        return null;
-//    }
-//
-//    @Override
-//    public boolean isSupportWebview() {
-//        return true;
-//    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
     @Override
     public String getType() {
         return "Deluge";
     }
 
     @Override
-    public DownloaderLoginResult login() {
+    public DownloaderLoginResult login0() {
         try {
             if (!this.client.login().isLoggedIn()) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
@@ -208,22 +178,6 @@ public class Deluge implements Downloader {
     @Override
     public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
 
-    }
-
-    @Override
-    public DownloaderLastStatus getLastStatus() {
-        return lastStatus;
-    }
-
-    @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
-        this.lastStatus = lastStatus;
-        this.statusMessage = statusMessage;
-    }
-
-    @Override
-    public TranslationComponent getLastStatusMessage() {
-        return statusMessage;
     }
 
     @Override
