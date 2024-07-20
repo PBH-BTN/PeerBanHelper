@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
 import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
@@ -344,7 +345,7 @@ public class PeerBanHelperServer {
             return thread;
         });
         log.info(tlUI(Lang.PBH_BAN_WAVE_STARTED));
-        BAN_WAVE_SERVICE.scheduleAtFixedRate(this::banWave, 1, profileConfig.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
+        BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::banWave, 1, profileConfig.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
     }
 
 
@@ -598,6 +599,9 @@ public class PeerBanHelperServer {
         if (!loginResult.success()) {
             log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
             downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
+            if (loginResult.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS || loginResult.getStatus() == DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS) {
+                downloader.setLastStatus(DownloaderLastStatus.NEED_TAKE_ACTION, loginResult.getMessage());
+            }
             return Collections.emptyMap();
         }
         List<Torrent> torrents = downloader.getTorrents();

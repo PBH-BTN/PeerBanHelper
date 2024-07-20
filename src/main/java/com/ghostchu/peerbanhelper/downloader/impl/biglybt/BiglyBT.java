@@ -96,7 +96,8 @@ public class BiglyBT extends AbstractDownloader {
         return config.saveToYaml();
     }
 
-    public DownloaderLoginResult login() {
+    @Override
+    public DownloaderLoginResult login0() {
         HttpResponse<Void> resp;
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
@@ -110,7 +111,6 @@ public class BiglyBT extends AbstractDownloader {
         } catch (Exception e) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.NETWORK_ERROR, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
         }
-
     }
 
     @Override

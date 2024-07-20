@@ -22,6 +22,7 @@ public class DownloaderLoginResult {
         INCORRECT_CREDENTIAL,
         MISSING_COMPONENTS,
         NETWORK_ERROR,
-        EXCEPTION
+        EXCEPTION,
+        REQUIRE_TAKE_ACTIONS
     }
 }

@@ -87,7 +87,7 @@ public class Transmission extends AbstractDownloader {
 
     @SneakyThrows(InterruptedException.class)
     @Override
-    public DownloaderLoginResult login() {
+    public DownloaderLoginResult login0() {
         RqSessionGet get = new RqSessionGet();
         TypedResponse<RsSessionGet> resp = client.execute(get); // 执行任意 RPC 操作以刷新 session
         String version = resp.getArgs().getVersion();

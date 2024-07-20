@@ -8,10 +8,12 @@ import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.text.CharacterIterator;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
 
 public class MsgUtil {
     private static final DecimalFormat df = new DecimalFormat("0.00%");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static String humanReadableByteCountBin(long bytes) {
         long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
         if (absB < 1024) {
@@ -107,6 +109,9 @@ public class MsgUtil {
         return df;
     }
 
+    public static SimpleDateFormat getDateFormatter() {
+        return sdf;
+    }
 
     /**
      * Replace args in raw to args

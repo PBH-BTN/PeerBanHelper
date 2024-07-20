@@ -310,3 +310,5 @@ USER_SCRIPT_RUN_RESULT: "UserScript {}: {}"
 SCHEDULED_OPERATIONS: "[Scheduled Tasks] Processed {} ban list external changes"
 
 ARB_BANNED_REASON: "IP address {} is in the same ban range as another banned IP address {}, performing chain ban operation: {}@{}"
+
+TOO_MANY_FAILED_ATTEMPT: "Too many failed login attempts. We paused attempt until {}."

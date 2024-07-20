@@ -83,7 +83,7 @@ public class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public DownloaderLoginResult login() {
+    public DownloaderLoginResult login0() {
         try {
             if (!this.client.login().isLoggedIn()) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));

@@ -90,7 +90,7 @@ public class QBittorrent extends AbstractDownloader {
         return config.saveToYaml();
     }
 
-    public DownloaderLoginResult login() {
+    public DownloaderLoginResult login0() {
         if (isLoggedIn())
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
         try {
