@@ -77,6 +77,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
                     } else {
                         log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
                         lastReport = System.currentTimeMillis();
+                        bans.clear();
                     }
                 })
                 .exceptionally(e -> {
