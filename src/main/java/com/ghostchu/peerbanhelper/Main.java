@@ -131,6 +131,7 @@ public class Main {
         if (proxySection == null) return;
         String host = proxySection.getString("host");
         String port = String.valueOf(proxySection.getInt("port"));
+        String nonProxyHost = proxySection.getString("non-proxy-hosts", "");
         switch (proxySection.getInt("setting")) {
             case 1 -> System.setProperty("java.net.useSystemProxies", "true");
             case 2 -> {
@@ -138,10 +139,13 @@ public class Main {
                 System.setProperty("http.proxyPort", port);
                 System.setProperty("https.proxyHost", host);
                 System.setProperty("https.proxyPort", port);
+                System.setProperty("http.nonProxyHosts", nonProxyHost);
+                System.setProperty("https.nonProxyHosts", nonProxyHost);
             }
             case 3 -> {
                 System.setProperty("socksProxyHost", host);
                 System.setProperty("socksProxyPort", port);
+                System.setProperty("socksNonProxyHosts", nonProxyHost);
             }
             default -> System.setProperty("java.net.useSystemProxies", "false");
         }

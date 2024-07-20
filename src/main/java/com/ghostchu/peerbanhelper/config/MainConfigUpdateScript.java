@@ -28,6 +28,10 @@ public class MainConfigUpdateScript {
         }
     }
 
+    @UpdateScript(version = 14)
+    public void proxyServerConfigSectionEnhanced() {
+        conf.set("proxy.non-proxy-host", "127.0.0.1|localhost");
+    }
     @UpdateScript(version = 13)
     public void proxyServerConfigSection() {
         conf.set("proxy.setting", 0);
