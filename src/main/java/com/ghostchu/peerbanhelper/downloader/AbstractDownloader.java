@@ -27,7 +27,10 @@ public abstract class AbstractDownloader implements Downloader {
         DownloaderLoginResult result;
         try {
             result = login0();
-            if (result.success()) return result;
+            if (result.success()) {
+                failedLoginAttempts = 0;
+                return result;
+            }
             failedLoginAttempts++;
             return result;
         } catch (Throwable e) {
