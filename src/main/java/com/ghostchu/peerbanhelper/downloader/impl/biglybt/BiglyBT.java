@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
@@ -47,17 +46,14 @@ import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class BiglyBT implements Downloader {
+public class BiglyBT extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(BiglyBT.class);
     private final String apiEndpoint;
     private final HttpClient httpClient;
     private final Config config;
-    private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
-    private String name;
-    private TranslationComponent statusMessage;
 
     public BiglyBT(String name, Config config) {
-        this.name = name;
+        super(name);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
@@ -120,31 +116,6 @@ public class BiglyBT implements Downloader {
     @Override
     public String getEndpoint() {
         return apiEndpoint;
-    }
-
-//    @Override
-//    public String getWebUIEndpoint() {
-//        return config.getEndpoint();
-//    }
-
-//    @Override
-//    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
-//        return null;
-//    }
-//
-//    @Override
-//    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
-//        return null;
-//    }
-//
-//    @Override
-//    public boolean isSupportWebview() {
-//        return false;
-//    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -265,22 +236,6 @@ public class BiglyBT implements Downloader {
             log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public DownloaderLastStatus getLastStatus() {
-        return lastStatus;
-    }
-
-    @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
-        this.lastStatus = lastStatus;
-        this.statusMessage = statusMessage;
-    }
-
-    @Override
-    public TranslationComponent getLastStatusMessage() {
-        return statusMessage;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -34,21 +33,18 @@ import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class Transmission implements Downloader {
+public class Transmission extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Transmission.class);
-    private final String name;
     private final TrClient client;
     private final String blocklistUrl;
     private final Config config;
-    private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
-    private TranslationComponent statusMessage;
 
     /*
             API 受限，实际实现起来意义不大
 
             */
     public Transmission(String name, String blocklistUrl, Config config) {
-        this.name = name;
+        super(name);
         this.config = config;
         this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
@@ -82,32 +78,6 @@ public class Transmission implements Downloader {
     @Override
     public String getEndpoint() {
         return config.getEndpoint();
-    }
-
-//    @Override
-//    public String getWebUIEndpoint() {
-//        return config.getEndpoint();
-//    }
-
-//    @Override
-//    public @Nullable DownloaderBasicAuth getDownloaderBasicAuth() {
-//        return new DownloaderBasicAuth(config.getEndpoint(), config.getUsername(), config.getPassword());
-//    }
-//
-//    @Override
-//    public @Nullable WebViewScriptCallback getWebViewJavaScript() {
-//        return null;
-//    }
-//
-//    @Override
-//    public boolean isSupportWebview() {
-//        return true;
-//    }
-
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -210,23 +180,6 @@ public class Transmission implements Downloader {
             }
         }).map(t -> Long.parseLong(t.getId())).toList());
     }
-
-    @Override
-    public DownloaderLastStatus getLastStatus() {
-        return lastStatus;
-    }
-
-    @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
-        this.lastStatus = lastStatus;
-        this.statusMessage = statusMessage;
-    }
-
-    @Override
-    public TranslationComponent getLastStatusMessage() {
-        return statusMessage;
-    }
-
 
     @Override
     public void close() {
