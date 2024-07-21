@@ -105,7 +105,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 SELECT
                                                  	%field%,
                                                  	COUNT( %field% ) AS ct,
-                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( %field% ) FROM history ) AS percent ,
+                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( * ) FROM history ) AS percent ,
                                                  	torrentName,
                                                  	torrentInfoHash,
                                                  	module
