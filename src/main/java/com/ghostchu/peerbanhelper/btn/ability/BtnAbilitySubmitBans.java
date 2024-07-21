@@ -5,24 +5,18 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBan;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeer;
-import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.module.impl.rule.BtnNetworkOnline;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.github.mizosoft.methanol.MutableRequest;
-import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -34,7 +28,6 @@ public class BtnAbilitySubmitBans implements BtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private final Map<BtnPeer, BanMetadata> bans = new ConcurrentHashMap<>();
     private long lastReport = System.currentTimeMillis();
 
     public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability) {
@@ -47,7 +40,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
     @Override
     public void load() {
         Main.getEventBus().register(this);
-        btnNetwork.getExecuteService().scheduleAtFixedRate(this::submit, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -55,10 +48,6 @@ public class BtnAbilitySubmitBans implements BtnAbility {
         Main.getEventBus().unregister(this);
     }
 
-    @Subscribe
-    public void onPeerBanEvent(PeerBanEvent event) {
-        bans.put(BtnPeer.from(event.getTorrentObj(), event.getPeerObj()), event.getBanMetadata());
-    }
 
     private void submit() {
         log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
@@ -77,7 +66,6 @@ public class BtnAbilitySubmitBans implements BtnAbility {
                     } else {
                         log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
                         lastReport = System.currentTimeMillis();
-                        bans.clear();
                     }
                 })
                 .exceptionally(e -> {
@@ -88,7 +76,9 @@ public class BtnAbilitySubmitBans implements BtnAbility {
 
     private List<BtnBan> generateBans() {
         List<BtnBan> list = new ArrayList<>();
-        for (Map.Entry<BtnPeer, BanMetadata> e : bans.entrySet()) {
+        Map<BtnPeer, BanMetadata> map = new HashMap<>();
+        btnNetwork.getServer().getBannedPeers().forEach((pa, meta) -> map.put(BtnPeer.from(meta.getTorrent(), meta.getPeer()), meta));
+        for (Map.Entry<BtnPeer, BanMetadata> e : map.entrySet()) {
             if (e.getValue().getBanAt() <= lastReport) {
                 continue;
             }
