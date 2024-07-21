@@ -87,7 +87,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         // 读取检查间隔
         checkInterval = config.getLong("check-interval", checkInterval);
         scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -384,7 +384,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             scheduledExecutorService.shutdown();
         }
         scheduledExecutorService = Executors.newScheduledThreadPool(1, r -> Thread.ofVirtual().name("IPBlackRuleList - Update Thread").unstarted(r));
-        scheduledExecutorService.scheduleAtFixedRate(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
     record IPBanResult(String ruleName, MatchResult matchResult) {

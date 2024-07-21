@@ -64,7 +64,7 @@ public class BtnAbilityRules implements BtnAbility {
         } catch (Exception e) {
             log.error("Unable to load cached BTN rules into memory");
         }
-        btnNetwork.getExecuteService().scheduleAtFixedRate(this::updateRule, new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::updateRule, new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void updateRule() {

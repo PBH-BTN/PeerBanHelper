@@ -30,7 +30,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Getter
 public class BtnNetwork {
-    private static final int BTN_PROTOCOL_VERSION = 5;
+    private static final int BTN_PROTOCOL_VERSION = 6;
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     @Getter
@@ -98,7 +98,6 @@ public class BtnNetwork {
             abilities.values().forEach(a -> {
                 try {
                     a.load();
-
                 } catch (Exception e) {
                     log.error("Failed to load BTN ability", e);
                 }
