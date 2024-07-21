@@ -8,6 +8,9 @@
         <language id="en" customLocalizationFile="./lang/en-US.utf8" />
       </additionalLanguages>
     </languages>
+    <variables>
+      <variable name="registerSystemService" value="registerSystemService" />
+    </variables>
     <jreBundles jdkProviderId="Zulu" release="21/21.0.3" />
   </application>
   <files>
@@ -71,6 +74,19 @@
         <file path="./icon.png" />
       </iconImageFiles>
     </launcher>
+    <launcher name="PeerBanHelper Service" id="70" excludeFromMenu="true" swtApp="true" checkUpdater="true">
+      <executable name="PeerBanHelper-Service" iconSet="true" executableDir="." redirectStderr="false" stderrFile="~/PeerBanHelper/error.log" stdoutFile="~/PeerBanHelper/output.log" executableMode="service" singleInstance="true" checkConsoleParameter="true">
+        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
+      </executable>
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx386M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="nogui">
+        <classPath>
+          <archive location="PeerBanHelper.jar" failOnError="false" />
+        </classPath>
+      </java>
+      <iconImageFiles>
+        <file path="./icon.png" />
+      </iconImageFiles>
+    </launcher>
   </launchers>
   <installerGui>
     <applications>
@@ -82,7 +98,9 @@
                 <serializedBean>
                   <property name="failIfNotObtainedMac" type="boolean" value="false" />
                   <property name="failIfNotObtainedWin" type="boolean" value="false" />
-                  <property name="obtainIfAdminWin" type="boolean" value="false" />
+                  <property name="obtainIfAdminMac" type="boolean" value="true" />
+                  <property name="obtainIfNormalMac" type="boolean" value="true" />
+                  <property name="obtainIfNormalWin" type="boolean" value="true" />
                 </serializedBean>
               </action>
             </actions>
@@ -206,6 +224,47 @@ return console.askOkCancel(message, true);
                   <property name="variableName" type="string">startupWhenLoggedIn</property>
                 </serializedBean>
               </formComponent>
+              <formComponent name="Register system service" id="79" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                <serializedBean>
+                  <property name="checkboxText" type="string">${i18n:checkbox.registersystemservice}</property>
+                  <property name="variableName" type="string">registerSystemService</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
+          <screen name="Show install as system service note" id="83" beanClass="com.install4j.runtime.beans.screens.DefaultInfoScreen" rollbackBarrierExitCode="0">
+            <condition>context.getBooleanVariable("registerSystemService")</condition>
+            <formComponents>
+              <formComponent id="84" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">${i18n:InfoBeforeClickLabel}</property>
+                </serializedBean>
+                <visibilityScript>!context.isConsole()</visibilityScript>
+              </formComponent>
+              <formComponent id="85" beanClass="com.install4j.runtime.beans.formcomponents.HtmlDisplayFormComponent" useExternalParametrization="true" externalParametrizationName="HTML or text display" externalParametrizationMode="include">
+                <serializedBean>
+                  <property name="displayedText" type="string">${i18n:systemservice.note}</property>
+                  <property name="fillVertical" type="boolean" value="true" />
+                  <property name="textSource" type="enum" class="com.install4j.runtime.beans.screens.components.TextSource" value="DIRECT" />
+                </serializedBean>
+                <externalParametrizationPropertyNames>
+                  <propertyName>textSource</propertyName>
+                  <propertyName>displayedText</propertyName>
+                  <propertyName>displayedTextFile</propertyName>
+                  <propertyName>variableName</propertyName>
+                </externalParametrizationPropertyNames>
+              </formComponent>
+              <formComponent id="86" beanClass="com.install4j.runtime.beans.formcomponents.ConsoleHandlerFormComponent">
+                <serializedBean>
+                  <property name="consoleScript">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">console.waitForEnter();
+return true;
+</property>
+                    </object>
+                  </property>
+                </serializedBean>
+              </formComponent>
             </formComponents>
           </screen>
           <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true" rollbackBarrierExitCode="0">
@@ -260,6 +319,24 @@ return console.askOkCancel(message, true);
                   <property name="itemName" type="string">${compiler:sys.fullName} ${compiler:sys.version}</property>
                 </serializedBean>
               </action>
+              <action id="76" beanClass="com.install4j.runtime.beans.actions.services.InstallServiceAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="delayedAutoStart" type="boolean" value="true" />
+                  <property name="launcherId" type="string">70</property>
+                  <property name="macosIdentifier" type="string">com.ghostchu.peerbanhelper.PBHService</property>
+                  <property name="maxRestarts" type="int" value="5" />
+                  <property name="restartOnFailure" type="boolean" value="true" />
+                  <property name="windowsPriority" type="enum" class="com.install4j.runtime.beans.actions.services.WindowsPriority" value="BELOW_NORMAL_PRIORITY_CLASS" />
+                </serializedBean>
+                <condition>context.getBooleanVariable("registerSystemService")</condition>
+              </action>
+              <action id="77" beanClass="com.install4j.runtime.beans.actions.services.StartServiceAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="autostartOnly" type="boolean" value="true" />
+                  <property name="launcherId" type="string">70</property>
+                </serializedBean>
+                <condition>context.getBooleanVariable("registerSystemService")</condition>
+              </action>
             </actions>
             <formComponents>
               <formComponent id="16" beanClass="com.install4j.runtime.beans.formcomponents.ProgressComponent">
@@ -289,7 +366,11 @@ return console.askOkCancel(message, true);
           <screen id="23" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
               <action id="33" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" rollbackBarrierExitCode="0" />
-              <action id="34" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
+              <action id="34" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="failIfNotObtained" type="boolean" value="false" />
+                </serializedBean>
+              </action>
             </actions>
           </screen>
         </startup>
@@ -578,5 +659,16 @@ return console.askYesNo(message, true);
   <mediaSets>
     <windows name="Windows x64" id="38" architecture="64" />
     <windows name="Windows arm64" id="41" architecture="arm64" />
+    <linuxDeb name="Linux Deb Archive amd64" id="72" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_amd64_${compiler:sys.version}">
+      <variables>
+        <variable name="registerSystemService" value="true" />
+      </variables>
+    </linuxDeb>
+    <linuxDeb name="Linux Deb Archive arm64" id="89" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_aarch64_${compiler:sys.version}">
+      <variables>
+        <variable name="registerSystemService" value="true" />
+      </variables>
+      <jreBundle platform="linux-aarch64" />
+    </linuxDeb>
   </mediaSets>
 </install4j>
