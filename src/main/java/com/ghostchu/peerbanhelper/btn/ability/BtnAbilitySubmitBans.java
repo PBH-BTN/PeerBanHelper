@@ -52,6 +52,10 @@ public class BtnAbilitySubmitBans implements BtnAbility {
     private void submit() {
         log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
         List<BtnBan> btnPeers = generateBans();
+        if (btnPeers.isEmpty()) {
+            lastReport = System.currentTimeMillis();
+            return;
+        }
         BtnBanPing ping = new BtnBanPing(
                 System.currentTimeMillis(),
                 btnPeers
