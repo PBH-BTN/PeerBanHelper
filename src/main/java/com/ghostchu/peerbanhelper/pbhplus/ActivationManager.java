@@ -1,15 +1,23 @@
 package com.ghostchu.peerbanhelper.pbhplus;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.encrypt.ActivationKeyUtil;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * 捐赠密钥管理器
  */
 @Component
+@Slf4j
 public class ActivationManager {
     @Getter
     private final String keyText;
@@ -22,6 +30,9 @@ public class ActivationManager {
             return;
         }
         this.keyData = ActivationKeyUtil.fromKey(this.keyText);
+        if (this.isActivated()) {
+            log.info(tlUI(Lang.DONATION_KEY_VERIFICATION_SUCCESSFUL, keyData.licenseTo(), keyData.source(), MsgUtil.getDateFormatter().format(new Date(keyData.expireAt()))));
+        }
     }
 
     /**

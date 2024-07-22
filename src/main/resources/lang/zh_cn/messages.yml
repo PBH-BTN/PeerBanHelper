@@ -316,3 +316,5 @@ TOO_MANY_FAILED_ATTEMPT: "连接此下载器时连续多次错误，已暂停登
 AMM_SHUTTING_DOWN: "请等待 ActiveMonitoring 将缓存在内存中的数据刷写到数据库，最多 5 秒……"
 AMM_CLEANING_TABLES: "[数据清理] ActiveMonitoring 正在清理过期数据，这可能需要一点时间……"
 AMM_CLEANED_UP: "[数据清理] ActiveMonitoring 已删除了 {} 条过期数据"
+
+DONATION_KEY_VERIFICATION_SUCCESSFUL: "捐赠密钥激活成功！感谢捐赠！授权给：{} ({})，过期时间：{}"
