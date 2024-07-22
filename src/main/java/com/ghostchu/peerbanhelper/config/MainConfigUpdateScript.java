@@ -1,15 +1,12 @@
 package com.ghostchu.peerbanhelper.config;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
 import java.util.UUID;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class MainConfigUpdateScript {
@@ -21,11 +18,11 @@ public class MainConfigUpdateScript {
     }
 
     private void validate() {
-        String token = conf.getString("server.token");
-        if (token == null || token.isBlank() || token.length() < 8) {
-            conf.set("server.token", UUID.randomUUID().toString());
-            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
-        }
+//        String token = conf.getString("server.token");
+//        if (token == null || token.isBlank() || token.length() < 8) {
+//            conf.set("server.token", UUID.randomUUID().toString());
+//            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
+//        }
     }
 
     @UpdateScript(version = 15)

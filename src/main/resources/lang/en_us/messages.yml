@@ -317,4 +317,7 @@ AMM_SHUTTING_DOWN: "Please wait ActiveMonitoring flush its data from memory to d
 AMM_CLEANING_TABLES: "[Data Cleanup] ActiveMonitoring deleting expired data, this may need a while..."
 AMM_CLEANED_UP: "[Data Cleanup] ActiveMonitoring deleted {} expired data"
 
+OOBE_DISALLOW_REINIT: "This PeerBanHelper instance already initialized，OOBE interface no-longer available"
+WEBAPI_NEED_INIT: "PeerBanHelper need redirect OOBE to initialize."
+
 DONATION_KEY_VERIFICATION_SUCCESSFUL: "Donation key active successfully! Thanks for donate! Licensed to ：{} ({}), Expire at：{}"

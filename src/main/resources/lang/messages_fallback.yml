@@ -317,4 +317,7 @@ AMM_SHUTTING_DOWN: "请等待 ActiveMonitoring 将缓存在内存中的数据刷
 AMM_CLEANING_TABLES: "[数据清理] ActiveMonitoring 正在清理过期数据，这可能需要一点时间……"
 AMM_CLEANED_UP: "[数据清理] ActiveMonitoring 已删除了 {} 条过期数据"
 
+OOBE_DISALLOW_REINIT: "此 PeerBanHelper 已被初始化，OOBE 接口不再可用。"
+WEBAPI_NEED_INIT: "PeerBanHelper 需要 OOBE 向导初始化"
+
 DONATION_KEY_VERIFICATION_SUCCESSFUL: "捐赠密钥激活成功！感谢捐赠！授权给：{} ({})，过期时间：{}"
