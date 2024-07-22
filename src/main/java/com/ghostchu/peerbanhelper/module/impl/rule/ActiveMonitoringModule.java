@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.module.impl.pbhplus;
+package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
@@ -39,7 +39,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
 
     @Override
     public @NotNull String getName() {
-        return "PeerRecordModule (PBH+)";
+        return "Active Monitoring";
     }
 
     @Override
