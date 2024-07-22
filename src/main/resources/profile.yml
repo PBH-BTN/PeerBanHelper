@@ -23,7 +23,7 @@ module:
   peer-id-blacklist:
     enabled: true
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
-    ban-duration: default
+    ban-duration: 259200000
     # method = 匹配方式
     #  + STARTS_WITH = 匹配开头
     #  + ENDS_WITH = 匹配结尾
@@ -66,7 +66,7 @@ module:
   client-name-blacklist:
     enabled: true
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
-    ban-duration: default
+    ban-duration: 259200000
     banned-client-name:
       #- '{"method":"CONTAINS","content":"xunlei 0019", "hit": "FALSE"}' # 排除新版迅雷（会提供上传，但上传比十分感人 1:2000）
       #- '{"method":"CONTAINS","content":"xunlei 0.0.1.9", "hit": "FALSE"}' # 排除新版迅雷（会提供上传，但上传比十分感人 1:2000）
@@ -125,11 +125,13 @@ module:
     # IPV4 前缀长度，前缀相同的 IP 都被视为同一个用户
     # 64 = 常见的 ISP 为单个接入用户分配的前缀长度
     ipv6-prefix-length: 64
+    # 封禁时长
+    ban-duration: 2592000000
   # IP 地址/端口 封禁
   ip-address-blocker:
     enabled: true
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
-    ban-duration: default
+    ban-duration: 259200000
     # 按 IP 封禁，支持 CIDR，其语法大致如下：
     # ::/64
     # a:b:c:d::a:b/64
@@ -154,7 +156,7 @@ module:
     # 是否启用
     enabled: true
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
-    ban-duration: default
+    ban-duration: 604800000
     # IPV4 前缀长度
     ipv4: 30 # /32 = 单个 IP，/24 = 整个 ?.?.?.x 段
     # IPV6 前缀长度
@@ -163,12 +165,12 @@ module:
   btn:
     enabled: true
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
-    ban-duration: default
+    ban-duration: 259200000
   # 多拨封禁（实验性功能）
   multi-dialing-blocker:
     enabled: true
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
-    ban-duration: default
+    ban-duration: 1296000000
     # 子网掩码长度
     # IP地址前多少位相同的视为同一个子网，位数越少范围越大，一般不需要修改
     subnet-mask-length: 24
@@ -235,9 +237,9 @@ module:
   ip-address-blocker-rules:
     enabled: true
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
-    ban-duration: default
+    ban-duration: 259200000
     # 检查间隔
-    check-interval: 86400000 # 24小时检查一次 毫秒
+    check-interval: 1296000000 # 24小时检查一次 毫秒
     # 规则列表
     rules:
       # 规则ID（任意）

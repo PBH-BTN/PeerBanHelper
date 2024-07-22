@@ -25,6 +25,10 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 12)
+    public void patchProgressCheckBlocker() {
+        conf.set("module.progress-cheat-blocker.ban-duration", "default");
+    }
     @UpdateScript(version = 11)
     public void reAddXL0019() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
