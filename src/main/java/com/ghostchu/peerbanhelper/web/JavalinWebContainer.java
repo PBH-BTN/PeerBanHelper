@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
+import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -93,6 +94,11 @@ public class JavalinWebContainer {
                     ctx.status(HttpStatus.FORBIDDEN);
                     ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED)));
                 })
+                .exception(NeedInitException.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.SEE_OTHER);
+                    ctx.header("Location", "/init");
+                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_NEED_INIT), "location", "/init"));
+                })
                 .exception(IllegalArgumentException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
                     ctx.json(Map.of("message", e.getMessage()));
@@ -109,12 +115,11 @@ public class JavalinWebContainer {
                     if (ctx.routeRoles().contains(Role.ANYONE)) {
                         return;
                     }
-                    if (ctx.path().equals("/init")) {
+                    if (ctx.path().startsWith("/init")) {
                         return;
                     }
                     if (token == null || token.isBlank()) {
-                        ctx.redirect("/init", HttpStatus.TEMPORARY_REDIRECT);
-                        return;
+                        throw new NeedInitException();
                     }
                     String authenticated = ctx.sessionAttribute("authenticated");
                     if (authenticated != null && authenticated.equals(token)) {

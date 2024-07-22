@@ -51,6 +51,11 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
     }
 
     private void handleLogin(Context ctx) {
+//        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
+//            ctx.status(HttpStatus.OK);
+//            ctx.json(Map.of("message", "Don't cry okay? Here is dummy success response, let's show OOBE page, it's fine?"));
+//            return;
+//        }
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
         if (loginRequest == null || !webContainer.getToken().equals(loginRequest.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);

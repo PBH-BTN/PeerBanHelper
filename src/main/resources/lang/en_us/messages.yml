@@ -316,3 +316,6 @@ TOO_MANY_FAILED_ATTEMPT: "Too many failed login attempts. We paused attempt unti
 AMM_SHUTTING_DOWN: "Please wait ActiveMonitoring flush its data from memory to disk... (up to 5 seconds)"
 AMM_CLEANING_TABLES: "[Data Cleanup] ActiveMonitoring deleting expired data, this may need a while..."
 AMM_CLEANED_UP: "[Data Cleanup] ActiveMonitoring deleted {} expired data"
+
+OOBE_DISALLOW_REINIT: "This PeerBanHelper instance already initialized，OOBE interface no-longer available"
+WEBAPI_NEED_INIT: "PeerBanHelper need redirect OOBE to initialize."
