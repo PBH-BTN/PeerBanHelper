@@ -659,16 +659,5 @@ return console.askYesNo(message, true);
   <mediaSets>
     <windows name="Windows x64" id="38" architecture="64" />
     <windows name="Windows arm64" id="41" architecture="arm64" />
-    <linuxDeb name="Linux Deb Archive amd64" id="72" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_amd64_${compiler:sys.version}">
-      <variables>
-        <variable name="registerSystemService" value="true" />
-      </variables>
-    </linuxDeb>
-    <linuxDeb name="Linux Deb Archive arm64" id="89" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_aarch64_${compiler:sys.version}">
-      <variables>
-        <variable name="registerSystemService" value="true" />
-      </variables>
-      <jreBundle platform="linux-aarch64" />
-    </linuxDeb>
   </mediaSets>
 </install4j>
