@@ -248,11 +248,6 @@ module:
         name: all-in-one
         # 规则文件订阅地址
         url: https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt
-  # PBH+ 功能
-  # 警告：启用此功能后，可能会导致数据库大小快速膨胀
-  # 警告：I/O密集型功能，请避免在 HDD 硬盘上启用此功能，会极大的加大磁盘噪音，并影响系统运行速度；请避免在 EMMC 设备上启用此功能，可能导致 Flash 芯片磨损问题
-  # 警告：此功能可能会加载 PeerBanHelper 的 CPU 与 RAM 使用量，请避免在低性能设备上（如：NAS、路由器等嵌入式设备）上启用此功能
-  # ----------
   # 主动监测
   # 启用后，PBH 将持续收集和记录所有活动 Torrent 上的 Peers 连接情况，并记录以下数据：
   # * PeerID (仅存储前 8 个 ASCII 字符)
@@ -264,6 +259,9 @@ module:
   # * 最后一次观测 Peer Flags 内容
   # * 首次发现此 Peer 的时间
   # * 最后一次观测到此 Peer 的时间
+  # 警告：启用此功能后，可能会导致数据库大小快速膨胀
+  # 警告：I/O密集型功能，请避免在 HDD 硬盘上启用此功能，会极大的加大磁盘噪音，并影响系统运行速度；请避免在 EMMC 设备上启用此功能，可能导致 Flash 芯片磨损问题
+  # 警告：此功能可能会加载 PeerBanHelper 的 CPU 与 RAM 使用量，请避免在低性能设备上（如：NAS、路由器等嵌入式设备）上启用此功能
   active-monitoring:
     # 是否启用此功能
     enabled: false
