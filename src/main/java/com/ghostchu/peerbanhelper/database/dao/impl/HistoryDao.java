@@ -45,6 +45,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 .groupBy("ip")
                 .orderBy("count", false)
                 .limit((long) n)
+                .where().ge("banAt", twoWeeksAgo)
                 .queryRaw()) {
             var results = banLogs.getResults();
             results.forEach(arr -> result.put(arr[0], Long.parseLong(arr[1])));
