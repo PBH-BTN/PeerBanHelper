@@ -15,6 +15,7 @@ import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 public class JavalinWebContainer {
     private final Javalin javalin;
+    @Setter
     @Getter
     private String token;
     private Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
@@ -105,6 +107,13 @@ public class JavalinWebContainer {
                         return;
                     }
                     if (ctx.routeRoles().contains(Role.ANYONE)) {
+                        return;
+                    }
+                    if (ctx.path().equals("/init")) {
+                        return;
+                    }
+                    if (token == null || token.isBlank()) {
+                        ctx.redirect("/init", HttpStatus.TEMPORARY_REDIRECT);
                         return;
                     }
                     String authenticated = ctx.sessionAttribute("authenticated");
