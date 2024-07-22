@@ -239,7 +239,7 @@ module:
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
     ban-duration: 259200000
     # 检查间隔
-    check-interval: 1296000000 # 24小时检查一次 毫秒
+    check-interval: 86400000 # 24小时检查一次 毫秒
     # 规则列表
     rules:
       # 规则ID（任意）
