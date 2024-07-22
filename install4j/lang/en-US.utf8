@@ -4,3 +4,5 @@ launcher.peerbanhelper.nogui=PeerBanHelper(NoGUI, Console)
 launcher.peerbanhelper.service=PeerBanHelper(Service)
 checkbox.followsystemstartup=Boot automatically to the system tray when logged in
 peerbanhelper.description=PeerBanHelper
+checkbox.registersystemservice=Register as system service
+systemservice.note=When you install PeerBanHelper as system service，under Windows operation system, the configuration and files will store at C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper. Access this location will require Administrator privileges.

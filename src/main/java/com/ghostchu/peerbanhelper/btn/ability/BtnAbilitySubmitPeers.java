@@ -42,6 +42,9 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
     private void submit() {
         log.info(tlUI(Lang.BTN_SUBMITTING_PEERS));
         List<BtnPeer> btnPeers = generatePing();
+        if (btnPeers.isEmpty()) {
+            return;
+        }
         BtnPeerPing ping = new BtnPeerPing(
                 System.currentTimeMillis(),
                 btnPeers

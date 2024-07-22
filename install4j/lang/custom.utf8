@@ -4,3 +4,5 @@ launcher.peerbanhelper.nogui=PeerBanHelper(无GUI, 控制台)
 launcher.peerbanhelper.service=PeerBanHelper(服务)
 checkbox.followsystemstartup=登录时自动启动到系统托盘
 peerbanhelper.description=PeerBanHelper
+checkbox.registersystemservice=注册为系统服务
+systemservice.note=将 PeerBanHelper 安装为系统服务时，Windows 系统下配置文件将被存储在 C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper 位置，访问此位置需要您拥有管理员权限。

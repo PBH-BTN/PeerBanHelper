@@ -141,6 +141,7 @@ public class PeerBanHelperServer {
     }
 
     public void start() throws SQLException {
+        log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
         loadDownloaders();
         registerBanListInvokers();
         registerModules();

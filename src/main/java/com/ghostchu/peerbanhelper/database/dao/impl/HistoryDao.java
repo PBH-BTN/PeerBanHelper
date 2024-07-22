@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.j256.ormlite.dao.GenericRawResults;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,14 +38,15 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
     }
 
     public Map<String, Long> getBannedIps(int n) throws Exception {
-        Timestamp twoWeeksAgo = new Timestamp(Instant.now().minus(14, ChronoUnit.DAYS).toEpochMilli());
-
-        String sql = "SELECT ip, COUNT(*) AS count FROM " + getTableName() + " WHERE banAt >= ? " +
-                "GROUP BY ip ORDER BY count DESC LIMIT " + n;
-
+        Timestamp twoWeeksAgo = new Timestamp(Instant.now().minus(60, ChronoUnit.DAYS).toEpochMilli());
         Map<String, Long> result = new HashMap<>();
-        var banLogs = super.queryRaw(sql, twoWeeksAgo.toString());
-        try (banLogs) {
+        try (GenericRawResults<String[]> banLogs = queryBuilder()
+                .selectRaw("ip, COUNT(*) AS count")
+                .groupBy("ip")
+                .orderBy("count", false)
+                .limit((long) n)
+                .where().ge("banAt", twoWeeksAgo)
+                .queryRaw()) {
             var results = banLogs.getResults();
             results.forEach(arr -> result.put(arr[0], Long.parseLong(arr[1])));
         }
@@ -105,7 +107,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 SELECT
                                                  	%field%,
                                                  	COUNT( %field% ) AS ct,
-                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( %field% ) FROM history ) AS percent ,
+                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( * ) FROM history ) AS percent ,
                                                  	torrentName,
                                                  	torrentInfoHash,
                                                  	module
