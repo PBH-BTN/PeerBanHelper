@@ -23,6 +23,7 @@ import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetric;
 import com.ghostchu.peerbanhelper.module.*;
+import com.ghostchu.peerbanhelper.module.impl.pbhplus.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
@@ -577,6 +578,7 @@ public class PeerBanHelperServer {
         moduleManager.register(RuleSubController.class);
         moduleManager.register(PBHAuthenticateController.class);
         moduleManager.register(PBHLogsController.class);
+        moduleManager.register(ActiveMonitoringModule.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

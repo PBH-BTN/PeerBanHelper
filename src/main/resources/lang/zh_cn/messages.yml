@@ -312,3 +312,7 @@ SCHEDULED_OPERATIONS: "[计划任务] 已处理 {} 个封禁列表的外部计�
 ARB_BANNED_REASON: "IP 地址 {} 与另一个已封禁的 IP 地址 {} 处于同一封禁区间内，执行连锁封禁操作：{}@{}"
 
 TOO_MANY_FAILED_ATTEMPT: "连接此下载器时连续多次错误，已暂停登录尝试，请检查用户名密码和网络连接。暂停状态将于 {} 恢复"
+
+AMM_SHUTTING_DOWN: "请等待 ActiveMonitoring 将缓存在内存中的数据刷写到数据库，最多 5 秒……"
+AMM_CLEANING_TABLES: "[数据清理] ActiveMonitoring 正在清理过期数据，这可能需要一点时间……"
+AMM_CLEANED_UP: "[数据清理] ActiveMonitoring 已删除了 {} 条过期数据"

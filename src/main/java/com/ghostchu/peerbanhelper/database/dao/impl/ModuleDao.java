@@ -13,6 +13,7 @@ import java.util.List;
 public class ModuleDao extends AbstractPBHDao<ModuleEntity, Long> {
     public ModuleDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), ModuleEntity.class);
+        setObjectCache(true);
     }
 
     @Override

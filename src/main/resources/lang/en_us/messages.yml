@@ -312,3 +312,7 @@ SCHEDULED_OPERATIONS: "[Scheduled Tasks] Processed {} ban list external changes"
 ARB_BANNED_REASON: "IP address {} is in the same ban range as another banned IP address {}, performing chain ban operation: {}@{}"
 
 TOO_MANY_FAILED_ATTEMPT: "Too many failed login attempts. We paused attempt until {}."
+
+AMM_SHUTTING_DOWN: "Please wait ActiveMonitoring flush its data from memory to disk... (up to 5 seconds)"
+AMM_CLEANING_TABLES: "[Data Cleanup] ActiveMonitoring deleting expired data, this may need a while..."
+AMM_CLEANED_UP: "[Data Cleanup] ActiveMonitoring deleted {} expired data"

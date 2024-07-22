@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @DatabaseTable(tableName = "metadata")
 public final class MetadataEntity {
-    @DatabaseField(id = true)
+    @DatabaseField(id = true, index = true)
     private String key;
     @DatabaseField
     private String value;

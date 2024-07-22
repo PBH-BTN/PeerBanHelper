@@ -14,6 +14,7 @@ import java.util.Objects;
 public class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
     public TorrentDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), TorrentEntity.class);
+        setObjectCache(true);
     }
 
     @Override

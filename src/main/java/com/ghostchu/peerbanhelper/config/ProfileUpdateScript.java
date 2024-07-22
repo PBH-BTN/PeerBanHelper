@@ -25,6 +25,13 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 12)
+    public void activeMonitoringModule() {
+        conf.set("module.active-monitoring.enabled", false);
+        conf.set("module.active-monitoring.data-retention-time", 5184000000L);
+        conf.set("module.active-monitoring.data-cleanup-interval", 604800000L);
+    }
+
     @UpdateScript(version = 11)
     public void reAddXL0019() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
