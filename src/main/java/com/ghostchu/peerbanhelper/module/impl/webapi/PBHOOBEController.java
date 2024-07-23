@@ -54,8 +54,9 @@ public class PBHOOBEController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin().post("/api/oobe", this::handleOOBERequest, Role.ANYONE); // 指定 ANYONE，否则会被鉴权代码拉取鉴权
-
+        webContainer.javalin()
+                .post("/api/oobe", this::handleOOBERequest, Role.ANYONE)
+                .post("/api/oobe/testDownloader", ctx -> validateDownloader(ctx, JsonParser.parseString(ctx.body()).getAsJsonObject()), Role.ANYONE); // 指定 ANYONE，否则会被鉴权代码拉取鉴权
     }
 
     private void handleOOBERequest(Context ctx) throws IOException {
@@ -94,7 +95,12 @@ public class PBHOOBEController extends AbstractFeatureModule {
     }
 
     // 从 PBHDownloaderController 抄过来的，堪虑合并
-    private boolean validateDownloader(Context ctx, JsonObject draftDownloader) {
+    public boolean validateDownloader(Context ctx, JsonObject draftDownloader) {
+        if (webContainer.getToken() != null && !webContainer.getToken().isBlank()) {
+            ctx.status(HttpStatus.FORBIDDEN);
+            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), 403));
+            return false;
+        }
         String name = draftDownloader.get("name").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
 //        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
