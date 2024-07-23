@@ -94,9 +94,6 @@ public class PeerBanHelperServer {
     private YamlConfiguration mainConfig;
     @Autowired
     private ModuleMatchCache moduleMatchCache;
-    @Autowired
-    @Qualifier("banListFile")
-    private File banListFile;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
     @Getter
     private Map<PeerAddress, PeerMetadata> LIVE_PEERS = new HashMap<>();

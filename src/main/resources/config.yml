@@ -30,7 +30,7 @@ lookup:
 # 数据持久化
 persist:
   # 封禁日志保留天数
-  ban-logs-keep-days: 30
+  ban-logs-keep-days: 180
   # 持久保存封禁列表
   banlist: true
 # BitTorrent Threat Network 威胁防护网络（测试版）
@@ -103,11 +103,6 @@ ip-database:
   database-city: 'GeoLite2-City'
   # GeoIP-City 的数据库名称，默认使用免费版（GeoLite2-ASN），如果您购买了付费的数据库，可以自行替换
   database-asn: 'GeoLite2-ASN'
-# 系统防火墙集成设定
-# 允许不支持 WebAPI 封禁 Peers 的客户端，通过系统防火墙阻断 IP 地址
-firewall-integration:
-  # 高级 Windows 防火墙（基于动态关键字），需要 Windows 10 或更高版本
-  windows-adv-firewall: true
 # 代理服务器设定
 proxy:
   # 代理服务器设置
