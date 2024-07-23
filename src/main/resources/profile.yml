@@ -150,6 +150,27 @@ module:
     # 按国家或地区封禁（需要配置 GeoIP-City 数据库才能工作！）
     regions:
     #  - ISO_CODE 输入国家或地区的 ISO 代码，大小写敏感，如：CN;UK;TW;HK;JP 等
+    # 按网络类型封禁（仅中国大陆地区 IP 地址有效）
+    net-type:
+      # 宽带
+      wideband: false
+      # 基站
+      base-station: false
+      # 政企专线
+      government-and-enterprise-line: false
+      # 业务平台
+      business-platform: false
+      # 骨干网
+      backbone-network: false
+      # IP 专网
+      ip-private-network: false
+      # 网吧
+      internet-cafe: false
+      # 物联网
+      iot: false
+      # 数据中心
+      datacenter: false
+
   # 范围 IP 段封禁
   # 在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁
   auto-range-ban:

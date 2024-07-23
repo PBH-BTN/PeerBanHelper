@@ -321,3 +321,4 @@ OOBE_DISALLOW_REINIT: "This PeerBanHelper instance already initialized，OOBE in
 WEBAPI_NEED_INIT: "PeerBanHelper need redirect OOBE to initialize."
 
 DONATION_KEY_VERIFICATION_SUCCESSFUL: "Donation key active successfully! Thanks for donate! Licensed to ：{} ({}), Expire at：{}"
+IP_BLACKLIST_NETTYPE_RULE: "Net type rules"

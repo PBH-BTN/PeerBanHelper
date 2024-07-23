@@ -321,3 +321,4 @@ OOBE_DISALLOW_REINIT: "此 PeerBanHelper 已被初始化，OOBE 接口不再可�
 WEBAPI_NEED_INIT: "PeerBanHelper 需要 OOBE 向导初始化"
 
 DONATION_KEY_VERIFICATION_SUCCESSFUL: "捐赠密钥激活成功！感谢捐赠！授权给：{} ({})，过期时间：{}"
+IP_BLACKLIST_NETTYPE_RULE: "网络类型规则"
