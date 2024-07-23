@@ -1,10 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.BuildMeta;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -32,10 +30,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 public class PBHOOBEController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
-    @Autowired
-    private BuildMeta buildMeta;
-    @Autowired
-    private ModuleManager moduleManager;
 
     @Override
     public boolean isConfigurable() {
