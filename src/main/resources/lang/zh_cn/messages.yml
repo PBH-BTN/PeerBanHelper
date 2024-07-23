@@ -322,3 +322,5 @@ WEBAPI_NEED_INIT: "PeerBanHelper 需要 OOBE 向导初始化"
 
 DONATION_KEY_VERIFICATION_SUCCESSFUL: "捐赠密钥激活成功！感谢捐赠！授权给：{} ({})，过期时间：{}"
 IP_BLACKLIST_NETTYPE_RULE: "网络类型规则"
+
+PBH_OOBE_REQUIRED: "PeerBanHelper 需要初始化，请前往 WebUI 完成初始化步骤！WebUI 已在 {} 上启动。"

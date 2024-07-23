@@ -153,9 +153,10 @@ public class PeerBanHelperServer {
         banListInvoker.forEach(BanListInvoker::reset);
         GENERAL_SCHEDULER.scheduleWithFixedDelay(this::saveBanList, 10 * 1000, BANLIST_SAVE_INTERVAL, TimeUnit.MILLISECONDS);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
-        if (downloaders.isEmpty()) {
+
+        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             for (int i = 0; i < 50; i++) {
-                log.error(tlUI(Lang.NEW_SETUP_NO_DOWNLOADERS, getWebContainer() == null ? "ERROR" : getWebContainer().getToken()));
+                log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://localhost:" + webContainer.javalin().port()));
             }
         }
     }

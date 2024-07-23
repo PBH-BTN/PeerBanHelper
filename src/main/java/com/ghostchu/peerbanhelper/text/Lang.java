@@ -303,9 +303,9 @@ public enum Lang {
     AMM_CLEANING_TABLES,
     AMM_CLEANED_UP,
     DONATION_KEY_VERIFICATION_SUCCESSFUL,
-    OOBE_DISALLOW_REINIT
+    OOBE_DISALLOW_REINIT,
 
-    ;
+    PBH_OOBE_REQUIRED;
 
     public String getKey() {
         return name();
