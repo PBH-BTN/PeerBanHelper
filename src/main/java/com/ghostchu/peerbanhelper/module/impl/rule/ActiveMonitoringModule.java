@@ -50,8 +50,26 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
     @Subscribe
     private void onLivePeerSnapshotEvent(LivePeersUpdatedEvent event) {
         List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
-        event.getLivePeers().values().forEach(meta -> tasks.add(new PeerRecordDao.BatchHandleTasks(meta.getDownloader(),
-                meta.getTorrent(), meta.getPeer())));
+        event.getLivePeers().values().stream()
+                .filter(peerMetadata -> {
+                    var clientName = peerMetadata.getPeer().getClientName();
+                    var peerId = peerMetadata.getPeer().getId();
+                    if (clientName != null && !clientName.isBlank()) {
+                        return true;
+                    }
+                    if (peerId != null && !peerId.isBlank()) {
+                        return true;
+                    }
+                    if (peerMetadata.getPeer().getProgress() > 0) {
+                        return true;
+                    }
+                    if (peerMetadata.getPeer().getDownloadSpeed() > 0) {
+                        return true;
+                    }
+                    return peerMetadata.getPeer().getUploadSpeed() > 0;
+                })
+                .forEach(meta -> tasks.add(new PeerRecordDao.BatchHandleTasks(meta.getDownloader(),
+                        meta.getTorrent(), meta.getPeer())));
         taskWriteService.submit(() -> {
             try {
                 peerRecordDao.syncPendingTasks(tasks);

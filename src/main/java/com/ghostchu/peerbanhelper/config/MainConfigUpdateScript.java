@@ -29,6 +29,7 @@ public class MainConfigUpdateScript {
     public void pbhPlusKeyConfig() {
         conf.set("pbh-plus-key", "");
     }
+
     @UpdateScript(version = 14)
     public void proxyServerConfigSectionEnhanced() {
         conf.set("proxy.non-proxy-host", "127.0.0.1|localhost");
