@@ -325,3 +325,5 @@ IP_BLACKLIST_NETTYPE_RULE: "网络类型规则"
 
 PBH_OOBE_REQUIRED: "PeerBanHelper 需要初始化，请前往 WebUI 完成初始化步骤！WebUI 已在 {} 上启动。"
 WEBVIEW_DEFAULT_DISABLED: "WebUI 现在默认禁用，建议使用系统浏览器打开 WebUI"
+
+PCB_SHUTTING_DOWN: "请等待 ProgressCheatBlocker 将缓存在内存中的数据刷写到数据库，最多 5 秒……"

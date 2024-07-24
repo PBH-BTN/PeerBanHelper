@@ -30,6 +30,8 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Component
 @Slf4j
 public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
@@ -141,9 +143,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
 
     @Override
     public void onDisable() {
-        scheduledTimer.shutdownNow();
+        scheduledTimer.shutdown();
         progressRecorder.invalidateAll();
         if (enablePersist) {
+            log.info(tlUI(Lang.PCB_SHUTTING_DOWN));
             flushDatabase();
         }
     }

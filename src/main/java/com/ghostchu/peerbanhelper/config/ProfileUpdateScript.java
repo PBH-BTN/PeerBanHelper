@@ -26,7 +26,7 @@ public class ProfileUpdateScript {
     }
 
 
-    @UpdateScript(version = 13)
+    @UpdateScript(version = 14)
     public void activeMonitoringAndNetTypeAndPCBPersist() {
         conf.set("module.active-monitoring.enabled", false);
         conf.set("module.active-monitoring.data-retention-time", 5184000000L);
@@ -44,6 +44,10 @@ public class ProfileUpdateScript {
 
         conf.set("module.progress-cheat-blocker.enable-persist", true);
         conf.set("module.progress-cheat-blocker.persist-duration", 1209600000);
+    }
+
+    @UpdateScript(version = 13)
+    public void skip() {
     }
 
     @UpdateScript(version = 12)

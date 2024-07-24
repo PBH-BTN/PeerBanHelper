@@ -325,3 +325,5 @@ IP_BLACKLIST_NETTYPE_RULE: "Net type rules"
 
 PBH_OOBE_REQUIRED: "PeerBanHelper initialize required, please open WebUI to finish OOBE steps. The WebUI is listening on {}."
 WEBVIEW_DEFAULT_DISABLED: "WebUI is disabled by default, recommend to access WebUI via System Browser"
+
+PCB_SHUTTING_DOWN: "Please wait ProgressCheatBlocker flush its data to disk from memory……"

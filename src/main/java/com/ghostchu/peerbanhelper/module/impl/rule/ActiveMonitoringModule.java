@@ -15,7 +15,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -138,6 +141,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
         }
         diskWriteCache.invalidateAll();
         flush();
+        taskWriteService.shutdown();
         try {
             log.info(tlUI(Lang.AMM_SHUTTING_DOWN));
             if (!taskWriteService.awaitTermination(10, TimeUnit.SECONDS)) {
@@ -145,27 +149,6 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        }
-    }
-
-    public record ReplaceableMonitoringData(PeerMetadata metadata) {
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof ReplaceableMonitoringData another)) {
-                return false;
-            }
-            if (!(metadata.getDownloader().equals(another.metadata.getDownloader()))) {
-                return false;
-            }
-            if (!(metadata.getPeer().getRawIp().equals(another.metadata().getPeer().getRawIp()))) {
-                return false;
-            }
-            return metadata.getTorrent().equals(another.metadata().getTorrent());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(metadata.getPeer().getAddress(), metadata.getDownloader(), metadata.getTorrent(), metadata);
         }
     }
 }
