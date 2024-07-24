@@ -85,7 +85,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
                 .get("/api/modules/" + getConfigName() + "/status", this::handleStatus, Role.USER_READ);
         scheduledTimer = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        scheduledTimer.scheduleWithFixedDelay(this::flushDatabase, 60, 60, TimeUnit.SECONDS);
+        scheduledTimer.scheduleWithFixedDelay(this::flushDatabase, 30, 30, TimeUnit.SECONDS);
         scheduledTimer.scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
     }
 
