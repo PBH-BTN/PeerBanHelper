@@ -49,8 +49,6 @@ public class PBHChartController extends AbstractFeatureModule {
             ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED), 401));
             return;
         }
-
-
     }
 
 
@@ -59,26 +57,19 @@ public class PBHChartController extends AbstractFeatureModule {
 
     }
 
-    private GeoIPQuery performGeoIPQuery(Context ctx) throws Exception {
-        try (var it = peerRecordDao.iterator()) {
-            while (it.hasNext()) {
 
-            }
-        }
-    }
-
-    public record GeoIPQuery(GeoIPPie data, long count) {
-
-    }
-
-    public record GeoIPPie(
-            String country,
-            String province,
-            String city,
-            String districts,
-            String net,
-            String isp
-    ) {
-
-    }
+//    public record GeoIPQuery(GeoIPPie data, long count) {
+//
+//    }
+//
+//    public record GeoIPPie(
+//            String country,
+//            String province,
+//            String city,
+//            String districts,
+//            String net,
+//            String isp
+//    ) {
+//
+//    }
 }
