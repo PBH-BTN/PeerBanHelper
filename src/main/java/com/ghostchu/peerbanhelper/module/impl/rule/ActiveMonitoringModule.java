@@ -5,7 +5,10 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -21,13 +24,18 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class ActiveMonitoringModule extends AbstractFeatureModule {
     private final PeerRecordDao peerRecordDao;
-    private final Set<ReplaceableMonitoringData> dataBuffer = new CopyOnWriteArraySet<>();
+    private final Deque<PeerMetadata> dataBuffer = new ConcurrentLinkedDeque<>();
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
     private ScheduledExecutorService scheduleService;
-    @SuppressWarnings("FieldCanBeLocal")
-    private BlockingQueue<Runnable> taskWriteQueue;
-    private boolean shouldSync = false;
+    private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
+    ;
+    private final Cache<PeerMetadata, Object> diskWriteCache = CacheBuilder
+            .newBuilder()
+            .expireAfterWrite(3, TimeUnit.MINUTES)
+            .maximumSize(3500)
+            .removalListener(notification -> dataBuffer.offer((PeerMetadata) notification.getKey()))
+            .build();
 
     public ActiveMonitoringModule(PeerRecordDao peerRecordDao) {
         super();
@@ -51,7 +59,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
 
     @Subscribe
     private void onLivePeerSnapshotEvent(LivePeersUpdatedEvent event) {
-        List<ReplaceableMonitoringData> peerMetadatas = event.getLivePeers().values().stream().flatMap(Collection::stream)
+        event.getLivePeers().values().stream().flatMap(Collection::stream)
                 .filter(peerMetadata -> {
                     var clientName = peerMetadata.getPeer().getClientName();
                     var peerId = peerMetadata.getPeer().getId();
@@ -69,16 +77,12 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
                     }
                     return peerMetadata.getPeer().getUploadSpeed() > 0;
                 })
-                .map(ReplaceableMonitoringData::new)
-                .toList();
-        peerMetadatas.forEach(dataBuffer::remove);
-        dataBuffer.addAll(peerMetadatas);
+                .forEach(meta -> diskWriteCache.put(meta, MiscUtil.EMPTY_OBJECT));
     }
 
     @Override
     public void onEnable() {
         reloadConfig();
-        this.taskWriteQueue = new LinkedBlockingQueue<>();
         this.taskWriteService = new ThreadPoolExecutor(1, 2, 60L, TimeUnit.SECONDS, taskWriteQueue);
         Main.getEventBus().register(this);
     }
@@ -93,27 +97,20 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
     }
 
     private void flush() {
-        shouldSync = !shouldSync;
-        if (!shouldSync) {
-            if (dataBuffer.size() < 5000) {
-                return;
-            }
-        }
-        var it = dataBuffer.iterator();
         List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
-        while (it.hasNext()) {
-            var meta = it.next().metadata();
-            tasks.add(new PeerRecordDao.BatchHandleTasks(meta.getDownloader(),
-                    meta.getTorrent(), meta.getPeer()));
-            it.remove();
+        while (!dataBuffer.isEmpty()) {
+            var pendingTask = dataBuffer.poll();
+            tasks.add(new PeerRecordDao.BatchHandleTasks(
+                    pendingTask.getDownloader(),
+                    pendingTask.getTorrent(),
+                    pendingTask.getPeer()
+            ));
         }
-        taskWriteService.submit(() -> {
-            try {
-                peerRecordDao.syncPendingTasks(tasks);
-            } catch (SQLException e) {
-                log.warn("Unable sync peers data to database", e);
-            }
-        });
+        try {
+            peerRecordDao.syncPendingTasks(tasks);
+        } catch (SQLException e) {
+            log.warn("Unable sync peers data to database", e);
+        }
     }
 
     private void cleanup() {
@@ -139,8 +136,8 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
         if (!this.scheduleService.isShutdown()) {
             this.scheduleService.shutdownNow();
         }
+        diskWriteCache.invalidateAll();
         flush();
-        taskWriteService.shutdown();
         try {
             log.info(tlUI(Lang.AMM_SHUTTING_DOWN));
             if (!taskWriteService.awaitTermination(10, TimeUnit.SECONDS)) {
@@ -157,10 +154,10 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
             if (!(obj instanceof ReplaceableMonitoringData another)) {
                 return false;
             }
-            if (!(metadata.getPeer().toPeerAddress().equals(another.metadata().getPeer().toPeerAddress()))) {
+            if (!(metadata.getDownloader().equals(another.metadata.getDownloader()))) {
                 return false;
             }
-            if (!(metadata.getDownloader().equals(another.metadata.getDownloader()))) {
+            if (!(metadata.getPeer().getRawIp().equals(another.metadata().getPeer().getRawIp()))) {
                 return false;
             }
             return metadata.getTorrent().equals(another.metadata().getTorrent());

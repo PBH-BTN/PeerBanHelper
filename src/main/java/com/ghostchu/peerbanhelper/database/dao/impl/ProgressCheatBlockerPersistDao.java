@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Component
@@ -40,12 +41,13 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                         entity.getFirstTimeSeen().getTime(),
                         entity.getLastTimeSeen().getTime()
                 )
-        ).collect(Collectors.toList()); // 可变 List
+        ).collect(Collectors.toCollection(CopyOnWriteArrayList::new)); // 可变 List，需要并发安全
     }
 
     public void flushDatabase(List<ProgressCheatBlocker.ClientTaskRecord> records) throws SQLException {
         callBatchTasks(() -> {
-            records.forEach(record -> record.task().forEach(task -> {
+            records.forEach(record ->
+                    record.task().forEach(task -> {
                 try {
                     var entity = findExists(record.address(), task.getTorrentId());
                     if (entity == null) {

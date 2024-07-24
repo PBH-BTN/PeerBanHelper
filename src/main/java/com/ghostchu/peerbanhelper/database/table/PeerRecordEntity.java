@@ -17,7 +17,7 @@ public final class PeerRecordEntity {
     private Long id;
     @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
     private String address;
-    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, uniqueCombo = true)
+    @DatabaseField(canBeNull = false, index = true, foreign = true, foreignAutoCreate = true, uniqueCombo = true)
     private TorrentEntity torrent;
     @DatabaseField(canBeNull = false, uniqueCombo = true)
     private String downloader;

@@ -277,7 +277,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         } catch (SQLException e) {
             log.error("Unable to load cached client tasks from database", e);
         }
-        return new ArrayList<>();
+        return new CopyOnWriteArrayList<>();
     }
 
     private int calcStringSize(String str) {
