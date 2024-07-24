@@ -46,7 +46,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             })
             .maximumWeight(16000000)
             .removalListener(notification -> {
-                if (!notification.wasEvicted()) return;
                 String key = notification.getKey();
                 List<ClientTask> tasks = notification.getValue();
                 pendingPersistQueue.offer(new ClientTaskRecord(key, tasks));
@@ -143,12 +142,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     @Override
     public void onDisable() {
         scheduledTimer.shutdownNow();
-        progressRecorder.cleanUp();
+        progressRecorder.invalidateAll();
         if (enablePersist) {
-            progressRecorder.asMap().forEach((k, v) -> pendingPersistQueue.add(new ClientTaskRecord(k, v)));
             flushDatabase();
         }
-        progressRecorder.invalidateAll();
     }
 
     private void reloadConfig() {
