@@ -372,7 +372,7 @@ public class Main {
         ConfigurableApplicationContext configurableApplicationContext = applicationContext;
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
         defaultListableBeanFactory.removeBeanDefinition(beanName);
-
     }
+
 
 }

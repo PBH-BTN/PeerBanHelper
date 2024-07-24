@@ -5,15 +5,14 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -22,11 +21,13 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class ActiveMonitoringModule extends AbstractFeatureModule {
     private final PeerRecordDao peerRecordDao;
+    private final Set<ReplaceableMonitoringData> dataBuffer = new CopyOnWriteArraySet<>();
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
-    private long dataCleanupInterval;
-    private ScheduledExecutorService cleanupScheduled;
+    private ScheduledExecutorService scheduleService;
+    @SuppressWarnings("FieldCanBeLocal")
     private BlockingQueue<Runnable> taskWriteQueue;
+    private boolean shouldSync = false;
 
     public ActiveMonitoringModule(PeerRecordDao peerRecordDao) {
         super();
@@ -50,9 +51,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
 
     @Subscribe
     private void onLivePeerSnapshotEvent(LivePeersUpdatedEvent event) {
-
-        List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
-        event.getLivePeers().values().stream().flatMap(Collection::stream)
+        List<ReplaceableMonitoringData> peerMetadatas = event.getLivePeers().values().stream().flatMap(Collection::stream)
                 .filter(peerMetadata -> {
                     var clientName = peerMetadata.getPeer().getClientName();
                     var peerId = peerMetadata.getPeer().getId();
@@ -70,16 +69,10 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
                     }
                     return peerMetadata.getPeer().getUploadSpeed() > 0;
                 })
-                .forEach(meta -> tasks.add(new PeerRecordDao.BatchHandleTasks(meta.getDownloader(),
-                        meta.getTorrent(), meta.getPeer())));
-        taskWriteService.submit(() -> {
-            try {
-                peerRecordDao.syncPendingTasks(tasks);
-            } catch (SQLException e) {
-                log.warn("Unable sync peers data to database", e);
-            }
-        });
-
+                .map(ReplaceableMonitoringData::new)
+                .toList();
+        peerMetadatas.forEach(dataBuffer::remove);
+        dataBuffer.addAll(peerMetadatas);
     }
 
     @Override
@@ -93,9 +86,34 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
     private void reloadConfig() {
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
-        this.dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
-        this.cleanupScheduled = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        this.cleanupScheduled.scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
+        long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
+        this.scheduleService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+        this.scheduleService.scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
+        this.scheduleService.scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
+    }
+
+    private void flush() {
+        shouldSync = !shouldSync;
+        if (!shouldSync) {
+            if (dataBuffer.size() < 5000) {
+                return;
+            }
+        }
+        var it = dataBuffer.iterator();
+        List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
+        while (it.hasNext()) {
+            var meta = it.next().metadata();
+            tasks.add(new PeerRecordDao.BatchHandleTasks(meta.getDownloader(),
+                    meta.getTorrent(), meta.getPeer()));
+            it.remove();
+        }
+        taskWriteService.submit(() -> {
+            try {
+                peerRecordDao.syncPendingTasks(tasks);
+            } catch (SQLException e) {
+                log.warn("Unable sync peers data to database", e);
+            }
+        });
     }
 
     private void cleanup() {
@@ -118,52 +136,39 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
     @Override
     public void onDisable() {
         Main.getEventBus().unregister(this);
-        if (!this.cleanupScheduled.isShutdown()) {
-            this.cleanupScheduled.shutdownNow();
+        if (!this.scheduleService.isShutdown()) {
+            this.scheduleService.shutdownNow();
         }
+        flush();
         taskWriteService.shutdown();
         try {
             log.info(tlUI(Lang.AMM_SHUTTING_DOWN));
-            if (!taskWriteService.awaitTermination(5, TimeUnit.SECONDS)) {
+            if (!taskWriteService.awaitTermination(10, TimeUnit.SECONDS)) {
                 taskWriteService.shutdownNow();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
-//    @AllArgsConstructor
-//    @Getter
-//    static class QueuedPeerRecord implements Comparable<QueuedPeerRecord> {
-//        private String downloader;
-//        private TorrentWrapper torrent;
-//        private PeerWrapper peer;
-//
-//        /*
-//            这里手动实现一下 hashCode 和 equals，因为我们要做Deque内数据替换
-//         */
-//        @Override
-//        public int hashCode() {
-//            return Objects.hash(downloader, torrent.getHash(), torrent.getName(), peer.getAddress().getIp(), peer.getAddress().getPort());
-//        }
-//
-//        @Override
-//        public boolean equals(Object obj) {
-//            if(!(obj instanceof QueuedPeerRecord target)){
-//                return false;
-//            }
-//            if(downloader.equals(target.downloader)){
-//                if(torrent.getHash().equals(target.torrent.getHash())){
-//                    if(peer.getAddress().getIp().equals(target.peer.getAddress().getIp())){
-//                        return peer.getAddress().getPort() == target.peer.getAddress().getPort();
-//                    }
-//                }
-//            }
-//            return false;
-//        }
-//
-//        @Override
-//        public int compareTo(@NotNull ActiveMonitoringModule.QueuedPeerRecord o) {
-//            return peer.toPeerAddress().compareTo(o.peer.toPeerAddress());
-//        }
-//    }
+
+    public record ReplaceableMonitoringData(PeerMetadata metadata) {
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof ReplaceableMonitoringData another)) {
+                return false;
+            }
+            if (!(metadata.getPeer().toPeerAddress().equals(another.metadata().getPeer().toPeerAddress()))) {
+                return false;
+            }
+            if (!(metadata.getDownloader().equals(another.metadata.getDownloader()))) {
+                return false;
+            }
+            return metadata.getTorrent().equals(another.metadata().getTorrent());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(metadata.getPeer().getAddress(), metadata.getDownloader(), metadata.getTorrent(), metadata);
+        }
+    }
 }
