@@ -324,3 +324,4 @@ DONATION_KEY_VERIFICATION_SUCCESSFUL: "捐赠密钥激活成功！感谢捐赠�
 IP_BLACKLIST_NETTYPE_RULE: "网络类型规则"
 
 PBH_OOBE_REQUIRED: "PeerBanHelper 需要初始化，请前往 WebUI 完成初始化步骤！WebUI 已在 {} 上启动。"
+WEBVIEW_DEFAULT_DISABLED: "WebUI 现在默认禁用，建议使用系统浏览器打开 WebUI"

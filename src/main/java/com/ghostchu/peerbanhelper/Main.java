@@ -244,7 +244,7 @@ public class Main {
         }
         if ("javafx".equals(guiType)) {
             try {
-                if (!loadJavaFxDependencies()) {
+                if (!loadDependencies("/libraries/javafx.maven")) {
                     guiType = "swing";
                 }
             } catch (IOException e) {
@@ -264,8 +264,8 @@ public class Main {
         return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.0-dev";
     }
 
-    private static boolean loadJavaFxDependencies() throws IOException {
-        try (var is = Main.class.getResourceAsStream("/libraries/javafx.maven")) {
+    public static boolean loadDependencies(String mavenManifestPath) throws IOException {
+        try (var is = Main.class.getResourceAsStream(mavenManifestPath)) {
             String str = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
             String[] libraries = str.split("\n");
             String osName = System.getProperty("os.name").toLowerCase();

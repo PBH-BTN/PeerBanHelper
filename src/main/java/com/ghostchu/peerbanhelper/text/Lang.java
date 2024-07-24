@@ -305,7 +305,7 @@ public enum Lang {
     DONATION_KEY_VERIFICATION_SUCCESSFUL,
     OOBE_DISALLOW_REINIT,
 
-    PBH_OOBE_REQUIRED;
+    PBH_OOBE_REQUIRED, WEBVIEW_DEFAULT_DISABLED;
 
     public String getKey() {
         return name();

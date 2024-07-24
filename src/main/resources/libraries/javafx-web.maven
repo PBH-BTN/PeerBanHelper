@@ -1,0 +1,2 @@
+org.openjfx:javafx-media:{javafx.version}:{system.platform}
+org.openjfx:javafx-web:{javafx.version}:{system.platform}
