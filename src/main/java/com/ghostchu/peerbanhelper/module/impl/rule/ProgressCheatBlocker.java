@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.Weigher;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -34,13 +35,21 @@ import java.util.concurrent.*;
 public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     private final Deque<ClientTaskRecord> pendingPersistQueue = new ConcurrentLinkedDeque<>();
     private final Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
-            .maximumSize(3192)
             .expireAfterAccess(30, TimeUnit.MINUTES)
+            .weigher((Weigher<String, List<ClientTask>>) (key, value) -> {
+                long totalSize = calcStringSize(key);
+                for (ClientTask clientTask : value) {
+                    totalSize += calcClientTaskSize(clientTask);
+                }
+                totalSize += 12;
+                return (int) Math.min(totalSize, Integer.MAX_VALUE);
+            })
+            .maximumWeight(16000000)
             .removalListener(notification -> {
                 if (!notification.wasEvicted()) return;
-                String key = (String) notification.getKey();
+                String key = notification.getKey();
                 @SuppressWarnings("unchecked")
-                List<ClientTask> tasks = (List<ClientTask>) notification.getValue();
+                List<ClientTask> tasks = notification.getValue();
                 pendingPersistQueue.offer(new ClientTaskRecord(key, tasks));
             })
             .build();
@@ -155,6 +164,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         this.enablePersist = getConfig().getBoolean("enable-persist");
         this.persistDuration = getConfig().getLong("persist-duration");
     }
+
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
@@ -274,6 +284,17 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         return new ArrayList<>();
     }
 
+    private long calcStringSize(String str) {
+        return 40 + 2L * str.length();
+    }
+
+    private long calcClientTaskSize(ClientTask clientTask) {
+        // long = 8
+        // double = 8
+        // int = 4
+        // 对象头 = 12
+        return calcStringSize(clientTask.torrentId) + (4 * 8) + 8 + (2 * 4) + 12;
+    }
 
     private String percent(double d) {
         return MsgUtil.getPercentageFormatter().format(d);
