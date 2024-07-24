@@ -38,6 +38,7 @@ public class DatabaseHelper {
         TableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class);
+        TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
     }
 
     private void performUpgrade() throws SQLException {

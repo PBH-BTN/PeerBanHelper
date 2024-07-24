@@ -1,4 +1,4 @@
-config-version: 13
+config-version: 14
 # 检查频率（单位：毫秒）
 check-interval: 5000
 # 更新 Peers UI 频率（单位：毫秒），此项仅用于显示数据，不影响封禁，建议设置一个不会给下载器增加太多压力的值
@@ -127,6 +127,14 @@ module:
     ipv6-prefix-length: 64
     # 封禁时长
     ban-duration: 2592000000
+    # 启用持久化记录
+    # 启用此功能可能增加磁盘 I/O 并可能影响性能
+    enable-persist: true
+    # 持久化数据存储时长
+    # 延长此值可缓解针对 PeerBanHelper 的 “缓慢失忆攻击”，但会增加磁盘 I/O 并影响性能
+    # 缩短此值可提高性能但吸血者者可能利用这一点进行 “缓慢失忆攻击”
+    # 单位：ms 默认值：1209600000 （14 天）
+    persist-duration: 1209600000
   # IP 地址/端口 封禁
   ip-address-blocker:
     enabled: true
@@ -170,7 +178,6 @@ module:
       iot: false
       # 数据中心
       datacenter: false
-
   # 范围 IP 段封禁
   # 在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁
   auto-range-ban:

@@ -25,8 +25,9 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+
     @UpdateScript(version = 13)
-    public void activeMonitoringAndNetType() {
+    public void activeMonitoringAndNetTypeAndPCBPersist() {
         conf.set("module.active-monitoring.enabled", false);
         conf.set("module.active-monitoring.data-retention-time", 5184000000L);
         conf.set("module.active-monitoring.data-cleanup-interval", 604800000L);
@@ -35,11 +36,14 @@ public class ProfileUpdateScript {
         conf.set("module.ip-address-blocker.net-type.base-station", false);
         conf.set("module.ip-address-blocker.net-type.government-and-enterprise-line", false);
         conf.set("module.ip-address-blocker.net-type.business-platform", false);
-        conf.set("module.ip-address-blocker.net-type,backbone-network", false);
+        conf.set("module.ip-address-blocker.net-type.backbone-network", false);
         conf.set("module.ip-address-blocker.net-type.ip-private-network", false);
         conf.set("module.ip-address-blocker.net-type.internet-cafe", false);
         conf.set("module.ip-address-blocker.net-type.iot", false);
         conf.set("module.ip-address-blocker.net-type.datacenter", false);
+
+        conf.set("module.progress-cheat-blocker.enable-persist", true);
+        conf.set("module.progress-cheat-blocker.persist-duration", 1209600000);
     }
 
     @UpdateScript(version = 12)
