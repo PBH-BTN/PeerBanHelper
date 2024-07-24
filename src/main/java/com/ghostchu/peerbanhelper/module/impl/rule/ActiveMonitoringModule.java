@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -49,8 +50,9 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
 
     @Subscribe
     private void onLivePeerSnapshotEvent(LivePeersUpdatedEvent event) {
+
         List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
-        event.getLivePeers().values().stream()
+        event.getLivePeers().values().stream().flatMap(Collection::stream)
                 .filter(peerMetadata -> {
                     var clientName = peerMetadata.getPeer().getClientName();
                     var peerId = peerMetadata.getPeer().getId();

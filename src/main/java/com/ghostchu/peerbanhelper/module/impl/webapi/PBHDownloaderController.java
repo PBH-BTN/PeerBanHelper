@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -178,6 +179,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Downloader downloader = selected.get();
         List<PopulatedPeerDTO> peerWrappers = getServer().getLivePeersSnapshot().values()
                 .stream()
+                .flatMap(Collection::stream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .filter(p -> p.getTorrent().getHash().equals(torrentId))
                 .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
@@ -208,7 +210,9 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         }
         Downloader downloader = selected.get();
         List<TorrentWrapper> torrentWrappers = getServer().getLivePeersSnapshot()
-                .values().stream().filter(p -> p.getDownloader().equals(downloader.getName()))
+                .values().stream()
+                .flatMap(Collection::stream)
+                .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .map(PeerMetadata::getTorrent)
                 .distinct()
                 .sorted((o1, o2) -> Long.compare(o2.getRtUploadSpeed(), o1.getRtUploadSpeed()))
@@ -231,11 +235,13 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         DownloaderLastStatus lastStatus = downloader.getLastStatus();
         long activeTorrents = getServer().getLivePeersSnapshot().values()
                 .stream()
+                .flatMap(Collection::stream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .map(p -> p.getTorrent().getHash())
                 .distinct().count();
         long activePeers = getServer().getLivePeersSnapshot().values()
                 .stream()
+                .flatMap(Collection::stream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .count();
 
