@@ -43,7 +43,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         try (GenericRawResults<String[]> banLogs = queryBuilder()
                 .selectRaw("ip, COUNT(*) AS count")
                 .groupBy("ip")
-                .orderBy("count", false)
+                .orderByRaw("count DESC")
                 .limit((long) n)
                 .where().ge("banAt", twoWeeksAgo)
                 .queryRaw()) {

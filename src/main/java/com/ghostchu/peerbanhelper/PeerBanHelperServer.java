@@ -94,12 +94,9 @@ public class PeerBanHelperServer {
     private YamlConfiguration mainConfig;
     @Autowired
     private ModuleMatchCache moduleMatchCache;
-    @Autowired
-    @Qualifier("banListFile")
-    private File banListFile;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
     @Getter
-    private Map<PeerAddress, PeerMetadata> LIVE_PEERS = new HashMap<>();
+    private Map<PeerAddress, List<PeerMetadata>> LIVE_PEERS = new HashMap<>();
     @Autowired
     @Qualifier("persistMetrics")
     private BasicMetrics metrics;
@@ -153,9 +150,10 @@ public class PeerBanHelperServer {
         banListInvoker.forEach(BanListInvoker::reset);
         GENERAL_SCHEDULER.scheduleWithFixedDelay(this::saveBanList, 10 * 1000, BANLIST_SAVE_INTERVAL, TimeUnit.MILLISECONDS);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
-        if (downloaders.isEmpty()) {
+
+        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             for (int i = 0; i < 50; i++) {
-                log.error(tlUI(Lang.NEW_SETUP_NO_DOWNLOADERS, getWebContainer() == null ? "ERROR" : getWebContainer().getToken()));
+                log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://localhost:" + webContainer.javalin().port()));
             }
         }
     }
@@ -491,15 +489,17 @@ public class PeerBanHelperServer {
     }
 
     private void updateLivePeers(Map<Downloader, Map<Torrent, List<Peer>>> peers) {
-        Map<PeerAddress, PeerMetadata> livePeers = new HashMap<>(128);
+        Map<PeerAddress, List<PeerMetadata>> livePeers = new HashMap<>(128);
         peers.forEach((downloader, tasks) ->
                 tasks.forEach((torrent, peer) ->
                         peer.forEach(p -> {
                                     PeerAddress address = p.getPeerAddress();
+                            List<PeerMetadata> data = livePeers.getOrDefault(address, new ArrayList<>());
                                     PeerMetadata metadata = new PeerMetadata(
                                             downloader.getName(),
                                             torrent, p);
-                                    livePeers.put(address, metadata);
+                            data.add(metadata);
+                            livePeers.put(address, data);
                                 }
                         )));
         LIVE_PEERS = Map.copyOf(livePeers);
@@ -577,6 +577,9 @@ public class PeerBanHelperServer {
         moduleManager.register(RuleSubController.class);
         moduleManager.register(PBHAuthenticateController.class);
         moduleManager.register(PBHLogsController.class);
+        moduleManager.register(ActiveMonitoringModule.class);
+        moduleManager.register(PBHPlusController.class);
+        moduleManager.register(PBHOOBEController.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
@@ -795,7 +798,7 @@ public class PeerBanHelperServer {
         return metadata;
     }
 
-    public Map<PeerAddress, PeerMetadata> getLivePeersSnapshot() {
+    public Map<PeerAddress, List<PeerMetadata>> getLivePeersSnapshot() {
         return LIVE_PEERS;
     }
 

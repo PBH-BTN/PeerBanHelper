@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @DatabaseTable(tableName = "torrents")
 public final class TorrentEntity {
-    @DatabaseField(generatedId = true)
+    @DatabaseField(generatedId = true, index = true)
     private Long id;
     @DatabaseField(canBeNull = false, uniqueIndex = true)
     private String infoHash;

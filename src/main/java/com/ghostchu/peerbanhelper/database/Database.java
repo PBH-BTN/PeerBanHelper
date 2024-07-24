@@ -7,12 +7,15 @@ import com.j256.ormlite.jdbc.db.SqliteDatabaseType;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 @Getter
+@Slf4j
 @Component
 public class Database {
     private JdbcSingleConnectionSource dataSource;
@@ -41,8 +44,16 @@ public class Database {
         config.setMaxLifetime(60000); // 60 Sec
         config.setMaximumPoolSize(1); // 50 Connections (including idle connections)
         this.hikari = new HikariDataSource(config);
-        this.dataSource = new JdbcSingleConnectionSource("jdbc:sqlite:" + file, new SqliteDatabaseType(), this.hikari.getConnection());
-
+        Connection rawConnection = this.hikari.getConnection();
+        if (System.getProperty("disableSQLitePragmaSettings") == null) {
+            try (var stmt = rawConnection.createStatement()) {
+                stmt.executeUpdate("PRAGMA synchronous = NORMAL");
+                stmt.executeUpdate("PRAGMA journal_mode = TRUNCATE");
+            } catch (Exception e) {
+                log.warn("Unable to set SQLite optimized PRAGMA arguments", e);
+            }
+        }
+        this.dataSource = new JdbcSingleConnectionSource("jdbc:sqlite:" + file, new SqliteDatabaseType(), rawConnection);
         //  this.dataSource = new DataSourceConnectionSource( new HikariDataSource(config), new SqliteDatabaseType());
     }
 

@@ -1,80 +1,114 @@
-config-version: 13
+config-version: 15
 # 设置程序语言
+# Set the program language
 # default 跟随操作系统 (Follow the operating system)
 # en_us English (US)
 # zh_cn Chinese Simplified (简体中文)
 language: default
+# PBH Plus 捐赠密钥 (https://afdian.com/a/Ghost_chu)，如果你有的话，就填在这里吧
+# PBH Plus donation key, if you have one, please fill to there
+pbh-plus-key: ''
 # Http 服务器设置
+# Http Server Settings
 server:
   # WebUI 监听端口
+  # WebUI listen port
   http: 9898
   # WebUI 监听地址，如果需要从非本机访问，请修改为 0.0.0.0，本机部署建议使用 127.0.0.1 提高安全性
+  # WebUI listen address, if you need access from non-localhost location, change it to 0.0.0.0. Locally deploy use 127.0.0.1 is recommended.
   address: "0.0.0.0"
   # 在 PBH 需要给下载器传递地址时，将使用此地址传递，请确保此地址最终可被下载器访问，请【不要】以 / 结尾
+  # When PBH need pass the URL of blocklist to downloader, it will use this address as prefix, make sure this URL can be access from your downloader. DO NOT end with slash (/)
   prefix: "http://127.0.0.1:9898"
-  # 要访问 WebUI 端点，则必须输入此 Token 以进行身份验证
+  # 要访问 WebUI 端点，则需要 Token。如果这里为空，PBH 在启用时将进入 OOBE 向导，指导您进行基本配置
+  # To access the WebUI endpoint, token is required. If there is empty string, OOBE will start to guide you set it.
   token: ""
   # 允许 CORS 跨站，仅在使用外部 PBH WebUI 时才应该启用
+  # Allow CORS, should be enabled when you use external WebUI only.
   allow-cors: false
 # 日志记录器配置
+# Logger configurer
 logger:
   # 是否隐藏 [完成] 已检查 XX 的 X 个活跃 Torrent 和 X 个对等体 的日志消息？
   # 在 DSM 的 ContainerManager 上有助于大幅度减少日志数量，并仅记录有价值的封禁等日志条目
+  # Do you want hide [Completed] spam logs? Can be enabled on DSM to avoid too many logs.
   hide-finish-log: false
 lookup:
   # 启用 DNS 反查，能够通过 IP 反查域名，但可能增加你所使用 DNS 服务器的压力，并可能导致 DNS 服务器对你采取降低服务质量的措施
+  # Enable reverse DNS lookup for IPs, however it will increase your DNS server payload, and DNS server may block your access if too many quires sent to them server.
   dns-reverse-lookup: false
-# 数据持久化
+# 封禁列表持久化配置项
+# Data persist
 persist:
-  # 封禁日志保留天数
-  ban-logs-keep-days: 30
-  # 持久保存封禁列表
+  # 您希望封禁日志保存多少天？
+  # How many days that banlogs should be keep in database?
+  ban-logs-keep-days: 180
+  # 您是否想要持久化保存封禁列表？如果不持久化，重启 PBH 将重置封禁列表。
+  # Do you want persist the banlist? If you disable it, PBH will reset the banlist when you restarting it.
   banlist: true
 # BitTorrent Threat Network 威胁防护网络（测试版）
+# BitTorrent Threat Network (BETA)
 btn:
   # 启用 BTN 模块
   # 启用后，才可以使用由 BTN 提供的云规则功能
   # 为了隐私起见，此功能需要您手动启用
+  # Enable BTN module, all settings below will only take effects if you turn this on.
   enabled: false
-  # 启用数据提交（匿名）
+  # 启用数据提交
   # BTN 网络基于所有启用此功能的用户提交的数据，对 Peers 进行可信度验证
   # 通过启用此选项，您也会加入 BTN 网络并提交您的 Torrent 上的活动
   # 以下信息将被发送到 BTN 实例；
   # 您的 Torrent 列表（包括：Torrent 种子摘要的二次不可逆哈希和 Torrent 大小）
   # 连接到您的 Torrent 的所有 Peers （包括：IP地址、端口号、PeerID、UserAgent（ClientName），Peer协议，Peer总下载量，Peer总上传量，Peer瞬时上传速度，Peer瞬时下载速度，Peer下载进度，以及您的下载器名称）
+  # 封禁列表
+  # Allow data submitting
+  # If this option is enabled (and module also enabled), PBH will generate send data to BTN server including:
+  # Your torrent lists (torrentIdentifier and torrent size, but not include: info hash, name)
+  # All peers connected to torrents (Including: IP, Port, PeerID, UserAgent, Peer Protocol, Flags, Uploaded, Downloaded, UploadRate, DownloadRate, PeerProgress, YourProgress and Downloader Name)
+  # Your banlist
   submit: true
   # 部分 BTN 实例可能要求您登录验证以确认您的身份或下发不同的配置文件。如果是这样的话，您需要在下面输入凭据信息
   # 如果 BTN 实例未要求您登录验证，则通常不需要填写
+  # Some BTN instance may require your authentication, if so, you can fill the credentials here
   app-id: "example-app-id"
   app-secret: "example-app-secret"
   # 填写实例 URL，您需要自行寻找一个 BTN 实例服务器
   # 默认使用 PBH-BTN 社区 BTN 服务器，请前往 https://btn-prod.ghostchu-services.top 注册并获取一个账号
+  # The BTN instance URL, you need find a BTN instance
+  # By default, PBH-BTN official BTN instance will be used
   config-url: "https://btn-prod.ghostchu-services.top/ping/config"
 # 封禁列表处理
 # PBH 能够除了调用 BT 客户端的封禁 API 外，还能够进行如下操作，以便适配更多其它客户端
+# Banlist invoker
+# PBH can generate banlist file or execute commands when banning/unbanning peers.
 banlist-invoker:
   # 生成 ipfilter.dat 文件
+  # Generate ipfilter.dat file
   ipfilter-dat:
     enabled: false
   # 执行指定的系统命令
   # 所有的可用占位符都会被注册到执行的命令的进程环境变量中
-  #如果您的命令没有读取环境变量的能力，则也可以使用 {%占位符名%}，这样 PBH 会在执行前替换命令中的占位符，但请注意转义问题
+  # 如果您的命令没有读取环境变量的能力，则也可以使用 {%占位符名%}，这样 PBH 会在执行前替换命令中的占位符，但请注意转义问题
   # 可用占位符列表：
-  #peer.ip - 对等体 IP 地址
-  #peer.port - 对等体端口
-  #meta.context - 封禁模块上下文
-  #meta.description - 封禁描述
-  #meta.banAt - 封禁时间
-  #meta.unbanAt - 解封时间
+  # Generate specific system command
+  # All available placeholders will injected into system env variable, you can use them like in shell
+  # If your command cannot parse system env variable, you also can use '{%PLACEHOLDER_NAME%}', so PBH will replace it to the placeholder.
+  # Full list:
+  #peer.ip - 对等体 IP 地址 - Peer IP Address
+  #peer.port - 对等体端口 - Peer port
+  #meta.context - 封禁模块上下文 - BanModule context
+  #meta.description - 封禁描述 - Ban description
+  #meta.banAt - 封禁时间 - Ban At
+  #meta.unbanAt - 解封时间 - Unban At
   #meta.peer.id - PeerID
-  #meta.peer.clientName - UserAgent 客户端名称字符串
-  #meta.peer.uploaded - 总上传量
-  #meta.peer.downloaded - 总下载量
-  #meta.peer.progress - 客户端进度
+  #meta.peer.clientName - UserAgent 客户端名称字符串 - Client Name
+  #meta.peer.uploaded - 总上传量 - Uploaded
+  #meta.peer.downloaded - 总下载量 - Downloaded
+  #meta.peer.progress - 客户端进度 - Peer Progress
   #meta.torrent.id - Torrent ID
-  #meta.torrent.name - Torrent 名称
-  #meta.torrent.hash - Torrent 的 Info Hash
-  #meta.torrent.size - Torrent 大小
+  #meta.torrent.name - Torrent 名称 - Torrent Name
+  #meta.torrent.hash - Torrent 的 Info Hash - InfoHash (preferred) of Torrent
+  #meta.torrent.size - Torrent 大小 - Torrent size
   command-exec:
     enabled: false
     reset:
@@ -87,32 +121,35 @@ banlist-invoker:
     unban:
       - "/bin/sh -c 'ipset remove peerbanhelper-blocklist ${peer.ip}'"
 # Maxmind GeoIP/ASN 数据库
+# Maxmind GeoIP/ASN database
 # https://www.maxmind.com/
 # 在您填写相关密钥信息后，PBH 将自动下载所需的数据库文件，这视为您同意 Maxmind 的最终用户许可协议：https://www.maxmind.com/en/end-user-license-agreement
+# After you filled them, PBH will automatically download GeoIP database. EULA: https://www.maxmind.com/en/end-user-license-agreement
 ip-database:
   # ==== 密钥信息开始 ==== - 在 LicenseKeys 页面创建凭据时，网页会提供这些信息
+  # ==== Begin of license keys ===, You can find them at LicenseKeys page
   account-id: ''
   license-key: ''
   # 允许自动更新 Maxmind GeoIP 数据库文件
+  # Allow PBH update Maxmind GeoIP database file while restarting if needed
   auto-update: true
   # ==== 密钥信息结束 ====
+  # ==== End of license keys ====
   # GeoIP-City 的数据库名称，默认使用免费版（GeoLite2-City），如果您购买了付费的数据库，可以自行替换
+  # GeoIP-City database name, by default, the free version (GeoLite2-City) will be used
   database-city: 'GeoLite2-City'
-  # GeoIP-City 的数据库名称，默认使用免费版（GeoLite2-ASN），如果您购买了付费的数据库，可以自行替换
+  # GeoIP-ASN 的数据库名称，默认使用免费版（GeoLite2-ASN），如果您购买了付费的数据库，可以自行替换
+  # GeoIP-ASN database name, by default, the free version (GeoLite2-ASN) will be used
   database-asn: 'GeoLite2-ASN'
-# 系统防火墙集成设定
-# 允许不支持 WebAPI 封禁 Peers 的客户端，通过系统防火墙阻断 IP 地址
-firewall-integration:
-  # 高级 Windows 防火墙（基于动态关键字），需要 Windows 10 或更高版本
-  windows-adv-firewall: true
 # 代理服务器设定
+# Proxy server settings
 proxy:
-  # 代理服务器设置
-  # 注意：不支持需要密码验证的代理服务器
-  # 0 = 不使用代理
-  # 1 = 使用系统代理
-  # 2 = 使用 HTTP(s) 代理
-  # 3 = 使用 socks5 代理
+  # 代理服务器设置 Proxy server setting
+  # 注意：不支持需要密码验证的代理服务器 NOTE: Authentication required proxy servers are not supported
+  # 0 = 不使用代理 - No proxy
+  # 1 = 使用系统代理 - Use system proxy
+  # 2 = 使用 HTTP(s) 代理 - Use HTTP(s) proxy
+  # 3 = 使用 socks5 代理(可能无法使用) - Use socks5 proxy (may not work well)
   setting: 0
   # 代理服务器地址
   host: "127.0.0.1"

@@ -37,6 +37,8 @@ public class DatabaseHelper {
         TableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class);
+        TableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class);
+        TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
     }
 
     private void performUpgrade() throws SQLException {
@@ -49,7 +51,7 @@ public class DatabaseHelper {
                 var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
                 historyDao.executeRaw("ALTER TABLE " + historyDao.getTableName() + " ADD COLUMN downloader VARCHAR DEFAULT ''");
             } catch (Exception err) {
-                log.error("Unable to upgrade database schema", err);
+                //log.error("Unable to upgrade database schema", err);
             }
             v = 3;
         }

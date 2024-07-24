@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class MiscUtil {
+    public static final Object EMPTY_OBJECT = new Object();
     /**
      * Get this class available or not
      *

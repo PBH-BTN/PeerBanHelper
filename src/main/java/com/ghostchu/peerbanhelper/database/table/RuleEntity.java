@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @DatabaseTable(tableName = "rules")
 public final class RuleEntity {
-    @DatabaseField(generatedId = true)
+    @DatabaseField(generatedId = true, index = true)
     private Long id;
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true, uniqueCombo = true)
     private ModuleEntity module;

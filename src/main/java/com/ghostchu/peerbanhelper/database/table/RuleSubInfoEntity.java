@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @Data
 @DatabaseTable(tableName = "rule_sub_info")
 public class RuleSubInfoEntity {
-    @DatabaseField(id = true)
+    @DatabaseField(id = true, index = true)
     private String ruleId;
     @DatabaseField
     private boolean enabled;
-    @DatabaseField
+    @DatabaseField()
     private String ruleName;
     @DatabaseField
     private String subUrl;
