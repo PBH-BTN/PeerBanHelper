@@ -327,3 +327,5 @@ PBH_OOBE_REQUIRED: "PeerBanHelper initialize required, please open WebUI to fini
 WEBVIEW_DEFAULT_DISABLED: "WebUI is disabled by default, recommend to access WebUI via System Browser"
 
 PCB_SHUTTING_DOWN: "Please wait ProgressCheatBlocker flush its data to disk from memory……"
+
+PBHPLUS_LICENSE_FAILED: "PBH Plus check failure, please fill a valid key in `pbh-plus-key` configuration in config.yml"
