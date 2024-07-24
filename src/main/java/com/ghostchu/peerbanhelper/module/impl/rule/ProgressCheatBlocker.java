@@ -37,12 +37,12 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     private final Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .weigher((Weigher<String, List<ClientTask>>) (key, value) -> {
-                long totalSize = calcStringSize(key);
+                int totalSize = calcStringSize(key);
                 for (ClientTask clientTask : value) {
                     totalSize += calcClientTaskSize(clientTask);
                 }
                 totalSize += 12;
-                return (int) Math.min(totalSize, Integer.MAX_VALUE);
+                return totalSize;
             })
             .maximumWeight(16000000)
             .removalListener(notification -> {
@@ -283,11 +283,11 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         return new ArrayList<>();
     }
 
-    private long calcStringSize(String str) {
-        return 40 + 2L * str.length();
+    private int calcStringSize(String str) {
+        return 40 + 2 * str.length();
     }
 
-    private long calcClientTaskSize(ClientTask clientTask) {
+    private int calcClientTaskSize(ClientTask clientTask) {
         // long = 8
         // double = 8
         // int = 4
