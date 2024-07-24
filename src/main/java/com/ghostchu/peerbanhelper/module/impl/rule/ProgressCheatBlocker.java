@@ -48,7 +48,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             .removalListener(notification -> {
                 if (!notification.wasEvicted()) return;
                 String key = notification.getKey();
-                @SuppressWarnings("unchecked")
                 List<ClientTask> tasks = notification.getValue();
                 pendingPersistQueue.offer(new ClientTaskRecord(key, tasks));
             })
