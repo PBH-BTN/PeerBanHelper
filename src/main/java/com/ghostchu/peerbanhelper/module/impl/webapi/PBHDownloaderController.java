@@ -144,6 +144,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             }
             downloader.close();
         } catch (Exception e) {
+            log.error("Validate downloader failed", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(Map.of("message", e.getMessage(), "valid", false));
         }
