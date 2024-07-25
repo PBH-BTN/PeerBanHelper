@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 public final class ModuleEntity {
     @DatabaseField(generatedId = true)
     private Long id;
-    @DatabaseField(unique = true)
+    @DatabaseField(unique = true, index = true)
     private String name;
 }

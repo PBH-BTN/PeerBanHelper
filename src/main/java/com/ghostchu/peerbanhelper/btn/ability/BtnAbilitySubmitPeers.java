@@ -69,9 +69,8 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
 
     private List<BtnPeer> generatePing() {
         List<BtnPeer> btnPeers = new ArrayList<>();
-        btnNetwork.getServer().getLivePeersSnapshot().forEach((pa, pm) -> {
-            btnPeers.add(BtnPeer.from(pm.getTorrent(), pm.getPeer()));
-        });
+        btnNetwork.getServer().getLivePeersSnapshot().forEach((pa, pm) ->
+                pm.forEach(meta -> btnPeers.add(BtnPeer.from(meta.getTorrent(), meta.getPeer()))));
         return btnPeers;
     }
 

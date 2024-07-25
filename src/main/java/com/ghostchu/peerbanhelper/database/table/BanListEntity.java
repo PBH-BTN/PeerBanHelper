@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @DatabaseTable(tableName = "banlist")
 public final class BanListEntity {
-    @DatabaseField(id = true)
+    @DatabaseField(id = true, index = true)
     private String address;
     @DatabaseField(canBeNull = false)
     private String metadata;

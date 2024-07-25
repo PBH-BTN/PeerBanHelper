@@ -10,9 +10,9 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master", "major-refactor", "release" ]
+    branches: [ "master", "release", "v6" ]
   pull_request:
-    branches: [ "master", "major-refactor", "release" ]
+    branches: [ "master", "release", "v6" ]
   workflow_dispatch:
   release:
     types:
@@ -71,7 +71,7 @@ jobs:
             type=raw,ci
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6.4.1
+        uses: docker/build-push-action@v6.5.0
         with:
           context: .
           file: ./Dockerfile-CI

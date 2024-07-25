@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
+import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -15,6 +16,7 @@ import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -31,6 +33,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 public class JavalinWebContainer {
     private final Javalin javalin;
+    @Setter
     @Getter
     private String token;
     private Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
@@ -55,7 +58,10 @@ public class JavalinWebContainer {
                     c.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
-                    if (Main.getMainConfig().getBoolean("server.allow-cors")) {
+                    if (Main.getMainConfig().getBoolean("server.allow-cors")
+                            || System.getenv("PBH_ALLOW_CORS") != null
+                            || System.getProperty("PBH_ALLOW_CORS") != null
+                    ) {
                         c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
                     }
                     if (Main.getMainConfig().getBoolean("server.external-webui", false)) {
@@ -91,6 +97,11 @@ public class JavalinWebContainer {
                     ctx.status(HttpStatus.FORBIDDEN);
                     ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED)));
                 })
+                .exception(NeedInitException.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.SEE_OTHER);
+                    ctx.header("Location", "/init");
+                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_NEED_INIT), "location", "/init"));
+                })
                 .exception(IllegalArgumentException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
                     ctx.json(Map.of("message", e.getMessage()));
@@ -106,6 +117,12 @@ public class JavalinWebContainer {
                     }
                     if (ctx.routeRoles().contains(Role.ANYONE)) {
                         return;
+                    }
+                    if (ctx.path().startsWith("/init")) {
+                        return;
+                    }
+                    if (token == null || token.isBlank()) {
+                        throw new NeedInitException();
                     }
                     String authenticated = ctx.sessionAttribute("authenticated");
                     if (authenticated != null && authenticated.equals(token)) {

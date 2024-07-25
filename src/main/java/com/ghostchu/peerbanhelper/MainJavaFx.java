@@ -35,7 +35,7 @@ public class MainJavaFx extends Application {
         stage = st;
         FXMLLoader fxmlLoader = new FXMLLoader(MainJavaFx.class.getResource("/javafx/main_window.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 600, 400);
-        st.setTitle(String.format("PeerBanHelper (JavaFx) - Loading..."));
+        st.setTitle("PeerBanHelper (JavaFx) - Loading...");
         st.setScene(scene);
         st.setWidth(1000);
         st.setHeight(600);

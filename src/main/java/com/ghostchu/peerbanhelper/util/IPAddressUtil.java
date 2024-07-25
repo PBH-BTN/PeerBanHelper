@@ -47,12 +47,13 @@ public class IPAddressUtil {
             log.error("Unable to get ipaddress from ip {}", ip, e);
             return null;
         }
+
     }
 
     @NotNull
     public static IPAddress toPrefixBlock(IPAddress ipAddress, int length) {
         try {
-            return IP_WITHOUT_PREFIX_CACHE.get(ipAddress, () -> ipAddress.toPrefixBlock(length));
+            return IP_WITHOUT_PREFIX_CACHE.get(ipAddress, () -> ipAddress.toPrefixBlock(length).toZeroHost());
         } catch (ExecutionException e) {
             log.error("Unable to get ipaddress with prefixblock for ip {}", ipAddress, e);
             return ipAddress;

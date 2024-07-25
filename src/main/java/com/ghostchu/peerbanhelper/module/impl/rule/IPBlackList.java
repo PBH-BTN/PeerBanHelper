@@ -35,6 +35,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     private List<Integer> ports;
     private List<Long> asns;
     private List<String> regions;
+    private List<String> netTypes;
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
@@ -91,7 +92,35 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         this.ports = getConfig().getIntList("ports");
         this.regions = getConfig().getStringList("regions");
         this.asns = getConfig().getLongList("asns");
-
+        this.netTypes = new ArrayList<>();
+        // GeoCN 字段名就是中文
+        if (getConfig().getBoolean("net-type.wideband")) {
+            this.netTypes.add("宽带");
+        }
+        if (getConfig().getBoolean("net-type.base-station")) {
+            this.netTypes.add("基站");
+        }
+        if (getConfig().getBoolean("net-type.government-and-enterprise-line")) {
+            this.netTypes.add("政企专线");
+        }
+        if (getConfig().getBoolean("net-type.business-platform")) {
+            this.netTypes.add("业务平台");
+        }
+        if (getConfig().getBoolean("net-type.backbone-network")) {
+            this.netTypes.add("骨干网");
+        }
+        if (getConfig().getBoolean("net-type.ip-private-network")) {
+            this.netTypes.add("IP专网");
+        }
+        if (getConfig().getBoolean("net-type.internet-cafe")) {
+            this.netTypes.add("网吧");
+        }
+        if (getConfig().getBoolean("net-type.iot")) {
+            this.netTypes.add("物联网");
+        }
+        if (getConfig().getBoolean("net-type.datacenter")) {
+            this.netTypes.add("数据中心");
+        }
     }
 
     @Override
@@ -137,6 +166,12 @@ public class IPBlackList extends AbstractRuleFeatureModule {
             String iso = geoData.getCountry().getIso();
             if (regions.contains(iso)) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_REGION_RULE, iso), new TranslationComponent(Lang.MODULE_IBL_MATCH_REGION, iso));
+            }
+        }
+        if (!netTypes.isEmpty() && geoData.getNetwork() != null && geoData.getNetwork().getNetType() != null) {
+            String netType = geoData.getNetwork().getNetType();
+            if (netTypes.contains(netType)) {
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_NETTYPE_RULE, netType), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, netType));
             }
         }
         return pass();

@@ -15,13 +15,13 @@ import java.sql.Timestamp;
 @Data
 @DatabaseTable(tableName = "history")
 public final class HistoryEntity {
-    @DatabaseField(generatedId = true)
+    @DatabaseField(generatedId = true, index = true)
     private Long id;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private Timestamp banAt;
     @DatabaseField(canBeNull = false)
     private Timestamp unbanAt;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private String ip;
     @DatabaseField(canBeNull = false)
     private Integer port;

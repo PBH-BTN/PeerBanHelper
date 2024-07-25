@@ -40,7 +40,7 @@ public class HTTPUtil {
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     @Getter
     private static SSLContext ignoreSslContext;
-    private static ProgressTracker tracker = ProgressTracker.newBuilder()
+    private static final ProgressTracker tracker = ProgressTracker.newBuilder()
             .bytesTransferredThreshold(60 * 1024) // 60 kB
             .timePassedThreshold(Duration.of(3, ChronoUnit.SECONDS))
             .build();

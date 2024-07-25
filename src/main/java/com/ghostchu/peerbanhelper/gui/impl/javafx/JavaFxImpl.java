@@ -29,7 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
@@ -52,7 +55,6 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
     private final String[] args;
-    private final LinkedList<String> lines = new LinkedList<>();
     private final Set<ListCell<ListLogEntry>> selected = new HashSet<>();
     private TrayIcon trayIcon;
     private ListView<ListLogEntry> logsView;
@@ -69,7 +71,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private boolean isWebViewSupported() {
         try {
             Class.forName("javafx.scene.web.WebView");
-            return true;
+            return System.getProperty("enableWebView") != null;
         } catch (ClassNotFoundException e) {
             return false;
         }
@@ -84,42 +86,30 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Subscribe
     public void onPBHServerStarted(PBHServerStartedEvent event) {
-        if (Arrays.stream(Main.getStartupArgs()).anyMatch(s -> s.equalsIgnoreCase("nowebuitab"))) {
+        Platform.runLater(() -> MainJavaFx.getStage().setTitle(tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev())));
+        if (Arrays.stream(Main.getStartupArgs()).noneMatch(s -> s.equalsIgnoreCase("enableWebview"))) {
+            log.info(tlUI(Lang.WEBVIEW_DEFAULT_DISABLED));
             return;
         }
-        CompletableFuture.runAsync(() -> {
-            if (isWebViewSupported()) {
+        try {
+            Main.loadDependencies("/libraries/javafx-web.maven");
+            CompletableFuture.runAsync(() -> {
                 Platform.runLater(() -> {
-                    MainJavaFx.getStage().setTitle(tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
                     if (isWebViewSupported()) {
                         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
                         Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), tlUI(Lang.GUI_MENU_WEBUI), Main.getServer().getWebUiUrl(), Collections.emptyMap(), null);
                         javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
                         selectionModel.select(webuiTab);
                         log.info(tlUI(Lang.WEBVIEW_ENABLED));
-//                        if (System.getProperty("pbh.enableDownloadWebView") != null) {
-//                            for (Downloader downloader : Main.getServer().getDownloaders()) {
-//                                if (!downloader.isSupportWebview()) {
-//                                    continue;
-//                                }
-//                                DownloaderBasicAuth basicAuth = downloader.getDownloaderBasicAuth();
-//                                Map<String, String> headers = new HashMap<>();
-//                                if (basicAuth != null) {
-//                                    String cred = Base64.getEncoder().encodeToString((basicAuth.username() + ":" + basicAuth.password()).getBytes(StandardCharsets.UTF_8));
-//                                    headers.put("Authorization", "Basic " + cred);
-//                                }
-//                                JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(),
-//                                        downloader.getName(),
-//                                        downloader.getWebUIEndpoint(),
-//                                        headers, downloader.getWebViewJavaScript());
-//                            }
-//                        }
                     } else {
                         log.info(tlUI(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED));
                     }
                 });
-            }
-        });
+            });
+        } catch (IOException e) {
+            log.error(tlUI(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED), e);
+        }
+
     }
 
     @SneakyThrows
@@ -326,6 +316,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 MainJavaFx.getStage().show();
             } else {
                 MainJavaFx.getStage().hide();
+
             }
         });
     }

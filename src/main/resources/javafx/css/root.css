@@ -1,4 +1,6 @@
-.root {
+* {
+    -fx-font-smoothing-type: gray;
+    -fx-font-family: "Microsoft YaHei UI", "Microsoft YaHei", "微软雅黑";
 }
 
 .log-window-list-cell {

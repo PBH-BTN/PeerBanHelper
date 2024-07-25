@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
@@ -50,7 +51,15 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         ctx.json(Map.of("message", "success"));
     }
 
-    private void handleLogin(Context ctx) {
+    private void handleLogin(Context ctx) throws NeedInitException {
+//        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
+//            ctx.status(HttpStatus.OK);
+//            ctx.json(Map.of("message", "Don't cry okay? Here is dummy success response, let's show OOBE page, it's fine?"));
+//            return;
+//        }
+        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
+            throw new NeedInitException();
+        }
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
         if (loginRequest == null || !webContainer.getToken().equals(loginRequest.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
