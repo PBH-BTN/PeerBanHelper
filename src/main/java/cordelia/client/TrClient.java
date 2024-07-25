@@ -73,7 +73,7 @@ public final class TrClient {
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(user, password.toCharArray());
+                        return new PasswordAuthentication(user, password == null ? new char[0] : password.toCharArray());
                     }
                 })
                 .cookieHandler(cm);
