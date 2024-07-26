@@ -6,6 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URI;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -64,4 +68,15 @@ public class MiscUtil {
         }
         return null;
     }
+
+    public static Long getStartOfToday(long time) {
+        Instant instant = Instant.now();
+        ZoneId systemZone = ZoneId.systemDefault();
+        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
+        LocalDate parse = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
+        return parse.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
+    }
+
+
+
 }

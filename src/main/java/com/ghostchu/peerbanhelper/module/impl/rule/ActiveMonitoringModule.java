@@ -2,6 +2,8 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
+import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -15,10 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -28,21 +27,23 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class ActiveMonitoringModule extends AbstractFeatureModule {
     private final PeerRecordDao peerRecordDao;
     private final Deque<PeerMetadata> dataBuffer = new ConcurrentLinkedDeque<>();
+    private final TrafficJournalDao trafficJournalDao;
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
     private ScheduledExecutorService scheduleService;
     private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
-    ;
     private final Cache<PeerMetadata, Object> diskWriteCache = CacheBuilder
             .newBuilder()
             .expireAfterWrite(3, TimeUnit.MINUTES)
             .maximumSize(3500)
             .removalListener(notification -> dataBuffer.offer((PeerMetadata) notification.getKey()))
             .build();
+    private TrafficJournalEntity journal;
 
-    public ActiveMonitoringModule(PeerRecordDao peerRecordDao) {
+    public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao) {
         super();
         this.peerRecordDao = peerRecordDao;
+        this.trafficJournalDao = trafficJournalDao;
     }
 
     @Override
@@ -97,6 +98,21 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
         this.scheduleService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
         this.scheduleService.scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
         this.scheduleService.scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
+        this.scheduleService.scheduleAtFixedRate(this::writeJournal, 0, 1, TimeUnit.HOURS);
+    }
+
+    private void writeJournal() {
+        try {
+            var entity = trafficJournalDao.getTodayJourney();
+            String[] data = peerRecordDao.queryBuilder()
+                    .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
+                    .queryRawFirst();
+            entity.setUploaded(Long.parseLong(data[0]));
+            entity.setDownloaded(Long.parseLong(data[1]));
+            trafficJournalDao.update(entity);
+        } catch (Exception e) {
+            log.error("Unable to write hourly traffic journal to database", e);
+        }
     }
 
     private void flush() {

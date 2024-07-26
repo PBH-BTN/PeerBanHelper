@@ -580,6 +580,7 @@ public class PeerBanHelperServer {
         moduleManager.register(ActiveMonitoringModule.class);
         moduleManager.register(PBHPlusController.class);
         moduleManager.register(PBHOOBEController.class);
+        moduleManager.register(PBHChartController.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

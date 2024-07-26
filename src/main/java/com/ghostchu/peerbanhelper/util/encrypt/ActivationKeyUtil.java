@@ -42,7 +42,7 @@ public class ActivationKeyUtil {
     public static KeyData fromKey(String key) {
         try {
             byte[] encrypted = Base64.getDecoder().decode(key);
-            String json = new String(RSAUtils.decryptByPublicKey(encrypted, getPBHPublicKey()), StandardCharsets.UTF_8);
+            String json = new String(RSAUtils.decryptByPublicKey(encrypted,getPBHPublicKey()),StandardCharsets.UTF_8);
             KeyData keyData = JsonUtil.standard().fromJson(json, KeyData.class);
             if (keyData == null) {
                 throw new IllegalStateException("Incorrect key schema");
