@@ -174,19 +174,23 @@ module:
     # 1.2.3.4/16
     # 1.2.255.4/255.255.0.0
     ips:
+      - "0.0.0.0"
     #- 8.8.8.8
     #- 9.9.9.9
     # 按端口封禁
     # Banning ports
     ports:
+      - 0
     #- 2003
     # 按 ASN（自治系统代码）封禁（需要配置 GeoIP-ASN 数据库才能工作！）
     # Banning ASN (Require config GeoIP-ASN database)
     asns:
+      - "0"
     #  - 0 # 网络 ASN 好
     # 按国家或地区封禁（需要配置 GeoIP-City 数据库才能工作！）
     # Banning as Country/Region code
     regions:
+      - "0"
     #  - ISO_CODE 输入国家或地区的 ISO 代码，大小写敏感，如：CN, UK, TW, HK, JP 等
     #  - ISO_CODE Enter the ISO code, case sensitive (E.g. CN, UK, TW, HK, JP, etc.)
     # 按网络类型封禁（仅中国大陆地区 IP 地址有效）
