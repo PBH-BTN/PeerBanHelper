@@ -17,6 +17,7 @@ import cordelia.rpc.*;
 import cordelia.rpc.types.Fields;
 import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
+import cordelia.rpc.types.Torrents;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -139,21 +140,30 @@ public class Transmission extends AbstractDownloader {
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-        relaunchTorrents(torrents.stream().filter(t -> {
-            try {
-                Long.parseLong(t.getId());
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }).map(t -> Long.parseLong(t.getId())).toList());
+        relaunchTorrents(torrents.stream()
+                .filter(t -> {
+                    try {
+                        Long.parseLong(t.getId());
+                        return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }).map(t -> Long.parseLong(t.getId())).toList());
     }
 
     private void relaunchTorrents(Collection<Long> ids) {
         if (ids.isEmpty()) return;
-        log.info(tlUI(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, ids.size()));
+        RqTorrentGet torrentList = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME,
+                Fields.PEERS_CONNECTED,
+                Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD,
+                Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE);
+        TypedResponse<RsTorrentGet> rsp = client.execute(torrentList);
+        List<Long> torrents = rsp.getArgs().getTorrents().stream()
+                .map(Torrents::getId)
+                .filter(ids::contains).toList();
+        log.info(tlUI(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size()));
         RqTorrent stop = new RqTorrent(TorrentAction.STOP, new ArrayList<>());
-        for (long torrent : ids) {
+        for (long torrent : torrents) {
             stop.add(torrent);
         }
         client.execute(stop);
@@ -163,7 +173,7 @@ public class Transmission extends AbstractDownloader {
             Thread.currentThread().interrupt();
         }
         RqTorrent resume = new RqTorrent(TorrentAction.START, new ArrayList<>());
-        for (long torrent : ids) {
+        for (long torrent : torrents) {
             resume.add(torrent);
         }
         client.execute(resume);
