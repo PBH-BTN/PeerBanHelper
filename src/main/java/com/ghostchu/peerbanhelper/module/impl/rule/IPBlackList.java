@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
+import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -20,22 +21,22 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
 public class IPBlackList extends AbstractRuleFeatureModule {
-    private List<IPAddress> ips;
-    private List<Integer> ports;
-    private List<Long> asns;
-    private List<String> regions;
-    private List<String> netTypes;
+    private Set<IPAddress> ips;
+    private Set<Integer> ports;
+    private Set<Long> asns;
+    private Set<String> regions;
+    private Set<String> netTypes;
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
@@ -59,8 +60,153 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     public void onEnable() {
         reloadConfig();
         webContainer.javalin()
-                .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
+                .get("/api/modules/ipblacklist", this::handleWebAPI, Role.USER_READ)
+                .post("/api/modules/ipblacklist/ip/test", this::handleIPTest, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/ip", this::handleIPPut, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/ip", this::handleIPDelete, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/port", this::handlePort, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/port", this::handlePortDelete, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/asn", this::handleASN, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/asn", this::handleASNDelete, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/region", this::handleRegion, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/region", this::handleRegionDelete, Role.USER_WRITE)
+                ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
     }
+
+    private void handleNetTypeDelete(Context context) throws IOException {
+        if (netTypes.removeIf(netType -> netType.equals(context.body()))) {
+            context.status(HttpStatus.OK);
+        } else {
+            context.status(HttpStatus.NOT_FOUND);
+        }
+        saveConfig();
+    }
+
+    private void handleRegionDelete(Context context) throws IOException {
+        if (regions.removeIf(region -> region.equals(context.body()))) {
+            context.status(HttpStatus.OK);
+        } else {
+            context.status(HttpStatus.NOT_FOUND);
+        }
+        saveConfig();
+    }
+
+    private void handleASNDelete(Context context) throws IOException {
+        if (asns.removeIf(p -> p == Long.parseLong(context.body()))) {
+            context.status(HttpStatus.OK);
+        } else {
+            context.status(HttpStatus.NOT_FOUND);
+        }
+        saveConfig();
+    }
+
+    private void handlePortDelete(Context context) throws IOException {
+        if (ports.removeIf(p -> p == Integer.parseInt(context.body()))) {
+            context.status(HttpStatus.OK);
+        } else {
+            context.status(HttpStatus.NOT_FOUND);
+        }
+        saveConfig();
+    }
+
+    private void handleIPDelete(Context context) throws IOException {
+        if (ips.removeIf(ipAddress -> ipAddress.toNormalizedString().equals(context.body()))) {
+            context.status(HttpStatus.OK);
+        } else {
+            context.status(HttpStatus.NOT_FOUND);
+        }
+        saveConfig();
+    }
+
+    private void handleNetType(Context ctx) {
+
+    }
+
+    private void handleRegion(Context ctx) throws IOException {
+        regions.add(ctx.body());
+        saveConfig();
+    }
+
+    private void handleASN(Context ctx) throws IOException {
+        long asn = Long.parseLong(ctx.body());
+        asns.add(asn);
+        saveConfig();
+    }
+
+
+    private void handlePort(Context ctx) throws IOException {
+        UserPortAddRequest req = ctx.bodyAsClass(UserPortAddRequest.class);
+        if (req.from() > req.to() || req.from() < 1 || req.to() > 65535) {
+            throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_INVALID_RANGE));
+        }
+        for (int i = req.from(); i <= req.to(); i++) {
+            ports.add(i);
+        }
+        ctx.status(HttpStatus.CREATED);
+        saveConfig();
+    }
+
+//    private void handlePortTest(Context ctx) {
+//        UserPortAddRequest req = ctx.bodyAsClass(UserPortAddRequest.class);
+//        if (req.from() > req.to() || req.from() < 1 || req.to() > 65535) {
+//            ctx.status(HttpStatus.BAD_REQUEST);
+//            ctx.json(new UserPortTestResult(false, tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_INVALID_RANGE), 0, null));
+//            return;
+//        }
+//        int count = req.from() - req.to();
+//        if (req.from() == req.to()) {
+//            count += 1;
+//        } else {
+//            count += 2;
+//        }
+//        if (req.from() < 1024) {
+//            ctx.json(new UserPortTestResult(true, null, count, tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_PRIVILEGED_PORT_TIPS)));
+//        } else {
+//            ctx.json(new UserPortTestResult(true, null, count, null));
+//        }
+//    }
+
+    private void handleIPPut(Context context) throws IOException {
+        IPAddress ipAddress = parseIPAddressFromReq(context);
+        ips.add(ipAddress);
+        context.status(HttpStatus.CREATED);
+        saveConfig();
+    }
+
+    private void handleIPTest(Context context) throws IOException {
+        IPAddress ipAddress = parseIPAddressFromReq(context);
+        IPAddress lower = ipAddress.getLower().withoutPrefixLength();
+        IPAddress upper = ipAddress.getUpper().withoutPrefixLength();
+        UserIPTestResult testResult = new UserIPTestResult(
+                lower.toFullString(),
+                upper.toFullString(),
+                ipAddress.toNormalizedString(),
+                ipAddress.getCount().toString());
+        context.json(testResult);
+        saveConfig();
+    }
+
+    private IPAddress parseIPAddressFromReq(Context ctx) throws IllegalArgumentException {
+        UserIPRuleAddRequest req = ctx.bodyAsClass(UserIPRuleAddRequest.class);
+        if ((req.ipRange() == null) && (req.cidr() == null)) {
+            throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_ARG));
+        }
+        if (req.ipRange() == null) {
+            IPAddress ipAddress = IPAddressUtil.getIPAddress(req.cidr());
+            if (ipAddress == null) {
+                throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_IP));
+            }
+            return ipAddress;
+        } else {
+            IPAddress from = IPAddressUtil.getIPAddress(req.ipRange().from());
+            IPAddress to = IPAddressUtil.getIPAddress(req.ipRange().to());
+            if (from == null || to == null) {
+                throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_IP));
+            }
+            return from.coverWithPrefixBlock(to);
+        }
+    }
+
 
     @Override
     public boolean isThreadSafe() {
@@ -73,6 +219,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         map.put("port", ports);
         map.put("asn", asns);
         map.put("region", regions);
+        map.put("netType", netTypes);
         ctx.status(HttpStatus.OK);
         ctx.json(map);
     }
@@ -82,17 +229,26 @@ public class IPBlackList extends AbstractRuleFeatureModule {
 
     }
 
+    @Override
+    public void saveConfig() throws IOException {
+        getConfig().set("ips", ips.stream().map(Address::toString).toList());
+        getConfig().set("ports", List.copyOf(ports));
+        getConfig().set("asns", List.copyOf(asns));
+        getConfig().set("region", List.copyOf(regions));
+        super.saveConfig();
+    }
+
     private void reloadConfig() {
         this.banDuration = getConfig().getLong("ban-duration", 0);
-        this.ips = new ArrayList<>();
+        this.ips = new HashSet<>();
         for (String s : getConfig().getStringList("ips")) {
             IPAddress ipAddress = IPAddressUtil.getIPAddress(s);
             this.ips.add(ipAddress);
         }
-        this.ports = getConfig().getIntList("ports");
-        this.regions = getConfig().getStringList("regions");
-        this.asns = getConfig().getLongList("asns");
-        this.netTypes = new ArrayList<>();
+        this.ports = new HashSet<>(getConfig().getIntList("ports"));
+        this.regions = new HashSet<>(getConfig().getStringList("regions"));
+        this.asns = new HashSet<>(getConfig().getLongList("asns"));
+        this.netTypes = new HashSet<>();
         // GeoCN 字段名就是中文
         if (getConfig().getBoolean("net-type.wideband")) {
             this.netTypes.add("宽带");
@@ -175,6 +331,36 @@ public class IPBlackList extends AbstractRuleFeatureModule {
             }
         }
         return pass();
+    }
+
+    public record UserIPTestResult(
+            String from,
+            String to,
+            String generatedCidr,
+            String count
+    ) {
+
+    }
+
+    public record UserPortAddRequest(
+            int from,
+            int to
+    ) {
+
+    }
+
+    public record UserIPRuleAddRequest(
+            String cidr,
+            UserIPRuleAddRequestIpRange ipRange
+    ) {
+
+    }
+
+    public record UserIPRuleAddRequestIpRange(
+            String from,
+            String to
+    ) {
+
     }
 
 }

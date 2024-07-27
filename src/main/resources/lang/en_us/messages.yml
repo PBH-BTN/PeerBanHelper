@@ -330,3 +330,7 @@ PCB_SHUTTING_DOWN: "Please wait ProgressCheatBlocker flush its data to disk from
 
 PBHPLUS_LICENSE_FAILED: "PBH Plus check failure, please fill a valid key in `pbh-plus-key` configuration in config.yml"
 CHARTS_IPDB_NEED_INIT: "Please configure GeoIP database in config.yml"
+
+IP_BLACKLIST_PUT_IP_INVALID_IP: "Invalid IP address, please input a valid IPV4/IPV6 address or CIDR."
+IP_BLACKLIST_PUT_IP_INVALID_ARG: "Cannot use CIDR and IPRange fields in same time / or both empty."
+IP_BLACKLIST_PUT_PORT_INVALID_RANGE: "Port ranges must between 1 and 65535. And startPort must smaller or equals endPort"
