@@ -68,7 +68,11 @@ public class ActivationKeyUtil {
             Long createAt,
             // Key 过期时间，通常是 100 年以后
             Long expireAt,
+            // 许可证描述
+            @Nullable
+            String description,
             // 隐藏字段，主要是为了改变 KEY，PBH 并不关心这个字段
+            @Nullable
             String hidden
     ) {
     }
