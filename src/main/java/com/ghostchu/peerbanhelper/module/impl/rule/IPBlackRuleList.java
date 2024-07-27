@@ -347,7 +347,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * @throws SQLException 查询异常
      */
     public List<RuleSubLogEntity> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
-        var builder = ruleSubLogsDao.queryBuilder();
+        var builder = ruleSubLogsDao.queryBuilder().orderBy("updateTime", false);
         if (ruleId != null) {
             builder = builder.where().eq("ruleId", ruleId).queryBuilder();
         }
