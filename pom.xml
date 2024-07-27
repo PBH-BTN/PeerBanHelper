@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
-        <flatlafVersion>3.4.1</flatlafVersion>
+        <flatlafVersion>3.5</flatlafVersion>
         <javafx.version>22.0.1</javafx.version>
         <javafx.scope>provided</javafx.scope>
         <install4j.home>/opt/install4j</install4j.home>
