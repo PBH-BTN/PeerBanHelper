@@ -108,7 +108,7 @@ public class JavalinWebContainer {
                     ctx.json(Map.of("message", e.getMessage()));
                 })
                 .exception(RequirePBHPlusLicenseException.class, (e, ctx) -> {
-                    ctx.status(HttpStatus.LOCKED);
+                    ctx.status(HttpStatus.PAYMENT_REQUIRED);
                     ctx.json(Map.of("message", e.getMessage()));
                 })
                 .exception(Exception.class, (e, ctx) -> {
