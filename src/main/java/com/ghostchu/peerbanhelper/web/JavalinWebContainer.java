@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
+import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.javalin.Javalin;
@@ -104,6 +105,10 @@ public class JavalinWebContainer {
                 })
                 .exception(IllegalArgumentException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
+                    ctx.json(Map.of("message", e.getMessage()));
+                })
+                .exception(RequirePBHPlusLicenseException.class, (e, ctx) -> {
+                    ctx.status(HttpStatus.LOCKED);
                     ctx.json(Map.of("message", e.getMessage()));
                 })
                 .exception(Exception.class, (e, ctx) -> {

@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +73,7 @@ public class PBHChartController extends AbstractFeatureModule {
 
     private void handleTraffic(Context ctx) throws Exception {
         if (!activationManager.isActivated()) {
-            throw new IllegalStateException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
         }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String[] data = peerRecordDao.queryBuilder()
@@ -109,7 +110,7 @@ public class PBHChartController extends AbstractFeatureModule {
 
     private void handlePeerTrends(Context ctx) throws Exception {
         if (!activationManager.isActivated()) {
-            throw new IllegalStateException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
         }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         Map<Long, AtomicInteger> connectedPeerTrends = new ConcurrentHashMap<>();
@@ -148,7 +149,7 @@ public class PBHChartController extends AbstractFeatureModule {
 
     private void handleGeoIP(Context ctx) throws Exception {
         if (!activationManager.isActivated()) {
-            throw new IllegalStateException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
         }
         IPDB ipdb = getServer().getIpdb();
         if (ipdb == null) {
