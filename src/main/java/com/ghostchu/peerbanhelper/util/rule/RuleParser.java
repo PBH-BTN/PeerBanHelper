@@ -116,7 +116,7 @@ public class RuleParser {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
                         String str = primitive.getAsString();
-                        return str.equalsIgnoreCase("true") ? MatchResult.TRUE : MatchResult.FALSE;
+                        return Boolean.parseBoolean(str) ? MatchResult.TRUE : MatchResult.FALSE;
                     }
 
                     @Override

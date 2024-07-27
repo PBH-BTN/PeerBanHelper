@@ -297,32 +297,32 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>webview</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>linux</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>mac</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>win</classifier>
-                </dependency>
-            </dependencies>
-        </profile>
+<!--        <profile>-->
+<!--            <id>webview</id>-->
+<!--            <dependencies>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>linux</classifier>-->
+<!--                </dependency>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>mac</classifier>-->
+<!--                </dependency>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>win</classifier>-->
+<!--                </dependency>-->
+<!--            </dependencies>-->
+<!--        </profile>-->
         <profile>
             <id>include-javafx-jars</id>
             <properties>
