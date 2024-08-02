@@ -330,7 +330,7 @@ module:
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
     ban-duration: 259200000
     # 检查间隔
-    check-interval: 86400000 # 24小时检查一次 毫秒; Timeunit: ms
+    check-interval: 14400000 # 4小时检查一次 毫秒; Timeunit: ms
     # 规则列表 - Rules list
     rules:
       # 规则ID（任意） - Rule Id(any)
@@ -340,7 +340,7 @@ module:
         # 显示名称 - Display Name
         name: all-in-one
         # 规则文件订阅地址 - Subscription Address
-        url: https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt
+        url: https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt
   # 主动监测 - Active Monitoring
   # 此功能允许 PeerBanHelper 主动记录每次请求下载器时获取到的数据到本地 SQLite 数据库中
   # Allow PBH records all data that fetched from downloader and save them into SQLite database
