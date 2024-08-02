@@ -55,7 +55,6 @@ public class JavalinWebContainer {
         };
         this.javalin = Javalin.create(c -> {
                     c.http.gzipOnlyCompression();
-                    c.http.generateEtags = true;
                     c.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
