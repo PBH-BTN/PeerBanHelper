@@ -61,6 +61,7 @@ import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
@@ -73,6 +74,7 @@ public class PeerBanHelperServer {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
+    private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
     private final List<Downloader> downloaders = new CopyOnWriteArrayList<>();
     @Getter
@@ -454,10 +456,22 @@ public class PeerBanHelperServer {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST));
             })) {
-                downloaders.forEach(downloader -> protect.getService().submit(() ->
-                        updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
-                                needRelaunched.getOrDefault(downloader, Collections.emptyList()),
-                                bannedPeers, unbannedPeers)));
+                if (!needReApplyBanList.get()) {
+                    downloaders.forEach(downloader -> protect.getService().submit(() ->
+                            updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
+                                    needRelaunched.getOrDefault(downloader, Collections.emptyList()),
+                                    bannedPeers, unbannedPeers)));
+                } else {
+                    log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
+                    downloaders.forEach(downloader -> protect.getService().submit(() -> {
+                        List<Torrent> torrents = downloader.getTorrents();
+                        var list = BAN_LIST.values().stream().map(meta -> meta.getTorrent().getId()).toList();
+                        torrents.removeIf(torrent -> !list.contains(torrent.getId()));
+                        updateDownloader(downloader, true,
+                                torrents, Collections.emptyList(), Collections.emptyList());
+                    }));
+                    needReApplyBanList.set(false);
+                }
             }
             if (!hideFinishLogs && !downloaders.isEmpty()) {
                 long downloadersCount = peers.keySet().size();
@@ -494,12 +508,12 @@ public class PeerBanHelperServer {
                 tasks.forEach((torrent, peer) ->
                         peer.forEach(p -> {
                                     PeerAddress address = p.getPeerAddress();
-                            List<PeerMetadata> data = livePeers.getOrDefault(address, new ArrayList<>());
+                                    List<PeerMetadata> data = livePeers.getOrDefault(address, new ArrayList<>());
                                     PeerMetadata metadata = new PeerMetadata(
                                             downloader.getName(),
                                             torrent, p);
-                            data.add(metadata);
-                            livePeers.put(address, data);
+                                    data.add(metadata);
+                                    livePeers.put(address, data);
                                 }
                         )));
         LIVE_PEERS = Map.copyOf(livePeers);
@@ -740,6 +754,8 @@ public class PeerBanHelperServer {
     private void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
         if (BAN_LIST.containsKey(peer.getPeerAddress())) {
             log.error(tlUI(Lang.DUPLICATE_BAN, banMetadata));
+            needReApplyBanList.set(true);
+            log.warn(tlUI(Lang.SCHEDULED_FULL_BANLIST_APPLY));
         }
         BAN_LIST.put(peer.getPeerAddress(), banMetadata);
         metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);

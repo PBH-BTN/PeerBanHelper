@@ -334,3 +334,6 @@ CHARTS_IPDB_NEED_INIT: "请先配置 GeoIP 数据库"
 IP_BLACKLIST_PUT_IP_INVALID_IP: "无效 IP 地址，请输入一个有效的 IPV4/IPV6 地址，或者 CIDR 表达式"
 IP_BLACKLIST_PUT_IP_INVALID_ARG: "不能同时输入 CIDR 地址或者范围（亦或者两个都不输入），两者只能使用其一"
 IP_BLACKLIST_PUT_PORT_INVALID_RANGE: "起始端口号不能小于结束端口号，且端口号需要在 1-65535 之间"
+
+APPLYING_FULL_BANLIST_TO_DOWNLOADER: "[修复] 正在使用全量封禁列表覆盖下载器的封禁 IP 名单……"
+SCHEDULED_FULL_BANLIST_APPLY: "[修复] PeerBanHelper 已计划在下次封禁检查时向下载器发送全量封禁列表"

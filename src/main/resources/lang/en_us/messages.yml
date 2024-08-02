@@ -334,3 +334,6 @@ CHARTS_IPDB_NEED_INIT: "Please configure GeoIP database in config.yml"
 IP_BLACKLIST_PUT_IP_INVALID_IP: "Invalid IP address, please input a valid IPV4/IPV6 address or CIDR."
 IP_BLACKLIST_PUT_IP_INVALID_ARG: "Cannot use CIDR and IPRange fields in same time / or both empty."
 IP_BLACKLIST_PUT_PORT_INVALID_RANGE: "Port ranges must between 1 and 65535. And startPort must smaller or equals endPort"
+
+APPLYING_FULL_BANLIST_TO_DOWNLOADER: "[Repair] Re-sync full banlist with downloaders..."
+SCHEDULED_FULL_BANLIST_APPLY: "[Repair] PeerBanHelper scheduled full banlist re-sync with downloaders"
