@@ -337,3 +337,4 @@ IP_BLACKLIST_PUT_PORT_INVALID_RANGE: "起始端口号不能小于结束端口号
 
 APPLYING_FULL_BANLIST_TO_DOWNLOADER: "[修复] 正在使用全量封禁列表覆盖下载器的封禁 IP 名单……"
 SCHEDULED_FULL_BANLIST_APPLY: "[修复] PeerBanHelper 已计划在下次封禁检查时向下载器发送全量封禁列表"
+CLEANED_BANLOGS: "[清理] 已清理 {} 条封禁日志"

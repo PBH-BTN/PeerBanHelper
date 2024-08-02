@@ -337,3 +337,4 @@ IP_BLACKLIST_PUT_PORT_INVALID_RANGE: "Port ranges must between 1 and 65535. And 
 
 APPLYING_FULL_BANLIST_TO_DOWNLOADER: "[Repair] Re-sync full banlist with downloaders..."
 SCHEDULED_FULL_BANLIST_APPLY: "[Repair] PeerBanHelper scheduled full banlist re-sync with downloaders"
+CLEANED_BANLOGS: "[Cleanup] Cleaned {} history records"

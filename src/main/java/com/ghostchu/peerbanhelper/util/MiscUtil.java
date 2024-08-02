@@ -69,6 +69,10 @@ public class MiscUtil {
         return null;
     }
 
+    public static ZoneOffset getSystemZoneOffset(){
+        return ZoneId.systemDefault().getRules().getOffset(Instant.now());
+    }
+
     public static Long getStartOfToday(long time) {
         Instant instant = Instant.now();
         ZoneId systemZone = ZoneId.systemDefault();
