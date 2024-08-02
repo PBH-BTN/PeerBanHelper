@@ -10,6 +10,7 @@ let peerIdLowercase = toLowerCase(peer.peerId);
 let clientNameLowercase = toLowerCase(peer.clientName);
 ## 映射表
 let table = seq.map(
+  'aria2explorer', '-ae',
   'bitcomet', '-bc',
   'transmission', '-tr',
   'qbittorrent', '-qb',
@@ -21,6 +22,7 @@ let table = seq.map(
   'adm', '-ad',
   'bitspirit', '-sp',
   'aria2', 'a2',
+  'utorrentmac', '-um',
   'utorrent mac', '-um',
   'μtorrent', '-ut',
   'utorrent', '-ut',
