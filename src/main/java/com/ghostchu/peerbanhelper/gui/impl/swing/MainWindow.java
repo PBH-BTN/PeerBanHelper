@@ -1,7 +1,12 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.jthemedetecor.OsThemeDetector;
+import com.pixelduke.window.ThemeWindowManager;
+import com.pixelduke.window.ThemeWindowManagerFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -26,9 +31,6 @@ public class MainWindow extends JFrame {
     private JTabbedPane tabbedPane;
     //  private JPanel tabbedPaneWebUI;
     private JPanel tabbedPaneLogs;
-    private JTable livePeers;
-    private JPanel tabbedPaneLivePeers;
-    private JButton resizeTable;
     @Nullable
     @Getter
     private TrayIcon trayIcon;
@@ -82,7 +84,6 @@ public class MainWindow extends JFrame {
         });
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("/assets/icon.png"));
         setIconImage(imageIcon.getImage());
-        Main.getEventBus().register(this);
         setVisible(!swingGUI.isSilentStart());
     }
 
@@ -208,19 +209,6 @@ public class MainWindow extends JFrame {
         loggerTextArea.setLineWrap(true);
         loggerTextArea.setWrapStyleWord(true);
         scrollPane1.setViewportView(loggerTextArea);
-        tabbedPaneLivePeers = new JPanel();
-        tabbedPaneLivePeers.setLayout(new BorderLayout(0, 0));
-        tabbedPane.addTab("Peers", tabbedPaneLivePeers);
-        final JPanel panel1 = new JPanel();
-        panel1.setLayout(new BorderLayout(0, 0));
-        tabbedPaneLivePeers.add(panel1, BorderLayout.NORTH);
-        resizeTable = new JButton();
-        resizeTable.setText("Resize");
-        panel1.add(resizeTable, BorderLayout.WEST);
-        final JScrollPane scrollPane2 = new JScrollPane();
-        tabbedPaneLivePeers.add(scrollPane2, BorderLayout.CENTER);
-        livePeers = new JTable();
-        scrollPane2.setViewportView(livePeers);
     }
 
     /**

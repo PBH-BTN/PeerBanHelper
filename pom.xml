@@ -655,6 +655,26 @@
             <artifactId>simplereloadlib</artifactId>
             <version>1.1.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.mkpaz</groupId>
+            <artifactId>atlantafx-base</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Dansoftowner</groupId>
+            <artifactId>jSystemThemeDetector</artifactId>
+            <version>3.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pixelduke</groupId>
+            <artifactId>fxthemes</artifactId>
+            <version>1.5.1</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.pixelduke</groupId>-->
+<!--            <artifactId>transit</artifactId>-->
+<!--            <version>2.0.0</version>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
         <!--        <dependency>-->
         <!--            <groupId>org.jfxtras</groupId>-->

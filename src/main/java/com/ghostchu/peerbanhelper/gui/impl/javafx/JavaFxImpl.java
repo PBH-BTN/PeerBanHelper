@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.javafx;
 
+import atlantafx.base.theme.PrimerDark;
+import atlantafx.base.theme.PrimerLight;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.MainJavaFx;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
@@ -10,6 +12,12 @@ import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.collection.CircularArrayList;
 import com.google.common.eventbus.Subscribe;
+import com.jthemedetecor.OsThemeDetector;
+import com.pixelduke.window.ThemeWindowManager;
+import com.pixelduke.window.ThemeWindowManagerFactory;
+import com.pixelduke.window.Win10ThemeWindowManager;
+import com.pixelduke.window.Win11ThemeWindowManager;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
@@ -20,7 +28,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -126,7 +136,9 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     private void setupJFXWindow() {
         Stage st = MainJavaFx.getStage();
-        st.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/root.css").toExternalForm());
+        OsThemeDetector detector = OsThemeDetector.getDetector();
+        detector.registerListener(this::updateTheme);
+        updateTheme(detector.isDark());
         st.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, this::closeWindowEvent);
         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
         this.logsView = controller.getLogsListView();
@@ -239,6 +251,28 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         }
     }
 
+    private void updateTheme(boolean isDark) {
+        Stage stage = MainJavaFx.getStage();
+        Window window = stage.getScene().getWindow();
+        ThemeWindowManager themeWindowManager = ThemeWindowManagerFactory.create();
+//        if(themeWindowManager instanceof Win10ThemeWindowManager win10ThemeWindowManager){
+//           // win10ThemeWindowManager.enableAcrylic(stage.getScene().getWindow(), );
+//        }else if (themeWindowManager instanceof Win11ThemeWindowManager win11ThemeWindowManager){
+//            win11ThemeWindowManager.setWindowBackdrop(window, Win11ThemeWindowManager.Backdrop.MICA);
+//           // win11ThemeWindowManager.setWindowBorderColor(stage.getScene().getWindow(), Color.web("#4493f8"));
+//        }
+        themeWindowManager.setDarkModeForWindowFrame(window, isDark);
+        stage.getScene().getRoot().getStylesheets().removeAll();
+        stage.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/root.css").toExternalForm());
+        if (isDark) {
+            Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+            stage.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/dark.css").toExternalForm());
+        } else {
+            Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+            stage.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/light.css").toExternalForm());
+        }
+    }
+
     private void closeWindowEvent(WindowEvent windowEvent) {
         minimizeToTray();
     }
@@ -316,7 +350,6 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 MainJavaFx.getStage().show();
             } else {
                 MainJavaFx.getStage().hide();
-
             }
         });
     }
