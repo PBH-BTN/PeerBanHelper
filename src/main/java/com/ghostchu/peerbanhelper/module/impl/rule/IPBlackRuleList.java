@@ -150,7 +150,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                 }
                 log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
             }
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         }
     }
@@ -170,7 +170,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             return new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), 400);
         }
         String name = rule.getString("name", ruleId);
-        if(name.contains(".")){
+        if (name.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
         String url = rule.getString("url");
@@ -275,13 +275,38 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             if (ele.startsWith("#")) {
                 return; // 注释
             }
-            count.getAndIncrement();
-            var ip = IPAddressUtil.getIPAddress(ele);
-            if (ip != null) {
-                ips.add(IPAddressUtil.getIPAddress(ele));
+            try {
+                var parsedIp = parseRuleLine(ele);
+                if (parsedIp != null) {
+                    count.getAndIncrement();
+                    ips.add(parsedIp);
+                }
+            } catch (Exception e) {
+                log.error("Unable parse rule: {}", ele, e);
             }
         });
         return count.get();
+    }
+
+    private IPAddress parseRuleLine(String ele) {
+        // 注释？
+        if (ele.startsWith("#")) return null;
+        // 检查是否是 DAT/eMule 格式
+        // 016.000.000.000 , 016.255.255.255 , 200 , Yet another organization
+        // 032.000.000.000 , 032.255.255.255 , 200 , And another
+        if (ele.contains(",")) {
+            var spilted = ele.split(",");
+            if (spilted.length < 3) {
+                return null;
+            }
+            IPAddress start = IPAddressUtil.getIPAddress(spilted[0]);
+            IPAddress end = IPAddressUtil.getIPAddress(spilted[1]);
+            int level = Integer.parseInt(spilted[2]);
+            if (level >= 128) return null;
+            if (start == null || end == null) return null;
+            return start.spanWithRange(end).coverWithPrefixBlock();
+        }
+        return IPAddressUtil.getIPAddress(ele);
     }
 
     /**
