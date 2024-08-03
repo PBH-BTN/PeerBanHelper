@@ -48,20 +48,24 @@ public class PersistMetrics implements BasicMetrics {
     }
 
     private void cleanup() {
-        int keepDays = Main.getMainConfig().getInt("persist.ban-logs-keep-days");
-        if (keepDays > 0) {
-            try {
-                var builder = historyDao.deleteBuilder();
-                builder.setWhere(builder
-                        .where()
-                        .le("banAt",
-                                new Timestamp(LocalDateTime.now().minusDays(keepDays)
-                                        .toInstant(MiscUtil.getSystemZoneOffset())
-                                        .toEpochMilli())));
-                log.info(tlUI(Lang.CLEANED_BANLOGS, builder.delete()));
-            } catch (Exception e) {
-                log.error("Unable to cleanup expired banlogs", e);
+        try {
+            int keepDays = Main.getMainConfig().getInt("persist.ban-logs-keep-days");
+            if (keepDays > 0) {
+                try {
+                    var builder = historyDao.deleteBuilder();
+                    builder.setWhere(builder
+                            .where()
+                            .le("banAt",
+                                    new Timestamp(LocalDateTime.now().minusDays(keepDays)
+                                            .toInstant(MiscUtil.getSystemZoneOffset())
+                                            .toEpochMilli())));
+                    log.info(tlUI(Lang.CLEANED_BANLOGS, builder.delete()));
+                } catch (Exception e) {
+                    log.error("Unable to cleanup expired banlogs", e);
+                }
             }
+        }catch (Throwable throwable){
+            log.error("Unable to complete scheduled tasks", throwable);
         }
     }
 

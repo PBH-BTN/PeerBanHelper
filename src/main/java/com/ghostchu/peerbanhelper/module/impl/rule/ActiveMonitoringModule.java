@@ -110,42 +110,50 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
             entity.setUploaded(Long.parseLong(data[0]));
             entity.setDownloaded(Long.parseLong(data[1]));
             trafficJournalDao.update(entity);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Unable to write hourly traffic journal to database", e);
         }
     }
 
     private void flush() {
-        List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
-        while (!dataBuffer.isEmpty()) {
-            var pendingTask = dataBuffer.poll();
-            tasks.add(new PeerRecordDao.BatchHandleTasks(
-                    pendingTask.getDownloader(),
-                    pendingTask.getTorrent(),
-                    pendingTask.getPeer()
-            ));
-        }
         try {
-            peerRecordDao.syncPendingTasks(tasks);
-        } catch (SQLException e) {
-            log.warn("Unable sync peers data to database", e);
+            List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
+            while (!dataBuffer.isEmpty()) {
+                var pendingTask = dataBuffer.poll();
+                tasks.add(new PeerRecordDao.BatchHandleTasks(
+                        pendingTask.getDownloader(),
+                        pendingTask.getTorrent(),
+                        pendingTask.getPeer()
+                ));
+            }
+            try {
+                peerRecordDao.syncPendingTasks(tasks);
+            } catch (SQLException e) {
+                log.warn("Unable sync peers data to database", e);
+            }
+        }catch (Throwable throwable){
+            log.error("Unable to complete scheduled tasks", throwable);
         }
     }
 
     private void cleanup() {
-        if (dataRetentionTime <= 0) {
-            return;
-        }
-        log.info(tlUI(Lang.AMM_CLEANING_TABLES));
         try {
-            var deleteBuilder = peerRecordDao.deleteBuilder();
-            var where = deleteBuilder.where()
-                    .lt("lastTimeSeen", dataRetentionTime);
-            deleteBuilder.setWhere(where);
-            int deleted = deleteBuilder.delete();
-            log.info(tlUI(Lang.AMM_CLEANED_UP, deleted));
-        } catch (SQLException e) {
-            log.warn("Unable to clean up AMM tables", e);
+            if (dataRetentionTime <= 0) {
+                return;
+            }
+            log.info(tlUI(Lang.AMM_CLEANING_TABLES));
+            try {
+                var deleteBuilder = peerRecordDao.deleteBuilder();
+                var where = deleteBuilder.where()
+                        .lt("lastTimeSeen", dataRetentionTime);
+                deleteBuilder.setWhere(where);
+                int deleted = deleteBuilder.delete();
+                log.info(tlUI(Lang.AMM_CLEANED_UP, deleted));
+            } catch (SQLException e) {
+                log.warn("Unable to clean up AMM tables", e);
+            }
+        }catch (Throwable throwable){
+            log.error("Unable to complete scheduled tasks", throwable);
         }
     }
 

@@ -109,9 +109,14 @@ public class BtnNetwork {
     }
 
     private void checkIfNeedRetryConfig() {
-        if (!configSuccess.get()) {
-            configBtnNetwork();
+        try {
+            if (!configSuccess.get()) {
+                configBtnNetwork();
+            }
+        }catch (Throwable throwable){
+            log.error("Unable to complete scheduled tasks", throwable);
         }
+
     }
 
     private void setupHttpClient() {

@@ -60,7 +60,7 @@ public class BtnPeer {
         btnPeer.setRtUploadSpeed(peer.getUploadSpeed());
         btnPeer.setPeerProgress(peer.getProgress());
         btnPeer.setDownloaderProgress(torrent.getProgress());
-        btnPeer.setPeerFlag(peer.getFlags() == null ? null : peer.getFlags().toString());
+        btnPeer.setPeerFlag(peer.getFlags() == null ? null : peer.getFlags());
         return btnPeer;
     }
 }

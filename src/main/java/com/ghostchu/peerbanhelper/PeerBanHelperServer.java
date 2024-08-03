@@ -366,7 +366,6 @@ public class PeerBanHelperServer {
      * 启动新的一轮封禁序列
      */
     public void banWave() {
-
         banWaveWatchDog.setLastOperation("Ban wave - start");
         long startTimer = System.currentTimeMillis();
         try {
@@ -480,7 +479,9 @@ public class PeerBanHelperServer {
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
             banWaveWatchDog.setLastOperation("Completed");
-        } finally {
+        }catch (Throwable throwable){
+            log.error("Unable to complete scheduled tasks", throwable);
+        }finally {
             banWaveWatchDog.feed();
             metrics.recordCheck();
         }

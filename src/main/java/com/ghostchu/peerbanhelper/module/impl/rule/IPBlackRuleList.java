@@ -132,22 +132,26 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * Reload the configuration for this module.
      */
     private void reloadConfig() {
-        this.banDuration = getConfig().getLong("ban-duration", 0);
-        if (null == ipBanMatchers) {
-            ipBanMatchers = new ArrayList<>();
-        }
-        ConfigurationSection config = getConfig();
-        // 读取检查间隔
-        checkInterval = config.getLong("check-interval", checkInterval);
-        // 读取规则
-        ConfigurationSection rules = getRuleSubsConfig();
-        if (null != rules) {
-            for (String ruleId : rules.getKeys(false)) {
-                ConfigurationSection rule = rules.getConfigurationSection(ruleId);
-                assert rule != null;
-                updateRule(DEF_LOCALE, rule, IPBanRuleUpdateType.AUTO);
+        try {
+            this.banDuration = getConfig().getLong("ban-duration", 0);
+            if (null == ipBanMatchers) {
+                ipBanMatchers = new ArrayList<>();
             }
-            log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
+            ConfigurationSection config = getConfig();
+            // 读取检查间隔
+            checkInterval = config.getLong("check-interval", checkInterval);
+            // 读取规则
+            ConfigurationSection rules = getRuleSubsConfig();
+            if (null != rules) {
+                for (String ruleId : rules.getKeys(false)) {
+                    ConfigurationSection rule = rules.getConfigurationSection(ruleId);
+                    assert rule != null;
+                    updateRule(DEF_LOCALE, rule, IPBanRuleUpdateType.AUTO);
+                }
+                log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
+            }
+        }catch (Throwable throwable){
+            log.error("Unable to complete scheduled tasks", throwable);
         }
     }
 

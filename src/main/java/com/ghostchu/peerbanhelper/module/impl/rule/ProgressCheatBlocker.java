@@ -93,20 +93,24 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
     private void cleanDatabase() {
         try {
             progressCheatBlockerPersistDao.cleanupDatabase(new Timestamp(System.currentTimeMillis() - persistDuration));
-        } catch (SQLException e) {
+        } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
         }
     }
 
     private void flushDatabase() {
-        List<ClientTaskRecord> records = new ArrayList<>();
-        while (!pendingPersistQueue.isEmpty()) {
-            records.add(pendingPersistQueue.poll());
-        }
         try {
-            progressCheatBlockerPersistDao.flushDatabase(records);
-        } catch (SQLException e) {
-            log.error("Unable flush records into database", e);
+            List<ClientTaskRecord> records = new ArrayList<>();
+            while (!pendingPersistQueue.isEmpty()) {
+                records.add(pendingPersistQueue.poll());
+            }
+            try {
+                progressCheatBlockerPersistDao.flushDatabase(records);
+            } catch (SQLException e) {
+                log.error("Unable flush records into database", e);
+            }
+        }catch (Throwable throwable){
+            log.error("Unable to complete scheduled tasks", throwable);
         }
     }
 

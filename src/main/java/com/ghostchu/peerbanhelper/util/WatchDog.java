@@ -55,7 +55,7 @@ public class WatchDog {
                     good();
                 }
             }, executor).get(3, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (Throwable e) {
             log.error(tlUI(Lang.WATCH_DOG_CALLBACK_BLOCKED), e);
         }
 
