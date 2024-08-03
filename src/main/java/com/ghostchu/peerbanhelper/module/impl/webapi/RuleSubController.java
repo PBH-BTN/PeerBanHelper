@@ -267,6 +267,9 @@ public class RuleSubController extends AbstractFeatureModule {
                 subUrl = ruleSubInfo.getSubUrl();
             }
         }
+        if(ruleName.contains(".")){
+            throw new IllegalArgumentException("Illegal character (.) in name: " + ruleName);
+        }
         ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, 0, 0));
         assert configurationSection != null;
         try {

@@ -66,6 +66,9 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     private void handleDownloaderPut(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
+        if(name.contains(".")){
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
@@ -92,6 +95,9 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     private void handleDownloaderPatch(Context ctx, String downloaderName) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
+        if(name.contains(".")){
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
@@ -122,6 +128,9 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     private void handleDownloaderTest(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
+        if(name.contains(".")){
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
 //        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
 //            ctx.status(HttpStatus.CONFLICT);

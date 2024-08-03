@@ -70,6 +70,9 @@ public class PBHOOBEController extends AbstractFeatureModule {
         conf.save(Main.getMainConfigFile());
         webContainer.setToken(token);
         String name = draftDownloader.get("name").getAsString();
+        if(name.contains(".")){
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         Downloader downloader = getServer().createDownloader(name, config);
         if (getServer().registerDownloader(downloader)) {
@@ -96,6 +99,9 @@ public class PBHOOBEController extends AbstractFeatureModule {
             return false;
         }
         String name = draftDownloader.get("name").getAsString();
+        if(name.contains(".")){
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
 //        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
 //            ctx.status(HttpStatus.CONFLICT);

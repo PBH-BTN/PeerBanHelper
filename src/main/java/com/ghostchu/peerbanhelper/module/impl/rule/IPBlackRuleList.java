@@ -170,6 +170,9 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             return new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), 400);
         }
         String name = rule.getString("name", ruleId);
+        if(name.contains(".")){
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         String url = rule.getString("url");
         if (null != url && url.startsWith("http")) {
             // 解析远程订阅
