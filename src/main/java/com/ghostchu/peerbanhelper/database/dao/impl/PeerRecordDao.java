@@ -54,7 +54,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
                 peer.getUploaded(),
                 peer.getDownloaded(),
                 peer.getDownloaded(),
-                peer.getFlags() == null ? null : peer.getFlags().getLtStdString(),
+                peer.getFlags() == null ? null : peer.getFlags(),
                 new Timestamp(System.currentTimeMillis()),
                 new Timestamp(System.currentTimeMillis())
         );
