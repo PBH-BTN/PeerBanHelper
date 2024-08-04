@@ -174,6 +174,8 @@ public class PeerBanHelperServer implements Reloadable {
                 log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://localhost:" + webContainer.javalin().port()));
             }
         }
+
+        Main.getReloadManager().register(this);
     }
 
     public void loadDownloaders() {
@@ -298,6 +300,7 @@ public class PeerBanHelperServer implements Reloadable {
             }
         });
         log.info(tlUI(Lang.SHUTDOWN_DONE));
+        Main.getReloadManager().unregister(this);
     }
 
     private void loadBanListToMemory() {
@@ -617,6 +620,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHPlusController.class);
         moduleManager.register(PBHOOBEController.class);
         moduleManager.register(PBHChartController.class);
+        moduleManager.register(PBHGeneralController.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

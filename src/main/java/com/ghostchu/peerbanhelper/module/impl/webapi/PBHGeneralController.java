@@ -56,7 +56,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
                    entryName = reloadable.getClass().getName();
                }
            }
-           entryList.add(new ReloadEntry(entryName, r));
+           entryList.add(new ReloadEntry(entryName, r.getStatus().name()));
         });
         context.json(entryList);
     }
@@ -70,7 +70,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
 
     public record ReloadEntry(
             String reloadable,
-            ReloadResult reloadResult
+            String reloadResult
     ){}
 
 }
