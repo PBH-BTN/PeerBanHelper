@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.encrypt.ActivationKeyUtil;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -18,13 +20,18 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
  */
 @Component
 @Slf4j
-public class ActivationManager {
+public class ActivationManager implements Reloadable {
     @Getter
-    private final String keyText;
+    private String keyText;
     @Nullable
     private ActivationKeyUtil.KeyData keyData = null;
 
     public ActivationManager() {
+        load();
+        Main.getReloadManager().register(this);
+    }
+
+    private void load() {
         this.keyText = Main.getMainConfig().getString("pbh-plus-key");
         if (keyText == null || keyText.isBlank()) {
             return;
@@ -33,6 +40,12 @@ public class ActivationManager {
         if (this.isActivated()) {
             log.info(tlUI(Lang.DONATION_KEY_VERIFICATION_SUCCESSFUL, keyData.licenseTo(), keyData.source(), MsgUtil.getDateFormatter().format(new Date(keyData.expireAt()))));
         }
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        load();
+        return Reloadable.super.reloadModule();
     }
 
     /**

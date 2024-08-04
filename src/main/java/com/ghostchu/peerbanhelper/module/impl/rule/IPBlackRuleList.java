@@ -17,6 +17,9 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -54,7 +57,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @Getter
-public class IPBlackRuleList extends AbstractRuleFeatureModule {
+public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
     private final RuleSubLogsDao ruleSubLogsDao;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
@@ -88,10 +91,18 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         checkInterval = config.getLong("check-interval", checkInterval);
         scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
         scheduledExecutorService.scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        Main.getReloadManager().register(this);
     }
 
     @Override
     public void onDisable() {
+        Main.getReloadManager().unregister(this);
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     @Override

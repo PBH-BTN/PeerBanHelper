@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -12,6 +13,9 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -31,7 +35,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class IPBlackList extends AbstractRuleFeatureModule {
+public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable {
     private Set<IPAddress> ips;
     private Set<Integer> ports;
     private Set<Long> asns;
@@ -74,6 +78,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
                 .put("/api/modules/ipblacklist/cities", this::handleCities, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/cities", this::handleCitiesDelete, Role.USER_WRITE)
         ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
+        Main.getReloadManager().register(this);
     }
 
     private void handleCitiesDelete(Context context) throws IOException {
@@ -244,7 +249,13 @@ public class IPBlackList extends AbstractRuleFeatureModule {
 
     @Override
     public void onDisable() {
+        Main.getReloadManager().unregister(this);
+    }
 
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     @Override

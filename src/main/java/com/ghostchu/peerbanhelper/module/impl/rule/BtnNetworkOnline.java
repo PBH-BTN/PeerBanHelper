@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityRules;
@@ -14,6 +15,9 @@ import com.ghostchu.peerbanhelper.util.NullUtil;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +30,7 @@ import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
-public class BtnNetworkOnline extends AbstractRuleFeatureModule {
+public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable {
     private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.GENERAL_NA), new TranslationComponent("BtnManager not initialized"));
     @Autowired(required = false)
     private BtnNetwork manager;
@@ -50,11 +54,18 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule {
     @Override
     public void onEnable() {
         reloadConfig();
+        Main.getReloadManager().register(this);
     }
 
     @Override
     public void onDisable() {
+        Main.getReloadManager().unregister(this);
+    }
 
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     public void reloadConfig() {

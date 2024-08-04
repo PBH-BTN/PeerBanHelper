@@ -38,6 +38,8 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
@@ -70,7 +72,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class PeerBanHelperServer {
+public class PeerBanHelperServer implements Reloadable {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
@@ -82,7 +84,7 @@ public class PeerBanHelperServer {
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     @Getter
     private final List<BanListInvoker> banListInvoker = new ArrayList<>();
-    private final String pbhServerAddress;
+    private String pbhServerAddress;
     private final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofVirtual().factory());
     @Getter
     private YamlConfiguration profileConfig;
@@ -127,6 +129,10 @@ public class PeerBanHelperServer {
     private BanListDao banListDao;
 
     public PeerBanHelperServer() {
+        reloadConfig();
+    }
+
+    private void reloadConfig(){
         this.pbhServerAddress = Main.getPbhServerAddress();
         this.profileConfig = Main.getProfileConfig();
         this.banDuration = profileConfig.getLong("ban-duration");
@@ -137,6 +143,16 @@ public class PeerBanHelperServer {
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
             ignoreAddresses.add(ignored);
         });
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        loadDownloaders();
+        resetKnownDownloaders();
+        loadBanListToMemory();
+        registerTimer();
+        return Reloadable.super.reloadModule();
     }
 
     public void start() throws SQLException {
@@ -255,6 +271,7 @@ public class PeerBanHelperServer {
 
 
     private void registerBanListInvokers() {
+        banListInvoker.clear();
         banListInvoker.add(new IPFilterInvoker(this));
         banListInvoker.add(new CommandExec(this));
     }
@@ -287,6 +304,7 @@ public class PeerBanHelperServer {
         if (!mainConfig.getBoolean("persist.banlist")) {
             return;
         }
+        this.BAN_LIST.clear();
         try {
             Map<PeerAddress, BanMetadata> data = banListDao.readBanList();
             this.BAN_LIST.putAll(data);
@@ -330,6 +348,9 @@ public class PeerBanHelperServer {
     }
 
     private void registerTimer() {
+        if(this.banWaveWatchDog != null){
+            this.banWaveWatchDog.close();
+        }
         this.banWaveWatchDog = new WatchDog("BanWave Thread", profileConfig.getLong("check-interval", 5000) + (1000 * 60), this::watchDogHungry, null);
         registerBanWaveTimer();
         this.banWaveWatchDog.start();

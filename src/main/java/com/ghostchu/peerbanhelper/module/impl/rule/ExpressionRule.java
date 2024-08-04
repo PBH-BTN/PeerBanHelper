@@ -14,6 +14,9 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Expression;
@@ -49,7 +52,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class ExpressionRule extends AbstractRuleFeatureModule {
+public class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
     private final long maxScriptExecuteTime = 1500;
     private final Map<ExpressionMetadata, ReentrantLock> threadLocks = new HashMap<>();
     private Map<Expression, ExpressionMetadata> expressions = new HashMap<>();
@@ -233,6 +236,17 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
         }
     }
 
+    @Override
+    public void onDisable() {
+        Main.getReloadManager().unregister(this);
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
+    }
+
     private void reloadConfig() throws IOException {
         expressions.clear();
         threadLocks.clear();
@@ -318,11 +332,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             file.createNewFile();
             Files.writeString(file.toPath(), content);
         }
-    }
-
-    @Override
-    public void onDisable() {
-
     }
 
     record ExpressionMetadata(String name, String author, boolean cacheable, boolean threadSafe, String version,

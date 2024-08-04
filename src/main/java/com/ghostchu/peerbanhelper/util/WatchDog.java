@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class WatchDog {
+public class WatchDog implements AutoCloseable{
     private final String name;
     private final long timeout;
     private final AtomicLong lastFeedAt = new AtomicLong(System.currentTimeMillis());
@@ -40,6 +40,11 @@ public class WatchDog {
 
     public void start() {
         this.service.scheduleAtFixedRate(this::watchDogCheck, 1, timeout, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void close(){
+        this.service.shutdown();
     }
 
     public void feed() {

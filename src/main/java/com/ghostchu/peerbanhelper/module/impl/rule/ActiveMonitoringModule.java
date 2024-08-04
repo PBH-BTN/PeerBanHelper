@@ -9,6 +9,9 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.eventbus.Subscribe;
@@ -24,7 +27,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class ActiveMonitoringModule extends AbstractFeatureModule {
+public class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable {
     private final PeerRecordDao peerRecordDao;
     private final Deque<PeerMetadata> dataBuffer = new ConcurrentLinkedDeque<>();
     private final TrafficJournalDao trafficJournalDao;
@@ -89,12 +92,25 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
         reloadConfig();
         this.taskWriteService = new ThreadPoolExecutor(1, 2, 60L, TimeUnit.SECONDS, taskWriteQueue);
         Main.getEventBus().register(this);
+        Main.getReloadManager().register(this);
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     private void reloadConfig() {
+        if(this.taskWriteService != null){
+            this.taskWriteService.shutdown();
+        }
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
+        if(this.scheduleService != null){
+            this.scheduleService.shutdown();
+        }
         this.scheduleService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
         this.scheduleService.scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
         this.scheduleService.scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
@@ -174,5 +190,6 @@ public class ActiveMonitoringModule extends AbstractFeatureModule {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        Main.getReloadManager().unregister(this);
     }
 }

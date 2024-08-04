@@ -46,6 +46,7 @@ public class TextManager implements Reloadable {
             this.overrideDirectory.mkdirs();
         }
         load();
+        Main.getReloadManager().register(this);
     }
 
     public static String tlUI(Lang key, Object... params) {
@@ -282,9 +283,9 @@ public class TextManager implements Reloadable {
     }
 
     @Override
-    public ReloadResult reloadModule() {
+    public ReloadResult reloadModule() throws Exception {
         load();
-        return ReloadResult.builder().status(ReloadStatus.SUCCESS).build();
+        return Reloadable.super.reloadModule();
     }
 
     /**
