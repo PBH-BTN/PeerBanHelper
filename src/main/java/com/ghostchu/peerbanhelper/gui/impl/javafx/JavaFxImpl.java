@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.javafx;
 
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.theme.Styles;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.MainJavaFx;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
@@ -36,6 +37,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
@@ -150,6 +152,8 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 //            }
 //        });
         Holder<Object> lastCell = new Holder<>();
+        Styles.addStyleClass(this.logsView,Styles.DENSE);
+        Styles.addStyleClass(this.logsView,Styles.STRIPED);
         this.logsView.setCellFactory(x -> new ListCell<>() {
             {
                 getStyleClass().add("log-window-list-cell");
@@ -271,6 +275,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
             Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
             stage.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/light.css").toExternalForm());
         }
+
     }
 
     private void closeWindowEvent(WindowEvent windowEvent) {
