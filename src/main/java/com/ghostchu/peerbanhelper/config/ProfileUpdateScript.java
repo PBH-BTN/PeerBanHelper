@@ -26,8 +26,17 @@ public class ProfileUpdateScript {
     }
 
     @UpdateScript(version = 15)
-    public void addCitiesBanningRule(){
+    public void addCitiesBanningRule() {
         conf.set("module.ip-address-blocker.cities", List.of("示例海南"));
+        var section = conf.getConfigurationSection("module.ip-address-blocker-rules.rules");
+        for (String key : section.getKeys(false)) {
+            var rule = section.getConfigurationSection(key);
+            var url = rule.getString("url", "");
+            if (url.equals("https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt") ||
+                    url.equals("https://fastly.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt")) {
+                rule.set("url", "https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt");
+            }
+        }
     }
 
     @UpdateScript(version = 14)
@@ -58,6 +67,7 @@ public class ProfileUpdateScript {
     public void patchProgressCheckBlocker() {
         conf.set("module.progress-cheat-blocker.ban-duration", "default");
     }
+
     @UpdateScript(version = 11)
     public void reAddXL0019() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
@@ -72,6 +82,7 @@ public class ProfileUpdateScript {
             thunderCheckScript.delete();
         }
     }
+
     @UpdateScript(version = 10)
     public void addBanDuration() {
         var module = conf.getConfigurationSection("module");
@@ -84,6 +95,7 @@ public class ProfileUpdateScript {
             }
         }
     }
+
     @UpdateScript(version = 9)
     public void updateXmRules() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
@@ -93,6 +105,7 @@ public class ProfileUpdateScript {
         bannedClientNames.add("{\"method\":\"STARTS_WITH\",\"content\":\"xm/torrent\"}");
         conf.set("module.client-name-blacklist.banned-client-name", bannedClientNames);
     }
+
     @UpdateScript(version = 8)
     public void bigUpdate() {
         conf.set("ignore-peers-from-addresses", List.of(
