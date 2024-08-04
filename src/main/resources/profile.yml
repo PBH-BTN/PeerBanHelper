@@ -1,4 +1,4 @@
-config-version: 14
+config-version: 15
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -191,6 +191,12 @@ module:
     # Banning as Country/Region code
     regions:
       - "0"
+    # 按城市/区/县封禁
+    # 默认使用 Maxmind 名称，如果成功加载 GeoCN 数据库，则对在 GeoCN 数据库中的 IP 地址使用 GeoCN 写法
+    # Banning as city name
+    # Use Maxmind name as default, or use GeoCN name for record exists in GeoCN if GeoCN is loaded
+    cities:
+      - "示例海南"
     #  - ISO_CODE 输入国家或地区的 ISO 代码，大小写敏感，如：CN, UK, TW, HK, JP 等
     #  - ISO_CODE Enter the ISO code, case sensitive (E.g. CN, UK, TW, HK, JP, etc.)
     # 按网络类型封禁（仅中国大陆地区 IP 地址有效）

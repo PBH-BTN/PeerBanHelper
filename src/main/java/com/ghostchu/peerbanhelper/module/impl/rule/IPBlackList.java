@@ -40,6 +40,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
+    private Set<String> cities;
 
     @Override
     public @NotNull String getName() {
@@ -70,7 +71,23 @@ public class IPBlackList extends AbstractRuleFeatureModule {
                 .delete("/api/modules/ipblacklist/asn", this::handleASNDelete, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/region", this::handleRegion, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/region", this::handleRegionDelete, Role.USER_WRITE)
-                ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
+                .put("/api/modules/ipblacklist/cities", this::handleCities, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/cities", this::handleCitiesDelete, Role.USER_WRITE)
+        ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
+    }
+
+    private void handleCitiesDelete(Context context) throws IOException {
+        if (cities.removeIf(cities -> cities.equals(context.body()))) {
+            context.status(HttpStatus.OK);
+        } else {
+            context.status(HttpStatus.NOT_FOUND);
+        }
+        saveConfig();
+    }
+
+    private void handleCities(Context context) throws IOException {
+        cities.add(context.body());
+        saveConfig();
     }
 
     private void handleNetTypeDelete(Context context) throws IOException {
@@ -219,6 +236,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         map.put("port", ports);
         map.put("asn", asns);
         map.put("region", regions);
+        map.put("cities", cities);
         map.put("netType", netTypes);
         ctx.status(HttpStatus.OK);
         ctx.json(map);
@@ -235,6 +253,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         getConfig().set("ports", List.copyOf(ports));
         getConfig().set("asns", List.copyOf(asns));
         getConfig().set("region", List.copyOf(regions));
+        getConfig().set("cities", List.copyOf(cities));
         super.saveConfig();
     }
 
@@ -248,6 +267,7 @@ public class IPBlackList extends AbstractRuleFeatureModule {
         this.ports = new HashSet<>(getConfig().getIntList("ports"));
         this.regions = new HashSet<>(getConfig().getStringList("regions"));
         this.asns = new HashSet<>(getConfig().getLongList("asns"));
+        this.cities = new HashSet<>(getConfig().getStringList("cities"));
         this.netTypes = new HashSet<>();
         // GeoCN 字段名就是中文
         if (getConfig().getBoolean("net-type.wideband")) {
@@ -328,6 +348,14 @@ public class IPBlackList extends AbstractRuleFeatureModule {
             String netType = geoData.getNetwork().getNetType();
             if (netTypes.contains(netType)) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_NETTYPE_RULE, netType), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, netType));
+            }
+        }
+        if (!cities.isEmpty() && geoData.getCity() != null && geoData.getCity().getName() != null) {
+            String fullCityName = geoData.getCity().getName();
+            for (String s : cities) {
+                if (fullCityName.contains(s)) {
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.IP_BLACKLIST_CITY_RULE, s), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, s));
+                }
             }
         }
         return pass();

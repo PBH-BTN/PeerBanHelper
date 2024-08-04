@@ -25,6 +25,10 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 15)
+    public void addCitiesBanningRule(){
+        conf.set("module.ip-address-blocker.cities", List.of("示例海南"));
+    }
 
     @UpdateScript(version = 14)
     public void activeMonitoringAndNetTypeAndPCBPersist() {
