@@ -5,11 +5,11 @@ import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.common.StdMsg;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import io.javalin.http.Context;
@@ -127,7 +127,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
 
         var results = historyDao.countDateField(startAt, endAt, timestampGetter, trimmer, pctFilter);
         ctx.status(HttpStatus.OK);
-        ctx.json(new StdMsg(true, "ok", results));
+        ctx.json(new StdResp(true,null,results));
     }
 
     private Calendar getZeroCalender() {
@@ -153,7 +153,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
             case null, default -> throw new IllegalArgumentException("type invalid");
         };
         ctx.status(HttpStatus.OK);
-        ctx.json(new StdMsg(true, "ok", results));
+        ctx.json(new StdResp(true, null, results));
     }
 
 
@@ -177,7 +177,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         resp.put("dict", dict);
         resp.put("data", dat);
         ctx.status(HttpStatus.OK);
-        ctx.json(resp);
+        ctx.json(new StdResp(true,null,resp));
     }
 
     private void handleBasicCounter(Context ctx) {
@@ -188,7 +188,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         map.put("banlistCounter", getServer().getBannedPeers().size());
         map.put("bannedIpCounter", getServer().getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
         ctx.status(HttpStatus.OK);
-        ctx.json(map);
+        ctx.json(new StdResp(true,null,map));
     }
 
     @Override

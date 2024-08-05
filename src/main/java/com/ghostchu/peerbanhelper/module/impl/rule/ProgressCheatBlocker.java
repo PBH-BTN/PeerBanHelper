@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -124,7 +125,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         List<ClientTaskRecord> records = progressRecorder.asMap().entrySet().stream()
                 .map(entry -> new ClientTaskRecord(entry.getKey(), entry.getValue()))
                 .toList();
-        ctx.json(records);
+        ctx.json(new StdResp(true,null,records));
     }
 
 
@@ -136,7 +137,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         config.put("maximumDifference", maximumDifference);
         config.put("rewindMaximumDifference", rewindMaximumDifference);
         ctx.status(HttpStatus.OK);
-        ctx.json(config);
+        ctx.json(new StdResp(true,null,config));
     }
 
     @Override

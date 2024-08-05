@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -243,7 +244,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             case "netType" -> map.put("netType", netTypes);
         }
         ctx.status(HttpStatus.OK);
-        ctx.json(map);
+        ctx.json(new StdResp(true, null, map));
     }
 
     @Override

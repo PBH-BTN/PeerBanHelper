@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -66,7 +67,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule implements Re
     private void handleWebAPI(Context ctx) {
         ctx.status(HttpStatus.OK);
         String locale = locale(ctx);
-        ctx.json(Map.of("clientName", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList()));
+        ctx.json(new StdResp(true, null, Map.of("clientName", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList())));
     }
 
     @Override

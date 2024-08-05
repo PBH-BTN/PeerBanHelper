@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -104,7 +105,7 @@ public class PBHChartController extends AbstractFeatureModule {
                 records.add(new TrafficJournalRecord(base.getTimestamp(), uploadedOffset, downloadedOffset));
             }
         }
-        ctx.json(new TrafficChart(totalUploaded, totalDownloaded, records));
+        ctx.json(new StdResp(true,null,new TrafficChart(totalUploaded, totalDownloaded, records)));
     }
 
 
@@ -139,12 +140,12 @@ public class PBHChartController extends AbstractFeatureModule {
                 bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
             }
         }
-        ctx.json(Map.of(
+        ctx.json(new StdResp(true,null,Map.of(
                 "connectedPeersTrend", connectedPeerTrends.entrySet().stream().map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
                         .toList(),
                 "bannedPeersTrend", bannedPeerTrends.entrySet().stream().map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
                         .toList()
-        ));
+        )));
     }
 
     private void handleGeoIP(Context ctx) throws Exception {
@@ -212,7 +213,7 @@ public class PBHChartController extends AbstractFeatureModule {
                 }
             }
         }
-        ctx.json(Map.of(
+        ctx.json(new StdResp(true,null,Map.of(
                 "isp", ispCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
@@ -222,7 +223,7 @@ public class PBHChartController extends AbstractFeatureModule {
                 "region", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList()
-        ));
+        )));
     }
 
 

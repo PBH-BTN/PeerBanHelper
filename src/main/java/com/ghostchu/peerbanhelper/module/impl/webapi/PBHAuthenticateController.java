@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
@@ -48,7 +49,7 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
 
     private void handleLogout(Context ctx) {
         ctx.sessionAttribute("authenticated", null);
-        ctx.json(Map.of("message", "success"));
+        ctx.json(new StdResp(true,"success", null));
     }
 
     private void handleLogin(Context ctx) throws NeedInitException {
@@ -63,12 +64,12 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
         if (loginRequest == null || !webContainer.getToken().equals(loginRequest.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
-            ctx.json(Map.of("message", tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN)));
+            ctx.json(new StdResp(false,  tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
             return;
         }
         ctx.sessionAttribute("authenticated", webContainer.getToken());
         ctx.status(HttpStatus.OK);
-        ctx.json(Map.of("message", tl(locale(ctx), Lang.WEBAPI_AUTH_OK)));
+        ctx.json(new StdResp(true,  tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }
 
 
