@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -14,7 +13,6 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
-import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.Address;
 import inet.ipaddr.IPAddress;
@@ -26,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 
@@ -65,7 +62,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     public void onEnable() {
         reloadConfig();
         webContainer.javalin()
-                .get("/api/modules/ipblacklist", this::handleWebAPI, Role.USER_READ)
+                .get("/api/modules/ipblacklist/{ruleType}", this::handleWebAPI, Role.USER_READ)
                 .post("/api/modules/ipblacklist/ip/test", this::handleIPTest, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/ip", this::handleIPPut, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/ip", this::handleIPDelete, Role.USER_WRITE)
@@ -237,12 +234,14 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
 
     private void handleWebAPI(Context ctx) {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("ip", ips.stream().map(Address::toString).toList());
-        map.put("port", ports);
-        map.put("asn", asns);
-        map.put("region", regions);
-        map.put("cities", cities);
-        map.put("netType", netTypes);
+        switch (ctx.pathParam("ruleType")) {
+            case "ip" -> map.put("ip", ips.stream().map(Address::toString).toList());
+            case "port" -> map.put("port", ports);
+            case "asn" -> map.put("asn", asns);
+            case "region" -> map.put("region", regions);
+            case "cities" -> map.put("cities", cities);
+            case "netType" -> map.put("netType", netTypes);
+        }
         ctx.status(HttpStatus.OK);
         ctx.json(map);
     }
