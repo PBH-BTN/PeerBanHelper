@@ -30,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -220,7 +219,7 @@ public class PBHChartController extends AbstractFeatureModule {
                 "province", cnProvinceCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
-                "region", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "city", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList()
         )));

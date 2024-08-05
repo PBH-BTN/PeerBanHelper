@@ -1,12 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.jthemedetecor.OsThemeDetector;
-import com.pixelduke.window.ThemeWindowManager;
-import com.pixelduke.window.ThemeWindowManagerFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;

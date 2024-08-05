@@ -71,8 +71,8 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
                 .delete("/api/modules/ipblacklist/port", this::handlePortDelete, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/asn", this::handleASN, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/asn", this::handleASNDelete, Role.USER_WRITE)
-                .put("/api/modules/ipblacklist/region", this::handleRegion, Role.USER_WRITE)
-                .delete("/api/modules/ipblacklist/region", this::handleRegionDelete, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/city", this::handleRegion, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/city", this::handleRegionDelete, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/cities", this::handleCities, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/cities", this::handleCitiesDelete, Role.USER_WRITE)
         ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
@@ -89,7 +89,8 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     private void handleCities(Context context) throws IOException {
-        cities.add(context.body());
+        cities.add(context.bodyAsClass(UserCityRuleAddRequest.class).city());
+        context.status(HttpStatus.CREATED);
         saveConfig();
     }
 
@@ -138,53 +139,27 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         saveConfig();
     }
 
-    private void handleNetType(Context ctx) {
-
-    }
 
     private void handleRegion(Context ctx) throws IOException {
-        regions.add(ctx.body());
+        regions.add(ctx.bodyAsClass(UserRegionRuleAddRequest.class).region());
+        ctx.status(HttpStatus.CREATED);
         saveConfig();
     }
 
     private void handleASN(Context ctx) throws IOException {
-        long asn = Long.parseLong(ctx.body());
-        asns.add(asn);
+        UserASNRuleAddRequest asn =ctx.bodyAsClass(UserASNRuleAddRequest.class);
+        asns.add(asn.asn());
+        ctx.status(HttpStatus.CREATED);
         saveConfig();
     }
 
 
     private void handlePort(Context ctx) throws IOException {
         UserPortAddRequest req = ctx.bodyAsClass(UserPortAddRequest.class);
-        if (req.from() > req.to() || req.from() < 1 || req.to() > 65535) {
-            throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_INVALID_RANGE));
-        }
-        for (int i = req.from(); i <= req.to(); i++) {
-            ports.add(i);
-        }
+        ports.add(req.port());
         ctx.status(HttpStatus.CREATED);
         saveConfig();
     }
-
-//    private void handlePortTest(Context ctx) {
-//        UserPortAddRequest req = ctx.bodyAsClass(UserPortAddRequest.class);
-//        if (req.from() > req.to() || req.from() < 1 || req.to() > 65535) {
-//            ctx.status(HttpStatus.BAD_REQUEST);
-//            ctx.json(new UserPortTestResult(false, tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_INVALID_RANGE), 0, null));
-//            return;
-//        }
-//        int count = req.from() - req.to();
-//        if (req.from() == req.to()) {
-//            count += 1;
-//        } else {
-//            count += 2;
-//        }
-//        if (req.from() < 1024) {
-//            ctx.json(new UserPortTestResult(true, null, count, tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_PRIVILEGED_PORT_TIPS)));
-//        } else {
-//            ctx.json(new UserPortTestResult(true, null, count, null));
-//        }
-//    }
 
     private void handleIPPut(Context context) throws IOException {
         IPAddress ipAddress = parseIPAddressFromReq(context);
@@ -202,29 +177,17 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
                 upper.toFullString(),
                 ipAddress.toNormalizedString(),
                 ipAddress.getCount().toString());
-        context.json(testResult);
+        context.json(new StdResp(true,null,testResult));
         saveConfig();
     }
 
     private IPAddress parseIPAddressFromReq(Context ctx) throws IllegalArgumentException {
         UserIPRuleAddRequest req = ctx.bodyAsClass(UserIPRuleAddRequest.class);
-        if ((req.ipRange() == null) && (req.cidr() == null)) {
-            throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_ARG));
+        IPAddress ipAddress = IPAddressUtil.getIPAddress(req.ip());
+        if (ipAddress == null) {
+            throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_IP));
         }
-        if (req.ipRange() == null) {
-            IPAddress ipAddress = IPAddressUtil.getIPAddress(req.cidr());
-            if (ipAddress == null) {
-                throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_IP));
-            }
-            return ipAddress;
-        } else {
-            IPAddress from = IPAddressUtil.getIPAddress(req.ipRange().from());
-            IPAddress to = IPAddressUtil.getIPAddress(req.ipRange().to());
-            if (from == null || to == null) {
-                throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_IP));
-            }
-            return from.coverWithPrefixBlock(to);
-        }
+        return ipAddress;
     }
 
 
@@ -239,7 +202,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             case "ip" -> map.put("ip", ips.stream().map(Address::toString).toList());
             case "port" -> map.put("port", ports);
             case "asn" -> map.put("asn", asns);
-            case "region" -> map.put("region", regions);
+            case "city" -> map.put("city", regions);
             case "cities" -> map.put("cities", cities);
             case "netType" -> map.put("netType", netTypes);
         }
@@ -263,7 +226,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         getConfig().set("ips", ips.stream().map(Address::toString).toList());
         getConfig().set("ports", List.copyOf(ports));
         getConfig().set("asns", List.copyOf(asns));
-        getConfig().set("region", List.copyOf(regions));
+        getConfig().set("city", List.copyOf(regions));
         getConfig().set("cities", List.copyOf(cities));
         super.saveConfig();
     }
@@ -382,15 +345,13 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     public record UserPortAddRequest(
-            int from,
-            int to
+            int port
     ) {
 
     }
 
     public record UserIPRuleAddRequest(
-            String cidr,
-            UserIPRuleAddRequestIpRange ipRange
+            String ip
     ) {
 
     }
@@ -401,5 +362,24 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     ) {
 
     }
+
+    public record UserASNRuleAddRequest(
+            long asn
+    ){
+
+    }
+
+    public record UserRegionRuleAddRequest(
+            String region
+    ){
+
+    }
+
+    public record UserCityRuleAddRequest(
+            String city
+    ){
+
+    }
+
 
 }

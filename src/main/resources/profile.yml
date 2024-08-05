@@ -259,7 +259,7 @@ module:
     # 容许同一网段下载同一种子的IP数量，正整数
     # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
     # The allowed maximum amount of ips in same subnet
-    # To avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same region
+    # To avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same city
     tolerate-num: 5
     # 缓存持续时间（秒）
     # Cache life span

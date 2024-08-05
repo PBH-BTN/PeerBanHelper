@@ -16,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component

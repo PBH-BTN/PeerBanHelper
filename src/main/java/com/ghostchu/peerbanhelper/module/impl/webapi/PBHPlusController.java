@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.util.encrypt.ActivationKeyUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +41,7 @@ public class PBHPlusController extends AbstractFeatureModule {
 
     private void handle(Context context) {
         context.status(HttpStatus.OK);
-        context.json(new ActiveInfo(activationManager.isActivated(), activationManager.getKeyText(), activationManager.getKeyData()));
+        context.json(new StdResp(true,null,new ActiveInfo(activationManager.isActivated(), activationManager.getKeyText(), activationManager.getKeyData())));
     }
 
     @Override
