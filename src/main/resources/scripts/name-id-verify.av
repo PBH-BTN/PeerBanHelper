@@ -1,6 +1,9 @@
 ## @NAME PeerID/ClientName 伪装检查
 ## @AUTHOR PBH-BTN Community
 ## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
 
 if(isBlank(peer.clientName) || isBlank(peer.peerId)) {
     return false; ## 二元组任意为空都不能继续检查，需要下载器支持
