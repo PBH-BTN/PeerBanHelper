@@ -76,7 +76,7 @@ public class PBHOOBEController extends AbstractFeatureModule {
         Downloader downloader = getServer().createDownloader(name, config);
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.CREATED);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATED), null));
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_CREATED), null));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS), null));
