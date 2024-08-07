@@ -73,7 +73,6 @@ public class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadabl
     }
 
     private void handleWebAPI(Context ctx) {
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true,null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix)));
     }
 

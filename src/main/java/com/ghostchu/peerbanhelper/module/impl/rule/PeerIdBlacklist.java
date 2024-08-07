@@ -64,7 +64,6 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule implements Reload
     }
 
     private void handleWebAPI(Context ctx) {
-        ctx.status(HttpStatus.OK);
         String locale = locale(ctx);
         ctx.json(new StdResp(true,null,Map.of("peerId", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList())));
     }

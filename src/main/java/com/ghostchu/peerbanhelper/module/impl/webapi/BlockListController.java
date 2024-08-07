@@ -38,7 +38,6 @@ public class BlockListController extends AbstractFeatureModule {
                         String end = pair.getKey().getIp();
                         builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
                     }
-                    ctx.status(HttpStatus.OK);
                     ctx.result(builder.toString());
                 }, Role.ANYONE)
                 .get("/blocklist/dat-emule", ctx -> {
@@ -49,7 +48,6 @@ public class BlockListController extends AbstractFeatureModule {
                         String fullIp = ipAddress.toFullString();
                         builder.append(fullIp).append(" - ").append(fullIp).append(" , 000 , ").append(UUID.randomUUID().toString().replace("-", "")).append("\n");
                     }
-                    ctx.status(HttpStatus.OK);
                     ctx.result(builder.toString());
                 }, Role.ANYONE);
     }

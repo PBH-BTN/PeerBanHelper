@@ -126,7 +126,6 @@ public class PBHMetricsController extends AbstractFeatureModule {
         double pctFilter = Double.parseDouble(filter);
 
         var results = historyDao.countDateField(startAt, endAt, timestampGetter, trimmer, pctFilter);
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true,null,results));
     }
 
@@ -152,7 +151,6 @@ public class PBHMetricsController extends AbstractFeatureModule {
             case "sum" -> historyDao.sumField(field, filter);
             case null, default -> throw new IllegalArgumentException("type invalid");
         };
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, results));
     }
 
@@ -176,7 +174,6 @@ public class PBHMetricsController extends AbstractFeatureModule {
         Map<String, Object> resp = new HashMap<>();
         resp.put("dict", dict);
         resp.put("data", dat);
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true,null,resp));
     }
 
@@ -187,7 +184,6 @@ public class PBHMetricsController extends AbstractFeatureModule {
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
         map.put("banlistCounter", getServer().getBannedPeers().size());
         map.put("bannedIpCounter", getServer().getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true,null,map));
     }
 

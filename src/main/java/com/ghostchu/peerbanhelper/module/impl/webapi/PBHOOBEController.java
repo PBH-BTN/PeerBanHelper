@@ -115,7 +115,6 @@ public class PBHOOBEController extends AbstractFeatureModule {
         }
         try {
             var testResult = downloader.login();
-            ctx.status(HttpStatus.OK);
             if (testResult.success()) {
                 ctx.json(new StdResp(testResult.success(), tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));
             } else {

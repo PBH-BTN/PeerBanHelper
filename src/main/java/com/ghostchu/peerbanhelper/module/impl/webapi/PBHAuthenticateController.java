@@ -66,7 +66,6 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
             return;
         }
         ctx.sessionAttribute("authenticated", webContainer.getToken());
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true,  tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }
 

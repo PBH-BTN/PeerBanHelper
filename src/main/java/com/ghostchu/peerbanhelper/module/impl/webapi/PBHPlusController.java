@@ -40,7 +40,6 @@ public class PBHPlusController extends AbstractFeatureModule {
     }
 
     private void handle(Context context) {
-        context.status(HttpStatus.OK);
         context.json(new StdResp(true,null,new ActiveInfo(activationManager.isActivated(), activationManager.getKeyText(), activationManager.getKeyData())));
     }
 

@@ -74,7 +74,6 @@ public class PBHBanController extends AbstractFeatureModule {
             }
         }
         pendingRemovals.forEach(pa -> getServer().scheduleUnBanPeer(pa));
-        context.status(HttpStatus.OK);
         context.json(new StdResp(true, null, Map.of("count", pendingRemovals.size())));
     }
 
@@ -88,7 +87,6 @@ public class PBHBanController extends AbstractFeatureModule {
                 list.add(new HistoryEntry(k, v));
             }
         });
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, list));
     }
 
@@ -104,7 +102,6 @@ public class PBHBanController extends AbstractFeatureModule {
         map.put("pageSize", pageSize);
         map.put("results", historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageIndex, pageSize).stream().map(r -> new BanLogResponse(locale(ctx), r)).toList());
         map.put("total", historyDao.countOf());
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, map));
     }
 
@@ -112,7 +109,6 @@ public class PBHBanController extends AbstractFeatureModule {
         long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
         long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
         var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit);
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, banResponseList.toList()));
     }
 

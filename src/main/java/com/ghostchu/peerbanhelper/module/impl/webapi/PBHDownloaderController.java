@@ -110,7 +110,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .filter(d -> d.getName().equals(downloaderName))
                 .forEach(d -> getServer().unregisterDownloader(d));
         if (getServer().registerDownloader(downloader)) {
-            ctx.status(HttpStatus.OK);
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATED), null));
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
@@ -145,7 +144,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         }
         try {
             var testResult = downloader.login();
-            ctx.status(HttpStatus.OK);
             if (testResult.success()) {
                 ctx.json(new StdResp(testResult.success(),  tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));
             } else {
@@ -170,7 +168,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         getServer().unregisterDownloader(downloader);
         try {
             getServer().saveDownloaders();
-            ctx.status(HttpStatus.OK);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_SAVED), null ));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -195,7 +192,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
                 .map(this::populatePeerDTO)
                 .toList();
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, peerWrappers));
     }
 
@@ -227,7 +223,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .distinct()
                 .sorted((o1, o2) -> Long.compare(o2.getRtUploadSpeed(), o1.getRtUploadSpeed()))
                 .toList();
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, torrentWrappers));
     }
 
@@ -256,13 +251,11 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .count();
 
         JsonObject config = downloader.saveDownloaderJson();
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config)));
     }
 
     private void handleDownloaderList(@NotNull Context ctx) {
         List<DownloaderWrapper> downloaders = getServer().getDownloaders().stream().map(d -> new DownloaderWrapper(d.getName(), d.getEndpoint(), d.getType().toLowerCase())).toList();
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, downloaders));
     }
 

@@ -77,7 +77,6 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
         Map<String, Map<String, Long>> mapSubnetCounter = new HashMap<>();
         subnetCounter.asMap().forEach((k, v) -> mapSubnetCounter.put(k, v.asMap()));
         status.put("subnetCounter", mapSubnetCounter);
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true,null, status));
     }
 
@@ -89,7 +88,6 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
         config.put("cacheLifespan", cacheLifespan);
         config.put("keepHunting", keepHunting);
         config.put("keepHuntingTime", keepHuntingTime);
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null,config));
     }
 

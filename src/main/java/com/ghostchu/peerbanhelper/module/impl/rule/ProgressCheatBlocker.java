@@ -120,7 +120,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
     }
 
     private void handleStatus(Context ctx) {
-        ctx.status(HttpStatus.OK);
         List<ClientTaskRecord> records = progressRecorder.asMap().entrySet().stream()
                 .map(entry -> new ClientTaskRecord(entry.getKey(), entry.getValue()))
                 .toList();
@@ -135,7 +134,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         config.put("excessiveThreshold", excessiveThreshold);
         config.put("maximumDifference", maximumDifference);
         config.put("rewindMaximumDifference", rewindMaximumDifference);
-        ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true,null,config));
     }
 

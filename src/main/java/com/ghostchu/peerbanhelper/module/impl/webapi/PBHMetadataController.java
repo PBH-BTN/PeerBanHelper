@@ -46,7 +46,6 @@ public class PBHMetadataController extends AbstractFeatureModule {
     }
 
     private void handleManifest(Context ctx) {
-        ctx.status(HttpStatus.OK);
         Map<String, Object> data = new HashMap<>();
         data.put("version", buildMeta);
         data.put("modules", moduleManager.getModules().stream()
