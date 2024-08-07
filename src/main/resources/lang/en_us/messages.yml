@@ -341,3 +341,4 @@ SCHEDULED_FULL_BANLIST_APPLY: "[Repair] PeerBanHelper scheduled full banlist re-
 CLEANED_BANLOGS: "[Cleanup] Cleaned {} history records"
 
 OPERATION_EXECUTE_SUCCESSFULLY: "Operation execute successfully"
+PBH_PLUS_LICENSE_UPDATED: "Donation key saved"

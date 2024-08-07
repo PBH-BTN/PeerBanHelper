@@ -31,7 +31,7 @@ public class ActivationManager implements Reloadable {
         Main.getReloadManager().register(this);
     }
 
-    private void load() {
+    public void load() {
         this.keyText = Main.getMainConfig().getString("pbh-plus-key");
         if (keyText == null || keyText.isBlank()) {
             return;

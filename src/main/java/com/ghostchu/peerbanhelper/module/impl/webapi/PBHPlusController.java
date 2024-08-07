@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.encrypt.ActivationKeyUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -11,6 +13,10 @@ import io.javalin.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 public class PBHPlusController extends AbstractFeatureModule {
@@ -36,7 +42,17 @@ public class PBHPlusController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin().get("/api/pbhplus/status", this::handle, Role.USER_READ);
+        webContainer.javalin()
+                .get("/api/pbhplus/status", this::handle, Role.USER_READ)
+                .put("/api/pbhplus/key", this::handleLicensePut, Role.USER_WRITE);
+    }
+
+    private void handleLicensePut(Context ctx) throws IOException {
+        var licenseReq = ctx.bodyAsClass(LicensePutRequest.class);
+        Main.getMainConfig().set("pbh-plus-key", licenseReq.key());
+        Main.getMainConfig().save(Main.getMainConfigFile());
+        activationManager.load();
+        ctx.json(new StdResp(true,tl(locale(ctx), Lang.PBH_PLUS_LICENSE_UPDATE), null ));
     }
 
     private void handle(Context context) {
@@ -53,6 +69,10 @@ public class PBHPlusController extends AbstractFeatureModule {
             String key,
             ActivationKeyUtil.KeyData keyData
     ) {
+
+    }
+    public record LicensePutRequest(String key)
+    {
 
     }
 }
