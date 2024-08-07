@@ -83,7 +83,6 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         if (cities.removeIf(cities -> cities.equals(context.body()))) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
@@ -100,7 +99,6 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         if (netTypes.removeIf(netType -> netType.equals(context.body()))) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
@@ -111,7 +109,6 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             //context.status(HttpStatus.OK);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
@@ -121,7 +118,6 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         if (asns.removeIf(p -> p == Long.parseLong(context.body()))) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
@@ -131,7 +127,6 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         if (ports.removeIf(p -> p == Integer.parseInt(context.body()))) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
@@ -141,7 +136,6 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         if (ips.removeIf(ipAddress -> ipAddress.toString().equals(context.body()))) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
