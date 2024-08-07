@@ -210,7 +210,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             case "ip" -> map.put("ip", ips.stream().map(Address::toString).toList());
             case "port" -> map.put("port", ports);
             case "asn" -> map.put("asn", asns);
-            case "city" -> map.put("city", regions);
+            case "region" -> map.put("region", regions);
             case "cities" -> map.put("cities", cities);
             case "netType" -> map.put("netType", netTypes);
         }
