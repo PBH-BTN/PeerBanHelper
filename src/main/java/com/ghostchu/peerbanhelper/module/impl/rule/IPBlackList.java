@@ -211,7 +211,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             case "port" -> map.put("port", ports);
             case "asn" -> map.put("asn", asns);
             case "region" -> map.put("region", regions);
-            case "cities" -> map.put("cities", cities);
+            case "city" -> map.put("city", cities);
             case "netType" -> map.put("netType", netTypes);
         }
         ctx.status(HttpStatus.OK);
@@ -234,7 +234,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         getConfig().set("ips", ips.stream().map(Address::toString).toList());
         getConfig().set("ports", List.copyOf(ports));
         getConfig().set("asns", List.copyOf(asns));
-        getConfig().set("city", List.copyOf(regions));
+        getConfig().set("region", List.copyOf(regions));
         getConfig().set("cities", List.copyOf(cities));
         super.saveConfig();
     }
