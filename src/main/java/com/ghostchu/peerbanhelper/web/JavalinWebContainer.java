@@ -73,7 +73,7 @@ public class JavalinWebContainer {
                             staticFiles.precompress = false;
                             staticFiles.aliasCheck = null;
                             staticFiles.skipFileFunction = req -> false;
-                            staticFiles.headers.put("Cache-Control", "no-cache");
+                            //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
                         c.spaRoot.addFile("/", new File(new File(Main.getDataDirectory(), "static"), "index.html").getPath(), Location.EXTERNAL);
                     } else {
@@ -84,7 +84,7 @@ public class JavalinWebContainer {
                             staticFiles.precompress = false;
                             staticFiles.aliasCheck = null;
                             staticFiles.skipFileFunction = req -> false;
-                            staticFiles.headers.put("Cache-Control", "no-cache");
+                            //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
                         c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                     }
