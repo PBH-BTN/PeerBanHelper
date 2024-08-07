@@ -213,6 +213,10 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             case "region" -> map.put("region", regions);
             case "city" -> map.put("city", cities);
             case "netType" -> map.put("netType", netTypes);
+            default -> {
+                ctx.status(HttpStatus.NOT_FOUND);
+                return;
+            }
         }
         ctx.status(HttpStatus.OK);
         ctx.json(new StdResp(true, null, map));
