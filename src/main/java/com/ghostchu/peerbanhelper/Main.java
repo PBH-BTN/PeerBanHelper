@@ -54,6 +54,8 @@ public class Main {
     private static File pluginDirectory;
     private static File libraryDirectory;
     @Getter
+    private static File debugDirectory;
+    @Getter
     private static PeerBanHelperServer server;
     @Getter
     private static PBHGuiManager guiManager;
@@ -169,6 +171,7 @@ public class Main {
         configDirectory = new File(dataDirectory, "config");
         pluginDirectory = new File(dataDirectory, "plugins");
         libraryDirectory = new File(dataDirectory, "libraries");
+        debugDirectory = new File(dataDirectory, "debug");
     }
 
     private static void setupLog4j2() {
@@ -305,6 +308,9 @@ public class Main {
         }
         if (!pluginDirectory.exists()) {
             pluginDirectory.mkdirs();
+        }
+        if (!debugDirectory.exists()) {
+            debugDirectory.mkdirs();
         }
         boolean exists = true;
         File config = new File(configDirectory, "config.yml");

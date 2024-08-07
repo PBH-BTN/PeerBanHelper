@@ -16,10 +16,12 @@ import com.google.common.eventbus.Subscribe;
 import com.jthemedetecor.OsThemeDetector;
 import com.pixelduke.window.ThemeWindowManager;
 import com.pixelduke.window.ThemeWindowManagerFactory;
+import com.sun.management.HotSpotDiagnosticMXBean;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListCell;
@@ -33,14 +35,15 @@ import javafx.stage.WindowEvent;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 
+import javax.management.MBeanServer;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
@@ -228,10 +231,10 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         controller.getMenuProgramQuit().setOnAction(e -> System.exit(0));
         controller.getMenuProgramOpenInGithub().setText(tlUI(Lang.ABOUT_VIEW_GITHUB));
         controller.getMenuProgramOpenInGithub().setOnAction(e -> openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
-        controller.getMenuProgramOpenInBrowser().setText(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
-        controller.getMenuProgramOpenInBrowser().setOnAction(e -> openWebpage(URI.create(Main.getServer().getWebUiUrl())));
-        controller.getMenuProgramCopyWebuiToken().setText(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
-        controller.getMenuProgramCopyWebuiToken().setOnAction(e -> {
+        controller.getMenuWebUIOpenInBrowser().setText(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
+        controller.getMenuWebUIOpenInBrowser().setOnAction(e -> openWebpage(URI.create(Main.getServer().getWebUiUrl())));
+        controller.getMenuWebUICopyWebuiToken().setText(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
+        controller.getMenuWebUICopyWebuiToken().setOnAction(e -> {
             if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
                 String content = Main.getServer().getWebContainer().getToken();
                 JFXUtil.copyText(content);
@@ -246,9 +249,85 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
             }
         });
+        controller.getMenuDebug().setText(tlUI(Lang.GUI_MENU_DEBUG));
+        controller.getMenuDebugReload().setText(tlUI(Lang.GUI_MENU_DEBUG_RELOAD_CONFIGURATION));
+        controller.getMenuDebugReload().setOnAction(this::debugReload);
+        controller.getMenuDebugHeapDump().setText(tlUI(Lang.GUI_MENU_DEBUG_HEAP_DUMP));
+        controller.getMenuDebugHeapDump().setOnAction(this::debugHeapDump);
+        controller.getMenuDebugPrintThreads().setText(tlUI(Lang.GUI_MENU_PRINT_THREADS));
+        controller.getMenuDebugPrintThreads().setOnAction(this::debugPrintThreads);
         if (silentStart) {
             setVisible(false);
         }
+    }
+
+    private void debugPrintThreads(ActionEvent actionEvent) {
+        ThreadGroup currentGroup =
+                Thread.currentThread().getThreadGroup();
+        int noThreads = currentGroup.activeCount();
+        Thread[] lstThreads = new Thread[noThreads];
+        currentGroup.enumerate(lstThreads);
+        StringBuilder builder = new StringBuilder();
+        for (Thread thread : lstThreads) {
+            var name = thread.getName();
+            var id = thread.threadId();
+            var priority = thread.getPriority();
+            var state = thread.getState().name();
+            var virtual = thread.isVirtual();
+            var alive = thread.isAlive();
+            var daemon = thread.isDaemon();
+            var interrupted = thread.isInterrupted();
+            String template = "{name} #{id} prio={prio} state={state} virtual={virtual} alive={alive} daemon={daemon} interrupted={interrupted}";
+            String result = template.replace("{name}", name)
+                    .replace("{id}", String.valueOf(id))
+                    .replace("{prio}", String.valueOf(priority))
+                    .replace("{state}", state)
+                    .replace("{virtual}", String.valueOf(virtual))
+                    .replace("{alive}", String.valueOf(alive))
+                    .replace("{daemon}", String.valueOf(daemon))
+                    .replace("{interrupted}", String.valueOf(interrupted));
+            StringJoiner joiner = new StringJoiner("\n");
+            for (StackTraceElement stackTraceElement : thread.getStackTrace()) {
+                joiner.add("\tat " + stackTraceElement.toString());
+            }
+            builder.append(result).append('\n').append(joiner).append("\n");
+        }
+        log.info(builder.toString());
+    }
+
+    private void debugHeapDump(ActionEvent actionEvent) {
+        try {
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
+                    server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+            File hprof = new File(Main.getDebugDirectory(), System.currentTimeMillis() + ".hprof");
+            System.gc();
+            mxBean.dumpHeap(hprof.getAbsolutePath(), true);
+            createDialog(Level.INFO, tlUI(Lang.HEAPDUMP_COMPLETED_TITLE), tlUI(Lang.HEAPDUMP_COMPLETED_DESCRIPTION));
+        }catch (Exception e){
+            log.error("Unable dump heap", e);
+            createDialog(Level.SEVERE,tlUI(Lang.HEAPDUMP_FAILED_TITLE), tlUI(Lang.HEAPDUMP_FAILED_DESCRIPTION) );
+        }
+    }
+
+    private void debugReload(ActionEvent actionEvent) {
+        var map = Main.getReloadManager().reload();
+        map.forEach((c,r)->{
+            var name = "???";
+            var reloadableWrapper = c.getReloadable();
+            if(reloadableWrapper != null){
+                var content = reloadableWrapper.get();
+                if(content != null){
+                    name =content.getClass().getName();
+                }else{
+                    name = "<Invalid>";
+                }
+            }else{
+                name = c.getReloadableMethod().getName();
+            }
+            log.info(tlUI(Lang.RELOADING_MODULE ,name, r.getStatus().name()) );
+        });
+        createDialog(Level.INFO, tlUI(Lang.RELOAD_COMPLETED_TITLE), tlUI(Lang.RELOAD_COMPLETED_DESCRIPTION, map.size()));
     }
 
     private void updateTheme(boolean isDark) {
