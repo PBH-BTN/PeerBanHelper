@@ -138,7 +138,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     private void handleIPDelete(Context context) throws IOException {
-        if (ips.removeIf(ipAddress -> ipAddress.toNormalizedString().equals(context.body()))) {
+        if (ips.removeIf(ipAddress -> ipAddress.toString().equals(context.body()))) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
             context.status(HttpStatus.NOT_FOUND);
