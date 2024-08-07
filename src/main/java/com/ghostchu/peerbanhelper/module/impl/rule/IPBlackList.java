@@ -71,10 +71,10 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
                 .delete("/api/modules/ipblacklist/port", this::handlePortDelete, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/asn", this::handleASN, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/asn", this::handleASNDelete, Role.USER_WRITE)
-                .put("/api/modules/ipblacklist/city", this::handleRegion, Role.USER_WRITE)
-                .delete("/api/modules/ipblacklist/city", this::handleRegionDelete, Role.USER_WRITE)
-                .put("/api/modules/ipblacklist/cities", this::handleCities, Role.USER_WRITE)
-                .delete("/api/modules/ipblacklist/cities", this::handleCitiesDelete, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/region", this::handleRegion, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/region", this::handleRegionDelete, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/city", this::handleCities, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/city", this::handleCitiesDelete, Role.USER_WRITE)
         ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
         Main.getReloadManager().register(this);
     }
