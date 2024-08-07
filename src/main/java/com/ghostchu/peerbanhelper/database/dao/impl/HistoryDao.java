@@ -39,13 +39,13 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
 
     public Map<String, Long> getBannedIps(int n) throws Exception {
         Timestamp twoWeeksAgo = new Timestamp(Instant.now().minus(60, ChronoUnit.DAYS).toEpochMilli());
-        Map<String, Long> result = new HashMap<>();
+        Map<String, Long> result = new LinkedHashMap<>();
         try (GenericRawResults<String[]> banLogs = queryBuilder()
                 .selectRaw("ip, COUNT(*) AS count")
                 .groupBy("ip")
                 .orderByRaw("count DESC")
                 .limit((long) n)
-                .where().ge("banAt", twoWeeksAgo)
+               // .where().ge("banAt", twoWeeksAgo)
                 .queryRaw()) {
             var results = banLogs.getResults();
             results.forEach(arr -> result.put(arr[0], Long.parseLong(arr[1])));

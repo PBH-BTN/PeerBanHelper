@@ -83,7 +83,7 @@ public class PBHBanController extends AbstractFeatureModule {
         Map<String, Long> countMap = historyDao.getBannedIps(number);
         List<HistoryEntry> list = new ArrayList<>(countMap.size());
         countMap.forEach((k, v) -> {
-            if (v >= 2) {
+            if (v >= 1) {
                 list.add(new HistoryEntry(k, v));
             }
         });
