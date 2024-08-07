@@ -29,7 +29,8 @@ let table = seq.map(
   'utorrent mac', '-um',
   'μtorrent', '-ut',
   'utorrent', '-ut',
-  'tixati', 'tix'
+  'tixati', 'tix',
+  'gopeed dev', '-gp'
 );
 ## 伪装检查
 for tableName in seq.keys(table) {
