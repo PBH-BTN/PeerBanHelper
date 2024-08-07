@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -72,123 +73,106 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
                 .delete("/api/modules/ipblacklist/asn", this::handleASNDelete, Role.USER_WRITE)
                 .put("/api/modules/ipblacklist/region", this::handleRegion, Role.USER_WRITE)
                 .delete("/api/modules/ipblacklist/region", this::handleRegionDelete, Role.USER_WRITE)
-                .put("/api/modules/ipblacklist/cities", this::handleCities, Role.USER_WRITE)
-                .delete("/api/modules/ipblacklist/cities", this::handleCitiesDelete, Role.USER_WRITE)
+                .put("/api/modules/ipblacklist/city", this::handleCities, Role.USER_WRITE)
+                .delete("/api/modules/ipblacklist/city", this::handleCitiesDelete, Role.USER_WRITE)
         ;//.patch("/api/modules/ipblacklist/nettype", this::handleNetType, Role.USER_WRITE);
         Main.getReloadManager().register(this);
     }
 
     private void handleCitiesDelete(Context context) throws IOException {
-        if (cities.removeIf(cities -> cities.equals(context.body()))) {
-            context.status(HttpStatus.OK);
+        if (cities.removeIf(cities -> cities.equals(context.bodyAsClass(UserCityRequest.class).city()))) {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
     }
 
     private void handleCities(Context context) throws IOException {
-        cities.add(context.body());
+        cities.add(context.bodyAsClass(UserCityRequest.class).city());
+        context.status(HttpStatus.CREATED);
+        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         saveConfig();
     }
-
-    private void handleNetTypeDelete(Context context) throws IOException {
-        if (netTypes.removeIf(netType -> netType.equals(context.body()))) {
-            context.status(HttpStatus.OK);
-        } else {
-            context.status(HttpStatus.NOT_FOUND);
-        }
-        saveConfig();
-    }
+//
+//    private void handleNetTypeDelete(Context context) throws IOException {
+//        if (netTypes.removeIf(netType -> netType.equals(context.))) {
+//            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+//        } else {
+//            context.status(HttpStatus.NOT_FOUND);
+//            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+//        }
+//        saveConfig();
+//    }
 
     private void handleRegionDelete(Context context) throws IOException {
-        if (regions.removeIf(region -> region.equals(context.body()))) {
-            context.status(HttpStatus.OK);
+        if (regions.removeIf(region -> region.equals(context.bodyAsClass(UserRegionRequest.class).region()))) {
+            //context.status(HttpStatus.OK);
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
     }
 
     private void handleASNDelete(Context context) throws IOException {
-        if (asns.removeIf(p -> p == Long.parseLong(context.body()))) {
-            context.status(HttpStatus.OK);
+        if (asns.removeIf(p -> p == context.bodyAsClass(UserASNRequest.class).asn())) {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
     }
 
     private void handlePortDelete(Context context) throws IOException {
-        if (ports.removeIf(p -> p == Integer.parseInt(context.body()))) {
-            context.status(HttpStatus.OK);
+        if (ports.removeIf(p -> p == context.bodyAsClass(UserPortRequest.class).port())) {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
     }
 
     private void handleIPDelete(Context context) throws IOException {
-        if (ips.removeIf(ipAddress -> ipAddress.toNormalizedString().equals(context.body()))) {
-            context.status(HttpStatus.OK);
+        var parsed = IPAddressUtil.getIPAddress(context.bodyAsClass(UserIPRequest.class).ip());
+        if (ips.removeIf(ipAddress -> ipAddress.equals(parsed))) {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         } else {
-            context.status(HttpStatus.NOT_FOUND);
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         }
         saveConfig();
     }
 
-    private void handleNetType(Context ctx) {
-
-    }
 
     private void handleRegion(Context ctx) throws IOException {
-        regions.add(ctx.body());
+        regions.add(ctx.bodyAsClass(UserRegionRequest.class).region());
+        ctx.status(HttpStatus.CREATED);
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         saveConfig();
     }
 
     private void handleASN(Context ctx) throws IOException {
-        long asn = Long.parseLong(ctx.body());
-        asns.add(asn);
+        UserASNRequest asn =ctx.bodyAsClass(UserASNRequest.class);
+        asns.add(asn.asn());
+        ctx.status(HttpStatus.CREATED);
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         saveConfig();
     }
 
 
     private void handlePort(Context ctx) throws IOException {
-        UserPortAddRequest req = ctx.bodyAsClass(UserPortAddRequest.class);
-        if (req.from() > req.to() || req.from() < 1 || req.to() > 65535) {
-            throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_INVALID_RANGE));
-        }
-        for (int i = req.from(); i <= req.to(); i++) {
-            ports.add(i);
-        }
+        UserPortRequest req = ctx.bodyAsClass(UserPortRequest.class);
+        ports.add(req.port());
         ctx.status(HttpStatus.CREATED);
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         saveConfig();
     }
-
-//    private void handlePortTest(Context ctx) {
-//        UserPortAddRequest req = ctx.bodyAsClass(UserPortAddRequest.class);
-//        if (req.from() > req.to() || req.from() < 1 || req.to() > 65535) {
-//            ctx.status(HttpStatus.BAD_REQUEST);
-//            ctx.json(new UserPortTestResult(false, tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_INVALID_RANGE), 0, null));
-//            return;
-//        }
-//        int count = req.from() - req.to();
-//        if (req.from() == req.to()) {
-//            count += 1;
-//        } else {
-//            count += 2;
-//        }
-//        if (req.from() < 1024) {
-//            ctx.json(new UserPortTestResult(true, null, count, tl(locale(ctx), Lang.IP_BLACKLIST_PUT_PORT_PRIVILEGED_PORT_TIPS)));
-//        } else {
-//            ctx.json(new UserPortTestResult(true, null, count, null));
-//        }
-//    }
 
     private void handleIPPut(Context context) throws IOException {
         IPAddress ipAddress = parseIPAddressFromReq(context);
         ips.add(ipAddress);
         context.status(HttpStatus.CREATED);
+        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
         saveConfig();
     }
 
@@ -201,29 +185,17 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
                 upper.toFullString(),
                 ipAddress.toNormalizedString(),
                 ipAddress.getCount().toString());
-        context.json(testResult);
+        context.json(new StdResp(true,null,testResult));
         saveConfig();
     }
 
     private IPAddress parseIPAddressFromReq(Context ctx) throws IllegalArgumentException {
-        UserIPRuleAddRequest req = ctx.bodyAsClass(UserIPRuleAddRequest.class);
-        if ((req.ipRange() == null) && (req.cidr() == null)) {
-            throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_ARG));
+        UserIPRequest req = ctx.bodyAsClass(UserIPRequest.class);
+        IPAddress ipAddress = IPAddressUtil.getIPAddress(req.ip());
+        if (ipAddress == null) {
+            throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_IP));
         }
-        if (req.ipRange() == null) {
-            IPAddress ipAddress = IPAddressUtil.getIPAddress(req.cidr());
-            if (ipAddress == null) {
-                throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_IP));
-            }
-            return ipAddress;
-        } else {
-            IPAddress from = IPAddressUtil.getIPAddress(req.ipRange().from());
-            IPAddress to = IPAddressUtil.getIPAddress(req.ipRange().to());
-            if (from == null || to == null) {
-                throw new IllegalArgumentException(tl(locale(ctx), Lang.IP_BLACKLIST_PUT_IP_INVALID_IP));
-            }
-            return from.coverWithPrefixBlock(to);
-        }
+        return ipAddress;
     }
 
 
@@ -239,11 +211,15 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             case "port" -> map.put("port", ports);
             case "asn" -> map.put("asn", asns);
             case "region" -> map.put("region", regions);
-            case "cities" -> map.put("cities", cities);
+            case "city" -> map.put("city", cities);
             case "netType" -> map.put("netType", netTypes);
+            default -> {
+                ctx.status(HttpStatus.NOT_FOUND);
+                return;
+            }
         }
         ctx.status(HttpStatus.OK);
-        ctx.json(map);
+        ctx.json(new StdResp(true, null, map));
     }
 
     @Override
@@ -380,16 +356,14 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
 
     }
 
-    public record UserPortAddRequest(
-            int from,
-            int to
+    public record UserPortRequest(
+            int port
     ) {
 
     }
 
-    public record UserIPRuleAddRequest(
-            String cidr,
-            UserIPRuleAddRequestIpRange ipRange
+    public record UserIPRequest(
+            String ip
     ) {
 
     }
@@ -400,5 +374,24 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     ) {
 
     }
+
+    public record UserASNRequest(
+            long asn
+    ){
+
+    }
+
+    public record UserRegionRequest(
+            String region
+    ){
+
+    }
+
+    public record UserCityRequest(
+            String city
+    ){
+
+    }
+
 
 }

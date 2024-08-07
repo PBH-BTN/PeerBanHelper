@@ -16,7 +16,6 @@ import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.simplereloadlib.ReloadResult;
-import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;

@@ -11,8 +11,8 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
-import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -77,8 +77,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
         Map<String, Map<String, Long>> mapSubnetCounter = new HashMap<>();
         subnetCounter.asMap().forEach((k, v) -> mapSubnetCounter.put(k, v.asMap()));
         status.put("subnetCounter", mapSubnetCounter);
-        ctx.status(HttpStatus.OK);
-        ctx.json(status);
+        ctx.json(new StdResp(true,null, status));
     }
 
     private void handleConfig(Context ctx) {
@@ -89,8 +88,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
         config.put("cacheLifespan", cacheLifespan);
         config.put("keepHunting", keepHunting);
         config.put("keepHuntingTime", keepHuntingTime);
-        ctx.status(HttpStatus.OK);
-        ctx.json(config);
+        ctx.json(new StdResp(true, null,config));
     }
 
     @Override

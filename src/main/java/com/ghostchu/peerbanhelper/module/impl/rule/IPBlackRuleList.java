@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -17,8 +16,8 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
-import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.hash.HashCode;
@@ -171,14 +170,14 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      *
      * @param rule 规则
      */
-    public SlimMsg updateRule(String locale, @NotNull ConfigurationSection rule, IPBanRuleUpdateType updateType) {
-        AtomicReference<SlimMsg> result = new AtomicReference<>();
+    public StdResp updateRule(String locale, @NotNull ConfigurationSection rule, IPBanRuleUpdateType updateType) {
+        AtomicReference<StdResp> result = new AtomicReference<>();
         String ruleId = rule.getName();
         if (!rule.getBoolean("enabled", false)) {
             // 检查ipBanMatchers是否有对应的规则，有则删除
             ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
             // 未启用跳过更新逻辑
-            return new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), 400);
+            return new StdResp(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), null);
         }
         String name = rule.getString("name", ruleId);
         if (name.contains(".")) {
@@ -204,17 +203,17 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                                 fileToIPList(ruleFile, ipAddresses);
                                 ipBanMatchers.add(new IPMatcher(ruleId, name, ipAddresses));
                                 log.warn(tlUI(Lang.IP_BAN_RULE_USE_CACHE, name));
-                                result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_USE_CACHE, name), 500));
+                                result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_USE_CACHE, name), null));
                             } catch (IOException ex) {
                                 log.error(tlUI(Lang.IP_BAN_RULE_LOAD_FAILED, name), ex);
-                                result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), 500));
+                                result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), null));
                             }
                         } else {
-                            result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_FAILED, name), 500));
+                            result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_FAILED, name), null));
                         }
                     } else {
                         // log.error(Lang.IP_BAN_RULE_LOAD_FAILED, name, throwable);
-                        result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), 500));
+                        result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), null));
                     }
                     throw new RuntimeException(throwable);
                 }
@@ -237,7 +236,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                             ent_count = fileToIPList(tempFile, ipAddresses);
                         } else {
                             log.info(tlUI(Lang.IP_BAN_RULE_NO_UPDATE, name));
-                            result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), 200));
+                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
                         }
                         tempFile.delete();
                     }
@@ -246,29 +245,29 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                         ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                             ele.setData(name, ipAddresses);
                             log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name));
-                            result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_UPDATE_SUCCESS, name), 200));
+                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATE_SUCCESS, name), null));
                         }, () -> {
                             ipBanMatchers.add(new IPMatcher(ruleId, name, ipAddresses));
                             log.info(tlUI(Lang.IP_BAN_RULE_LOAD_SUCCESS, name));
-                            result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_LOAD_SUCCESS, name), 200));
+                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_LOAD_SUCCESS, name), null));
                         });
                         // 更新日志
                         try {
                             ruleSubLogsDao.create(new RuleSubLogEntity(null, ruleId, System.currentTimeMillis(), ent_count, updateType));
-                            result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_UPDATED, name), 200));
+                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATED, name), null));
                         } catch (SQLException e) {
                             log.error(tlUI(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId), e);
-                            result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, name), 500));
+                            result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, name), null));
                         }
                     } else {
-                        result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), 200));
+                        result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }).join();
         } else {
-            result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_URL_WRONG, name), 400));
+            result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_URL_WRONG, name), null));
         }
         return result.get();
     }

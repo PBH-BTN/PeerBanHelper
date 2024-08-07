@@ -10,9 +10,9 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master", "release", "v6" ]
+    branches: [ "master", "release", "v6", "api-std" ]
   pull_request:
-    branches: [ "master", "release", "v6" ]
+    branches: [ "master", "release", "v6", "api-std" ]
   workflow_dispatch:
   release:
     types:

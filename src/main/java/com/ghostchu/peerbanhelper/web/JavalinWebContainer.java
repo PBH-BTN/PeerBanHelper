@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
 import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.javalin.Javalin;
@@ -91,28 +92,28 @@ public class JavalinWebContainer {
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);
-                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ)));
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ),null));
                 })
                 .exception(NotLoggedInException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.FORBIDDEN);
-                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED)));
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NOT_LOGGED), null));
                 })
                 .exception(NeedInitException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.SEE_OTHER);
                     ctx.header("Location", "/init");
-                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_NEED_INIT), "location", "/init"));
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NEED_INIT),Map.of("location", "/init")));
                 })
                 .exception(IllegalArgumentException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
-                    ctx.json(Map.of("message", e.getMessage()));
+                    ctx.json(new StdResp(false,null,e.getMessage()));
                 })
                 .exception(RequirePBHPlusLicenseException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.PAYMENT_REQUIRED);
-                    ctx.json(Map.of("message", e.getMessage()));
+                    ctx.json(new StdResp(false,null,e.getMessage()));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                    ctx.json(Map.of("message", tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR)));
+                    ctx.json(new StdResp(false,null,tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR)));
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {

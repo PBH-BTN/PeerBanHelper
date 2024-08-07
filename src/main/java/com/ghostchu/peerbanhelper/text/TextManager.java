@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.text.postprocessor.PostProcessor;
 import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
-import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
