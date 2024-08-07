@@ -74,8 +74,9 @@ public interface Downloader extends AutoCloseable {
      * @param fullList 全量列表
      * @param added    新增列表
      * @param removed  移除列表
+     * @param applyFullList 强制应用全量列表
      */
-    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed);
+    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
 
     /**
      * 如有需要，重启 Torrent 任务

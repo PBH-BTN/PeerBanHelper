@@ -127,7 +127,7 @@ public class Transmission extends AbstractDownloader {
 
     @SneakyThrows
     @Override
-    public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
+    public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {

@@ -264,7 +264,7 @@ public class PeerBanHelperServer implements Reloadable {
         try {
             for (Downloader downloader : downloaders) {
                 downloader.login();
-                downloader.setBanList(Collections.emptyList(), null, null);
+                downloader.setBanList(Collections.emptyList(), null, null, true);
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.RESET_DOWNLOADER_FAILED), e);
@@ -314,7 +314,7 @@ public class PeerBanHelperServer implements Reloadable {
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
             downloaders.forEach(downloader -> {
                 downloader.login();
-                downloader.setBanList(BAN_LIST.keySet(), null, null);
+                downloader.setBanList(BAN_LIST.keySet(), null, null, true);
             });
             Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
             downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
@@ -483,7 +483,7 @@ public class PeerBanHelperServer implements Reloadable {
                     downloaders.forEach(downloader -> protect.getService().submit(() ->
                             updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
                                     needRelaunched.getOrDefault(downloader, Collections.emptyList()),
-                                    bannedPeers, unbannedPeers)));
+                                    bannedPeers, unbannedPeers, false)));
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
                     downloaders.forEach(downloader -> protect.getService().submit(() -> {
@@ -491,7 +491,7 @@ public class PeerBanHelperServer implements Reloadable {
                         var list = BAN_LIST.values().stream().map(meta -> meta.getTorrent().getId()).toList();
                         torrents.removeIf(torrent -> !list.contains(torrent.getId()));
                         updateDownloader(downloader, true,
-                                torrents, Collections.emptyList(), Collections.emptyList());
+                                torrents, null, null, true);
                     }));
                     needReApplyBanList.set(false);
                 }
@@ -553,7 +553,7 @@ public class PeerBanHelperServer implements Reloadable {
      * @param updateBanList  是否需要从 BAN_LIST 常量更新封禁列表到下载器
      * @param needToRelaunch 传递一个集合，包含需要重启的种子；并非每个下载器都遵守此行为；对于 qbittorrent 等 banlist 可被实时应用的下载器来说，不会重启 Torrent
      */
-    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed) {
+    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (!updateBanList && needToRelaunch.isEmpty()) return;
         try {
             var loginResult = downloader.login();
@@ -564,7 +564,7 @@ public class PeerBanHelperServer implements Reloadable {
             } else {
                 downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.getMessage());
             }
-            downloader.setBanList(BAN_LIST.keySet(), added, removed);
+            downloader.setBanList(BAN_LIST.keySet(), added, removed, applyFullList);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint()), th);
