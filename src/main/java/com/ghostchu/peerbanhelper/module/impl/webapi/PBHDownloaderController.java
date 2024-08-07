@@ -168,7 +168,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         getServer().unregisterDownloader(downloader);
         try {
             getServer().saveDownloaders();
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_SAVED), null ));
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_SAVED), null ));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(new StdResp(false,e.getClass().getName() + ": " + e.getMessage(), null ));
