@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow.JFXWindowController;
 import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.collection.CircularArrayList;
 import com.google.common.eventbus.Subscribe;
 import com.jthemedetecor.OsThemeDetector;
@@ -42,6 +43,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -262,37 +265,12 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     private void debugPrintThreads(ActionEvent actionEvent) {
-        ThreadGroup currentGroup =
-                Thread.currentThread().getThreadGroup();
-        int noThreads = currentGroup.activeCount();
-        Thread[] lstThreads = new Thread[noThreads];
-        currentGroup.enumerate(lstThreads);
-        StringBuilder builder = new StringBuilder();
-        for (Thread thread : lstThreads) {
-            var name = thread.getName();
-            var id = thread.threadId();
-            var priority = thread.getPriority();
-            var state = thread.getState().name();
-            var virtual = thread.isVirtual();
-            var alive = thread.isAlive();
-            var daemon = thread.isDaemon();
-            var interrupted = thread.isInterrupted();
-            String template = "{name} #{id} prio={prio} state={state} virtual={virtual} alive={alive} daemon={daemon} interrupted={interrupted}";
-            String result = template.replace("{name}", name)
-                    .replace("{id}", String.valueOf(id))
-                    .replace("{prio}", String.valueOf(priority))
-                    .replace("{state}", state)
-                    .replace("{virtual}", String.valueOf(virtual))
-                    .replace("{alive}", String.valueOf(alive))
-                    .replace("{daemon}", String.valueOf(daemon))
-                    .replace("{interrupted}", String.valueOf(interrupted));
-            StringJoiner joiner = new StringJoiner("\n");
-            for (StackTraceElement stackTraceElement : thread.getStackTrace()) {
-                joiner.add("\tat " + stackTraceElement.toString());
-            }
-            builder.append(result).append('\n').append(joiner).append("\n");
+        StringBuilder threadDump = new StringBuilder(System.lineSeparator());
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
+            threadDump.append(MsgUtil.threadInfoToString(threadInfo));
         }
-        log.info(builder.toString());
+        log.info(threadDump.toString());
     }
 
     private void debugHeapDump(ActionEvent actionEvent) {
