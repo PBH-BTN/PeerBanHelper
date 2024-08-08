@@ -111,15 +111,15 @@ module:
     # and compare with peer reported progress
     # 如果对等体汇报的总体下载进度远远低于我们上传给此对等体的数据量的比例，我们应考虑客户端正在汇报假进度
     # If peer reported progress is smaller than our calculated progress too much, we will consider it's cheating
-    # 默认值为：8%
-    # Default allowed percentage is 8%
-    # 即：假设我们上传了 50% 的数据量给对方，对方汇报自己的下载进度只有 41%，差值大于 8%，进行封禁
-    # It will run like: if we uploaded 50% of data at least to peer, but peer reporting it only have 41%, difference ge 8%, we will ban it
+    # 默认值为：10%
+    # Default allowed percentage is 10%
+    # 即：假设我们上传了 50% 的数据量给对方，对方汇报自己的下载进度只有 39%，差值大于 10%，进行封禁
+    # It will run like: if we uploaded 50% of data at least to peer, but peer reporting it only have 39%, difference ge 10%, we will ban it
     # 对于自动识别迅雷、QQ旋风的变种非常有效，能够在不更新规则的情况下自动封禁报假进度的吸血客户端
     # It works well on detecting new various and cheat clients.
     maximum-difference: 0.1
     # 进度倒退检测 - Progress rewind detection
-    # 默认：最多允许倒退 5% 的进度 - Default: Up to 5% rewind is allowed
+    # 默认：最多允许倒退 7% 的进度 - Default: Up to 7% rewind is allowed
     # (考虑到有时文件片段在传输时可能因损坏而未通过校验被丢弃，我们允许客户端出现合理的进度倒退)
     # (Sometimes the pisces may break during transfer, client may drop those pisces, we allow client have rewind in reasonable range)
     # 设置为 -1 以禁用此检测
