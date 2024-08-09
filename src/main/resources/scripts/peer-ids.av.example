@@ -1,6 +1,8 @@
 ## @NAME PeerID/Client Name 黑名单
 ## @AUTHOR PBH-BTN Community
 ## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
 
 ## 全部转换为小写
 let peerIdLowercase = toLowerCase(peer.peerId);

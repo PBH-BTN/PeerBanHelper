@@ -91,7 +91,7 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
 
     public int cleanupDatabase(Timestamp timestamp) throws SQLException {
         var builder = deleteBuilder();
-        var where = builder.where().lt("lastSeenTime", timestamp);
+        var where = builder.where().lt("lastTimeSeen", timestamp);
         builder.setWhere(where);
         return builder.delete();
     }

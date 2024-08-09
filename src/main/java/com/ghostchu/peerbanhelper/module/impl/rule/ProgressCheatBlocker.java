@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
@@ -12,6 +13,9 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.Weigher;
@@ -34,7 +38,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
+public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
     private final Deque<ClientTaskRecord> pendingPersistQueue = new ConcurrentLinkedDeque<>();
     private final Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.MINUTES)
@@ -88,34 +92,38 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         scheduledTimer = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
         scheduledTimer.scheduleWithFixedDelay(this::flushDatabase, 30, 30, TimeUnit.SECONDS);
         scheduledTimer.scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
+        Main.getReloadManager().register(this);
     }
 
     private void cleanDatabase() {
         try {
             progressCheatBlockerPersistDao.cleanupDatabase(new Timestamp(System.currentTimeMillis() - persistDuration));
-        } catch (SQLException e) {
+        } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
         }
     }
 
     private void flushDatabase() {
-        List<ClientTaskRecord> records = new ArrayList<>();
-        while (!pendingPersistQueue.isEmpty()) {
-            records.add(pendingPersistQueue.poll());
-        }
         try {
-            progressCheatBlockerPersistDao.flushDatabase(records);
-        } catch (SQLException e) {
-            log.error("Unable flush records into database", e);
+            List<ClientTaskRecord> records = new ArrayList<>();
+            while (!pendingPersistQueue.isEmpty()) {
+                records.add(pendingPersistQueue.poll());
+            }
+            try {
+                progressCheatBlockerPersistDao.flushDatabase(records);
+            } catch (SQLException e) {
+                log.error("Unable flush records into database", e);
+            }
+        }catch (Throwable throwable){
+            log.error("Unable to complete scheduled tasks", throwable);
         }
     }
 
     private void handleStatus(Context ctx) {
-        ctx.status(HttpStatus.OK);
         List<ClientTaskRecord> records = progressRecorder.asMap().entrySet().stream()
                 .map(entry -> new ClientTaskRecord(entry.getKey(), entry.getValue()))
                 .toList();
-        ctx.json(records);
+        ctx.json(new StdResp(true,null,records));
     }
 
 
@@ -126,8 +134,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         config.put("excessiveThreshold", excessiveThreshold);
         config.put("maximumDifference", maximumDifference);
         config.put("rewindMaximumDifference", rewindMaximumDifference);
-        ctx.status(HttpStatus.OK);
-        ctx.json(config);
+        ctx.json(new StdResp(true,null,config));
     }
 
     @Override
@@ -140,6 +147,11 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         return true;
     }
 
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
+    }
 
     @Override
     public void onDisable() {
@@ -149,6 +161,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             log.info(tlUI(Lang.PCB_SHUTTING_DOWN));
             flushDatabase();
         }
+        Main.getReloadManager().unregister(this);
     }
 
     private void reloadConfig() {

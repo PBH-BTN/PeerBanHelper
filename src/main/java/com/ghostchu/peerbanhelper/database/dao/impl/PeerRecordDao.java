@@ -27,7 +27,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         callBatchTasks(() -> {
             tasks.forEach(t -> {
                 try {
-                    writeToDatabase(t.downloader, t.torrent, t.peer);
+                    writeToDatabase(t.timestamp, t.downloader, t.torrent, t.peer);
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -36,7 +36,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         });
     }
 
-    private int writeToDatabase(String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
+    private int writeToDatabase(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                 null,
                 torrent.getHash(),
@@ -50,27 +50,24 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
                 downloader,
                 peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
                 peer.getClientName(),
-                peer.getUploaded(),
-                peer.getUploaded(),
-                peer.getDownloaded(),
-                peer.getDownloaded(),
-                peer.getFlags() == null ? null : peer.getFlags().getLtStdString(),
-                new Timestamp(System.currentTimeMillis()),
-                new Timestamp(System.currentTimeMillis())
+                0,
+                0,
+                0,
+                0,
+                peer.getFlags(),
+                new Timestamp(timestamp),
+                new Timestamp(timestamp)
         );
         PeerRecordEntity databaseSnapshot = createIfNotExists(currentSnapshot);
-        // 如果数据库上次记录的值比本次的大，极有可能发生了重新连接，统计数据被重置。也意味着本次记录的是全量统计数据
-        boolean newConnection = databaseSnapshot.getDownloadedOffset() > peer.getDownloaded()
-                || databaseSnapshot.getUploadedOffset() > peer.getUploaded();
-        //检查现有数据是否可能是新连接的
-        if (newConnection) {
-            // 新的连接，则直接把目前下载器的数据往上面叠
+        if (databaseSnapshot.getLastTimeSeen().after(new Timestamp(timestamp))) {
+            return 0;
+        }
+        long downloadedIncremental = peer.getDownloaded() - databaseSnapshot.getDownloadedOffset();
+        long uploadedIncremental = peer.getUploaded() - databaseSnapshot.getUploadedOffset();
+        if (downloadedIncremental < 0 || uploadedIncremental < 0) {
             databaseSnapshot.setDownloaded(databaseSnapshot.getDownloaded() + peer.getDownloaded());
             databaseSnapshot.setUploaded(databaseSnapshot.getUploaded() + peer.getUploaded());
         } else {
-            // 旧的连接，与上次记录的 offset 求差，
-            long downloadedIncremental = Math.abs(peer.getDownloaded() - databaseSnapshot.getDownloadedOffset());
-            long uploadedIncremental = Math.abs(peer.getUploaded() - databaseSnapshot.getUploadedOffset());
             databaseSnapshot.setDownloaded(databaseSnapshot.getDownloaded() + downloadedIncremental);
             databaseSnapshot.setUploaded(databaseSnapshot.getUploaded() + uploadedIncremental);
         }
@@ -89,7 +86,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         PeerRecordEntity existing = queryBuilder().where()
                 .eq("address", data.getAddress())
                 .and()
-                .eq("torrent_id", data.getTorrent())
+                .eq("torrent_id", data.getTorrent().getId())
                 .and()
                 .eq("downloader", data.getDownloader())
                 .queryForFirst();
@@ -101,7 +98,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         }
     }
 
-    public record BatchHandleTasks(String downloader, TorrentWrapper torrent, PeerWrapper peer) {
+    public record BatchHandleTasks(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) {
 
     }
 

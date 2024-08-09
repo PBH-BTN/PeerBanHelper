@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -12,6 +13,9 @@ import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.Getter;
@@ -25,7 +29,7 @@ import java.util.concurrent.ExecutorService;
 
 @Getter
 @Component
-public class ClientNameBlacklist extends AbstractRuleFeatureModule {
+public class ClientNameBlacklist extends AbstractRuleFeatureModule implements Reloadable {
     private List<Rule> bannedPeers;
     @Autowired
     private JavalinWebContainer webContainer;
@@ -51,6 +55,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
         reloadConfig();
         webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
+        Main.getReloadManager().register(this);
     }
 
     @Override
@@ -59,14 +64,19 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule {
     }
 
     private void handleWebAPI(Context ctx) {
-        ctx.status(HttpStatus.OK);
         String locale = locale(ctx);
-        ctx.json(Map.of("clientName", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList()));
+        ctx.json(new StdResp(true, null, Map.of("clientName", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList())));
     }
 
     @Override
     public void onDisable() {
+        Main.getReloadManager().unregister(this);
+    }
 
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     private void reloadConfig() {

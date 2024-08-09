@@ -31,6 +31,15 @@ public final class IPGeoData {
         @Nullable
         private LocationData location;
 
+        @Nullable
+        private String cnProvince;
+
+        @Nullable
+        private String cnCity;
+
+        @Nullable
+        private String cnDistricts;
+
         @AllArgsConstructor
         @NoArgsConstructor
         @Data

@@ -49,27 +49,31 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
 
 
     private void submit() {
-        log.info(tlUI(Lang.BTN_SUBMITTING_HITRATE));
-        Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(btnNetwork.getServer().getHitRateMetric().getHitRateMetric());
-        List<RuleData> dat = metric.entrySet().stream()
-                .map(obj -> new RuleData(obj.getKey().getClass().getSimpleName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
-                .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
-                .toList();
-        MutableRequest request = MutableRequest.POST(endpoint
-                , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(dat).getBytes(StandardCharsets.UTF_8))
-        ).header("Content-Encoding", "gzip");
-        HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
-                .thenAccept(r -> {
-                    if (r.statusCode() != 200) {
-                        log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                    } else {
-                        log.info(tlUI(Lang.BTN_SUBMITTED_HITRATE, dat.size()));
-                    }
-                })
-                .exceptionally(e -> {
-                    log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
-                    return null;
-                });
+        try {
+            log.info(tlUI(Lang.BTN_SUBMITTING_HITRATE));
+            Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(btnNetwork.getServer().getHitRateMetric().getHitRateMetric());
+            List<RuleData> dat = metric.entrySet().stream()
+                    .map(obj -> new RuleData(obj.getKey().getClass().getSimpleName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
+                    .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
+                    .toList();
+            MutableRequest request = MutableRequest.POST(endpoint
+                    , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(dat).getBytes(StandardCharsets.UTF_8))
+            ).header("Content-Encoding", "gzip");
+            HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(r -> {
+                        if (r.statusCode() != 200) {
+                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
+                        } else {
+                            log.info(tlUI(Lang.BTN_SUBMITTED_HITRATE, dat.size()));
+                        }
+                    })
+                    .exceptionally(e -> {
+                        log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
+                        return null;
+                    });
+        } catch (Throwable throwable) {
+            log.error("Unable to finish scheduled tasks", throwable);
+        }
     }
 
     @AllArgsConstructor

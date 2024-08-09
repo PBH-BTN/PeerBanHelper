@@ -1,0 +1,46 @@
+.log-window-list-cell {
+    -fx-text-fill: black;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #dddddd;
+}
+
+.log-window-list-cell:empty {
+    -fx-border-width: 0;
+    -fx-background-color: #161b22;
+}
+
+.log-window-list-cell:fatal {
+    /*-fx-background-color: #f45154;*/
+    -fx-background-color: #161b22;
+    -fx-text-fill: #CF514E;
+}
+
+.log-window-list-cell:error {
+    /*-fx-background-color: #f45154;*/
+    -fx-background-color: #161b22;
+    -fx-text-fill: #f45154;
+}
+
+.log-window-list-cell:warn {
+    -fx-background-color: #161b22;
+    -fx-text-fill: #F2C55C;
+}
+
+.log-window-list-cell:info {
+    -fx-background-color: #161b22;
+    -fx-text-fill: #bcbec4;
+}
+
+.log-window-list-cell:debug {
+    -fx-background-color: #161b22;
+    -fx-text-fill: #bcbec4;
+}
+
+.log-window-list-cell:trace {
+    -fx-background-color: #161b22;
+    -fx-text-fill: #bcbec4;
+}
+
+.log-window-list-cell:selected {
+    -fx-background-color: #214283;
+}

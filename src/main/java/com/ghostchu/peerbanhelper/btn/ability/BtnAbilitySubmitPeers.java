@@ -40,6 +40,7 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
     }
 
     private void submit() {
+        try{
         log.info(tlUI(Lang.BTN_SUBMITTING_PEERS));
         List<BtnPeer> btnPeers = generatePing();
         if (btnPeers.isEmpty()) {
@@ -64,6 +65,9 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
                     log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
                     return null;
                 });
+        }catch (Throwable throwable){
+            log.error("Unable to finish scheduled tasks", throwable);
+        }
     }
 
 

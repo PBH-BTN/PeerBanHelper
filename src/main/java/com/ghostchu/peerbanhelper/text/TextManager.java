@@ -5,8 +5,8 @@ import com.ghostchu.peerbanhelper.text.postprocessor.PostProcessor;
 import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
-import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
+import javafx.beans.binding.Bindings;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
@@ -46,6 +46,7 @@ public class TextManager implements Reloadable {
             this.overrideDirectory.mkdirs();
         }
         load();
+        Main.getReloadManager().register(this);
     }
 
     public static String tlUI(Lang key, Object... params) {
@@ -282,9 +283,9 @@ public class TextManager implements Reloadable {
     }
 
     @Override
-    public ReloadResult reloadModule() {
+    public ReloadResult reloadModule() throws Exception {
         load();
-        return ReloadResult.builder().status(ReloadStatus.SUCCESS).build();
+        return Reloadable.super.reloadModule();
     }
 
     /**

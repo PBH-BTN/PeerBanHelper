@@ -33,14 +33,25 @@ public class JFXWindowController implements Initializable {
     private MenuItem menuProgramQuit;
     @FXML
     @Getter
-    private MenuItem menuProgramOpenInBrowser;
+    private MenuItem menuWebUIOpenInBrowser;
     @FXML
     @Getter
-    private MenuItem menuProgramCopyWebuiToken;
+    private MenuItem menuWebUICopyWebuiToken;
     @FXML
     @Getter
     private MenuItem menuProgramOpenDataDirectory;
-
+    @FXML
+    @Getter
+    private Menu menuDebug;
+    @FXML
+    @Getter
+    private MenuItem menuDebugReload;
+    @FXML
+    @Getter
+    private MenuItem menuDebugHeapDump;
+    @FXML
+    @Getter
+    private MenuItem menuDebugPrintThreads;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 

@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class PBHAlertController extends AbstractFeatureModule {
 
     private void handleListing(Context ctx) {
         ctx.status(200);
-        ctx.json(alertManager.getAlerts());
+        ctx.json(new StdResp(true, null,alertManager.getAlerts()));
     }
 
     private void handleDelete(Context ctx) {

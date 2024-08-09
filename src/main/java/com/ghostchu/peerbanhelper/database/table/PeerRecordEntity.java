@@ -39,5 +39,4 @@ public final class PeerRecordEntity {
     private Timestamp firstTimeSeen;
     @DatabaseField(canBeNull = false)
     private Timestamp lastTimeSeen;
-
 }

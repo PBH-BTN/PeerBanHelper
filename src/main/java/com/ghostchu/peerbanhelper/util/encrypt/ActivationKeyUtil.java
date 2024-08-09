@@ -42,7 +42,7 @@ public class ActivationKeyUtil {
     public static KeyData fromKey(String key) {
         try {
             byte[] encrypted = Base64.getDecoder().decode(key);
-            String json = new String(RSAUtils.decryptByPublicKey(encrypted, getPBHPublicKey()), StandardCharsets.UTF_8);
+            String json = new String(RSAUtils.decryptByPublicKey(encrypted,getPBHPublicKey()),StandardCharsets.UTF_8);
             KeyData keyData = JsonUtil.standard().fromJson(json, KeyData.class);
             if (keyData == null) {
                 throw new IllegalStateException("Incorrect key schema");
@@ -68,7 +68,11 @@ public class ActivationKeyUtil {
             Long createAt,
             // Key 过期时间，通常是 100 年以后
             Long expireAt,
+            // 许可证描述
+            @Nullable
+            String description,
             // 隐藏字段，主要是为了改变 KEY，PBH 并不关心这个字段
+            @Nullable
             String hidden
     ) {
     }

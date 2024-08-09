@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>5.1.0</version>
+    <version>6.0.0-24w31b</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -16,8 +16,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
-        <flatlafVersion>3.4.1</flatlafVersion>
-        <javafx.version>22.0.1</javafx.version>
+        <flatlafVersion>3.5.1</flatlafVersion>
+        <javafx.version>22.0.2</javafx.version>
         <javafx.scope>provided</javafx.scope>
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
@@ -108,7 +108,7 @@
                 <plugin>
                     <groupId>io.github.git-commit-id</groupId>
                     <artifactId>git-commit-id-maven-plugin</artifactId>
-                    <version>5.0.1</version>
+                    <version>9.0.1</version>
                     <executions>
                         <execution>
                             <id>get-the-git-infos</id>
@@ -192,7 +192,7 @@
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>5.0.1</version>
+                <version>9.0.1</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -297,32 +297,32 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>webview</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>linux</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>mac</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>win</classifier>
-                </dependency>
-            </dependencies>
-        </profile>
+<!--        <profile>-->
+<!--            <id>webview</id>-->
+<!--            <dependencies>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>linux</classifier>-->
+<!--                </dependency>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>mac</classifier>-->
+<!--                </dependency>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>win</classifier>-->
+<!--                </dependency>-->
+<!--            </dependencies>-->
+<!--        </profile>-->
         <profile>
             <id>include-javafx-jars</id>
             <properties>
@@ -503,12 +503,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.13</version>
+            <version>2.0.15</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.46.0.0</version>
+            <version>3.46.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -556,7 +556,7 @@
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
-            <version>6.1.6</version>
+            <version>6.2.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
         <dependency>
@@ -655,6 +655,26 @@
             <artifactId>simplereloadlib</artifactId>
             <version>1.1.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.mkpaz</groupId>
+            <artifactId>atlantafx-base</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Dansoftowner</groupId>
+            <artifactId>jSystemThemeDetector</artifactId>
+            <version>3.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pixelduke</groupId>
+            <artifactId>fxthemes</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.pixelduke</groupId>-->
+<!--            <artifactId>transit</artifactId>-->
+<!--            <version>2.0.0</version>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
         <!--        <dependency>-->
         <!--            <groupId>org.jfxtras</groupId>-->

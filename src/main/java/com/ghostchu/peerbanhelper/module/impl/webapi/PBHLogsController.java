@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.log4j2.MemoryLoggerAppender;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class PBHLogsController extends AbstractFeatureModule {
         ctx.status(200);
         StringJoiner joiner = new StringJoiner("\n");
         MemoryLoggerAppender.getLogs().forEach(joiner::add);
-        ctx.json(Map.of("logs", joiner.toString()));
+        ctx.json(new StdResp(true,null,Map.of("logs", joiner.toString())));
     }
 
 

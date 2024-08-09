@@ -47,7 +47,24 @@ public class IPAddressUtil {
             log.error("Unable to get ipaddress from ip {}", ip, e);
             return null;
         }
+    }
 
+    /**
+     * 将字符串转换为 IPAddress 对象，并自动进行 IPV4 in IPV6 提取转换
+     *
+     * @param ip
+     * @return
+     */
+    @Nullable
+    public static IPAddress getIPAddressNoAutoConversation(String ip) {
+        try {
+            return IP_ADDRESS_CACHE.get(ip, () -> {
+                return new IPAddressString(ip).toAddress();
+            });
+        } catch (ExecutionException e) {
+            log.error("Unable to get ipaddress from ip {}", ip, e);
+            return null;
+        }
     }
 
     @NotNull
