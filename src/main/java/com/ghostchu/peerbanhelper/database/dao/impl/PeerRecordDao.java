@@ -27,7 +27,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         callBatchTasks(() -> {
             tasks.forEach(t -> {
                 try {
-                    writeToDatabase(t.downloader, t.torrent, t.peer);
+                    writeToDatabase(t.timestamp, t.downloader, t.torrent, t.peer);
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -36,7 +36,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         });
     }
 
-    private int writeToDatabase(String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
+    private int writeToDatabase(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                 null,
                 torrent.getHash(),
@@ -50,15 +50,18 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
                 downloader,
                 peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
                 peer.getClientName(),
-                peer.getUploaded(),
-                peer.getUploaded(),
-                peer.getDownloaded(),
-                peer.getDownloaded(),
+                0,
+                0,
+                0,
+                0,
                 peer.getFlags(),
-                new Timestamp(System.currentTimeMillis()),
-                new Timestamp(System.currentTimeMillis())
+                new Timestamp(timestamp),
+                new Timestamp(timestamp)
         );
         PeerRecordEntity databaseSnapshot = createIfNotExists(currentSnapshot);
+        if (databaseSnapshot.getLastTimeSeen().after(new Timestamp(timestamp))) {
+            return 0;
+        }
         long downloadedIncremental = peer.getDownloaded() - databaseSnapshot.getDownloadedOffset();
         long uploadedIncremental = peer.getUploaded() - databaseSnapshot.getUploadedOffset();
         if (downloadedIncremental < 0 || uploadedIncremental < 0) {
@@ -95,7 +98,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         }
     }
 
-    public record BatchHandleTasks(String downloader, TorrentWrapper torrent, PeerWrapper peer) {
+    public record BatchHandleTasks(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) {
 
     }
 

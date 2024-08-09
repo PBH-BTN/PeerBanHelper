@@ -31,17 +31,17 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable {
     private final PeerRecordDao peerRecordDao;
-    private final Deque<PeerMetadata> dataBuffer = new ConcurrentLinkedDeque<>();
+    private final Deque<PeerRecordDao.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
     private final TrafficJournalDao trafficJournalDao;
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
     private ScheduledExecutorService scheduleService;
     private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
-    private final Cache<PeerMetadata, Object> diskWriteCache = CacheBuilder
+    private final Cache<PeerRecordDao.BatchHandleTasks, Object> diskWriteCache = CacheBuilder
             .newBuilder()
             .expireAfterWrite(3, TimeUnit.MINUTES)
             .maximumSize(3500)
-            .removalListener(notification -> dataBuffer.offer((PeerMetadata) notification.getKey()))
+            .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
     private TrafficJournalEntity journal;
 
@@ -86,7 +86,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
                     }
                     return peerMetadata.getPeer().getUploadSpeed() > 0;
                 })
-                .forEach(meta -> diskWriteCache.put(meta, MiscUtil.EMPTY_OBJECT));
+                .forEach(meta -> diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(),meta.getDownloader(), meta.getTorrent(),meta.getPeer()), MiscUtil.EMPTY_OBJECT));
     }
 
     @Override
@@ -137,12 +137,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         try {
             List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
             while (!dataBuffer.isEmpty()) {
-                var pendingTask = dataBuffer.poll();
-                tasks.add(new PeerRecordDao.BatchHandleTasks(
-                        pendingTask.getDownloader(),
-                        pendingTask.getTorrent(),
-                        pendingTask.getPeer()
-                ));
+                tasks.add(dataBuffer.poll());
             }
             try {
                 peerRecordDao.syncPendingTasks(tasks);
@@ -194,4 +189,5 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         }
         Main.getReloadManager().unregister(this);
     }
+
 }
