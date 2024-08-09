@@ -59,18 +59,12 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
                 new Timestamp(System.currentTimeMillis())
         );
         PeerRecordEntity databaseSnapshot = createIfNotExists(currentSnapshot);
-        // 如果数据库上次记录的值比本次的大，极有可能发生了重新连接，统计数据被重置。也意味着本次记录的是全量统计数据
-        boolean newConnection = databaseSnapshot.getDownloadedOffset() > peer.getDownloaded()
-                || databaseSnapshot.getUploadedOffset() > peer.getUploaded();
-        //检查现有数据是否可能是新连接的
-        if (newConnection) {
-            // 新的连接，则直接把目前下载器的数据往上面叠
+        long downloadedIncremental = peer.getDownloaded() - databaseSnapshot.getDownloadedOffset();
+        long uploadedIncremental = peer.getUploaded() - databaseSnapshot.getUploadedOffset();
+        if (downloadedIncremental < 0 || uploadedIncremental < 0) {
             databaseSnapshot.setDownloaded(databaseSnapshot.getDownloaded() + peer.getDownloaded());
             databaseSnapshot.setUploaded(databaseSnapshot.getUploaded() + peer.getUploaded());
         } else {
-            // 旧的连接，与上次记录的 offset 求差，
-            long downloadedIncremental = Math.abs(peer.getDownloaded() - databaseSnapshot.getDownloadedOffset());
-            long uploadedIncremental = Math.abs(peer.getUploaded() - databaseSnapshot.getUploadedOffset());
             databaseSnapshot.setDownloaded(databaseSnapshot.getDownloaded() + downloadedIncremental);
             databaseSnapshot.setUploaded(databaseSnapshot.getUploaded() + uploadedIncremental);
         }
