@@ -89,7 +89,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         PeerRecordEntity existing = queryBuilder().where()
                 .eq("address", data.getAddress())
                 .and()
-                .eq("torrent_id", data.getTorrent())
+                .eq("torrent_id", data.getTorrent().getId())
                 .and()
                 .eq("downloader", data.getDownloader())
                 .queryForFirst();
