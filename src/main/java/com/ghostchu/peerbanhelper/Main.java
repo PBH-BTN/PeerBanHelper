@@ -264,7 +264,7 @@ public class Main {
     }
 
     public static String getUserAgent() {
-        return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.0-dev";
+        return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.1";
     }
 
     public static boolean loadDependencies(String mavenManifestPath) throws IOException {
