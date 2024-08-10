@@ -80,7 +80,7 @@ public class BtnNetwork {
                 throw new IllegalStateException("Server config response missing min_protocol_version field");
             }
             int min_protocol_version = json.get("min_protocol_version").getAsInt();
-            if (min_protocol_version > BTN_PROTOCOL_VERSION) {
+            if (min_protocol_version < BTN_PROTOCOL_VERSION) {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             int max_protocol_version = json.get("max_protocol_version").getAsInt();
