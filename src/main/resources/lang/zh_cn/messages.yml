@@ -283,8 +283,8 @@ MDB_MULTI_DIALING_DETECTED: "检测到多拨下载"
 MDB_MULTI_HUNTING: "多拨持续追踪"
 
 BTN_BTN_RULE: "BTN-{}-{}"
-BTN_PORT_RULE: "BTN 端口规则"
-BTN_IP_RULE: "BTN IP 规则"
+BTN_PORT_RULE: "BTN 端口规则 ({})"
+BTN_IP_RULE: "BTN IP 规则 ({})"
 GENERAL_NA: "N/A"
 
 DUPLICATE_BAN: "警告：正在封禁的 Peer 已处于封禁列表中！这可能是由于程序错误，或者您手动清理了下载器的封禁列表。如果持续出现此问题，请尝试重新启动 PBH，并与开发者联系：{}"

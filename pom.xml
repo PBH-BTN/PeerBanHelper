@@ -670,6 +670,11 @@
             <artifactId>fxthemes</artifactId>
             <version>1.6.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.dlsc.preferencesfx</groupId>
+            <artifactId>preferencesfx-core</artifactId>
+            <version>11.8.0</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.pixelduke</groupId>-->
 <!--            <artifactId>transit</artifactId>-->

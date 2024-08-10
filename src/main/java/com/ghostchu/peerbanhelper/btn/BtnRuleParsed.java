@@ -56,7 +56,7 @@ public class BtnRuleParsed {
 
                     @Override
                     public TranslationComponent matcherName() {
-                        return new TranslationComponent(Lang.BTN_PORT_RULE);
+                        return new TranslationComponent(Lang.BTN_PORT_RULE, version);
                     }
 
                     @Override
@@ -72,7 +72,7 @@ public class BtnRuleParsed {
 
     public Map<String, List<Rule>> parseIPRule(Map<String, List<String>> raw) {
         Map<String, List<Rule>> rules = new HashMap<>();
-        raw.forEach((k, v) -> rules.put(k, List.of(new BtnRuleIpMatcher(k, k, v.stream().map(IPAddressUtil::getIPAddress).toList()))));
+        raw.forEach((k, v) -> rules.put(k, List.of(new BtnRuleIpMatcher(version, k, k, v.stream().map(IPAddressUtil::getIPAddress).toList()))));
         return rules;
     }
 
@@ -84,13 +84,16 @@ public class BtnRuleParsed {
 
     public static class BtnRuleIpMatcher extends IPMatcher {
 
-        public BtnRuleIpMatcher(String ruleId, String ruleName, List<IPAddress> ruleData) {
+        private final String version;
+
+        public BtnRuleIpMatcher(String version, String ruleId, String ruleName, List<IPAddress> ruleData) {
             super(ruleId, ruleName, ruleData);
+            this.version = version;
         }
 
         @Override
         public @NotNull TranslationComponent matcherName() {
-            return new TranslationComponent(Lang.BTN_IP_RULE);
+            return new TranslationComponent(Lang.BTN_IP_RULE, version);
         }
 
         @Override

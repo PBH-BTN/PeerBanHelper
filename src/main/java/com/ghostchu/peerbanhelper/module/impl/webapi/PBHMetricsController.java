@@ -157,7 +157,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
 
     private void handleRules(Context ctx) {
         String locale = locale(ctx);
-        Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(getServer().getHitRateMetric().getHitRateMetric());
+        Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(getServer().getHitRateMetric().getHitRateMetric().asMap());
         Map<String, String> dict = new HashMap<>();
         List<RuleData> dat = metric.entrySet().stream()
                 .map(obj -> {
