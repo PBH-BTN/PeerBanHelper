@@ -124,8 +124,6 @@ public class PeerBanHelperServer implements Reloadable {
     @Getter
     private HitRateMetric hitRateMetric = new HitRateMetric();
     @Autowired
-    private DatabaseHelper databaseHelper;
-    @Autowired
     private BanListDao banListDao;
 
     public PeerBanHelperServer() {
