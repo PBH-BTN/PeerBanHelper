@@ -30,7 +30,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Getter
 public class BtnNetwork {
-    private static final int BTN_PROTOCOL_VERSION = 7;
+    private static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 7;
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     @Getter
@@ -80,11 +80,11 @@ public class BtnNetwork {
                 throw new IllegalStateException("Server config response missing min_protocol_version field");
             }
             int min_protocol_version = json.get("min_protocol_version").getAsInt();
-            if (min_protocol_version < BTN_PROTOCOL_VERSION) {
+            if (PBH_BTN_PROTOCOL_IMPL_VERSION < min_protocol_version) {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             int max_protocol_version = json.get("max_protocol_version").getAsInt();
-            if (max_protocol_version > BTN_PROTOCOL_VERSION) {
+            if (PBH_BTN_PROTOCOL_IMPL_VERSION > max_protocol_version) {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             resetScheduler();
