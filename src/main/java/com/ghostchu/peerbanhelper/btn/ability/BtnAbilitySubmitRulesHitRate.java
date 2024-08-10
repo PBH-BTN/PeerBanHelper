@@ -51,7 +51,7 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
     private void submit() {
         try {
             log.info(tlUI(Lang.BTN_SUBMITTING_HITRATE));
-            Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(btnNetwork.getServer().getHitRateMetric().getHitRateMetric());
+            Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(btnNetwork.getServer().getHitRateMetric().getHitRateMetric().asMap());
             List<RuleData> dat = metric.entrySet().stream()
                     .map(obj -> new RuleData(obj.getKey().getClass().getSimpleName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
                     .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
