@@ -34,7 +34,7 @@ public class BtnNetwork {
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     @Getter
-    private final ScheduledExecutorService executeService = Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService executeService = null;
     private String configUrl;
     private boolean submit;
     private String appId;
@@ -55,6 +55,14 @@ public class BtnNetwork {
         this.appId = appId;
         this.appSecret = appSecret;
         setupHttpClient();
+        resetScheduler();
+    }
+
+    private void resetScheduler() {
+        if (executeService != null) {
+            executeService.shutdownNow();
+        }
+        executeService = Executors.newScheduledThreadPool(2);
         executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 600, 600, TimeUnit.SECONDS);
     }
 
@@ -79,6 +87,7 @@ public class BtnNetwork {
             if (max_protocol_version > BTN_PROTOCOL_VERSION) {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
+            resetScheduler();
             JsonObject ability = json.get("ability").getAsJsonObject();
             if (ability.has("submit_peers") && submit) {
                 abilities.put(BtnAbilitySubmitPeers.class, new BtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));
@@ -113,7 +122,7 @@ public class BtnNetwork {
             if (!configSuccess.get()) {
                 configBtnNetwork();
             }
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         }
 
