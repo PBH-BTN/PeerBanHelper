@@ -30,7 +30,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Getter
 public class BtnNetwork {
-    private static final int BTN_PROTOCOL_VERSION = 6;
+    private static final int BTN_PROTOCOL_VERSION = 7;
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     @Getter
