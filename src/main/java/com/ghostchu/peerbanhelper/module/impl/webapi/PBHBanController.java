@@ -81,14 +81,12 @@ public class PBHBanController extends AbstractFeatureModule {
     private void handleRanks(Context ctx) throws Exception {
         int pageIndex = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0"));
         int pageSize = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100"));
-        Map<String, Long> countMap = historyDao.getBannedIps(pageIndex, pageSize);
-        List<HistoryEntry> list = new ArrayList<>(countMap.size());
-        countMap.forEach((k, v) -> {
-            if (v >= 1) {
-                list.add(new HistoryEntry(k, v));
-            }
-        });
-        ctx.json(new StdResp(true, null, list));
+        Map<String, Object> map = new HashMap<>();
+        map.put("pageIndex", pageIndex);
+        map.put("pageSize", pageSize);
+        map.put("results", historyDao.getBannedIps(pageIndex, pageSize).entrySet().stream().map((entry)->new HistoryEntry(entry.getKey(), entry.getValue())).toList());
+        map.put("total", historyDao.countOf());
+        ctx.json(new StdResp(true, null, map));
     }
 
     private void handleLogs(Context ctx) throws SQLException {
