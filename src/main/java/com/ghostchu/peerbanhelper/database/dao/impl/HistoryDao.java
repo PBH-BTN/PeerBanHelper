@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.j256.ormlite.dao.GenericRawResults;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,20 +39,21 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         return list.getFirst();
     }
 
-    public Map<String, Long> getBannedIps(long pageIndex, long pageSize) throws Exception {
-        Map<String, Long> result = new LinkedHashMap<>();
-        try (GenericRawResults<String[]> banLogs = queryBuilder()
+    public Page<PeerBanCount> getBannedIps(Pageable pageable) throws Exception {
+        var builder = queryBuilder()
                 .selectRaw("ip, COUNT(*) AS count")
                 .groupBy("ip")
-                .orderByRaw("count DESC")
-                .limit(pageSize)
-                .offset(pageIndex * pageSize)
+                .orderByRaw("count DESC");
+        List<PeerBanCount> mapped;
+        try (GenericRawResults<String[]> banLogs = builder
+                .limit(pageable.getSize())
+                .offset(pageable.getQueryIndex()*pageable.getSize())
                // .where().ge("banAt", twoWeeksAgo)
                 .queryRaw()) {
             var results = banLogs.getResults();
-            results.forEach(arr -> result.put(arr[0], Long.parseLong(arr[1])));
+            mapped = results.stream().map(arr-> new PeerBanCount(arr[0], Long.parseLong(arr[1]))).toList();
         }
-        return result;
+        return new Page<>(pageable,queryBuilder().selectColumns("ip").distinct().countOf(), mapped);
     }
 
     public List<UniversalFieldNumResult> sumField(String field, double percentFilter) throws Exception {

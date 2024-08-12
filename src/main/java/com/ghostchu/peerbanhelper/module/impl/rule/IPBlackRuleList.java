@@ -14,6 +14,8 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -344,7 +346,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             return null;
         }
 
-        Optional<RuleSubLogEntity> first = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), 0, 1).stream().findFirst();
+        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), new Pageable(1,1)).getResults();
+        Optional<RuleSubLogEntity> first = result.isEmpty() ? Optional.empty() : Optional.of(result.getFirst());
         long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
         int count = first.map(RuleSubLogEntity::getCount).orElse(0);
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
@@ -383,17 +386,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      * 查询规则订阅日志
      *
      * @param ruleId    规则ID
-     * @param pageIndex 页码
-     * @param pageSize  每页数量
      * @return 规则订阅日志
      * @throws SQLException 查询异常
      */
-    public List<RuleSubLogEntity> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
+    public Page<RuleSubLogEntity> queryRuleSubLogs(String ruleId, Pageable pageable) throws SQLException {
         var builder = ruleSubLogsDao.queryBuilder().orderBy("updateTime", false);
         if (ruleId != null) {
             builder = builder.where().eq("ruleId", ruleId).queryBuilder();
         }
-        return ruleSubLogsDao.queryByPaging(builder, pageIndex, pageSize);
+        return ruleSubLogsDao.queryByPaging(builder, pageable);
     }
 
     /**

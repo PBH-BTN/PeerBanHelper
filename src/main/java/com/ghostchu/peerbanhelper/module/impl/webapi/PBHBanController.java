@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -79,14 +81,8 @@ public class PBHBanController extends AbstractFeatureModule {
 
 
     private void handleRanks(Context ctx) throws Exception {
-        int pageIndex = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0"));
-        int pageSize = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100"));
-        Map<String, Object> map = new HashMap<>();
-        map.put("pageIndex", pageIndex);
-        map.put("pageSize", pageSize);
-        map.put("results", historyDao.getBannedIps(pageIndex, pageSize).entrySet().stream().map((entry)->new HistoryEntry(entry.getKey(), entry.getValue())).toList());
-        map.put("total", historyDao.countOf());
-        ctx.json(new StdResp(true, null, map));
+        Pageable pageable = new Pageable(ctx);
+        ctx.json(new StdResp(true, null, historyDao.getBannedIps(pageable)));
     }
 
     private void handleLogs(Context ctx) throws SQLException {
@@ -94,14 +90,10 @@ public class PBHBanController extends AbstractFeatureModule {
             throw new IllegalStateException("Database not initialized on this PeerBanHelper server");
         }
         persistMetrics.flush();
-        int pageIndex = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0"));
-        int pageSize = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100"));
-        Map<String, Object> map = new HashMap<>();
-        map.put("pageIndex", pageIndex);
-        map.put("pageSize", pageSize);
-        map.put("results", historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageIndex, pageSize).stream().map(r -> new BanLogResponse(locale(ctx), r)).toList());
-        map.put("total", historyDao.countOf());
-        ctx.json(new StdResp(true, null, map));
+        Pageable pageable = new Pageable(ctx);
+        var queryResult = historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageable);
+        var result = queryResult.getResults().stream().map(r -> new BanLogResponse(locale(ctx), r)).toList();
+        ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
     private void handleBans(Context ctx) {

@@ -7,6 +7,8 @@ import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -118,17 +120,9 @@ public class RuleSubController extends AbstractFeatureModule {
      * @param ruleId 规则ID
      */
     private void logs(Context ctx, String ruleId) {
-        String pageIndexStr = Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0");
-        String pageSizeStr = Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100");
         try {
-            int pageIndex = Integer.parseInt(pageIndexStr.isEmpty() ? "0" : pageIndexStr);
-            int pageSize = Integer.parseInt(pageSizeStr.isEmpty() ? "100" : pageSizeStr);
-            Map<String, Object> map = new HashMap<>();
-            map.put("pageIndex", pageIndex);
-            map.put("pageSize", pageSize);
-            map.put("results", ipBlackRuleList.queryRuleSubLogs(ruleId, pageIndex, pageSize));
-            map.put("total", ipBlackRuleList.countRuleSubLogs(ruleId));
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), map));
+            Pageable pageable = new Pageable(ctx);
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), ipBlackRuleList.queryRuleSubLogs(ruleId, pageable)));
         } catch (Exception e) {
             log.error(tlUI(Lang.IP_BAN_RULE_LOG_QUERY_ERROR), e);
             ctx.status(HttpStatus.BAD_REQUEST);
