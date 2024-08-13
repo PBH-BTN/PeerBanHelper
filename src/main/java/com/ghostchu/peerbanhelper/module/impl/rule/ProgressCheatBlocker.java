@@ -57,6 +57,18 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 pendingPersistQueue.offer(new ClientTaskRecord(key, tasks));
             })
             .build();
+    private final Cache<String, List<String>> ipRecorder = CacheBuilder.newBuilder()
+            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .weigher((Weigher<String, List<String>>) (key, value) -> {
+                int totalSize = calcStringSize(key);
+                for (String peerIpString : value) {
+                    totalSize += calcStringSize(peerIpString);
+                }
+                totalSize += 12;
+                return totalSize;
+            })
+            .maximumWeight(16000000)
+            .build();
     private ScheduledExecutorService scheduledTimer;
     private long torrentMinimumSize;
     private boolean blockExcessiveClients;
@@ -184,13 +196,22 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             return handshaking();
         }
         // 处理 IPV6
-        IPAddress peerIp;
+        String peerPrefixBlock;
         if (peer.getPeerAddress().getAddress().isIPv4()) {
-            peerIp = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv4PrefixLength);
+            peerPrefixBlock = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv4PrefixLength).toString();
         } else {
-            peerIp = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv6PrefixLength);
+            peerPrefixBlock = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv6PrefixLength).toString();
         }
-        String peerIpString = peerIp.toString();
+        String peerIpString = peer.getPeerAddress().getAddress().toString();
+        // 记录同网段下所有ip
+        List<String> lastRecordedIPs = null;
+        try {
+            lastRecordedIPs = ipRecorder.get(peerPrefixBlock, () -> new CopyOnWriteArrayList<>());
+        } catch (ExecutionException e) {
+            log.error("Unhandled exception during load cached record data", e);
+        }
+        if (lastRecordedIPs == null) lastRecordedIPs = new CopyOnWriteArrayList<>();
+        if (!lastRecordedIPs.contains(peerIpString)) lastRecordedIPs.add(peerIpString);
         // 从缓存取数据
         List<ClientTask> lastRecordedProgress = null;
         try {
@@ -218,8 +239,24 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         }
         // 累加上传增量
         clientTask.setTrackingUploadedIncreaseTotal(clientTask.getTrackingUploadedIncreaseTotal() + uploadedIncremental);
-        // 获取真实已上传量（下载器报告、PBH上次报告记录，增量总计，三者取最大）
-        final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), clientTask.getTrackingUploadedIncreaseTotal()));
+        long allUploadedIncreaseTotal = 0; // 同网段增量总计之和
+        for (String peerIpString1: lastRecordedIPs) {
+            List<ClientTask> lastRecordedProgress1 = null;
+            try {
+                lastRecordedProgress1 = progressRecorder.get(peerIpString1, () -> loadClientTasks(peerIpString1, torrent.getId()));
+            } catch (ExecutionException e) {
+                log.error("Unhandled exception during load cached record data", e);
+            }
+            if (lastRecordedProgress1 == null) lastRecordedProgress1 = new CopyOnWriteArrayList<>();
+            for (ClientTask clientTask1 : lastRecordedProgress1) {
+                if (clientTask1.getTorrentId().equals(torrent.getId())) {
+                    allUploadedIncreaseTotal += clientTask1.getTrackingUploadedIncreaseTotal();
+                    break;
+                }
+            }
+        }
+        // 获取真实已上传量（下载器报告、PBH上次报告记录，同网段增量总计，三者取最大）
+        final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), allUploadedIncreaseTotal));
         try {
             final long torrentSize = torrent.getSize();
             // 过滤
@@ -282,6 +319,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
             progressRecorder.put(peerIpString, lastRecordedProgress);
+            ipRecorder.put(peerPrefixBlock, lastRecordedIPs);
         }
     }
 
