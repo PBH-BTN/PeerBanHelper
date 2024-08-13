@@ -79,10 +79,10 @@ public class PBHBanController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, Map.of("count", pendingRemovals.size())));
     }
 
-
     private void handleRanks(Context ctx) throws Exception {
         Pageable pageable = new Pageable(ctx);
-        ctx.json(new StdResp(true, null, historyDao.getBannedIps(pageable)));
+        String filter = ctx.queryParam("filter");
+        ctx.json(new StdResp(true, null, historyDao.getBannedIps(pageable, filter)));
     }
 
     private void handleLogs(Context ctx) throws SQLException {
