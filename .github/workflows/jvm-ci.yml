@@ -17,15 +17,16 @@ on:
   release:
     types:
       - published
+
 jobs:
-  CI:
+  checkout_and_setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Get WebUI Files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
+        run: cd src/main/resources && git clone --depth 1 --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static && cd ../../..
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -36,6 +37,11 @@ jobs:
         with:
           version: 10.0.8
           license: ${{ secrets.INSTALL4J_LICENSE }}
+
+  build_and_test:
+    needs: checkout_and_setup
+    runs-on: ubuntu-latest
+    steps:
       - name: Build with Maven
         run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
       - name: Upload build artifacts
@@ -47,6 +53,11 @@ jobs:
             target/peerbanhelper-binary
             target/media/*.exe
         id: project
+
+  docker_setup:
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    steps:
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx
@@ -81,4 +92,3 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
-
