@@ -29,6 +29,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
+          cache-dependency-path: '**/pom.xml'
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
