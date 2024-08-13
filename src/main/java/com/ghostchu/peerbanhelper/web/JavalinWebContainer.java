@@ -19,6 +19,7 @@ import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -92,7 +93,7 @@ public class JavalinWebContainer {
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);
-                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ),null));
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_AUTH_BANNED_TOO_FREQ), null));
                 })
                 .exception(NotLoggedInException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.FORBIDDEN);
@@ -101,19 +102,19 @@ public class JavalinWebContainer {
                 .exception(NeedInitException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.SEE_OTHER);
                     ctx.header("Location", "/init");
-                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NEED_INIT),Map.of("location", "/init")));
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_NEED_INIT), Map.of("location", "/init")));
                 })
                 .exception(IllegalArgumentException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
-                    ctx.json(new StdResp(false,null,e.getMessage()));
+                    ctx.json(new StdResp(false, null, e.getMessage()));
                 })
                 .exception(RequirePBHPlusLicenseException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.PAYMENT_REQUIRED);
-                    ctx.json(new StdResp(false,null,e.getMessage()));
+                    ctx.json(new StdResp(false, null, e.getMessage()));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                    ctx.json(new StdResp(false,null,tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR)));
+                    ctx.json(new StdResp(false, null, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR)));
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
@@ -134,8 +135,7 @@ public class JavalinWebContainer {
                         return;
                     }
                     // 开始登陆验证
-                    var counter = FAIL2BAN.get(ctx.ip(), () -> new AtomicInteger(0));
-                    if (counter.get() > 10) {
+                    if (!allowAttemptLogin(ctx.ip())) {
                         throw new IPAddressBannedException();
                     }
                     String authToken = ctx.header("Authorization");
@@ -143,12 +143,12 @@ public class JavalinWebContainer {
                         if (authToken.startsWith("Bearer ")) {
                             String tk = authToken.substring(7);
                             if (tk.equals(token)) {
-                                counter.set(0);
+                                markLoginSuccess(ctx.ip());
                                 return;
                             }
                         }
                     }
-                    counter.incrementAndGet();
+                    markLoginFailed(ctx.ip());
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200));
@@ -199,6 +199,25 @@ public class JavalinWebContainer {
         return preferLocales;
     }
 
+    @SneakyThrows
+    public boolean allowAttemptLogin(String ip) {
+        var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
+        return counter.get() <= 10;
+    }
+    @SneakyThrows
+    public void markLoginFailed(String ip){
+        var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
+        counter.incrementAndGet();
+    }
+    @SneakyThrows
+    public void markLoginSuccess(String ip){
+        var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
+        counter.set(0);
+    }
+
+    private Cache<String, AtomicInteger> fail2Ban() {
+        return FAIL2BAN;
+    }
 
     public record AcceptLanguages(String code, float prefer) implements Comparable<AcceptLanguages> {
         @Override

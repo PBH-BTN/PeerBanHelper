@@ -90,7 +90,7 @@
 //    public boolean login() {
 //        if (isLoggedIn()) return true; // 重用 Session 会话
 //        try {
-//            var obj = this.connector.sendPayload(new Call(serializerHandler, "system.listMethods"), true);
+//            var data = this.connector.sendPayload(new Call(serializerHandler, "system.listMethods"), true);
 //            return true;
 //        } catch (Exception e) {
 //            throw new RuntimeException(e);

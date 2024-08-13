@@ -98,7 +98,7 @@ public class TextManager implements Reloadable {
                 components[i] = "null";
                 continue;
             }
-            //     Class<?> clazz = obj.getClass();
+            //     Class<?> clazz = data.getClass();
             // Check
 
             try {

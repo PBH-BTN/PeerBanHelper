@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper.log4j2;
 
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.event.LoggerEventRecordCreatedEvent;
+import com.ghostchu.peerbanhelper.util.collection.CircularArrayList;
 import lombok.Getter;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -21,7 +24,7 @@ import static org.apache.logging.log4j.core.layout.PatternLayout.createDefaultLa
 @Plugin(name = "MemoryLoggerAppender", category = "Core", elementType = "appender", printObject = true)
 public class MemoryLoggerAppender extends AbstractAppender {
     @Getter
-    private static final List<String> logs = Collections.synchronizedList(new LinkedList<>());
+    private static final List<LoggerEventRecord> logs = Collections.synchronizedList(new CircularArrayList<>(50));
 
     private final int maxLines;
 
@@ -48,16 +51,13 @@ public class MemoryLoggerAppender extends AbstractAppender {
         return new MemoryLoggerAppender(name, layout, filter, maxLines, ignoreExceptions);
     }
 
-
     @Override
     public void append(LogEvent event) {
-        String message = new String(this.getLayout().toByteArray(event));
-        logs.addAll(Arrays.asList(message.split("\n")));
-        int lineCount = logs.size();
-        int linesToCut = (lineCount - maxLines) + (maxLines / 2);
-        linesToCut = Math.min(linesToCut, lineCount);
-        for (int i = 0; i < linesToCut; i++) {
-            logs.removeFirst();
-        }
+        String message = new String(this.getLayout().toByteArray(event)).trim();
+        var record = new LoggerEventRecord(event.getLevel().name(), message);
+        logs.add(record);
+        Main.getEventBus().post(new LoggerEventRecordCreatedEvent(record));
     }
+
+    public record LoggerEventRecord(String level, String message){}
 }
