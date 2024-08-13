@@ -1,11 +1,3 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Java Release
 
 on:
@@ -13,6 +5,7 @@ on:
   release:
     types:
       - published
+
 jobs:
   build:
     permissions:
@@ -30,7 +23,7 @@ jobs:
       - name: Get WebUI Files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
+        run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static && cd ../../..
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -58,6 +51,11 @@ jobs:
         with:
           asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*"]'
         id: project
+
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx
@@ -92,7 +90,11 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
-      # ---------------- ALIYUN ACR --------------------
+
+  aliyun:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Log in to Aliyun ACR
         uses: docker/login-action@v3
         with:
