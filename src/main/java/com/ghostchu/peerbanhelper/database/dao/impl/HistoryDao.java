@@ -54,26 +54,12 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
             var results = banLogs.getResults();
             mapped = results.stream().map(arr -> new PeerBanCount(arr[0], Long.parseLong(arr[1]))).toList();
         }
-        return new Page<>(pageable, queryBuilder().selectColumns("ip").distinct().countOf(), mapped);
-    }
-
-    public Page<PeerBanCount> searchBannedIps(String ipFilter, Pageable pageable) throws Exception {
-        var builder = queryBuilder()
-                .selectRaw("ip, COUNT(*) AS count")
-                .groupBy("ip")
-                .orderByRaw("count DESC");
-        var where = builder.where().like("ip", ipFilter + "%");
-        builder.setWhere(where);
-        List<PeerBanCount> mapped;
-        try (GenericRawResults<String[]> banLogs = builder
-                .limit(pageable.getSize())
-                .offset(pageable.getQueryIndex() * pageable.getSize())
-                // .where().ge("banAt", twoWeeksAgo)
-                .queryRaw()) {
-            var results = banLogs.getResults();
-            mapped = results.stream().map(arr -> new PeerBanCount(arr[0], Long.parseLong(arr[1]))).toList();
+        var countBuilder = queryBuilder()
+                .selectColumns("ip");
+        if (filter != null) {
+            countBuilder.setWhere(builder.where().like("ip", filter + "%"));
         }
-        return new Page<>(pageable, queryBuilder().selectColumns("ip").distinct().countOf(), mapped);
+        return new Page<>(pageable, countBuilder.countOf("DISTINCT ip"), mapped);
     }
 
     public List<UniversalFieldNumResult> sumField(String field, double percentFilter) throws Exception {
