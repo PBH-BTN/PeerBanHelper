@@ -81,7 +81,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6.6.1
+        uses: docker/build-push-action@v6.7.0
         with:
           context: .
           file: ./Dockerfile
@@ -117,7 +117,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Aliyun ACR
-        uses: docker/build-push-action@v6.6.1
+        uses: docker/build-push-action@v6.7.0
         with:
           context: .
           file: ./Dockerfile
