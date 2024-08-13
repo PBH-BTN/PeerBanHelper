@@ -118,7 +118,7 @@ public class PBHLogsController extends AbstractFeatureModule {
             case "login" -> handleClientLoginMessage(ctx, session, clientMessage);
             case "history" -> handleClientHistoryMessage(ctx, session, clientMessage);
             default ->
-                    ctx.send(new WebSocketServerMessage<>(clientMessage.getMsgId(), "undefined", "Unknown type, please check API documentation."));
+                    ctx.send(new WebSocketServerMessage<>(clientMessage.getMsgId(), "unknown_error", "Unknown type, please check API documentation."));
         }
     }
 
