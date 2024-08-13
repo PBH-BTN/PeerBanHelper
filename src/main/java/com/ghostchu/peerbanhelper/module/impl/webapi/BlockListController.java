@@ -30,6 +30,13 @@ public class BlockListController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.javalin()
+                .get("/blocklist/ip", ctx->{
+                    StringBuilder builder = new StringBuilder();
+                    for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
+                        builder.append(pair.getKey().getIp()).append("\n");
+                    }
+                    ctx.result(builder.toString());
+                })
                 .get("/blocklist/p2p-plain-format", ctx -> {
                     StringBuilder builder = new StringBuilder();
                     for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
