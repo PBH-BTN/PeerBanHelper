@@ -146,12 +146,12 @@ public class PBHLogsController extends AbstractFeatureModule {
         }
         if (webContainer.getToken().equals(token)) {
             session.setLoggedIn(true);
-            ctx.send(new WebSocketServerMessage<>(loginMessage.getMsgId(), "loginResult", true));
+            ctx.send(new WebSocketServerMessage<>(loginMessage.getMsgId(), "login", true));
             if(ip != null){
                 webContainer.markLoginSuccess(ip);
             }
         } else {
-            ctx.send(new WebSocketServerMessage<>(loginMessage.getMsgId(), "loginResult", false));
+            ctx.send(new WebSocketServerMessage<>(loginMessage.getMsgId(), "login", false));
             if(ip != null){
                 webContainer.markLoginFailed(ip);
                 if(!webContainer.allowAttemptLogin(ip)){
