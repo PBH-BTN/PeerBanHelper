@@ -21,7 +21,7 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
 
     public Page<T> queryByPaging(QueryBuilder<T, ID> qb, Pageable pageable) throws SQLException {
         var r = query(qb.offset(pageable.getQueryIndex() * pageable.getSize()).limit(pageable.getSize()).prepare());
-        var ct =  qb.countOf();
+        var ct =  qb.offset(null).limit(null).countOf();
         return new Page<>(
                 pageable,
                ct,
