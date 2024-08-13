@@ -57,7 +57,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         var countBuilder = queryBuilder()
                 .selectColumns("ip");
         if (filter != null) {
-            countBuilder.setWhere(builder.where().like("ip", filter + "%"));
+            countBuilder.setWhere(countBuilder.where().like("ip", filter + "%"));
         }
         return new Page<>(pageable, countBuilder.countOf("DISTINCT ip"), mapped);
     }
