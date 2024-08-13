@@ -177,6 +177,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             this.scheduleService.shutdownNow();
         }
         diskWriteCache.invalidateAll();
+        writeJournal();
         flush();
         taskWriteService.shutdown();
         try {
