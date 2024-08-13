@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -140,9 +141,13 @@ public class PBHChartController extends AbstractFeatureModule {
             }
         }
         ctx.json(new StdResp(true,null,Map.of(
-                "connectedPeersTrend", connectedPeerTrends.entrySet().stream().map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
+                "connectedPeersTrend", connectedPeerTrends.entrySet().stream()
+                        .map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
+                        .sorted((o1, o2) -> Long.compare(o1.key(), o2.key))
                         .toList(),
-                "bannedPeersTrend", bannedPeerTrends.entrySet().stream().map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
+                "bannedPeersTrend", bannedPeerTrends.entrySet().stream()
+                        .map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
+                                .sorted((o1, o2) -> Long.compare(o1.key(), o2.key))
                         .toList()
         )));
     }
