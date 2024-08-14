@@ -98,6 +98,10 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         }
     }
 
+    public record TorrentRecord(){
+
+    }
+
     public record BatchHandleTasks(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) {
 
     }

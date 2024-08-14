@@ -354,3 +354,5 @@ HEAPDUMP_FAILED_TITLE: "Heapdump failed"
 HEAPDUMP_FAILED_DESCRIPTION: "Unable to dump the heap, check the console for details."
 HEAPDUMP_COMPLETED_DESCRIPTION: "Memory snapshot dump successfully, check .hprof files in data/debug directory.\nIf you need send to developers for debugging, please zip it with Archive Tools."
 RELOADING_MODULE: "[Reload] {}: {}"
+
+TORRENT_NOT_FOUND: "No records found by given InfoHash"

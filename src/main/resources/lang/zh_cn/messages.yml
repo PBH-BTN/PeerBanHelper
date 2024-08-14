@@ -354,3 +354,5 @@ HEAPDUMP_FAILED_TITLE: "堆转储失败"
 HEAPDUMP_FAILED_DESCRIPTION: "无法转储内存快照，错误详见控制台日志消息。"
 HEAPDUMP_COMPLETED_DESCRIPTION: "内存快照已转储成功，请见 data/debug 目录下的 .hprof 文件。\n如需发送给开发者，请使用压缩工具打包压缩。"
 RELOADING_MODULE: "[重载] {}: {}"
+
+TORRENT_NOT_FOUND: "指定的 Torrent 记录不存在"
