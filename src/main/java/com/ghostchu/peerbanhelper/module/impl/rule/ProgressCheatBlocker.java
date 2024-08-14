@@ -196,17 +196,18 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             return handshaking();
         }
         // 处理 IPV6
-        String peerPrefixBlock;
+        IPAddress peerPrefix;
         if (peer.getPeerAddress().getAddress().isIPv4()) {
-            peerPrefixBlock = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv4PrefixLength).toString();
+            peerPrefix = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv4PrefixLength);
         } else {
-            peerPrefixBlock = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv6PrefixLength).toString();
+            peerPrefix = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv6PrefixLength);
         }
+        String peerPrefixString = peerPrefix.toString();
         String peerIpString = peer.getPeerAddress().getAddress().toString();
         // 记录同网段下所有ip
         List<String> lastRecordedIPs = null;
         try {
-            lastRecordedIPs = ipRecorder.get(peerPrefixBlock, () -> new CopyOnWriteArrayList<>());
+            lastRecordedIPs = ipRecorder.get(peerPrefixString, () -> loadClientIPs(peerPrefix, torrent.getId()));
         } catch (ExecutionException e) {
             log.error("Unhandled exception during load cached record data", e);
         }
@@ -319,7 +320,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
             progressRecorder.put(peerIpString, lastRecordedProgress);
-            ipRecorder.put(peerPrefixBlock, lastRecordedIPs);
+            ipRecorder.put(peerPrefixString, lastRecordedIPs);
         }
     }
 
@@ -330,6 +331,17 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             }
         } catch (SQLException e) {
             log.error("Unable to load cached client tasks from database", e);
+        }
+        return new CopyOnWriteArrayList<>();
+    }
+
+    private List<String> loadClientIPs(IPAddress peerPrefix, String id) {
+        try {
+            if (enablePersist) {
+                return progressCheatBlockerPersistDao.fetchFromDatabase(peerPrefix, id, new Timestamp(System.currentTimeMillis() - persistDuration));
+            }
+        } catch (SQLException e) {
+            log.error("Unable to load cached client IPs from database", e);
         }
         return new CopyOnWriteArrayList<>();
     }

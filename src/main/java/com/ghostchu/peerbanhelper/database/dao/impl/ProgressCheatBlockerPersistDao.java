@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ProgressCheatBlockerPersistEntity;
 import com.ghostchu.peerbanhelper.module.impl.rule.ProgressCheatBlocker;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,6 +43,19 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                         entity.getFirstTimeSeen().getTime(),
                         entity.getLastTimeSeen().getTime()
                 )
+        ).collect(Collectors.toCollection(CopyOnWriteArrayList::new)); // 可变 List，需要并发安全
+    }
+
+    public List<String> fetchFromDatabase(IPAddress address, String torrentId, Timestamp after) throws SQLException {
+        List<ProgressCheatBlockerPersistEntity> entities = queryBuilder()
+                .where()
+                .eq("torrentId", torrentId)
+                .and()
+                .ge("lastTimeSeen", after)
+                .query();
+        return entities.stream().map(
+                ProgressCheatBlockerPersistEntity::getAddress
+        ).filter(entity -> address.contains(IPAddressUtil.getIPAddress(entity))
         ).collect(Collectors.toCollection(CopyOnWriteArrayList::new)); // 可变 List，需要并发安全
     }
 
