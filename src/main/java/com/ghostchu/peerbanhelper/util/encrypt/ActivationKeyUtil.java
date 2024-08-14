@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.encrypt;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;

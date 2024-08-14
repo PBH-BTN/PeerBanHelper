@@ -1,6 +1,6 @@
 package raccoonfink.deluge.responses;
 
-import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.Getter;

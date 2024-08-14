@@ -76,7 +76,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
                 .eq("torrent_id", t.getId())
                 .countOf();
         var peerAccessCount = peerRecordDao.queryBuilder()
-                .orderBy("lastSeenAt", false)
+                .orderBy("lastTimeSeen", false)
                 .where()
                 .eq("torrent_id", t.getId())
                 .countOf();
@@ -95,7 +95,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
         }
         Pageable pageable = new Pageable(ctx);
         var t = torrent.get();
-        var queryBuilder = peerRecordDao.queryBuilder();
+        var queryBuilder = peerRecordDao.queryBuilder().orderBy("lastTimeSeen", false);
         var queryWhere = queryBuilder.where().eq("torrent_id", t);
         queryBuilder.setWhere(queryWhere);
         Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder,pageable);

@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;

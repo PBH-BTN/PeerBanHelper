@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.j256.ormlite.field.DatabaseField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -96,10 +97,6 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         } else {
             return existing;
         }
-    }
-
-    public record TorrentRecord(){
-
     }
 
     public record BatchHandleTasks(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) {

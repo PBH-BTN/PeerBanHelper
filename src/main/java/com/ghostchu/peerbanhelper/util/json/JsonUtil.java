@@ -1,8 +1,10 @@
-package com.ghostchu.peerbanhelper.util;
+package com.ghostchu.peerbanhelper.util.json;
 
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public class JsonUtil {
@@ -11,6 +13,8 @@ public class JsonUtil {
             .enableComplexMapKeySerialization()
             .setExclusionStrategies(new HiddenAnnotationExclusionStrategy())
             .serializeNulls()
+            .registerTypeAdapter(Timestamp.class, TimestampTypeAdapter.INSTANCE)
+            .registerTypeAdapter(TranslationComponent.class, TranslationComponentTypeAdapter.INSTANCE)
             .disableHtmlEscaping()
             .create();
 
