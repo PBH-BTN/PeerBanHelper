@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,11 +51,11 @@ public class PBHPlusController extends AbstractFeatureModule {
         Main.getMainConfig().set("pbh-plus-key", licenseReq.key());
         Main.getMainConfig().save(Main.getMainConfigFile());
         activationManager.load();
-        ctx.json(new StdResp(true,tl(locale(ctx), Lang.PBH_PLUS_LICENSE_UPDATE), null ));
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_UPDATE), null));
     }
 
     private void handle(Context context) {
-        context.json(new StdResp(true,null,new ActiveInfo(activationManager.isActivated(), activationManager.getKeyText(), activationManager.getKeyData())));
+        context.json(new StdResp(true, null, new ActiveInfo(activationManager.isActivated(), activationManager.getKeyText(), activationManager.getKeyData())));
     }
 
     @Override
@@ -71,8 +70,8 @@ public class PBHPlusController extends AbstractFeatureModule {
     ) {
 
     }
-    public record LicensePutRequest(String key)
-    {
+
+    public record LicensePutRequest(String key) {
 
     }
 }

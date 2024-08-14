@@ -23,6 +23,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 public class PBHAuthenticateController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -47,7 +48,7 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
 
     private void handleLogout(Context ctx) {
         ctx.sessionAttribute("authenticated", null);
-        ctx.json(new StdResp(true,"success", null));
+        ctx.json(new StdResp(true, "success", null));
     }
 
     private void handleLogin(Context ctx) throws NeedInitException {
@@ -62,11 +63,11 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
         if (loginRequest == null || !webContainer.getToken().equals(loginRequest.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
-            ctx.json(new StdResp(false,  tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
             return;
         }
         ctx.sessionAttribute("authenticated", webContainer.getToken());
-        ctx.json(new StdResp(true,  tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }
 
 

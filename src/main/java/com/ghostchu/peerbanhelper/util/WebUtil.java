@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 
 public class WebUtil {
 
-    public static TimeQueryModel parseTimeQueryModel(Context ctx) throws IllegalArgumentException{
+    public static TimeQueryModel parseTimeQueryModel(Context ctx) throws IllegalArgumentException {
         var startAtStr = ctx.queryParam("startAt");
         var endAtStr = ctx.queryParam("endAt");
         if (startAtStr == null) {
@@ -17,11 +17,12 @@ public class WebUtil {
         }
         Timestamp startAt = new Timestamp(Long.parseLong(startAtStr));
         Timestamp endAt = new Timestamp(Long.parseLong(endAtStr));
-        return new TimeQueryModel(startAt,endAt);
+        return new TimeQueryModel(startAt, endAt);
     }
 
     public record TimeQueryModel(
             Timestamp startAt,
             Timestamp endAt
-    ){}
+    ) {
+    }
 }

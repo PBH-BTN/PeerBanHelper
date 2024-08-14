@@ -16,6 +16,7 @@ public class PBHAlertController extends AbstractFeatureModule {
     private AlertManager alertManager;
     @Autowired
     private JavalinWebContainer webContainer;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -40,7 +41,7 @@ public class PBHAlertController extends AbstractFeatureModule {
 
     private void handleListing(Context ctx) {
         ctx.status(200);
-        ctx.json(new StdResp(true, null,alertManager.getAlerts()));
+        ctx.json(new StdResp(true, null, alertManager.getAlerts()));
     }
 
     private void handleDelete(Context ctx) {

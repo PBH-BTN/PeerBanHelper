@@ -18,7 +18,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
         Map<String, Map<String, Long>> mapSubnetCounter = new HashMap<>();
         subnetCounter.asMap().forEach((k, v) -> mapSubnetCounter.put(k, v.asMap()));
         status.put("subnetCounter", mapSubnetCounter);
-        ctx.json(new StdResp(true,null, status));
+        ctx.json(new StdResp(true, null, status));
     }
 
     private void handleConfig(Context ctx) {
@@ -88,7 +87,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
         config.put("cacheLifespan", cacheLifespan);
         config.put("keepHunting", keepHunting);
         config.put("keepHuntingTime", keepHuntingTime);
-        ctx.json(new StdResp(true, null,config));
+        ctx.json(new StdResp(true, null, config));
     }
 
     @Override

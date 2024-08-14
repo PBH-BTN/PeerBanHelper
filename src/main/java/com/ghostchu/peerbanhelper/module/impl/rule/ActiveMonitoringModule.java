@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
-import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
@@ -86,7 +85,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
                     }
                     return peerMetadata.getPeer().getUploadSpeed() > 0;
                 })
-                .forEach(meta -> diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(),meta.getDownloader(), meta.getTorrent(),meta.getPeer()), MiscUtil.EMPTY_OBJECT));
+                .forEach(meta -> diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(), meta.getDownloader(), meta.getTorrent(), meta.getPeer()), MiscUtil.EMPTY_OBJECT));
     }
 
     @Override
@@ -104,13 +103,13 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
     }
 
     private void reloadConfig() {
-        if(this.taskWriteService != null){
+        if (this.taskWriteService != null) {
             this.taskWriteService.shutdown();
         }
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
-        if(this.scheduleService != null){
+        if (this.scheduleService != null) {
             this.scheduleService.shutdown();
         }
         this.scheduleService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
@@ -144,7 +143,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             } catch (SQLException e) {
                 log.warn("Unable sync peers data to database", e);
             }
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         }
     }
@@ -165,7 +164,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             } catch (SQLException e) {
                 log.warn("Unable to clean up AMM tables", e);
             }
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         }
     }

@@ -71,9 +71,9 @@ public interface Downloader extends AutoCloseable {
     /**
      * 设置并使新的 BanList 生效
      *
-     * @param fullList 全量列表
-     * @param added    新增列表
-     * @param removed  移除列表
+     * @param fullList      全量列表
+     * @param added         新增列表
+     * @param removed       移除列表
      * @param applyFullList 强制应用全量列表
      */
     void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);

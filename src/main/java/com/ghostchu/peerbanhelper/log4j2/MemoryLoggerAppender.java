@@ -14,9 +14,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.logging.log4j.core.layout.PatternLayout.createDefaultLayout;
@@ -59,5 +57,6 @@ public class MemoryLoggerAppender extends AbstractAppender {
         Main.getEventBus().post(new LoggerEventRecordCreatedEvent(record));
     }
 
-    public record LoggerEventRecord(String level, String message){}
+    public record LoggerEventRecord(String level, String message) {
+    }
 }

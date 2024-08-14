@@ -81,9 +81,9 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
 
     private void handleCitiesDelete(Context context) throws IOException {
         if (cities.removeIf(cities -> cities.equals(context.bodyAsClass(UserCityRequest.class).city()))) {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
     }
@@ -91,7 +91,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     private void handleCities(Context context) throws IOException {
         cities.add(context.bodyAsClass(UserCityRequest.class).city());
         context.status(HttpStatus.CREATED);
-        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
     }
 //
@@ -108,27 +108,27 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     private void handleRegionDelete(Context context) throws IOException {
         if (regions.removeIf(region -> region.equals(context.bodyAsClass(UserRegionRequest.class).region()))) {
             //context.status(HttpStatus.OK);
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
     }
 
     private void handleASNDelete(Context context) throws IOException {
         if (asns.removeIf(p -> p == context.bodyAsClass(UserASNRequest.class).asn())) {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
     }
 
     private void handlePortDelete(Context context) throws IOException {
         if (ports.removeIf(p -> p == context.bodyAsClass(UserPortRequest.class).port())) {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
     }
@@ -136,9 +136,9 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     private void handleIPDelete(Context context) throws IOException {
         var parsed = IPAddressUtil.getIPAddress(context.bodyAsClass(UserIPRequest.class).ip());
         if (ips.removeIf(ipAddress -> ipAddress.equals(parsed))) {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
     }
@@ -147,15 +147,15 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     private void handleRegion(Context ctx) throws IOException {
         regions.add(ctx.bodyAsClass(UserRegionRequest.class).region());
         ctx.status(HttpStatus.CREATED);
-        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
     }
 
     private void handleASN(Context ctx) throws IOException {
-        UserASNRequest asn =ctx.bodyAsClass(UserASNRequest.class);
+        UserASNRequest asn = ctx.bodyAsClass(UserASNRequest.class);
         asns.add(asn.asn());
         ctx.status(HttpStatus.CREATED);
-        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
     }
 
@@ -164,7 +164,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         UserPortRequest req = ctx.bodyAsClass(UserPortRequest.class);
         ports.add(req.port());
         ctx.status(HttpStatus.CREATED);
-        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
     }
 
@@ -172,7 +172,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         IPAddress ipAddress = parseIPAddressFromReq(context);
         ips.add(ipAddress);
         context.status(HttpStatus.CREATED);
-        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY),null));
+        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
     }
 
@@ -185,7 +185,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
                 upper.toFullString(),
                 ipAddress.toNormalizedString(),
                 ipAddress.getCount().toString());
-        context.json(new StdResp(true,null,testResult));
+        context.json(new StdResp(true, null, testResult));
         saveConfig();
     }
 
@@ -377,19 +377,19 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
 
     public record UserASNRequest(
             long asn
-    ){
+    ) {
 
     }
 
     public record UserRegionRequest(
             String region
-    ){
+    ) {
 
     }
 
     public record UserCityRequest(
             String city
-    ){
+    ) {
 
     }
 

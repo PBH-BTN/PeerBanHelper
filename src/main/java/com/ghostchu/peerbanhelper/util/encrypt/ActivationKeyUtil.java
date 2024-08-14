@@ -13,6 +13,7 @@ import java.util.Base64;
 // https://blog.csdn.net/silangfeilang/article/details/108403723
 public class ActivationKeyUtil {
     public static String PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCHxgRTk+Zx/pkN8rpK+Lbr1/f1meapIRDJIgBiSfFy4xdbmDF8wE9PJhdM+3peThz9dJQlt6dkeduIVp65rGS9oZdj7gO5YKtUCDir4NgGQGe1p2C41Xv6RiOXObLmF+ubAJILsimwtDyJT8IysEh9hgaZWnvRXT8JX9wB0Ti2rwIDAQAB";
+
     /**
      * 获取 PBH PublicKey 用来解密密文，获取 Key 内容
      * 如果 data/REPLACEMENT_PBH_PUBLIC_KEY.pem 文件存在，那么就用这个文件里的公钥替换内置的 KEY
@@ -42,7 +43,7 @@ public class ActivationKeyUtil {
     public static KeyData fromKey(String key) {
         try {
             byte[] encrypted = Base64.getDecoder().decode(key);
-            String json = new String(RSAUtils.decryptByPublicKey(encrypted,getPBHPublicKey()),StandardCharsets.UTF_8);
+            String json = new String(RSAUtils.decryptByPublicKey(encrypted, getPBHPublicKey()), StandardCharsets.UTF_8);
             KeyData keyData = JsonUtil.standard().fromJson(json, KeyData.class);
             if (keyData == null) {
                 throw new IllegalStateException("Incorrect key schema");

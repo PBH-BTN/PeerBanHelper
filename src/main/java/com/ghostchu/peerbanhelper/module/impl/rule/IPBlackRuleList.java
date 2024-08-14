@@ -346,7 +346,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             return null;
         }
 
-        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), new Pageable(1,1)).getResults();
+        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), new Pageable(1, 1)).getResults();
         Optional<RuleSubLogEntity> first = result.isEmpty() ? Optional.empty() : Optional.of(result.getFirst());
         long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
         int count = first.map(RuleSubLogEntity::getCount).orElse(0);
@@ -385,7 +385,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     /**
      * 查询规则订阅日志
      *
-     * @param ruleId    规则ID
+     * @param ruleId 规则ID
      * @return 规则订阅日志
      * @throws SQLException 查询异常
      */

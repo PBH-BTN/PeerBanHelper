@@ -16,6 +16,7 @@ public class TranslationComponent {
 
     /**
      * 注意：Params 的所有对象必须都可以被 Gson 序列化/反序列化！
+     *
      * @param key
      * @param params
      */
@@ -27,8 +28,10 @@ public class TranslationComponent {
     public TranslationComponent(Lang key) {
         this(key.getKey());
     }
+
     /**
      * 注意：Params 的所有对象必须都可以被 Gson 序列化/反序列化！
+     *
      * @param key
      * @param params
      */

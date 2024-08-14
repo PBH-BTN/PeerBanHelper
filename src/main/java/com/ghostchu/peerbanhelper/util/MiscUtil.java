@@ -16,6 +16,7 @@ import java.util.Objects;
 
 public class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
+
     /**
      * Get this class available or not
      *
@@ -69,7 +70,7 @@ public class MiscUtil {
         return null;
     }
 
-    public static ZoneOffset getSystemZoneOffset(){
+    public static ZoneOffset getSystemZoneOffset() {
         return ZoneId.systemDefault().getRules().getOffset(Instant.now());
     }
 
@@ -80,7 +81,6 @@ public class MiscUtil {
         LocalDate parse = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
         return parse.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
     }
-
 
 
 }

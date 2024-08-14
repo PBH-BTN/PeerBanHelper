@@ -21,7 +21,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.Weigher;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -114,7 +113,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             } catch (SQLException e) {
                 log.error("Unable flush records into database", e);
             }
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         }
     }
@@ -123,7 +122,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         List<ClientTaskRecord> records = progressRecorder.asMap().entrySet().stream()
                 .map(entry -> new ClientTaskRecord(entry.getKey(), entry.getValue()))
                 .toList();
-        ctx.json(new StdResp(true,null,records));
+        ctx.json(new StdResp(true, null, records));
     }
 
 
@@ -134,7 +133,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         config.put("excessiveThreshold", excessiveThreshold);
         config.put("maximumDifference", maximumDifference);
         config.put("rewindMaximumDifference", rewindMaximumDifference);
-        ctx.json(new StdResp(true,null,config));
+        ctx.json(new StdResp(true, null, config));
     }
 
     @Override

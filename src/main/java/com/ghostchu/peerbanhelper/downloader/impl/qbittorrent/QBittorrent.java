@@ -42,6 +42,7 @@ public class QBittorrent extends AbstractDownloader {
     private final String apiEndpoint;
     private final HttpClient httpClient;
     private final Config config;
+
     public QBittorrent(String name, Config config) {
         super(name);
         this.config = config;

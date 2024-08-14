@@ -21,7 +21,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -36,6 +37,7 @@ public class RuleSubController extends AbstractFeatureModule {
 
     @Autowired
     private ModuleManager moduleManager;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -125,7 +127,7 @@ public class RuleSubController extends AbstractFeatureModule {
         } catch (Exception e) {
             log.error(tlUI(Lang.IP_BAN_RULE_LOG_QUERY_ERROR), e);
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM),null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM), null));
         }
     }
 
@@ -227,20 +229,20 @@ public class RuleSubController extends AbstractFeatureModule {
         }
         if (ruleId == null || ruleId.isEmpty()) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_NO_ID),null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_NO_ID), null));
             return;
         }
         RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (isAdd && ruleSubInfo != null) {
             // 新增时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_ID_CONFLICT, ruleId),null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_ID_CONFLICT, ruleId), null));
             return;
         }
         if (!isAdd && ruleSubInfo == null) {
             // 更新时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId),null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId), null));
             return;
         }
         String ruleName = subInfo.ruleName();
@@ -259,7 +261,7 @@ public class RuleSubController extends AbstractFeatureModule {
                 subUrl = ruleSubInfo.getSubUrl();
             }
         }
-        if(ruleName.contains(".")){
+        if (ruleName.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + ruleName);
         }
         ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, 0, 0));
@@ -271,7 +273,7 @@ public class RuleSubController extends AbstractFeatureModule {
                 ctx.json(msg);
                 return;
             }
-            ctx.json(new StdResp(true, tlUI(Lang.IP_BAN_RULE_SAVED),null));
+            ctx.json(new StdResp(true, tlUI(Lang.IP_BAN_RULE_SAVED), null));
         } catch (Exception e) {
             // 更新失败时回滚
             if (isAdd) {
@@ -280,7 +282,7 @@ public class RuleSubController extends AbstractFeatureModule {
                 ipBlackRuleList.saveRuleSubInfo(ruleSubInfo);
             }
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_URL_WRONG, ruleName),null));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_URL_WRONG, ruleName), null));
             log.error("Unable to retrieve the sub from given URL", e);
         }
     }

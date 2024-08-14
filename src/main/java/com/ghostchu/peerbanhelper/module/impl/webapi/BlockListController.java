@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
-import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +21,7 @@ import java.util.UUID;
 public class BlockListController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -30,7 +30,7 @@ public class BlockListController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.javalin()
-                .get("/blocklist/ip", ctx->{
+                .get("/blocklist/ip", ctx -> {
                     StringBuilder builder = new StringBuilder();
                     for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
                         builder.append(pair.getKey().getIp()).append("\n");

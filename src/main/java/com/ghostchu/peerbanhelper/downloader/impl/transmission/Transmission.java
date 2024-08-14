@@ -159,7 +159,7 @@ public class Transmission extends AbstractDownloader {
                 Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrentList);
         List<Long> torrents = rsp.getArgs().getTorrents().stream()
-                .filter(t->t.getStatus() != Status.STOPPED)
+                .filter(t -> t.getStatus() != Status.STOPPED)
                 .map(Torrents::getId)
                 .filter(ids::contains).toList();
         log.info(tlUI(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size()));

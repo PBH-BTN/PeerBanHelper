@@ -10,9 +10,7 @@ import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
     protected AbstractPBHDao(ConnectionSource connectionSource, Class<T> dataClass) throws SQLException {
@@ -21,10 +19,10 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
 
     public Page<T> queryByPaging(QueryBuilder<T, ID> qb, Pageable pageable) throws SQLException {
         var r = query(qb.offset(pageable.getQueryIndex() * pageable.getSize()).limit(pageable.getSize()).prepare());
-        var ct =  qb.offset(null).limit(null).countOf();
+        var ct = qb.offset(null).limit(null).countOf();
         return new Page<>(
                 pageable,
-               ct,
+                ct,
                 r
         );
     }

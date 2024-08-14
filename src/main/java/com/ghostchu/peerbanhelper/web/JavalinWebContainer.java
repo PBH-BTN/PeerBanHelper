@@ -204,13 +204,15 @@ public class JavalinWebContainer {
         var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
         return counter.get() <= 10;
     }
+
     @SneakyThrows
-    public void markLoginFailed(String ip){
+    public void markLoginFailed(String ip) {
         var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
         counter.incrementAndGet();
     }
+
     @SneakyThrows
-    public void markLoginSuccess(String ip){
+    public void markLoginSuccess(String ip) {
         var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
         counter.set(0);
     }

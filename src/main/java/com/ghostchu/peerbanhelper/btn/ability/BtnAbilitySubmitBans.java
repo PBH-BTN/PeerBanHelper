@@ -77,7 +77,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
                         log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
                         return null;
                     });
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Unable to finish scheduled tasks", throwable);
         }
     }

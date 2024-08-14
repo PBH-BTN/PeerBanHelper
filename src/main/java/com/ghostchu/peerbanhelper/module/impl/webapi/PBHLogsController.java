@@ -24,7 +24,10 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -56,20 +59,20 @@ public class PBHLogsController extends AbstractFeatureModule {
                 .ws("/api/logs/stream", this::handleLogsStream, Role.USER_READ);
         Main.getEventBus().register(this);
         scheduledService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        scheduledService.scheduleWithFixedDelay(this::cronJob,0, 1000*15, TimeUnit.MILLISECONDS);
+        scheduledService.scheduleWithFixedDelay(this::cronJob, 0, 1000 * 15, TimeUnit.MILLISECONDS);
     }
 
     private void cronJob() {
-        try{
+        try {
             for (Map.Entry<WsContext, WebSocketSession> e : new ArrayList<>(connectedWebSocketSessions.entrySet())) {
-                if(!e.getValue().isLoggedIn()){
-                    if(System.currentTimeMillis() - e.getValue().getConnectedAt() > 1000*15){
+                if (!e.getValue().isLoggedIn()) {
+                    if (System.currentTimeMillis() - e.getValue().getConnectedAt() > 1000 * 15) {
                         e.getKey().closeSession(WsCloseStatus.NORMAL_CLOSURE, "Login timed out");
                     }
                 }
             }
 
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Exception occurred during cron job in PBHLogsController", throwable);
         }
     }
@@ -135,11 +138,11 @@ public class PBHLogsController extends AbstractFeatureModule {
         WebSocketClientLoginMessage loginMessage = ctx.messageAsClass(WebSocketClientLoginMessage.class);
         String token = loginMessage.getToken();
         String ip = null;
-        if(ctx.session.getRemoteAddress() instanceof InetSocketAddress inetSocketAddress){
+        if (ctx.session.getRemoteAddress() instanceof InetSocketAddress inetSocketAddress) {
             ip = inetSocketAddress.getHostString();
         }
-        if(ip != null){
-            if(!webContainer.allowAttemptLogin(ip)){
+        if (ip != null) {
+            if (!webContainer.allowAttemptLogin(ip)) {
                 ctx.closeSession(WsCloseStatus.TRY_AGAIN_LATER, "IP banned due too many failed authenticating tries, login message is not accepted anymore.");
                 return;
             }
@@ -147,14 +150,14 @@ public class PBHLogsController extends AbstractFeatureModule {
         if (webContainer.getToken().equals(token)) {
             session.setLoggedIn(true);
             ctx.send(new WebSocketServerMessage<>(loginMessage.getMsgId(), "login", true));
-            if(ip != null){
+            if (ip != null) {
                 webContainer.markLoginSuccess(ip);
             }
         } else {
             ctx.send(new WebSocketServerMessage<>(loginMessage.getMsgId(), "login", false));
-            if(ip != null){
+            if (ip != null) {
                 webContainer.markLoginFailed(ip);
-                if(!webContainer.allowAttemptLogin(ip)){
+                if (!webContainer.allowAttemptLogin(ip)) {
                     ctx.closeSession(WsCloseStatus.TRY_AGAIN_LATER, "Closing connection, IP banned due too many failed authenticating tries");
                 }
             }

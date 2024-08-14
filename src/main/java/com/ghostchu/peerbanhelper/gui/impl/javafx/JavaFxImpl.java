@@ -36,7 +36,6 @@ import javafx.stage.WindowEvent;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 
 import javax.management.MBeanServer;
 import java.awt.*;
@@ -46,7 +45,10 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
@@ -154,8 +156,8 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 //            }
 //        });
         Holder<Object> lastCell = new Holder<>();
-        Styles.addStyleClass(this.logsView,Styles.DENSE);
-        Styles.addStyleClass(this.logsView,Styles.STRIPED);
+        Styles.addStyleClass(this.logsView, Styles.DENSE);
+        Styles.addStyleClass(this.logsView, Styles.STRIPED);
         this.logsView.setCellFactory(x -> new ListCell<>() {
             {
                 getStyleClass().add("log-window-list-cell");
@@ -282,28 +284,28 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
             System.gc();
             mxBean.dumpHeap(hprof.getAbsolutePath(), true);
             createDialog(Level.INFO, tlUI(Lang.HEAPDUMP_COMPLETED_TITLE), tlUI(Lang.HEAPDUMP_COMPLETED_DESCRIPTION));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Unable dump heap", e);
-            createDialog(Level.SEVERE,tlUI(Lang.HEAPDUMP_FAILED_TITLE), tlUI(Lang.HEAPDUMP_FAILED_DESCRIPTION) );
+            createDialog(Level.SEVERE, tlUI(Lang.HEAPDUMP_FAILED_TITLE), tlUI(Lang.HEAPDUMP_FAILED_DESCRIPTION));
         }
     }
 
     private void debugReload(ActionEvent actionEvent) {
         var map = Main.getReloadManager().reload();
-        map.forEach((c,r)->{
+        map.forEach((c, r) -> {
             var name = "???";
             var reloadableWrapper = c.getReloadable();
-            if(reloadableWrapper != null){
+            if (reloadableWrapper != null) {
                 var content = reloadableWrapper.get();
-                if(content != null){
-                    name =content.getClass().getName();
-                }else{
+                if (content != null) {
+                    name = content.getClass().getName();
+                } else {
                     name = "<Invalid>";
                 }
-            }else{
+            } else {
                 name = c.getReloadableMethod().getName();
             }
-            log.info(tlUI(Lang.RELOADING_MODULE ,name, r.getStatus().name()) );
+            log.info(tlUI(Lang.RELOADING_MODULE, name, r.getStatus().name()));
         });
         createDialog(Level.INFO, tlUI(Lang.RELOAD_COMPLETED_TITLE), tlUI(Lang.RELOAD_COMPLETED_DESCRIPTION, map.size()));
     }

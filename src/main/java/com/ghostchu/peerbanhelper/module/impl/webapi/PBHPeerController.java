@@ -80,7 +80,7 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .where()
                 .eq("address", ip)
                 .queryRawFirst();
-        if(upDownResult == null){
+        if (upDownResult == null) {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NOT_FOUND), null));
             return;
         }
@@ -109,7 +109,7 @@ public class PBHPeerController extends AbstractFeatureModule {
             if (ipdb != null) {
                 geoIP = ipdb.query(InetAddress.getByName(ip));
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.warn("Unable to perform GeoIP query for ip {}", ip);
         }
         var info = new PeerInfo(ip, firstTimeSeen.getTime(), lastTimeSeen.getTime(), banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP);

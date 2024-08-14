@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -53,29 +52,29 @@ public class PBHTorrentController extends AbstractFeatureModule {
     public void onEnable() {
         javalinWebContainer
                 .javalin()
-                .get("/api/torrent",this::handleTorrentList, Role.USER_READ)
-                .get("/api/torrent/search",this::handleTorrentSearch, Role.USER_READ)
-                .get("/api/torrent/{infoHash}",this::handleTorrentInfo, Role.USER_READ)
-                .get("/api/torrent/{infoHash}/accessHistory",this::handleConnectHistory,Role.USER_READ);
+                .get("/api/torrent", this::handleTorrentList, Role.USER_READ)
+                .get("/api/torrent/search", this::handleTorrentSearch, Role.USER_READ)
+                .get("/api/torrent/{infoHash}", this::handleTorrentInfo, Role.USER_READ)
+                .get("/api/torrent/{infoHash}/accessHistory", this::handleConnectHistory, Role.USER_READ);
     }
 
     private void handleTorrentSearch(Context ctx) throws SQLException {
         Pageable pageable = new Pageable(ctx);
         String keyword = ctx.queryParam("keyword");
         var builder = torrentDao.queryBuilder();
-        builder.setWhere(builder.where().like("name","%"+keyword+"%"));
-        ctx.json(new StdResp(true, null , torrentDao.queryByPaging(builder,pageable)));
+        builder.setWhere(builder.where().like("name", "%" + keyword + "%"));
+        ctx.json(new StdResp(true, null, torrentDao.queryByPaging(builder, pageable)));
     }
 
     private void handleTorrentList(Context ctx) throws SQLException {
         Pageable pageable = new Pageable(ctx);
-        ctx.json(new StdResp(true, null , torrentDao.queryByPaging(pageable)));
+        ctx.json(new StdResp(true, null, torrentDao.queryByPaging(pageable)));
     }
 
 
     private void handleTorrentInfo(Context ctx) throws SQLException {
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
-        if(torrent.isEmpty()){
+        if (torrent.isEmpty()) {
             ctx.status(404);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.TORRENT_NOT_FOUND), null));
             return;
@@ -92,13 +91,13 @@ public class PBHTorrentController extends AbstractFeatureModule {
                 .countOf();
 
         ctx.json(new StdResp(true, null, new TorrentInfo(t.getInfoHash(),
-                t.getName(),t.getSize(),
+                t.getName(), t.getSize(),
                 peerBanCount, peerAccessCount)));
     }
 
     private void handleConnectHistory(Context ctx) throws SQLException {
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
-        if(torrent.isEmpty()){
+        if (torrent.isEmpty()) {
             ctx.status(404);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.TORRENT_NOT_FOUND), null));
             return;
@@ -108,7 +107,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
         var queryBuilder = peerRecordDao.queryBuilder().orderBy("lastTimeSeen", false);
         var queryWhere = queryBuilder.where().eq("torrent_id", t);
         queryBuilder.setWhere(queryWhere);
-        Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder,pageable);
+        Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);
         ctx.json(new StdResp(true, null, page));
     }
 
@@ -118,7 +117,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
             long size,
             long peerBanCount,
             long peerAccessCount
-    ){
+    ) {
 
     }
 

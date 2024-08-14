@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.util.json;
 
-import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 

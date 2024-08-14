@@ -52,6 +52,7 @@ public class JFXWindowController implements Initializable {
     @FXML
     @Getter
     private MenuItem menuDebugPrintThreads;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
