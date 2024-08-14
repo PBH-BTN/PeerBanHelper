@@ -296,7 +296,6 @@ public class DelugeServer {
     }
 
     private void printError(DelugeResponse response) {
-        System.out.println(response.getResponseData().toString());
         JSONObject object = response.getResponseData().getJSONObject("error");
         log.info("Error when call Deluge RPC: message={}, code={}", object.getString("message"), object.getInt("code"));
     }
