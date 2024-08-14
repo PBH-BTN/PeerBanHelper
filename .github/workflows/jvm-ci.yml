@@ -11,12 +11,7 @@ name: Java CI
 on:
   push:
     branches: [ "master", "release", "v6", "api-std" ]
-  pull_request:
-    branches: [ "master", "release", "v6", "api-std" ]
   workflow_dispatch:
-  release:
-    types:
-      - published
 jobs:
   CI:
     runs-on: ubuntu-latest
