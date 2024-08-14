@@ -53,8 +53,14 @@ public class PBHTorrentController extends AbstractFeatureModule {
     public void onEnable() {
         javalinWebContainer
                 .javalin()
+                .get("/api/torrent",this::handleTorrentList, Role.USER_READ)
                 .get("/api/torrent/{infoHash}",this::handleTorrentInfo, Role.USER_READ)
                 .get("/api/torrent/{infoHash}/accessHistory",this::handleConnectHistory,Role.USER_READ);
+    }
+
+    private void handleTorrentList(Context ctx) throws SQLException {
+        Pageable pageable = new Pageable(ctx);
+        ctx.json(new StdResp(true, null , torrentDao.queryByPaging(pageable)));
     }
 
     private void handleTorrentInfo(Context ctx) throws SQLException {
