@@ -158,7 +158,8 @@ public class PBHChartController extends AbstractFeatureModule {
         }
         IPDB ipdb = getServer().getIpdb();
         if (ipdb == null) {
-            throw new IllegalStateException(tl(locale(ctx), Lang.CHARTS_IPDB_NEED_INIT));
+            ctx.json(new StdResp(false,tl(locale(ctx), Lang.CHARTS_IPDB_NEED_INIT), null));
+            return;
         }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
 
