@@ -14,7 +14,6 @@ public class JsonUtil {
             .setExclusionStrategies(new HiddenAnnotationExclusionStrategy())
             .serializeNulls()
             .registerTypeAdapter(Timestamp.class, TimestampTypeAdapter.INSTANCE)
-            .registerTypeAdapter(TranslationComponent.class, TranslationComponentTypeAdapter.INSTANCE)
             .disableHtmlEscaping()
             .create();
 
