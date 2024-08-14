@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.sql.SQLException;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
@@ -77,7 +80,11 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .where()
                 .eq("address", ip)
                 .queryRawFirst();
-        if (upDownResult != null && upDownResult.length == 2) {
+        if(upDownResult == null){
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NOT_FOUND), null));
+            return;
+        }
+        if (upDownResult.length == 2) {
             uploadedToPeer = Long.parseLong(upDownResult[0]);
             downloadedFromPeer = Long.parseLong(upDownResult[1]);
         } else {

@@ -356,3 +356,4 @@ HEAPDUMP_COMPLETED_DESCRIPTION: "内存快照已转储成功，请见 data/debug
 RELOADING_MODULE: "[重载] {}: {}"
 
 TORRENT_NOT_FOUND: "指定的 Torrent 记录不存在"
+PEER_NOT_FOUND: "指定的 Peer 记录不存在"

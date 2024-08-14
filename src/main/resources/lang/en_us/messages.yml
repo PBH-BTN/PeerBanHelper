@@ -356,3 +356,4 @@ HEAPDUMP_COMPLETED_DESCRIPTION: "Memory snapshot dump successfully, check .hprof
 RELOADING_MODULE: "[Reload] {}: {}"
 
 TORRENT_NOT_FOUND: "No records found by given InfoHash"
+PEER_NOT_FOUND: "No records found by given Peer"
