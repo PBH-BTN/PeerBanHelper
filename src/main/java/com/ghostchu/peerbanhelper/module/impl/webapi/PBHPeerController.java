@@ -2,6 +2,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.ipdb.IPDB;
+import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.paging.Page;
@@ -10,12 +12,15 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
 import java.sql.SQLException;
 
 @Component
+@Slf4j
 public class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryDao historyDao;
@@ -72,7 +77,7 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .where()
                 .eq("address", ip)
                 .queryRawFirst();
-        if (upDownResult.length == 2) {
+        if (upDownResult != null && upDownResult.length == 2) {
             uploadedToPeer = Long.parseLong(upDownResult[0]);
             downloadedFromPeer = Long.parseLong(upDownResult[1]);
         } else {
@@ -90,7 +95,17 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .where()
                 .eq("address", ip)
                 .queryForFirst().getLastTimeSeen();
-        var info = new PeerInfo(ip, firstTimeSeen.getTime(), lastTimeSeen.getTime(), banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer);
+
+        IPDB ipdb = getServer().getIpdb();
+        IPGeoData geoIP = null;
+        try {
+            if (ipdb != null) {
+                geoIP = ipdb.query(InetAddress.getByName(ip));
+            }
+        }catch (Exception e){
+            log.warn("Unable to perform GeoIP query for ip {}", ip);
+        }
+        var info = new PeerInfo(ip, firstTimeSeen.getTime(), lastTimeSeen.getTime(), banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP);
         ctx.json(new StdResp(true, null, info));
     }
 
@@ -136,7 +151,8 @@ public class PBHPeerController extends AbstractFeatureModule {
             long banCount,
             long torrentAccessCount,
             long uploadedToPeer,
-            long downloadedFromPeer
+            long downloadedFromPeer,
+            IPGeoData geo
     ) {
     }
 }

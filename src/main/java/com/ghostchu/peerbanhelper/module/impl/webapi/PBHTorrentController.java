@@ -54,14 +54,24 @@ public class PBHTorrentController extends AbstractFeatureModule {
         javalinWebContainer
                 .javalin()
                 .get("/api/torrent",this::handleTorrentList, Role.USER_READ)
+                .get("/api/torrent/search",this::handleTorrentSearch, Role.USER_READ)
                 .get("/api/torrent/{infoHash}",this::handleTorrentInfo, Role.USER_READ)
                 .get("/api/torrent/{infoHash}/accessHistory",this::handleConnectHistory,Role.USER_READ);
+    }
+
+    private void handleTorrentSearch(Context ctx) throws SQLException {
+        Pageable pageable = new Pageable(ctx);
+        String keyword = ctx.queryParam("keyword");
+        var builder = torrentDao.queryBuilder();
+        builder.setWhere(builder.where().like("name","%"+keyword+"%"));
+        ctx.json(new StdResp(true, null , torrentDao.queryByPaging(builder,pageable)));
     }
 
     private void handleTorrentList(Context ctx) throws SQLException {
         Pageable pageable = new Pageable(ctx);
         ctx.json(new StdResp(true, null , torrentDao.queryByPaging(pageable)));
     }
+
 
     private void handleTorrentInfo(Context ctx) throws SQLException {
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
