@@ -9,6 +9,7 @@ public class Host {
     private final int m_port;
     private final Status m_status;
     private final String m_version;
+
     public Host(final String id, final String hostname, final int port, final String status, final String version) {
         m_id = id;
         m_hostname = hostname;

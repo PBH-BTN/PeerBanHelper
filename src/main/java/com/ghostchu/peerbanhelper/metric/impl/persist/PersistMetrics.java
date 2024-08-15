@@ -63,7 +63,7 @@ public class PersistMetrics implements BasicMetrics {
                     log.error("Unable to cleanup expired banlogs", e);
                 }
             }
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         }
     }

@@ -1,7 +1,10 @@
 package com.ghostchu.peerbanhelper.util.encrypt;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -13,6 +16,7 @@ import java.util.Base64;
 // https://blog.csdn.net/silangfeilang/article/details/108403723
 public class ActivationKeyUtil {
     public static String PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCHxgRTk+Zx/pkN8rpK+Lbr1/f1meapIRDJIgBiSfFy4xdbmDF8wE9PJhdM+3peThz9dJQlt6dkeduIVp65rGS9oZdj7gO5YKtUCDir4NgGQGe1p2C41Xv6RiOXObLmF+ubAJILsimwtDyJT8IysEh9hgaZWnvRXT8JX9wB0Ti2rwIDAQAB";
+
     /**
      * 获取 PBH PublicKey 用来解密密文，获取 Key 内容
      * 如果 data/REPLACEMENT_PBH_PUBLIC_KEY.pem 文件存在，那么就用这个文件里的公钥替换内置的 KEY
@@ -42,11 +46,19 @@ public class ActivationKeyUtil {
     public static KeyData fromKey(String key) {
         try {
             byte[] encrypted = Base64.getDecoder().decode(key);
-            String json = new String(RSAUtils.decryptByPublicKey(encrypted,getPBHPublicKey()),StandardCharsets.UTF_8);
+            String json = new String(RSAUtils.decryptByPublicKey(encrypted, getPBHPublicKey()), StandardCharsets.UTF_8);
             KeyData keyData = JsonUtil.standard().fromJson(json, KeyData.class);
             if (keyData == null) {
                 throw new IllegalStateException("Incorrect key schema");
             }
+            String description = keyData.description;
+            if (description != null) {
+                if (description.equalsIgnoreCase("No description")
+                        || description.isBlank()) {
+                    description = null;
+                }
+            }
+            keyData.setDescription(description);
             if ("PeerBanHelper".equals(keyData.verifyMagic)) {
                 return keyData;
             }
@@ -57,23 +69,25 @@ public class ActivationKeyUtil {
         }
     }
 
-    public record KeyData(
-            // verifyMagic 应固定为 PeerBanHelper
-            String verifyMagic,
-            // source 为来源
-            String source,
-            // 授权给（用户名），爱发电的话大概都是 “爱发电用户” 固定的
-            String licenseTo,
-            // Key 创建时间
-            Long createAt,
-            // Key 过期时间，通常是 100 年以后
-            Long expireAt,
-            // 许可证描述
-            @Nullable
-            String description,
-            // 隐藏字段，主要是为了改变 KEY，PBH 并不关心这个字段
-            @Nullable
-            String hidden
-    ) {
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class KeyData {
+        // verifyMagic 应固定为 PeerBanHelper
+        private String verifyMagic;
+        // source 为来源
+        private String source;
+        // 授权给（用户名），爱发电的话大概都是 “爱发电用户” 固定的
+        private String licenseTo;
+        // Key 创建时间
+        private Long createAt;
+        // Key 过期时间，通常是 100 年以后
+        private Long expireAt;
+        // 许可证描述
+        @Nullable
+        private String description;
+        // 隐藏字段，主要是为了改变 KEY，PBH 并不关心这个字段
+        @Nullable
+        private String hidden;
     }
 }

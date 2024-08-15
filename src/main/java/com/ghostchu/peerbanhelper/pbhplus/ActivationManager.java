@@ -37,8 +37,10 @@ public class ActivationManager implements Reloadable {
             return;
         }
         this.keyData = ActivationKeyUtil.fromKey(this.keyText);
-        if (this.isActivated()) {
-            log.info(tlUI(Lang.DONATION_KEY_VERIFICATION_SUCCESSFUL, keyData.licenseTo(), keyData.source(), MsgUtil.getDateFormatter().format(new Date(keyData.expireAt()))));
+        if(keyData != null) {
+            if (this.isActivated()) {
+                log.info(tlUI(Lang.DONATION_KEY_VERIFICATION_SUCCESSFUL, keyData.getLicenseTo(), keyData.getSource(), MsgUtil.getDateFormatter().format(new Date(keyData.getExpireAt()))));
+            }
         }
     }
 
@@ -65,6 +67,6 @@ public class ActivationManager implements Reloadable {
      * @return 是否已激活，返回 true 时应启用捐赠功能
      */
     public boolean isActivated() {
-        return this.keyData != null && System.currentTimeMillis() < this.keyData.expireAt();
+        return this.keyData != null && System.currentTimeMillis() < this.keyData.getExpireAt();
     }
 }

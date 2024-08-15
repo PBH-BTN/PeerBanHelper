@@ -341,7 +341,10 @@ SCHEDULED_FULL_BANLIST_APPLY: "[Repair] PeerBanHelper scheduled full banlist re-
 CLEANED_BANLOGS: "[Cleanup] Cleaned {} history records"
 
 OPERATION_EXECUTE_SUCCESSFULLY: "Operation execute successfully"
-PBH_PLUS_LICENSE_UPDATED: "Donation key saved"
+PBH_PLUS_LICENSE_UPDATED: "License saved"
+PBH_PLUS_LICENSE_EXPIRED: "License expired"
+PBH_PLUS_LICENSE_INVALID: "License invalid"
+
 
 GUI_MENU_DEBUG: "Debug"
 GUI_MENU_DEBUG_RELOAD_CONFIGURATION: "Reload configuration..."
@@ -354,3 +357,6 @@ HEAPDUMP_FAILED_TITLE: "Heapdump failed"
 HEAPDUMP_FAILED_DESCRIPTION: "Unable to dump the heap, check the console for details."
 HEAPDUMP_COMPLETED_DESCRIPTION: "Memory snapshot dump successfully, check .hprof files in data/debug directory.\nIf you need send to developers for debugging, please zip it with Archive Tools."
 RELOADING_MODULE: "[Reload] {}: {}"
+
+TORRENT_NOT_FOUND: "No records found by given InfoHash"
+PEER_NOT_FOUND: "No records found by given Peer"

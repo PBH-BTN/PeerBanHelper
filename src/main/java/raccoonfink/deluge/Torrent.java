@@ -28,6 +28,7 @@ public class Torrent implements Comparable<Torrent> {
     private String m_trackerHost;
     private long m_uploadPayloadRate;
     private State m_state;
+
     public Torrent(final String key, final JSONObject data) {
         m_key = key;
         m_distributedCopies = data.optDouble("distributed_copies");

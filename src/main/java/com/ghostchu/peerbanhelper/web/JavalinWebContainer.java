@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.web;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.exception.NotLoggedInException;
@@ -204,13 +204,15 @@ public class JavalinWebContainer {
         var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
         return counter.get() <= 10;
     }
+
     @SneakyThrows
-    public void markLoginFailed(String ip){
+    public void markLoginFailed(String ip) {
         var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
         counter.incrementAndGet();
     }
+
     @SneakyThrows
-    public void markLoginSuccess(String ip){
+    public void markLoginSuccess(String ip) {
         var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
         counter.set(0);
     }

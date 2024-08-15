@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
-import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
@@ -130,7 +129,7 @@ public class PeerBanHelperServer implements Reloadable {
         reloadConfig();
     }
 
-    private void reloadConfig(){
+    private void reloadConfig() {
         this.pbhServerAddress = Main.getPbhServerAddress();
         this.profileConfig = Main.getProfileConfig();
         this.banDuration = profileConfig.getLong("ban-duration");
@@ -349,7 +348,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void registerTimer() {
-        if(this.banWaveWatchDog != null){
+        if (this.banWaveWatchDog != null) {
             this.banWaveWatchDog.close();
         }
         this.banWaveWatchDog = new WatchDog("BanWave Thread", profileConfig.getLong("check-interval", 5000) + (1000 * 60), this::watchDogHungry, null);
@@ -501,9 +500,9 @@ public class PeerBanHelperServer implements Reloadable {
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
             banWaveWatchDog.setLastOperation("Completed");
-        }catch (Throwable throwable){
+        } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-        }finally {
+        } finally {
             banWaveWatchDog.feed();
             metrics.recordCheck();
         }
@@ -619,6 +618,8 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHOOBEController.class);
         moduleManager.register(PBHChartController.class);
         moduleManager.register(PBHGeneralController.class);
+        moduleManager.register(PBHTorrentController.class);
+        moduleManager.register(PBHPeerController.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

@@ -18,7 +18,6 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadabl
     }
 
     private void handleWebAPI(Context ctx) {
-        ctx.json(new StdResp(true,null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix)));
+        ctx.json(new StdResp(true, null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix)));
     }
 
     @Override

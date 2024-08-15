@@ -17,7 +17,6 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,7 +64,7 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule implements Reload
 
     private void handleWebAPI(Context ctx) {
         String locale = locale(ctx);
-        ctx.json(new StdResp(true,null,Map.of("peerId", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList())));
+        ctx.json(new StdResp(true, null, Map.of("peerId", bannedPeers.stream().map(r -> r.toPrintableText(locale)).toList())));
     }
 
     @Override

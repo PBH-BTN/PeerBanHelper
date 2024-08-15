@@ -145,9 +145,9 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         try {
             var testResult = downloader.login();
             if (testResult.success()) {
-                ctx.json(new StdResp(testResult.success(),  tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));
+                ctx.json(new StdResp(testResult.success(), tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));
             } else {
-                ctx.json(new StdResp(testResult.success(),  tl(locale(ctx),  testResult.getMessage()), null));
+                ctx.json(new StdResp(testResult.success(), tl(locale(ctx), testResult.getMessage()), null));
             }
             downloader.close();
         } catch (Exception e) {
@@ -161,17 +161,17 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(new StdResp(false,tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_NOT_EXISTS), null ));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_NOT_EXISTS), null));
             return;
         }
         Downloader downloader = selected.get();
         getServer().unregisterDownloader(downloader);
         try {
             getServer().saveDownloaders();
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_SAVED), null ));
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_SAVED), null));
         } catch (IOException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(new StdResp(false,e.getClass().getName() + ": " + e.getMessage(), null ));
+            ctx.json(new StdResp(false, e.getClass().getName() + ": " + e.getMessage(), null));
         }
 
     }
@@ -180,7 +180,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS), null ));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS), null));
             return;
         }
         Downloader downloader = selected.get();
@@ -211,7 +211,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS), null ));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS), null));
             return;
         }
         Downloader downloader = selected.get();
@@ -233,7 +233,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS), null ));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS), null));
             return;
         }
         Downloader downloader = selected.get();

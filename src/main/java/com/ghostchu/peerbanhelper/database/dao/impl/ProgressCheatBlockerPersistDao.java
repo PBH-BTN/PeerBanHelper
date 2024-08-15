@@ -63,34 +63,34 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
         callBatchTasks(() -> {
             records.forEach(record ->
                     record.task().forEach(task -> {
-                try {
-                    var entity = findExists(record.address(), task.getTorrentId());
-                    if (entity == null) {
-                        entity = new ProgressCheatBlockerPersistEntity(null,
-                                record.address(),
-                                task.getTorrentId(),
-                                task.getLastReportProgress(),
-                                task.getLastReportUploaded(),
-                                task.getTrackingUploadedIncreaseTotal(),
-                                task.getRewindCounter(),
-                                task.getProgressDifferenceCounter(),
-                                new Timestamp(System.currentTimeMillis()),
-                                new Timestamp(System.currentTimeMillis())
-                        );
-                        create(entity);
-                    } else {
-                        entity.setLastReportProgress(task.getLastReportProgress());
-                        entity.setLastReportUploaded(task.getLastReportUploaded());
-                        entity.setProgressDifferenceCounter(task.getProgressDifferenceCounter());
-                        entity.setRewindCounter(task.getRewindCounter());
-                        entity.setTrackingUploadedIncreaseTotal(task.getTrackingUploadedIncreaseTotal());
-                        entity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
-                        update(entity);
-                    }
-                } catch (SQLException e) {
-                    log.error("Unable write PCB persist data into database", e);
-                }
-            }));
+                        try {
+                            var entity = findExists(record.address(), task.getTorrentId());
+                            if (entity == null) {
+                                entity = new ProgressCheatBlockerPersistEntity(null,
+                                        record.address(),
+                                        task.getTorrentId(),
+                                        task.getLastReportProgress(),
+                                        task.getLastReportUploaded(),
+                                        task.getTrackingUploadedIncreaseTotal(),
+                                        task.getRewindCounter(),
+                                        task.getProgressDifferenceCounter(),
+                                        new Timestamp(System.currentTimeMillis()),
+                                        new Timestamp(System.currentTimeMillis())
+                                );
+                                create(entity);
+                            } else {
+                                entity.setLastReportProgress(task.getLastReportProgress());
+                                entity.setLastReportUploaded(task.getLastReportUploaded());
+                                entity.setProgressDifferenceCounter(task.getProgressDifferenceCounter());
+                                entity.setRewindCounter(task.getRewindCounter());
+                                entity.setTrackingUploadedIncreaseTotal(task.getTrackingUploadedIncreaseTotal());
+                                entity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
+                                update(entity);
+                            }
+                        } catch (SQLException e) {
+                            log.error("Unable write PCB persist data into database", e);
+                        }
+                    }));
             return null;
         });
     }

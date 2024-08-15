@@ -21,6 +21,7 @@ public interface RuleFeatureModule extends FeatureModule {
     /**
      * 指示模块的内部处理逻辑是否是线程安全的，如果线程不安全，PeerBanHelper 将在同步块中执行不安全的模块
      * 以避免出现线程安全错误
+     *
      * @return 是否是线程安全模块
      */
     default boolean isThreadSafe() {

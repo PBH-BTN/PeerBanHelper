@@ -6,7 +6,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -159,7 +159,7 @@ public class Transmission extends AbstractDownloader {
                 Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrentList);
         List<Long> torrents = rsp.getArgs().getTorrents().stream()
-                .filter(t->t.getStatus() != Status.STOPPED)
+                .filter(t -> t.getStatus() != Status.STOPPED)
                 .map(Torrents::getId)
                 .filter(ids::contains).toList();
         log.info(tlUI(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size()));

@@ -341,7 +341,10 @@ SCHEDULED_FULL_BANLIST_APPLY: "[修复] PeerBanHelper 已计划在下次封禁�
 CLEANED_BANLOGS: "[清理] 已清理 {} 条封禁日志"
 
 OPERATION_EXECUTE_SUCCESSFULLY: "操作执行成功"
-PBH_PLUS_LICENSE_UPDATED: "捐赠密钥已保存"
+PBH_PLUS_LICENSE_UPDATED: "许可证信息已保存"
+PBH_PLUS_LICENSE_EXPIRED: "许可证已过期"
+PBH_PLUS_LICENSE_INVALID: "许可证无效"
+
 
 GUI_MENU_DEBUG: "调试"
 GUI_MENU_DEBUG_RELOAD_CONFIGURATION: "重载配置文件..."
@@ -354,3 +357,6 @@ HEAPDUMP_FAILED_TITLE: "堆转储失败"
 HEAPDUMP_FAILED_DESCRIPTION: "无法转储内存快照，错误详见控制台日志消息。"
 HEAPDUMP_COMPLETED_DESCRIPTION: "内存快照已转储成功，请见 data/debug 目录下的 .hprof 文件。\n如需发送给开发者，请使用压缩工具打包压缩。"
 RELOADING_MODULE: "[重载] {}: {}"
+
+TORRENT_NOT_FOUND: "指定的 Torrent 记录不存在"
+PEER_NOT_FOUND: "指定的 Peer 记录不存在"

@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -126,7 +125,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         double pctFilter = Double.parseDouble(filter);
 
         var results = historyDao.countDateField(startAt, endAt, timestampGetter, trimmer, pctFilter);
-        ctx.json(new StdResp(true,null,results));
+        ctx.json(new StdResp(true, null, results));
     }
 
     private Calendar getZeroCalender() {
@@ -174,7 +173,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         Map<String, Object> resp = new HashMap<>();
         resp.put("dict", dict);
         resp.put("data", dat);
-        ctx.json(new StdResp(true,null,resp));
+        ctx.json(new StdResp(true, null, resp));
     }
 
     private void handleBasicCounter(Context ctx) {
@@ -184,7 +183,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
         map.put("banlistCounter", getServer().getBannedPeers().size());
         map.put("bannedIpCounter", getServer().getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
-        ctx.json(new StdResp(true,null,map));
+        ctx.json(new StdResp(true, null, map));
     }
 
     @Override

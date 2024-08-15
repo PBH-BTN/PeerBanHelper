@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,11 +51,31 @@ public class PBHPlusController extends AbstractFeatureModule {
         Main.getMainConfig().set("pbh-plus-key", licenseReq.key());
         Main.getMainConfig().save(Main.getMainConfigFile());
         activationManager.load();
-        ctx.json(new StdResp(true,tl(locale(ctx), Lang.PBH_PLUS_LICENSE_UPDATE), null ));
+        if(activationManager.isActivated()) {
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_UPDATE), null));
+        }else{
+            var keyData = activationManager.getKeyData();
+            if(keyData == null) {
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_INVALID), null));
+            }else if(System.currentTimeMillis() >= keyData.getExpireAt()){
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_EXPIRED), null));
+            }else{
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_INVALID), null));
+            }
+        }
     }
 
     private void handle(Context context) {
-        context.json(new StdResp(true,null,new ActiveInfo(activationManager.isActivated(), activationManager.getKeyText(), activationManager.getKeyData())));
+        String key = null;
+        if (activationManager.getKeyText().length() > 10) {
+            key = activationManager.getKeyText().substring(0, 10) + "******";
+        } else {
+            key = activationManager.getKeyText().substring(0, 5) + "***********";
+        }
+        context.json(new StdResp(true, null,
+                new ActiveInfo(activationManager.isActivated(),
+                        key,
+                        activationManager.getKeyData())));
     }
 
     @Override
@@ -71,8 +90,8 @@ public class PBHPlusController extends AbstractFeatureModule {
     ) {
 
     }
-    public record LicensePutRequest(String key)
-    {
+
+    public record LicensePutRequest(String key) {
 
     }
 }
