@@ -161,26 +161,36 @@ public class PBHChartController extends AbstractFeatureModule {
             return;
         }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        var bannedOnly = Boolean.parseBoolean(ctx.queryParam("bannedOnly"));
+        if (bannedOnly) {
+            handleGeoIPBanned(ctx, timeQueryModel, ipdb);
+        } else {
+            handleGeoIPPeerRecord(ctx, timeQueryModel, ipdb);
+        }
+    }
 
+    //@TODO: 底下写的一团糟，后面需要优化去重
+
+    private void handleGeoIPBanned(Context ctx, WebUtil.TimeQueryModel timeQueryModel, IPDB ipdb) throws Exception {
         Map<String, AtomicInteger> ispCounter = new ConcurrentHashMap<>();
         Map<String, AtomicInteger> cnProvinceCounter = new ConcurrentHashMap<>();
         Map<String, AtomicInteger> cnCityCounter = new ConcurrentHashMap<>();
         Map<String, AtomicInteger> countryOrRegionCounter = new ConcurrentHashMap<>();
         Map<String, AtomicInteger> netTypeCounter = new ConcurrentHashMap<>();
-        try (var it = peerRecordDao.queryBuilder()
+        try (var it = historyDao.queryBuilder()
                 .distinct()
-                .selectColumns("id", "address")
+                .selectColumns("id", "ip")
                 .where()
-                .ge("lastTimeSeen", timeQueryModel.startAt())
+                .ge("banAt", timeQueryModel.startAt())
                 .and()
-                .le("lastTimeSeen", timeQueryModel.endAt())
+                .le("banAt", timeQueryModel.endAt())
                 .iterator()) {
             try (ExecutorService service = Executors.newVirtualThreadPerTaskExecutor()) {
                 while (it.hasNext()) {
-                    var ip = it.next();
+                    var entity = it.next();
                     service.submit(() -> {
                         try {
-                            IPGeoData ipGeoData = ipdb.query(InetAddress.getByName(ip.getAddress()));
+                            IPGeoData ipGeoData = ipdb.query(InetAddress.getByName(entity.getIp()));
                             String isp = "N/A";
                             if (ipGeoData.getAs() != null) {
                                 isp = ipGeoData.getAs().getOrganization();
@@ -193,6 +203,7 @@ public class PBHChartController extends AbstractFeatureModule {
                                 countryOrRegion = ipGeoData.getCountry().getName();
                             }
                             if (ipGeoData.getCity() != null) {
+                                city = ipGeoData.getCity().getName();
                                 if (ipGeoData.getCity().getCnProvince() != null) {
                                     province = ipGeoData.getCity().getCnProvince();
                                 }
@@ -211,7 +222,7 @@ public class PBHChartController extends AbstractFeatureModule {
                             netTypeCounter.computeIfAbsent(netType, k -> new AtomicInteger()).incrementAndGet();
 
                         } catch (UnknownHostException e) {
-                            log.error("Unable to resolve the GeoIP data for ip {}", ip, e);
+                            log.error("Unable to resolve the GeoIP data for ip {}", entity, e);
                         }
                     });
                 }
@@ -224,7 +235,83 @@ public class PBHChartController extends AbstractFeatureModule {
                 "province", cnProvinceCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
-                "city", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "region", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                        .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
+                        .toList(),
+                "city", cnCityCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                        .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
+                        .toList()
+        )));
+    }
+
+    private void handleGeoIPPeerRecord(Context ctx, WebUtil.TimeQueryModel timeQueryModel, IPDB ipdb) throws Exception {
+        Map<String, AtomicInteger> ispCounter = new ConcurrentHashMap<>();
+        Map<String, AtomicInteger> cnProvinceCounter = new ConcurrentHashMap<>();
+        Map<String, AtomicInteger> cnCityCounter = new ConcurrentHashMap<>();
+        Map<String, AtomicInteger> countryOrRegionCounter = new ConcurrentHashMap<>();
+        Map<String, AtomicInteger> netTypeCounter = new ConcurrentHashMap<>();
+        try (var it = peerRecordDao.queryBuilder()
+                .distinct()
+                .selectColumns("id", "address")
+                .where()
+                .ge("lastTimeSeen", timeQueryModel.startAt())
+                .and()
+                .le("lastTimeSeen", timeQueryModel.endAt())
+                .iterator()) {
+            try (ExecutorService service = Executors.newVirtualThreadPerTaskExecutor()) {
+                while (it.hasNext()) {
+                    var entity = it.next();
+                    service.submit(() -> {
+                        try {
+                            IPGeoData ipGeoData = ipdb.query(InetAddress.getByName(entity.getAddress()));
+                            String isp = "N/A";
+                            if (ipGeoData.getAs() != null) {
+                                isp = ipGeoData.getAs().getOrganization();
+                            }
+                            String countryOrRegion = "N/A";
+                            String province = "N/A";
+                            String city = "N/A";
+                            String netType = "N/A";
+                            if (ipGeoData.getCountry() != null) {
+                                countryOrRegion = ipGeoData.getCountry().getName();
+                            }
+                            if (ipGeoData.getCity() != null) {
+                                city = ipGeoData.getCity().getName();
+                                if (ipGeoData.getCity().getCnProvince() != null) {
+                                    province = ipGeoData.getCity().getCnProvince();
+                                }
+                                if (ipGeoData.getCity().getCnCity() != null) {
+                                    city = ipGeoData.getCity().getCnProvince() + " " + ipGeoData.getCity().getCnCity();
+                                }
+                            }
+                            if (ipGeoData.getNetwork() != null) {
+                                isp = ipGeoData.getNetwork().getIsp();
+                                netType = ipGeoData.getNetwork().getNetType();
+                            }
+                            ispCounter.computeIfAbsent(isp, k -> new AtomicInteger()).incrementAndGet();
+                            cnProvinceCounter.computeIfAbsent(province, k -> new AtomicInteger()).incrementAndGet();
+                            cnCityCounter.computeIfAbsent(city, k -> new AtomicInteger()).incrementAndGet();
+                            countryOrRegionCounter.computeIfAbsent(countryOrRegion, k -> new AtomicInteger()).incrementAndGet();
+                            netTypeCounter.computeIfAbsent(netType, k -> new AtomicInteger()).incrementAndGet();
+
+                        } catch (UnknownHostException e) {
+                            log.error("Unable to resolve the GeoIP data for ip {}", entity, e);
+                        }
+                    });
+                }
+            }
+        }
+        ctx.json(new StdResp(true, null, Map.of(
+                "isp", ispCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                        .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
+                        .toList(),
+                "province", cnProvinceCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                        .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
+                        .toList(),
+                "city", cnCityCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                        .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
+                        .toList(),
+                "region", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList()
         )));
