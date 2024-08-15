@@ -2,6 +2,9 @@ package com.ghostchu.peerbanhelper.util.encrypt;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -48,6 +51,14 @@ public class ActivationKeyUtil {
             if (keyData == null) {
                 throw new IllegalStateException("Incorrect key schema");
             }
+            String description = keyData.description;
+            if (description != null) {
+                if (description.equalsIgnoreCase("No description")
+                        || description.isBlank()) {
+                    description = null;
+                }
+            }
+            keyData.setDescription(description);
             if ("PeerBanHelper".equals(keyData.verifyMagic)) {
                 return keyData;
             }
@@ -58,23 +69,25 @@ public class ActivationKeyUtil {
         }
     }
 
-    public record KeyData(
-            // verifyMagic 应固定为 PeerBanHelper
-            String verifyMagic,
-            // source 为来源
-            String source,
-            // 授权给（用户名），爱发电的话大概都是 “爱发电用户” 固定的
-            String licenseTo,
-            // Key 创建时间
-            Long createAt,
-            // Key 过期时间，通常是 100 年以后
-            Long expireAt,
-            // 许可证描述
-            @Nullable
-            String description,
-            // 隐藏字段，主要是为了改变 KEY，PBH 并不关心这个字段
-            @Nullable
-            String hidden
-    ) {
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class KeyData {
+        // verifyMagic 应固定为 PeerBanHelper
+        private String verifyMagic;
+        // source 为来源
+        private String source;
+        // 授权给（用户名），爱发电的话大概都是 “爱发电用户” 固定的
+        private String licenseTo;
+        // Key 创建时间
+        private Long createAt;
+        // Key 过期时间，通常是 100 年以后
+        private Long expireAt;
+        // 许可证描述
+        @Nullable
+        private String description;
+        // 隐藏字段，主要是为了改变 KEY，PBH 并不关心这个字段
+        @Nullable
+        private String hidden;
     }
 }
