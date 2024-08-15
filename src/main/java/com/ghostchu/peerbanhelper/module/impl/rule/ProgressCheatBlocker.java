@@ -49,7 +49,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 totalSize += 12;
                 return totalSize;
             })
-            .maximumWeight(16000000)
+            .maximumWeight(12000000)
             .removalListener(notification -> {
                 String key = notification.getKey();
                 List<ClientTask> tasks = notification.getValue();
@@ -183,30 +183,31 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             return handshaking();
         }
         // 处理 IPV6
-        IPAddress peerIp;
+        IPAddress peerPrefix;
         if (peer.getPeerAddress().getAddress().isIPv4()) {
-            peerIp = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv4PrefixLength);
+            peerPrefix = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv4PrefixLength);
         } else {
-            peerIp = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv6PrefixLength);
+            peerPrefix = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv6PrefixLength);
         }
-        String peerIpString = peerIp.toString();
+        String peerPrefixString = peerPrefix.toString();
+        String peerIpString = peer.getPeerAddress().getAddress().toString();
         // 从缓存取数据
         List<ClientTask> lastRecordedProgress = null;
         try {
-            lastRecordedProgress = progressRecorder.get(peerIpString, () -> loadClientTasks(peerIpString, torrent.getId()));
+            lastRecordedProgress = progressRecorder.get(peerPrefixString, () -> loadClientTasks(peerPrefix, torrent.getId()));
         } catch (ExecutionException e) {
             log.error("Unhandled exception during load cached record data", e);
         }
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = null;
         for (ClientTask recordedProgress : lastRecordedProgress) {
-            if (recordedProgress.getTorrentId().equals(torrent.getId())) {
+            if (recordedProgress.getPeerIp().equals(peerIpString) && recordedProgress.getTorrentId().equals(torrent.getId())) {
                 clientTask = recordedProgress;
                 break;
             }
         }
         if (clientTask == null) {
-            clientTask = new ClientTask(torrent.getId(), 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis());
+            clientTask = new ClientTask(peerIpString, torrent.getId(), 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis());
             lastRecordedProgress.add(clientTask);
         }
         long uploadedIncremental; // 上传增量
@@ -217,8 +218,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         }
         // 累加上传增量
         clientTask.setTrackingUploadedIncreaseTotal(clientTask.getTrackingUploadedIncreaseTotal() + uploadedIncremental);
-        // 获取真实已上传量（下载器报告、PBH上次报告记录，增量总计，三者取最大）
-        final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), clientTask.getTrackingUploadedIncreaseTotal()));
+        // 整个段的增量总计
+        final long prefixTrackingUploadedIncreaseTotal = lastRecordedProgress.stream().mapToLong(task -> task.getTorrentId().equals(torrent.getId()) ? 0 : task.getTrackingUploadedIncreaseTotal()).sum();
+        // 获取真实已上传量（下载器报告、PBH上次报告记录，整个段的增量总计，三者取最大）
+        final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), prefixTrackingUploadedIncreaseTotal));
         try {
             final long torrentSize = torrent.getSize();
             // 过滤
@@ -280,14 +283,14 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             // 无论如何都写入缓存，同步更改
             clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
-            progressRecorder.put(peerIpString, lastRecordedProgress);
+            progressRecorder.put(peerPrefixString, lastRecordedProgress);
         }
     }
 
-    private List<ClientTask> loadClientTasks(String peerIpString, String id) {
+    private List<ClientTask> loadClientTasks(IPAddress peerPrefix, String id) {
         try {
             if (enablePersist) {
-                return progressCheatBlockerPersistDao.fetchFromDatabase(peerIpString, id, new Timestamp(System.currentTimeMillis() - persistDuration));
+                return progressCheatBlockerPersistDao.fetchFromDatabase(peerPrefix, id, new Timestamp(System.currentTimeMillis() - persistDuration));
             }
         } catch (SQLException e) {
             log.error("Unable to load cached client tasks from database", e);
@@ -304,7 +307,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         // double = 8
         // int = 4
         // 对象头 = 12
-        return calcStringSize(clientTask.torrentId) + (4 * 8) + 8 + (2 * 4) + 12;
+        return calcStringSize(clientTask.peerIp) + calcStringSize(clientTask.torrentId) + (4 * 8) + 8 + (2 * 4) + 12;
     }
 
     private String percent(double d) {
@@ -317,6 +320,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
     @AllArgsConstructor
     @Data
     public static class ClientTask {
+        private String peerIp;
         private String torrentId;
         private double lastReportProgress;
         private long lastReportUploaded;

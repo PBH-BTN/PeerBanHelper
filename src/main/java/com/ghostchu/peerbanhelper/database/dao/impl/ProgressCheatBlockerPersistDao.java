@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ProgressCheatBlockerPersistEntity;
 import com.ghostchu.peerbanhelper.module.impl.rule.ProgressCheatBlocker;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,17 +23,18 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
         super(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
     }
 
-    public List<ProgressCheatBlocker.ClientTask> fetchFromDatabase(String address, String torrentId, Timestamp after) throws SQLException {
+    public List<ProgressCheatBlocker.ClientTask> fetchFromDatabase(IPAddress address, String torrentId, Timestamp after) throws SQLException {
         List<ProgressCheatBlockerPersistEntity> entities = queryBuilder()
                 .where()
-                .eq("address", address)
-                .and()
                 .eq("torrentId", torrentId)
                 .and()
                 .ge("lastTimeSeen", after)
                 .query();
-        return entities.stream().map(
+        return entities.stream().filter(
+                entity -> address.contains(IPAddressUtil.getIPAddress(entity.getAddress()))
+        ).map(
                 entity -> new ProgressCheatBlocker.ClientTask(
+                        entity.getAddress(),
                         entity.getTorrentId(),
                         entity.getLastReportProgress(),
                         entity.getLastReportUploaded(),
@@ -49,10 +52,10 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
             records.forEach(record ->
                     record.task().forEach(task -> {
                         try {
-                            var entity = findExists(record.address(), task.getTorrentId());
+                            var entity = findExists(task.getPeerIp(), task.getTorrentId());
                             if (entity == null) {
                                 entity = new ProgressCheatBlockerPersistEntity(null,
-                                        record.address(),
+                                        task.getPeerIp(),
                                         task.getTorrentId(),
                                         task.getLastReportProgress(),
                                         task.getLastReportUploaded(),
