@@ -57,7 +57,7 @@
                 </Menu>
                 <Menu fx:id="menuDebug" mnemonicParsing="false" text="Debug">
                     <items>
-                        <MenuItem fx:id="menuDebugReload" mnemonicParsing="false" text="Reload configuration...n"/>
+                        <MenuItem fx:id="menuDebugReload" mnemonicParsing="false" text="Reload configuration...n" visible="false"/>
                         <MenuItem fx:id="menuDebugHeapDump" mnemonicParsing="false" text="Heap dump..."/>
                         <MenuItem fx:id="menuDebugPrintThreads" mnemonicParsing="false" text="Print threads information..."/>
                     </items>
