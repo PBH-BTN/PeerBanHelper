@@ -25,6 +25,14 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 16)
+    public void progressCheckerIPv6PrefixLength() {
+        var section = conf.getConfigurationSection("module.progress-cheat-blocker");
+        if (section.getInt("ipv6-prefix-length") == 128) {
+            conf.set("module.progress-cheat-blocker.ipv6-prefix-length", 60);
+        }
+    }
+
     @UpdateScript(version = 15)
     public void addCitiesBanningRule() {
         conf.set("module.ip-address-blocker.cities", List.of("示例海南"));
