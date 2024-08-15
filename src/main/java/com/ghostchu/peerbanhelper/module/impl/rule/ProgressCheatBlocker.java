@@ -219,7 +219,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         // 累加上传增量
         clientTask.setTrackingUploadedIncreaseTotal(clientTask.getTrackingUploadedIncreaseTotal() + uploadedIncremental);
         // 整个段的增量总计
-        final long prefixTrackingUploadedIncreaseTotal = lastRecordedProgress.stream().mapToLong(task -> task.getTorrentId().equals(torrent.getId()) ? 0 : task.getTrackingUploadedIncreaseTotal()).sum();
+        final long prefixTrackingUploadedIncreaseTotal = lastRecordedProgress.stream().mapToLong(task -> task.getTorrentId().equals(torrent.getId()) ? task.getTrackingUploadedIncreaseTotal() : 0).sum();
         // 获取真实已上传量（下载器报告、PBH上次报告记录，整个段的增量总计，三者取最大）
         final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), prefixTrackingUploadedIncreaseTotal));
         try {
