@@ -194,19 +194,22 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         // 从缓存取数据
         List<ClientTask> lastRecordedProgress = null;
         try {
+            // 如果未命中缓存 只导入当前种子记录的ip
             lastRecordedProgress = progressRecorder.get(peerPrefixString, () -> loadClientTasks(peerPrefix, torrent.getId()));
         } catch (ExecutionException e) {
             log.error("Unhandled exception during load cached record data", e);
         }
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
-        ClientTask clientTask = null;
-        for (ClientTask recordedProgress : lastRecordedProgress) {
-            if (recordedProgress.getPeerIp().equals(peerIpString) && recordedProgress.getTorrentId().equals(torrent.getId())) {
-                clientTask = recordedProgress;
-                break;
-            }
+        // 命中缓存但缓存中无当前种子 需要从数据库导入
+        if (lastRecordedProgress.stream().noneMatch(task -> task.getTorrentId().equals(torrent.getId()))){
+            lastRecordedProgress.addAll(0,loadClientTasks(peerPrefix, torrent.getId()));
         }
-        if (clientTask == null) {
+        ClientTask clientTask;
+        // 需要满足同个ip和种子
+        Optional<ClientTask> selected = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString) && task.getTorrentId().equals(torrent.getId())).findFirst();
+        if (selected.isPresent()) {
+            clientTask = selected.get();
+        } else {
             clientTask = new ClientTask(peerIpString, torrent.getId(), 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis());
             lastRecordedProgress.add(clientTask);
         }
