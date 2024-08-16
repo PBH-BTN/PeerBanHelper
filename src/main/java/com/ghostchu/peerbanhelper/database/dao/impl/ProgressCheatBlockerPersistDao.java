@@ -23,10 +23,11 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
         super(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
     }
 
-    public List<ProgressCheatBlocker.ClientTask> fetchFromDatabase(IPAddress address, String torrentId, Timestamp after) throws SQLException {
+    public List<ProgressCheatBlocker.ClientTask> fetchFromDatabase(ProgressCheatBlocker.Client client, Timestamp after) throws SQLException {
+        IPAddress address = IPAddressUtil.getIPAddress(client.getPeerPrefix());
         List<ProgressCheatBlockerPersistEntity> entities = queryBuilder()
                 .where()
-                .eq("torrentId", torrentId)
+                .eq("torrentId", client.getTorrentId())
                 .and()
                 .ge("lastTimeSeen", after)
                 .query();
@@ -35,7 +36,6 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
         ).map(
                 entity -> new ProgressCheatBlocker.ClientTask(
                         entity.getAddress(),
-                        entity.getTorrentId(),
                         entity.getLastReportProgress(),
                         entity.getLastReportUploaded(),
                         entity.getTrackingUploadedIncreaseTotal(),
@@ -49,14 +49,15 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
 
     public void flushDatabase(List<ProgressCheatBlocker.ClientTaskRecord> records) throws SQLException {
         callBatchTasks(() -> {
-            records.forEach(record ->
+            records.forEach(record -> {
+                    String torrentId = record.client().getTorrentId();
                     record.task().forEach(task -> {
                         try {
-                            var entity = findExists(task.getPeerIp(), task.getTorrentId());
+                            var entity = findExists(task.getPeerIp(), torrentId);
                             if (entity == null) {
                                 entity = new ProgressCheatBlockerPersistEntity(null,
                                         task.getPeerIp(),
-                                        task.getTorrentId(),
+                                        torrentId,
                                         task.getLastReportProgress(),
                                         task.getLastReportUploaded(),
                                         task.getTrackingUploadedIncreaseTotal(),
@@ -78,7 +79,8 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                         } catch (SQLException e) {
                             log.error("Unable write PCB persist data into database", e);
                         }
-                    }));
+                    });
+            });
             return null;
         });
     }
