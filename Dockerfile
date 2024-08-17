@@ -4,7 +4,7 @@ COPY . /build
 WORKDIR /build
 RUN sh setup-webui.sh && mvn -B clean package --file pom.xml -T 1C
 
-FROM docker.io/azul/zulu-openjdk-alpine:21.0.4-jdk
+FROM docker.io/azul/zulu-openjdk-alpine:22.0.2-jdk
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 ENV TZ=UTC

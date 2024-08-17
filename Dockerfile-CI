@@ -1,4 +1,4 @@
-FROM docker.io/azul/zulu-openjdk-alpine:21.0.4-jdk
+FROM docker.io/azul/zulu-openjdk-alpine:22.0.2-jdk
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 COPY target/PeerBanHelper.jar /app/PeerBanHelper.jar
 USER 0
