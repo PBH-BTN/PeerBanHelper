@@ -124,8 +124,18 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             String[] data = peerRecordDao.queryBuilder()
                     .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
                     .queryRawFirst();
-            entity.setUploaded(Long.parseLong(data[0]));
-            entity.setDownloaded(Long.parseLong(data[1]));
+            long uploaded = 0;
+            long downloaded = 0;
+            if (data != null) {
+                if(data[0]!=null && !data[0].isBlank()){
+                    uploaded = Long.parseLong(data[0]);
+                }
+                if(data[1]!=null && !data[1].isBlank()){
+                    downloaded = Long.parseLong(data[1]);
+                }
+            }
+            entity.setUploaded(uploaded);
+            entity.setDownloaded(downloaded);
             trafficJournalDao.update(entity);
         } catch (Throwable e) {
             log.error("Unable to write hourly traffic journal to database", e);
