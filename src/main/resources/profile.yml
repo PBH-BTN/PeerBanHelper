@@ -55,7 +55,7 @@ module:
       - '{"method":"STARTS_WITH","content":"-dt"}'
       - '{"method":"STARTS_WITH","content":"-gt0002"}'
       - '{"method":"STARTS_WITH","content":"-gt0003"}'
-      - '{"method":"CONTAINS","content":"rn0.0.0"}'
+      - '{"method":"CONTAINS","content":"-rn0.0.0"}'
       - '{"method":"STARTS_WITH","content":"-sd"}'
       - '{"method":"STARTS_WITH","content":"-xf"}'
       - '{"method":"STARTS_WITH","content":"-qd"}'
@@ -84,6 +84,7 @@ module:
       - '{"method":"STARTS_WITH","content":"go.torrent"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"CONTAINS","content":"rain 0.0.0"}'
+      - '{"method":"CONTAINS","content":"gopeed dev"}'
       - '{"method":"STARTS_WITH","content":"xfplay"}'
       - '{"method":"CONTAINS","content":"StellarPlayer"}'
       - '{"method":"CONTAINS","content":"SP "}' # 不要删除尾随空格

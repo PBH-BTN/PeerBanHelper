@@ -28,7 +28,7 @@ public class ProfileUpdateScript {
     @UpdateScript(version = 17)
     public void updateProfiles() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");
-        bannedPeerIds.add("{\"method\":\"CONTAINS\",\"content\":\"rn0.0.0\"}");
+        bannedPeerIds.add("{\"method\":\"CONTAINS\",\"content\":\"-rn0.0.0\"}");
         conf.set("module.peer-id-blacklist.banned-peer-id", bannedPeerIds);
         List<String> bannedClientNames = conf.getStringList("module.client-name-blacklist.banned-client-name");
         bannedClientNames.add("{\"method\":\"CONTAINS\",\"content\":\"rain 0.0.0\"}");
