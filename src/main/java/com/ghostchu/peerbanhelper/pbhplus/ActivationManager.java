@@ -60,9 +60,7 @@ public class ActivationManager implements Reloadable {
     }
 
     /**
-     * 检查是否已激活，如果它为 true，那么就是激活了，就是这样
-     * 简单吗？是的，很简单！确实是这样
-     * 你说很容易被破解？这就对了！
+     * 检查是否已激活
      *
      * @return 是否已激活，返回 true 时应启用捐赠功能
      */

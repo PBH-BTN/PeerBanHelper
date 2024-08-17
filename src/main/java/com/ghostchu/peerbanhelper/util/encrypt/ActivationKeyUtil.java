@@ -20,7 +20,6 @@ public class ActivationKeyUtil {
     /**
      * 获取 PBH PublicKey 用来解密密文，获取 Key 内容
      * 如果 data/REPLACEMENT_PBH_PUBLIC_KEY.pem 文件存在，那么就用这个文件里的公钥替换内置的 KEY
-     * 什么？你觉得这很容易被破解？这就对了！
      *
      * @return PBH PublicKey
      */
@@ -77,7 +76,7 @@ public class ActivationKeyUtil {
         private String verifyMagic;
         // source 为来源
         private String source;
-        // 授权给（用户名），爱发电的话大概都是 “爱发电用户” 固定的
+        // 授权给（用户名）
         private String licenseTo;
         // Key 创建时间
         private Long createAt;
