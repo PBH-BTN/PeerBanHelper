@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -28,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
+@IgnoreScan
 public class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable {
     @Autowired
     private PeerBanHelperServer peerBanHelperServer;

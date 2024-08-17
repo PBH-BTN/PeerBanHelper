@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -31,6 +32,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Slf4j
 @Component
+@IgnoreScan
 public class PBHBanController extends AbstractFeatureModule {
     @Autowired
     private Database db;

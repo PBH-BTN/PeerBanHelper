@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -28,6 +29,7 @@ import java.util.function.Function;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
+@IgnoreScan
 public class PBHMetricsController extends AbstractFeatureModule {
     @Autowired
     @Qualifier("persistMetrics")

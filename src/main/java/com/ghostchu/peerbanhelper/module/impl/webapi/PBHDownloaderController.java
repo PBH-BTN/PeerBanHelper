@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -31,6 +32,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Slf4j
 @Component
+@IgnoreScan
 public class PBHDownloaderController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;

@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.BuildMeta;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@IgnoreScan
 public class PBHMetadataController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;

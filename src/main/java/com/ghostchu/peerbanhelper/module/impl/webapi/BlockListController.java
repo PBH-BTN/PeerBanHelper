@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
+@IgnoreScan
 public class BlockListController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;

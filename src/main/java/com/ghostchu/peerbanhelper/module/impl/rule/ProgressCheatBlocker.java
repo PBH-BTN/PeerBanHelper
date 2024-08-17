@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -37,6 +38,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
+@IgnoreScan
 public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
     private final Deque<ClientTaskRecord> pendingPersistQueue = new ConcurrentLinkedDeque<>();
     private final Cache<Client, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()

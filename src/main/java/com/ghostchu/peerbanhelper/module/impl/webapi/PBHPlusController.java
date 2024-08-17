@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.encrypt.ActivationKeyUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
+@IgnoreScan
 public class PBHPlusController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
@@ -51,15 +53,15 @@ public class PBHPlusController extends AbstractFeatureModule {
         Main.getMainConfig().set("pbh-plus-key", licenseReq.key());
         Main.getMainConfig().save(Main.getMainConfigFile());
         activationManager.load();
-        if(activationManager.isActivated()) {
+        if (activationManager.isActivated()) {
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_UPDATE), null));
-        }else{
+        } else {
             var keyData = activationManager.getKeyData();
-            if(keyData == null) {
+            if (keyData == null) {
                 ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_INVALID), null));
-            }else if(System.currentTimeMillis() >= keyData.getExpireAt()){
+            } else if (System.currentTimeMillis() >= keyData.getExpireAt()) {
                 ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_EXPIRED), null));
-            }else{
+            } else {
                 ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_INVALID), null));
             }
         }

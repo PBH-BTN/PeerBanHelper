@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -24,6 +25,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
+@IgnoreScan
 public class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryDao historyDao;

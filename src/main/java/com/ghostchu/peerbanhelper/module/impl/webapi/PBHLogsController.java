@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.LoggerEventRecordCreatedEvent;
 import com.ghostchu.peerbanhelper.log4j2.MemoryLoggerAppender;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
+@IgnoreScan
 public class PBHLogsController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;

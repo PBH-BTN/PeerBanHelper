@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@IgnoreScan
 public class PBHGeneralController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;

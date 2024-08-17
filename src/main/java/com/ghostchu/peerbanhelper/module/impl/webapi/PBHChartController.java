@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
@@ -35,6 +36,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
+@IgnoreScan
 public class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;

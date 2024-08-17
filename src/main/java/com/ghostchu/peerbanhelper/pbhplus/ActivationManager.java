@@ -37,7 +37,7 @@ public class ActivationManager implements Reloadable {
             return;
         }
         this.keyData = ActivationKeyUtil.fromKey(this.keyText);
-        if(keyData != null) {
+        if (keyData != null) {
             if (this.isActivated()) {
                 log.info(tlUI(Lang.DONATION_KEY_VERIFICATION_SUCCESSFUL, keyData.getLicenseTo(), keyData.getSource(), MsgUtil.getDateFormatter().format(new Date(keyData.getExpireAt()))));
             }

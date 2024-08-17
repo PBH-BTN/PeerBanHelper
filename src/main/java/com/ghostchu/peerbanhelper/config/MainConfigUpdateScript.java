@@ -25,6 +25,11 @@ public class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 17)
+    public void windowsEcoQoSApi() {
+        conf.set("performance.windows-ecoqos-api", true);
+    }
+
     @UpdateScript(version = 16)
     public void fixNonProxyHosts() {
         if (!conf.isSet("proxy.non-proxy-hosts")) {

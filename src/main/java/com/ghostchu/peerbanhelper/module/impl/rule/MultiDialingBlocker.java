@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -34,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
+@IgnoreScan
 public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Reloadable {
     // 计算缓存容量
     private static final int TORRENT_PEER_MAX_NUM = 1024;

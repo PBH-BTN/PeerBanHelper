@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -26,6 +27,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
  */
 @Component
 @Slf4j
+@IgnoreScan
 public class PBHOOBEController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;

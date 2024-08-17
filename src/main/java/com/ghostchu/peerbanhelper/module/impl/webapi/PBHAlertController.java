@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@IgnoreScan
 public class PBHAlertController extends AbstractFeatureModule {
     @Autowired
     private AlertManager alertManager;

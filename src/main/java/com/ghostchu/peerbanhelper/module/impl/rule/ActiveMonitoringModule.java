@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
@@ -28,6 +29,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
+@IgnoreScan
 public class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable {
     private final PeerRecordDao peerRecordDao;
     private final Deque<PeerRecordDao.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
@@ -127,10 +129,10 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             long uploaded = 0;
             long downloaded = 0;
             if (data != null) {
-                if(data[0]!=null && !data[0].isBlank()){
+                if (data[0] != null && !data[0].isBlank()) {
                     uploaded = Long.parseLong(data[0]);
                 }
-                if(data[1]!=null && !data[1].isBlank()){
+                if (data[1] != null && !data[1].isBlank()) {
                     downloaded = Long.parseLong(data[1]);
                 }
             }

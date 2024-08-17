@@ -50,36 +50,36 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
     public void flushDatabase(List<ProgressCheatBlocker.ClientTaskRecord> records) throws SQLException {
         callBatchTasks(() -> {
             records.forEach(record -> {
-                    String torrentId = record.client().getTorrentId();
-                    record.task().forEach(task -> {
-                        try {
-                            var entity = findExists(task.getPeerIp(), torrentId);
-                            if (entity == null) {
-                                entity = new ProgressCheatBlockerPersistEntity(null,
-                                        task.getPeerIp(),
-                                        torrentId,
-                                        task.getLastReportProgress(),
-                                        task.getLastReportUploaded(),
-                                        task.getTrackingUploadedIncreaseTotal(),
-                                        task.getRewindCounter(),
-                                        task.getProgressDifferenceCounter(),
-                                        new Timestamp(System.currentTimeMillis()),
-                                        new Timestamp(System.currentTimeMillis())
-                                );
-                                create(entity);
-                            } else {
-                                entity.setLastReportProgress(task.getLastReportProgress());
-                                entity.setLastReportUploaded(task.getLastReportUploaded());
-                                entity.setProgressDifferenceCounter(task.getProgressDifferenceCounter());
-                                entity.setRewindCounter(task.getRewindCounter());
-                                entity.setTrackingUploadedIncreaseTotal(task.getTrackingUploadedIncreaseTotal());
-                                entity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
-                                update(entity);
-                            }
-                        } catch (SQLException e) {
-                            log.error("Unable write PCB persist data into database", e);
+                String torrentId = record.client().getTorrentId();
+                record.task().forEach(task -> {
+                    try {
+                        var entity = findExists(task.getPeerIp(), torrentId);
+                        if (entity == null) {
+                            entity = new ProgressCheatBlockerPersistEntity(null,
+                                    task.getPeerIp(),
+                                    torrentId,
+                                    task.getLastReportProgress(),
+                                    task.getLastReportUploaded(),
+                                    task.getTrackingUploadedIncreaseTotal(),
+                                    task.getRewindCounter(),
+                                    task.getProgressDifferenceCounter(),
+                                    new Timestamp(System.currentTimeMillis()),
+                                    new Timestamp(System.currentTimeMillis())
+                            );
+                            create(entity);
+                        } else {
+                            entity.setLastReportProgress(task.getLastReportProgress());
+                            entity.setLastReportUploaded(task.getLastReportUploaded());
+                            entity.setProgressDifferenceCounter(task.getProgressDifferenceCounter());
+                            entity.setRewindCounter(task.getRewindCounter());
+                            entity.setTrackingUploadedIncreaseTotal(task.getTrackingUploadedIncreaseTotal());
+                            entity.setLastTimeSeen(new Timestamp(System.currentTimeMillis()));
+                            update(entity);
                         }
-                    });
+                    } catch (SQLException e) {
+                        log.error("Unable write PCB persist data into database", e);
+                    }
+                });
             });
             return null;
         });

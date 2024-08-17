@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -30,6 +31,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
+@IgnoreScan
 public class RuleSubController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
