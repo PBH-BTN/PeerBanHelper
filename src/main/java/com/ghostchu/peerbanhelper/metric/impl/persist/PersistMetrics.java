@@ -43,7 +43,7 @@ public class PersistMetrics implements BasicMetrics {
         this.moduleDao = moduleDao;
         this.torrentDao = torrentDao;
         this.inMemory = inMemory;
-        scheduler.scheduleAtFixedRate(this::cleanup, 0, 1, TimeUnit.DAYS);
+        scheduler.scheduleAtFixedRate(this::cleanup, 1, 24, TimeUnit.HOURS);
     }
 
     private void cleanup() {
