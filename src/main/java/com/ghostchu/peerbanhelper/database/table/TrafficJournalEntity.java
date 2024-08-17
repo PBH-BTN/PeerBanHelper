@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "traffic_journey")
+@DatabaseTable(tableName = "traffic_journal")
 public final class TrafficJournalEntity {
     @DatabaseField(id = true, unique = true, index = true)
     private Long timestamp;

@@ -102,6 +102,8 @@ public class PBHChartController extends AbstractFeatureModule {
                 var target = it.next();
                 long uploadedOffset = target.getUploaded() - base.getUploaded();
                 long downloadedOffset = target.getDownloaded() - base.getDownloaded();
+                if(uploadedOffset < 0) uploadedOffset = 0;
+                if(downloadedOffset < 0) downloadedOffset = 0;
                 base = target;
                 records.add(new TrafficJournalRecord(base.getTimestamp(), uploadedOffset, downloadedOffset));
             }
