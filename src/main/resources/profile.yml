@@ -1,4 +1,4 @@
-config-version: 15
+config-version: 16
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -144,7 +144,7 @@ module:
     # IPV6 prefix length, same prefix will trick as a same user
     # 64 = 常见的 ISP 为单个接入用户分配的前缀长度
     # 64 = The common prefix length that ISP allocate for one user
-    ipv6-prefix-length: 128
+    ipv6-prefix-length: 60
     ban-duration: 2592000000
     # 启用持久化记录
     # Enable persist recording
