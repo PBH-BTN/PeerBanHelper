@@ -1,4 +1,4 @@
-config-version: 16
+config-version: 17
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -157,3 +157,9 @@ proxy:
   port: 7890
   # 代理例外地址，使用 | 分隔不同条目 - Exception list, spilt with | symbol
   non-proxy-hosts: "localhost|127.*|192.168.*|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*"
+
+performance:
+  # 启用 Windows 平台上的 EcoQoS API
+  # Enable EcoQoS API on Windows Platform
+  # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
+  windows-ecoqos-api: true

@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>6.0.0-24w33a</version>
+    <version>6.0.0-24w33b</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -249,6 +249,7 @@
                     <exclude>static/**</exclude>
                     <exclude>assets/**</exclude>
                     <exclude>javafx/**</exclude>
+                    <exclude>native/**</exclude>
                 </excludes>
             </resource>
             <resource>
@@ -267,6 +268,11 @@
             <resource>
                 <directory>src/main/resources/assets</directory>
                 <targetPath>assets</targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/native</directory>
+                <targetPath>native</targetPath>
                 <filtering>false</filtering>
             </resource>
         </resources>

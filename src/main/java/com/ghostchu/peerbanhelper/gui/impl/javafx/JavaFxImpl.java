@@ -6,6 +6,7 @@ import atlantafx.base.theme.Styles;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.MainJavaFx;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
+import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow.JFXWindowController;
@@ -45,11 +46,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -72,6 +73,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private final boolean silentStart;
     private final String[] args;
     private final Set<ListCell<ListLogEntry>> selected = new HashSet<>();
+    private final ScheduledExecutorService scheduledService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
     private TrayIcon trayIcon;
     private ListView<ListLogEntry> logsView;
     private boolean persistFlagTrayMessageSent = false;
@@ -102,7 +104,8 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Subscribe
     public void onPBHServerStarted(PBHServerStartedEvent event) {
-        Platform.runLater(() -> MainJavaFx.getStage().setTitle(tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev())));
+        //Platform.runLater(() -> MainJavaFx.getStage().setTitle(tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev())));
+        scheduledService.scheduleWithFixedDelay(this::updateTitleFlags, 0, 5, TimeUnit.SECONDS);
         if (Arrays.stream(Main.getStartupArgs()).noneMatch(s -> s.equalsIgnoreCase("enableWebview"))) {
             log.info(tlUI(Lang.WEBVIEW_DEFAULT_DISABLED));
             return;
@@ -126,6 +129,13 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
             log.error(tlUI(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED), e);
         }
 
+    }
+
+    public void updateTitleFlags() {
+        StringJoiner joiner = new StringJoiner(" ", "[", "]");
+        String base = tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev());
+        ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
+        Platform.runLater(() -> MainJavaFx.getStage().setTitle(base + " " + joiner));
     }
 
     @SneakyThrows

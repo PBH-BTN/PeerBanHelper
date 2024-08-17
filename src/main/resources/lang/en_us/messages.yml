@@ -360,3 +360,6 @@ RELOADING_MODULE: "[Reload] {}: {}"
 
 TORRENT_NOT_FOUND: "No records found by given InfoHash"
 PEER_NOT_FOUND: "No records found by given Peer"
+
+IN_ECOMODE_SHORT: "🍃EcoQoS"
+IN_ECOMODE_DESCRIPTION: "EcoQoS API load successfully，Windows Efficiency Mode now applied to PeerBanHelper for saving power usage."

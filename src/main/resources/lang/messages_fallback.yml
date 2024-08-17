@@ -360,3 +360,6 @@ RELOADING_MODULE: "[重载] {}: {}"
 
 TORRENT_NOT_FOUND: "指定的 Torrent 记录不存在"
 PEER_NOT_FOUND: "指定的 Peer 记录不存在"
+
+IN_ECOMODE_SHORT: "🍃EcoQoS"
+IN_ECOMODE_DESCRIPTION: "EcoQoS API 加载成功，Windows 效率模式已应用至 PeerBanHelper 以降低系统能耗"
