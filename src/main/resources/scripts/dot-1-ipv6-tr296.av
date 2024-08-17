@@ -19,3 +19,4 @@ if(string.endsWith(strIp, "::1")){
     return "Transmission 2.94 (IPV6 ::1) 多拨伪装吸血";
 }
 
+return false;
