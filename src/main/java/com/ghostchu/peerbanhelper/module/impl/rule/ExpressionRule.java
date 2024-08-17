@@ -6,14 +6,17 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.googlecode.aviator.AviatorEvaluator;
@@ -233,6 +236,12 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             log.error("Failed to load scripts", e);
             System.exit(1);
         }
+//        test code
+//        Torrent torrent = new TorrentImpl("1", "","",1,1.00d, 1,1);
+//        Peer peer = new PeerImpl(new PeerAddress("2408:8214:1551:bf20::1", 51413),
+//                "2408:8214:1551:bf20::1","-TR2940-", "Transmission 2.94",
+//                1,1,1,1,0.0d,null);
+//        System.out.println(shouldBanPeer(torrent,peer, Executors.newVirtualThreadPerTaskExecutor()));
     }
 
     @Override

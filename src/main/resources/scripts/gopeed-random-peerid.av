@@ -16,8 +16,4 @@ if(string.indexOf(clientNameLowercase,"gopeed dev") != -1) {
         return 'Gopeed Dev 全随机 PeerID 检测';
     }
 }
-
-if(string.startsWith(clientNameLowercase, peerIdLowercase)){
-        return 'Gopeed Dev 全随机变种检测';
-}
 return false;
