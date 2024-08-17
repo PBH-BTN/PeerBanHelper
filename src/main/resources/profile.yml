@@ -1,4 +1,4 @@
-config-version: 16
+config-version: 17
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -55,6 +55,7 @@ module:
       - '{"method":"STARTS_WITH","content":"-dt"}'
       - '{"method":"STARTS_WITH","content":"-gt0002"}'
       - '{"method":"STARTS_WITH","content":"-gt0003"}'
+      - '{"method":"CONTAINS","content":"rn0.0.0"}'
       - '{"method":"STARTS_WITH","content":"-sd"}'
       - '{"method":"STARTS_WITH","content":"-xf"}'
       - '{"method":"STARTS_WITH","content":"-qd"}'
@@ -82,6 +83,7 @@ module:
       - '{"method":"STARTS_WITH","content":"xm "}'
       - '{"method":"STARTS_WITH","content":"go.torrent"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
+      - '{"method":"CONTAINS","content":"rain 0.0.0"}'
       - '{"method":"STARTS_WITH","content":"xfplay"}'
       - '{"method":"CONTAINS","content":"StellarPlayer"}'
       - '{"method":"CONTAINS","content":"SP "}' # 不要删除尾随空格
@@ -358,7 +360,7 @@ module:
   # NOTE: This may lead database size increase quickly
   active-monitoring:
     # 是否启用此功能
-    enabled: false
+    enabled: true
     # 清理周期
     # Retention time
     # 请注意：由于 SQLite 的特性，记录被删除后不会释放磁盘空间，但后续新数据记录会重新利用此部分空间
