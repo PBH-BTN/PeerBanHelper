@@ -8,8 +8,6 @@ import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.ice.tar.TarEntry;
-import com.ice.tar.TarInputStream;
 import com.maxmind.db.MaxMindDbConstructor;
 import com.maxmind.db.MaxMindDbParameter;
 import com.maxmind.db.Reader;
@@ -20,12 +18,12 @@ import com.maxmind.geoip2.model.CountryResponse;
 import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Country;
 import com.maxmind.geoip2.record.Location;
-import lombok.Cleanup;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.Authenticator;
 import java.net.InetAddress;
 import java.net.PasswordAuthentication;
@@ -42,7 +40,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPInputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -247,6 +244,7 @@ public class IPDB implements AutoCloseable {
         Files.move(tmp, mmdbGeoCNFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
+
     private void loadMMDB() throws IOException {
         this.languageTag = List.of(Main.DEF_LOCALE, "en");
         this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
@@ -258,42 +256,13 @@ public class IPDB implements AutoCloseable {
 
     private void updateMMDB(String databaseName, File target) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
-        MutableRequest request = MutableRequest.GET("https://download.maxmind.com/geoip/databases/" + databaseName + "/download?suffix=tar.gz");
-        Path tmp = Files.createTempFile("ipdb-mmdb-archive", ".tar.gz");
+        MutableRequest request = MutableRequest.GET("https://github.com/P3TERX/GeoLite.mmdb/raw/download/" + databaseName + ".mmdb");
+        Path tmp = Files.createTempFile(databaseName, ".mmdb");
         downloadFile(request, tmp, databaseName).join();
         if (!tmp.toFile().exists()) {
             throw new IllegalStateException("Download mmdb database failed!");
         }
-        boolean found = false;
-        @Cleanup
-        InputStream gzipIn = new GZIPInputStream(new FileInputStream(tmp.toFile()));
-        @Cleanup
-        TarInputStream tarInputStream = new TarInputStream(gzipIn);
-        String filename;
-        TarEntry entry;
-        while ((entry = tarInputStream.getNextEntry()) != null) {
-            if (!entry.isDirectory()) {
-                filename = entry.getName();
-                if (filename.substring(filename.length() - 5).equalsIgnoreCase(".mmdb")) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-        if (!found) {
-            throw new IllegalStateException("Except an .mmdb file inside Maxmind archive");
-        }
-        Path path = Files.createTempFile("ipdb-extracted", ".mmdb");
-        File out = path.toFile();
-        try (FileOutputStream outputStream = new FileOutputStream(out)) {
-            byte[] buffer = new byte[1024];
-            int length = tarInputStream.read(buffer);
-            while (length >= 0) {
-                outputStream.write(buffer, 0, length);
-                length = tarInputStream.read(buffer);
-            }
-        }
-        Files.move(path, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     private void setupHttpClient() {

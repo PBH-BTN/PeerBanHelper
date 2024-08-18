@@ -246,10 +246,10 @@ public class PeerBanHelperServer implements Reloadable {
             String databaseCity = mainConfig.getString("ip-database.database-city", "");
             String databaseASN = mainConfig.getString("ip-database.database-asn", "");
             boolean autoUpdate = mainConfig.getBoolean("ip-database.auto-update");
-            if (accountId.isEmpty() || licenseKey.isEmpty() || databaseCity.isEmpty() || databaseASN.isEmpty()) {
-                log.warn(tlUI(Lang.IPDB_NEED_CONFIG));
-                return;
-            }
+//            if (accountId.isEmpty() || licenseKey.isEmpty() || databaseCity.isEmpty() || databaseASN.isEmpty()) {
+//                log.warn(tlUI(Lang.IPDB_NEED_CONFIG));
+//                return;
+//            }
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
                     databaseCity, databaseASN, autoUpdate, Main.getUserAgent());
         } catch (Exception e) {

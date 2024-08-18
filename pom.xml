@@ -553,12 +553,6 @@
             <artifactId>geoip2</artifactId>
             <version>4.2.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javatar/javatar -->
-        <dependency>
-            <groupId>javatar</groupId>
-            <artifactId>javatar</artifactId>
-            <version>2.5</version>
-        </dependency>
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
