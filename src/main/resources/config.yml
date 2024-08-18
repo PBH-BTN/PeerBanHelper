@@ -159,7 +159,7 @@ proxy:
   non-proxy-hosts: "localhost|127.*|192.168.*|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*"
 
 performance:
-  # 启用 Windows 平台上的 EcoQoS API
-  # Enable EcoQoS API on Windows Platform
+  # 启用 Windows 平台上的 EcoQoS API以节约能源消耗，作为交换，程序运行速度将降低，定时任务可能推迟
+  # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
