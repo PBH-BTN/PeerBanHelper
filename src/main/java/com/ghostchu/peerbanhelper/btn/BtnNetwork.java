@@ -63,7 +63,7 @@ public class BtnNetwork {
             executeService.shutdownNow();
         }
         executeService = Executors.newScheduledThreadPool(2);
-        executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 0, 600, TimeUnit.SECONDS);
+        executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 600, 600, TimeUnit.SECONDS);
     }
 
     public void configBtnNetwork() {
