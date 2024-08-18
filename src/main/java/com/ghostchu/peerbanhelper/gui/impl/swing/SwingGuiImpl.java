@@ -1,9 +1,12 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
+import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,7 +34,19 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Override
     public void setup() {
         super.setup();
-        FlatIntelliJLaf.setup();
+        //FlatIntelliJLaf.setup();
+        Main.getEventBus().register(this);
+        OsThemeDetector detector = OsThemeDetector.getDetector();
+        detector.registerListener(this::updateTheme);
+        updateTheme(detector.isDark());
+    }
+
+    private void updateTheme(Boolean isDark) {
+        if (isDark) {
+            FlatDarculaLaf.setup();
+        } else {
+            FlatIntelliJLaf.setup();
+        }
     }
 
     @Override

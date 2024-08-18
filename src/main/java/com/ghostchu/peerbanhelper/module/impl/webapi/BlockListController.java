@@ -2,12 +2,12 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import inet.ipaddr.IPAddress;
-import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,9 +19,11 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
+@IgnoreScan
 public class BlockListController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -30,6 +32,13 @@ public class BlockListController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.javalin()
+                .get("/blocklist/ip", ctx -> {
+                    StringBuilder builder = new StringBuilder();
+                    for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
+                        builder.append(pair.getKey().getIp()).append("\n");
+                    }
+                    ctx.result(builder.toString());
+                })
                 .get("/blocklist/p2p-plain-format", ctx -> {
                     StringBuilder builder = new StringBuilder();
                     for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
@@ -38,7 +47,6 @@ public class BlockListController extends AbstractFeatureModule {
                         String end = pair.getKey().getIp();
                         builder.append(ruleName).append(":").append(start).append("-").append(end).append("\n");
                     }
-                    ctx.status(HttpStatus.OK);
                     ctx.result(builder.toString());
                 }, Role.ANYONE)
                 .get("/blocklist/dat-emule", ctx -> {
@@ -49,7 +57,6 @@ public class BlockListController extends AbstractFeatureModule {
                         String fullIp = ipAddress.toFullString();
                         builder.append(fullIp).append(" - ").append(fullIp).append(" , 000 , ").append(UUID.randomUUID().toString().replace("-", "")).append("\n");
                     }
-                    ctx.status(HttpStatus.OK);
                     ctx.result(builder.toString());
                 }, Role.ANYONE);
     }

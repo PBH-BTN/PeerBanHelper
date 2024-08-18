@@ -11,9 +11,12 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Expression;
@@ -49,7 +52,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class ExpressionRule extends AbstractRuleFeatureModule {
+@IgnoreScan
+public class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
     private final long maxScriptExecuteTime = 1500;
     private final Map<ExpressionMetadata, ReentrantLock> threadLocks = new HashMap<>();
     private Map<Expression, ExpressionMetadata> expressions = new HashMap<>();
@@ -231,6 +235,23 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             log.error("Failed to load scripts", e);
             System.exit(1);
         }
+//        test code
+//        Torrent torrent = new TorrentImpl("1", "","",1,1.00d, 1,1);
+//        Peer peer = new PeerImpl(new PeerAddress("2408:8214:1551:bf20::1", 51413),
+//                "2408:8214:1551:bf20::1","-TR2940-", "Transmission 2.94",
+//                1,1,1,1,0.0d,null);
+//        System.out.println(shouldBanPeer(torrent,peer, Executors.newVirtualThreadPerTaskExecutor()));
+    }
+
+    @Override
+    public void onDisable() {
+        Main.getReloadManager().unregister(this);
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     private void reloadConfig() throws IOException {
@@ -318,11 +339,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule {
             file.createNewFile();
             Files.writeString(file.toPath(), content);
         }
-    }
-
-    @Override
-    public void onDisable() {
-
     }
 
     record ExpressionMetadata(String name, String author, boolean cacheable, boolean threadSafe, String version,

@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.text.postprocessor.PostProcessor;
 import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
-import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +45,7 @@ public class TextManager implements Reloadable {
             this.overrideDirectory.mkdirs();
         }
         load();
+        Main.getReloadManager().register(this);
     }
 
     public static String tlUI(Lang key, Object... params) {
@@ -67,8 +67,11 @@ public class TextManager implements Reloadable {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
         YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
         if (yamlConfiguration == null) {
-            new Exception("Unsupported locale").printStackTrace();
-            return "Unsupported locale: " + locale;
+            yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("en_us");
+            if (yamlConfiguration == null) {
+                log.warn("The locale {} are not supported and fallback locale en_us load failed.", locale);
+                return "Unsupported locale " + locale;
+            }
         }
         String str = yamlConfiguration.getString(translationComponent.getKey());
         if (str == null) {
@@ -97,7 +100,7 @@ public class TextManager implements Reloadable {
                 components[i] = "null";
                 continue;
             }
-            //     Class<?> clazz = obj.getClass();
+            //     Class<?> clazz = data.getClass();
             // Check
 
             try {
@@ -282,9 +285,9 @@ public class TextManager implements Reloadable {
     }
 
     @Override
-    public ReloadResult reloadModule() {
+    public ReloadResult reloadModule() throws Exception {
         load();
-        return ReloadResult.builder().status(ReloadStatus.SUCCESS).build();
+        return Reloadable.super.reloadModule();
     }
 
     /**

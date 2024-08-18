@@ -25,6 +25,19 @@ public class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 17)
+    public void windowsEcoQoSApi() {
+        conf.set("performance.windows-ecoqos-api", true);
+    }
+
+    @UpdateScript(version = 16)
+    public void fixNonProxyHosts() {
+        if (!conf.isSet("proxy.non-proxy-hosts")) {
+            conf.set("proxy.non-proxy-hosts", conf.get("proxy.non-proxy-host", "localhost|127.*|192.168.*|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*"));
+        }
+        conf.set("proxy.non-proxy-host", null);
+    }
+
     @UpdateScript(version = 15)
     public void pbhPlusKeyConfig() {
         conf.set("pbh-plus-key", "");
@@ -34,6 +47,7 @@ public class MainConfigUpdateScript {
     public void proxyServerConfigSectionEnhanced() {
         conf.set("proxy.non-proxy-host", "127.0.0.1|localhost");
     }
+
     @UpdateScript(version = 13)
     public void proxyServerConfigSection() {
         conf.set("proxy.setting", 0);

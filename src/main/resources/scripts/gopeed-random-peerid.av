@@ -1,0 +1,19 @@
+## @NAME Gopeed 全随机检查
+## @AUTHOR PBH-BTN Community
+## @CACHEABLE true
+## @VERSION 1.1
+## @THREADSAFE true
+
+if(isBlank(peer.clientName) || isBlank(peer.peerId)) {
+    return false; ## 二元组任意为空都不能继续检查，需要下载器支持
+}
+## 全部转换为小写
+let peerIdLowercase = toLowerCase(peer.peerId);
+let clientNameLowercase = toLowerCase(peer.clientName);
+
+if(string.indexOf(clientNameLowercase,"gopeed dev") != -1) {
+    if(!string.startsWith(peerIdLowercase, "-gp")) {
+        return 'Gopeed Dev 全随机 PeerID 检测';
+    }
+}
+return false;

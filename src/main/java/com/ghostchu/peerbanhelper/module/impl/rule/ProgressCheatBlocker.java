@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
@@ -10,14 +11,17 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.Weigher;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -34,21 +38,22 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
+@IgnoreScan
+public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
     private final Deque<ClientTaskRecord> pendingPersistQueue = new ConcurrentLinkedDeque<>();
-    private final Cache<String, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
+    private final Cache<Client, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.MINUTES)
-            .weigher((Weigher<String, List<ClientTask>>) (key, value) -> {
-                int totalSize = calcStringSize(key);
+            .weigher((Weigher<Client, List<ClientTask>>) (key, value) -> {
+                int totalSize = calcClientSize(key);
                 for (ClientTask clientTask : value) {
                     totalSize += calcClientTaskSize(clientTask);
                 }
                 totalSize += 12;
                 return totalSize;
             })
-            .maximumWeight(16000000)
+            .maximumWeight(12000000)
             .removalListener(notification -> {
-                String key = notification.getKey();
+                Client key = notification.getKey();
                 List<ClientTask> tasks = notification.getValue();
                 pendingPersistQueue.offer(new ClientTaskRecord(key, tasks));
             })
@@ -88,34 +93,38 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         scheduledTimer = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
         scheduledTimer.scheduleWithFixedDelay(this::flushDatabase, 30, 30, TimeUnit.SECONDS);
         scheduledTimer.scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
+        Main.getReloadManager().register(this);
     }
 
     private void cleanDatabase() {
         try {
             progressCheatBlockerPersistDao.cleanupDatabase(new Timestamp(System.currentTimeMillis() - persistDuration));
-        } catch (SQLException e) {
+        } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
         }
     }
 
     private void flushDatabase() {
-        List<ClientTaskRecord> records = new ArrayList<>();
-        while (!pendingPersistQueue.isEmpty()) {
-            records.add(pendingPersistQueue.poll());
-        }
         try {
-            progressCheatBlockerPersistDao.flushDatabase(records);
-        } catch (SQLException e) {
-            log.error("Unable flush records into database", e);
+            List<ClientTaskRecord> records = new ArrayList<>();
+            while (!pendingPersistQueue.isEmpty()) {
+                records.add(pendingPersistQueue.poll());
+            }
+            try {
+                progressCheatBlockerPersistDao.flushDatabase(records);
+            } catch (SQLException e) {
+                log.error("Unable flush records into database", e);
+            }
+        } catch (Throwable throwable) {
+            log.error("Unable to complete scheduled tasks", throwable);
         }
     }
 
     private void handleStatus(Context ctx) {
-        ctx.status(HttpStatus.OK);
         List<ClientTaskRecord> records = progressRecorder.asMap().entrySet().stream()
                 .map(entry -> new ClientTaskRecord(entry.getKey(), entry.getValue()))
                 .toList();
-        ctx.json(records);
+        ctx.json(new StdResp(true, null, records));
     }
 
 
@@ -126,8 +135,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         config.put("excessiveThreshold", excessiveThreshold);
         config.put("maximumDifference", maximumDifference);
         config.put("rewindMaximumDifference", rewindMaximumDifference);
-        ctx.status(HttpStatus.OK);
-        ctx.json(config);
+        ctx.json(new StdResp(true, null, config));
     }
 
     @Override
@@ -140,6 +148,11 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         return true;
     }
 
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
+    }
 
     @Override
     public void onDisable() {
@@ -149,6 +162,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             log.info(tlUI(Lang.PCB_SHUTTING_DOWN));
             flushDatabase();
         }
+        Main.getReloadManager().unregister(this);
     }
 
     private void reloadConfig() {
@@ -171,30 +185,27 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             return handshaking();
         }
         // 处理 IPV6
-        IPAddress peerIp;
-        if (peer.getPeerAddress().getAddress().isIPv4()) {
-            peerIp = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv4PrefixLength);
+        IPAddress peerPrefix;
+        IPAddress peerIp = peer.getPeerAddress().getAddress();
+        if (peerIp.isIPv4()) {
+            peerPrefix = IPAddressUtil.toPrefixBlock(peerIp, ipv4PrefixLength);
         } else {
-            peerIp = IPAddressUtil.toPrefixBlock(peer.getPeerAddress().getAddress(), ipv6PrefixLength);
+            peerPrefix = IPAddressUtil.toPrefixBlock(peerIp, ipv6PrefixLength);
         }
         String peerIpString = peerIp.toString();
+        Client client = new Client(peerPrefix.toString(), torrent.getId());
         // 从缓存取数据
         List<ClientTask> lastRecordedProgress = null;
         try {
-            lastRecordedProgress = progressRecorder.get(peerIpString, () -> loadClientTasks(peerIpString, torrent.getId()));
+            // 如果未命中缓存 只导入当前种子记录的ip
+            lastRecordedProgress = progressRecorder.get(client, () -> loadClientTasks(client));
         } catch (ExecutionException e) {
             log.error("Unhandled exception during load cached record data", e);
         }
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
-        ClientTask clientTask = null;
-        for (ClientTask recordedProgress : lastRecordedProgress) {
-            if (recordedProgress.getTorrentId().equals(torrent.getId())) {
-                clientTask = recordedProgress;
-                break;
-            }
-        }
+        ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
         if (clientTask == null) {
-            clientTask = new ClientTask(torrent.getId(), 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis());
+            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis());
             lastRecordedProgress.add(clientTask);
         }
         long uploadedIncremental; // 上传增量
@@ -205,8 +216,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         }
         // 累加上传增量
         clientTask.setTrackingUploadedIncreaseTotal(clientTask.getTrackingUploadedIncreaseTotal() + uploadedIncremental);
-        // 获取真实已上传量（下载器报告、PBH上次报告记录，增量总计，三者取最大）
-        final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), clientTask.getTrackingUploadedIncreaseTotal()));
+        // 整个段的增量总计
+        final long prefixTrackingUploadedIncreaseTotal = lastRecordedProgress.stream().mapToLong(ClientTask::getTrackingUploadedIncreaseTotal).sum();
+        // 获取真实已上传量（下载器报告、PBH上次报告记录，整个段的增量总计，三者取最大）
+        final long actualUploaded = Math.max(peer.getUploaded(), Math.max(clientTask.getLastReportUploaded(), prefixTrackingUploadedIncreaseTotal));
         try {
             final long torrentSize = torrent.getSize();
             // 过滤
@@ -251,7 +264,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
                 boolean ban = rewind > rewindMaximumDifference;
                 if (ban) {
                     clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
-                    progressRecorder.invalidate(peerIpString); // 封禁时，移除缓存
+                    progressRecorder.invalidate(client); // 封禁时，移除缓存
                 }
 
                 return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
@@ -268,14 +281,14 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
             // 无论如何都写入缓存，同步更改
             clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
-            progressRecorder.put(peerIpString, lastRecordedProgress);
+            progressRecorder.put(client, lastRecordedProgress);
         }
     }
 
-    private List<ClientTask> loadClientTasks(String peerIpString, String id) {
+    private List<ClientTask> loadClientTasks(Client client) {
         try {
             if (enablePersist) {
-                return progressCheatBlockerPersistDao.fetchFromDatabase(peerIpString, id, new Timestamp(System.currentTimeMillis() - persistDuration));
+                return progressCheatBlockerPersistDao.fetchFromDatabase(client, new Timestamp(System.currentTimeMillis() - persistDuration));
             }
         } catch (SQLException e) {
             log.error("Unable to load cached client tasks from database", e);
@@ -292,20 +305,24 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         // double = 8
         // int = 4
         // 对象头 = 12
-        return calcStringSize(clientTask.torrentId) + (4 * 8) + 8 + (2 * 4) + 12;
+        return calcStringSize(clientTask.peerIp) + (4 * 8) + 8 + (2 * 4) + 12;
+    }
+
+    private int calcClientSize(Client client) {
+        return calcStringSize(client.peerPrefix) + calcStringSize(client.torrentId) + 12;
     }
 
     private String percent(double d) {
         return MsgUtil.getPercentageFormatter().format(d);
     }
 
-    public record ClientTaskRecord(String address, List<ClientTask> task) {
+    public record ClientTaskRecord(Client client, List<ClientTask> task) {
     }
 
     @AllArgsConstructor
     @Data
     public static class ClientTask {
-        private String torrentId;
+        private String peerIp;
         private double lastReportProgress;
         private long lastReportUploaded;
         private long trackingUploadedIncreaseTotal;
@@ -313,6 +330,13 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule {
         private int progressDifferenceCounter;
         private long firstTimeSeen;
         private long lastTimeSeen;
+    }
+
+    @AllArgsConstructor
+    @Data
+    public static class Client {
+        private String peerPrefix;
+        private String torrentId;
     }
 }
 

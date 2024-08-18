@@ -51,8 +51,15 @@
                 </Menu>
                 <Menu fx:id="menuWebui" mnemonicParsing="false" text="WebUI">
                     <items>
-                        <MenuItem fx:id="menuProgramOpenInBrowser" mnemonicParsing="false" text="Open in Browser..."/>
-                        <MenuItem fx:id="menuProgramCopyWebuiToken" mnemonicParsing="false" text="Copy WebUI Token "/>
+                        <MenuItem fx:id="menuWebUIOpenInBrowser" mnemonicParsing="false" text="Open in Browser..."/>
+                        <MenuItem fx:id="menuWebUICopyWebuiToken" mnemonicParsing="false" text="Copy WebUI Token "/>
+                    </items>
+                </Menu>
+                <Menu fx:id="menuDebug" mnemonicParsing="false" text="Debug">
+                    <items>
+                        <MenuItem fx:id="menuDebugReload" mnemonicParsing="false" text="Reload configuration...n" visible="false"/>
+                        <MenuItem fx:id="menuDebugHeapDump" mnemonicParsing="false" text="Heap dump..."/>
+                        <MenuItem fx:id="menuDebugPrintThreads" mnemonicParsing="false" text="Print threads information..."/>
                     </items>
                 </Menu>
             </menus>

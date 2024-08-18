@@ -9,12 +9,22 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
     public TorrentDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), TorrentEntity.class);
         setObjectCache(true);
+    }
+
+    public Optional<TorrentEntity> queryByInfoHash(String infoHash) throws SQLException {
+        var torrent = queryBuilder()
+                .limit(1L)
+                .where()
+                .eq("infoHash", infoHash)
+                .queryForFirst();
+        return Optional.ofNullable(torrent);
     }
 
     @Override

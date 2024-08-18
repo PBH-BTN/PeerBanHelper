@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.j256.ormlite.dao.GenericRawResults;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -37,20 +37,29 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         return list.getFirst();
     }
 
-    public Map<String, Long> getBannedIps(int n) throws Exception {
-        Timestamp twoWeeksAgo = new Timestamp(Instant.now().minus(60, ChronoUnit.DAYS).toEpochMilli());
-        Map<String, Long> result = new HashMap<>();
-        try (GenericRawResults<String[]> banLogs = queryBuilder()
+    public Page<PeerBanCount> getBannedIps(Pageable pageable, String filter) throws Exception {
+        var builder = queryBuilder()
                 .selectRaw("ip, COUNT(*) AS count")
                 .groupBy("ip")
-                .orderByRaw("count DESC")
-                .limit((long) n)
-                .where().ge("banAt", twoWeeksAgo)
+                .orderByRaw("count DESC");
+        if (filter != null) {
+            builder.setWhere(builder.where().like("ip", filter + "%"));
+        }
+        List<PeerBanCount> mapped;
+        try (GenericRawResults<String[]> banLogs = builder
+                .limit(pageable.getSize())
+                .offset(pageable.getQueryIndex() * pageable.getSize())
+                // .where().ge("banAt", twoWeeksAgo)
                 .queryRaw()) {
             var results = banLogs.getResults();
-            results.forEach(arr -> result.put(arr[0], Long.parseLong(arr[1])));
+            mapped = results.stream().map(arr -> new PeerBanCount(arr[0], Long.parseLong(arr[1]))).toList();
         }
-        return result;
+        var countBuilder = queryBuilder()
+                .selectColumns("ip");
+        if (filter != null) {
+            countBuilder.setWhere(countBuilder.where().like("ip", filter + "%"));
+        }
+        return new Page<>(pageable, countBuilder.countOf("DISTINCT ip"), mapped);
     }
 
     public List<UniversalFieldNumResult> sumField(String field, double percentFilter) throws Exception {

@@ -5,7 +5,7 @@
 //import com.ghostchu.peerbanhelper.peer.Peer;
 //import com.ghostchu.peerbanhelper.torrent.Torrent;
 //import com.ghostchu.peerbanhelper.util.HTTPUtil;
-//import com.ghostchu.peerbanhelper.util.JsonUtil;
+//import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 //import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 //import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 //import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -90,7 +90,7 @@
 //    public boolean login() {
 //        if (isLoggedIn()) return true; // 重用 Session 会话
 //        try {
-//            var obj = this.connector.sendPayload(new Call(serializerHandler, "system.listMethods"), true);
+//            var data = this.connector.sendPayload(new Call(serializerHandler, "system.listMethods"), true);
 //            return true;
 //        } catch (Exception e) {
 //            throw new RuntimeException(e);

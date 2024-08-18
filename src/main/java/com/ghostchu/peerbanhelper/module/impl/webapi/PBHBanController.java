@@ -5,14 +5,16 @@ import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,14 +24,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
-import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
+@IgnoreScan
 public class PBHBanController extends AbstractFeatureModule {
     @Autowired
     private Database db;
@@ -74,61 +77,31 @@ public class PBHBanController extends AbstractFeatureModule {
             }
         }
         pendingRemovals.forEach(pa -> getServer().scheduleUnBanPeer(pa));
-        context.status(HttpStatus.OK);
-        context.json(Map.of("count", pendingRemovals.size()));
+        context.json(new StdResp(true, null, Map.of("count", pendingRemovals.size())));
     }
 
-
-    private void handleRanks(Context ctx) {
-        int number = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("limit"), "50"));
-        try {
-            Map<String, Long> countMap = historyDao.getBannedIps(number);
-            List<HistoryEntry> list = new ArrayList<>(countMap.size());
-            countMap.forEach((k, v) -> {
-                if (v >= 2) {
-                    list.add(new HistoryEntry(k, v));
-                }
-            });
-            ctx.status(HttpStatus.OK);
-            ctx.json(list);
-        } catch (Exception e) {
-            log.error("Error on handling Web API request", e);
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(Map.of("message", "Internal server error"));
-        }
+    private void handleRanks(Context ctx) throws Exception {
+        Pageable pageable = new Pageable(ctx);
+        String filter = ctx.queryParam("filter");
+        ctx.json(new StdResp(true, null, historyDao.getBannedIps(pageable, filter)));
     }
 
-    private void handleLogs(Context ctx) {
+    private void handleLogs(Context ctx) throws SQLException {
         if (db == null) {
-            ctx.status(HttpStatus.NO_CONTENT);
-            ctx.json(Map.of("message", "Database not initialized on this PeerBanHelper server"));
-            return;
+            throw new IllegalStateException("Database not initialized on this PeerBanHelper server");
         }
         persistMetrics.flush();
-        int pageIndex = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0"));
-        int pageSize = Integer.parseInt(Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100"));
-        try {
-
-            Map<String, Object> map = new HashMap<>();
-            map.put("pageIndex", pageIndex);
-            map.put("pageSize", pageSize);
-            map.put("results", historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageIndex, pageSize).stream().map(r -> new BanLogResponse(locale(ctx), r)).toList());
-            map.put("total", historyDao.countOf());
-            ctx.status(HttpStatus.OK);
-            ctx.json(map);
-        } catch (Exception e) {
-            log.error(tlUI(Lang.WEB_BANLOGS_INTERNAL_ERROR), e);
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            ctx.json(Map.of("message", "Internal server error"));
-        }
+        Pageable pageable = new Pageable(ctx);
+        var queryResult = historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageable);
+        var result = queryResult.getResults().stream().map(r -> new BanLogResponse(locale(ctx), r)).toList();
+        ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
     private void handleBans(Context ctx) {
         long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
         long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
         var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit);
-        ctx.status(HttpStatus.OK);
-        ctx.json(banResponseList.toList());
+        ctx.json(new StdResp(true, null, banResponseList.toList()));
     }
 
     @Override

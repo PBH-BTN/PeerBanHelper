@@ -1,17 +1,25 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.encrypt.ActivationKeyUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
 @Component
+@IgnoreScan
 public class PBHPlusController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
@@ -35,12 +43,41 @@ public class PBHPlusController extends AbstractFeatureModule {
 
     @Override
     public void onEnable() {
-        webContainer.javalin().get("/api/pbhplus/status", this::handle, Role.USER_READ);
+        webContainer.javalin()
+                .get("/api/pbhplus/status", this::handle, Role.USER_READ)
+                .put("/api/pbhplus/key", this::handleLicensePut, Role.USER_WRITE);
+    }
+
+    private void handleLicensePut(Context ctx) throws IOException {
+        var licenseReq = ctx.bodyAsClass(LicensePutRequest.class);
+        Main.getMainConfig().set("pbh-plus-key", licenseReq.key());
+        Main.getMainConfig().save(Main.getMainConfigFile());
+        activationManager.load();
+        if (activationManager.isActivated()) {
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_UPDATE), null));
+        } else {
+            var keyData = activationManager.getKeyData();
+            if (keyData == null) {
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_INVALID), null));
+            } else if (System.currentTimeMillis() >= keyData.getExpireAt()) {
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_EXPIRED), null));
+            } else {
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PBH_PLUS_LICENSE_INVALID), null));
+            }
+        }
     }
 
     private void handle(Context context) {
-        context.status(HttpStatus.OK);
-        context.json(new ActiveInfo(activationManager.isActivated(), activationManager.getKeyText(), activationManager.getKeyData()));
+        String key = null;
+        if (activationManager.getKeyText().length() > 10) {
+            key = activationManager.getKeyText().substring(0, 10) + "******";
+        }else{
+            key = activationManager.getKeyText();
+        }
+        context.json(new StdResp(true, null,
+                new ActiveInfo(activationManager.isActivated(),
+                        key,
+                        activationManager.getKeyData())));
     }
 
     @Override
@@ -53,6 +90,10 @@ public class PBHPlusController extends AbstractFeatureModule {
             String key,
             ActivationKeyUtil.KeyData keyData
     ) {
+
+    }
+
+    public record LicensePutRequest(String key) {
 
     }
 }

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.metric.impl.persist;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.ModuleDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.RuleDao;
@@ -11,30 +12,61 @@ import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component("persistMetrics")
 public class PersistMetrics implements BasicMetrics {
-    @Autowired
-    private InMemoryMetrics inMemory;
-    @Autowired
-    private TorrentDao torrentDao;
-    @Autowired
-    private ModuleDao moduleDao;
-    @Autowired
-    private RuleDao ruleDao;
-    @Autowired
-    private HistoryDao historyDao;
+    private final InMemoryMetrics inMemory;
+    private final TorrentDao torrentDao;
+    private final ModuleDao moduleDao;
+    private final RuleDao ruleDao;
+    private final HistoryDao historyDao;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+
+    public PersistMetrics(HistoryDao historyDao, RuleDao ruleDao, ModuleDao moduleDao, TorrentDao torrentDao, InMemoryMetrics inMemory) {
+        this.historyDao = historyDao;
+        this.ruleDao = ruleDao;
+        this.moduleDao = moduleDao;
+        this.torrentDao = torrentDao;
+        this.inMemory = inMemory;
+        scheduler.scheduleAtFixedRate(this::cleanup, 1, 24, TimeUnit.HOURS);
+    }
+
+    private void cleanup() {
+        try {
+            int keepDays = Main.getMainConfig().getInt("persist.ban-logs-keep-days");
+            if (keepDays > 0) {
+                try {
+                    var builder = historyDao.deleteBuilder();
+                    builder.setWhere(builder
+                            .where()
+                            .le("banAt",
+                                    new Timestamp(LocalDateTime.now().minusDays(keepDays)
+                                            .toInstant(MiscUtil.getSystemZoneOffset())
+                                            .toEpochMilli())));
+                    log.info(tlUI(Lang.CLEANED_BANLOGS, builder.delete()));
+                } catch (Exception e) {
+                    log.error("Unable to cleanup expired banlogs", e);
+                }
+            }
+        } catch (Throwable throwable) {
+            log.error("Unable to complete scheduled tasks", throwable);
+        }
+    }
 
     @Override
     public long getCheckCounter() {
@@ -124,6 +156,7 @@ public class PersistMetrics implements BasicMetrics {
 
     @Override
     public void close() {
+        scheduler.close();
         inMemory.close();
         flush();
     }

@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>5.1.0</version>
+    <version>6.0.0</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -16,8 +16,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
-        <flatlafVersion>3.4.1</flatlafVersion>
-        <javafx.version>22.0.1</javafx.version>
+        <flatlafVersion>3.5.1</flatlafVersion>
+        <javafx.version>23-ea+22</javafx.version>
         <javafx.scope>provided</javafx.scope>
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
@@ -108,7 +108,7 @@
                 <plugin>
                     <groupId>io.github.git-commit-id</groupId>
                     <artifactId>git-commit-id-maven-plugin</artifactId>
-                    <version>5.0.1</version>
+                    <version>9.0.1</version>
                     <executions>
                         <execution>
                             <id>get-the-git-infos</id>
@@ -192,7 +192,7 @@
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>5.0.1</version>
+                <version>9.0.1</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -249,6 +249,7 @@
                     <exclude>static/**</exclude>
                     <exclude>assets/**</exclude>
                     <exclude>javafx/**</exclude>
+                    <exclude>native/**</exclude>
                 </excludes>
             </resource>
             <resource>
@@ -267,6 +268,11 @@
             <resource>
                 <directory>src/main/resources/assets</directory>
                 <targetPath>assets</targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/native</directory>
+                <targetPath>native</targetPath>
                 <filtering>false</filtering>
             </resource>
         </resources>
@@ -297,32 +303,32 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>webview</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>linux</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>mac</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                    <version>${javafx.version}</version>
-                    <scope>compile</scope>
-                    <classifier>win</classifier>
-                </dependency>
-            </dependencies>
-        </profile>
+<!--        <profile>-->
+<!--            <id>webview</id>-->
+<!--            <dependencies>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>linux</classifier>-->
+<!--                </dependency>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>mac</classifier>-->
+<!--                </dependency>-->
+<!--                <dependency>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-web</artifactId>-->
+<!--                    <version>${javafx.version}</version>-->
+<!--                    <scope>compile</scope>-->
+<!--                    <classifier>win</classifier>-->
+<!--                </dependency>-->
+<!--            </dependencies>-->
+<!--        </profile>-->
         <profile>
             <id>include-javafx-jars</id>
             <properties>
@@ -486,7 +492,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.2.1-jre</version>
+            <version>33.3.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -503,12 +509,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.13</version>
+            <version>2.0.16</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.46.0.0</version>
+            <version>3.46.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -539,7 +545,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.3</version>
+            <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -556,7 +562,7 @@
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
-            <version>6.1.6</version>
+            <version>6.2.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
         <dependency>
@@ -631,7 +637,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.1.11</version>
+            <version>6.1.12</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
         <dependency>
@@ -646,15 +652,35 @@
             <version>${ormlite.version}</version>
         </dependency>
         <dependency>
-            <groupId>fr.turri</groupId>
-            <artifactId>aXMLRPC</artifactId>
-            <version>1.14.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.ghostchu</groupId>
             <artifactId>simplereloadlib</artifactId>
             <version>1.1.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.mkpaz</groupId>
+            <artifactId>atlantafx-base</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Dansoftowner</groupId>
+            <artifactId>jSystemThemeDetector</artifactId>
+            <version>3.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pixelduke</groupId>
+            <artifactId>fxthemes</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dlsc.preferencesfx</groupId>
+            <artifactId>preferencesfx-core</artifactId>
+            <version>11.17.0</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.pixelduke</groupId>-->
+<!--            <artifactId>transit</artifactId>-->
+<!--            <version>2.0.0</version>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
         <!--        <dependency>-->
         <!--            <groupId>org.jfxtras</groupId>-->

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
@@ -8,13 +9,16 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +29,8 @@ import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
-public class AutoRangeBan extends AbstractRuleFeatureModule {
+@IgnoreScan
+public class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable {
     @Autowired
     private PeerBanHelperServer peerBanHelperServer;
     private int ipv4Prefix;
@@ -54,6 +59,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
         reloadConfig();
         webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleWebAPI, Role.USER_READ);
+        Main.getReloadManager().register(this);
     }
 
     @Override
@@ -61,14 +67,19 @@ public class AutoRangeBan extends AbstractRuleFeatureModule {
         return super.isThreadSafe();
     }
 
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
+    }
+
     private void handleWebAPI(Context ctx) {
-        ctx.status(HttpStatus.OK);
-        ctx.json(Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix));
+        ctx.json(new StdResp(true, null, Map.of("ipv4-prefix", ipv4Prefix, "ipv6-prefix", ipv6Prefix)));
     }
 
     @Override
     public void onDisable() {
-
+        Main.getReloadManager().unregister(this);
     }
 
     private void reloadConfig() {

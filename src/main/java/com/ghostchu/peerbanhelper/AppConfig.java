@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 
 @Configuration
-@ComponentScan("com.ghostchu.peerbanhelper")
+@ComponentScan(value = "com.ghostchu.peerbanhelper", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
 @Slf4j
 public class AppConfig {
     @Bean

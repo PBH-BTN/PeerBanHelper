@@ -10,13 +10,8 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master", "release", "v6" ]
-  pull_request:
-    branches: [ "master", "release", "v6" ]
+    branches: [ "master", "release", "v6", "api-std" ]
   workflow_dispatch:
-  release:
-    types:
-      - published
 jobs:
   CI:
     runs-on: ubuntu-latest
@@ -30,7 +25,8 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "21"
-          cache: "maven"
+          cache: 'maven'
+          cache-dependency-path: '**/pom.xml'
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
@@ -71,7 +67,7 @@ jobs:
             type=raw,ci
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6.5.0
+        uses: docker/build-push-action@v6.7.0
         with:
           context: .
           file: ./Dockerfile-CI
@@ -81,4 +77,3 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
-

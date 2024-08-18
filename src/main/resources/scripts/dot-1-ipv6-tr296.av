@@ -1,0 +1,22 @@
+## @NAME IPV6 ::1 Transmission 2.94 恶意多拨
+## @AUTHOR PBH-BTN Community
+## @CACHEABLE true
+## @VERSION 1.1
+## @THREADSAFE true
+
+if(isBlank(peer.clientName)) {
+    return false; ## 下载器必须提供 ClientName
+}
+
+ipAddress = peer.peerAddress.address;
+strIp = toString(ipAddress);
+
+if(!string.contains(peer.clientName, 'Transmission 2.94')){
+    return false; ## 不管非 Transmission 2.94 的
+}
+
+if(string.endsWith(strIp, "::1")){
+    return "Transmission 2.94 (IPV6 ::1) 多拨伪装吸血";
+}
+
+return false;

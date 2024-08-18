@@ -8,15 +8,20 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -54,7 +59,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @Getter
-public class IPBlackRuleList extends AbstractRuleFeatureModule {
+@IgnoreScan
+public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
     private final RuleSubLogsDao ruleSubLogsDao;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
@@ -88,10 +94,18 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
         checkInterval = config.getLong("check-interval", checkInterval);
         scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
         scheduledExecutorService.scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        Main.getReloadManager().register(this);
     }
 
     @Override
     public void onDisable() {
+        Main.getReloadManager().unregister(this);
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     @Override
@@ -132,22 +146,26 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      * Reload the configuration for this module.
      */
     private void reloadConfig() {
-        this.banDuration = getConfig().getLong("ban-duration", 0);
-        if (null == ipBanMatchers) {
-            ipBanMatchers = new ArrayList<>();
-        }
-        ConfigurationSection config = getConfig();
-        // 读取检查间隔
-        checkInterval = config.getLong("check-interval", checkInterval);
-        // 读取规则
-        ConfigurationSection rules = getRuleSubsConfig();
-        if (null != rules) {
-            for (String ruleId : rules.getKeys(false)) {
-                ConfigurationSection rule = rules.getConfigurationSection(ruleId);
-                assert rule != null;
-                updateRule(DEF_LOCALE, rule, IPBanRuleUpdateType.AUTO);
+        try {
+            this.banDuration = getConfig().getLong("ban-duration", 0);
+            if (null == ipBanMatchers) {
+                ipBanMatchers = new ArrayList<>();
             }
-            log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
+            ConfigurationSection config = getConfig();
+            // 读取检查间隔
+            checkInterval = config.getLong("check-interval", checkInterval);
+            // 读取规则
+            ConfigurationSection rules = getRuleSubsConfig();
+            if (null != rules) {
+                for (String ruleId : rules.getKeys(false)) {
+                    ConfigurationSection rule = rules.getConfigurationSection(ruleId);
+                    assert rule != null;
+                    updateRule(DEF_LOCALE, rule, IPBanRuleUpdateType.AUTO);
+                }
+                log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
+            }
+        } catch (Throwable throwable) {
+            log.error("Unable to complete scheduled tasks", throwable);
         }
     }
 
@@ -156,16 +174,19 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
      *
      * @param rule 规则
      */
-    public SlimMsg updateRule(String locale, @NotNull ConfigurationSection rule, IPBanRuleUpdateType updateType) {
-        AtomicReference<SlimMsg> result = new AtomicReference<>();
+    public StdResp updateRule(String locale, @NotNull ConfigurationSection rule, IPBanRuleUpdateType updateType) {
+        AtomicReference<StdResp> result = new AtomicReference<>();
         String ruleId = rule.getName();
         if (!rule.getBoolean("enabled", false)) {
             // 检查ipBanMatchers是否有对应的规则，有则删除
             ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
             // 未启用跳过更新逻辑
-            return new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), 400);
+            return new StdResp(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), null);
         }
         String name = rule.getString("name", ruleId);
+        if (name.contains(".")) {
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         String url = rule.getString("url");
         if (null != url && url.startsWith("http")) {
             // 解析远程订阅
@@ -186,17 +207,17 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                                 fileToIPList(ruleFile, ipAddresses);
                                 ipBanMatchers.add(new IPMatcher(ruleId, name, ipAddresses));
                                 log.warn(tlUI(Lang.IP_BAN_RULE_USE_CACHE, name));
-                                result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_USE_CACHE, name), 500));
+                                result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_USE_CACHE, name), null));
                             } catch (IOException ex) {
                                 log.error(tlUI(Lang.IP_BAN_RULE_LOAD_FAILED, name), ex);
-                                result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), 500));
+                                result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), null));
                             }
                         } else {
-                            result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_FAILED, name), 500));
+                            result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_FAILED, name), null));
                         }
                     } else {
                         // log.error(Lang.IP_BAN_RULE_LOAD_FAILED, name, throwable);
-                        result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), 500));
+                        result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), null));
                     }
                     throw new RuntimeException(throwable);
                 }
@@ -219,7 +240,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                             ent_count = fileToIPList(tempFile, ipAddresses);
                         } else {
                             log.info(tlUI(Lang.IP_BAN_RULE_NO_UPDATE, name));
-                            result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), 200));
+                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
                         }
                         tempFile.delete();
                     }
@@ -228,29 +249,29 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
                         ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                             ele.setData(name, ipAddresses);
                             log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name));
-                            result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_UPDATE_SUCCESS, name), 200));
+                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATE_SUCCESS, name), null));
                         }, () -> {
                             ipBanMatchers.add(new IPMatcher(ruleId, name, ipAddresses));
                             log.info(tlUI(Lang.IP_BAN_RULE_LOAD_SUCCESS, name));
-                            result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_LOAD_SUCCESS, name), 200));
+                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_LOAD_SUCCESS, name), null));
                         });
                         // 更新日志
                         try {
                             ruleSubLogsDao.create(new RuleSubLogEntity(null, ruleId, System.currentTimeMillis(), ent_count, updateType));
-                            result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_UPDATED, name), 200));
+                            result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATED, name), null));
                         } catch (SQLException e) {
                             log.error(tlUI(Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, ruleId), e);
-                            result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, name), 500));
+                            result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_LOG_ERROR, name), null));
                         }
                     } else {
-                        result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), 200));
+                        result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }).join();
         } else {
-            result.set(new SlimMsg(false, tl(locale, Lang.IP_BAN_RULE_URL_WRONG, name), 400));
+            result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_URL_WRONG, name), null));
         }
         return result.get();
     }
@@ -268,13 +289,38 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             if (ele.startsWith("#")) {
                 return; // 注释
             }
-            count.getAndIncrement();
-            var ip = IPAddressUtil.getIPAddress(ele);
-            if (ip != null) {
-                ips.add(IPAddressUtil.getIPAddress(ele));
+            try {
+                var parsedIp = parseRuleLine(ele);
+                if (parsedIp != null) {
+                    count.getAndIncrement();
+                    ips.add(parsedIp);
+                }
+            } catch (Exception e) {
+                log.error("Unable parse rule: {}", ele, e);
             }
         });
         return count.get();
+    }
+
+    private IPAddress parseRuleLine(String ele) {
+        // 注释？
+        if (ele.startsWith("#")) return null;
+        // 检查是否是 DAT/eMule 格式
+        // 016.000.000.000 , 016.255.255.255 , 200 , Yet another organization
+        // 032.000.000.000 , 032.255.255.255 , 200 , And another
+        if (ele.contains(",")) {
+            var spilted = ele.split(",");
+            if (spilted.length < 3) {
+                return null;
+            }
+            IPAddress start = IPAddressUtil.getIPAddress(spilted[0]);
+            IPAddress end = IPAddressUtil.getIPAddress(spilted[1]);
+            int level = Integer.parseInt(spilted[2]);
+            if (level >= 128) return null;
+            if (start == null || end == null) return null;
+            return start.spanWithRange(end).coverWithPrefixBlock();
+        }
+        return IPAddressUtil.getIPAddress(ele);
     }
 
     /**
@@ -302,7 +348,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
             return null;
         }
 
-        Optional<RuleSubLogEntity> first = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), 0, 1).stream().findFirst();
+        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), new Pageable(1, 1)).getResults();
+        Optional<RuleSubLogEntity> first = result.isEmpty() ? Optional.empty() : Optional.of(result.getFirst());
         long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
         int count = first.map(RuleSubLogEntity::getCount).orElse(0);
         return new RuleSubInfoEntity(ruleId, rule.getBoolean("enabled", false), rule.getString("name", ruleId), rule.getString("url"), lastUpdate, count);
@@ -340,18 +387,16 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule {
     /**
      * 查询规则订阅日志
      *
-     * @param ruleId    规则ID
-     * @param pageIndex 页码
-     * @param pageSize  每页数量
+     * @param ruleId 规则ID
      * @return 规则订阅日志
      * @throws SQLException 查询异常
      */
-    public List<RuleSubLogEntity> queryRuleSubLogs(String ruleId, int pageIndex, int pageSize) throws SQLException {
-        var builder = ruleSubLogsDao.queryBuilder();
+    public Page<RuleSubLogEntity> queryRuleSubLogs(String ruleId, Pageable pageable) throws SQLException {
+        var builder = ruleSubLogsDao.queryBuilder().orderBy("updateTime", false);
         if (ruleId != null) {
             builder = builder.where().eq("ruleId", ruleId).queryBuilder();
         }
-        return ruleSubLogsDao.queryByPaging(builder, pageIndex, pageSize);
+        return ruleSubLogsDao.queryByPaging(builder, pageable);
     }
 
     /**

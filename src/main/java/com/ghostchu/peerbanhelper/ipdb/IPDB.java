@@ -129,6 +129,7 @@ public class IPDB implements AutoCloseable {
             if (!cityName.isBlank()) {
                 cityResponse.setName(cityName);
             }
+
             Integer code = null;
             if (cnLookupResult.getProvinceCode() != null) {
                 code = cnLookupResult.getProvinceCode().intValue();
@@ -140,6 +141,9 @@ public class IPDB implements AutoCloseable {
                 code = cnLookupResult.getDistrictsCode().intValue();
             }
             cityResponse.setIso(Long.parseLong("86" + code));
+            cityResponse.setCnProvince(cnLookupResult.getProvince());
+            cityResponse.setCnCity(cnLookupResult.getCity());
+            cityResponse.setCnDistricts(cnLookupResult.getDistricts());
             geoData.setCity(cityResponse);
             // Network Data
             IPGeoData.NetworkData networkData = Objects.requireNonNullElse(geoData.getNetwork(), new IPGeoData.NetworkData());

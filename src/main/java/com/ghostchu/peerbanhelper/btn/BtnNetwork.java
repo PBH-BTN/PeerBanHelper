@@ -30,11 +30,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Getter
 public class BtnNetwork {
-    private static final int BTN_PROTOCOL_VERSION = 6;
+    private static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 7;
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     @Getter
-    private final ScheduledExecutorService executeService = Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService executeService = null;
     private String configUrl;
     private boolean submit;
     private String appId;
@@ -55,7 +55,15 @@ public class BtnNetwork {
         this.appId = appId;
         this.appSecret = appSecret;
         setupHttpClient();
-        executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 600, 600, TimeUnit.SECONDS);
+        resetScheduler();
+    }
+
+    private void resetScheduler() {
+        if (executeService != null) {
+            executeService.shutdownNow();
+        }
+        executeService = Executors.newScheduledThreadPool(2);
+        executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 0, 600, TimeUnit.SECONDS);
     }
 
     public void configBtnNetwork() {
@@ -72,13 +80,14 @@ public class BtnNetwork {
                 throw new IllegalStateException("Server config response missing min_protocol_version field");
             }
             int min_protocol_version = json.get("min_protocol_version").getAsInt();
-            if (min_protocol_version > BTN_PROTOCOL_VERSION) {
+            if (PBH_BTN_PROTOCOL_IMPL_VERSION < min_protocol_version) {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             int max_protocol_version = json.get("max_protocol_version").getAsInt();
-            if (max_protocol_version > BTN_PROTOCOL_VERSION) {
+            if (PBH_BTN_PROTOCOL_IMPL_VERSION > max_protocol_version) {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
+            resetScheduler();
             JsonObject ability = json.get("ability").getAsJsonObject();
             if (ability.has("submit_peers") && submit) {
                 abilities.put(BtnAbilitySubmitPeers.class, new BtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));
@@ -109,9 +118,14 @@ public class BtnNetwork {
     }
 
     private void checkIfNeedRetryConfig() {
-        if (!configSuccess.get()) {
-            configBtnNetwork();
+        try {
+            if (!configSuccess.get()) {
+                configBtnNetwork();
+            }
+        } catch (Throwable throwable) {
+            log.error("Unable to complete scheduled tasks", throwable);
         }
+
     }
 
     private void setupHttpClient() {

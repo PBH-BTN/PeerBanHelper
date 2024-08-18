@@ -20,7 +20,8 @@ MODULE_CNB_MATCH_CLIENT_NAME: "Match ClientName (UserAgent): {}"
 MODULE_IBL_MATCH_IP: "Match IP rule: {}"
 MODULE_IBL_MATCH_IP_RULE: "Match IP blacklist subscription rule: {}, IP address: {}"
 MODULE_IBL_MATCH_ASN: "Match ASN rule: {}"
-MODULE_IBL_MATCH_REGION: "Match country or region ISO code rule: {}"
+MODULE_IBL_MATCH_REGION: "Match country or city ISO code rule: {}"
+MODULE_IBL_MATCH_CITY: "Match city rule: {}"
 MODULE_IBL_EXCEPTION_GEOIP: "An exception occurred while matching GeoIP information, please report the error to the developer"
 MODULE_IBL_MATCH_PORT: "Match Port rule: {}"
 MODULE_PID_MATCH_PEER_ID: "Match PeerId rule: {}"
@@ -282,8 +283,8 @@ MDB_MULTI_DIALING_DETECTED: "Detected multi-dialing"
 MDB_MULTI_HUNTING: "Multi-dialing ongoing tracking"
 
 BTN_BTN_RULE: "BTN-{}-{}"
-BTN_PORT_RULE: "BTN Port Rule"
-BTN_IP_RULE: "BTN IP Rule"
+BTN_PORT_RULE: "BTN Port Rule ({})"
+BTN_IP_RULE: "BTN IP Rule ({})"
 GENERAL_NA: "N/A"
 
 DUPLICATE_BAN: "Warning: The Peer being blocked is in the block list! This may be due to a program error, or you have manually cleaned the downloader's block list. If this problem persists, try restarting PBH and contact the developers: {}"
@@ -329,3 +330,36 @@ WEBVIEW_DEFAULT_DISABLED: "WebUI is disabled by default, recommend to access Web
 PCB_SHUTTING_DOWN: "Please wait ProgressCheatBlocker flush its data to disk from memory……"
 
 PBHPLUS_LICENSE_FAILED: "PBH Plus check failure, please fill a valid key in `pbh-plus-key` configuration in config.yml"
+CHARTS_IPDB_NEED_INIT: "Please configure GeoIP database in config.yml"
+
+IP_BLACKLIST_PUT_IP_INVALID_IP: "Invalid IP address, please input a valid IPV4/IPV6 address or CIDR."
+IP_BLACKLIST_PUT_IP_INVALID_ARG: "Cannot use CIDR and IPRange fields in same time / or both empty."
+IP_BLACKLIST_PUT_PORT_INVALID_RANGE: "Port ranges must between 1 and 65535. And startPort must smaller or equals endPort"
+
+APPLYING_FULL_BANLIST_TO_DOWNLOADER: "[Repair] Re-sync full banlist with downloaders..."
+SCHEDULED_FULL_BANLIST_APPLY: "[Repair] PeerBanHelper scheduled full banlist re-sync with downloaders"
+CLEANED_BANLOGS: "[Cleanup] Cleaned {} history records"
+
+OPERATION_EXECUTE_SUCCESSFULLY: "Operation execute successfully"
+PBH_PLUS_LICENSE_UPDATED: "License saved"
+PBH_PLUS_LICENSE_EXPIRED: "License expired"
+PBH_PLUS_LICENSE_INVALID: "License invalid"
+
+
+GUI_MENU_DEBUG: "Debug"
+GUI_MENU_DEBUG_RELOAD_CONFIGURATION: "Reload configuration..."
+GUI_MENU_DEBUG_HEAP_DUMP: "Dump memory snapshot..."
+GUI_MENU_PRINT_THREADS: "Print thread info..."
+RELOAD_COMPLETED_TITLE: "Configuration reloaded"
+RELOAD_COMPLETED_DESCRIPTION: "Reloaded {} modules.\nSome features may not support reload, restart PBH is recommended."
+HEAPDUMP_COMPLETED_TITLE: "Heapdump completed"
+HEAPDUMP_FAILED_TITLE: "Heapdump failed"
+HEAPDUMP_FAILED_DESCRIPTION: "Unable to dump the heap, check the console for details."
+HEAPDUMP_COMPLETED_DESCRIPTION: "Memory snapshot dump successfully, check .hprof files in data/debug directory.\nIf you need send to developers for debugging, please zip it with Archive Tools."
+RELOADING_MODULE: "[Reload] {}: {}"
+
+TORRENT_NOT_FOUND: "No records found by given InfoHash"
+PEER_NOT_FOUND: "No records found by given Peer"
+
+IN_ECOMODE_SHORT: "🍃EcoQoS"
+IN_ECOMODE_DESCRIPTION: "EcoQoS API load successfully，Windows Efficiency Mode now applied to PeerBanHelper for saving power usage."

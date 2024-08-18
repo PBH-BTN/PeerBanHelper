@@ -5,12 +5,13 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
-import com.ghostchu.peerbanhelper.module.impl.webapi.common.SlimMsg;
-import com.ghostchu.peerbanhelper.module.impl.webapi.common.StdMsg;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.JsonUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -29,6 +31,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
+@IgnoreScan
 public class RuleSubController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
@@ -36,6 +39,7 @@ public class RuleSubController extends AbstractFeatureModule {
 
     @Autowired
     private ModuleManager moduleManager;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -93,7 +97,7 @@ public class RuleSubController extends AbstractFeatureModule {
      * @param ctx 上下文
      */
     private void getCheckInterval(Context ctx) {
-        ctx.json(new StdMsg(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS), ipBlackRuleList.getCheckInterval()));
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_QUERY_SUCCESS), ipBlackRuleList.getCheckInterval()));
     }
 
     /**
@@ -105,10 +109,10 @@ public class RuleSubController extends AbstractFeatureModule {
         try {
             long interval = JsonUtil.readObject(ctx.body()).get("checkInterval").getAsLong();
             ipBlackRuleList.changeCheckInterval(interval);
-            ctx.json(new SlimMsg(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_UPDATED), HttpStatus.OK.getCode()));
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_UPDATED), null));
         } catch (Exception e) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CHECK_INTERVAL_WRONG_PARAM), null));
         }
     }
 
@@ -119,21 +123,13 @@ public class RuleSubController extends AbstractFeatureModule {
      * @param ruleId 规则ID
      */
     private void logs(Context ctx, String ruleId) {
-        String pageIndexStr = Objects.requireNonNullElse(ctx.queryParam("pageIndex"), "0");
-        String pageSizeStr = Objects.requireNonNullElse(ctx.queryParam("pageSize"), "100");
         try {
-            int pageIndex = Integer.parseInt(pageIndexStr.isEmpty() ? "0" : pageIndexStr);
-            int pageSize = Integer.parseInt(pageSizeStr.isEmpty() ? "100" : pageSizeStr);
-            Map<String, Object> map = new HashMap<>();
-            map.put("pageIndex", pageIndex);
-            map.put("pageSize", pageSize);
-            map.put("results", ipBlackRuleList.queryRuleSubLogs(ruleId, pageIndex, pageSize));
-            map.put("total", ipBlackRuleList.countRuleSubLogs(ruleId));
-            ctx.json(new StdMsg(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), map));
+            Pageable pageable = new Pageable(ctx);
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_SUCCESS), ipBlackRuleList.queryRuleSubLogs(ruleId, pageable)));
         } catch (Exception e) {
             log.error(tlUI(Lang.IP_BAN_RULE_LOG_QUERY_ERROR), e);
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_LOG_QUERY_WRONG_PARAM), null));
         }
     }
 
@@ -142,12 +138,12 @@ public class RuleSubController extends AbstractFeatureModule {
      *
      * @return 响应
      */
-    private SlimMsg updateAll(String locale) {
-        AtomicReference<SlimMsg> result = new AtomicReference<>();
+    private StdResp updateAll(String locale) {
+        AtomicReference<StdResp> result = new AtomicReference<>();
         ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().map(k -> update(locale, k)).filter(ele -> !ele.success())
                 .findFirst()
                 .ifPresentOrElse(result::set, () ->
-                        result.set(new SlimMsg(true, tl(locale, Lang.IP_BAN_RULE_ALL_UPDATED), 200)));
+                        result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_ALL_UPDATED), null)));
         return result.get();
     }
 
@@ -157,13 +153,13 @@ public class RuleSubController extends AbstractFeatureModule {
      * @param ruleId 规则ID
      * @return 响应
      */
-    private SlimMsg update(String locale, String ruleId) {
+    private StdResp update(String locale, String ruleId) {
         if (ruleId == null || ruleId.isEmpty()) {
-            return new SlimMsg(false, tlUI(Lang.IP_BAN_RULE_NO_ID), HttpStatus.NOT_FOUND.getCode());
+            return new StdResp(false, tlUI(Lang.IP_BAN_RULE_NO_ID), null);
         }
         ConfigurationSection configurationSection = ipBlackRuleList.getRuleSubsConfig().getConfigurationSection(ruleId);
         if (null == configurationSection) {
-            return new SlimMsg(false, tlUI(Lang.IP_BAN_RULE_CANT_FIND, ruleId), HttpStatus.NOT_FOUND.getCode());
+            return new StdResp(false, tlUI(Lang.IP_BAN_RULE_CANT_FIND, ruleId), null);
         }
         return ipBlackRuleList.updateRule(locale, configurationSection, IPBanRuleUpdateType.MANUAL);
     }
@@ -180,13 +176,13 @@ public class RuleSubController extends AbstractFeatureModule {
             enabled = JsonUtil.readObject(ctx.body()).get("enabled").getAsBoolean();
         } catch (Exception e) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_ENABLED_WRONG_PARAM), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_ENABLED_WRONG_PARAM), null));
             return;
         }
         RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId), null));
             return;
         }
         String msg = tl(locale(ctx), (enabled ? Lang.IP_BAN_RULE_ENABLED : Lang.IP_BAN_RULE_DISABLED), ruleSubInfo.getRuleName());
@@ -194,10 +190,10 @@ public class RuleSubController extends AbstractFeatureModule {
             ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, enabled, ruleSubInfo.getRuleName(), ruleSubInfo.getSubUrl(), 0, 0));
             ipBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);
             log.info(msg);
-            ctx.json(new SlimMsg(true, msg, 200));
+            ctx.json(new StdResp(true, msg, null));
         } else {
             // 表示已经是启用/禁用状态
-            ctx.json(new SlimMsg(false, msg, 200));
+            ctx.json(new StdResp(false, msg, null));
         }
     }
 
@@ -211,14 +207,14 @@ public class RuleSubController extends AbstractFeatureModule {
         RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (null == ruleSubInfo) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId), null));
             return;
         }
         ipBlackRuleList.deleteRuleSubInfo(ruleId);
         ipBlackRuleList.getIpBanMatchers().removeIf(ele -> ele.getRuleId().equals(ruleId));
         String msg = tl(locale(ctx), Lang.IP_BAN_RULE_DELETED, ruleSubInfo.getRuleName());
         log.info(msg);
-        ctx.json(new SlimMsg(true, msg, 200));
+        ctx.json(new StdResp(true, msg, null));
     }
 
     /**
@@ -235,20 +231,20 @@ public class RuleSubController extends AbstractFeatureModule {
         }
         if (ruleId == null || ruleId.isEmpty()) {
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_NO_ID), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_NO_ID), null));
             return;
         }
         RuleSubInfoEntity ruleSubInfo = ipBlackRuleList.getRuleSubInfo(ruleId);
         if (isAdd && ruleSubInfo != null) {
             // 新增时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_ID_CONFLICT, ruleId), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_ID_CONFLICT, ruleId), null));
             return;
         }
         if (!isAdd && ruleSubInfo == null) {
             // 更新时检查规则是否存在
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId), null));
             return;
         }
         String ruleName = subInfo.ruleName();
@@ -256,7 +252,7 @@ public class RuleSubController extends AbstractFeatureModule {
         if (isAdd) {
             if (ruleName == null || subUrl == null || ruleName.isEmpty() || subUrl.isEmpty()) {
                 ctx.status(HttpStatus.BAD_REQUEST);
-                ctx.json(new SlimMsg(false, tlUI(Lang.IP_BAN_RULE_PARAM_WRONG), HttpStatus.BAD_REQUEST.getCode()));
+                ctx.json(new StdResp(false, tlUI(Lang.IP_BAN_RULE_PARAM_WRONG), null));
                 return;
             }
         } else {
@@ -267,16 +263,19 @@ public class RuleSubController extends AbstractFeatureModule {
                 subUrl = ruleSubInfo.getSubUrl();
             }
         }
+        if (ruleName.contains(".")) {
+            throw new IllegalArgumentException("Illegal character (.) in name: " + ruleName);
+        }
         ConfigurationSection configurationSection = ipBlackRuleList.saveRuleSubInfo(new RuleSubInfoEntity(ruleId, isAdd || ruleSubInfo.isEnabled(), ruleName, subUrl, 0, 0));
         assert configurationSection != null;
         try {
-            SlimMsg msg = ipBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);
+            StdResp msg = ipBlackRuleList.updateRule(locale(ctx), configurationSection, IPBanRuleUpdateType.MANUAL);
             if (!msg.success()) {
                 ctx.status(HttpStatus.BAD_REQUEST);
                 ctx.json(msg);
                 return;
             }
-            ctx.json(new SlimMsg(true, tlUI(Lang.IP_BAN_RULE_SAVED), HttpStatus.CREATED.getCode()));
+            ctx.json(new StdResp(true, tlUI(Lang.IP_BAN_RULE_SAVED), null));
         } catch (Exception e) {
             // 更新失败时回滚
             if (isAdd) {
@@ -285,7 +284,7 @@ public class RuleSubController extends AbstractFeatureModule {
                 ipBlackRuleList.saveRuleSubInfo(ruleSubInfo);
             }
             ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.json(new SlimMsg(false, tl(locale(ctx), Lang.IP_BAN_RULE_URL_WRONG, ruleName), HttpStatus.BAD_REQUEST.getCode()));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_URL_WRONG, ruleName), null));
             log.error("Unable to retrieve the sub from given URL", e);
         }
     }
@@ -296,8 +295,8 @@ public class RuleSubController extends AbstractFeatureModule {
      * @param ruleId 规则ID
      * @return 响应
      */
-    private StdMsg get(String locale, String ruleId) throws SQLException {
-        return new StdMsg(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), ipBlackRuleList.getRuleSubInfo(ruleId));
+    private StdResp get(String locale, String ruleId) throws SQLException {
+        return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), ipBlackRuleList.getRuleSubInfo(ruleId));
     }
 
     /**
@@ -305,13 +304,13 @@ public class RuleSubController extends AbstractFeatureModule {
      *
      * @return 响应
      */
-    private StdMsg list(String locale) throws SQLException {
+    private StdResp list(String locale) throws SQLException {
         List<String> list = ipBlackRuleList.getRuleSubsConfig().getKeys(false).stream().toList();
         List<RuleSubInfoEntity> data = new ArrayList<>(list.size());
         for (String s : list) {
             data.add(ipBlackRuleList.getRuleSubInfo(s));
         }
-        return new StdMsg(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), data);
+        return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), data);
     }
 
     /**

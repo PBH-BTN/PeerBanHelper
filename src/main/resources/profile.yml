@@ -1,4 +1,4 @@
-config-version: 14
+config-version: 17
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -55,6 +55,7 @@ module:
       - '{"method":"STARTS_WITH","content":"-dt"}'
       - '{"method":"STARTS_WITH","content":"-gt0002"}'
       - '{"method":"STARTS_WITH","content":"-gt0003"}'
+      - '{"method":"CONTAINS","content":"-rn0.0.0"}'
       - '{"method":"STARTS_WITH","content":"-sd"}'
       - '{"method":"STARTS_WITH","content":"-xf"}'
       - '{"method":"STARTS_WITH","content":"-qd"}'
@@ -82,6 +83,8 @@ module:
       - '{"method":"STARTS_WITH","content":"xm "}'
       - '{"method":"STARTS_WITH","content":"go.torrent"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
+      - '{"method":"CONTAINS","content":"rain 0.0.0"}'
+      - '{"method":"CONTAINS","content":"gopeed dev"}'
       - '{"method":"STARTS_WITH","content":"xfplay"}'
       - '{"method":"CONTAINS","content":"StellarPlayer"}'
       - '{"method":"CONTAINS","content":"SP "}' # 不要删除尾随空格
@@ -111,15 +114,15 @@ module:
     # and compare with peer reported progress
     # 如果对等体汇报的总体下载进度远远低于我们上传给此对等体的数据量的比例，我们应考虑客户端正在汇报假进度
     # If peer reported progress is smaller than our calculated progress too much, we will consider it's cheating
-    # 默认值为：8%
-    # Default allowed percentage is 8%
-    # 即：假设我们上传了 50% 的数据量给对方，对方汇报自己的下载进度只有 41%，差值大于 8%，进行封禁
-    # It will run like: if we uploaded 50% of data at least to peer, but peer reporting it only have 41%, difference ge 8%, we will ban it
+    # 默认值为：10%
+    # Default allowed percentage is 10%
+    # 即：假设我们上传了 50% 的数据量给对方，对方汇报自己的下载进度只有 39%，差值大于 10%，进行封禁
+    # It will run like: if we uploaded 50% of data at least to peer, but peer reporting it only have 39%, difference ge 10%, we will ban it
     # 对于自动识别迅雷、QQ旋风的变种非常有效，能够在不更新规则的情况下自动封禁报假进度的吸血客户端
     # It works well on detecting new various and cheat clients.
     maximum-difference: 0.1
     # 进度倒退检测 - Progress rewind detection
-    # 默认：最多允许倒退 5% 的进度 - Default: Up to 5% rewind is allowed
+    # 默认：最多允许倒退 7% 的进度 - Default: Up to 7% rewind is allowed
     # (考虑到有时文件片段在传输时可能因损坏而未通过校验被丢弃，我们允许客户端出现合理的进度倒退)
     # (Sometimes the pisces may break during transfer, client may drop those pisces, we allow client have rewind in reasonable range)
     # 设置为 -1 以禁用此检测
@@ -144,7 +147,7 @@ module:
     # IPV6 prefix length, same prefix will trick as a same user
     # 64 = 常见的 ISP 为单个接入用户分配的前缀长度
     # 64 = The common prefix length that ISP allocate for one user
-    ipv6-prefix-length: 64
+    ipv6-prefix-length: 60
     ban-duration: 2592000000
     # 启用持久化记录
     # Enable persist recording
@@ -174,19 +177,29 @@ module:
     # 1.2.3.4/16
     # 1.2.255.4/255.255.0.0
     ips:
+      - "0.0.0.0"
     #- 8.8.8.8
     #- 9.9.9.9
     # 按端口封禁
     # Banning ports
     ports:
+      - 0
     #- 2003
     # 按 ASN（自治系统代码）封禁（需要配置 GeoIP-ASN 数据库才能工作！）
     # Banning ASN (Require config GeoIP-ASN database)
     asns:
+      - "0"
     #  - 0 # 网络 ASN 好
     # 按国家或地区封禁（需要配置 GeoIP-City 数据库才能工作！）
     # Banning as Country/Region code
     regions:
+      - "0"
+    # 按城市/区/县封禁
+    # 默认使用 Maxmind 名称，如果成功加载 GeoCN 数据库，则对在 GeoCN 数据库中的 IP 地址使用 GeoCN 写法
+    # Banning as city name
+    # Use Maxmind name as default, or use GeoCN name for record exists in GeoCN if GeoCN is loaded
+    cities:
+      - "示例海南"
     #  - ISO_CODE 输入国家或地区的 ISO 代码，大小写敏感，如：CN, UK, TW, HK, JP 等
     #  - ISO_CODE Enter the ISO code, case sensitive (E.g. CN, UK, TW, HK, JP, etc.)
     # 按网络类型封禁（仅中国大陆地区 IP 地址有效）
@@ -249,7 +262,7 @@ module:
     # 容许同一网段下载同一种子的IP数量，正整数
     # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
     # The allowed maximum amount of ips in same subnet
-    # To avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same region
+    # To avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same city
     tolerate-num: 5
     # 缓存持续时间（秒）
     # Cache life span
@@ -326,7 +339,7 @@ module:
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
     ban-duration: 259200000
     # 检查间隔
-    check-interval: 86400000 # 24小时检查一次 毫秒; Timeunit: ms
+    check-interval: 14400000 # 4小时检查一次 毫秒; Timeunit: ms
     # 规则列表 - Rules list
     rules:
       # 规则ID（任意） - Rule Id(any)
@@ -336,7 +349,7 @@ module:
         # 显示名称 - Display Name
         name: all-in-one
         # 规则文件订阅地址 - Subscription Address
-        url: https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt
+        url: https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt
   # 主动监测 - Active Monitoring
   # 此功能允许 PeerBanHelper 主动记录每次请求下载器时获取到的数据到本地 SQLite 数据库中
   # Allow PBH records all data that fetched from downloader and save them into SQLite database
@@ -348,7 +361,7 @@ module:
   # NOTE: This may lead database size increase quickly
   active-monitoring:
     # 是否启用此功能
-    enabled: false
+    enabled: true
     # 清理周期
     # Retention time
     # 请注意：由于 SQLite 的特性，记录被删除后不会释放磁盘空间，但后续新数据记录会重新利用此部分空间

@@ -1,18 +1,29 @@
 package com.ghostchu.peerbanhelper.gui.impl.javafx;
 
+import atlantafx.base.theme.PrimerDark;
+import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.theme.Styles;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.MainJavaFx;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
+import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.javafx.mainwindow.JFXWindowController;
 import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.collection.CircularArrayList;
 import com.google.common.eventbus.Subscribe;
+import com.jthemedetecor.OsThemeDetector;
+import com.pixelduke.window.ThemeWindowManager;
+import com.pixelduke.window.ThemeWindowManagerFactory;
+import com.sun.management.HotSpotDiagnosticMXBean;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListCell;
@@ -21,19 +32,25 @@ import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.management.MBeanServer;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -56,6 +73,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private final boolean silentStart;
     private final String[] args;
     private final Set<ListCell<ListLogEntry>> selected = new HashSet<>();
+    private final ScheduledExecutorService scheduledService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
     private TrayIcon trayIcon;
     private ListView<ListLogEntry> logsView;
     private boolean persistFlagTrayMessageSent = false;
@@ -86,7 +104,8 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Subscribe
     public void onPBHServerStarted(PBHServerStartedEvent event) {
-        Platform.runLater(() -> MainJavaFx.getStage().setTitle(tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev())));
+        //Platform.runLater(() -> MainJavaFx.getStage().setTitle(tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev())));
+        scheduledService.scheduleWithFixedDelay(this::updateTitleFlags, 0, 5, TimeUnit.SECONDS);
         if (Arrays.stream(Main.getStartupArgs()).noneMatch(s -> s.equalsIgnoreCase("enableWebview"))) {
             log.info(tlUI(Lang.WEBVIEW_DEFAULT_DISABLED));
             return;
@@ -112,6 +131,13 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     }
 
+    public void updateTitleFlags() {
+        StringJoiner joiner = new StringJoiner(" ", "[", "]");
+        String base = tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev());
+        ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
+        Platform.runLater(() -> MainJavaFx.getStage().setTitle(base + " " + joiner));
+    }
+
     @SneakyThrows
     @Override
     public void createMainWindow() {
@@ -126,7 +152,9 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     private void setupJFXWindow() {
         Stage st = MainJavaFx.getStage();
-        st.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/root.css").toExternalForm());
+        OsThemeDetector detector = OsThemeDetector.getDetector();
+        detector.registerListener(this::updateTheme);
+        updateTheme(detector.isDark());
         st.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, this::closeWindowEvent);
         JFXWindowController controller = MainJavaFx.INSTANCE.getController();
         this.logsView = controller.getLogsListView();
@@ -138,6 +166,8 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 //            }
 //        });
         Holder<Object> lastCell = new Holder<>();
+        Styles.addStyleClass(this.logsView, Styles.DENSE);
+        Styles.addStyleClass(this.logsView, Styles.STRIPED);
         this.logsView.setCellFactory(x -> new ListCell<>() {
             {
                 getStyleClass().add("log-window-list-cell");
@@ -216,10 +246,10 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         controller.getMenuProgramQuit().setOnAction(e -> System.exit(0));
         controller.getMenuProgramOpenInGithub().setText(tlUI(Lang.ABOUT_VIEW_GITHUB));
         controller.getMenuProgramOpenInGithub().setOnAction(e -> openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
-        controller.getMenuProgramOpenInBrowser().setText(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
-        controller.getMenuProgramOpenInBrowser().setOnAction(e -> openWebpage(URI.create(Main.getServer().getWebUiUrl())));
-        controller.getMenuProgramCopyWebuiToken().setText(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
-        controller.getMenuProgramCopyWebuiToken().setOnAction(e -> {
+        controller.getMenuWebUIOpenInBrowser().setText(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
+        controller.getMenuWebUIOpenInBrowser().setOnAction(e -> openWebpage(URI.create(Main.getServer().getWebUiUrl())));
+        controller.getMenuWebUICopyWebuiToken().setText(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
+        controller.getMenuWebUICopyWebuiToken().setOnAction(e -> {
             if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
                 String content = Main.getServer().getWebContainer().getToken();
                 JFXUtil.copyText(content);
@@ -234,9 +264,83 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
             }
         });
+        controller.getMenuDebug().setText(tlUI(Lang.GUI_MENU_DEBUG));
+        controller.getMenuDebugReload().setText(tlUI(Lang.GUI_MENU_DEBUG_RELOAD_CONFIGURATION));
+        controller.getMenuDebugReload().setOnAction(this::debugReload);
+        controller.getMenuDebugHeapDump().setText(tlUI(Lang.GUI_MENU_DEBUG_HEAP_DUMP));
+        controller.getMenuDebugHeapDump().setOnAction(this::debugHeapDump);
+        controller.getMenuDebugPrintThreads().setText(tlUI(Lang.GUI_MENU_PRINT_THREADS));
+        controller.getMenuDebugPrintThreads().setOnAction(this::debugPrintThreads);
         if (silentStart) {
             setVisible(false);
         }
+    }
+
+    private void debugPrintThreads(ActionEvent actionEvent) {
+        StringBuilder threadDump = new StringBuilder(System.lineSeparator());
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
+            threadDump.append(MsgUtil.threadInfoToString(threadInfo));
+        }
+        log.info(threadDump.toString());
+    }
+
+    private void debugHeapDump(ActionEvent actionEvent) {
+        try {
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
+                    server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+            File hprof = new File(Main.getDebugDirectory(), System.currentTimeMillis() + ".hprof");
+            System.gc();
+            mxBean.dumpHeap(hprof.getAbsolutePath(), true);
+            createDialog(Level.INFO, tlUI(Lang.HEAPDUMP_COMPLETED_TITLE), tlUI(Lang.HEAPDUMP_COMPLETED_DESCRIPTION));
+        } catch (Exception e) {
+            log.error("Unable dump heap", e);
+            createDialog(Level.SEVERE, tlUI(Lang.HEAPDUMP_FAILED_TITLE), tlUI(Lang.HEAPDUMP_FAILED_DESCRIPTION));
+        }
+    }
+
+    private void debugReload(ActionEvent actionEvent) {
+        var map = Main.getReloadManager().reload();
+        map.forEach((c, r) -> {
+            var name = "???";
+            var reloadableWrapper = c.getReloadable();
+            if (reloadableWrapper != null) {
+                var content = reloadableWrapper.get();
+                if (content != null) {
+                    name = content.getClass().getName();
+                } else {
+                    name = "<Invalid>";
+                }
+            } else {
+                name = c.getReloadableMethod().getName();
+            }
+            log.info(tlUI(Lang.RELOADING_MODULE, name, r.getStatus().name()));
+        });
+        createDialog(Level.INFO, tlUI(Lang.RELOAD_COMPLETED_TITLE), tlUI(Lang.RELOAD_COMPLETED_DESCRIPTION, map.size()));
+    }
+
+    private void updateTheme(boolean isDark) {
+        Stage stage = MainJavaFx.getStage();
+        Window window = stage.getScene().getWindow();
+        ThemeWindowManager themeWindowManager = ThemeWindowManagerFactory.create();
+//        if(themeWindowManager instanceof Win10ThemeWindowManager win10ThemeWindowManager){
+//           // win10ThemeWindowManager.enableAcrylic(stage.getScene().getWindow(), );
+//        }else if (themeWindowManager instanceof Win11ThemeWindowManager win11ThemeWindowManager){
+//            win11ThemeWindowManager.setWindowBackdrop(window, Win11ThemeWindowManager.Backdrop.MICA);
+//           // win11ThemeWindowManager.setWindowBorderColor(stage.getScene().getWindow(), Color.web("#4493f8"));
+//        }
+        themeWindowManager.setDarkModeForWindowFrame(window, isDark);
+        stage.getScene().getRoot().getStylesheets().removeAll();
+        stage.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/root.css").toExternalForm());
+        if (isDark) {
+            Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+            stage.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/dark.css").toExternalForm());
+        } else {
+            Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+            stage.getScene().getRoot().getStylesheets().add(Main.class.getResource("/javafx/css/light.css").toExternalForm());
+        }
+
     }
 
     private void closeWindowEvent(WindowEvent windowEvent) {
@@ -316,7 +420,6 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                 MainJavaFx.getStage().show();
             } else {
                 MainJavaFx.getStage().hide();
-
             }
         });
     }

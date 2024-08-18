@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -8,13 +9,16 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +35,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class MultiDialingBlocker extends AbstractRuleFeatureModule {
+@IgnoreScan
+public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Reloadable {
     // 计算缓存容量
     private static final int TORRENT_PEER_MAX_NUM = 1024;
     private static final int PEER_MAX_NUM_PER_SUBNET = 16;
@@ -52,6 +57,18 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
         webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
                 .get("/api/modules/" + getConfigName() + "/status", this::handleStatus, Role.USER_READ);
+        Main.getReloadManager().register(this);
+    }
+
+    @Override
+    public void onDisable() {
+        Main.getReloadManager().unregister(this);
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
     }
 
     private void handleStatus(Context ctx) {
@@ -61,8 +78,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
         Map<String, Map<String, Long>> mapSubnetCounter = new HashMap<>();
         subnetCounter.asMap().forEach((k, v) -> mapSubnetCounter.put(k, v.asMap()));
         status.put("subnetCounter", mapSubnetCounter);
-        ctx.status(HttpStatus.OK);
-        ctx.json(status);
+        ctx.json(new StdResp(true, null, status));
     }
 
     private void handleConfig(Context ctx) {
@@ -73,8 +89,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
         config.put("cacheLifespan", cacheLifespan);
         config.put("keepHunting", keepHunting);
         config.put("keepHuntingTime", keepHuntingTime);
-        ctx.status(HttpStatus.OK);
-        ctx.json(config);
+        ctx.json(new StdResp(true, null, config));
     }
 
     @Override
@@ -90,11 +105,6 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule {
     @Override
     public boolean isConfigurable() {
         return true;
-    }
-
-    @Override
-    public void onDisable() {
-
     }
 
     private void reloadConfig() {

@@ -2,9 +2,11 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.AllArgsConstructor;
@@ -15,15 +17,15 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
+@IgnoreScan
 public class PBHAuthenticateController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+
     @Override
     public boolean isConfigurable() {
         return false;
@@ -48,7 +50,7 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
 
     private void handleLogout(Context ctx) {
         ctx.sessionAttribute("authenticated", null);
-        ctx.json(Map.of("message", "success"));
+        ctx.json(new StdResp(true, "success", null));
     }
 
     private void handleLogin(Context ctx) throws NeedInitException {
@@ -63,12 +65,11 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
         if (loginRequest == null || !webContainer.getToken().equals(loginRequest.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
-            ctx.json(Map.of("message", tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN)));
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
             return;
         }
         ctx.sessionAttribute("authenticated", webContainer.getToken());
-        ctx.status(HttpStatus.OK);
-        ctx.json(Map.of("message", tl(locale(ctx), Lang.WEBAPI_AUTH_OK)));
+        ctx.json(new StdResp(true, tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }
 
 

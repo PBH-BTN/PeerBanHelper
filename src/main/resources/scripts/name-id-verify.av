@@ -1,6 +1,9 @@
 ## @NAME PeerID/ClientName 伪装检查
 ## @AUTHOR PBH-BTN Community
 ## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
 
 if(isBlank(peer.clientName) || isBlank(peer.peerId)) {
     return false; ## 二元组任意为空都不能继续检查，需要下载器支持
@@ -10,6 +13,7 @@ let peerIdLowercase = toLowerCase(peer.peerId);
 let clientNameLowercase = toLowerCase(peer.clientName);
 ## 映射表
 let table = seq.map(
+  'aria2explorer', '-ae',
   'bitcomet', '-bc',
   'transmission', '-tr',
   'qbittorrent', '-qb',
@@ -21,10 +25,12 @@ let table = seq.map(
   'adm', '-ad',
   'bitspirit', '-sp',
   'aria2', 'a2',
+  'utorrentmac', '-um',
   'utorrent mac', '-um',
   'μtorrent', '-ut',
   'utorrent', '-ut',
-  'tixati', 'tix'
+  'tixati', 'tix',
+  'gopeed dev', '-gp'
 );
 ## 伪装检查
 for tableName in seq.keys(table) {
