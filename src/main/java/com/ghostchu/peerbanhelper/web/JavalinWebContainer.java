@@ -151,6 +151,7 @@ public class JavalinWebContainer {
                     markLoginFailed(ctx.ip());
                     throw new NotLoggedInException();
                 })
+                .after("/*", ctx -> ctx.removeHeader("Last-Modified"))
                 .options("/*", ctx -> ctx.status(200));
 
     }
