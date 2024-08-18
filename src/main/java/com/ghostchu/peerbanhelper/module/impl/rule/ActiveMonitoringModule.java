@@ -44,7 +44,6 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             .maximumSize(3500)
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
-    private TrafficJournalEntity journal;
 
     public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao) {
         super();
