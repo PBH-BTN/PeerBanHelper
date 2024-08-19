@@ -22,9 +22,6 @@ jobs:
     needs: Build 
     runs-on: ubuntu-latest
     steps:
-      - name: Build
-        uses: ./github/workflows/build_fe.yml
-
       - name: Lint
         run: pnpm run lint
 
