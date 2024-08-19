@@ -29,6 +29,14 @@ jobs:
           cache-dependency-path: '**/pom.xml'
       - name: Build with Maven
         run: mvn -B clean package --file pom.xml -P thin-sqlite-packaging
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PullRequest-Artifact-${{ github.sha }}
+          path: |
+            target/*.jar
+            target/peerbanhelper-binary
+            target/media/*.exe
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx
