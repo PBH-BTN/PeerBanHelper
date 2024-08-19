@@ -9,6 +9,7 @@ on:
     branches: ["master"]
     paths:
       - 'webui/**'
+  workflow_call:
 
 defaults:
   run:

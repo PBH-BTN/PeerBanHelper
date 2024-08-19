@@ -18,9 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Get WebUI Files
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
+        uses: ./.github/workflows/webui.yml
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
