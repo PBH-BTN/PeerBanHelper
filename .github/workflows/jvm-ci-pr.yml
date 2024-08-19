@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 jobs:
   WebUI:
-    uses: ./github/workflows/build_fe.yml
+    uses: ./.github/workflows/build_fe.yml
   CI:
     runs-on: ubuntu-latest
     steps:

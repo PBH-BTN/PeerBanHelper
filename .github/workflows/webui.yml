@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   WebUI:
-    uses: ./github/workflows/build_fe.yml
+    uses: ./.github/workflows/build_fe.yml
   Check:
     runs-on: ubuntu-latest
     steps:
