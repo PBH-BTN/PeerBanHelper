@@ -41,7 +41,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: build
+    needs: Check
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     permissions:
