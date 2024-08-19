@@ -14,6 +14,8 @@ on:
     types:
       - published
 jobs:
+  WebUI:
+    uses: ./github/workflows/build_fe.yml
   build:
     permissions:
       contents: write
@@ -27,8 +29,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Get WebUI Files
-        uses: ./github/workflows/build_fe.yml
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'

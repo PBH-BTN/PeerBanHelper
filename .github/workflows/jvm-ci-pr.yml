@@ -8,12 +8,12 @@ on:
     branches: [ "master", "release", "v6", "api-std" ]
   workflow_dispatch:
 jobs:
+  WebUI:
+    uses: ./github/workflows/build_fe.yml
   CI:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Get WebUI Files
-        uses: ./github/workflows/build_fe.yml
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"

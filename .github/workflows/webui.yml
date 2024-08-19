@@ -16,11 +16,11 @@ defaults:
     working-directory: 'webui'
 
 jobs:
-  build:
+  WebUI:
+    uses: ./github/workflows/build_fe.yml
+  Check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - name: Build
         uses: ./github/workflows/build_fe.yml
 
