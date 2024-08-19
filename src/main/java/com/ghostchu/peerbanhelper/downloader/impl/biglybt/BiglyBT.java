@@ -152,9 +152,9 @@ public class BiglyBT extends AbstractDownloader {
         List<Torrent> torrents = new ArrayList<>();
         for (DownloadRecord detail : torrentDetail) {
             torrents.add(new TorrentImpl(
-                    detail.getTorrent().getHashBase64(),
+                    detail.getTorrent().getInfoHash(),
                     detail.getName(),
-                    new String(Base64.getDecoder().decode(detail.getTorrent().getHashBase64()), StandardCharsets.ISO_8859_1),
+                    detail.getTorrent().getInfoHash(),
                     detail.getTorrent().getSize(),
                     detail.getStats().getCompletedInThousandNotation() / 1000d,
                     detail.getStats().getRtUploadSpeed(),
@@ -191,7 +191,7 @@ public class BiglyBT extends AbstractDownloader {
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
                     peer.getIp(),
-                    new String(Base64.getDecoder().decode(peer.getPeerIdBase64()), StandardCharsets.ISO_8859_1),
+                    peer.getPeerId(),
                     peer.getClient(),
                     peer.getStats().getRtDownloadSpeed(),
                     peer.getStats().getTotalReceived(),
