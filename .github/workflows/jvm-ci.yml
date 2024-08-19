@@ -16,6 +16,7 @@ jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
   CI:
+    needs: WebUI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

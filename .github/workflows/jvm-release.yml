@@ -17,6 +17,7 @@ jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
   build:
+    needs: WebUI
     permissions:
       contents: write
       checks: write
