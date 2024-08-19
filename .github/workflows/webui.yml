@@ -21,38 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: 21.x
-
-      - uses: pnpm/action-setup@v3
-        name: Install pnpm
-        with:
-          version: 9.1.1
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install
+      - name: Build
+        uses: ./github/workflows/build_fe.yml
 
       - name: Lint
         run: pnpm run lint
-
-      - name: Build
-        run: pnpm run build
 
       - name: Extract branch name
         shell: bash

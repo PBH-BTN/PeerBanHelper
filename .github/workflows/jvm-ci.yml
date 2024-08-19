@@ -18,8 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Get WebUI Files
-        run: pnpm i && pnpm run build
-        working-directory: 'webui'
+        uses: ./github/workflows/build_fe.yml
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
