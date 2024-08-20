@@ -191,6 +191,9 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public Downloader createDownloader(String client, ConfigurationSection downloaderSection) {
+        if(downloaderSection.getString("name") != null){
+            downloaderSection.set("name", downloaderSection.getString("name", "").replace(".", "-"));
+        }
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
@@ -205,6 +208,9 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public Downloader createDownloader(String client, JsonObject downloaderSection) {
+        if(downloaderSection.get("name") != null){
+            downloaderSection.addProperty("name", downloaderSection.get("name").getAsString().replace(".", "-"));
+        }
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
