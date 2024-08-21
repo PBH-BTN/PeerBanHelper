@@ -2,7 +2,8 @@ FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21 as build
 
 COPY . /build
 WORKDIR /build
-RUN cd webui && \
+RUN apk add --update npm && \
+    cd webui && \
     npm i && \
     npm run build && \
     cd .. && \
