@@ -16,7 +16,7 @@ on:
 jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
-  Build Windows:
+  Build_Windows:
     needs: WebUI
     permissions:
       contents: write
@@ -63,7 +63,8 @@ jobs:
         with:
           asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*"]'
         id: project
-  Build Docker:
+  Build_Docker:
+    runs-on: ubuntu-latest
     steps:
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
