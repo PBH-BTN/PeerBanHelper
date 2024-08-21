@@ -66,6 +66,7 @@ jobs:
   Build_Docker:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx
