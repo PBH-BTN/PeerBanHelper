@@ -65,7 +65,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: webui-dist
           path: ./dist
 
       - name: Deploy to GitHub Pages
