@@ -40,5 +40,7 @@ export default {
   'page.charts.tooltip.traffic':
     'Data collected by PeerBanHelper. Due the API limitation, The data may be subject to large errors and the results are for reference only.',
   'page.charts.tooltip.2048':
-    "Because the chart is ugly when the icons are not aligned, I listened to Ghost_chu's suggestion and put a 2048 here"
+    "Because the chart is ugly when the icons are not aligned, I listened to Ghost_chu's suggestion and put a 2048 here",
+  'page.charts.error.title': 'Failed to load chart',
+  'page.charts.error.refresh': 'Retry'
 }

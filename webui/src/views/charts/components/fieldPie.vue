@@ -1,6 +1,27 @@
 <template>
   <a-card hoverable :title="t('page.charts.options.field.' + option.field)">
+    <a-result
+      v-if="err"
+      status="500"
+      :title="t('page.charts.error.title')"
+      class="chart chart-error"
+    >
+      <template #subtitle> {{ err.message }} </template>
+      <template #extra>
+        <a-button
+          type="primary"
+          @click="
+            () => {
+              err = undefined
+              refresh()
+            }
+          "
+          >{{ t('page.charts.error.refresh') }}</a-button
+        >
+      </template>
+    </a-result>
     <v-chart
+      v-else
       class="chart"
       :option="chartOption"
       :loading="loading"
@@ -74,6 +95,7 @@ const loadingOptions = computed(() => ({
   textColor: darkStore.isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgb(29, 33, 41)',
   maskColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.4)'
 }))
+const err = ref<Error>()
 
 const chartOption = ref({
   tooltip: {
@@ -120,7 +142,7 @@ watch(option, (v) => {
   run(v.field, v.enableThreshold)
 })
 
-const { loading, run } = useRequest(getAnalysisDataByField, {
+const { loading, run, refresh } = useRequest(getAnalysisDataByField, {
   defaultParams: ['peerId', true],
   onSuccess: (data) => {
     if (data.data) {
@@ -157,6 +179,9 @@ const { loading, run } = useRequest(getAnalysisDataByField, {
         }))
       }
     }
+  },
+  onError: (e) => {
+    err.value = e
   }
 })
 </script>

@@ -34,7 +34,28 @@
         </template>
       </a-popover>
     </template>
+    <a-result
+      v-if="err"
+      status="500"
+      :title="t('page.charts.error.title')"
+      class="chart chart-error"
+    >
+      <template #subtitle> {{ err.message }} </template>
+      <template #extra>
+        <a-button
+          type="primary"
+          @click="
+            () => {
+              err = undefined
+              refresh()
+            }
+          "
+          >{{ t('page.charts.error.refresh') }}</a-button
+        >
+      </template>
+    </a-result>
     <v-chart
+      v-else
       class="chart"
       :option="chartOptions"
       :loading="loading"
@@ -66,6 +87,8 @@ const { t } = useI18n()
 const option = reactive({
   range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
 })
+
+const err = ref<Error>()
 
 const darkStore = useDarkStore()
 const loadingOptions = computed(() => ({
@@ -112,7 +135,7 @@ watch(option, (v) => {
   run(v.range[0], v.range[1])
 })
 
-const { loading, run } = useRequest(getTrends, {
+const { loading, run, refresh } = useRequest(getTrends, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()],
   onSuccess: (data) => {
     if (data.data) {
@@ -127,6 +150,9 @@ const { loading, run } = useRequest(getTrends, {
           return [new Date(it.key), it.value]
         })
     }
+  },
+  onError: (e) => {
+    err.value = e
   }
 })
 </script>

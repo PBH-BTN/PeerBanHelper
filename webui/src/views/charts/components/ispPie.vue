@@ -5,7 +5,17 @@
       t('page.charts.title.geoip') + (option.bannedOnly ? t('page.charts.subtitle.bannedOnly') : '')
     "
   >
+    <a-result v-if="err" status="500" :title="t('page.charts.error.title')" class="chart chart-error">
+      <template #subtitle> {{ err.message }} </template>
+      <template #extra>
+        <a-button type="primary"  @click="()=>{
+          err = undefined
+          refresh()
+        }" >{{ t('page.charts.error.refresh')}}</a-button>
+      </template>
+    </a-result>
     <v-chart
+      v-else
       class="chart"
       :option="chartOption"
       :loading="loading"
@@ -97,6 +107,7 @@ const { t } = useI18n()
 
 use([TooltipComponent, LegendComponent, PieChart, SVGRenderer])
 const darkStore = useDarkStore()
+const err = ref<Error>()
 
 const option = reactive({
   field: 'isp' as 'isp' | 'province' | 'city' | 'region',
@@ -157,7 +168,7 @@ watch(option, (v) => {
   run(v.range[0], v.range[1], option.bannedOnly)
 })
 
-const { loading, run } = useRequest(getGeoIPData, {
+const { loading, run,refresh } = useRequest(getGeoIPData, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), option.bannedOnly],
   onSuccess: (data) => {
     if (data.data) {
@@ -184,6 +195,9 @@ const { loading, run } = useRequest(getGeoIPData, {
       }))
       chartOption.value.series[0].name = t('page.charts.options.field.' + option.field)
     }
+  },
+  onError: (e) => {
+    err.value = e
   }
 })
 </script>
