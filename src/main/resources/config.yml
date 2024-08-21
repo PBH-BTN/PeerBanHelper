@@ -126,20 +126,12 @@ banlist-invoker:
 # 在您填写相关密钥信息后，PBH 将自动下载所需的数据库文件，这视为您同意 Maxmind 的最终用户许可协议：https://www.maxmind.com/en/end-user-license-agreement
 # After you filled them, PBH will automatically download GeoIP database. EULA: https://www.maxmind.com/en/end-user-license-agreement
 ip-database:
-  # ==== 密钥信息开始 ==== - 在 LicenseKeys 页面创建凭据时，网页会提供这些信息
-  # ==== Begin of license keys ===, You can find them at LicenseKeys page
-  account-id: ''
-  license-key: ''
   # 允许自动更新 Maxmind GeoIP 数据库文件
   # Allow PBH update Maxmind GeoIP database file while restarting if needed
   auto-update: true
   # ==== 密钥信息结束 ====
   # ==== End of license keys ====
-  # GeoIP-City 的数据库名称，默认使用免费版（GeoLite2-City），如果您购买了付费的数据库，可以自行替换
-  # GeoIP-City database name, by default, the free version (GeoLite2-City) will be used
   database-city: 'GeoLite2-City'
-  # GeoIP-ASN 的数据库名称，默认使用免费版（GeoLite2-ASN），如果您购买了付费的数据库，可以自行替换
-  # GeoIP-ASN database name, by default, the free version (GeoLite2-ASN) will be used
   database-asn: 'GeoLite2-ASN'
 # 代理服务器设定
 # Proxy server settings
