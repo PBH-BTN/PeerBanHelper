@@ -8,14 +8,19 @@ on:
     branches: [ "master", "release", "v6", "api-std" ]
   workflow_dispatch:
 jobs:
+  WebUI:
+    uses: ./.github/workflows/build_fe.yml
   CI:
+    needs: WebUI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Get WebUI Files
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
+      - uses: actions/download-artifact@v4
+        with:
+          name: webui-dist
+          path: src/main/resources/static
+      - name: Display structure of WebUI dist
+        run: ls src/main/resources/static
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -24,6 +29,14 @@ jobs:
           cache-dependency-path: '**/pom.xml'
       - name: Build with Maven
         run: mvn -B clean package --file pom.xml -P thin-sqlite-packaging
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PullRequest-Artifact-${{ github.sha }}
+          path: |
+            target/*.jar
+            target/peerbanhelper-binary
+            target/media/*.exe
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx

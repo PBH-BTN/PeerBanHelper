@@ -191,6 +191,9 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public Downloader createDownloader(String client, ConfigurationSection downloaderSection) {
+        if(downloaderSection.getString("name") != null){
+            downloaderSection.set("name", downloaderSection.getString("name", "").replace(".", "-"));
+        }
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
@@ -205,6 +208,9 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public Downloader createDownloader(String client, JsonObject downloaderSection) {
+        if(downloaderSection.get("name") != null){
+            downloaderSection.addProperty("name", downloaderSection.get("name").getAsString().replace(".", "-"));
+        }
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
@@ -246,10 +252,10 @@ public class PeerBanHelperServer implements Reloadable {
             String databaseCity = mainConfig.getString("ip-database.database-city", "");
             String databaseASN = mainConfig.getString("ip-database.database-asn", "");
             boolean autoUpdate = mainConfig.getBoolean("ip-database.auto-update");
-            if (accountId.isEmpty() || licenseKey.isEmpty() || databaseCity.isEmpty() || databaseASN.isEmpty()) {
-                log.warn(tlUI(Lang.IPDB_NEED_CONFIG));
-                return;
-            }
+//            if (accountId.isEmpty() || licenseKey.isEmpty() || databaseCity.isEmpty() || databaseASN.isEmpty()) {
+//                log.warn(tlUI(Lang.IPDB_NEED_CONFIG));
+//                return;
+//            }
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
                     databaseCity, databaseASN, autoUpdate, Main.getUserAgent());
         } catch (Exception e) {

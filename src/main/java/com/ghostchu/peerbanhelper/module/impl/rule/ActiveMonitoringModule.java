@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
-import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -44,7 +43,6 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             .maximumSize(3500)
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
-    private TrafficJournalEntity journal;
 
     public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao) {
         super();
@@ -122,7 +120,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
 
     private void writeJournal() {
         try {
-            var entity = trafficJournalDao.getTodayJourney();
+            var entity = trafficJournalDao.getTodayJournal();
             String[] data = peerRecordDao.queryBuilder()
                     .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
                     .queryRawFirst();

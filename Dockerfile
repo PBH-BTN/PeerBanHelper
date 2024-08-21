@@ -1,8 +1,14 @@
-FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.8-eclipse-temurin-21 as build
+FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21 as build
 
 COPY . /build
 WORKDIR /build
-RUN sh setup-webui.sh && mvn -B clean package --file pom.xml -T 1C
+RUN apk add --update npm && \
+    cd webui && \
+    npm i && \
+    npm run build && \
+    cd .. && \
+    mv webui/dist src/main/resources/static && \
+    mvn -B clean package --file pom.xml -T 1.5C
 
 FROM docker.io/azul/zulu-openjdk-alpine:21.0.4-21.36-jre
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"

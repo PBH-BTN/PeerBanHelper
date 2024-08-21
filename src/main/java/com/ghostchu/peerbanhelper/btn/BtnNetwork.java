@@ -56,6 +56,7 @@ public class BtnNetwork {
         this.appSecret = appSecret;
         setupHttpClient();
         resetScheduler();
+        checkIfNeedRetryConfig();
     }
 
     private void resetScheduler() {
@@ -63,12 +64,10 @@ public class BtnNetwork {
             executeService.shutdownNow();
         }
         executeService = Executors.newScheduledThreadPool(2);
-        executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 0, 600, TimeUnit.SECONDS);
+        executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 600, 600, TimeUnit.SECONDS);
     }
 
     public void configBtnNetwork() {
-        abilities.values().forEach(BtnAbility::unload);
-        abilities.clear();
         try {
             HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
@@ -88,6 +87,8 @@ public class BtnNetwork {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             resetScheduler();
+            abilities.values().forEach(BtnAbility::unload);
+            abilities.clear();
             JsonObject ability = json.get("ability").getAsJsonObject();
             if (ability.has("submit_peers") && submit) {
                 abilities.put(BtnAbilitySubmitPeers.class, new BtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));

@@ -1,0 +1,37 @@
+.normal-enter-active,
+.normal-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.normal-enter-from,
+.normal-leave-to {
+  opacity: 0;
+}
+
+.route-right-enter-active,
+.route-right-leave-active,
+.route-left-enter-active,
+.route-left-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.route-left-leave-active,
+.route-right-leave-active {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.route-left-leave-to,
+.route-right-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.route-left-enter-from,
+.route-right-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}

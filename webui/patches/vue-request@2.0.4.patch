@@ -1,0 +1,43 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+deleted file mode 100644
+index d8211cb2878a897638fa9388fdde6788e2d7c509..0000000000000000000000000000000000000000
+diff --git a/CHANGELOG.zh-CN.md b/CHANGELOG.zh-CN.md
+deleted file mode 100644
+index ba64ecd5c9280d350fd865a298d03f03722c3797..0000000000000000000000000000000000000000
+diff --git a/README-en_US.md b/README-en_US.md
+deleted file mode 100644
+index dd6678fed1142bea8d86b2dd92ad6a53332e592f..0000000000000000000000000000000000000000
+diff --git a/dist/index.cjs.js b/dist/index.cjs.js
+index b3b8208c8ac04c4e056115c5a0efa46a7fbfb39c..e43868b41b48cb56ecf7b4daa79cd3df29606ccf 100644
+--- a/dist/index.cjs.js
++++ b/dist/index.cjs.js
+@@ -1168,6 +1168,7 @@ function useRequest(service, options, plugins) {
+ 
+ function usePagination(service) {
+   let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
++  let plugins = arguments[2]
+   const defaultPaginationOptions = {
+     currentKey: 'current',
+     pageSizeKey: 'pageSize',
+@@ -1196,7 +1197,7 @@ function usePagination(service) {
+     params,
+     run,
+     ...rest
+-  } = useRequest(service, finallyOptions);
++  } = useRequest(service, finallyOptions, plugins);
+   const paging = paginationParams => {
+     const [oldPaginationParams, ...restParams] = params.value || [];
+     const newPaginationParams = {
+diff --git a/dist/types/index.d.ts b/dist/types/index.d.ts
+index ac0223505e0f07a59c66e7e8fdf4f886c1575de5..537e21159124531a5bc7aafd8d461119bb9733a8 100644
+--- a/dist/types/index.d.ts
++++ b/dist/types/index.d.ts
+@@ -20,7 +20,7 @@ interface PaginationQueryResult<R, P extends unknown[]> extends QueryResult<R, P
+     changePageSize: (pageSize: number) => void;
+     changePagination: (current: number, pageSize: number) => void;
+ }
+-declare function usePagination<R, P extends unknown[] = any>(service: Service<R, P>, options?: PaginationOptions<R, P>): PaginationQueryResult<R, P>;
++declare function usePagination<R, P extends unknown[] = any>(service: Service<R, P>, options?: PaginationOptions<R, P>, plugins?: PluginImplementType<R, P>[]): PaginationQueryResult<R, P>;
+ 
+ type CacheData<R = any, P = any> = {
+     data: R;

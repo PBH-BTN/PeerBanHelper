@@ -275,7 +275,7 @@ public class RuleSubController extends AbstractFeatureModule {
                 ctx.json(msg);
                 return;
             }
-            ctx.json(new StdResp(true, tlUI(Lang.IP_BAN_RULE_SAVED), null));
+            ctx.json(new StdResp(true, tl(locale(ctx), Lang.IP_BAN_RULE_SAVED), null));
         } catch (Exception e) {
             // 更新失败时回滚
             if (isAdd) {

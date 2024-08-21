@@ -67,7 +67,7 @@ public class PBHChartController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.javalin()
-                .get("/api/chart/geoip", this::handleGeoIP, Role.USER_READ)
+                .get("/api/chart/geoIpInfo", this::handleGeoIP, Role.USER_READ)
                 .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ)
                 .get("/api/chart/traffic", this::handleTraffic, Role.USER_READ)
         ;
@@ -97,16 +97,22 @@ public class PBHChartController extends AbstractFeatureModule {
             while (it.hasNext()) {
                 if (base == null) {
                     base = it.next();
+                    // 多插一个进去
+                    records.add(new TrafficJournalRecord(base.getTimestamp(), base.getUploaded(), base.getDownloaded()));
                     continue;
                 }
                 var target = it.next();
                 long uploadedOffset = target.getUploaded() - base.getUploaded();
                 long downloadedOffset = target.getDownloaded() - base.getDownloaded();
-                if(uploadedOffset < 0) uploadedOffset = 0;
-                if(downloadedOffset < 0) downloadedOffset = 0;
+                if (uploadedOffset < 0) uploadedOffset = 0;
+                if (downloadedOffset < 0) downloadedOffset = 0;
                 base = target;
                 records.add(new TrafficJournalRecord(base.getTimestamp(), uploadedOffset, downloadedOffset));
             }
+        }
+        if (records.size() > 1) {
+            // 多插的那个移除
+            records.removeFirst();
         }
         ctx.json(new StdResp(true, null, new TrafficChart(totalUploaded, totalDownloaded, records)));
     }

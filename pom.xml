@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>6.0.0</version>
+    <version>6.0.2-24w34a</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -17,7 +17,7 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.5.1</flatlafVersion>
-        <javafx.version>23-ea+22</javafx.version>
+        <javafx.version>23-ea+27</javafx.version>
         <javafx.scope>provided</javafx.scope>
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
@@ -514,7 +514,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.46.0.1</version>
+            <version>3.46.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -552,12 +552,6 @@
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
             <version>4.2.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/javatar/javatar -->
-        <dependency>
-            <groupId>javatar</groupId>
-            <artifactId>javatar</artifactId>
-            <version>2.5</version>
         </dependency>
         <dependency>
             <groupId>io.javalin</groupId>

@@ -14,7 +14,10 @@ on:
     types:
       - published
 jobs:
+  WebUI:
+    uses: ./.github/workflows/build_fe.yml
   build:
+    needs: WebUI
     permissions:
       contents: write
       checks: write
@@ -27,10 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Get WebUI Files
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd src/main/resources && git clone --depth 1  --branch gh-pages "https://github.com/PBH-BTN/pbh-fe.git" static&& cd ../../..
+      - uses: actions/download-artifact@v4
+        with:
+          name: webui-dist
+          path: src/main/resources/static
+      - name: Display structure of WebUI dist
+        run: ls src/main/resources/static
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -46,7 +51,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Linux-${{ github.sha }}
+          name: Artifact-${{ github.sha }}
           path: |
             target/*.jar
             target/peerbanhelper-binary
