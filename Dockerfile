@@ -4,8 +4,9 @@ COPY . /build
 WORKDIR /build
 RUN apk add --update npm && \
     cd webui && \
-    npm i && \
-    npm run build && \
+    npm install -g pnpm && \
+    pnpm i && \
+    pnpm run build && \
     cd .. && \
     mv webui/dist src/main/resources/static && \
     mvn -B clean package --file pom.xml -T 1.5C
