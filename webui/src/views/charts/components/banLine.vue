@@ -73,7 +73,28 @@
         </template>
       </a-popover>
     </template>
+    <a-result
+      v-if="err"
+      status="500"
+      :title="t('page.charts.error.title')"
+      class="chart chart-error"
+    >
+      <template #subtitle> {{ err.message }} </template>
+      <template #extra>
+        <a-button
+          type="primary"
+          @click="
+            () => {
+              err = undefined
+              refresh()
+            }
+          "
+          >{{ t('page.charts.error.refresh') }}</a-button
+        >
+      </template>
+    </a-result>
     <v-chart
+      v-else
       class="chart"
       :option="chartOptions"
       :loading="loading"
@@ -104,7 +125,10 @@ const loadingOptions = computed(() => ({
   textColor: darkStore.isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgb(29, 33, 41)',
   maskColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.4)'
 }))
+
 const darkStore = useDarkStore()
+const err = ref<Error>()
+
 use([TooltipComponent, LineChart, GridComponent, SVGRenderer])
 const changeStep = (v: string) => {
   if (v === 'day') {
@@ -143,7 +167,7 @@ watch(option, (v) => {
   run(v.range[0], v.range[1], v.timeStep)
 })
 
-const { loading, run } = useRequest(getTimebasedStaticsData, {
+const { loading, run, refresh } = useRequest(getTimebasedStaticsData, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), 'day'],
   onSuccess: (data) => {
     if (data.data) {
@@ -162,6 +186,9 @@ const { loading, run } = useRequest(getTimebasedStaticsData, {
         .sort(([k1], [k2]) => k1 - k2)
         .map(([key, value]) => [new Date(key), value])
     }
+  },
+  onError: (e) => {
+    err.value = e
   }
 })
 </script>

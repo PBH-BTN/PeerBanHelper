@@ -39,5 +39,7 @@ export default {
   'page.charts.options.bannedOnly': '仅显示封禁数据',
   'page.charts.tooltip.traffic':
     '数据由 PeerBanHelper 自行统计。由于 API 限制，数据可能存在较大误差，结果仅供参考。',
-  'page.charts.tooltip.2048': '由于图标对不齐很丑，所以听从Ghost_chu的建议，放一个2048在这'
+  'page.charts.tooltip.2048': '由于图标对不齐很丑，所以听从Ghost_chu的建议，放一个2048在这',
+  'page.charts.error.title': '图标加载失败',
+  'page.charts.error.refresh': '重试'
 }

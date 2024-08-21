@@ -37,7 +37,28 @@
         </a-tooltip>
       </a-popover>
     </template>
+    <a-result
+      v-if="err"
+      status="500"
+      :title="t('page.charts.error.title')"
+      class="chart chart-error"
+    >
+      <template #subtitle> {{ err.message }} </template>
+      <template #extra>
+        <a-button
+          type="primary"
+          @click="
+            () => {
+              err = undefined
+              refresh()
+            }
+          "
+          >{{ t('page.charts.error.refresh') }}</a-button
+        >
+      </template>
+    </a-result>
     <v-chart
+      v-else
       class="chart"
       :option="chartOptions"
       :loading="loading"
@@ -54,7 +75,12 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { use } from 'echarts/core'
 import { BarChart } from 'echarts/charts'
-import { GridComponent, LegendComponent, ToolboxComponent, TooltipComponent } from 'echarts/components'
+import {
+  GridComponent,
+  LegendComponent,
+  ToolboxComponent,
+  TooltipComponent
+} from 'echarts/components'
 import { SVGRenderer } from 'echarts/renderers'
 import { useDarkStore } from '@/stores/dark'
 import { getTraffic } from '@/service/charts'
@@ -77,6 +103,8 @@ const loadingOptions = computed(() => ({
 }))
 
 const { t, d } = useI18n()
+
+const err = ref<Error>()
 
 const chartOptions = ref({
   tooltip: {
@@ -142,7 +170,7 @@ watch(option, (v) => {
   run(v.range[0], v.range[1])
 })
 
-const { loading, run } = useRequest(getTraffic, {
+const { loading, run, refresh } = useRequest(getTraffic, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()],
   onSuccess: (data) => {
     if (data.data) {
@@ -155,6 +183,9 @@ const { loading, run } = useRequest(getTraffic, {
         chartOptions.value.series[1].data.push(record.uploaded)
       })
     }
+  },
+  onError: (e) => {
+    err.value = e
   }
 })
 </script>
