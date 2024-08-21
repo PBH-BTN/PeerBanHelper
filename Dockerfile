@@ -1,12 +1,13 @@
-FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21-alpine as build
+FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21-alpine AS build
 
 COPY . /build
 WORKDIR /build
 RUN apk add --update npm && \
-    cd webui && \
     npm install -g pnpm && \
-    pnpm i && \
-    pnpm run build && \
+    pnpm --version && \
+    cd webui && \
+    pnpm i&& \
+    pnpm run build --loglevel verbose && \
     cd .. && \
     mv webui/dist src/main/resources/static && \
     mvn -B clean package --file pom.xml -T 1.5C
