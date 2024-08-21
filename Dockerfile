@@ -1,10 +1,11 @@
-FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21-alpine as build
+FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21-alpine AS build
 
 COPY . /build
 WORKDIR /build
-RUN apk add --update npm && \
+RUN apk add --update npm curl && \
+    curl -L https://unpkg.com/@pnpm/self-installer | node && \
     cd webui && \
-    npm i && \
+    pnpm i && \
     npm run build && \
     cd .. && \
     mv webui/dist src/main/resources/static && \
