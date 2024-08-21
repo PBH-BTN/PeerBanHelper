@@ -29,10 +29,7 @@ export async function getAnalysisDataByField(
 export async function getGeoIPData(startAt: Date, endAt: Date, bannedOnly: boolean): Promise<CommonResponse<GeoIP>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/chart/geoip`),
-    location.href
-  )
+  const url = new URL(urlJoin(endpointStore.endpoint, `api/chart/geoIpInfo`), location.href)
 
   // Convert dates to Unix timestamp in milliseconds
   const startAtTimestamp = startAt.getTime()

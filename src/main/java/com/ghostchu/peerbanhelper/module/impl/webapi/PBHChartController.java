@@ -67,7 +67,7 @@ public class PBHChartController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.javalin()
-                .get("/api/chart/geoip", this::handleGeoIP, Role.USER_READ)
+                .get("/api/chart/geoIpInfo", this::handleGeoIP, Role.USER_READ)
                 .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ)
                 .get("/api/chart/traffic", this::handleTraffic, Role.USER_READ)
         ;
