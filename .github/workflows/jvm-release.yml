@@ -16,7 +16,7 @@ on:
 jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
-  build:
+  Build Windows:
     needs: WebUI
     permissions:
       contents: write
@@ -38,9 +38,9 @@ jobs:
         run: ls src/main/resources/static
       - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
+          distribution: "temurin"
+          java-version: "21"
+          cache: "maven"
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
@@ -63,6 +63,8 @@ jobs:
         with:
           asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*"]'
         id: project
+  Build Docker:
+    steps:
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx
