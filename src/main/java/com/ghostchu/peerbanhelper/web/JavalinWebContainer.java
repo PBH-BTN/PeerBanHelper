@@ -73,7 +73,7 @@ public class JavalinWebContainer {
                             staticFiles.location = Location.EXTERNAL;
                             staticFiles.precompress = false;
                             staticFiles.aliasCheck = null;
-                            staticFiles.skipFileFunction = req -> false;
+                            staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                             //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
                         c.spaRoot.addFile("/", new File(new File(Main.getDataDirectory(), "static"), "index.html").getPath(), Location.EXTERNAL);
@@ -84,7 +84,7 @@ public class JavalinWebContainer {
                             staticFiles.location = Location.CLASSPATH;
                             staticFiles.precompress = false;
                             staticFiles.aliasCheck = null;
-                            staticFiles.skipFileFunction = req -> false;
+                            staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                             //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
                         c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
@@ -151,7 +151,6 @@ public class JavalinWebContainer {
                     markLoginFailed(ctx.ip());
                     throw new NotLoggedInException();
                 })
-                .after("/*", ctx -> ctx.removeHeader("Last-Modified"))
                 .options("/*", ctx -> ctx.status(200));
 
     }
