@@ -1,11 +1,27 @@
 <template>
-  <a-modal hide-cancel closable v-model:visible="visible" @ok="handleOk" fullscreen width="auto" @close="cancel()">
+  <a-modal
+    hide-cancel
+    closable
+    v-model:visible="visible"
+    @ok="handleOk"
+    unmount-on-close
+    width="auto"
+    @close="cancel()"
+  >
     <template #title> {{ t('page.dashboard.peerList.title') + tname }} </template>
-    <a-table :columns="columns" :data="data?.data" :loading="!loading && !data" :virtual-list-props="{ height: 850 }"
-      :pagination="false">
+    <a-table
+      :columns="columns"
+      :data="data?.data"
+      :loading="!loading && !data"
+      :virtual-list-props="{ height: 500 }"
+      :pagination="false"
+    >
       <template #peerAddress="{ record }">
         <a-typography-text copyable code>
-          <countryFlag v-if="record.geo && record.geo.countryRegion" :iso="record.geo.countryRegion" />
+          <countryFlag
+            v-if="record.geo && record.geo.countryRegion"
+            :iso="record.geo.countryRegion"
+          />
           {{ record.peer.address.ip }}
         </a-typography-text>
       </template>
@@ -26,10 +42,14 @@
       <template #uploadDownload="{ record }">
         <a-space fill style="justify-content: space-between">
           <a-space fill direction="vertical">
-            <a-typography-text><icon-arrow-up class="green" />
-              {{ formatFileSize(record.peer.uploaded) }}</a-typography-text>
-            <a-typography-text><icon-arrow-down class="red" />
-              {{ formatFileSize(record.peer.downloaded) }}</a-typography-text>
+            <a-typography-text
+              ><icon-arrow-up class="green" />
+              {{ formatFileSize(record.peer.uploaded) }}</a-typography-text
+            >
+            <a-typography-text
+              ><icon-arrow-down class="red" />
+              {{ formatFileSize(record.peer.downloaded) }}</a-typography-text
+            >
           </a-space>
         </a-space>
       </template>
@@ -64,6 +84,7 @@ import { useRequest } from 'vue-request'
 import { formatFileSize } from '@/utils/file'
 import countryFlag from '@/views/banlist/components/countryFlag.vue'
 import { useI18n } from 'vue-i18n'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 const { t } = useI18n()
 const visible = ref(false)
 const downloader = ref('')
@@ -83,51 +104,46 @@ const handleOk = () => {
   downloader.value = ''
   tid.value = ''
 }
-const { data, loading, run, cancel } = useRequest(getPeer, {
-  defaultParams: [downloader.value, tid.value],
-  manual: true,
-  pollingInterval: 1000
-})
+const { data, loading, run, cancel } = useRequest(
+  getPeer,
+  {
+    defaultParams: [downloader.value, tid.value]
+  },
+  [useAutoUpdatePlugin]
+)
 const columns = [
   {
     title: () => t('page.dashboard.peerList.column.address'),
     slotName: 'peerAddress',
-    width: 400
+    width: 330
   },
   {
     title: () => t('page.dashboard.peerList.column.port'),
-    dataIndex: 'peer.address.port',
-    width: 100
+    dataIndex: 'peer.address.port'
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
-    slotName: 'flags',
-    width: 100
+    slotName: 'flags'
   },
   {
     title: 'Peer ID',
-    dataIndex: 'peer.id',
-    width: 100
+    dataIndex: 'peer.id'
   },
   {
     title: () => t('page.dashboard.peerList.column.clientName'),
-    dataIndex: 'peer.clientName',
-    width: 400
+    dataIndex: 'peer.clientName'
   },
   {
     title: () => t('page.dashboard.peerList.column.speed'),
-    slotName: 'speed',
-    width: 100
+    slotName: 'speed'
   },
   {
     title: () => t('page.dashboard.peerList.column.uploadedDownloaded'),
-    slotName: 'uploadDownload',
-    width: 100
+    slotName: 'uploadDownload'
   },
   {
     title: () => t('page.dashboard.peerList.column.progress'),
-    slotName: 'progress',
-    width: 100
+    slotName: 'progress'
   }
 ]
 const parseFlags = (flags: string) =>
