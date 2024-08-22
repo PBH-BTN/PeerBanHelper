@@ -61,8 +61,8 @@ public class JavalinWebContainer {
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
                     if (Main.getMainConfig().getBoolean("server.allow-cors")
-                            || System.getenv("PBH_ALLOW_CORS") != null
-                            || System.getProperty("PBH_ALLOW_CORS") != null
+                        || System.getenv("PBH_ALLOW_CORS") != null
+                        || System.getProperty("PBH_ALLOW_CORS") != null
                     ) {
                         c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
                     }
@@ -106,15 +106,15 @@ public class JavalinWebContainer {
                 })
                 .exception(IllegalArgumentException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
-                    ctx.json(new StdResp(false, null, e.getMessage()));
+                    ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
                 })
                 .exception(RequirePBHPlusLicenseException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.PAYMENT_REQUIRED);
-                    ctx.json(new StdResp(false, null, e.getMessage()));
+                    ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                    ctx.json(new StdResp(false,  tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
