@@ -10,6 +10,6 @@ export default {
   'settings.modal.accessTokenTips.here': 'here',
   'settings.modal.pollInterval': 'Polling interval:',
   'settings.endpoint.error': 'Cannot connect to the backend, please check the Endpoint settings',
-  'settings.accessToken.error': 'Failed to get version from Github server.',
+  'settings.accessToken.error': 'Failed to check update',
   'settings.accessToken.error.limit': 'API Rate limit reached, try to set the token at settings.'
 }

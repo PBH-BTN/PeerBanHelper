@@ -9,6 +9,6 @@ export default {
   'settings.endpoint.error': '无法连接到后端，请检查Endpoint设置',
   'settings.modal.accessTokenTips': '你可以在{here}填写 Github Access Token',
   'settings.modal.accessTokenTips.here': '这里',
-  'settings.accessToken.error': '连接到 Github 检查 PBH 版本更新出错',
+  'settings.accessToken.error': '检查 PBH 版本更新出错',
   'settings.accessToken.error.limit': 'API 访问频率限制，请尝试在设置中填写 Token'
 }
