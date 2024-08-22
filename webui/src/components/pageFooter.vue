@@ -50,11 +50,12 @@
 
 <script setup lang="ts">
 import { useEndpointStore } from '@/stores/endpoint'
-import { Button, Message, Notification } from '@arco-design/web-vue'
+import { Button, Notification } from '@arco-design/web-vue'
 import { computed, h, ref, watch } from 'vue'
 import { compare } from 'compare-versions'
 import { useI18n } from 'vue-i18n'
 import plusModal from './plusModal.vue'
+import { RequestError } from '@octokit/request-error'
 
 const { t } = useI18n()
 const version = __APP_VERSION__
@@ -87,7 +88,27 @@ watch(hasNewVersion, () => {
 watch(
   () => endpointStore.checkUpgradeError,
   (error) => {
-    Message.error(`${t('settings.accessToken.error')},error:${error}`)
+    if (error instanceof RequestError) {
+      if (error?.message.includes('limit')) {
+        Notification.error({
+          title: t('settings.accessToken.error'),
+          content: t('settings.accessToken.error.limit'),
+          footer: () =>
+            h(
+              Button,
+              {
+                type: 'primary',
+                onClick: () => endpointStore.emmitter.emit('open-settings-modal')
+              },
+              () => t('settings.open')
+            )
+        })
+      }
+    } else
+      Notification.error({
+        title: t('settings.accessToken.error'),
+        content: error?.message ?? ''
+      })
   }
 )
 
