@@ -64,7 +64,8 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                                     task.getRewindCounter(),
                                     task.getProgressDifferenceCounter(),
                                     new Timestamp(System.currentTimeMillis()),
-                                    new Timestamp(System.currentTimeMillis())
+                                    new Timestamp(System.currentTimeMillis()),
+                                    task.getDownloader()
                             );
                             create(entity);
                         } else {

@@ -33,4 +33,6 @@ public final class ProgressCheatBlockerPersistEntity {
     private Timestamp firstTimeSeen;
     @DatabaseField(canBeNull = false)
     private Timestamp lastTimeSeen;
+    @DatabaseField(canBeNull = false)
+    private String downloader;
 }

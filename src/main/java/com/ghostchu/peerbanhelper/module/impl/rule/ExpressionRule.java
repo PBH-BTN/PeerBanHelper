@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -143,12 +144,12 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
 
     @SneakyThrows
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         AtomicReference<CheckResult> checkResult = new AtomicReference<>(pass());
         try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
             for (Expression expression : expressions.keySet()) {
                 exec.submit(() -> {
-                    CheckResult expressionRun = runExpression(expression, torrent, peer, ruleExecuteExecutor);
+                    CheckResult expressionRun = runExpression(expression, torrent, peer, downloader, ruleExecuteExecutor);
                     if (expressionRun.action() == PeerAction.SKIP) {
                         checkResult.set(expressionRun); // 提前退出
                         return;
@@ -164,7 +165,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         return checkResult.get();
     }
 
-    public CheckResult runExpression(Expression expression, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+    public CheckResult runExpression(Expression expression, @NotNull Torrent torrent, @NotNull Peer peer,@NotNull Downloader downloader,  @NotNull ExecutorService ruleExecuteExecutor) {
         ExpressionMetadata expressionMetadata = expressions.get(expression);
         return getCache().readCacheButWritePassOnly(this, expression.hashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
@@ -172,6 +173,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                 Map<String, Object> env = expression.newEnv();
                 env.put("torrent", torrent);
                 env.put("peer", peer);
+                env.put("downloader",downloader);
                 env.put("cacheable", new AtomicBoolean(false));
                 Object returns;
                 if (expressionMetadata.threadSafe()) {
