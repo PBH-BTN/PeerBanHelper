@@ -53,7 +53,7 @@ public class ProfileUpdateScript {
             var rule = section.getConfigurationSection(key);
             var url = rule.getString("url", "");
             if (url.equals("https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt") ||
-                    url.equals("https://fastly.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt")) {
+                url.equals("https://fastly.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt")) {
                 rule.set("url", "https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt");
             }
         }

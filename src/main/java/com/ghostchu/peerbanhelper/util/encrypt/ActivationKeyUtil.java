@@ -53,7 +53,7 @@ public class ActivationKeyUtil {
             String description = keyData.description;
             if (description != null) {
                 if (description.equalsIgnoreCase("No description")
-                        || description.isBlank()) {
+                    || description.isBlank()) {
                     description = null;
                 }
             }

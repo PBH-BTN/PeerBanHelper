@@ -191,7 +191,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public Downloader createDownloader(String client, ConfigurationSection downloaderSection) {
-        if(downloaderSection.getString("name") != null){
+        if (downloaderSection.getString("name") != null) {
             downloaderSection.set("name", downloaderSection.getString("name", "").replace(".", "-"));
         }
         Downloader downloader = null;
@@ -208,7 +208,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public Downloader createDownloader(String client, JsonObject downloaderSection) {
-        if(downloaderSection.get("name") != null){
+        if (downloaderSection.get("name") != null) {
             downloaderSection.addProperty("name", downloaderSection.get("name").getAsString().replace(".", "-"));
         }
         Downloader downloader = null;

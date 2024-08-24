@@ -30,6 +30,7 @@ public class MainConfigUpdateScript {
         conf.set("ip-database.account-id", null);
         conf.set("ip-database.license-key", null);
     }
+
     @UpdateScript(version = 17)
     public void windowsEcoQoSApi() {
         conf.set("performance.windows-ecoqos-api", true);

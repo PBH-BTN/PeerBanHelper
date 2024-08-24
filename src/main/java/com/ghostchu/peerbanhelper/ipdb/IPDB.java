@@ -102,7 +102,7 @@ public class IPDB implements AutoCloseable {
                 if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
                     String iso = geoData.getCountry().getIso();
                     if (iso.equalsIgnoreCase("CN") || iso.equalsIgnoreCase("TW")
-                            || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
+                        || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
                         queryGeoCN(address, geoData);
                     }
                 }

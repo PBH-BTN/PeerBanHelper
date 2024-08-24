@@ -165,7 +165,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         return checkResult.get();
     }
 
-    public CheckResult runExpression(Expression expression, @NotNull Torrent torrent, @NotNull Peer peer,@NotNull Downloader downloader,  @NotNull ExecutorService ruleExecuteExecutor) {
+    public CheckResult runExpression(Expression expression, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         ExpressionMetadata expressionMetadata = expressions.get(expression);
         return getCache().readCacheButWritePassOnly(this, expression.hashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
@@ -173,7 +173,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                 Map<String, Object> env = expression.newEnv();
                 env.put("torrent", torrent);
                 env.put("peer", peer);
-                env.put("downloader",downloader);
+                env.put("downloader", downloader);
                 env.put("cacheable", new AtomicBoolean(false));
                 Object returns;
                 if (expressionMetadata.threadSafe()) {

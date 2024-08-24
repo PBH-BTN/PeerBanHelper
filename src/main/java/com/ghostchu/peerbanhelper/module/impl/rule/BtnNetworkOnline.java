@@ -80,7 +80,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer , @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         if (manager == null) {
             return BTN_MANAGER_NOT_INITIALIZED;
         }

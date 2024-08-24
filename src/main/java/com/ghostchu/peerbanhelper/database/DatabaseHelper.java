@@ -56,7 +56,7 @@ public class DatabaseHelper {
             }
             v = 3;
         }
-        if(v == 3){
+        if (v == 3) {
             TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
             TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
             v = 4;
