@@ -42,7 +42,8 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                         entity.getRewindCounter(),
                         entity.getProgressDifferenceCounter(),
                         entity.getFirstTimeSeen().getTime(),
-                        entity.getLastTimeSeen().getTime()
+                        entity.getLastTimeSeen().getTime(),
+                        entity.getDownloader()
                 )
         ).collect(Collectors.toCollection(CopyOnWriteArrayList::new)); // 可变 List，需要并发安全
     }

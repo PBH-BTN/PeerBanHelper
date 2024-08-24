@@ -418,7 +418,7 @@ public class PeerBanHelperServer implements Reloadable {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_CHECK_BANS));
             })) {
-                downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader)))));
+                downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader))));
             }
 
 
@@ -514,14 +514,14 @@ public class PeerBanHelperServer implements Reloadable {
         }
     }
 
-    private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided) {
+    private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
                     protect.getService().submit(() -> {
-                        CheckResult checkResult = checkBan(torrent, peer);
+                        CheckResult checkResult = checkBan(torrent, peer, downloader);
                         details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
                     });
                 }
@@ -704,7 +704,7 @@ public class PeerBanHelperServer implements Reloadable {
      * @return 封禁规则检查结果
      */
     @NotNull
-    public CheckResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
+    public CheckResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         List<CheckResult> results = new ArrayList<>();
         if (peer.getPeerAddress().getAddress().isAnyLocal()) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-local-address"), new TranslationComponent("general-reason-skip-local-peers"));
@@ -722,11 +722,11 @@ public class PeerBanHelperServer implements Reloadable {
                 try {
                     CheckResult checkResult;
                     if (module.isThreadSafe()) {
-                        checkResult = module.shouldBanPeer(torrent, peer, executor);
+                        checkResult = module.shouldBanPeer(torrent, peer, downloader, executor);
                     } else {
                         registeredModule.getThreadLock().lock();
                         try {
-                            checkResult = module.shouldBanPeer(torrent, peer, executor);
+                            checkResult = module.shouldBanPeer(torrent, peer, downloader, executor);
                         } finally {
                             registeredModule.getThreadLock().unlock();
                         }
