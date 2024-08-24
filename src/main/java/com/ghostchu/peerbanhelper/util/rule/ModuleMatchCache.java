@@ -24,8 +24,8 @@ public class ModuleMatchCache {
             .maximumWeight(50000L)
             .weigher((key, value) -> {
                 if (value == AbstractRuleFeatureModule.HANDSHAKING_CHECK_RESULT
-                        || value == AbstractRuleFeatureModule.TEAPOT_CHECK_RESULT
-                        || value == AbstractRuleFeatureModule.OK_CHECK_RESULT) {
+                    || value == AbstractRuleFeatureModule.TEAPOT_CHECK_RESULT
+                    || value == AbstractRuleFeatureModule.OK_CHECK_RESULT) {
                     return 1;
                 }
                 return 5;

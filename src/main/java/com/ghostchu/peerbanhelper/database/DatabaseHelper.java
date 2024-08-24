@@ -44,7 +44,7 @@ public class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "0"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "4"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -55,6 +55,11 @@ public class DatabaseHelper {
                 //log.error("Unable to upgrade database schema", err);
             }
             v = 3;
+        }
+        if (v == 3) {
+            TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
+            TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            v = 4;
         }
         version.setValue(String.valueOf(v));
         metadata.update(version);

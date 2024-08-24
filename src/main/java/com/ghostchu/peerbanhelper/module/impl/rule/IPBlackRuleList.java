@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.RuleSubLogsDao;
 import com.ghostchu.peerbanhelper.database.table.RuleSubInfoEntity;
 import com.ghostchu.peerbanhelper.database.table.RuleSubLogEntity;
+import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
@@ -109,7 +110,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         return getCache().readCacheButWritePassOnly(this, peer.getPeerAddress().getIp(), () -> {
             long t1 = System.currentTimeMillis();
             String ip = peer.getPeerAddress().getIp();

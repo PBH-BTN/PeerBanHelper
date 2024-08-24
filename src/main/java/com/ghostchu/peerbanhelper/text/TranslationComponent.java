@@ -42,8 +42,8 @@ public class TranslationComponent {
     @Override
     public String toString() {
         return "TranslationComponent{" +
-                "key='" + key + '\'' +
-                ", params=" + Arrays.toString(params) +
-                '}';
+               "key='" + key + '\'' +
+               ", params=" + Arrays.toString(params) +
+               '}';
     }
 }

@@ -40,7 +40,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
@@ -137,9 +136,9 @@ public class BiglyBT extends AbstractDownloader {
         HttpResponse<String> request;
         try {
             request = httpClient.send(MutableRequest.GET(apiEndpoint + "/downloads?filter="
-                            + BiglyBTDownloadStateConst.ST_DOWNLOADING
-                            + "&filter=" + BiglyBTDownloadStateConst.ST_SEEDING
-                            + "&filter=" + BiglyBTDownloadStateConst.ST_ERROR),
+                                                         + BiglyBTDownloadStateConst.ST_DOWNLOADING
+                                                         + "&filter=" + BiglyBTDownloadStateConst.ST_SEEDING
+                                                         + "&filter=" + BiglyBTDownloadStateConst.ST_ERROR),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);

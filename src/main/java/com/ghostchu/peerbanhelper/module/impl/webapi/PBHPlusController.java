@@ -71,7 +71,7 @@ public class PBHPlusController extends AbstractFeatureModule {
         String key = null;
         if (activationManager.getKeyText().length() > 10) {
             key = activationManager.getKeyText().substring(0, 10) + "******";
-        }else{
+        } else {
             key = activationManager.getKeyText();
         }
         context.json(new StdResp(true, null,
