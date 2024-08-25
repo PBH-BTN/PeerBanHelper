@@ -48,6 +48,7 @@ export default {
   'page.dashboard.editModal.label.verifySsl': '验证SSL证书',
   'page.dashboard.editModal.biglybt': '请先安装 {url}',
   'page.dashboard.editModal.biglybt.url': '插件',
+  'page.dashboard.editModal.transmission.discourage': '警告：Transmission 适配器已被废弃，不再推荐使用。在频繁发生封禁事件的种子上，频繁启停 Torrent 将导致对 Tracker 服务器的频繁更新，并间接引发 DoS 攻击，这会增加 Tracker 服务器压力并可能导致您的 IP 地址被 Tracker 服务器封禁。我们鼓励您尽可能迁移到其它下载器上。https://github.com/PBH-BTN/PeerBanHelper/issues/382',
   'page.dashboard.peerList.title': '活动 Peer 列表：',
   'page.dashboard.peerList.column.address': '地址',
   'page.dashboard.peerList.column.port': '端口',
