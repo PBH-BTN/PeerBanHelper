@@ -63,6 +63,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
@@ -98,6 +100,7 @@ public class PeerBanHelperServer implements Reloadable {
     @Autowired
     private ModuleMatchCache moduleMatchCache;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
+    private final Lock banWaveLock = new ReentrantLock();
     @Getter
     private Map<PeerAddress, List<PeerMetadata>> LIVE_PEERS = new HashMap<>();
     @Autowired
@@ -393,14 +396,20 @@ public class PeerBanHelperServer implements Reloadable {
      * 启动新的一轮封禁序列
      */
     public void banWave() {
-        banWaveWatchDog.setLastOperation("Ban wave - start");
-        long startTimer = System.currentTimeMillis();
         try {
+            if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
+                return;
+            }
+            banWaveWatchDog.setLastOperation("Ban wave - start");
+            long startTimer = System.currentTimeMillis();
             // 重置所有下载器状态为健康，这样后面失败就会对其降级
             banWaveWatchDog.setLastOperation("Reset last status");
             // 声明基本集合
             // 需要重启的种子列表
             Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
+            // 执行计划任务
+            banWaveWatchDog.setLastOperation("Run scheduled tasks");
+            downloaders.forEach(Downloader::runScheduleTasks);
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
@@ -506,11 +515,15 @@ public class PeerBanHelperServer implements Reloadable {
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
             banWaveWatchDog.setLastOperation("Completed");
+        } catch (InterruptedException e) {
+            log.error("Thread interrupted");
+            Thread.currentThread().interrupt();
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         } finally {
             banWaveWatchDog.feed();
             metrics.recordCheck();
+            banWaveLock.unlock();
         }
     }
 

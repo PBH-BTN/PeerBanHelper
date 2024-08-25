@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.google.common.primitives.Ints;
 import com.google.gson.JsonObject;
 import cordelia.client.TrClient;
 import cordelia.client.TypedResponse;
@@ -19,10 +20,12 @@ import cordelia.rpc.types.Status;
 import cordelia.rpc.types.TorrentAction;
 import cordelia.rpc.types.Torrents;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -30,6 +33,9 @@ import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -39,6 +45,7 @@ public class Transmission extends AbstractDownloader {
     private final TrClient client;
     private final String blocklistUrl;
     private final Config config;
+    private final DelayQueue<DelayedTorrents> pausedTorrents = new DelayQueue<>();
 
     /*
             API 受限，实际实现起来意义不大
@@ -161,23 +168,15 @@ public class Transmission extends AbstractDownloader {
         List<Long> torrents = rsp.getArgs().getTorrents().stream()
                 .filter(t -> t.getStatus() != Status.STOPPED)
                 .map(Torrents::getId)
-                .filter(ids::contains).toList();
+                .filter(ids::contains).collect(Collectors.toList());
         log.info(tlUI(Lang.DOWNLOADER_TR_DISCONNECT_PEERS, torrents.size()));
         RqTorrent stop = new RqTorrent(TorrentAction.STOP, new ArrayList<>());
         for (long torrent : torrents) {
             stop.add(torrent);
         }
+        pausedTorrents.add(new DelayedTorrents(torrents, 5000));
         client.execute(stop);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        RqTorrent resume = new RqTorrent(TorrentAction.START, new ArrayList<>());
-        for (long torrent : torrents) {
-            resume.add(torrent);
-        }
-        client.execute(resume);
+        unpauseTorrents(false);
     }
 
     @Override
@@ -192,9 +191,63 @@ public class Transmission extends AbstractDownloader {
         }).map(t -> Long.parseLong(t.getId())).toList());
     }
 
+    private synchronized void unpauseTorrents(boolean includeUnexpired) {
+        List<DelayedTorrents> ids;
+        if (includeUnexpired) {
+            ids = new ArrayList<>(pausedTorrents);
+            pausedTorrents.clear();
+        } else {
+            ids = new ArrayList<>();
+            pausedTorrents.drainTo(ids);
+        }
+        if (ids.isEmpty()) {
+            return;
+        }
+        RqTorrent resume = new RqTorrent(TorrentAction.START, new ArrayList<>());
+        ids.stream().flatMap(d -> d.getTorrentIds().stream()).forEach(resume::add);
+        try {
+            var run = client.execute(resume);
+            if (!run.isSuccess()) {
+                pausedTorrents.addAll(ids);
+            }
+        } catch (Exception e) {
+            log.warn("Unable handle Transmission task restore, scheduled re-run in next schedule task window.");
+            pausedTorrents.addAll(ids);
+        }
+    }
+
+    @Override
+    public void runScheduleTasks() {
+        unpauseTorrents(false);
+    }
+
     @Override
     public void close() {
+        unpauseTorrents(true);
         client.shutdown();
+    }
+
+
+    public static class DelayedTorrents implements Delayed {
+        private final long start;
+        @Getter
+        private final List<Long> torrentIds;
+
+        public DelayedTorrents(List<Long> torrentIds, long delay) {
+            this.torrentIds = new ArrayList<>(torrentIds);
+            this.start = System.currentTimeMillis() + delay;
+        }
+
+        @Override
+        public long getDelay(@NotNull TimeUnit unit) {
+            long diff = start - System.currentTimeMillis();
+            return unit.convert(diff, TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public int compareTo(@NotNull Delayed o) {
+            return Ints.saturatedCast(this.start - ((DelayedTorrents) o).start);
+        }
     }
 
     @NoArgsConstructor
