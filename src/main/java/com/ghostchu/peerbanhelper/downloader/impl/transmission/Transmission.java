@@ -57,6 +57,7 @@ public class Transmission extends AbstractDownloader {
         this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
+        log.warn(tlUI(Lang.DOWNLOADER_TRANSMISSION_DISCOURAGE));
     }
 
     private static String generateBlocklistUrl(String pbhServerAddress) {
@@ -113,7 +114,7 @@ public class Transmission extends AbstractDownloader {
             }
             Thread.sleep(3000);
         }
-        return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_TRANSMISSION_DISCOURAGE));
     }
 
     @Override
