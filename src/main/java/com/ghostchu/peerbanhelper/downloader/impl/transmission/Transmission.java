@@ -114,7 +114,7 @@ public class Transmission extends AbstractDownloader {
             }
             Thread.sleep(3000);
         }
-        if (System.getProperty("pbh.downloader.transmission.i-know-transmission-is-discourage-and-coule-be-removed-in-future-please-dont-show-require-take-actions-status-text-and-i-know-what-i-am-doing") != null) {
+        if (System.getProperty("pbh.downloader.transmission.i-know-transmission-is-discourage-and-could-be-removed-in-future-please-dont-show-require-take-actions-status-text-and-i-know-what-i-am-doing") != null) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
         } else {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_TRANSMISSION_DISCOURAGE));
