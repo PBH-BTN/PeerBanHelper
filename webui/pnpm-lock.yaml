@@ -15,7 +15,7 @@ importers:
     dependencies:
       '@arco-design/web-vue':
         specifier: ^2.56.0
-        version: 2.56.0(vue@3.4.38(typescript@5.5.4))
+        version: 2.56.1(vue@3.4.38(typescript@5.5.4))
       '@dzangolab/flag-icon-css':
         specifier: ^3.4.5
         version: 3.4.5
@@ -160,8 +160,8 @@ packages:
   '@arco-design/color@0.4.0':
     resolution: {integrity: sha512-s7p9MSwJgHeL8DwcATaXvWT3m2SigKpxx4JA1BGPHL4gfvaQsmQfrLBDpjOJFJuJ2jG2dMt3R3P8Pm9E65q18g==}
 
-  '@arco-design/web-vue@2.56.0':
-    resolution: {integrity: sha512-LsrTE1vL54a/DVQCZ4c2F5LDA1r2mcWF2AHrM+fKEi5hzE63/awZVIOQ6P8yGaYRAP9eqUNj60uNI1Jz0UvGlA==}
+  '@arco-design/web-vue@2.56.1':
+    resolution: {integrity: sha512-RHIG7DXpCJrpxCKXdxZMzsGvMPCUott57soXW3aHJfxOcf+I2rdX8/UTAt2ka5MyRLUZ4B90B1LKyUgLChGklg==}
     peerDependencies:
       vue: ^3.1.0
 
@@ -2511,7 +2511,7 @@ snapshots:
     dependencies:
       color: 3.2.1
 
-  '@arco-design/web-vue@2.56.0(vue@3.4.38(typescript@5.5.4))':
+  '@arco-design/web-vue@2.56.1(vue@3.4.38(typescript@5.5.4))':
     dependencies:
       '@arco-design/color': 0.4.0
       b-tween: 0.3.3
