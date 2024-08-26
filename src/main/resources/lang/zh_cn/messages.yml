@@ -362,3 +362,5 @@ PEER_NOT_FOUND: "指定的 Peer 记录不存在"
 
 IN_ECOMODE_SHORT: "🍃EcoQoS"
 IN_ECOMODE_DESCRIPTION: "EcoQoS API 加载成功，Windows 效率模式已应用至 PeerBanHelper 以降低系统能耗"
+
+DOWNLOADER_TRANSMISSION_DISCOURAGE: "警告：Transmission 适配器已被废弃，不再推荐使用。在频繁发生封禁事件的种子上，频繁启停 Torrent 将导致对 Tracker 服务器的频繁更新，并间接引发 DoS 攻击，这会增加 Tracker 服务器压力并可能导致您的 IP 地址被 Tracker 服务器封禁。我们鼓励您尽可能迁移到其它下载器上。https://github.com/PBH-BTN/PeerBanHelper/issues/382"

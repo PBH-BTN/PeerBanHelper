@@ -46,6 +46,7 @@ export default {
   'page.dashboard.editModal.label.verifySsl': 'Verify SSL',
   'page.dashboard.editModal.biglybt': 'Please install plugin at {url} first.',
   'page.dashboard.editModal.biglybt.url': 'here',
+  'page.dashboard.editModal.transmission.discourage': 'Warning: Use Transmission Adapter is discourage. Frequent starting and stopping of torrents on seeds that are often subject to bans can result in frequent updates to the tracker server, indirectly triggering DoS attacks. This increases the load on the tracker server and may lead to your IP address being banned by the tracker. We encourage you to migrate to other downloaders whenever possible. https://github.com/PBH-BTN/PeerBanHelper/issues/382',
   'page.dashboard.peerList.title': 'Active Peer List for ',
   'page.dashboard.peerList.column.address': 'Address',
   'page.dashboard.peerList.column.port': 'Port',
