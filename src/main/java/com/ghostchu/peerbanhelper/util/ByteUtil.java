@@ -32,11 +32,12 @@ public class ByteUtil {
             result = new byte[(hexlen / 2)];
         }
         int j = 0;
+        ByteBuffer buffer = ByteBuffer.wrap(result);
         for (int i = 0; i < hexlen; i += 2) {
-            result[j] = hexToByte(inHex.substring(i, i + 2));
-            j++;
+            buffer.put(hexToByte(inHex.substring(i, i + 2)));
         }
         return result;
+    }
     }
 
     /**
