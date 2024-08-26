@@ -131,6 +131,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
   const setAccessToken = async (value: string) => {
     accessToken.value = value
     try {
+      await serverAvailable.value
       const latestRelease = await getLatestVersion()
       latestVersion.value = {
         tagName: latestRelease.tag_name,
@@ -161,7 +162,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
   // init
   setEndpoint(endpoint.value, { retryOnNetWorkFail: true })
 
-  setTimeout(async () => getPlusStatus(), 1000)
+  setTimeout(async () => getPlusStatus())
   setTimeout(async () => setAccessToken(accessToken.value), 3000)
   return {
     endpointSaved: readonly(endpoint),
