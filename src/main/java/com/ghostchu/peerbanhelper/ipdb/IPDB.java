@@ -304,7 +304,7 @@ public class IPDB implements AutoCloseable {
                     }
                 })
                 .exceptionally(e -> {
-                    log.error(tlUI(Lang.IPDB_UPDATE_FAILED, "Java Exception"), e);
+                    log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, e.getMessage()), e);
                     File file = path.toFile();
                     if (file.exists()) {
                         file.delete(); // 删除下载不完整的文件

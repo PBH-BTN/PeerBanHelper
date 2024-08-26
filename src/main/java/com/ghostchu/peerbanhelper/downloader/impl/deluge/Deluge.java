@@ -105,9 +105,13 @@ public class Deluge extends AbstractDownloader {
             for (PBHActiveTorrentsResponse.ActiveTorrentsResponseDTO activeTorrent : this.client.getActiveTorrents().getActiveTorrents()) {
                 List<Peer> peers = new ArrayList<>();
                 for (PBHActiveTorrentsResponse.ActiveTorrentsResponseDTO.PeersDTO peer : activeTorrent.getPeers()) {
+                    var peerId = StrUtil.toStringHex(peer.getPeerId());
+                    if (peerId.length() > 8) {
+                        peerId = peerId.substring(0, 8);
+                    }
                     DelugePeer delugePeer = new DelugePeer(
                             new PeerAddress(peer.getIp(), peer.getPort()),
-                            StrUtil.toStringHex(peer.getPeerId()),
+                            peerId,
                             peer.getClientName(),
                             peer.getTotalDownload(),
                             peer.getPayloadDownSpeed(),

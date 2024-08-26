@@ -162,6 +162,7 @@ import { ref, computed } from 'vue'
 import { useViewRoute } from '@/router'
 import { useRoute } from 'vue-router'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
+import { useEndpointStore } from '@/stores/endpoint'
 const { t, locale } = useI18n()
 const { changeLocale } = useLocale()
 const locales = [...LOCALE_OPTIONS]
@@ -191,6 +192,11 @@ const props = withDefaults(
     disableMenu: false
   }
 )
+const endpointStore = useEndpointStore()
+
+endpointStore.emmitter.on('open-settings-modal', () => {
+  settingsModalRef.value?.showModal()
+})
 
 const [routers, currentName, goto] = useViewRoute()
 const route = useRoute()
