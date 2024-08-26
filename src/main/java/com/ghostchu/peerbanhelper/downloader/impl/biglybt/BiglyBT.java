@@ -188,10 +188,14 @@ public class BiglyBT extends AbstractDownloader {
         PeerManagerRecord peerManagerRecord = JsonUtil.getGson().fromJson(resp.body(), PeerManagerRecord.class);
         List<Peer> peersList = new ArrayList<>();
         for (PeerRecord peer : peerManagerRecord.getPeers()) {
+            var peerId = new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1);
+            if (peerId.length() > 8) {
+                peerId = peerId.substring(0, 8);
+            }
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
                     peer.getIp(),
-                    new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
+                    peerId,
                     peer.getClient(),
                     peer.getStats().getRtDownloadSpeed(),
                     peer.getStats().getTotalReceived(),
