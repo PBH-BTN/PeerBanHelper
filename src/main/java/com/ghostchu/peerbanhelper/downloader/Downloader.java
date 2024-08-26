@@ -53,6 +53,12 @@ public interface Downloader extends AutoCloseable {
     DownloaderLoginResult login();
 
     /**
+     * 一个执行调度任务的窗口，该方法总是在 banWave 中调用
+     */
+    default void runScheduleTasks() {
+    }
+
+    /**
      * 获取此下载器的所有目前正在活动的 Torrent 列表
      *
      * @return 返回所有活动的 Torrents

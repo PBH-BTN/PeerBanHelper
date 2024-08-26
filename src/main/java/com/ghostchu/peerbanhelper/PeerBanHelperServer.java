@@ -63,6 +63,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
@@ -98,6 +100,7 @@ public class PeerBanHelperServer implements Reloadable {
     @Autowired
     private ModuleMatchCache moduleMatchCache;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
+    private final Lock banWaveLock = new ReentrantLock();
     @Getter
     private Map<PeerAddress, List<PeerMetadata>> LIVE_PEERS = new HashMap<>();
     @Autowired
@@ -191,7 +194,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public Downloader createDownloader(String client, ConfigurationSection downloaderSection) {
-        if(downloaderSection.getString("name") != null){
+        if (downloaderSection.getString("name") != null) {
             downloaderSection.set("name", downloaderSection.getString("name", "").replace(".", "-"));
         }
         Downloader downloader = null;
@@ -208,7 +211,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public Downloader createDownloader(String client, JsonObject downloaderSection) {
-        if(downloaderSection.get("name") != null){
+        if (downloaderSection.get("name") != null) {
             downloaderSection.addProperty("name", downloaderSection.get("name").getAsString().replace(".", "-"));
         }
         Downloader downloader = null;
@@ -393,14 +396,20 @@ public class PeerBanHelperServer implements Reloadable {
      * 启动新的一轮封禁序列
      */
     public void banWave() {
-        banWaveWatchDog.setLastOperation("Ban wave - start");
-        long startTimer = System.currentTimeMillis();
         try {
+            if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
+                return;
+            }
+            banWaveWatchDog.setLastOperation("Ban wave - start");
+            long startTimer = System.currentTimeMillis();
             // 重置所有下载器状态为健康，这样后面失败就会对其降级
             banWaveWatchDog.setLastOperation("Reset last status");
             // 声明基本集合
             // 需要重启的种子列表
             Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
+            // 执行计划任务
+            banWaveWatchDog.setLastOperation("Run scheduled tasks");
+            downloaders.forEach(Downloader::runScheduleTasks);
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
@@ -418,7 +427,7 @@ public class PeerBanHelperServer implements Reloadable {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_CHECK_BANS));
             })) {
-                downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader)))));
+                downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader))));
             }
 
 
@@ -506,22 +515,26 @@ public class PeerBanHelperServer implements Reloadable {
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
             banWaveWatchDog.setLastOperation("Completed");
+        } catch (InterruptedException e) {
+            log.error("Thread interrupted");
+            Thread.currentThread().interrupt();
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
         } finally {
             banWaveWatchDog.feed();
             metrics.recordCheck();
+            banWaveLock.unlock();
         }
     }
 
-    private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided) {
+    private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
                     protect.getService().submit(() -> {
-                        CheckResult checkResult = checkBan(torrent, peer);
+                        CheckResult checkResult = checkBan(torrent, peer, downloader);
                         details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
                     });
                 }
@@ -704,7 +717,7 @@ public class PeerBanHelperServer implements Reloadable {
      * @return 封禁规则检查结果
      */
     @NotNull
-    public CheckResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer) {
+    public CheckResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         List<CheckResult> results = new ArrayList<>();
         if (peer.getPeerAddress().getAddress().isAnyLocal()) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-local-address"), new TranslationComponent("general-reason-skip-local-peers"));
@@ -722,11 +735,11 @@ public class PeerBanHelperServer implements Reloadable {
                 try {
                     CheckResult checkResult;
                     if (module.isThreadSafe()) {
-                        checkResult = module.shouldBanPeer(torrent, peer, executor);
+                        checkResult = module.shouldBanPeer(torrent, peer, downloader, executor);
                     } else {
                         registeredModule.getThreadLock().lock();
                         try {
-                            checkResult = module.shouldBanPeer(torrent, peer, executor);
+                            checkResult = module.shouldBanPeer(torrent, peer, downloader, executor);
                         } finally {
                             registeredModule.getThreadLock().unlock();
                         }

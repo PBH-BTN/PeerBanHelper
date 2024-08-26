@@ -61,8 +61,8 @@ public class JavalinWebContainer {
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
                     if (Main.getMainConfig().getBoolean("server.allow-cors")
-                            || System.getenv("PBH_ALLOW_CORS") != null
-                            || System.getProperty("PBH_ALLOW_CORS") != null
+                        || System.getenv("PBH_ALLOW_CORS") != null
+                        || System.getProperty("PBH_ALLOW_CORS") != null
                     ) {
                         c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
                     }
@@ -73,7 +73,7 @@ public class JavalinWebContainer {
                             staticFiles.location = Location.EXTERNAL;
                             staticFiles.precompress = false;
                             staticFiles.aliasCheck = null;
-                            staticFiles.skipFileFunction = req -> false;
+                            staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                             //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
                         c.spaRoot.addFile("/", new File(new File(Main.getDataDirectory(), "static"), "index.html").getPath(), Location.EXTERNAL);
@@ -84,7 +84,7 @@ public class JavalinWebContainer {
                             staticFiles.location = Location.CLASSPATH;
                             staticFiles.precompress = false;
                             staticFiles.aliasCheck = null;
-                            staticFiles.skipFileFunction = req -> false;
+                            staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                             //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
                         c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
@@ -106,15 +106,15 @@ public class JavalinWebContainer {
                 })
                 .exception(IllegalArgumentException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.BAD_REQUEST);
-                    ctx.json(new StdResp(false, null, e.getMessage()));
+                    ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
                 })
                 .exception(RequirePBHPlusLicenseException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.PAYMENT_REQUIRED);
-                    ctx.json(new StdResp(false, null, e.getMessage()));
+                    ctx.json(new StdResp(false, e.getMessage(), e.getMessage()));
                 })
                 .exception(Exception.class, (e, ctx) -> {
                     ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                    ctx.json(new StdResp(false, null, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR)));
+                    ctx.json(new StdResp(false, tl(reqLocale(ctx), Lang.WEBAPI_INTERNAL_ERROR), null));
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
@@ -151,7 +151,6 @@ public class JavalinWebContainer {
                     markLoginFailed(ctx.ip());
                     throw new NotLoggedInException();
                 })
-                .after("/*", ctx -> ctx.removeHeader("Last-Modified"))
                 .options("/*", ctx -> ctx.status(200));
 
     }

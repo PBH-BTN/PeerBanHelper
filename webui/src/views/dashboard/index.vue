@@ -11,8 +11,8 @@ const { t } = useI18n()
     <a-typography-text style="font-size: 1.2em">
       {{ t('page.dashboard.description') }}
     </a-typography-text>
-    <ClientStatus />
-    <br />
     <StatisticInfo />
+    <br />
+    <ClientStatus />
   </a-space>
 </template>

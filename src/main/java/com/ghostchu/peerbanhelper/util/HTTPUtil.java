@@ -168,9 +168,9 @@ public class HTTPUtil {
         }
         if (r != null) {
             return r.statusCode() == 500
-                    || r.statusCode() == 502
-                    || r.statusCode() == 503
-                    || r.statusCode() == 504;
+                   || r.statusCode() == 502
+                   || r.statusCode() == 503
+                   || r.statusCode() == 504;
         }
         return false;
     }
