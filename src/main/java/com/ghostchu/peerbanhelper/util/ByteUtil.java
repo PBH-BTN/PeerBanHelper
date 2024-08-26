@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.util;
 
+import java.nio.ByteBuffer;
+
 public class ByteUtil {
     public static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
@@ -33,7 +35,6 @@ public class ByteUtil {
             buffer.put(hexToByte(inHex.substring(i, i + 2)));
         }
         return result;
-    }
     }
 
     /**
