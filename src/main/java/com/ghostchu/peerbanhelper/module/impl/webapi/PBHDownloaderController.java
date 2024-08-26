@@ -223,7 +223,14 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .map(PeerMetadata::getTorrent)
                 .distinct()
-                .sorted((o1, o2) -> Long.compare(o2.getRtUploadSpeed(), o1.getRtUploadSpeed()))
+                .sorted((o1, o2) -> {
+                    var compare = Long.compare(o2.getRtUploadSpeed(), o1.getRtUploadSpeed());
+                    if (compare != 0) {
+                        return compare;
+                    } else {
+                        return Long.compare(o2.getRtDownloadSpeed(), o1.getRtDownloadSpeed());
+                    }
+                })
                 .toList();
         ctx.json(new StdResp(true, null, torrentWrappers));
     }

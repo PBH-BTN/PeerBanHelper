@@ -36,7 +36,7 @@
           <a-space>
             {{ version }}
             <div>
-              (<a-link :href="`https://github.com/Gaojianli/pbh-fe/commit/${hash}`">
+              (<a-link :href="`https://github.com/PBH-BTN/PeerBanHelper/tree/${hash}/webui`">
                 {{ hash.substring(0, 8) }} </a-link
               >)
             </div></a-space
