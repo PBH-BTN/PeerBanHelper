@@ -62,6 +62,6 @@ public class PushPlusPushProvider implements PushProvider {
         if (resp.statusCode() != 200) {
             throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + resp.body());
         }
-        return false;
+        return true;
     }
 }
