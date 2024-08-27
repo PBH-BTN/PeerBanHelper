@@ -5,19 +5,19 @@
       <a-input-search
         :style="{ width: '250px' }"
         :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
-        @search="handleSearch"
         allow-clear
         search-button
+        @search="handleSearch"
       />
     </a-space>
     <a-list
-      :virtualListProps="{
+      ref="banlist"
+      :virtual-list-props="{
         height: virtualListHeight
       }"
-      ref="banlist"
-      @reach-bottom="loadMore"
       :scrollbar="false"
       :data="list"
+      @reach-bottom="loadMore"
     >
       <template #item="{ item, index }">
         <a-list-item
@@ -32,7 +32,7 @@
           :style="{ height: `${virtualListHeight}px`, display: 'flex', alignItems: 'center' }"
         />
         <a-empty v-else-if="list.length === 0" :style="{ height: `${virtualListHeight}px` }" />
-        <div style="position: absolute; transform: translateY(-50%)" v-if="loadingMore">
+        <div v-if="loadingMore" style="position: absolute; transform: translateY(-50%)">
           <a-typography-text v-if="bottom">{{
             t('page.banlist.banlist.bottomReached')
           }}</a-typography-text>

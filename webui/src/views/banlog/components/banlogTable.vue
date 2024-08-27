@@ -14,9 +14,9 @@
     }"
     column-resizable
     size="medium"
+    class="banlog-table"
     @page-change="changeCurrent"
     @page-size-change="changePageSize"
-    class="banlog-table"
   >
     <template #banAt="{ record }">
       <a-space fill direction="vertical">

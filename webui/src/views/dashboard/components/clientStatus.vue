@@ -46,7 +46,7 @@
         </a-card>
       </a-col>
       <!-- client 卡片 -->
-      <a-col v-else :xs="24" :sm="12" :md="8" :lg="6" v-for="client in data" :key="client.name">
+      <a-col v-for="client in data" v-else :key="client.name" :xs="24" :sm="12" :md="8" :lg="6">
         <ClientStatusCard
           :disable-remove="data.length === 1"
           :downloader="client"
@@ -61,7 +61,7 @@
         >{{ t('page.dashboard.torrentList.title') }}
       </a-typography-title>
       <a-tabs size="large" animation lazy-load destroy-on-hide>
-        <a-tab-pane :key="downloader.name" v-for="downloader in data" :title="downloader.name">
+        <a-tab-pane v-for="downloader in data" :key="downloader.name" :title="downloader.name">
           <torrentList :downloader="downloader.name" />
         </a-tab-pane>
       </a-tabs>

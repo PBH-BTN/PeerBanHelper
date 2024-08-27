@@ -1,10 +1,10 @@
 <!--copied from https://github.com/noeGnh/vue3-country-flag-icon/blob/master/src/components/CountryFlag/Index.vue-->
 <template>
   <span
+    v-if="props.iso !== ''"
     :class="flagIconClass"
     :title="props.title || props.iso"
     class="flag-icon"
-    v-if="props.iso !== ''"
   />
 </template>
 

@@ -1,27 +1,29 @@
 <template>
-  <a-row justify="center" style="margin: 2% auto 0; width: 100%;">
+  <a-row justify="center" style="margin: 2% auto 0; width: 100%">
     <a-col :xl="16" :md="18" :sm="24">
       <a-space direction="vertical" style="display: flex; justify-content: center">
         <a-steps :current="current">
-          <a-step v-for="step of steps" v-bind:key="step.title" :description="step.description">{{
+          <a-step v-for="step of steps" :key="step.title" :description="step.description">{{
             step.title
-            }}</a-step>
+          }}</a-step>
         </a-steps>
-        <div :style="{
-          width: '100%',
-          minHeight: '50vh',
-          textAlign: 'center',
-          position: 'relative',
-        }">
+        <div
+          :style="{
+            width: '100%',
+            minHeight: '50vh',
+            textAlign: 'center',
+            position: 'relative'
+          }"
+        >
           <Suspense>
             <component :is="componentList[current - 1]" v-model="initConfig" />
           </Suspense>
         </div>
         <a-space size="large" style="display: flex; justify-content: center">
-          <a-button type="secondary" v-if="current > 1" @click="onPrev">
+          <a-button v-if="current > 1" type="secondary" @click="onPrev">
             <IconLeft /> {{ t('page.oobe.action.back') }}
           </a-button>
-          <a-button type="primary" :disabled="!canNext()" v-if="current < 4" @click="onNext">
+          <a-button v-if="current < 4" type="primary" :disabled="!canNext()" @click="onNext">
             {{ t('page.oobe.action.next') }}
             <IconRight />
           </a-button>

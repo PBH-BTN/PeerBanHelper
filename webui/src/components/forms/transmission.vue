@@ -1,6 +1,11 @@
 <template>
-  <a-form-item field="config.endpoint" :label="t('page.dashboard.editModal.label.endpoint')" validate-trigger="blur"
-    required :rules="urlRules">
+  <a-form-item
+    field="config.endpoint"
+    :label="t('page.dashboard.editModal.label.endpoint')"
+    validate-trigger="blur"
+    required
+    :rules="urlRules"
+  >
     <a-input v-model="config.endpoint" allow-clear></a-input>
   </a-form-item>
   <a-form-item field="config.username" :label="t('page.dashboard.editModal.label.username')">
@@ -19,7 +24,11 @@
     </a-radio-group>
     <template #extra>{{ t('page.dashboard.editModal.label.httpVersion.description') }} </template>
   </a-form-item>
-  <a-form-item field="config.verifySsl" default-checked :label="t('page.dashboard.editModal.label.verifySsl')">
+  <a-form-item
+    field="config.verifySsl"
+    default-checked
+    :label="t('page.dashboard.editModal.label.verifySsl')"
+  >
     <a-switch v-model="config.verifySsl" />
   </a-form-item>
 </template>
