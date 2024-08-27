@@ -50,6 +50,8 @@ public class PushPlusPushProvider implements PushProvider {
             if (channel != null) {
                 put("channel", channel);
             }
+            put("title", title);
+            put("content", content);
         }};
         HttpResponse<String> resp = HTTPUtil.getHttpClient(false, null).send(
                 MutableRequest.POST("https://www.pushplus.plus/send"
@@ -58,7 +60,7 @@ public class PushPlusPushProvider implements PushProvider {
                 , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
         );
         if (resp.statusCode() != 200) {
-            throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus");
+            throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + resp.body());
         }
         return false;
     }

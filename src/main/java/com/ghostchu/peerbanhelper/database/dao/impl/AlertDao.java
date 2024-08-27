@@ -21,4 +21,11 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
     public Page<AlertEntity> getUnreadAlerts(Pageable pageable) throws SQLException {
         return queryByPaging(queryBuilder().orderBy("createAt", false).where().isNull("readAt").queryBuilder(), pageable);
     }
+
+    public boolean identifierAlertExists(String identifier) throws SQLException {
+        return queryBuilder().where()
+                .eq("identifier", identifier).and()
+                .isNull("readAt")
+                .queryForFirst() != null;
+    }
 }

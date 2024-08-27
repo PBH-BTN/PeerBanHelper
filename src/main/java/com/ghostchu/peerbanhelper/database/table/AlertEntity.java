@@ -30,5 +30,4 @@ public final class AlertEntity {
     private TranslationComponent title;
     @DatabaseField(canBeNull = false, persisterClass = TranslationComponentPersistener.class)
     private TranslationComponent content;
-    private transient Boolean persist;
 }
