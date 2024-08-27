@@ -25,6 +25,11 @@ public class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 19)
+    public void addPushProvider(YamlConfiguration bundle) {
+        conf.set("push-notification", bundle.get("push-notification"));
+    }
+
     @UpdateScript(version = 18)
     public void noMaxmindDownload() {
         conf.set("ip-database.account-id", null);
