@@ -2,8 +2,11 @@ package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 
+import java.util.Collection;
 import java.util.Date;
 
 public abstract class AbstractDownloader implements Downloader {
@@ -57,6 +60,13 @@ public abstract class AbstractDownloader implements Downloader {
         this.statusMessage = statusMessage;
     }
 
+    @Override
+    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+    }
+
+    @Override
+    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
+    }
     @Override
     public TranslationComponent getLastStatusMessage() {
         return statusMessage;
