@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
+import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
@@ -50,9 +51,15 @@ public class PBHAlertController extends AbstractFeatureModule {
                 .delete("/api/alert/{id}", this::handleDelete, Role.USER_WRITE);
     }
 
+
     private void handleListing(Context ctx) throws SQLException {
         ctx.status(200);
-        var alerts = alertDao.queryByPaging(new Pageable(ctx));
+        Page<AlertEntity> alerts;
+        if (ctx.queryParam("unread") != null && Boolean.parseBoolean(ctx.queryParam("unread"))) {
+            alerts = alertDao.getUnreadAlerts(new Pageable(ctx));
+        } else {
+            alerts = alertDao.queryByPaging(new Pageable(ctx));
+        }
         var newAlerts = new Page<>(alerts.getPage(), alerts.getSize(), alerts.getTotal(),
                 alerts.getResults().stream().map(alert -> new AlertDTO(
                         alert.getId(),
