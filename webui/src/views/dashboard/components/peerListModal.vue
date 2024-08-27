@@ -107,7 +107,8 @@ const handleOk = () => {
 const { data, loading, run, cancel } = useRequest(
   getPeer,
   {
-    defaultParams: [downloader.value, tid.value]
+    defaultParams: [downloader.value, tid.value],
+    ready: visible
   },
   [useAutoUpdatePlugin]
 )
