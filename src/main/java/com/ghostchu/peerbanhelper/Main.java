@@ -17,6 +17,11 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.config.plugins.util.PluginManager;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -128,6 +133,33 @@ public class Main {
         guiManager.sync();
     }
 
+    private static void updateLogFileLocation(String newLogFilePath) {
+        // Ensure all directories are created
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
+        Configuration config = context.getConfiguration();
+
+        RollingRandomAccessFileAppender appender = config.getAppender("File");
+
+        RollingRandomAccessFileAppender newAppender = RollingRandomAccessFileAppender.newBuilder()
+                .setName(appender.getName())
+                .setLayout(appender.getLayout())
+                .withFileName(new File(newLogFilePath, "latest.log").getPath())
+                .withFilePattern(new File(newLogFilePath, "%d{yyyy-MM-dd}-%i.log.gz").getPath())
+                .withPolicy(appender.getManager().getTriggeringPolicy())
+                .withStrategy(appender.getManager().getRolloverStrategy())
+                .build();
+
+        newAppender.start();
+
+        config.addAppender(newAppender);
+        for (LoggerConfig loggerConfig : config.getLoggers().values()) {
+            loggerConfig.removeAppender(appender.getName());
+            loggerConfig.addAppender(newAppender, null, null);
+        }
+
+        context.updateLoggers();
+    }
+
     private static void setupProxySettings() {
         var proxySection = mainConfig.getConfigurationSection("proxy");
         if (proxySection == null) return;
@@ -166,6 +198,7 @@ public class Main {
         if (System.getProperty("pbh.datadir") != null) {
             root = System.getProperty("pbh.datadir");
         }
+        ;
         dataDirectory = new File(root);
         logsDirectory = new File(dataDirectory, "logs");
         configDirectory = new File(dataDirectory, "config");
@@ -176,6 +209,7 @@ public class Main {
 
     private static void setupLog4j2() {
         PluginManager.addPackage("com.ghostchu.peerbanhelper.log4j2");
+        updateLogFileLocation(logsDirectory.getAbsolutePath());
     }
 
     private static YamlConfiguration loadConfiguration(File file) {
@@ -331,7 +365,7 @@ public class Main {
             return name;
         }
         if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
-            Character.isUpperCase(name.charAt(0))) {
+                Character.isUpperCase(name.charAt(0))) {
             return name;
         }
         char chars[] = name.toCharArray();
