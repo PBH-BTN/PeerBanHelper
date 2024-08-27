@@ -291,6 +291,21 @@ public class QBittorrentEE extends AbstractDownloader {
             this.httpClient = httpClient;
             this.name = name;
             this.apiEndpoint = apiEndpoint;
+            try {
+                HttpResponse<String> request = httpClient.send(MutableRequest
+                                .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()
+                                        .query("json", JsonUtil.getGson().toJson(Map.of("shadow_ban", true))).build())
+                                .header("Content-Type", "application/x-www-form-urlencoded")
+                        , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                if (request.statusCode() != 200) {
+                    log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                    throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
+                }
+            } catch (Exception e) {
+                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+                throw new IllegalStateException(e);
+            }
+
         }
 
         @Override
