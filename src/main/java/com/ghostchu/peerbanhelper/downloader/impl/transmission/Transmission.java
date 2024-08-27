@@ -127,6 +127,7 @@ public class Transmission extends AbstractDownloader {
         TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
         return rsp.getArgs().getTorrents().stream()
                 .filter(t -> t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING)
+                .filter(t -> !(config.isIgnorePrivate() && t.getIsPrivate()))
                 .map(TRTorrent::new).collect(Collectors.toList());
     }
 
@@ -168,7 +169,7 @@ public class Transmission extends AbstractDownloader {
         RqTorrentGet torrentList = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME,
                 Fields.PEERS_CONNECTED,
                 Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD,
-                Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE);
+                Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.IS_PRIVATE);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrentList);
         List<Long> torrents = rsp.getArgs().getTorrents().stream()
                 .filter(t -> t.getStatus() != Status.STOPPED)
@@ -266,6 +267,7 @@ public class Transmission extends AbstractDownloader {
         private String httpVersion;
         private boolean verifySsl;
         private String rpcUrl;
+        private boolean ignorePrivate;
 
         public static Transmission.Config readFromYaml(ConfigurationSection section) {
             Transmission.Config config = new Transmission.Config();
@@ -279,6 +281,7 @@ public class Transmission extends AbstractDownloader {
             config.setRpcUrl(section.getString("rpc-url", "/transmission/rpc"));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
+            config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             return config;
         }
 
@@ -291,6 +294,7 @@ public class Transmission extends AbstractDownloader {
             section.set("rpc-url", rpcUrl);
             section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
+            section.set("ignore-private", ignorePrivate);
             return section;
         }
     }

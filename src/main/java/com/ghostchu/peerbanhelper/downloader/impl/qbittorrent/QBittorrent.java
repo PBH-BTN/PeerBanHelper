@@ -160,7 +160,10 @@ public class QBittorrent extends AbstractDownloader {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (QBTorrent detail : qbTorrent) {
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(), detail.getDlspeed()));
+            if (config.isIgnorePrivate() && detail.getPrivateTorrent()) {
+                continue;
+            }
+            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(), detail.getPrivateTorrent()));
         }
         return torrents;
     }
@@ -298,6 +301,7 @@ public class QBittorrent extends AbstractDownloader {
         private String httpVersion;
         private boolean incrementBan;
         private boolean verifySsl;
+        private boolean ignorePrivate;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -315,6 +319,7 @@ public class QBittorrent extends AbstractDownloader {
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setIncrementBan(section.getBoolean("increment-ban", false));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
+            config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             return config;
         }
 
@@ -329,6 +334,7 @@ public class QBittorrent extends AbstractDownloader {
             section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
             section.set("verify-ssl", verifySsl);
+            section.set("ignore-private", ignorePrivate);
             return section;
         }
 

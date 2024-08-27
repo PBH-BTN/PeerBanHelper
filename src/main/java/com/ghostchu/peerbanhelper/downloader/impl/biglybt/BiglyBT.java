@@ -151,6 +151,9 @@ public class BiglyBT extends AbstractDownloader {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (DownloadRecord detail : torrentDetail) {
+            if (config.isIgnorePrivate() && detail.getTorrent().isPrivateTorrent()) {
+                continue;
+            }
             torrents.add(new TorrentImpl(
                     detail.getTorrent().getInfoHash(),
                     detail.getName(),
@@ -158,7 +161,8 @@ public class BiglyBT extends AbstractDownloader {
                     detail.getTorrent().getSize(),
                     detail.getStats().getCompletedInThousandNotation() / 1000d,
                     detail.getStats().getRtUploadSpeed(),
-                    detail.getStats().getRtDownloadSpeed()));
+                    detail.getStats().getRtDownloadSpeed(),
+                    detail.getTorrent().isPrivateTorrent()));
         }
         return torrents;
     }
@@ -257,6 +261,7 @@ public class BiglyBT extends AbstractDownloader {
         private String httpVersion;
         private boolean incrementBan;
         private boolean verifySsl;
+        private boolean ignorePrivate;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -269,6 +274,7 @@ public class BiglyBT extends AbstractDownloader {
             config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
+            config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             return config;
         }
 
@@ -279,6 +285,7 @@ public class BiglyBT extends AbstractDownloader {
             section.set("token", token);
             section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
+            section.set("ignore-private", ignorePrivate);
             section.set("verify-ssl", verifySsl);
             return section;
         }
