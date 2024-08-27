@@ -16,7 +16,7 @@ import java.sql.Timestamp;
 @Data
 @DatabaseTable(tableName = "alert")
 public final class AlertEntity {
-    @DatabaseField(id = true, index = true)
+    @DatabaseField(generatedId = true)
     private Long id;
     @DatabaseField(canBeNull = false, index = true)
     private Timestamp createAt;
