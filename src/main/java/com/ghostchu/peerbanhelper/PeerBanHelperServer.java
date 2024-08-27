@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper;
 
-import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
@@ -177,9 +176,6 @@ public class PeerBanHelperServer implements Reloadable {
         }
 
         Main.getReloadManager().register(this);
-        alertManager.publishAlert(true, AlertLevel.INFO, null
-                , new TranslationComponent("PeerBanHelper 启动")
-                , new TranslationComponent("这是一条测试消息，用来测试消息推送"));
     }
 
     public void loadDownloaders() {
