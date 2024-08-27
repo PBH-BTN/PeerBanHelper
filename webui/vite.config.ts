@@ -12,7 +12,9 @@ import VueDevTools from 'vite-plugin-vue-devtools'
 const exec = promisify(execCallBack)
 
 const isAnalyze = process.env.ANALYZE === 'true'
-
+console.log(
+  (await exec('git rev-parse HEAD').catch(console.log))?.stdout.toString() ?? process.env.GIT_HASH
+)
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '',
