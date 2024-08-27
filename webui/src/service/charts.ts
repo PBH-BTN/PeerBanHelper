@@ -1,5 +1,11 @@
 import type { CommonResponse } from '@/api/model/common'
-import type { AnalysisField, GeoIP, TimeStatisticItem, Traffic, Trends } from '@/api/model/statistic'
+import type {
+  AnalysisField,
+  GeoIP,
+  TimeStatisticItem,
+  Traffic,
+  Trends
+} from '@/api/model/statistic'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -26,7 +32,11 @@ export async function getAnalysisDataByField(
   })
 }
 
-export async function getGeoIPData(startAt: Date, endAt: Date, bannedOnly: boolean): Promise<CommonResponse<GeoIP>> {
+export async function getGeoIPData(
+  startAt: Date,
+  endAt: Date,
+  bannedOnly: boolean
+): Promise<CommonResponse<GeoIP>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const url = new URL(urlJoin(endpointStore.endpoint, `api/chart/geoIpInfo`), location.href)

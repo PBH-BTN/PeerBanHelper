@@ -101,6 +101,8 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+          build-args: |
+            GIT_HASH=${{ github.sha }}
       # ---------------- ALIYUN ACR --------------------
       - name: Log in to Aliyun ACR
         uses: docker/login-action@v3

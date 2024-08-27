@@ -1,21 +1,21 @@
 <template>
   <a-modal
-    :modal-style="{ 'max-width': '80vw' }"
     v-model:visible="showModal"
-    @before-ok="handleOk"
-    @cancel="handleCancel"
+    :modal-style="{ 'max-width': '80vw' }"
     :closable="!forceModal"
-    :maskClosable="!forceModal"
+    :mask-closable="!forceModal"
     :hide-cancel="forceModal"
     :ok-loading="loading"
+    @before-ok="handleOk"
+    @cancel="handleCancel"
   >
     <template #title> {{ t('settings.modal.title') }} </template>
     <a-form
       :model="form"
-      @submit="handleOk"
       :layout="(['vertical', 'horizontal'] as const)[formLayout]"
       :label-col-props="{ span: 6 }"
       :wrapper-col-props="{ span: 18 }"
+      @submit="handleOk"
     >
       <a-form-item
         field="endpoint"
@@ -37,7 +37,7 @@
       <a-form-item field="accessToken" label="Access Token:" validate-trigger="input">
         <template #extra>
           <i18n-t keypath="settings.modal.accessTokenTips">
-            <template v-slot:here>
+            <template #here>
               <a href="https://github.com/settings/tokens">{{
                 t('settings.modal.accessTokenTips.here')
               }}</a>
@@ -95,7 +95,7 @@ watch(
     if (IncorrectTokenError.is(error) || NeedInitError.is(error)) {
       handleCancel()
     } else if (GetManifestError.is(error)) {
-      !error.isManual && Message.error(t(error.message))
+      if (!error.isManual) Message.error(t(error.message))
       if (!showModal.value && error.isApiWrong) {
         showModal.value = true
         initForm()

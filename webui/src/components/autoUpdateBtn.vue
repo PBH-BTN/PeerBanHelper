@@ -1,6 +1,7 @@
 <template>
   <a-popover>
     <a-button
+      ref="autoUpdateBtn"
       class="auto-update-btn"
       :class="{
         loading: loadingStatus === 'loading' || loadingHolding,
@@ -9,7 +10,6 @@
       :type="autoUpdate.autoUpdate ? 'primary' : 'outline'"
       :shape="'circle'"
       @click="() => autoUpdate.refresh()"
-      ref="autoUpdateBtn"
     >
       <icon-sync />
     </a-button>

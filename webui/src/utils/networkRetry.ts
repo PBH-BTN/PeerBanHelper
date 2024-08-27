@@ -1,4 +1,4 @@
-import { Notification, Space, Button } from '@arco-design/web-vue'
+import { Button, Notification, Space } from '@arco-design/web-vue'
 import { h } from 'vue'
 import i18n from '../locale'
 
@@ -9,7 +9,7 @@ function minDelay<T>(promise: Promise<T>, delay: number): Promise<T> {
 }
 
 function networkFailRetryNotication<T>(
-  retry: () => Promise<readonly [false, T] | [true, any]>,
+  retry: () => Promise<readonly [false, T] | [true, unknown]>,
   onCancel: () => Error
 ): Promise<T> {
   const NetWorkFailRetryNotificationId = 'network-error-retry' as const
@@ -65,8 +65,8 @@ function networkFailRetryNotication<T>(
       Notification.remove(NetWorkFailRetryNotificationId)
     }
     const handleRetry = (init = false) => {
-      timmer && clearInterval(timmer)
-      !init &&
+      if (timmer) clearInterval(timmer)
+      if (!init)
         renderNotication({
           count: 0,
           loading: true,
