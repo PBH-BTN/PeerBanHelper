@@ -188,7 +188,10 @@ public class QBittorrentEE extends AbstractDownloader {
         List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
-            QBPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBPeer.class);
+            QBEEPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBEEPeer.class);
+            if (qbPeer.getShadowBanned()) {
+                continue; // 当做不存在处理
+            }
             // 一个 QB 本地化问题的 Workaround
             if (qbPeer.getPeerId() == null || qbPeer.getPeerId().equals("Unknown") || qbPeer.getPeerId().equals("未知")) {
                 qbPeer.setPeerIdClient("");
