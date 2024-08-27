@@ -198,7 +198,7 @@ public class Main {
         if (System.getProperty("pbh.datadir") != null) {
             root = System.getProperty("pbh.datadir");
         }
-        ;
+
         dataDirectory = new File(root);
         logsDirectory = new File(dataDirectory, "logs");
         configDirectory = new File(dataDirectory, "config");
