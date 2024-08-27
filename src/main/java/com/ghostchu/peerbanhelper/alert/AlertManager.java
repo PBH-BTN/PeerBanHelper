@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class AlertManager {
-    private Map<String, Alert> alerts = new ConcurrentHashMap<>();
+    private final Map<String, Alert> alerts = new ConcurrentHashMap<>();
 
     public void addAlert(Alert alert) {
         if (alerts.containsKey(alert.id())) {
