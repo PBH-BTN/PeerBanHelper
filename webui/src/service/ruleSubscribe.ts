@@ -1,12 +1,12 @@
-import { useEndpointStore } from '@/stores/endpoint'
-import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
 import type {
   CommonResponse,
   CommonResponseWithoutData,
   CommonResponseWithPage
 } from '@/api/model/common'
 import type { ruleBrief, updateLog } from '@/api/model/ruleSubscribe'
+import { useEndpointStore } from '@/stores/endpoint'
+import urlJoin from 'url-join'
+import { getCommonHeader } from './utils'
 
 export async function getRuleList(): Promise<CommonResponse<ruleBrief[]>> {
   const endpointStore = useEndpointStore()

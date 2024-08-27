@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
+import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -187,10 +188,14 @@ public class BiglyBT extends AbstractDownloader {
         PeerManagerRecord peerManagerRecord = JsonUtil.getGson().fromJson(resp.body(), PeerManagerRecord.class);
         List<Peer> peersList = new ArrayList<>();
         for (PeerRecord peer : peerManagerRecord.getPeers()) {
+            var peerId = new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1);
+            if (peerId.length() > 8) {
+                peerId = peerId.substring(0, 8);
+            }
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
                     peer.getIp(),
-                    peer.getPeerId(),
+                    peerId,
                     peer.getClient(),
                     peer.getStats().getRtDownloadSpeed(),
                     peer.getStats().getTotalReceived(),

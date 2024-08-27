@@ -321,6 +321,21 @@ client:
 
 清除浏览器缓存。
 
+### 无法下载 GeoIP 库 / 代理无效
+
+打开 `data/config.yml` 文件，配置代理服务器：
+
+```yaml
+proxy:
+  # 代理服务器设置 Proxy server setting
+  # 注意：不支持需要密码验证的代理服务器 NOTE: Authentication required proxy servers are not supported
+  # 0 = 不使用代理 - No proxy
+  # 1 = 使用系统代理 - Use system proxy
+  # 2 = 使用 HTTP(s) 代理 - Use HTTP(s) proxy
+  # 3 = 使用 socks5 代理(可能无法使用) - Use socks5 proxy (may not work well)
+  setting: 0
+```
+
 ### PeerBanHelper 运行在 Docker 里时，下载器 IP 地址怎么填，127.0.0.1 不管用
 
 如果您的 Docker 容器和下载器运行在同一台服务器上，且使用 桥接 网络模式（默认就是桥接），那么您不能使用 127.0.0.1。

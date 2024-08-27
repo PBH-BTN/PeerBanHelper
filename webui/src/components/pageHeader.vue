@@ -53,12 +53,12 @@
       </a-menu>
     </template>
     <template #extra>
-      <div style="display: flex; gap: 12px" v-if="!disableMenu">
+      <div v-if="!disableMenu" style="display: flex; gap: 12px">
         <a-dropdown
           v-if="mobileLayout === 0"
           position="bl"
-          @select="(router: unknown) => goto(String((router as (typeof routers)[number]).name))"
           :popup-max-height="false"
+          @select="(router: unknown) => goto(String((router as (typeof routers)[number]).name))"
         >
           <a-button style="flex-grow: 1; gap: 12px">
             <template v-if="route.meta?.icon" #icon>
@@ -162,6 +162,7 @@ import { ref, computed } from 'vue'
 import { useViewRoute } from '@/router'
 import { useRoute } from 'vue-router'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
+import { useEndpointStore } from '@/stores/endpoint'
 const { t, locale } = useI18n()
 const { changeLocale } = useLocale()
 const locales = [...LOCALE_OPTIONS]
@@ -191,6 +192,11 @@ const props = withDefaults(
     disableMenu: false
   }
 )
+const endpointStore = useEndpointStore()
+
+endpointStore.emmitter.on('open-settings-modal', () => {
+  settingsModalRef.value?.showModal()
+})
 
 const [routers, currentName, goto] = useViewRoute()
 const route = useRoute()

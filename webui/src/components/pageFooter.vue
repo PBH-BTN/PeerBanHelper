@@ -16,10 +16,10 @@
             <div v-else>{{ serverVersion?.version }}</div>
             <a-button
               v-if="endpointStore.plusStatus?.activated"
-              @click="plusInfo?.showModal()"
               class="plus-button"
               type="outline"
               size="mini"
+              @click="plusInfo?.showModal()"
             >
               <icon-heart-fill />
               &nbsp;PBH Plus
@@ -36,7 +36,7 @@
           <a-space>
             {{ version }}
             <div>
-              (<a-link :href="`https://github.com/Gaojianli/pbh-fe/commit/${hash}`">
+              (<a-link :href="`https://github.com/PBH-BTN/PeerBanHelper/tree/${hash}/webui`">
                 {{ hash.substring(0, 8) }} </a-link
               >)
             </div></a-space
@@ -50,11 +50,12 @@
 
 <script setup lang="ts">
 import { useEndpointStore } from '@/stores/endpoint'
-import { Button, Message, Notification } from '@arco-design/web-vue'
+import { Button, Notification } from '@arco-design/web-vue'
 import { computed, h, ref, watch } from 'vue'
 import { compare } from 'compare-versions'
 import { useI18n } from 'vue-i18n'
 import plusModal from './plusModal.vue'
+import { RequestError } from '@octokit/request-error'
 
 const { t } = useI18n()
 const version = __APP_VERSION__
@@ -87,7 +88,27 @@ watch(hasNewVersion, () => {
 watch(
   () => endpointStore.checkUpgradeError,
   (error) => {
-    Message.error(`${t('settings.accessToken.error')},error:${error}`)
+    if (error instanceof RequestError) {
+      if (error?.message.includes('limit')) {
+        Notification.error({
+          title: t('settings.accessToken.error'),
+          content: t('settings.accessToken.error.limit'),
+          footer: () =>
+            h(
+              Button,
+              {
+                type: 'primary',
+                onClick: () => endpointStore.emmitter.emit('open-settings-modal')
+              },
+              () => t('settings.open')
+            )
+        })
+      }
+    } else
+      Notification.error({
+        title: t('settings.accessToken.error'),
+        content: error?.message ?? ''
+      })
   }
 )
 

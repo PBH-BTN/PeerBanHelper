@@ -2,22 +2,41 @@
   <a-card hoverable style="height: 100%" :header-style="{ height: 'auto' }" class="card">
     <template #extra>
       <a-space v-if="client" size="mini">
-        <a-button class="edit-btn" shape="circle" type="text"
-          @click="() => emits('edit-click', { name: downloader.name, config: client?.data?.config!! })">
+        <a-button
+          class="edit-btn"
+          shape="circle"
+          type="text"
+          @click="
+            () => emits('edit-click', { name: downloader.name, config: client?.data?.config!! })
+          "
+        >
           <template #icon>
             <icon-edit />
           </template>
         </a-button>
-        <a-tooltip v-if="props.disableRemove" :content="t('page.dashboard.clientStatus.card.lastDelete')">
+        <a-tooltip
+          v-if="props.disableRemove"
+          :content="t('page.dashboard.clientStatus.card.lastDelete')"
+        >
           <a-button class="edit-btn" status="danger" shape="circle" type="text" disabled>
             <template #icon>
               <icon-delete />
             </template>
           </a-button>
         </a-tooltip>
-        <a-popconfirm v-else :content="t('page.rule_management.ruleSubscribe.column.deleteConfirm')" type="warning"
-          @before-ok="handleDelete">
-          <a-button class="edit-btn" status="danger" shape="circle" type="text" :disabled="props.disableRemove">
+        <a-popconfirm
+          v-else
+          :content="t('page.rule_management.ruleSubscribe.column.deleteConfirm')"
+          type="warning"
+          @before-ok="handleDelete"
+        >
+          <a-button
+            class="edit-btn"
+            status="danger"
+            shape="circle"
+            type="text"
+            :disabled="props.disableRemove"
+          >
             <template #icon>
               <icon-delete />
             </template>
@@ -26,20 +45,34 @@
       </a-space>
     </template>
     <template #title>
-      <a-typography-title :style="{ margin: '0px' }" :ellipsis="{
-        rows: 2,
-        showTooltip: true
-      }" :heading="3">
+      <a-typography-title
+        :style="{ margin: '0px' }"
+        :ellipsis="{
+          rows: 2,
+          showTooltip: true
+        }"
+        :heading="3"
+      >
         {{ downloader.name }}
       </a-typography-title>
     </template>
     <a-skeleton v-if="!client" :animation="true">
       <a-space direction="vertical" :style="{ width: '100%' }" :size="0">
-        <a-skeleton-line :rows="4" :line-height="22" :line-spacing="14" :widths="['60%', '70%', '50%', '60%']" />
+        <a-skeleton-line
+          :rows="4"
+          :line-height="22"
+          :line-spacing="14"
+          :widths="['60%', '70%', '50%', '60%']"
+        />
       </a-space>
     </a-skeleton>
-    <a-descriptions v-if="client" :column="1" layout="inline-horizontal" class="space"
-      :label-style="{ paddingRight: '10px' }">
+    <a-descriptions
+      v-if="client"
+      :column="1"
+      layout="inline-horizontal"
+      class="space"
+      :label-style="{ paddingRight: '10px' }"
+    >
       <a-descriptions-item :label="t('page.dashboard.clientStatus.card.type')">
         <a-space>
           <a-tag bordered>{{ downloader.type }}</a-tag>
@@ -55,48 +88,44 @@
             <icon-check-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.HEALTHY" />
             <icon-close-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.ERROR" />
             <icon-question-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.UNKNOWN" />
-            <icon-exclamation-polygon-fill v-if="client.data.lastStatus == ClientStatusEnum.NEED_TAKE_ACTION" />
+            <icon-exclamation-polygon-fill
+              v-if="client.data.lastStatus == ClientStatusEnum.NEED_TAKE_ACTION"
+            />
             {{ t(getStatusSafe(client.data)[1]) }}
           </a-typography-text>
         </a-tooltip>
       </a-descriptions-item>
 
-      <a-descriptions-item v-if="client.data.lastStatus == ClientStatusEnum.HEALTHY"
-        :label="t('page.dashboard.clientStatus.card.status.torrentNumber')">
-        <a-space>
-          <a-typography-text>{{ client.data.activeTorrents }}</a-typography-text>
-          <a-tooltip v-if="client.data.activeTorrents > 0" :content="t('page.dashboard.torrentList.tips')">
-            <a-button @click="() => emits('torrent-view-click', downloader.name)" shape="circle" type="text"
-              size="mini">
-              <template #icon>
-                <icon-eye size="large" style="color: var(--color-text-1)" />
-              </template>
-            </a-button>
-          </a-tooltip>
-        </a-space>
+      <a-descriptions-item
+        v-if="client.data.lastStatus == ClientStatusEnum.HEALTHY"
+        :label="t('page.dashboard.clientStatus.card.status.torrentNumber')"
+      >
+        <a-typography-text>{{ client.data.activeTorrents }}</a-typography-text>
       </a-descriptions-item>
 
-      <a-descriptions-item v-if="client.data.lastStatus == ClientStatusEnum.HEALTHY"
-        :label="t('page.dashboard.clientStatus.card.status.peerNumber')">
+      <a-descriptions-item
+        v-if="client.data.lastStatus == ClientStatusEnum.HEALTHY"
+        :label="t('page.dashboard.clientStatus.card.status.peerNumber')"
+      >
         <a-typography-text>{{ client.data.activePeers }}</a-typography-text>
       </a-descriptions-item>
     </a-descriptions>
   </a-card>
 </template>
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
 import {
   ClientStatusEnum,
   type ClientStatus,
   type Downloader,
   type downloaderConfig
 } from '@/api/model/downloader'
-import { useRequest } from 'vue-request'
 import { DeleteDownloader, getClientStatus } from '@/service/downloaders'
-import { computed } from 'vue'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 const { t } = useI18n()
 const statusMap: Record<ClientStatusEnum, [string, string]> = {
   [ClientStatusEnum.HEALTHY]: ['success', 'page.dashboard.clientStatus.card.status.normal'],
@@ -116,7 +145,6 @@ const props = withDefaults(
 )
 
 const emits = defineEmits<{
-  (e: 'torrent-view-click', name: string): void
   (e: 'downloader-deleted'): void
   (
     e: 'edit-click',
@@ -153,8 +181,8 @@ const handleDelete = async () => {
       emits('downloader-deleted')
       return true
     }
-  } catch (e: any) {
-    Message.error(e.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) Message.error(e.message)
     return false
   }
 }

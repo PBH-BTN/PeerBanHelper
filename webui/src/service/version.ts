@@ -33,8 +33,10 @@ export function getLatestVersion(token = useEndpointStore().accessToken) {
     .then((res) => res.data)
 }
 
-export function getPBHPlusStatus(): Promise<CommonResponse<donateStatus>> {
-  const url = new URL(urlJoin(useEndpointStore().endpoint, '/api/pbhplus/status'), location.href)
+export async function getPBHPlusStatus(): Promise<CommonResponse<donateStatus>> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+  const url = new URL(urlJoin(endpointStore.endpoint, '/api/pbhplus/status'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     useEndpointStore().assertResponseLogin(res)
     return res.json()

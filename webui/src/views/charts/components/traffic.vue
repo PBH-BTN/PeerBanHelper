@@ -11,8 +11,8 @@
               label-col-flex="100px"
             >
               <a-range-picker
-                show-time
                 v-model="option.range"
+                show-time
                 value-format="Date"
                 :shortcuts="[
                   {
@@ -62,7 +62,7 @@
       class="chart"
       :option="chartOptions"
       :loading="loading"
-      :loadingOptions="loadingOptions"
+      :loading-options="loadingOptions"
       theme="ovilia-green"
       autoresize
       :init-options="{ renderer: 'svg' }"

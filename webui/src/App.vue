@@ -19,12 +19,12 @@
               @after-enter="onAfterEnter"
             >
               <a-result
-                status="403"
-                :title="t('router.moduleNotEnable', { moduleName: t(String(route.meta?.label)) })"
                 v-if="
                   route.meta?.moduleRequire &&
                   !isModuleEnable(endPointStore.serverManifest, String(route.meta?.moduleRequire))
                 "
+                status="403"
+                :title="t('router.moduleNotEnable', { moduleName: t(String(route.meta?.label)) })"
               >
                 <template #subtitle>
                   <a-typography-text style="font-size: 0.8rem">{{
@@ -40,7 +40,7 @@
                   </a-space>
                 </template>
               </a-result>
-              <component v-else :is="Component" :key="route.fullPath" />
+              <component :is="Component" v-else :key="route.fullPath" />
             </transition>
           </router-view>
           <a-divider />
