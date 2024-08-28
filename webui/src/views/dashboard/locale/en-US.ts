@@ -44,6 +44,8 @@ export default {
   'page.dashboard.editModal.label.incrementBan.description':
     'Helps to alleviate the downloader pressure when saving the ban list, but may cause the inability to ban Peers on some downloaders',
   'page.dashboard.editModal.label.verifySsl': 'Verify SSL',
+  'page.dashboard.editModal.label.ignorePrivate': 'Ignore Private Torrents',
+  'page.dashboard.editModal.label.ignorePrivate.description': 'Only works on qBittorrent 5.0+',
   'page.dashboard.editModal.biglybt': 'Please install plugin at {url} first.',
   'page.dashboard.editModal.biglybt.url': 'here',
   'page.dashboard.editModal.transmission.discourage':

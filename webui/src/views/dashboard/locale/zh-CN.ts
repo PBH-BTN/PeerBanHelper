@@ -45,6 +45,8 @@ export default {
   'page.dashboard.editModal.label.incrementBan.description':
     '有助于缓解保存封禁列表时的下载器压力，但在部分下载器上可能会导致无法封禁Peers',
   'page.dashboard.editModal.label.verifySsl': '验证SSL证书',
+  'page.dashboard.editModal.label.ignorePrivate': '忽略私有种子',
+  'page.dashboard.editModal.label.ignorePrivate.description': '只在 qBittorrent 5.0+ 上有效',
   'page.dashboard.editModal.biglybt': '请先安装 {url}',
   'page.dashboard.editModal.biglybt.url': '插件',
   'page.dashboard.editModal.transmission.discourage':

@@ -31,11 +31,17 @@
   >
     <a-switch v-model="config.verifySsl" />
   </a-form-item>
+  <a-form-item
+    field="config.ignorePrivate"
+    :label="t('page.dashboard.editModal.label.ignorePrivate')"
+  >
+    <a-switch v-model="config.ignorePrivate" />
+  </a-form-item>
 </template>
 <script setup lang="ts">
-import type { transmissionConfig } from '@/api/model/downloader'
-import type { FieldRule } from '@arco-design/web-vue'
-import { useI18n } from 'vue-i18n'
+import type { transmissionConfig } from '@/api/model/downloader';
+import type { FieldRule } from '@arco-design/web-vue';
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n()
 const config = defineModel<transmissionConfig>({ required: true })
 const urlRules: FieldRule<string> = {
