@@ -11,9 +11,11 @@ import lombok.NoArgsConstructor;
 @Data
 @DatabaseTable(tableName = "traffic_journal_v2")
 public final class TrafficJournalEntity {
-    @DatabaseField(id = true, index = true, uniqueCombo = true)
+    @DatabaseField(generatedId = true, index = true)
+    private Long id;
+    @DatabaseField(index = true, uniqueCombo = true)
     private Long timestamp;
-    @DatabaseField(uniqueCombo = true)
+    @DatabaseField(index = true, uniqueCombo = true)
     private String downloader;
     @DatabaseField
     private long dataOverallUploaded;
