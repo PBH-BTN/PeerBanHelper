@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,43 +78,53 @@ public class PBHChartController extends AbstractFeatureModule {
             throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
         }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-        String[] data = peerRecordDao.queryBuilder()
-                .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
-                .queryRawFirst();
-        long totalUploaded = Long.parseLong(data[0]);
-        long totalDownloaded = Long.parseLong(data[1]);
 
-        List<TrafficJournalRecord> records = new ArrayList<>();
-        // -----
-        try (var it = trafficJournalDao.queryBuilder()
+        var records = trafficJournalDao.queryBuilder().where()
+                .between("timestamp", timeQueryModel.startAt(), timeQueryModel.endAt())
+                .queryBuilder()
                 .orderBy("timestamp", true)
-                .where()
-                .ge("timestamp", MiscUtil.getStartOfToday(timeQueryModel.startAt().getTime()))
-                .and()
-                .le("timestamp", MiscUtil.getStartOfToday(timeQueryModel.endAt().getTime()))
-                .iterator()) {
-            TrafficJournalEntity base = null;
-            while (it.hasNext()) {
-                if (base == null) {
-                    base = it.next();
-                    // 多插一个进去
-                    records.add(new TrafficJournalRecord(base.getTimestamp(), base.getUploaded(), base.getDownloaded()));
-                    continue;
-                }
-                var target = it.next();
-                long uploadedOffset = target.getUploaded() - base.getUploaded();
-                long downloadedOffset = target.getDownloaded() - base.getDownloaded();
-                if (uploadedOffset < 0) uploadedOffset = 0;
-                if (downloadedOffset < 0) downloadedOffset = 0;
-                base = target;
-                records.add(new TrafficJournalRecord(base.getTimestamp(), uploadedOffset, downloadedOffset));
-            }
-        }
-        if (records.size() > 1) {
-            // 多插的那个移除
-            records.removeFirst();
-        }
-        ctx.json(new StdResp(true, null, new TrafficChart(totalUploaded, totalDownloaded, records)));
+                .query();
+
+        var timestamps = records.stream().map(TrafficJournalEntity::getTimestamp).distinct();
+
+
+//        String[] data = peerRecordDao.queryBuilder()
+//                .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
+//                .queryRawFirst();
+//        long totalUploaded = Long.parseLong(data[0]);
+//        long totalDownloaded = Long.parseLong(data[1]);
+//
+//        List<TrafficJournalRecord> records = new ArrayList<>();
+//        // -----
+//        try (var it = trafficJournalDao.queryBuilder()
+//                .orderBy("timestamp", true)
+//                .where()
+//                .ge("timestamp", MiscUtil.getStartOfToday(timeQueryModel.startAt().getTime()))
+//                .and()
+//                .le("timestamp", MiscUtil.getStartOfToday(timeQueryModel.endAt().getTime()))
+//                .iterator()) {
+//            TrafficJournalEntity base = null;
+//            while (it.hasNext()) {
+//                if (base == null) {
+//                    base = it.next();
+//                    // 多插一个进去
+//                    records.add(new TrafficJournalRecord(base.getTimestamp(), base.getDataOverallUploaded(), base.getDataOverallDownloaded()));
+//                    continue;
+//                }
+//                var target = it.next();
+//                long uploadedOffset = target.getDataOverallUploaded() - base.getDataOverallUploaded();
+//                long downloadedOffset = target.getDataOverallDownloaded() - base.getDataOverallDownloaded();
+//                if (uploadedOffset < 0) uploadedOffset = 0;
+//                if (downloadedOffset < 0) downloadedOffset = 0;
+//                base = target;
+//                records.add(new TrafficJournalRecord(base.getTimestamp(), uploadedOffset, downloadedOffset));
+//            }
+//        }
+//        if (records.size() > 1) {
+//            // 多插的那个移除
+//            records.removeFirst();
+//        }
+//        ctx.json(new StdResp(true, null, new TrafficChart(totalUploaded, totalDownloaded, records)));
     }
 
 
@@ -346,18 +356,17 @@ public class PBHChartController extends AbstractFeatureModule {
     }
 
     record TrafficChart(
-            long allTimeUploaded,
-            long allTimeDownloaded,
-            List<TrafficJournalRecord> journal
+            List<Timestamp> xAxis,
+            List<String> seriesNames,
+            Map<String, Map<Timestamp, List<TrafficData>>> yAxis
     ) {
+
     }
 
-    record TrafficJournalRecord(
-            long timestamp,
-            long uploaded,
-            long downloaded
-    ) {
-
+    record TrafficData(
+            String downloader,
+            long dataOverallUploaded,
+            long dataOverallDownloaded) {
     }
 
 

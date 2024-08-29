@@ -2,11 +2,13 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerManagerRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerRecord;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.StatisticsRecord;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -18,7 +20,6 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
@@ -163,14 +164,21 @@ public class BiglyBT extends AbstractDownloader {
         return torrents;
     }
 
-    @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-
-    }
 
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-
+    public DownloaderStatistics getStatistics() {
+        HttpResponse<String> resp;
+        try {
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/statistics"),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (resp.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, resp.statusCode(), resp.body()));
+        }
+        StatisticsRecord statisticsRecord = JsonUtil.getGson().fromJson(resp.body(), StatisticsRecord.class);
+        return new DownloaderStatistics(statisticsRecord.getOverallDataBytesSent(), statisticsRecord.getOverallDataBytesReceived());
     }
 
     @Override

@@ -15,8 +15,25 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
         super(database.getDataSource(), TrafficJournalEntity.class);
     }
 
-    public TrafficJournalEntity getTodayJournal() throws SQLException {
-        return createIfNotExists(new TrafficJournalEntity(MiscUtil.getStartOfToday(System.currentTimeMillis()), 0, 0));
+    public TrafficJournalEntity getTodayJournal(String downloader) throws SQLException {
+        return createIfNotExists(new TrafficJournalEntity(MiscUtil.getStartOfToday(System.currentTimeMillis()), downloader, 0, 0, 0, 0));
+    }
+
+    @Override
+    public synchronized TrafficJournalEntity createIfNotExists(TrafficJournalEntity data) throws SQLException {
+        if (data == null) {
+            return null;
+        }
+        TrafficJournalEntity existing = queryBuilder().where()
+                .eq("timestamp", data.getTimestamp())
+                .and()
+                .eq("downloader", data.getDownloader()).queryBuilder().queryForFirst();
+        if (existing == null) {
+            create(data);
+            return data;
+        } else {
+            return existing;
+        }
     }
 
 }

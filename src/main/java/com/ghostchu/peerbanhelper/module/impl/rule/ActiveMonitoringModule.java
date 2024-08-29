@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
+import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -119,26 +120,16 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
     }
 
     private void writeJournal() {
-        try {
-            var entity = trafficJournalDao.getTodayJournal();
-            String[] data = peerRecordDao.queryBuilder()
-                    .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
-                    .queryRawFirst();
-            long uploaded = 0;
-            long downloaded = 0;
-            if (data != null) {
-                if (data[0] != null && !data[0].isBlank()) {
-                    uploaded = Long.parseLong(data[0]);
-                }
-                if (data[1] != null && !data[1].isBlank()) {
-                    downloaded = Long.parseLong(data[1]);
-                }
+        for (Downloader downloader : getServer().getDownloaders()) {
+            try {
+                var entity = trafficJournalDao.getTodayJournal(downloader.getName());
+                var stats = downloader.getStatistics();
+                entity.setDataOverallUploaded(stats.totalUploaded());
+                entity.setDataOverallDownloaded(stats.totalDownloaded());
+                trafficJournalDao.update(entity);
+            } catch (Throwable e) {
+                log.error("Unable to write hourly traffic journal to database", e);
             }
-            entity.setUploaded(uploaded);
-            entity.setDownloaded(downloaded);
-            trafficJournalDao.update(entity);
-        } catch (Throwable e) {
-            log.error("Unable to write hourly traffic journal to database", e);
         }
     }
 
