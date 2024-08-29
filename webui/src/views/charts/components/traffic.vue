@@ -148,7 +148,7 @@ const chartOptions = ref({
       emphasis: {
         focus: 'series'
       },
-      data: [] as [Date,number][]
+      data: [] as [Date, number][]
     },
     {
       name: t('page.charts.traffic.options.upload'),
@@ -156,7 +156,7 @@ const chartOptions = ref({
       emphasis: {
         focus: 'series'
       },
-      data: [] as [Date,number][]
+      data: [] as [Date, number][]
     }
   ]
 })
@@ -169,8 +169,14 @@ const { loading, run, refresh } = useRequest(getTraffic, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()],
   onSuccess: (data) => {
     if (data.data) {
-     chartOptions.value.series[0].data = data.data.map(v=>[new Date(v.timestamp),v.dataOverallDownloaded])
-     chartOptions.value.series[0].data = data.data.map(v=>[new Date(v.timestamp),v.dataOverallUploaded])
+      chartOptions.value.series[0].data = data.data.map((v) => [
+        new Date(v.timestamp),
+        v.dataOverallDownloaded
+      ])
+      chartOptions.value.series[0].data = data.data.map((v) => [
+        new Date(v.timestamp),
+        v.dataOverallUploaded
+      ])
     }
   },
   onError: (e) => {
