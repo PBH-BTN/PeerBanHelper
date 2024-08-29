@@ -57,10 +57,7 @@
                 </a-option>
               </a-select>
             </a-form-item>
-            <a-form-item
-              field="range"
-              :label="t('page.charts.options.days')"
-            >
+            <a-form-item field="range" :label="t('page.charts.options.days')">
               <a-range-picker
                 v-model="option.range"
                 show-time
