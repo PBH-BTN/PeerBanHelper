@@ -20,23 +20,23 @@ public class QBMainData {
         @SerializedName("alltime_ul")
         private Long alltimeUl;
         @SerializedName("average_time_queue")
-        private Integer averageTimeQueue;
+        private Long averageTimeQueue;
         @SerializedName("connection_status")
         private String connectionStatus;
         @SerializedName("dht_nodes")
-        private Integer dhtNodes;
+        private Long dhtNodes;
         @SerializedName("dl_info_data")
-        private Integer dlInfoData;
+        private Long dlInfoData;
         @SerializedName("dl_info_speed")
-        private Integer dlInfoSpeed;
+        private Long dlInfoSpeed;
         @SerializedName("dl_rate_limit")
-        private Integer dlRateLimit;
+        private Long dlRateLimit;
         @SerializedName("free_space_on_disk")
         private Long freeSpaceOnDisk;
         @SerializedName("global_ratio")
         private String globalRatio;
         @SerializedName("queued_io_jobs")
-        private Integer queuedIoJobs;
+        private Long queuedIoJobs;
         @SerializedName("queueing")
         private Boolean queueing;
         @SerializedName("read_cache_hits")
@@ -44,21 +44,21 @@ public class QBMainData {
         @SerializedName("read_cache_overload")
         private String readCacheOverload;
         @SerializedName("refresh_interval")
-        private Integer refreshInterval;
+        private Long refreshInterval;
         @SerializedName("total_buffers_size")
-        private Integer totalBuffersSize;
+        private Long totalBuffersSize;
         @SerializedName("total_peer_connections")
-        private Integer totalPeerConnections;
+        private Long totalPeerConnections;
         @SerializedName("total_queued_size")
-        private Integer totalQueuedSize;
+        private Long totalQueuedSize;
         @SerializedName("total_wasted_session")
-        private Integer totalWastedSession;
+        private Long totalWastedSession;
         @SerializedName("up_info_data")
         private Long upInfoData;
         @SerializedName("up_info_speed")
-        private Integer upInfoSpeed;
+        private Long upInfoSpeed;
         @SerializedName("up_rate_limit")
-        private Integer upRateLimit;
+        private Long upRateLimit;
         @SerializedName("use_alt_speed_limits")
         private Boolean useAltSpeedLimits;
         @SerializedName("use_subcategories")
