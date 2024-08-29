@@ -42,7 +42,8 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
                 .le("timestamp", end.getTime())
                 .and()
                 .eq("downloader", downloadName)
-                .queryBuilder().groupBy("timestamp")
+                .queryBuilder()
+                .groupBy("timestamp")
                 .queryRaw()) {
             return results.getResults().stream().map(args -> new TrafficData(new Timestamp(Long.parseLong(args[0])), Long.parseLong(args[1]), Long.parseLong(args[2]))).toList();
         }
