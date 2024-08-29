@@ -10,7 +10,7 @@ name: Java CI
 
 on:
   push:
-    branches: [ "master", "release", "v6", "api-std", "use-downloader-data" ]
+  #    branches: [ "master", "release", "v6", "api-std", "use-downloader-data" ]
   workflow_dispatch:
 jobs:
   WebUI:
