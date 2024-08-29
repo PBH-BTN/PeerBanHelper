@@ -1,22 +1,37 @@
 <template>
-  <a-modal v-model:visible="showModal" :title="newItem
-      ? t('page.rule_management.ruleSubscribe.editModal.title.new')
-      : t('page.rule_management.ruleSubscribe.editModal.title')
-    " unmountOnClose @before-ok="handleBeforeOk">
+  <a-modal
+    v-model:visible="showModal"
+    :title="
+      newItem
+        ? t('page.rule_management.ruleSubscribe.editModal.title.new')
+        : t('page.rule_management.ruleSubscribe.editModal.title')
+    "
+    unmount-on-close
+    @before-ok="handleBeforeOk"
+  >
     <a-form ref="formRef" :model="form" :rules="rules">
       <a-form-item field="ruleId" label="ID">
         <a-input v-model="form.ruleId" :disabled="!newItem" allow-clear />
-        <template #extra>{{ t('page.rule_management.ruleSubscribe.editModal.form.id.extra') }}
+        <template #extra
+          >{{ t('page.rule_management.ruleSubscribe.editModal.form.id.extra') }}
         </template>
       </a-form-item>
-      <a-form-item field="ruleName" :label="t('page.rule_management.ruleSubscribe.editModal.form.name')">
+      <a-form-item
+        field="ruleName"
+        :label="t('page.rule_management.ruleSubscribe.editModal.form.name')"
+      >
         <a-input v-model="form.ruleName" allow-clear />
       </a-form-item>
       <a-form-item field="subUrl" label="URL">
-        <a-textarea v-model="form.subUrl" allow-clear @change="handleUrlChange" :auto-size="{
-          minRows: 2,
-          maxRows: 5
-        }" />
+        <a-textarea
+          v-model="form.subUrl"
+          allow-clear
+          :auto-size="{
+            minRows: 2,
+            maxRows: 5
+          }"
+          @change="handleUrlChange"
+        />
       </a-form-item>
     </a-form>
   </a-modal>

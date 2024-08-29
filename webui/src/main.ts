@@ -3,7 +3,7 @@ import './assets/main.less'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { Message } from '@arco-design/web-vue'
-import { Notification } from '@arco-design/web-vue';
+import { Notification } from '@arco-design/web-vue'
 import App from './App.vue'
 import router from './router'
 import i18n from './locale'

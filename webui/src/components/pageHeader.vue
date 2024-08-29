@@ -53,12 +53,12 @@
       </a-menu>
     </template>
     <template #extra>
-      <div style="display: flex; gap: 12px" v-if="!disableMenu">
+      <div v-if="!disableMenu" style="display: flex; gap: 12px">
         <a-dropdown
           v-if="mobileLayout === 0"
           position="bl"
-          @select="(router: unknown) => goto(String((router as (typeof routers)[number]).name))"
           :popup-max-height="false"
+          @select="(router: unknown) => goto(String((router as (typeof routers)[number]).name))"
         >
           <a-button style="flex-grow: 1; gap: 12px">
             <template v-if="route.meta?.icon" #icon>

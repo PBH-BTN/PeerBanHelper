@@ -1,11 +1,11 @@
 <template>
   <a-modal
+    v-model:visible="visible"
     hide-cancel
     closable
-    v-model:visible="visible"
-    @ok="handleOk"
     unmount-on-close
     width="auto"
+    @ok="handleOk"
     @close="cancel()"
   >
     <template #title> {{ t('page.dashboard.peerList.title') + tname }} </template>
@@ -107,7 +107,8 @@ const handleOk = () => {
 const { data, loading, run, cancel } = useRequest(
   getPeer,
   {
-    defaultParams: [downloader.value, tid.value]
+    defaultParams: [downloader.value, tid.value],
+    ready: visible
   },
   [useAutoUpdatePlugin]
 )

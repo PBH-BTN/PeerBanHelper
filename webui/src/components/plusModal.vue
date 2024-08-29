@@ -2,7 +2,7 @@
   <a-modal
     v-model:visible="showModal"
     title="PeerBanHelper Plus"
-    unmountOnClose
+    unmount-on-close
     hide-cancel
     width="auto"
     draggable
@@ -40,26 +40,27 @@
           </a-descriptions-item>
         </a-descriptions>
         <a-space
+          v-if="!status?.activated"
           direction="vertical"
           style="display: flex; flex-direction: column; text-align: center"
-          v-if="!status?.activated"
         >
           <a-typography-text>{{ t('plus.begging') }}</a-typography-text>
           <a href="https://afdian.com/a/Ghost_chu?tab=shop" target="_blank">
             <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 30%" />
           </a>
         </a-space>
-        <a-space direction="vertical" size="small" v-if="!status?.activated">
+        <a-space v-if="!status?.activated" direction="vertical" size="small">
           <a-typography-text type="secondary">{{ t('plus.activeTips') }}</a-typography-text>
           <a-input-search
             button-text="Go!"
             search-button
-            @search="submitKey"
             :loading="loading"
+            @search="submitKey"
           ></a-input-search>
         </a-space>
       </a-space>
       <medal
+        v-if="status?.activated"
         :text="
           status?.keyData?.licenseTo
             ? status.keyData.licenseTo.length > 13
@@ -67,18 +68,17 @@
               : status.keyData.licenseTo
             : 'PBH Plus'
         "
-        v-if="status?.activated"
         style="margin-right: 40px; margin-left: 40px"
       />
     </a-space>
   </a-modal>
 </template>
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { useEndpointStore } from '@/stores/endpoint'
-import { useI18n } from 'vue-i18n'
-import { Message } from '@arco-design/web-vue'
 import medal from '@/components/plusMedal.vue'
+import { useEndpointStore } from '@/stores/endpoint'
+import { Message } from '@arco-design/web-vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t, d } = useI18n()
 const endpointStore = useEndpointStore()
@@ -96,8 +96,8 @@ const submitKey = async (key: string) => {
   try {
     await endpointStore.setPlusKey(key)
     Message.info(t('plus.activeSuccess'))
-  } catch (e: any) {
-    Message.error((e as Error).message)
+  } catch (e: unknown) {
+    if (e instanceof Error) Message.error(e.message)
   } finally {
     loading.value = false
   }

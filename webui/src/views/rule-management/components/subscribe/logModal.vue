@@ -2,7 +2,7 @@
   <a-modal
     v-model:visible="showModal"
     :title="t('page.rule_management.ruleSubscribe.updateLog')"
-    unmountOnClose
+    unmount-on-close
     width="auto"
     :modal-style="{ width: '35vw' }"
   >
@@ -20,9 +20,9 @@
         bufferSize: 1
       }"
       size="medium"
+      class="banlog-table"
       @page-change="changeCurrent"
       @page-size-change="changePageSize"
-      class="banlog-table"
     >
       <template #ruleId="{ record }">
         <a-tag :color="getColor(record.ruleId)">{{ record.ruleId }}</a-tag>

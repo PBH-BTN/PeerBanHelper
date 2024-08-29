@@ -50,7 +50,7 @@ const { t } = useI18n()
 .chart {
   height: 440px;
 }
-.chart-error{
+.chart-error {
   display: flex;
   flex-direction: column;
   align-items: center;

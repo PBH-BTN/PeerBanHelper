@@ -26,7 +26,7 @@
       :option="chartOption"
       :loading="loading"
       autoresize
-      :loadingOptions="loadingOptions"
+      :loading-options="loadingOptions"
       :theme="darkStore.isDark ? 'dark' : 'light'"
       :init-options="{ renderer: 'svg' }"
     >
@@ -55,7 +55,7 @@
                 <a-typography-text>{{ t('page.charts.options.thresold') }}</a-typography-text>
               </a-space>
             </a-form-item>
-            <a-form-item field="mergeSameVersion" v-if="option.field === 'peerId'">
+            <a-form-item v-if="option.field === 'peerId'" field="mergeSameVersion">
               <a-space>
                 <a-switch v-model="option.mergeSameVersion" />
                 <a-typography-text>{{ t('page.charts.options.mergeSame') }}</a-typography-text>
@@ -157,7 +157,7 @@ const { loading, run, refresh } = useRequest(getAnalysisDataByField, {
           const match = key.match(/^([-]?[a-zA-z]+)[0-9]+.*/)
           if (match && match?.length >= 2) key = match[1] + '*'
           if (map.has(key)) {
-            map.set(key, map.get(key)!! + it.count)
+            map.set(key, map.get(key)! + it.count)
           } else {
             map.set(key, it.count)
           }

@@ -113,19 +113,19 @@
   </a-card>
 </template>
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
 import {
   ClientStatusEnum,
   type ClientStatus,
   type Downloader,
   type downloaderConfig
 } from '@/api/model/downloader'
-import { useRequest } from 'vue-request'
 import { DeleteDownloader, getClientStatus } from '@/service/downloaders'
-import { computed } from 'vue'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 const { t } = useI18n()
 const statusMap: Record<ClientStatusEnum, [string, string]> = {
   [ClientStatusEnum.HEALTHY]: ['success', 'page.dashboard.clientStatus.card.status.normal'],
@@ -181,8 +181,8 @@ const handleDelete = async () => {
       emits('downloader-deleted')
       return true
     }
-  } catch (e: any) {
-    Message.error(e.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) Message.error(e.message)
     return false
   }
 }

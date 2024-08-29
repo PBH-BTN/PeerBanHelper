@@ -30,9 +30,9 @@
         <div>
           <a-button-group class="hover-display-btn">
             <AsyncMethod
+              v-slot="{ run, loading }"
               once
               :async-fn="() => handleUnban(item.banMetadata.peer.address.ip)"
-              v-slot="{ run, loading }"
             >
               <a-button type="outline" :loading="loading" @click="run">
                 {{ t('page.banlist.banlist.listItem.unban') }}

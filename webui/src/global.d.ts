@@ -1,1 +1,1 @@
-type Timeout = ReturnType<typeof setTimeout>;
+type Timeout = ReturnType<typeof setTimeout>

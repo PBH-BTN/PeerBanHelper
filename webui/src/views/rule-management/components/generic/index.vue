@@ -45,15 +45,19 @@
         </a-space>
         <a-space v-else style="display: flex; justify-content: space-between" fill>
           <a-input
+            v-model="record.data"
             :placeholder="t(`page.rule_management.${type}.placeholder`)"
             style="max-width: 150px"
-            v-model="record.data"
           />
           <a-space>
-            <AsyncMethod once :async-fn="() => handleSubmit(rowIndex)" v-slot="{ run, loading }">
+            <AsyncMethod
+              v-slot="{ run, loading: load }"
+              once
+              :async-fn="() => handleSubmit(rowIndex)"
+            >
               <a-button class="edit-btn" shape="circle" type="text" status="success" @click="run">
                 <template #icon>
-                  <icon-refresh v-if="loading" :spin="loading" />
+                  <icon-refresh v-if="load" :spin="load" />
                   <icon-check v-else />
                 </template>
               </a-button>
@@ -81,13 +85,13 @@
   </a-space>
 </template>
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n'
 import { type ruleType } from '@/api/model/blacklist'
-import { useRequest } from 'vue-request'
-import { addBlackList, deleteBlackList, getBlackList } from '@/service/blacklist'
 import AsyncMethod from '@/components/asyncMethod.vue'
-import { computed, reactive, type Reactive } from 'vue'
+import { addBlackList, deleteBlackList, getBlackList } from '@/service/blacklist'
 import { Message, type TableColumnData } from '@arco-design/web-vue'
+import { computed, reactive, type Reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 const { t } = useI18n()
 const props = defineProps<{
   type: ruleType
@@ -153,8 +157,10 @@ const handleSubmit = async (index: number) => {
       Message.success(resp.message)
     }
     refresh()
-  } catch (e: any) {
-    Message.error(e.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      Message.error(e.message)
+    }
   }
 }
 
@@ -167,8 +173,8 @@ const handleDelete = async (target: number | string) => {
     Message.success(resp.message)
     refresh()
     return true
-  } catch (e: any) {
-    Message.error(e.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) Message.error(e.message)
     return false
   }
 }
