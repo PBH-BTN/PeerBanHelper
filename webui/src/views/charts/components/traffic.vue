@@ -1,42 +1,39 @@
 <template>
-  <a-card hoverable :title="t('page.charts.title.traffic')">
-    <template #extra>
-      <a-popover>
-        <a-link>{{ t('page.charts.options.more') }}</a-link>
-        <template #content>
-          <a-form :model="option">
-            <a-form-item
-              field="range"
-              :label="t('page.charts.options.days')"
-              label-col-flex="100px"
-            >
-              <a-range-picker
-                v-model="option.range"
-                show-time
-                value-format="Date"
-                :shortcuts="[
-                  {
-                    label: t('page.charts.options.shortcut.7days'),
-                    value: () => [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
-                  },
-                  {
-                    label: t('page.charts.options.shortcut.14days'),
-                    value: () => [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
-                  },
-                  {
-                    label: t('page.charts.options.shortcut.30days'),
-                    value: () => [dayjs().startOf('day').add(-30, 'day').toDate(), new Date()]
-                  }
-                ]"
-              />
-            </a-form-item>
-          </a-form>
-        </template>
+  <a-card hoverable>
+    <template #title>
+      <a-space>
+        {{ t('page.charts.title.traffic') }}
         <a-tooltip :content="t('page.charts.tooltip.traffic')">
           <icon-question-circle />
         </a-tooltip>
-      </a-popover>
+      </a-space>
     </template>
+    <template #extra>
+      <a-form :model="option">
+        <a-form-item field="range" style="margin-bottom: 0" :label="t('page.charts.options.days')">
+          <a-range-picker
+            v-model="option.range"
+            style="width: 275px"
+            value-format="Date"
+            :shortcuts="[
+              {
+                label: t('page.charts.options.shortcut.7days'),
+                value: () => [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+              },
+              {
+                label: t('page.charts.options.shortcut.14days'),
+                value: () => [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
+              },
+              {
+                label: t('page.charts.options.shortcut.30days'),
+                value: () => [dayjs().startOf('day').add(-30, 'day').toDate(), new Date()]
+              }
+            ]"
+          />
+        </a-form-item>
+      </a-form>
+    </template>
+
     <a-result
       v-if="err"
       status="500"
@@ -70,10 +67,10 @@
   </a-card>
 </template>
 <script setup lang="ts">
+import { getTraffic } from '@/service/charts'
+import { useDarkStore } from '@/stores/dark'
+import { formatFileSize } from '@/utils/file'
 import dayjs from 'dayjs'
-import { computed, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { use } from 'echarts/core'
 import { BarChart } from 'echarts/charts'
 import {
   GridComponent,
@@ -81,13 +78,13 @@ import {
   ToolboxComponent,
   TooltipComponent
 } from 'echarts/components'
+import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
-import { useDarkStore } from '@/stores/dark'
-import { getTraffic } from '@/service/charts'
-import { useRequest } from 'vue-request'
-import VChart from 'vue-echarts'
-import { formatFileSize } from '@/utils/file'
 import type { CallbackDataParams } from 'echarts/types/dist/shared'
+import { computed, reactive, ref, watch } from 'vue'
+import VChart from 'vue-echarts'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 
 use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, BarChart, SVGRenderer])
 

@@ -139,9 +139,9 @@ public class QBittorrent extends AbstractDownloader {
     @Override
     public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
-            setBanListIncrement(added);
+            setBanListIncrement(added, config.useShadowBan);
         } else {
-            setBanListFull(fullList);
+            setBanListFull(fullList, config.useShadowBan);
         }
     }
 
@@ -213,7 +213,7 @@ public class QBittorrent extends AbstractDownloader {
         return peersList;
     }
 
-    private void setBanListIncrement(Collection<BanMetadata> added) {
+    private void setBanListIncrement(Collection<BanMetadata> added, boolean useShadowBan) {
         Map<String, StringJoiner> banTasks = new HashMap<>();
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
@@ -223,7 +223,7 @@ public class QBittorrent extends AbstractDownloader {
         banTasks.forEach((hash, peers) -> {
             try {
                 HttpResponse<String> request = httpClient.send(MutableRequest
-                                .POST(apiEndpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
+                                .POST(apiEndpoint + (useShadowBan ? "/transfer/shadowbanPeers" : "/transfer/banPeers"), FormBodyPublisher.newBuilder()
                                         .query("hash", hash)
                                         .query("peers", peers.toString()).build())
                                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -237,40 +237,15 @@ public class QBittorrent extends AbstractDownloader {
                 throw new IllegalStateException(e);
             }
         });
-//
-//        Map<String, StringJoiner> banTasks = new HashMap<>();
-//        added.forEach(p -> {
-//            StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
-//            IPAddress ipAddress = IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp());
-//
-//            banTasks.put(p.getTorrent().getHash(), joiner);
-//        });
-//        banTasks.forEach((hash, peers) -> {
-//            try {
-//                HttpResponse<String> request = httpClient.send(MutableRequest
-//                                .POST(apiEndpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
-//                                        .query("hash", hash)
-//                                        .query("peers", peers.toString()).build())
-//                                .header("Content-Type", "application/x-www-form-urlencoded")
-//                        , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-//                if (request.statusCode() != 200) {
-//                    log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-//                    throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
-//                }
-//            } catch (Exception e) {
-//                log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
-//                throw new IllegalStateException(e);
-//            }
-//        });
     }
 
-    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
+    private void setBanListFull(Collection<PeerAddress> peerAddresses, boolean useShadowBan) {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()
-                                    .query("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString()))).build())
+                                    .query("json", JsonUtil.getGson().toJson(Map.of(useShadowBan ? "shadow_banned_IPs" : "banned_IPs", joiner.toString()))).build())
                             .header("Content-Type", "application/x-www-form-urlencoded")
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
@@ -300,6 +275,7 @@ public class QBittorrent extends AbstractDownloader {
         private BasicauthDTO basicAuth;
         private String httpVersion;
         private boolean incrementBan;
+        private boolean useShadowBan;
         private boolean verifySsl;
         private boolean ignorePrivate;
 
@@ -318,6 +294,7 @@ public class QBittorrent extends AbstractDownloader {
             config.setBasicAuth(basicauthDTO);
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setIncrementBan(section.getBoolean("increment-ban", false));
+            config.setUseShadowBan(section.getBoolean("use-shadow-ban", false));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             return config;
@@ -333,6 +310,7 @@ public class QBittorrent extends AbstractDownloader {
             section.set("basic-auth.pass", Objects.requireNonNullElse(basicAuth.pass, ""));
             section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
+            section.set("use-shadow-ban", useShadowBan);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
             return section;
