@@ -70,26 +70,26 @@
   </a-card>
 </template>
 <script setup lang="ts">
+import { getTraffic } from '@/service/charts'
+import { useDarkStore } from '@/stores/dark'
+import { formatFileSize } from '@/utils/file'
 import dayjs from 'dayjs'
-import { computed, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { use } from 'echarts/core'
-import { BarChart } from 'echarts/charts'
+import { LineChart } from 'echarts/charts'
 import {
   GridComponent,
   LegendComponent,
   ToolboxComponent,
   TooltipComponent
 } from 'echarts/components'
+import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
-import { useDarkStore } from '@/stores/dark'
-import { getTraffic } from '@/service/charts'
-import { useRequest } from 'vue-request'
-import VChart from 'vue-echarts'
-import { formatFileSize } from '@/utils/file'
 import type { CallbackDataParams } from 'echarts/types/dist/shared'
+import { computed, reactive, ref, watch } from 'vue'
+import VChart from 'vue-echarts'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 
-use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, BarChart, SVGRenderer])
+use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, LineChart, SVGRenderer])
 
 const option = reactive({
   range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
@@ -102,7 +102,7 @@ const loadingOptions = computed(() => ({
   maskColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.4)'
 }))
 
-const { t, d } = useI18n()
+const { t } = useI18n()
 
 const err = ref<Error>()
 
@@ -128,23 +128,18 @@ const chartOptions = ref({
     data: [t('page.charts.traffic.options.download'), t('page.charts.traffic.options.upload')]
   },
 
-  xAxis: [
-    {
-      type: 'category',
-      axisTick: { show: false },
-      data: [] as string[]
-    }
-  ],
-  yAxis: [
-    {
-      type: 'value',
-      axisLabel: {
-        formatter: (value: number) => {
-          return formatFileSize(value)
-        }
+  xAxis: {
+    type: 'time',
+    max: 'dataMax'
+  },
+  yAxis: {
+    type: 'value',
+    axisLabel: {
+      formatter: (value: number) => {
+        return formatFileSize(value)
       }
     }
-  ],
+  },
   series: [
     {
       name: t('page.charts.traffic.options.download'),
@@ -153,7 +148,7 @@ const chartOptions = ref({
       emphasis: {
         focus: 'series'
       },
-      data: [] as number[]
+      data: [] as [Date,number][]
     },
     {
       name: t('page.charts.traffic.options.upload'),
@@ -161,7 +156,7 @@ const chartOptions = ref({
       emphasis: {
         focus: 'series'
       },
-      data: [] as number[]
+      data: [] as [Date,number][]
     }
   ]
 })
@@ -174,14 +169,8 @@ const { loading, run, refresh } = useRequest(getTraffic, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()],
   onSuccess: (data) => {
     if (data.data) {
-      chartOptions.value.xAxis[0].data.splice(0)
-      chartOptions.value.series[0].data.splice(0)
-      chartOptions.value.series[1].data.splice(0)
-      data.data.journal.forEach((record) => {
-        chartOptions.value.xAxis[0].data.push(d(new Date(record.timestamp), 'short'))
-        chartOptions.value.series[0].data.push(record.downloaded)
-        chartOptions.value.series[1].data.push(record.uploaded)
-      })
+     chartOptions.value.series[0].data = data.data.map(v=>[new Date(v.timestamp),v.dataOverallDownloaded])
+     chartOptions.value.series[0].data = data.data.map(v=>[new Date(v.timestamp),v.dataOverallUploaded])
     }
   },
   onError: (e) => {
