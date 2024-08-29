@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
-import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.Timestamp;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -79,14 +76,12 @@ public class PBHChartController extends AbstractFeatureModule {
         }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
 
-        var records = trafficJournalDao.queryBuilder().where()
-                .between("timestamp", timeQueryModel.startAt(), timeQueryModel.endAt())
-                .queryBuilder()
-                .orderBy("timestamp", true)
-                .query();
-
-        var timestamps = records.stream().map(TrafficJournalEntity::getTimestamp).distinct();
-
+        String downloader = ctx.queryParam("downloader");
+        if (downloader == null || downloader.isBlank()) {
+            ctx.json(new StdResp(true, null, trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt())));
+        } else {
+            ctx.json(new StdResp(true, null, trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt())));
+        }
 
 //        String[] data = peerRecordDao.queryBuilder()
 //                .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
@@ -353,20 +348,6 @@ public class PBHChartController extends AbstractFeatureModule {
 
     record SimpleLongLongKV(long key, long value) {
 
-    }
-
-    record TrafficChart(
-            List<Timestamp> xAxis,
-            List<String> seriesNames,
-            Map<String, Map<Timestamp, List<TrafficData>>> yAxis
-    ) {
-
-    }
-
-    record TrafficData(
-            String downloader,
-            long dataOverallUploaded,
-            long dataOverallDownloaded) {
     }
 
 

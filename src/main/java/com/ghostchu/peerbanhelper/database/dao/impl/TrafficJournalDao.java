@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long> {
@@ -17,6 +19,31 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
 
     public TrafficJournalEntity getTodayJournal(String downloader) throws SQLException {
         return createIfNotExists(new TrafficJournalEntity(MiscUtil.getStartOfToday(System.currentTimeMillis()), downloader, 0, 0, 0, 0));
+    }
+
+    public List<TrafficData> getAllDownloadersOverallData(Timestamp start, Timestamp end) throws Exception {
+        try (var results = queryBuilder().selectRaw("timestamp", "SUM(dataOverallUploaded) AS totalUploaded", "SUM(dataOverallDownloaded) AS totalDownloaded")
+                .where()
+                .ge("timestamp", start.getTime())
+                .and()
+                .le("timestamp", end.getTime())
+                .queryBuilder().groupBy("timestamp")
+                .queryRaw()) {
+            return results.getResults().stream().map(args -> new TrafficData(new Timestamp(Long.parseLong(args[0])), Long.parseLong(args[1]), Long.parseLong(args[2]))).toList();
+        }
+    }
+
+    public List<TrafficData> getSpecificDownloaderOverallData(String downloadName, Timestamp start, Timestamp end) throws Exception {
+        try (var results = queryBuilder().selectRaw("timestamp", "SUM(dataOverallUploaded) AS totalUploaded", "SUM(dataOverallDownloaded) AS totalDownloaded")
+                .where()
+                .ge("timestamp", start.getTime())
+                .and()
+                .le("timestamp", end.getTime())
+                .and().ge("downloader", downloadName)
+                .queryBuilder().groupBy("timestamp")
+                .queryRaw()) {
+            return results.getResults().stream().map(args -> new TrafficData(new Timestamp(Long.parseLong(args[0])), Long.parseLong(args[1]), Long.parseLong(args[2]))).toList();
+        }
     }
 
     @Override
@@ -34,6 +61,13 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
         } else {
             return existing;
         }
+    }
+
+    public record TrafficData(
+            Timestamp timestamp,
+            long dataOverallUploaded,
+            long dataOverallDownloaded
+    ) {
     }
 
 }
