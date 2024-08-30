@@ -10,7 +10,6 @@ name: Java CI
 
 on:
   push:
-   branches: [ "master", "release"]
   workflow_dispatch:
 jobs:
   WebUI:
