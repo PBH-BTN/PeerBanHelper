@@ -4,6 +4,9 @@ import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,11 +69,13 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
         }
     }
 
-    public record TrafficData(
-            Timestamp timestamp,
-            long dataOverallUploaded,
-            long dataOverallDownloaded
-    ) {
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TrafficData {
+        private Timestamp timestamp;
+        private long dataOverallUploaded;
+        private long dataOverallDownloaded;
     }
 
 }

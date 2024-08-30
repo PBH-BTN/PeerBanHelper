@@ -23,6 +23,9 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -78,50 +81,18 @@ public class PBHChartController extends AbstractFeatureModule {
 
         String downloader = ctx.queryParam("downloader");
         if (downloader == null || downloader.isBlank()) {
-            ctx.json(new StdResp(true, null, trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt())));
+            ctx.json(new StdResp(true, null, trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList()));
         } else {
-            ctx.json(new StdResp(true, null, trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt())));
+            ctx.json(new StdResp(true, null, trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList()));
         }
-
-//        String[] data = peerRecordDao.queryBuilder()
-//                .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
-//                .queryRawFirst();
-//        long totalUploaded = Long.parseLong(data[0]);
-//        long totalDownloaded = Long.parseLong(data[1]);
-//
-//        List<TrafficJournalRecord> records = new ArrayList<>();
-//        // -----
-//        try (var it = trafficJournalDao.queryBuilder()
-//                .orderBy("timestamp", true)
-//                .where()
-//                .ge("timestamp", MiscUtil.getStartOfToday(timeQueryModel.startAt().getTime()))
-//                .and()
-//                .le("timestamp", MiscUtil.getStartOfToday(timeQueryModel.endAt().getTime()))
-//                .iterator()) {
-//            TrafficJournalEntity base = null;
-//            while (it.hasNext()) {
-//                if (base == null) {
-//                    base = it.next();
-//                    // 多插一个进去
-//                    records.add(new TrafficJournalRecord(base.getTimestamp(), base.getDataOverallUploaded(), base.getDataOverallDownloaded()));
-//                    continue;
-//                }
-//                var target = it.next();
-//                long uploadedOffset = target.getDataOverallUploaded() - base.getDataOverallUploaded();
-//                long downloadedOffset = target.getDataOverallDownloaded() - base.getDataOverallDownloaded();
-//                if (uploadedOffset < 0) uploadedOffset = 0;
-//                if (downloadedOffset < 0) downloadedOffset = 0;
-//                base = target;
-//                records.add(new TrafficJournalRecord(base.getTimestamp(), uploadedOffset, downloadedOffset));
-//            }
-//        }
-//        if (records.size() > 1) {
-//            // 多插的那个移除
-//            records.removeFirst();
-//        }
-//        ctx.json(new StdResp(true, null, new TrafficChart(totalUploaded, totalDownloaded, records)));
     }
 
+    private void fixTimezone(Context ctx, TrafficJournalDao.TrafficData data) {
+        Timestamp ts = data.getTimestamp();
+        var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
+                .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
+        data.setTimestamp(new Timestamp(epochSecond * 1000));
+    }
 
     private void handlePeerTrends(Context ctx) throws Exception {
         if (!activationManager.isActivated()) {
