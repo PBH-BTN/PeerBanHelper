@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.push;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.push.impl.PushPlusPushProvider;
+import com.ghostchu.peerbanhelper.push.impl.ServerChanPushProvider;
 import com.ghostchu.peerbanhelper.push.impl.SmtpPushProvider;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -30,6 +31,7 @@ public class PushManager implements Reloadable {
                 switch (provider) {
                     case "smtp" -> registered.add(new SmtpPushProvider(section));
                     case "pushplus" -> registered.add(new PushPlusPushProvider(section));
+                    case "serverchan" -> registered.add(new ServerChanPushProvider(section));
                 }
             }
         });

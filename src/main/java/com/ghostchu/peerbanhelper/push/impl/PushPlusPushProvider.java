@@ -53,12 +53,12 @@ public class PushPlusPushProvider implements PushProvider {
             put("title", title);
             put("content", content);
         }};
-        HttpResponse<String> resp = HTTPUtil.getHttpClient(false, null).send(
+        HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                 MutableRequest.POST("https://www.pushplus.plus/send"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(args)))
                         .header("Content-Type", "application/json")
                 , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-        );
+        ).join();
         if (resp.statusCode() != 200) {
             throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + resp.body());
         }
