@@ -44,6 +44,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 * [多拨追猎](https://pbh-btn.github.io/pbh-docs/docs/module/multi-dial)
 * Peer ID/Client Name 伪装检查；通过 [AviatorScript 引擎](https://pbh-btn.github.io/pbh-docs/docs/module/expression-engine) 实现
 * [主动监测（提供本地数据分析功能）](https://pbh-btn.github.io/pbh-docs/docs/module/active-monitoring)
+* [网络 IP 集规则订阅](https://pbh-btn.github.io/pbh-docs/docs/module/ip-address-blocker-rules)
 * WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP，规则订阅管理，图表查看，Peer 列表查看）
 
 此外，PeerBanHelper 会在启动时下载 GeoIP 库，成功加载后支持以下功能：
