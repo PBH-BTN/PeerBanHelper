@@ -131,7 +131,7 @@ public class Deluge extends AbstractDownloader {
                         activeTorrent.getUploadPayloadRate(),
                         activeTorrent.getDownloadPayloadRate(),
                         peers,
-                        false
+                        activeTorrent.getPriv()
                 );
                 torrents.add(torrent);
             }
