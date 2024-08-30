@@ -57,11 +57,7 @@
                 </a-option>
               </a-select>
             </a-form-item>
-            <a-form-item
-              field="range"
-              :label="t('page.charts.options.days')"
-              label-col-flex="100px"
-            >
+            <a-form-item field="range" :label="t('page.charts.options.days')">
               <a-range-picker
                 v-model="option.range"
                 show-time
@@ -102,17 +98,17 @@
 </template>
 
 <script lang="ts" setup>
-import { use } from 'echarts/core'
+import { getGeoIPData } from '@/service/charts'
+import { useDarkStore } from '@/stores/dark'
+import dayjs from 'dayjs'
 import { PieChart } from 'echarts/charts'
 import { LegendComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
 import { computed, reactive, ref, watch } from 'vue'
-import { getGeoIPData } from '@/service/charts'
-import { useRequest } from 'vue-request'
 import VChart from 'vue-echarts'
-import { useDarkStore } from '@/stores/dark'
 import { useI18n } from 'vue-i18n'
-import dayjs from 'dayjs'
+import { useRequest } from 'vue-request'
 
 const { t } = useI18n()
 

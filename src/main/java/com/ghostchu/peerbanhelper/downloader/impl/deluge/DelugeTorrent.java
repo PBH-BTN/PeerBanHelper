@@ -18,4 +18,10 @@ public final class DelugeTorrent implements Torrent {
     private long rtUploadSpeed;
     private long rtDownloadSpeed;
     private List<Peer> peers;
+    private boolean privateTorrent;
+
+    @Override
+    public boolean isPrivate() {
+        return privateTorrent;
+    }
 }

@@ -130,7 +130,8 @@ public class Deluge extends AbstractDownloader {
                         activeTorrent.getSize(),
                         activeTorrent.getUploadPayloadRate(),
                         activeTorrent.getDownloadPayloadRate(),
-                        peers
+                        peers,
+                        activeTorrent.getPriv()
                 );
                 torrents.add(torrent);
             }
@@ -321,6 +322,7 @@ public class Deluge extends AbstractDownloader {
         private boolean verifySsl;
         private String rpcUrl;
         private boolean incrementBan;
+        private boolean ignorePrivate;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -334,6 +336,7 @@ public class Deluge extends AbstractDownloader {
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIncrementBan(section.getBoolean("increment-ban", true));
+            config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             return config;
         }
 
@@ -346,6 +349,7 @@ public class Deluge extends AbstractDownloader {
             section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
             section.set("verify-ssl", verifySsl);
+            section.set("ignore-private", ignorePrivate);
             return section;
         }
     }

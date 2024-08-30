@@ -12,11 +12,11 @@
       <a-form-item field="config.type" :label="t('page.dashboard.editModal.label.type')" required>
         <a-radio-group v-model="config.downloaderConfig.config.type" type="button">
           <a-radio :value="ClientTypeEnum.qBittorrent">qBittorrent</a-radio>
+          <a-radio :value="ClientTypeEnum.BiglyBT">BiglyBT</a-radio>
+          <a-radio :value="ClientTypeEnum.Deluge">Deluge</a-radio>
           <a-tooltip :content="t('page.dashboard.editModal.transmission.discourage')">
             <a-radio :value="ClientTypeEnum.Transmission" disabled>Transmission</a-radio>
           </a-tooltip>
-          <a-radio :value="ClientTypeEnum.BiglyBT">BiglyBT</a-radio>
-          <a-radio :value="ClientTypeEnum.Deluge">Deluge</a-radio>
         </a-radio-group>
         <template v-if="config.downloaderConfig.config.type === ClientTypeEnum.BiglyBT" #extra>
           <i18n-t keypath="page.dashboard.editModal.biglybt">
