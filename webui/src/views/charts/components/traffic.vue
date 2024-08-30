@@ -83,7 +83,7 @@ import {
 } from 'echarts/components'
 import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
-import type { CallbackDataParams, } from 'echarts/types/dist/shared'
+import type { CallbackDataParams } from 'echarts/types/dist/shared'
 import type { OptionDataValue } from 'echarts/types/src/util/types.js'
 import { computed, reactive, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
@@ -103,7 +103,7 @@ const loadingOptions = computed(() => ({
   maskColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.4)'
 }))
 
-const { t ,d} = useI18n()
+const { t, d } = useI18n()
 
 const err = ref<Error>()
 
@@ -115,7 +115,7 @@ const chartOptions = ref({
     },
     formatter: function (value: CallbackDataParams[]) {
       return (
-        d((value[0].data as OptionDataValue[])[0] as Date,'short')+
+        d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
         ':<br/>' +
         value
           .map((params: CallbackDataParams) => {
@@ -132,8 +132,8 @@ const chartOptions = ref({
   xAxis: {
     type: 'time',
     max: 'dataMax',
-    min:'dataMin',
-    minInterval: 3600 * 24 * 1000,
+    min: 'dataMin',
+    minInterval: 3600 * 24 * 1000
   },
   yAxis: {
     type: 'value',
