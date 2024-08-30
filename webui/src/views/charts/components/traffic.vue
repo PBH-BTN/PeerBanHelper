@@ -83,7 +83,8 @@ import {
 } from 'echarts/components'
 import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
-import type { CallbackDataParams } from 'echarts/types/dist/shared'
+import type { CallbackDataParams, } from 'echarts/types/dist/shared'
+import type { OptionDataValue } from 'echarts/types/src/util/types.js'
 import { computed, reactive, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { useI18n } from 'vue-i18n'
@@ -102,7 +103,7 @@ const loadingOptions = computed(() => ({
   maskColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.4)'
 }))
 
-const { t } = useI18n()
+const { t ,d} = useI18n()
 
 const err = ref<Error>()
 
@@ -114,11 +115,11 @@ const chartOptions = ref({
     },
     formatter: function (value: CallbackDataParams[]) {
       return (
-        value[0]?.name +
+        d((value[0].data as OptionDataValue[])[0] as Date,'short')+
         ':<br/>' +
         value
           .map((params: CallbackDataParams) => {
-            return `${params.marker} ${params.seriesName}: ${formatFileSize(params.value as number)}`
+            return `${params.marker} ${params.seriesName}: ${formatFileSize((value[0].data as OptionDataValue[])[1] as number)}`
           })
           .join('<br>')
       )
@@ -130,7 +131,9 @@ const chartOptions = ref({
 
   xAxis: {
     type: 'time',
-    max: 'dataMax'
+    max: 'dataMax',
+    min:'dataMin',
+    minInterval: 3600 * 24 * 1000,
   },
   yAxis: {
     type: 'value',
@@ -143,8 +146,7 @@ const chartOptions = ref({
   series: [
     {
       name: t('page.charts.traffic.options.download'),
-      type: 'bar',
-      barGap: 0,
+      type: 'line',
       emphasis: {
         focus: 'series'
       },
@@ -152,7 +154,7 @@ const chartOptions = ref({
     },
     {
       name: t('page.charts.traffic.options.upload'),
-      type: 'bar',
+      type: 'line',
       emphasis: {
         focus: 'series'
       },
@@ -173,7 +175,7 @@ const { loading, run, refresh } = useRequest(getTraffic, {
         new Date(v.timestamp),
         v.dataOverallDownloaded
       ])
-      chartOptions.value.series[0].data = data.data.map((v) => [
+      chartOptions.value.series[1].data = data.data.map((v) => [
         new Date(v.timestamp),
         v.dataOverallUploaded
       ])
