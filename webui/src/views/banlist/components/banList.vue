@@ -44,15 +44,15 @@
 </template>
 
 <script setup lang="ts">
-import {useRequest} from 'vue-request'
-import {computed, onMounted, ref, watch} from 'vue'
-import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
-import {useEndpointStore} from '@/stores/endpoint'
-import {getBanList} from '@/service/banList'
-import type {BanList} from '@/api/model/banlist'
-import {useI18n} from 'vue-i18n'
-import {useResponsiveState} from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
-import {useWindowSize} from '@vueuse/core'
+import { useRequest } from 'vue-request'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useEndpointStore } from '@/stores/endpoint'
+import { getBanList } from '@/service/banList'
+import type { BanList } from '@/api/model/banlist'
+import { useI18n } from 'vue-i18n'
+import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
+import { useWindowSize } from '@vueuse/core'
 import banListItem from './banListItem.vue'
 
 const { height } = useWindowSize()

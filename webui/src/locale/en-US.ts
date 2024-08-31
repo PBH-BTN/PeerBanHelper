@@ -10,7 +10,6 @@ import loginLocale from '@/views/login/locale/en-US'
 import oobeLocale from '@/views/oobe/locale/en-US'
 import ruleManageMentLocale from '@/views/rule-management/locale/en-US'
 import chartsLocale from '@/views/charts/locale/en-US'
-
 export default {
   'navbar.action.locale': 'Switch to English',
   'navbar.action.autoUpdate': 'Auto Update',

@@ -33,10 +33,9 @@
   </a-form-item>
 </template>
 <script setup lang="ts">
-import type {biglybtConfig} from '@/api/model/downloader'
-import type {FieldRule} from '@arco-design/web-vue'
-import {useI18n} from 'vue-i18n'
-
+import type { biglybtConfig } from '@/api/model/downloader'
+import type { FieldRule } from '@arco-design/web-vue'
+import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 const config = defineModel<biglybtConfig>({ required: true })
 const urlRules: FieldRule<string> = {

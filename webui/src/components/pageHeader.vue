@@ -153,17 +153,16 @@
 <script setup lang="ts">
 import settingsModal from './settingsModal.vue'
 import autoUpdateBtn from './autoUpdateBtn.vue'
-import {useDark, useToggle} from '@vueuse/core'
+import { useDark, useToggle } from '@vueuse/core'
 import useLocale from '@/stores/locale'
-import {useDarkStore} from '@/stores/dark'
-import {LOCALE_OPTIONS} from '@/locale'
-import {useI18n} from 'vue-i18n'
-import {computed, ref} from 'vue'
-import {useViewRoute} from '@/router'
-import {useRoute} from 'vue-router'
-import {useResponsiveState} from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
-import {useEndpointStore} from '@/stores/endpoint'
-
+import { useDarkStore } from '@/stores/dark'
+import { LOCALE_OPTIONS } from '@/locale'
+import { useI18n } from 'vue-i18n'
+import { ref, computed } from 'vue'
+import { useViewRoute } from '@/router'
+import { useRoute } from 'vue-router'
+import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
+import { useEndpointStore } from '@/stores/endpoint'
 const { t, locale } = useI18n()
 const { changeLocale } = useLocale()
 const locales = [...LOCALE_OPTIONS]

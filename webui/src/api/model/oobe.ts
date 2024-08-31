@@ -1,4 +1,4 @@
-import type {downloaderConfig} from './downloader'
+import type { downloaderConfig } from './downloader'
 
 interface initDownloaderConfig {
   name: string

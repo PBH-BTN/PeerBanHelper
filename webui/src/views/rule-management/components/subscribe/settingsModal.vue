@@ -28,11 +28,11 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import {GetCheckInvervalSettings, SetCheckInterval} from '@/service/ruleSubscribe'
-import {Message} from '@arco-design/web-vue'
-import {reactive, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {useRequest} from 'vue-request'
+import { GetCheckInvervalSettings, SetCheckInterval } from '@/service/ruleSubscribe'
+import { Message } from '@arco-design/web-vue'
+import { reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 
 const { t } = useI18n()
 const showModal = ref(false)

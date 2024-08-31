@@ -1,4 +1,4 @@
-import type {KV} from './common'
+import type { KV } from './common'
 
 export interface Statistic {
   peerUnbanCounter: number

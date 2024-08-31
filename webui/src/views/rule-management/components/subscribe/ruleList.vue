@@ -115,16 +115,21 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import type {ruleBrief} from '@/api/model/ruleSubscribe'
+import type { ruleBrief } from '@/api/model/ruleSubscribe'
 import AsyncMethod from '@/components/asyncMethod.vue'
-import {DeleteRule, getRuleList, RefreshRule, ToggleRuleEnable, UpdateAll} from '@/service/ruleSubscribe'
-import {getColor} from '@/utils/color'
-import {Message} from '@arco-design/web-vue'
+import {
+  DeleteRule,
+  getRuleList,
+  RefreshRule,
+  ToggleRuleEnable,
+  UpdateAll
+} from '@/service/ruleSubscribe'
+import { getColor } from '@/utils/color'
+import { Message } from '@arco-design/web-vue'
 import copy from 'copy-to-clipboard'
-import {defineAsyncComponent, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {useRequest} from 'vue-request'
-
+import { defineAsyncComponent, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 const EditRuleModal = defineAsyncComponent(() => import('./editRuleItemModal.vue'))
 const SettingsModal = defineAsyncComponent(() => import('./settingsModal.vue'))
 const UpdateLog = defineAsyncComponent(() => import('./logModal.vue'))

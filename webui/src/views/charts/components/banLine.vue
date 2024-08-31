@@ -107,18 +107,17 @@
 </template>
 
 <script lang="ts" setup>
-import {use} from 'echarts/core'
-import {LineChart} from 'echarts/charts'
-import {GridComponent, TooltipComponent} from 'echarts/components'
+import { use } from 'echarts/core'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
-import {computed, reactive, ref, watch} from 'vue'
-import {useRequest} from 'vue-request'
-import {SVGRenderer} from 'echarts/renderers'
-import {useDarkStore} from '@/stores/dark'
+import { ref, reactive, watch, computed } from 'vue'
+import { useRequest } from 'vue-request'
+import { SVGRenderer } from 'echarts/renderers'
+import { useDarkStore } from '@/stores/dark'
 import dayjs from 'dayjs'
-import {useI18n} from 'vue-i18n'
-import {getTimebasedStaticsData} from '@/service/charts'
-
+import { useI18n } from 'vue-i18n'
+import { getTimebasedStaticsData } from '@/service/charts'
 const { t } = useI18n()
 const loadingOptions = computed(() => ({
   text: t('page.charts.loading'),

@@ -3,8 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue'
-
+import { ref } from 'vue'
 const callId = ref(0)
 const loading = ref(false)
 const error = ref<Error>()

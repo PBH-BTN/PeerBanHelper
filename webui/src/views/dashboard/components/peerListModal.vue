@@ -78,14 +78,13 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import {getPeer} from '@/service/downloaders'
-import {ref} from 'vue'
-import {useRequest} from 'vue-request'
-import {formatFileSize} from '@/utils/file'
+import { getPeer } from '@/service/downloaders'
+import { ref } from 'vue'
+import { useRequest } from 'vue-request'
+import { formatFileSize } from '@/utils/file'
 import countryFlag from '@/views/banlist/components/countryFlag.vue'
-import {useI18n} from 'vue-i18n'
-import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
-
+import { useI18n } from 'vue-i18n'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 const { t } = useI18n()
 const visible = ref(false)
 const downloader = ref('')

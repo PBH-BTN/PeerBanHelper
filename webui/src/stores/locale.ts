@@ -1,7 +1,7 @@
-import {useI18n} from 'vue-i18n'
-import {Message} from '@arco-design/web-vue'
-import {defineStore} from 'pinia'
-import {useStorage} from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
+import { Message } from '@arco-design/web-vue'
+import { defineStore } from 'pinia'
+import { useStorage } from '@vueuse/core'
 
 const useLocalStore = defineStore('locale', () => {
   const localeStore = useStorage('locale.store', '')

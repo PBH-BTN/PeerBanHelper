@@ -47,12 +47,11 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref, type UnwrapRef} from 'vue'
-import {type FormInstance, Message} from '@arco-design/web-vue'
-import {useI18n} from 'vue-i18n'
-import {useEndpointStore} from '@/stores/endpoint'
-import {useRoute} from 'vue-router'
-
+import { onMounted, ref, type UnwrapRef } from 'vue'
+import { Message, type FormInstance } from '@arco-design/web-vue'
+import { useI18n } from 'vue-i18n'
+import { useEndpointStore } from '@/stores/endpoint'
+import { useRoute } from 'vue-router'
 const endpointStore = useEndpointStore()
 const { t } = useI18n()
 const loading = ref(false)

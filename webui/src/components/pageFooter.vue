@@ -49,13 +49,13 @@
 </template>
 
 <script setup lang="ts">
-import {useEndpointStore} from '@/stores/endpoint'
-import {Button, Notification} from '@arco-design/web-vue'
-import {computed, h, ref, watch} from 'vue'
-import {compare} from 'compare-versions'
-import {useI18n} from 'vue-i18n'
+import { useEndpointStore } from '@/stores/endpoint'
+import { Button, Notification } from '@arco-design/web-vue'
+import { computed, h, ref, watch } from 'vue'
+import { compare } from 'compare-versions'
+import { useI18n } from 'vue-i18n'
 import plusModal from './plusModal.vue'
-import {RequestError} from '@octokit/request-error'
+import { RequestError } from '@octokit/request-error'
 
 const { t } = useI18n()
 const version = __APP_VERSION__

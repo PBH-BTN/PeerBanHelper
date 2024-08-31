@@ -75,10 +75,10 @@
 </template>
 <script lang="ts" setup>
 import medal from '@/components/plusMedal.vue'
-import {useEndpointStore} from '@/stores/endpoint'
-import {Message} from '@arco-design/web-vue'
-import {computed, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
+import { useEndpointStore } from '@/stores/endpoint'
+import { Message } from '@arco-design/web-vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t, d } = useI18n()
 const endpointStore = useEndpointStore()

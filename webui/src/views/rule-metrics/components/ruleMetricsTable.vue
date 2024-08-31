@@ -38,16 +38,15 @@
   </a-table>
 </template>
 <script setup lang="ts">
-import {useRequest} from 'vue-request'
-import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
-import {useEndpointStore} from '@/stores/endpoint'
-import {watch} from 'vue'
-import {getRuleStatic} from '@/service/ruleStatics'
-import type {RuleMetric} from '@/api/model/ruleStatics'
-import {useI18n} from 'vue-i18n'
-import type {TableColumnData} from '@arco-design/web-vue'
-import {getColor} from '@/utils/color'
-
+import { useRequest } from 'vue-request'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useEndpointStore } from '@/stores/endpoint'
+import { watch } from 'vue'
+import { getRuleStatic } from '@/service/ruleStatics'
+import type { RuleMetric } from '@/api/model/ruleStatics'
+import { useI18n } from 'vue-i18n'
+import type { TableColumnData } from '@arco-design/web-vue'
+import { getColor } from '@/utils/color'
 const { t } = useI18n()
 const endpointStore = useEndpointStore()
 const { data, refresh, loading } = useRequest(

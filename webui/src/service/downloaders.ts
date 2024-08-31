@@ -1,9 +1,15 @@
-import type {ClientStatus, CreateDownloadRequest, Downloader, PeerInfo, Torrent} from '@/api/model/downloader'
-import type {Statistic} from '@/api/model/statistic'
-import {useEndpointStore} from '@/stores/endpoint'
+import type {
+  ClientStatus,
+  CreateDownloadRequest,
+  Downloader,
+  PeerInfo,
+  Torrent
+} from '@/api/model/downloader'
+import type { Statistic } from '@/api/model/statistic'
+import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import {getCommonHeader} from './utils'
-import type {CommonResponse, CommonResponseWithoutData} from '@/api/model/common'
+import { getCommonHeader } from './utils'
+import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 
 export async function getClientStatus(name: string): Promise<CommonResponse<ClientStatus>> {
   const endpointStore = useEndpointStore()

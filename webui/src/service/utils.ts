@@ -1,5 +1,5 @@
-import {getNavigatorLanguage} from '@/locale'
-import {useEndpointStore} from '@/stores/endpoint'
+import { getNavigatorLanguage } from '@/locale'
+import { useEndpointStore } from '@/stores/endpoint'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'

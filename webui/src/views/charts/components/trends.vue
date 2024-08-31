@@ -59,17 +59,17 @@
 </template>
 
 <script lang="ts" setup>
-import {getTrends} from '@/service/charts'
-import {useDarkStore} from '@/stores/dark'
+import { getTrends } from '@/service/charts'
+import { useDarkStore } from '@/stores/dark'
 import dayjs from 'dayjs'
-import {LineChart} from 'echarts/charts'
-import {GridComponent, TooltipComponent} from 'echarts/components'
-import {use} from 'echarts/core'
-import {SVGRenderer} from 'echarts/renderers'
-import {computed, reactive, ref, watch} from 'vue'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+import { SVGRenderer } from 'echarts/renderers'
+import { computed, reactive, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
-import {useI18n} from 'vue-i18n'
-import {useRequest} from 'vue-request'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 
 use([GridComponent, TooltipComponent, LineChart, SVGRenderer])
 

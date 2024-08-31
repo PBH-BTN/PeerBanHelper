@@ -98,17 +98,17 @@
 </template>
 
 <script lang="ts" setup>
-import {getGeoIPData} from '@/service/charts'
-import {useDarkStore} from '@/stores/dark'
+import { getGeoIPData } from '@/service/charts'
+import { useDarkStore } from '@/stores/dark'
 import dayjs from 'dayjs'
-import {PieChart} from 'echarts/charts'
-import {LegendComponent, TooltipComponent} from 'echarts/components'
-import {use} from 'echarts/core'
-import {SVGRenderer} from 'echarts/renderers'
-import {computed, reactive, ref, watch} from 'vue'
+import { PieChart } from 'echarts/charts'
+import { LegendComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+import { SVGRenderer } from 'echarts/renderers'
+import { computed, reactive, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
-import {useI18n} from 'vue-i18n'
-import {useRequest} from 'vue-request'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 
 const { t } = useI18n()
 

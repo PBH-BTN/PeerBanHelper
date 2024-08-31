@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ClientStatus from './components/clientStatus.vue'
 import StatisticInfo from './components/statisticInfo.vue'
-import {useI18n} from 'vue-i18n'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 </script>

@@ -1,8 +1,8 @@
-import {type BanList, type UnbanResult} from '@/api/model/banlist'
-import {useEndpointStore} from '@/stores/endpoint'
-import {type CommonResponse} from '@/api/model/common'
+import { type BanList, type UnbanResult } from '@/api/model/banlist'
+import { useEndpointStore } from '@/stores/endpoint'
+import { type CommonResponse } from '@/api/model/common'
 import urlJoin from 'url-join'
-import {getCommonHeader} from './utils'
+import { getCommonHeader } from './utils'
 
 export async function getBanList(
   limit: number,

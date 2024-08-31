@@ -156,15 +156,15 @@
   </a-descriptions>
 </template>
 <script setup lang="ts">
-import {formatFileSize} from '@/utils/file'
-import {getColor} from '@/utils/color'
+import { formatFileSize } from '@/utils/file'
+import { getColor } from '@/utils/color'
 import CountryFlag from './countryFlag.vue'
-import type {BanList} from '@/api/model/banlist'
-import {useResponsiveState} from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
-import {useI18n} from 'vue-i18n'
-import {Message} from '@arco-design/web-vue'
-import {ref} from 'vue'
-import {unbanIP} from '@/service/banList'
+import type { BanList } from '@/api/model/banlist'
+import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
+import { useI18n } from 'vue-i18n'
+import { Message } from '@arco-design/web-vue'
+import { ref } from 'vue'
+import { unbanIP } from '@/service/banList'
 import AsyncMethod from '@/components/asyncMethod.vue'
 
 const { t, d } = useI18n()

@@ -1,9 +1,9 @@
-import {createI18n} from 'vue-i18n'
+import { createI18n } from 'vue-i18n'
 import zhCN from '@arco-design/web-vue/es/locale/lang/zh-cn'
 import enUS from '@arco-design/web-vue/es/locale/lang/en-us'
 import en from './en-US'
 import cn from './zh-CN'
-import type {ArcoLang} from '@arco-design/web-vue/es/locale/interface'
+import type { ArcoLang } from '@arco-design/web-vue/es/locale/interface'
 
 export const LOCALE_OPTIONS = [
   { label: '中文', value: 'zh-CN' },

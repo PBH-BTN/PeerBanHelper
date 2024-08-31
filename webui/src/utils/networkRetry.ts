@@ -1,5 +1,5 @@
-import {Button, Notification, Space} from '@arco-design/web-vue'
-import {h} from 'vue'
+import { Button, Notification, Space } from '@arco-design/web-vue'
+import { h } from 'vue'
 import i18n from '../locale'
 
 function minDelay<T>(promise: Promise<T>, delay: number): Promise<T> {

@@ -34,11 +34,10 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineAsyncComponent, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {type InitConfig} from '@/api/model/oobe'
-import type {downloaderConfig} from '@/api/model/downloader'
-
+import { computed, ref, defineAsyncComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { type InitConfig } from '@/api/model/oobe'
+import type { downloaderConfig } from '@/api/model/downloader'
 const { t } = useI18n()
 const current = ref(1)
 const steps = computed(() => [

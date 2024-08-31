@@ -25,12 +25,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type {InitConfig} from '@/api/model/oobe'
-import {InitPBH} from '@/service/init'
-import {ref} from 'vue'
-import {useI18n} from 'vue-i18n'
-import {useEndpointStore} from '@/stores/endpoint'
-
+import type { InitConfig } from '@/api/model/oobe'
+import { InitPBH } from '@/service/init'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useEndpointStore } from '@/stores/endpoint'
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })
 const loading = ref(true)

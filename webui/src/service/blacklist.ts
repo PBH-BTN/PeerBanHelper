@@ -1,8 +1,8 @@
-import {useEndpointStore} from '@/stores/endpoint'
+import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import {getCommonHeader} from './utils'
-import type {BlackList, ruleType} from '@/api/model/blacklist'
-import type {CommonResponse, CommonResponseWithoutData} from '@/api/model/common'
+import { getCommonHeader } from './utils'
+import type { ruleType, BlackList } from '@/api/model/blacklist'
+import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 
 export async function getBlackList<T extends ruleType>(
   type: T

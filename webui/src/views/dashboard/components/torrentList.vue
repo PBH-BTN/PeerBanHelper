@@ -50,15 +50,14 @@
   <peerListModal ref="peerList" />
 </template>
 <script setup lang="ts">
-import {Message} from '@arco-design/web-vue'
-import {getTorrents} from '@/service/downloaders'
-import {defineAsyncComponent, ref} from 'vue'
-import {useRequest} from 'vue-request'
-import {formatFileSize} from '@/utils/file'
-import {useI18n} from 'vue-i18n'
-import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
+import { Message } from '@arco-design/web-vue'
+import { getTorrents } from '@/service/downloaders'
+import { defineAsyncComponent, ref } from 'vue'
+import { useRequest } from 'vue-request'
+import { formatFileSize } from '@/utils/file'
+import { useI18n } from 'vue-i18n'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import copy from 'copy-to-clipboard'
-
 const peerListModal = defineAsyncComponent(() => import('./peerListModal.vue'))
 const { t } = useI18n()
 const { downloader } = defineProps<{

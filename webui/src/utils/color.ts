@@ -1,5 +1,4 @@
-import {hashString} from './string'
-
+import { hashString } from './string'
 export const getColor = (value: string) => {
   const hash = Math.abs(hashString(value)) % colorTable.length
   return colorTable[hash]

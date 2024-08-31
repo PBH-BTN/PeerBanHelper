@@ -1,6 +1,6 @@
-import {useEndpointStore} from '@/stores/endpoint'
+import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import {getCommonHeader} from './utils'
+import { getCommonHeader } from './utils'
 
 export class IncorrectTokenError extends Error {
   static name = 'IncorrectTokenError' as const

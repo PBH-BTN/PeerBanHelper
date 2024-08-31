@@ -71,14 +71,13 @@
   </a-table>
 </template>
 <script setup lang="ts">
-import {computed, ref, watch} from 'vue'
-import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
-import {useEndpointStore} from '@/stores/endpoint'
-import {usePagination} from 'vue-request'
-import {getBanlogs} from '@/service/banLogs'
-import {formatFileSize} from '@/utils/file'
-import {useI18n} from 'vue-i18n'
-
+import { computed, ref, watch } from 'vue'
+import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useEndpointStore } from '@/stores/endpoint'
+import { usePagination } from 'vue-request'
+import { getBanlogs } from '@/service/banLogs'
+import { formatFileSize } from '@/utils/file'
+import { useI18n } from 'vue-i18n'
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()

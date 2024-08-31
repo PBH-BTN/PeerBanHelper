@@ -1,11 +1,18 @@
-import {defineStore} from 'pinia'
-import {useStorage} from '@vueuse/core'
-import {getLatestVersion, getManifest, GetManifestError, getPBHPlusStatus, setPHBPlusKey} from '@/service/version'
-import {computed, type DeepReadonly, readonly, ref} from 'vue'
-import type {donateStatus, mainfest, release} from '@/api/model/manifest'
-import {IncorrectTokenError, login, NeedInitError} from '@/service/login'
-import {compare} from 'compare-versions'
-import {basePath} from '@/router'
+import { defineStore } from 'pinia'
+import { useStorage } from '@vueuse/core'
+import {
+  getLatestVersion,
+  getManifest,
+  getPBHPlusStatus,
+  setPHBPlusKey,
+  GetManifestError
+} from '@/service/version'
+import { computed, readonly, ref, type DeepReadonly } from 'vue'
+import type { donateStatus, release } from '@/api/model/manifest'
+import { IncorrectTokenError, login, NeedInitError } from '@/service/login'
+import { compare } from 'compare-versions'
+import type { mainfest } from '@/api/model/manifest'
+import { basePath } from '@/router'
 import mitt from 'mitt'
 import networkFailRetryNotication from '@/utils/networkRetry'
 
