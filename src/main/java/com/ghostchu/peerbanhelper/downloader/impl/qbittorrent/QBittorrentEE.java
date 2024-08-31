@@ -402,7 +402,7 @@ public class QBittorrentEE extends AbstractDownloader {
             config.setBasicAuth(basicauthDTO);
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setIncrementBan(section.getBoolean("increment-ban", false));
-            config.setUseShadowBan(section.getBoolean("use-shadow-ban", false));
+            config.setUseShadowBan(section.getBoolean("shadow-ban", false));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             return config;
         }
@@ -417,7 +417,7 @@ public class QBittorrentEE extends AbstractDownloader {
             section.set("basic-auth.pass", Objects.requireNonNullElse(basicAuth.pass, ""));
             section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
-            section.set("use-shadow-ban", useShadowBan);
+            section.set("shadow-ban", useShadowBan);
             section.set("verify-ssl", verifySsl);
             return section;
         }
