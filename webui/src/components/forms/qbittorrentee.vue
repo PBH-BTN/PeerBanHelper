@@ -33,7 +33,7 @@
     <template #extra> {{ t('page.dashboard.editModal.label.incrementBan.description') }}</template>
   </a-form-item>
   <a-form-item field="config.shadowBan" default-checked :label="t('page.dashboard.editModal.label.shadowBan')">
-    <a-switch v-model="config.shadowBan" />
+    <a-switch v-model="config.useShadowBan" />
     <template #extra><div v-html="t('page.dashboard.editModal.label.shadowBan.description')"></div></template>
   </a-form-item>
   <a-form-item field="config.verifySsl" default-checked :label="t('page.dashboard.editModal.label.verifySsl')">

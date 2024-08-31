@@ -101,7 +101,7 @@ public class QBittorrentEE extends AbstractDownloader {
         // 这个接口没登陆也会 400
         try {
             if (config.isUseShadowBan() && !testShadowBanAPI()) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
             }
         } catch (Exception e) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
