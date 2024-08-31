@@ -109,15 +109,6 @@ const chartOptions = ref({
       type: 'shadow'
     },
     formatter: function (value: CallbackDataParams[]) {
-      // return (
-      //   d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
-      //   ':<br/>' +
-      //   value
-      //     .map((params: CallbackDataParams) => {
-      //       return `${params.marker} ${params.seriesName}: ${formatFileSize((value[0].data as OptionDataValue[])[1] as number)}`
-      //     })
-      //     .join('<br>')
-      // )
       return (
           d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
           ':<br/>' +
