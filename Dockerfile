@@ -8,7 +8,7 @@ RUN corepack enable pnpm && \
 
 # 下载依赖
 FROM maven:3-eclipse-temurin-21-alpine as backend-build
-ADD pom.xml /build/pom.xml
+COPY pom.xml /build/pom.xml
 WORKDIR /build
 # fetch all dependencies
 RUN mvn dependency:go-offline -B -T 1.5C -Daether.dependencyCollector.impl=bf -Dmaven.artifact.threads=32
