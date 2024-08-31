@@ -85,13 +85,14 @@
   </a-space>
 </template>
 <script lang="ts" setup>
-import { type ruleType } from '@/api/model/blacklist'
+import {type ruleType} from '@/api/model/blacklist'
 import AsyncMethod from '@/components/asyncMethod.vue'
-import { addBlackList, deleteBlackList, getBlackList } from '@/service/blacklist'
-import { Message, type TableColumnData } from '@arco-design/web-vue'
-import { computed, reactive, type Reactive } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRequest } from 'vue-request'
+import {addBlackList, deleteBlackList, getBlackList} from '@/service/blacklist'
+import {Message, type TableColumnData} from '@arco-design/web-vue'
+import {computed, reactive, type Reactive} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {useRequest} from 'vue-request'
+
 const { t } = useI18n()
 const props = defineProps<{
   type: ruleType

@@ -1,8 +1,8 @@
-import type { rankItem } from '@/api/model/topban'
-import { useEndpointStore } from '@/stores/endpoint'
+import type {rankItem} from '@/api/model/topban'
+import {useEndpointStore} from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
-import type { CommonResponseWithPage } from '@/api/model/common'
+import {getCommonHeader} from './utils'
+import type {CommonResponseWithPage} from '@/api/model/common'
 
 export async function getRanks(params: {
   page: number

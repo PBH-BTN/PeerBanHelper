@@ -69,16 +69,17 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { useEndpointStore } from '@/stores/endpoint'
-import { ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import {useEndpointStore} from '@/stores/endpoint'
+import {ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
 import ClientStatusCard from './clientStatusCard.vue'
 import EditDownloaderModal from './editDownloaderModal.vue'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
-import { useRequest } from 'vue-request'
-import { getDownloaders } from '@/service/downloaders'
-import { type Downloader } from '@/api/model/downloader'
+import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
+import {useRequest} from 'vue-request'
+import {getDownloaders} from '@/service/downloaders'
+import {type Downloader} from '@/api/model/downloader'
 import torrentList from './torrentList.vue'
+
 const { t } = useI18n()
 const endpointState = useEndpointStore()
 const data = ref<Downloader[]>()

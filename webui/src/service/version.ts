@@ -1,9 +1,10 @@
-import { useEndpointStore } from '@/stores/endpoint'
+import {useEndpointStore} from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
-import { Octokit } from '@octokit/core'
-import type { donateStatus, mainfest } from '@/api/model/manifest'
-import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
+import {getCommonHeader} from './utils'
+import {Octokit} from '@octokit/core'
+import type {donateStatus, mainfest} from '@/api/model/manifest'
+import type {CommonResponse, CommonResponseWithoutData} from '@/api/model/common'
+
 export class GetManifestError extends Error {
   static name = 'GetManifestError' as const
   name = GetManifestError.name

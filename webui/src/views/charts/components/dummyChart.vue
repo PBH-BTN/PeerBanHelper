@@ -9,13 +9,13 @@
   </v-chart>
 </template>
 <script setup lang="ts">
-import { use } from 'echarts/core'
-import { SVGRenderer } from 'echarts/renderers'
-import { PieChart } from 'echarts/charts'
-import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'
+import {use} from 'echarts/core'
+import {SVGRenderer} from 'echarts/renderers'
+import {PieChart} from 'echarts/charts'
+import {LegendComponent, TitleComponent, TooltipComponent} from 'echarts/components'
 import VChart from 'vue-echarts'
-import { ref } from 'vue'
-import { useDarkStore } from '@/stores/dark'
+import {ref} from 'vue'
+import {useDarkStore} from '@/stores/dark'
 
 const darkStore = useDarkStore()
 

@@ -61,14 +61,15 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { useRequest } from 'vue-request'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
-import { useEndpointStore } from '@/stores/endpoint'
-import { getStatistic } from '@/service/downloaders'
-import type { Statistic } from '@/api/model/statistic'
-import { ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { isEqual } from 'lodash'
+import {useRequest} from 'vue-request'
+import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
+import {useEndpointStore} from '@/stores/endpoint'
+import {getStatistic} from '@/service/downloaders'
+import type {Statistic} from '@/api/model/statistic'
+import {ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {isEqual} from 'lodash'
+
 const { t } = useI18n()
 const endpointStore = useEndpointStore()
 const previous = ref<Statistic>({

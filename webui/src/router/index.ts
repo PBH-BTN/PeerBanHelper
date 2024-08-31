@@ -1,20 +1,15 @@
-import {
-  createRouter,
-  createWebHistory,
-  useRoute,
-  useRouter,
-  type RouteRecordRaw
-} from 'vue-router'
+import {createRouter, createWebHistory, type RouteRecordRaw, useRoute, useRouter} from 'vue-router'
 import Dashboard from '../views/dashboard/index.vue'
-import { computed, h } from 'vue'
+import {computed, h} from 'vue'
 import BanList from '@/views/banlist/index.vue'
 import BanLog from '@/views/banlog/index.vue'
 import Ranks from '@/views/ranks/index.vue'
 import RuleMetric from '@/views/rule-metrics/index.vue'
 import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
 import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
-import { genIconComponent } from '@/components/iconFont'
-import { IconCloud, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
+import {genIconComponent} from '@/components/iconFont'
+import {IconCloud, IconLocation, IconStorage} from '@arco-design/web-vue/es/icon'
+
 export const routerOptions: RouteRecordRaw[] = [
   {
     path: '/dashboard',

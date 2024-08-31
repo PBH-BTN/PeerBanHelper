@@ -46,11 +46,12 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { getRanks } from '@/service/ranks'
-import { usePagination } from 'vue-request'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
-import { useI18n } from 'vue-i18n'
-import type { TableColumnData } from '@arco-design/web-vue'
+import {getRanks} from '@/service/ranks'
+import {usePagination} from 'vue-request'
+import {useAutoUpdatePlugin} from '@/stores/autoUpdate'
+import {useI18n} from 'vue-i18n'
+import type {TableColumnData} from '@arco-design/web-vue'
+
 const { t } = useI18n()
 const columns: TableColumnData[] = [
   {

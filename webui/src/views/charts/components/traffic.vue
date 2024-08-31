@@ -119,13 +119,13 @@ const chartOptions = ref({
       //     .join('<br>')
       // )
       return (
-          d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
-          ':<br/>' +
-          value
-              .map((params: CallbackDataParams) => {
-                return `${params.marker} ${params.seriesName}: ${formatFileSize((params.data as OptionDataValue[])[1] as number)}`
-              })
-              .join('<br>')
+        d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
+        ':<br/>' +
+        value
+          .map((params: CallbackDataParams) => {
+            return `${params.marker} ${params.seriesName}: ${formatFileSize((params.data as OptionDataValue[])[1] as number)}`
+          })
+          .join('<br>')
       )
     }
   },

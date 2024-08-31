@@ -1,9 +1,9 @@
-import { useEndpointStore } from '@/stores/endpoint'
+import {useEndpointStore} from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
-import type { InitReq } from '@/api/model/init'
-import type { CommonResponseWithoutData } from '@/api/model/common'
-import type { CreateDownloadRequest } from '@/api/model/downloader'
+import {getCommonHeader} from './utils'
+import type {InitReq} from '@/api/model/init'
+import type {CommonResponseWithoutData} from '@/api/model/common'
+import type {CreateDownloadRequest} from '@/api/model/downloader'
 
 export async function InitPBH(req: InitReq): Promise<CommonResponseWithoutData> {
   const endpointStore = useEndpointStore()

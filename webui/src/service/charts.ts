@@ -1,14 +1,8 @@
-import type { CommonResponse } from '@/api/model/common'
-import type {
-  AnalysisField,
-  GeoIP,
-  TimeStatisticItem,
-  Traffic,
-  Trends
-} from '@/api/model/statistic'
-import { useEndpointStore } from '@/stores/endpoint'
+import type {CommonResponse} from '@/api/model/common'
+import type {AnalysisField, GeoIP, TimeStatisticItem, Traffic, Trends} from '@/api/model/statistic'
+import {useEndpointStore} from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
+import {getCommonHeader} from './utils'
 
 export async function getAnalysisDataByField(
   field: 'peerId' | 'torrentName' | 'module',

@@ -10,6 +10,7 @@ import loginLocale from '@/views/login/locale/zh-CN'
 import oobeLocale from '@/views/oobe/locale/zh-CN'
 import ruleManageMentLocale from '@/views/rule-management/locale/zh-CN'
 import chartsLocale from '@/views/charts/locale/zh-CN'
+
 export default {
   'navbar.action.locale': '切换为中文',
   'navbar.action.autoUpdate': '自动刷新',

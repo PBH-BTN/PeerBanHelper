@@ -11,7 +11,7 @@
   </a-card>
 </template>
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n'
+import {useI18n} from 'vue-i18n'
 import vue2048 from 'vue-2048'
 import 'vue-2048/dist/style.css'
 

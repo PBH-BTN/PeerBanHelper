@@ -1,8 +1,8 @@
-import type { BanLog } from '@/api/model/banlogs'
-import { useEndpointStore } from '@/stores/endpoint'
-import type { CommonResponseWithPage } from '@/api/model/common'
+import type {BanLog} from '@/api/model/banlogs'
+import {useEndpointStore} from '@/stores/endpoint'
+import type {CommonResponseWithPage} from '@/api/model/common'
 import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
+import {getCommonHeader} from './utils'
 
 export async function getBanlogs(params: {
   page: number

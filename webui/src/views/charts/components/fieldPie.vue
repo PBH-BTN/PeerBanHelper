@@ -68,16 +68,16 @@
   </a-card>
 </template>
 <script lang="ts" setup>
-import { use } from 'echarts/core'
-import { PieChart } from 'echarts/charts'
-import { TooltipComponent, LegendComponent } from 'echarts/components'
-import { SVGRenderer } from 'echarts/renderers'
-import { ref, reactive, watch, computed } from 'vue'
-import { getAnalysisDataByField } from '@/service/charts'
-import { useRequest } from 'vue-request'
+import {use} from 'echarts/core'
+import {PieChart} from 'echarts/charts'
+import {LegendComponent, TooltipComponent} from 'echarts/components'
+import {SVGRenderer} from 'echarts/renderers'
+import {computed, reactive, ref, watch} from 'vue'
+import {getAnalysisDataByField} from '@/service/charts'
+import {useRequest} from 'vue-request'
 import VChart from 'vue-echarts'
-import { useDarkStore } from '@/stores/dark'
-import { useI18n } from 'vue-i18n'
+import {useDarkStore} from '@/stores/dark'
+import {useI18n} from 'vue-i18n'
 
 const { t } = useI18n()
 

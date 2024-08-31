@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import ispPie from '@/views/charts/components/ispPie.vue'
-import { useI18n } from 'vue-i18n'
+import {useI18n} from 'vue-i18n'
 import game2048 from './components/2048.vue'
 import banLine from './components/banLine.vue'
 import fieldPie from './components/fieldPie.vue'

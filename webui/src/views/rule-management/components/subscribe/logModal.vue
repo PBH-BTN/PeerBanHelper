@@ -44,12 +44,13 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import { GetUpdateLogs } from '@/service/ruleSubscribe'
-import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { usePagination } from 'vue-request'
-import { getColor } from '@/utils/color'
-import { updateType } from '@/api/model/ruleSubscribe'
+import {GetUpdateLogs} from '@/service/ruleSubscribe'
+import {computed, ref, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {usePagination} from 'vue-request'
+import {getColor} from '@/utils/color'
+import {updateType} from '@/api/model/ruleSubscribe'
+
 const { t, d } = useI18n()
 const showModal = ref(false)
 defineExpose({

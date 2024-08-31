@@ -1,8 +1,8 @@
-import type { GetRuleMetricsResponse } from '@/api/model/ruleStatics'
-import { useEndpointStore } from '@/stores/endpoint'
+import type {GetRuleMetricsResponse} from '@/api/model/ruleStatics'
+import {useEndpointStore} from '@/stores/endpoint'
 import urlJoin from 'url-join'
-import { getCommonHeader } from './utils'
-import type { CommonResponse } from '@/api/model/common'
+import {getCommonHeader} from './utils'
+import type {CommonResponse} from '@/api/model/common'
 
 export async function getRuleStatic(): Promise<CommonResponse<GetRuleMetricsResponse>> {
   const endpointStore = useEndpointStore()

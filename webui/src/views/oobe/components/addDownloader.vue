@@ -44,12 +44,12 @@
   </a-space>
 </template>
 <script lang="ts" setup>
-import { ClientTypeEnum } from '@/api/model/downloader'
-import type { InitConfig } from '@/api/model/oobe'
-import { TestDownloaderConfig } from '@/service/init'
-import { Message } from '@arco-design/web-vue'
-import { defineAsyncComponent, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import {ClientTypeEnum} from '@/api/model/downloader'
+import type {InitConfig} from '@/api/model/oobe'
+import {TestDownloaderConfig} from '@/service/init'
+import {Message} from '@arco-design/web-vue'
+import {defineAsyncComponent, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
 const transmissionForm = defineAsyncComponent(() => import('@/components/forms/transmission.vue'))
