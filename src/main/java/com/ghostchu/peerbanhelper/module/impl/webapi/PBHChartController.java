@@ -26,6 +26,8 @@ import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -69,7 +71,7 @@ public class PBHChartController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/api/chart/geoIpInfo", this::handleGeoIP, Role.USER_READ)
                 .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ)
-                .get("/api/chart/traffic", this::handleTraffic, Role.USER_READ)
+                .get("/api/chart/traffic", this::handleTrafficClassic, Role.USER_READ)
         ;
     }
 
@@ -86,6 +88,50 @@ public class PBHChartController extends AbstractFeatureModule {
             ctx.json(new StdResp(true, null, trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList()));
         }
     }
+
+    private void handleTrafficClassic(Context ctx) throws Exception {
+        if (!activationManager.isActivated()) {
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+        }
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        List<TrafficJournalDao.TrafficData> results = null;
+
+        String downloader = ctx.queryParam("downloader");
+        if (downloader == null || downloader.isBlank()) {
+            results = trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList();
+        } else {
+            results = trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList();
+        }
+
+        List<TrafficJournalDao.TrafficData> records = new ArrayList<>();
+        var it = results.iterator();
+        // -----
+        TrafficJournalDao.TrafficData base = null;
+        while (it.hasNext()) {
+            var target = it.next();
+
+            if (base == null) {
+                base = target;
+                continue; // 跳过插入当天的总数据，直接计算增量
+            }
+
+            long uploadedOffset = target.getDataOverallUploaded() - base.getDataOverallUploaded();
+            long downloadedOffset = target.getDataOverallDownloaded() - base.getDataOverallDownloaded();
+            if (uploadedOffset < 0) uploadedOffset = 0;
+            if (downloadedOffset < 0) downloadedOffset = 0;
+
+            // 插入增量数据
+            records.add(new TrafficJournalDao.TrafficData(target.getTimestamp(), uploadedOffset, downloadedOffset));
+            base = target;
+        }
+
+//        if (records.size() > 1) {
+//            // 多插的那个移除
+//            records.removeFirst();
+//        }
+        ctx.json(new StdResp(true, null, records));
+    }
+
 
     private void fixTimezone(Context ctx, TrafficJournalDao.TrafficData data) {
         Timestamp ts = data.getTimestamp();
@@ -321,6 +367,13 @@ public class PBHChartController extends AbstractFeatureModule {
 
     }
 
+    record TrafficJournalRecord(
+            long timestamp,
+            long uploaded,
+            long downloaded
+    ) {
+
+    }
 
 //    public record GeoIPQuery(GeoIPPie data, long count) {
 //

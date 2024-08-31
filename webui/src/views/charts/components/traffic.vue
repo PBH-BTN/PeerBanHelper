@@ -70,25 +70,20 @@
   </a-card>
 </template>
 <script setup lang="ts">
-import { getTraffic } from '@/service/charts'
-import { useDarkStore } from '@/stores/dark'
-import { formatFileSize } from '@/utils/file'
+import {getTraffic} from '@/service/charts'
+import {useDarkStore} from '@/stores/dark'
+import {formatFileSize} from '@/utils/file'
 import dayjs from 'dayjs'
-import { LineChart } from 'echarts/charts'
-import {
-  GridComponent,
-  LegendComponent,
-  ToolboxComponent,
-  TooltipComponent
-} from 'echarts/components'
-import { use } from 'echarts/core'
-import { SVGRenderer } from 'echarts/renderers'
-import type { CallbackDataParams } from 'echarts/types/dist/shared'
-import type { OptionDataValue } from 'echarts/types/src/util/types.js'
-import { computed, reactive, ref, watch } from 'vue'
+import {LineChart} from 'echarts/charts'
+import {GridComponent, LegendComponent, ToolboxComponent, TooltipComponent} from 'echarts/components'
+import {use} from 'echarts/core'
+import {SVGRenderer} from 'echarts/renderers'
+import type {CallbackDataParams} from 'echarts/types/dist/shared'
+import type {OptionDataValue} from 'echarts/types/src/util/types.js'
+import {computed, reactive, ref, watch} from 'vue'
 import VChart from 'vue-echarts'
-import { useI18n } from 'vue-i18n'
-import { useRequest } from 'vue-request'
+import {useI18n} from 'vue-i18n'
+import {useRequest} from 'vue-request'
 
 use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, LineChart, SVGRenderer])
 
@@ -114,14 +109,23 @@ const chartOptions = ref({
       type: 'shadow'
     },
     formatter: function (value: CallbackDataParams[]) {
+      // return (
+      //   d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
+      //   ':<br/>' +
+      //   value
+      //     .map((params: CallbackDataParams) => {
+      //       return `${params.marker} ${params.seriesName}: ${formatFileSize((value[0].data as OptionDataValue[])[1] as number)}`
+      //     })
+      //     .join('<br>')
+      // )
       return (
-        d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
-        ':<br/>' +
-        value
-          .map((params: CallbackDataParams) => {
-            return `${params.marker} ${params.seriesName}: ${formatFileSize((value[0].data as OptionDataValue[])[1] as number)}`
-          })
-          .join('<br>')
+          d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
+          ':<br/>' +
+          value
+              .map((params: CallbackDataParams) => {
+                return `${params.marker} ${params.seriesName}: ${formatFileSize((params.data as OptionDataValue[])[1] as number)}`
+              })
+              .join('<br>')
       )
     }
   },
