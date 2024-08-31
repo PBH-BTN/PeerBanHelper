@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
-import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -24,6 +23,9 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +71,7 @@ public class PBHChartController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/api/chart/geoIpInfo", this::handleGeoIP, Role.USER_READ)
                 .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ)
-                .get("/api/chart/traffic", this::handleTraffic, Role.USER_READ)
+                .get("/api/chart/traffic", this::handleTrafficClassic, Role.USER_READ)
         ;
     }
 
@@ -78,45 +80,65 @@ public class PBHChartController extends AbstractFeatureModule {
             throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
         }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-        String[] data = peerRecordDao.queryBuilder()
-                .selectRaw("SUM(uploaded) as total_uploaded", "SUM(downloaded) as total_downloaded")
-                .queryRawFirst();
-        long totalUploaded = Long.parseLong(data[0]);
-        long totalDownloaded = Long.parseLong(data[1]);
 
-        List<TrafficJournalRecord> records = new ArrayList<>();
-        // -----
-        try (var it = trafficJournalDao.queryBuilder()
-                .orderBy("timestamp", true)
-                .where()
-                .ge("timestamp", MiscUtil.getStartOfToday(timeQueryModel.startAt().getTime()))
-                .and()
-                .le("timestamp", MiscUtil.getStartOfToday(timeQueryModel.endAt().getTime()))
-                .iterator()) {
-            TrafficJournalEntity base = null;
-            while (it.hasNext()) {
-                if (base == null) {
-                    base = it.next();
-                    // 多插一个进去
-                    records.add(new TrafficJournalRecord(base.getTimestamp(), base.getUploaded(), base.getDownloaded()));
-                    continue;
-                }
-                var target = it.next();
-                long uploadedOffset = target.getUploaded() - base.getUploaded();
-                long downloadedOffset = target.getDownloaded() - base.getDownloaded();
-                if (uploadedOffset < 0) uploadedOffset = 0;
-                if (downloadedOffset < 0) downloadedOffset = 0;
-                base = target;
-                records.add(new TrafficJournalRecord(base.getTimestamp(), uploadedOffset, downloadedOffset));
-            }
+        String downloader = ctx.queryParam("downloader");
+        if (downloader == null || downloader.isBlank()) {
+            ctx.json(new StdResp(true, null, trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList()));
+        } else {
+            ctx.json(new StdResp(true, null, trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList()));
         }
-        if (records.size() > 1) {
-            // 多插的那个移除
-            records.removeFirst();
-        }
-        ctx.json(new StdResp(true, null, new TrafficChart(totalUploaded, totalDownloaded, records)));
     }
 
+    private void handleTrafficClassic(Context ctx) throws Exception {
+        if (!activationManager.isActivated()) {
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+        }
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        List<TrafficJournalDao.TrafficData> results = null;
+
+        String downloader = ctx.queryParam("downloader");
+        if (downloader == null || downloader.isBlank()) {
+            results = trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList();
+        } else {
+            results = trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList();
+        }
+
+        List<TrafficJournalDao.TrafficData> records = new ArrayList<>();
+        var it = results.iterator();
+        // -----
+        TrafficJournalDao.TrafficData base = null;
+        while (it.hasNext()) {
+            var target = it.next();
+
+            if (base == null) {
+                base = target;
+                continue; // 跳过插入当天的总数据，直接计算增量
+            }
+
+            long uploadedOffset = target.getDataOverallUploaded() - base.getDataOverallUploaded();
+            long downloadedOffset = target.getDataOverallDownloaded() - base.getDataOverallDownloaded();
+            if (uploadedOffset < 0) uploadedOffset = 0;
+            if (downloadedOffset < 0) downloadedOffset = 0;
+
+            // 插入增量数据
+            records.add(new TrafficJournalDao.TrafficData(target.getTimestamp(), uploadedOffset, downloadedOffset));
+            base = target;
+        }
+
+//        if (records.size() > 1) {
+//            // 多插的那个移除
+//            records.removeFirst();
+//        }
+        ctx.json(new StdResp(true, null, records));
+    }
+
+
+    private void fixTimezone(Context ctx, TrafficJournalDao.TrafficData data) {
+        Timestamp ts = data.getTimestamp();
+        var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
+                .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
+        data.setTimestamp(new Timestamp(epochSecond * 1000));
+    }
 
     private void handlePeerTrends(Context ctx) throws Exception {
         if (!activationManager.isActivated()) {
@@ -345,13 +367,6 @@ public class PBHChartController extends AbstractFeatureModule {
 
     }
 
-    record TrafficChart(
-            long allTimeUploaded,
-            long allTimeDownloaded,
-            List<TrafficJournalRecord> journal
-    ) {
-    }
-
     record TrafficJournalRecord(
             long timestamp,
             long uploaded,
@@ -359,7 +374,6 @@ public class PBHChartController extends AbstractFeatureModule {
     ) {
 
     }
-
 
 //    public record GeoIPQuery(GeoIPPie data, long count) {
 //

@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -11,7 +12,6 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.github.mizosoft.methanol.FormBodyPublisher;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -171,13 +171,18 @@ public class QBittorrent extends AbstractDownloader {
     }
 
     @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-        // QB 很棒，什么都不需要做
-    }
-
-    @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-        // QB 很棒，什么都不需要做
+    public DownloaderStatistics getStatistics() {
+        HttpResponse<String> request;
+        try {
+            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/maindata"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (request.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, request.statusCode(), request.body()));
+        }
+        QBMainData mainData = JsonUtil.getGson().fromJson(request.body(), QBMainData.class);
+        return new DownloaderStatistics(mainData.getServerState().getAlltimeUl(), mainData.getServerState().getAlltimeDl());
     }
 
     @Override
