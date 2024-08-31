@@ -128,7 +128,7 @@ public class QBittorrentEE extends AbstractDownloader {
 
     @Override
     public String getType() {
-        return "qBittorrent";
+        return "qBittorrentEE";
     }
 
     public boolean isLoggedIn() {
@@ -374,7 +374,7 @@ public class QBittorrentEE extends AbstractDownloader {
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
-            config.setType("qbittorrent");
+            config.setType("qbittorrentee");
             config.setEndpoint(section.getString("endpoint"));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
@@ -394,7 +394,7 @@ public class QBittorrentEE extends AbstractDownloader {
 
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
-            section.set("type", "qbittorrent");
+            section.set("type", "qbittorrentee");
             section.set("endpoint", endpoint);
             section.set("username", username);
             section.set("password", password);
