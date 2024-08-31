@@ -163,7 +163,9 @@ public class QBittorrent extends AbstractDownloader {
             if (config.isIgnorePrivate() && detail.getPrivateTorrent() != null && detail.getPrivateTorrent()) {
                 continue;
             }
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(), detail.getPrivateTorrent()));
+            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(),
+                    detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(),
+                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
         }
         return torrents;
     }
