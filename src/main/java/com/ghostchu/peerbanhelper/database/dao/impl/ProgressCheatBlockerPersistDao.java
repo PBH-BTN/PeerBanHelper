@@ -43,7 +43,8 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                         entity.getProgressDifferenceCounter(),
                         entity.getFirstTimeSeen().getTime(),
                         entity.getLastTimeSeen().getTime(),
-                        entity.getDownloader()
+                        entity.getDownloader(),
+                        entity.getBanDelayWindowEndAt()
                 )
         ).collect(Collectors.toCollection(CopyOnWriteArrayList::new)); // 可变 List，需要并发安全
     }
@@ -66,7 +67,8 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                                     task.getProgressDifferenceCounter(),
                                     new Timestamp(System.currentTimeMillis()),
                                     new Timestamp(System.currentTimeMillis()),
-                                    task.getDownloader()
+                                    task.getDownloader(),
+                                    task.getBanDelayWindowEndAt()
                             );
                             create(entity);
                         } else {
