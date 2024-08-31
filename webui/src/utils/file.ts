@@ -7,5 +7,6 @@ export function formatFileSize(bytes: number, decimals = 2) {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   if (i >= sizes.length) return 'Too large'
+  if (i < 0) return bytes + ' Bytes'
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
 }

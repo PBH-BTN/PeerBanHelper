@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -150,6 +151,13 @@ public class Transmission extends AbstractDownloader {
         }
     }
 
+    @Override
+    public DownloaderStatistics getStatistics() {
+        RqSessionStats sessionStats = new RqSessionStats();
+        TypedResponse<RsSessionStats> sessionStatsResp = client.execute(sessionStats);
+        var stats = sessionStatsResp.getArgs();
+        return new DownloaderStatistics(stats.getCumulativeStats().getUploadedBytes(), stats.getCumulativeStats().getDownloadedBytes());
+    }
 
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
