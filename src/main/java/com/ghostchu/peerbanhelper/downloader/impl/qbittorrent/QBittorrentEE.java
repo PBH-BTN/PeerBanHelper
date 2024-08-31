@@ -26,6 +26,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -97,9 +98,18 @@ public class QBittorrentEE extends AbstractDownloader {
     }
 
     public DownloaderLoginResult login0() {
+        // 这个接口没登陆也会 400
+        try {
+            if (config.isUseShadowBan() && !testShadowBanAPI()) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
+            }
+        } catch (Exception e) {
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
+        }
         if (isLoggedIn())
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
         try {
+
             HttpResponse<String> request = httpClient
                     .send(MutableRequest.POST(apiEndpoint + "/auth/login",
                                             FormBodyPublisher.newBuilder()
@@ -129,6 +139,13 @@ public class QBittorrentEE extends AbstractDownloader {
     @Override
     public String getType() {
         return "qBittorrentEE";
+    }
+
+    private boolean testShadowBanAPI() throws IOException, InterruptedException {
+        HttpResponse<String> request = httpClient.send(MutableRequest
+                        .GET(apiEndpoint + "/transfer/shadowbanPeers")
+                , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        return request.statusCode() == 400;
     }
 
     public boolean isLoggedIn() {
@@ -207,7 +224,6 @@ public class QBittorrentEE extends AbstractDownloader {
         }
         return peersList;
     }
-
 
 
     @Override
@@ -355,7 +371,6 @@ public class QBittorrentEE extends AbstractDownloader {
             }
         }
     }
-
 
 
     @NoArgsConstructor
