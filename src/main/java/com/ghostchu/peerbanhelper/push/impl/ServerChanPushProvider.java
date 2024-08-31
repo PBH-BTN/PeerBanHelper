@@ -35,17 +35,16 @@ public class ServerChanPushProvider implements PushProvider {
 
     @Override
     public boolean push(String title, String content) throws Exception {
-        Map<String, Object> map = new HashMap<>() {{
-            put("title", title);
-            put("desp", content);
-            put("text", title);
-            if (channel != null) {
-                put("channel", channel);
-            }
-            if (openid != null) {
-                put("openid", openid);
-            }
-        }};
+        Map<String, Object> map = new HashMap<>();
+        map.put("title", title);
+        map.put("desp", content);
+        map.put("text", title);
+        if (channel != null) {
+            map.put("channel", channel);
+        }
+        if (openid != null) {
+            map.put("openid", openid);
+        }
         HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                 MutableRequest.POST("https://sctapi.ftqq.com/" + sendKey + ".send"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
