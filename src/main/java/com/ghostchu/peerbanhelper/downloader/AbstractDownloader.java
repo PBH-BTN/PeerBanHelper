@@ -71,13 +71,6 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-    }
-
-    @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-    }
-    @Override
     public TranslationComponent getLastStatusMessage() {
         return statusMessage;
     }

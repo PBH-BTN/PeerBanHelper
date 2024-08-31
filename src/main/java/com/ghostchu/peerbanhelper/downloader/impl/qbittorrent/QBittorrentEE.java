@@ -182,7 +182,10 @@ public class QBittorrentEE extends AbstractDownloader {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (QBTorrent detail : qbTorrent) {
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(), detail.getDlspeed()));
+            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(),
+                    detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(),
+                    detail.getDlspeed(),
+                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
         }
         return torrents;
     }
