@@ -171,7 +171,7 @@ module:
     # When a Peer reached ban condition, the timer will start and Peer will be banned after timer timed out if Peer's progress not update to excepted value on time
     # 注意：这不适用于进度回退和过量下载
     # Note: This not suitable for progress rewind or over-download
-    max-wait-duration: 180000
+    max-wait-duration: 30000
   # IP 地址/端口 封禁
   # IP address/port blacklist
   ip-address-blocker:
