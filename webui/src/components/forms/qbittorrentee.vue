@@ -1,6 +1,11 @@
 <template>
-  <a-form-item field="config.endpoint" :label="t('page.dashboard.editModal.label.endpoint')" validate-trigger="blur"
-    required :rules="urlRules">
+  <a-form-item
+    field="config.endpoint"
+    :label="t('page.dashboard.editModal.label.endpoint')"
+    validate-trigger="blur"
+    required
+    :rules="urlRules"
+  >
     <a-input v-model="config.endpoint" allow-clear></a-input>
   </a-form-item>
   <a-form-item field="config.username" :label="t('page.dashboard.editModal.label.username')">
@@ -11,7 +16,8 @@
   </a-form-item>
   <a-form-item>
     <a-checkbox v-model="useBasicAuth">
-      {{ t('page.dashboard.editModal.label.useBasicAuth') }}</a-checkbox>
+      {{ t('page.dashboard.editModal.label.useBasicAuth') }}</a-checkbox
+    >
   </a-form-item>
   <a-form-item v-if="useBasicAuth" :content-flex="false">
     <a-form-item field="config.basicAuth.user" label="User">
@@ -28,15 +34,29 @@
     </a-radio-group>
     <template #extra>{{ t('page.dashboard.editModal.label.httpVersion.description') }} </template>
   </a-form-item>
-  <a-form-item field="config.incrementBan" default-checked :label="t('page.dashboard.editModal.label.incrementBan')">
+  <a-form-item
+    field="config.incrementBan"
+    default-checked
+    :label="t('page.dashboard.editModal.label.incrementBan')"
+  >
     <a-switch v-model="config.incrementBan" />
     <template #extra> {{ t('page.dashboard.editModal.label.incrementBan.description') }}</template>
   </a-form-item>
-  <a-form-item field="config.shadowBan" default-checked :label="t('page.dashboard.editModal.label.shadowBan')">
+  <a-form-item
+    field="config.shadowBan"
+    default-checked
+    :label="t('page.dashboard.editModal.label.shadowBan')"
+  >
     <a-switch v-model="config.useShadowBan" />
-    <template #extra><div v-html="t('page.dashboard.editModal.label.shadowBan.description')"></div></template>
+    <template #extra
+      ><div v-html="t('page.dashboard.editModal.label.shadowBan.description')"></div
+    ></template>
   </a-form-item>
-  <a-form-item field="config.verifySsl" default-checked :label="t('page.dashboard.editModal.label.verifySsl')">
+  <a-form-item
+    field="config.verifySsl"
+    default-checked
+    :label="t('page.dashboard.editModal.label.verifySsl')"
+  >
     <a-switch v-model="config.verifySsl" />
   </a-form-item>
 </template>

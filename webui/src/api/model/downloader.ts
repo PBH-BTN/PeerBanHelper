@@ -215,7 +215,12 @@ interface TorrentWrapper {
   size?: number
 }
 
-export type downloaderConfig = qBittorrentConfig | qBittorrentEEConfig | transmissionConfig | biglybtConfig | delugeConfig
+export type downloaderConfig =
+  | qBittorrentConfig
+  | qBittorrentEEConfig
+  | transmissionConfig
+  | biglybtConfig
+  | delugeConfig
 
 export interface qBittorrentConfig {
   type: ClientTypeEnum.qBittorrent
