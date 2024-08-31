@@ -225,6 +225,7 @@ export interface qBittorrentConfig {
   httpVersion: string
   incrementBan: boolean
   verifySsl: boolean
+  ignorePrivate: boolean
 }
 
 interface BasicAuth {
@@ -239,6 +240,7 @@ export interface transmissionConfig {
   password: string
   httpVersion: string
   verifySsl: boolean
+  ignorePrivate: boolean
   rpcUrl: string
 }
 
@@ -248,6 +250,7 @@ export interface biglybtConfig {
   token: string
   httpVersion: string
   verifySsl: boolean
+  ignorePrivate: boolean
 }
 
 export interface delugeConfig {
