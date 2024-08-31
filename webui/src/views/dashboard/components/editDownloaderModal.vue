@@ -49,6 +49,7 @@ import {ClientTypeEnum, type downloaderConfig} from '@/api/model/downloader'
 import {CreateDownloader, TestDownloaderConfig, UpdateDownloader} from '@/service/downloaders'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
+const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
 const transmissionForm = defineAsyncComponent(() => import('@/components/forms/transmission.vue'))
 const biglybtForm = defineAsyncComponent(() => import('@/components/forms/biglybt.vue'))
 const delugeForm = defineAsyncComponent(() => import('@/components/forms/deluge.vue'))
@@ -59,6 +60,7 @@ const newItem = ref(false)
 
 const formMap = {
   [ClientTypeEnum.qBittorrent]: qbittorrentForm,
+  [ClientTypeEnum.qBittorrentEE]: qbittorrentEEForm,
   [ClientTypeEnum.Transmission]: transmissionForm,
   [ClientTypeEnum.BiglyBT]: biglybtForm,
   [ClientTypeEnum.Deluge]: delugeForm

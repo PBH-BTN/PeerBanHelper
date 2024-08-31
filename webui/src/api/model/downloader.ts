@@ -15,6 +15,7 @@ export enum ClientStatusEnum {
 
 export enum ClientTypeEnum {
   qBittorrent = 'qbittorrent',
+  qBittorrentEE = 'qbittorrentee',
   Transmission = 'transmission',
   BiglyBT = 'biglybt',
   Deluge = 'deluge',
@@ -214,7 +215,7 @@ interface TorrentWrapper {
   size?: number
 }
 
-export type downloaderConfig = qBittorrentConfig | transmissionConfig | biglybtConfig | delugeConfig
+export type downloaderConfig = qBittorrentConfig | qBittorrentEEConfig | transmissionConfig | biglybtConfig | delugeConfig
 
 export interface qBittorrentConfig {
   type: ClientTypeEnum.qBittorrent
@@ -224,6 +225,18 @@ export interface qBittorrentConfig {
   basicAuth: BasicAuth
   httpVersion: string
   incrementBan: boolean
+  verifySsl: boolean
+}
+
+export interface qBittorrentEEConfig {
+  type: ClientTypeEnum.qBittorrentEE
+  endpoint: string
+  username: string
+  password: string
+  basicAuth: BasicAuth
+  httpVersion: string
+  incrementBan: boolean
+  shadowBan: boolean
   verifySsl: boolean
 }
 

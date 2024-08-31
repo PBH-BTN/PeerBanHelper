@@ -49,12 +49,14 @@ import {TestDownloaderConfig} from '@/service/init'
 import {Message} from '@arco-design/web-vue'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
+const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
 const transmissionForm = defineAsyncComponent(() => import('@/components/forms/transmission.vue'))
 const biglybtForm = defineAsyncComponent(() => import('@/components/forms/biglybt.vue'))
 const delugeForm = defineAsyncComponent(() => import('@/components/forms/deluge.vue'))
 
 const formMap = {
   [ClientTypeEnum.qBittorrent]: qbittorrentForm,
+  [ClientTypeEnum.qBittorrentEE]: qbittorrentEEForm,
   [ClientTypeEnum.Transmission]: transmissionForm,
   [ClientTypeEnum.BiglyBT]: biglybtForm,
   [ClientTypeEnum.Deluge]: delugeForm
