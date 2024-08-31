@@ -16,10 +16,10 @@
             <div v-else>{{ serverVersion?.version }}</div>
             <a-button
               v-if="endpointStore.plusStatus?.activated"
-              @click="plusInfo?.showModal()"
               class="plus-button"
               type="outline"
               size="mini"
+              @click="plusInfo?.showModal()"
             >
               <icon-heart-fill />
               &nbsp;PBH Plus

@@ -46,9 +46,12 @@ export default {
   'page.dashboard.editModal.label.shadowBan': 'ShadowBan',
   'page.dashboard.editModal.label.shadowBan.description': 'Use qBittorrent Enhanced Edition\'s ShadowBan API to replace the regular IP block list. <a href="https://pbh-btn.github.io/pbh-docs/docs/downloader/qBittorrentEE">Learn more</a>',
   'page.dashboard.editModal.label.verifySsl': 'Verify SSL',
+  'page.dashboard.editModal.label.ignorePrivate': 'Ignore Private Torrents',
+  'page.dashboard.editModal.label.ignorePrivate.description': 'Only works on qBittorrent 5.0+',
   'page.dashboard.editModal.biglybt': 'Please install plugin at {url} first.',
   'page.dashboard.editModal.biglybt.url': 'here',
-  'page.dashboard.editModal.transmission.discourage': 'Warning: Use Transmission Adapter is discourage. Frequent starting and stopping of torrents on seeds that are often subject to bans can result in frequent updates to the tracker server, indirectly triggering DoS attacks. This increases the load on the tracker server and may lead to your IP address being banned by the tracker. We encourage you to migrate to other downloaders whenever possible. https://github.com/PBH-BTN/PeerBanHelper/issues/382',
+  'page.dashboard.editModal.transmission.discourage':
+    'Warning: Support for Transmission is deprecated, support will be removed in the future. https://github.com/PBH-BTN/PeerBanHelper/issues/382',
   'page.dashboard.peerList.title': 'Active Peer List for ',
   'page.dashboard.peerList.column.address': 'Address',
   'page.dashboard.peerList.column.port': 'Port',

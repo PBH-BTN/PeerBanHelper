@@ -1,8 +1,8 @@
-import { onUnmounted, readonly, ref, watch } from 'vue'
-import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
+import { defineStore } from 'pinia'
+import { onUnmounted, readonly, ref, watch } from 'vue'
 import { type PluginImplementType } from 'vue-request'
-type MapValue<T> = T extends Map<any, infer V> ? V : never
+type MapValue<T> = T extends Map<unknown, infer V> ? V : never
 type status = 'idle' | 'loading'
 class AutoUpdateMessageChannel extends MessageChannel {
   private count = 0
@@ -131,7 +131,7 @@ export const useAutoUpdate = defineStore('autoUpdate', () => {
   }
 })
 
-export const useAutoUpdatePlugin = <R, P extends any[]>(
+export const useAutoUpdatePlugin = <R, P extends unknown[]>(
   queryInstance: Parameters<PluginImplementType<R, P>>[0]
 ): ReturnType<PluginImplementType<R, P>> => {
   const autoupdateStore = useAutoUpdate()

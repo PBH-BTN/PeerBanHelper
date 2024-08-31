@@ -7,15 +7,15 @@
   </a-space>
 </template>
 
+<script setup lang="ts">
+import banlogTable from './components/banlogTable.vue'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+</script>
+
 <style scoped>
 .align-right {
   display: flex;
   justify-content: flex-end;
 }
 </style>
-
-<script setup lang="ts">
-import banlogTable from './components/banlogTable.vue'
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
-</script>

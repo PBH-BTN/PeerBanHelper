@@ -161,4 +161,8 @@ public final class QBTorrent {
 
     @SerializedName("upspeed")
     private Long upspeed;
+
+    @SerializedName("is_private")
+    private Boolean privateTorrent;
+
 }

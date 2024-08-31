@@ -5,13 +5,24 @@
       t('page.charts.title.geoip') + (option.bannedOnly ? t('page.charts.subtitle.bannedOnly') : '')
     "
   >
-    <a-result v-if="err" status="500" :title="t('page.charts.error.title')" class="chart chart-error">
+    <a-result
+      v-if="err"
+      status="500"
+      :title="t('page.charts.error.title')"
+      class="chart chart-error"
+    >
       <template #subtitle> {{ err.message }} </template>
       <template #extra>
-        <a-button type="primary"  @click="()=>{
-          err = undefined
-          refresh()
-        }" >{{ t('page.charts.error.refresh')}}</a-button>
+        <a-button
+          type="primary"
+          @click="
+            () => {
+              err = undefined
+              refresh()
+            }
+          "
+          >{{ t('page.charts.error.refresh') }}</a-button
+        >
       </template>
     </a-result>
     <v-chart
@@ -20,7 +31,7 @@
       :option="chartOption"
       :loading="loading"
       autoresize
-      :loadingOptions="loadingOptions"
+      :loading-options="loadingOptions"
       :theme="darkStore.isDark ? 'dark' : 'light'"
       :init-options="{ renderer: 'svg' }"
     >
@@ -46,14 +57,10 @@
                 </a-option>
               </a-select>
             </a-form-item>
-            <a-form-item
-              field="range"
-              :label="t('page.charts.options.days')"
-              label-col-flex="100px"
-            >
+            <a-form-item field="range" :label="t('page.charts.options.days')">
               <a-range-picker
-                show-time
                 v-model="option.range"
+                show-time
                 value-format="Date"
                 :shortcuts="[
                   {
@@ -91,17 +98,17 @@
 </template>
 
 <script lang="ts" setup>
-import { use } from 'echarts/core'
+import { getGeoIPData } from '@/service/charts'
+import { useDarkStore } from '@/stores/dark'
+import dayjs from 'dayjs'
 import { PieChart } from 'echarts/charts'
 import { LegendComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
 import { computed, reactive, ref, watch } from 'vue'
-import { getGeoIPData } from '@/service/charts'
-import { useRequest } from 'vue-request'
 import VChart from 'vue-echarts'
-import { useDarkStore } from '@/stores/dark'
 import { useI18n } from 'vue-i18n'
-import dayjs from 'dayjs'
+import { useRequest } from 'vue-request'
 
 const { t } = useI18n()
 
@@ -168,7 +175,7 @@ watch(option, (v) => {
   run(v.range[0], v.range[1], option.bannedOnly)
 })
 
-const { loading, run,refresh } = useRequest(getGeoIPData, {
+const { loading, run, refresh } = useRequest(getGeoIPData, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), option.bannedOnly],
   onSuccess: (data) => {
     if (data.data) {

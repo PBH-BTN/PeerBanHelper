@@ -1,5 +1,5 @@
 <template>
-  <a-space direction="vertical">
+  <a-space direction="vertical" style="width: 70%">
     <a-typography style="text-align: left">
       <a-typography-title>
         {{ t('page.oobe.addDownloader.title') }}
@@ -19,9 +19,9 @@
             <a-radio :value="ClientTypeEnum.Transmission" disabled>Transmission</a-radio>
           </a-tooltip>
         </a-radio-group>
-        <template #extra v-if="config.downloaderConfig.config.type === ClientTypeEnum.BiglyBT">
+        <template v-if="config.downloaderConfig.config.type === ClientTypeEnum.BiglyBT" #extra>
           <i18n-t keypath="page.dashboard.editModal.biglybt">
-            <template v-slot:url>
+            <template #url>
               <a href="https://github.com/PBH-BTN/PBH-Adapter-BiglyBT">{{
                 t('page.dashboard.editModal.biglybt.url')
               }}</a>
@@ -32,7 +32,10 @@
       <a-form-item field="name" :label="t('page.dashboard.editModal.label.name')" required>
         <a-input v-model="config.downloaderConfig.name" allow-clear />
       </a-form-item>
-      <component :is="formMap[config.downloaderConfig.config.type] as any" v-model="config.downloaderConfig.config" />
+      <component
+        :is="formMap[config.downloaderConfig.config.type] as any"
+        v-model="config.downloaderConfig.config"
+      />
       <a-form-item v-if="config.downloaderConfig.config.type">
         <a-button :loading="testing" @click="handleTest">{{
           t('page.oobe.addDownloader.test')
@@ -42,12 +45,12 @@
   </a-space>
 </template>
 <script lang="ts" setup>
-import type {InitConfig} from '@/api/model/oobe'
-import {ClientTypeEnum} from '@/api/model/downloader'
-import {useI18n} from 'vue-i18n'
-import {defineAsyncComponent, ref} from 'vue'
-import {TestDownloaderConfig} from '@/service/init'
-import {Message} from '@arco-design/web-vue'
+import { ClientTypeEnum } from '@/api/model/downloader'
+import type { InitConfig } from '@/api/model/oobe'
+import { TestDownloaderConfig } from '@/service/init'
+import { Message } from '@arco-design/web-vue'
+import { defineAsyncComponent, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
 const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
@@ -74,8 +77,8 @@ const handleTest = async () => {
       config: config.value.downloaderConfig.config
     })
     if (!testResult.success) throw new Error(testResult.message)
-  } catch (e: any) {
-    Message.error(e.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) Message.error(e.message)
     return false
   } finally {
     testing.value = false

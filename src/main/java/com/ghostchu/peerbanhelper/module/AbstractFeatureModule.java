@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -98,4 +99,11 @@ public abstract class AbstractFeatureModule implements FeatureModule {
         return javalinWebContainer.reqLocale(ctx);
     }
 
+    public TimeZone timezone(Context ctx) {
+        var tz = TimeZone.getDefault();
+        if (ctx.header("X-Timezone") != null) {
+            tz = TimeZone.getTimeZone(ctx.header("X-Timezone"));
+        }
+        return tz;
+    }
 }

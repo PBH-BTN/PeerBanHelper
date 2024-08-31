@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -159,9 +160,30 @@ public class QBittorrent extends AbstractDownloader {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (QBTorrent detail : qbTorrent) {
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(), detail.getDlspeed()));
+            if (config.isIgnorePrivate() && detail.getPrivateTorrent() != null && detail.getPrivateTorrent()) {
+                continue;
+            }
+            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(),
+                    detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(),
+                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
         }
         return torrents;
+    }
+
+
+    @Override
+    public DownloaderStatistics getStatistics() {
+        HttpResponse<String> request;
+        try {
+            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/maindata"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (request.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, request.statusCode(), request.body()));
+        }
+        QBMainData mainData = JsonUtil.getGson().fromJson(request.body(), QBMainData.class);
+        return new DownloaderStatistics(mainData.getServerState().getAlltimeUl(), mainData.getServerState().getAlltimeDl());
     }
 
     @Override
@@ -261,7 +283,9 @@ public class QBittorrent extends AbstractDownloader {
         private BasicauthDTO basicAuth;
         private String httpVersion;
         private boolean incrementBan;
+        private boolean useShadowBan;
         private boolean verifySsl;
+        private boolean ignorePrivate;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -278,7 +302,9 @@ public class QBittorrent extends AbstractDownloader {
             config.setBasicAuth(basicauthDTO);
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setIncrementBan(section.getBoolean("increment-ban", false));
+            config.setUseShadowBan(section.getBoolean("use-shadow-ban", false));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
+            config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             return config;
         }
 
@@ -292,7 +318,9 @@ public class QBittorrent extends AbstractDownloader {
             section.set("basic-auth.pass", Objects.requireNonNullElse(basicAuth.pass, ""));
             section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
+            section.set("use-shadow-ban", useShadowBan);
             section.set("verify-ssl", verifySsl);
+            section.set("ignore-private", ignorePrivate);
             return section;
         }
 

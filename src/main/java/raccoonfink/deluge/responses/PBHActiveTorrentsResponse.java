@@ -45,6 +45,8 @@ public class PBHActiveTorrentsResponse extends DelugeResponse {
         private Integer uploadPayloadRate;
         @SerializedName("download_payload_rate")
         private Integer downloadPayloadRate;
+        @SerializedName("priv")
+        private Boolean priv;
         @SerializedName("peers")
         private List<PeersDTO> peers;
 

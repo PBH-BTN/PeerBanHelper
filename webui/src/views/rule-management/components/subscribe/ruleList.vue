@@ -39,16 +39,20 @@
       </template>
       <template #status="{ record }">
         <a-space>
-          <a-switch v-model="record.enabled" :beforeChange="async (newStatus: string | number | boolean) => {
-            const result = await ToggleRuleEnable(record.ruleId, newStatus as boolean)
-            if (!result.success) {
-              Message.error(result.message)
-              return false
-            }
-            refresh()
-            return true
-          }
-            " />
+          <a-switch
+            v-model="record.enabled"
+            :before-change="
+              async (newStatus: string | number | boolean) => {
+                const result = await ToggleRuleEnable(record.ruleId, newStatus as boolean)
+                if (!result.success) {
+                  Message.error(result.message)
+                  return false
+                }
+                refresh()
+                return true
+              }
+            "
+          />
         </a-space>
       </template>
       <template #lastUpdated="{ record }">
@@ -63,24 +67,39 @@
       </template>
       <template #action="{ record }">
         <a-space warp>
-          <a-tooltip :content="t('page.rule_management.ruleSubscribe.column.actions.edit')" position="top" mini>
+          <a-tooltip
+            :content="t('page.rule_management.ruleSubscribe.column.actions.edit')"
+            position="top"
+            mini
+          >
             <a-button class="edit-btn" shape="circle" type="text" @click="() => handleEdit(record)">
               <template #icon>
                 <icon-edit />
               </template>
             </a-button>
           </a-tooltip>
-          <AsyncMethod once :async-fn="() => handleRefresh(record.ruleId)" v-slot="{ run, loading }">
-            <a-tooltip :content="t('page.rule_management.ruleSubscribe.column.actions.update')" position="top" mini>
+          <AsyncMethod
+            v-slot="{ run, loading: load }"
+            once
+            :async-fn="() => handleRefresh(record.ruleId)"
+          >
+            <a-tooltip
+              :content="t('page.rule_management.ruleSubscribe.column.actions.update')"
+              position="top"
+              mini
+            >
               <a-button class="edit-btn" shape="circle" type="text" @click="run">
                 <template #icon>
-                  <icon-refresh :spin="loading" />
+                  <icon-refresh :spin="load" />
                 </template>
               </a-button>
             </a-tooltip>
           </AsyncMethod>
-          <a-popconfirm :content="t('page.rule_management.ruleSubscribe.column.deleteConfirm')" type="warning"
-            @before-ok="() => handleDelete(record.ruleId)">
+          <a-popconfirm
+            :content="t('page.rule_management.ruleSubscribe.column.deleteConfirm')"
+            type="warning"
+            @before-ok="() => handleDelete(record.ruleId)"
+          >
             <a-button class="edit-btn" status="danger" shape="circle" type="text">
               <template #icon>
                 <icon-delete />
@@ -96,6 +115,8 @@
   </a-space>
 </template>
 <script setup lang="ts">
+import type { ruleBrief } from '@/api/model/ruleSubscribe'
+import AsyncMethod from '@/components/asyncMethod.vue'
 import {
   DeleteRule,
   getRuleList,
@@ -103,14 +124,12 @@ import {
   ToggleRuleEnable,
   UpdateAll
 } from '@/service/ruleSubscribe'
-import type { ruleBrief } from '@/api/model/ruleSubscribe'
-import { useRequest } from 'vue-request'
-import { useI18n } from 'vue-i18n'
 import { getColor } from '@/utils/color'
 import { Message } from '@arco-design/web-vue'
-import { defineAsyncComponent, ref } from 'vue'
-import AsyncMethod from '@/components/asyncMethod.vue'
 import copy from 'copy-to-clipboard'
+import { defineAsyncComponent, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 const EditRuleModal = defineAsyncComponent(() => import('./editRuleItemModal.vue'))
 const SettingsModal = defineAsyncComponent(() => import('./settingsModal.vue'))
 const UpdateLog = defineAsyncComponent(() => import('./logModal.vue'))

@@ -11,8 +11,8 @@
               label-col-flex="100px"
             >
               <a-range-picker
-                show-time
                 v-model="option.range"
+                show-time
                 value-format="Date"
                 :shortcuts="[
                   {
@@ -62,7 +62,7 @@
       class="chart"
       :option="chartOptions"
       :loading="loading"
-      :loadingOptions="loadingOptions"
+      :loading-options="loadingOptions"
       theme="ovilia-green"
       autoresize
       :init-options="{ renderer: 'svg' }"
@@ -70,26 +70,27 @@
   </a-card>
 </template>
 <script setup lang="ts">
+import { getTraffic } from '@/service/charts'
+import { useDarkStore } from '@/stores/dark'
+import { formatFileSize } from '@/utils/file'
 import dayjs from 'dayjs'
-import { computed, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { use } from 'echarts/core'
-import { BarChart } from 'echarts/charts'
+import { LineChart } from 'echarts/charts'
 import {
   GridComponent,
   LegendComponent,
   ToolboxComponent,
   TooltipComponent
 } from 'echarts/components'
+import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
-import { useDarkStore } from '@/stores/dark'
-import { getTraffic } from '@/service/charts'
-import { useRequest } from 'vue-request'
-import VChart from 'vue-echarts'
-import { formatFileSize } from '@/utils/file'
 import type { CallbackDataParams } from 'echarts/types/dist/shared'
+import type { OptionDataValue } from 'echarts/types/src/util/types.js'
+import { computed, reactive, ref, watch } from 'vue'
+import VChart from 'vue-echarts'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 
-use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, BarChart, SVGRenderer])
+use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, LineChart, SVGRenderer])
 
 const option = reactive({
   range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
@@ -114,11 +115,11 @@ const chartOptions = ref({
     },
     formatter: function (value: CallbackDataParams[]) {
       return (
-        value[0]?.name +
+        d((value[0].data as OptionDataValue[])[0] as Date, 'short') +
         ':<br/>' +
         value
           .map((params: CallbackDataParams) => {
-            return `${params.marker} ${params.seriesName}: ${formatFileSize(params.value as number)}`
+            return `${params.marker} ${params.seriesName}: ${formatFileSize((params.data as OptionDataValue[])[1] as number)}`
           })
           .join('<br>')
       )
@@ -128,40 +129,36 @@ const chartOptions = ref({
     data: [t('page.charts.traffic.options.download'), t('page.charts.traffic.options.upload')]
   },
 
-  xAxis: [
-    {
-      type: 'category',
-      axisTick: { show: false },
-      data: [] as string[]
-    }
-  ],
-  yAxis: [
-    {
-      type: 'value',
-      axisLabel: {
-        formatter: (value: number) => {
-          return formatFileSize(value)
-        }
+  xAxis: {
+    type: 'time',
+    max: 'dataMax',
+    min: 'dataMin',
+    minInterval: 3600 * 24 * 1000
+  },
+  yAxis: {
+    type: 'value',
+    axisLabel: {
+      formatter: (value: number) => {
+        return formatFileSize(value)
       }
     }
-  ],
+  },
   series: [
     {
       name: t('page.charts.traffic.options.download'),
-      type: 'bar',
-      barGap: 0,
+      type: 'line',
       emphasis: {
         focus: 'series'
       },
-      data: [] as number[]
+      data: [] as [Date, number][]
     },
     {
       name: t('page.charts.traffic.options.upload'),
-      type: 'bar',
+      type: 'line',
       emphasis: {
         focus: 'series'
       },
-      data: [] as number[]
+      data: [] as [Date, number][]
     }
   ]
 })
@@ -174,14 +171,14 @@ const { loading, run, refresh } = useRequest(getTraffic, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()],
   onSuccess: (data) => {
     if (data.data) {
-      chartOptions.value.xAxis[0].data.splice(0)
-      chartOptions.value.series[0].data.splice(0)
-      chartOptions.value.series[1].data.splice(0)
-      data.data.journal.forEach((record) => {
-        chartOptions.value.xAxis[0].data.push(d(new Date(record.timestamp), 'short'))
-        chartOptions.value.series[0].data.push(record.downloaded)
-        chartOptions.value.series[1].data.push(record.uploaded)
-      })
+      chartOptions.value.series[0].data = data.data.map((v) => [
+        new Date(v.timestamp),
+        v.dataOverallDownloaded
+      ])
+      chartOptions.value.series[1].data = data.data.map((v) => [
+        new Date(v.timestamp),
+        v.dataOverallUploaded
+      ])
     }
   },
   onError: (e) => {

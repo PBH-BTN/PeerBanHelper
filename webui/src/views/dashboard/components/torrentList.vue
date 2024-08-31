@@ -66,7 +66,8 @@ const { downloader } = defineProps<{
 const { data, loading } = useRequest(
   getTorrents,
   {
-    defaultParams: [downloader]
+    defaultParams: [downloader],
+    ready: () => !!downloader
   },
   [useAutoUpdatePlugin]
 )

@@ -366,3 +366,5 @@ IN_ECOMODE_DESCRIPTION: "EcoQoS API load successfully，Windows Efficiency Mode 
 
 DOWNLOADER_TRANSMISSION_DISCOURAGE: "Warning: Use Transmission Adapter is discourage. Frequent starting and stopping of torrents on seeds that are often subject to bans can result in frequent updates to the tracker server, indirectly triggering DoS attacks. This increases the load on the tracker server and may lead to your IP address being banned by the tracker. We encourage you to migrate to other downloaders whenever possible. https://github.com/PBH-BTN/PeerBanHelper/issues/382"
 DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE: "You're using official qBittorrent build or the qBittorrentEE version you're using that not support ShadowBan, Please turn off ShadowBan switch."
+
+DOWNLOADER_FAILED_REQUEST_STATISTICS: "Getting stats data from downloader {} failed: {}"

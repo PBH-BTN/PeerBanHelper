@@ -47,6 +47,16 @@ public abstract class AbstractDownloader implements Downloader {
         }
     }
 
+    @Override
+    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+
+    }
+
+    @Override
+    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
+
+    }
+
     public abstract DownloaderLoginResult login0();
 
     @Override
@@ -75,5 +85,10 @@ public abstract class AbstractDownloader implements Downloader {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public DownloaderStatistics getStatistics() {
+        return new DownloaderStatistics(0, 0);
     }
 }
