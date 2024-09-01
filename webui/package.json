@@ -10,7 +10,7 @@
     "build-only": "vite build",
     "analyze": "ANALYZE=true vite build",
     "type-check": "vue-tsc --build --force",
-    "lint": "prettier -c src/ && eslint --fix . --ignore-pattern 'dist/*'",
+    "lint": "prettier -c src/ && eslint . --ignore-pattern 'dist/*'",
     "format": "prettier --write src/"
   },
   "dependencies": {
