@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
 import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrentEE;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
@@ -200,6 +201,7 @@ public class PeerBanHelperServer implements Reloadable {
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
+            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(client, downloaderSection);
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
@@ -217,6 +219,7 @@ public class PeerBanHelperServer implements Reloadable {
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
             case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
+            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(client, downloaderSection);
             case "transmission" ->
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
