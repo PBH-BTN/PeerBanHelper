@@ -4,22 +4,21 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'webui/**'
+      - "webui/**"
   pull_request:
     branches: ["master"]
     paths:
-      - 'webui/**'
-  
+      - "webui/**"
 
 defaults:
   run:
-    working-directory: 'webui'
+    working-directory: "webui"
 
 jobs:
   Build:
     uses: ./.github/workflows/build_fe.yml
   Lint:
-    needs: Build 
+    needs: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
