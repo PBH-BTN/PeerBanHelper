@@ -279,6 +279,7 @@ export interface delugeConfig {
   httpVersion: string
   incrementBan: boolean
   verifySsl: boolean
+  ignorePrivate: boolean
   rpcUrl: string
 }
 
