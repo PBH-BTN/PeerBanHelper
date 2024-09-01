@@ -46,8 +46,8 @@ export default {
     '有助于缓解保存封禁列表时的下载器压力，但在部分下载器上可能会导致无法封禁Peers',
   'page.dashboard.editModal.label.shadowBan': 'ShadowBan',
   'page.dashboard.editModal.label.shadowBan.description':
-    '使用 qBittorrent Enhanced Edition 提供的 ShadowBan API 来代替传统 IP 屏蔽列表。{link}</a>',
-  'page.dashboard.editModal.label.shadowBan.description.link': '了解更多',
+    '使用 qBittorrent Enhanced Edition 提供的 ShadowBan API 来代替传统 IP 屏蔽列表。{learnMore}',
+  'page.dashboard.editModal.label.shadowBan.description.learnMore': '了解更多',
   'page.dashboard.editModal.label.verifySsl': '验证SSL证书',
   'page.dashboard.editModal.label.ignorePrivate': '忽略私有种子',
   'page.dashboard.editModal.label.ignorePrivate.description': '只在 qBittorrent 5.0+ 上有效',
