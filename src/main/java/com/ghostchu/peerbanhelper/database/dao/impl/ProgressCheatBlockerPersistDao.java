@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
 
     public List<ProgressCheatBlocker.ClientTask> fetchFromDatabase(ProgressCheatBlocker.Client client, Timestamp after) throws SQLException {
         IPAddress address = IPAddressUtil.getIPAddress(client.getPeerPrefix());
+        if(address == null) return Collections.emptyList();
         List<ProgressCheatBlockerPersistEntity> entities = queryBuilder()
                 .where()
                 .eq("torrentId", client.getTorrentId())
@@ -44,7 +46,7 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                         entity.getFirstTimeSeen().getTime(),
                         entity.getLastTimeSeen().getTime(),
                         entity.getDownloader(),
-                        entity.getBanDelayWindowEndAt()
+                        entity.getBanDelayWindowEndAt().getTime()
                 )
         ).collect(Collectors.toCollection(CopyOnWriteArrayList::new)); // 可变 List，需要并发安全
     }
@@ -68,7 +70,7 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                                     new Timestamp(System.currentTimeMillis()),
                                     new Timestamp(System.currentTimeMillis()),
                                     task.getDownloader(),
-                                    task.getBanDelayWindowEndAt()
+                                    new Timestamp(task.getBanDelayWindowEndAt())
                             );
                             create(entity);
                         } else {
