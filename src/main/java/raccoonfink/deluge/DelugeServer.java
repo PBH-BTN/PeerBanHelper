@@ -283,6 +283,11 @@ public class DelugeServer {
         return !determineResponseError(response);
     }
 
+    public PBHStatisticsResponse queryStatistics() throws DelugeException {
+        final DelugeResponse response = makeRequest(new DelugeRequest("peerbanhelperadapter.get_session_totals"));
+        return new PBHStatisticsResponse(response.getResponseCode(), response.getResponseData());
+    }
+
     private boolean determineResponseError(DelugeResponse response) {
         if (response.getResponseData().isNull("error")) {
             return false;
