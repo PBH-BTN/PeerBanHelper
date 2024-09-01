@@ -244,6 +244,7 @@ export interface qBittorrentEEConfig {
   incrementBan: boolean
   useShadowBan: boolean
   verifySsl: boolean
+  ignorePrivate: boolean
 }
 
 interface BasicAuth {
