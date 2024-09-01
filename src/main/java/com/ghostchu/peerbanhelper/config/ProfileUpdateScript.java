@@ -25,6 +25,11 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 18)
+    public void banDelayWait() {
+        conf.set("module.progress-cheat-blocker.max-wait-duration", 30000);
+    }
+
     @UpdateScript(version = 17)
     public void updateProfiles() {
         List<String> bannedPeerIds = conf.getStringList("module.peer-id-blacklist.banned-peer-id");

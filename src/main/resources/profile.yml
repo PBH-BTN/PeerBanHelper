@@ -1,4 +1,4 @@
-config-version: 17
+config-version: 18
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -163,6 +163,15 @@ module:
     # 单位：ms 默认值：1209600000 （14 天）
     # Time unit: ms, default: 1209600000 (14 days)
     persist-duration: 1209600000
+    # 封禁前最长等待时间
+    # Max duration before ban
+    # 有时由于下载器网络原因，Peer 可能无法及时同步其进度信息
+    # Sometimes due the network issue, the peer may cannot sync the progress information on time
+    # 当 Peer 达到封禁阈值后开始计时，如果 Peer 未在给定时间内更新自己的进度到正常水平，则将被封禁
+    # When a Peer reached ban condition, the timer will start and Peer will be banned after timer timed out if Peer's progress not update to excepted value on time
+    # 注意：这不适用于进度回退和过量下载
+    # Note: This not suitable for progress rewind or over-download
+    max-wait-duration: 30000
   # IP 地址/端口 封禁
   # IP address/port blacklist
   ip-address-blocker:

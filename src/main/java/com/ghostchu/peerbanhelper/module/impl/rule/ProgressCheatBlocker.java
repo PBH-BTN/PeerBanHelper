@@ -74,6 +74,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
     private ProgressCheatBlockerPersistDao progressCheatBlockerPersistDao;
     private boolean enablePersist;
     private long persistDuration;
+    private long maxWaitDuration;
 
     @Override
     public @NotNull String getName() {
@@ -177,6 +178,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         this.ipv6PrefixLength = getConfig().getInt("ipv6-prefix-length");
         this.enablePersist = getConfig().getBoolean("enable-persist");
         this.persistDuration = getConfig().getLong("persist-duration");
+        this.maxWaitDuration = getConfig().getLong("max-wait-duration");
     }
 
 
@@ -206,7 +208,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
         if (clientTask == null) {
-            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getName());
+            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getName(), 0L);
             lastRecordedProgress.add(clientTask);
         }
         long uploadedIncremental; // 上传增量
@@ -238,6 +240,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 // 下载过量，检查
                 long maxAllowedExcessiveThreshold = (long) (torrentSize * excessiveThreshold);
                 if (actualUploaded > maxAllowedExcessiveThreshold) {
+                    clientTask.setBanDelayWindowEndAt(0L);
+                    progressRecorder.invalidate(client); // 封禁时，移除缓存
                     return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
                             new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
                                     torrentSize,
@@ -252,12 +256,17 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             // 计算进度差异
             double difference = Math.abs(actualProgress - clientProgress);
             if (difference > maximumDifference) {
-                clientTask.setProgressDifferenceCounter(clientTask.getProgressDifferenceCounter() + 1);
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE),
-                        new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS,
-                                percent(clientProgress),
-                                percent(actualProgress),
-                                percent(difference)));
+                if (banPeerIfConditionReached(clientTask)) {
+                    clientTask.setProgressDifferenceCounter(clientTask.getProgressDifferenceCounter() + 1);
+                    clientTask.setBanDelayWindowEndAt(0L);
+                    progressRecorder.invalidate(client); // 封禁时，移除缓存
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE),
+                            new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS,
+                                    percent(clientProgress),
+                                    percent(actualProgress),
+                                    percent(difference)));
+                }
+
             }
             if (rewindMaximumDifference > 0) {
                 double lastRecord = clientTask.getLastReportProgress();
@@ -265,6 +274,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 boolean ban = rewind > rewindMaximumDifference;
                 if (ban) {
                     clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
+                    clientTask.setBanDelayWindowEndAt(0L);
                     progressRecorder.invalidate(client); // 封禁时，移除缓存
                 }
 
@@ -284,6 +294,14 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             clientTask.setLastReportProgress(peer.getProgress());
             progressRecorder.put(client, lastRecordedProgress);
         }
+    }
+
+    private boolean banPeerIfConditionReached(ClientTask clientTask) {
+        if (clientTask.getBanDelayWindowEndAt() == 0L) {
+            clientTask.setBanDelayWindowEndAt(System.currentTimeMillis() + this.maxWaitDuration);
+            return false;
+        }
+        return System.currentTimeMillis() >= clientTask.getBanDelayWindowEndAt();
     }
 
     private List<ClientTask> loadClientTasks(Client client) {
@@ -306,7 +324,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         // double = 8
         // int = 4
         // 对象头 = 12
-        return calcStringSize(clientTask.peerIp) + (4 * 8) + 8 + (2 * 4) + 12;
+        return calcStringSize(clientTask.peerIp) + (5 * 8) + 8 + (2 * 4) + 12;
     }
 
     private int calcClientSize(Client client) {
@@ -332,6 +350,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         private long firstTimeSeen;
         private long lastTimeSeen;
         private String downloader;
+        private long banDelayWindowEndAt;
     }
 
     @AllArgsConstructor
