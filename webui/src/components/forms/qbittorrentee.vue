@@ -48,13 +48,19 @@
     :label="t('page.dashboard.editModal.label.shadowBan')"
   >
     <a-switch v-model="config.useShadowBan" />
-    <template #extra
-      ><div v-html="t('page.dashboard.editModal.label.shadowBan.description')"></div
-    ></template>
+    <template #extra>
+      <i18n-t keypath="page.dashboard.editModal.label.shadowBan.description">
+        <template #link>
+          <a href="https://pbh-btn.github.io/pbh-docs/docs/downloader/qBittorrentEE">{{
+            t('page.dashboard.editModal.label.shadowBan.description.link')
+          }}</a>
+        </template>
+      </i18n-t></template
+    >
   </a-form-item>
   <a-form-item
-      field="config.ignorePrivate"
-      :label="t('page.dashboard.editModal.label.ignorePrivate')"
+    field="config.ignorePrivate"
+    :label="t('page.dashboard.editModal.label.ignorePrivate')"
   >
     <a-switch v-model="config.ignorePrivate" />
     <template #extra>{{ t('page.dashboard.editModal.label.ignorePrivate.description') }} </template>
