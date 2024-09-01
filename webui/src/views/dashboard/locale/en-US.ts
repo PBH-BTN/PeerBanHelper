@@ -45,7 +45,8 @@ export default {
     'Helps to alleviate the downloader pressure when saving the ban list, but may cause the inability to ban Peers on some downloaders',
   'page.dashboard.editModal.label.shadowBan': 'ShadowBan',
   'page.dashboard.editModal.label.shadowBan.description':
-    'Use qBittorrent Enhanced Edition\'s ShadowBan API to replace the regular IP block list. <a href="https://pbh-btn.github.io/pbh-docs/docs/downloader/qBittorrentEE">Learn more</a>',
+    'Use qBittorrent Enhanced Edition\'s ShadowBan API to replace the regular IP block list. {learnMore}',
+  'page.dashboard.editModal.label.shadowBan.description.learnMore': 'Learn More',
   'page.dashboard.editModal.label.verifySsl': 'Verify SSL',
   'page.dashboard.editModal.label.ignorePrivate': 'Ignore Private Torrents',
   'page.dashboard.editModal.label.ignorePrivate.description': 'Only works on qBittorrent 5.0+',
