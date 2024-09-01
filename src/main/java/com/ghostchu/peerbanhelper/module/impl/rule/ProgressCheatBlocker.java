@@ -298,7 +298,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             clientTask.setBanDelayWindowEndAt(System.currentTimeMillis() + this.maxWaitDuration);
             return false;
         }
-        return clientTask.getBanDelayWindowEndAt() >= System.currentTimeMillis();
+        return System.currentTimeMillis() >= clientTask.getBanDelayWindowEndAt();
     }
 
     private List<ClientTask> loadClientTasks(Client client) {
@@ -321,7 +321,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         // double = 8
         // int = 4
         // 对象头 = 12
-        return calcStringSize(clientTask.peerIp) + (4 * 8) + 8 + (2 * 4) + 12;
+        return calcStringSize(clientTask.peerIp) + (5 * 8) + 8 + (2 * 4) + 12;
     }
 
     private int calcClientSize(Client client) {
