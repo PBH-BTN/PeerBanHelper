@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -181,6 +182,21 @@ public class QBittorrentEE extends AbstractDownloader {
                     detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
         }
         return torrents;
+    }
+
+    @Override
+    public DownloaderStatistics getStatistics() {
+        HttpResponse<String> request;
+        try {
+            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/maindata"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (request.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, request.statusCode(), request.body()));
+        }
+        QBMainData mainData = JsonUtil.getGson().fromJson(request.body(), QBMainData.class);
+        return new DownloaderStatistics(mainData.getServerState().getAlltimeUl(), mainData.getServerState().getAlltimeDl());
     }
 
     @Override
