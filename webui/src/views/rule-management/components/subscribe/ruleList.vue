@@ -45,7 +45,7 @@
               async (newStatus: string | number | boolean) => {
                 const result = await ToggleRuleEnable(record.ruleId, newStatus as boolean)
                 if (!result.success) {
-                  Message.error(result.message)
+                  Message.error({ content: result.message, resetOnHover: true })
                   return false
                 }
                 refresh()
@@ -178,18 +178,18 @@ const handleAdd = () => {
 const handleRefresh = (ruleId: string) =>
   RefreshRule(ruleId).then((result) => {
     if (!result.success) {
-      Message.error(result.message)
+      Message.error({ content: result.message, resetOnHover: true })
     } else {
-      Message.info(result.message)
+      Message.info({ content: result.message, resetOnHover: true })
     }
     refresh()
   })
 const handleDelete = async (ruleId: string) => {
   const result = await DeleteRule(ruleId)
   if (!result.success) {
-    Message.error(result.message)
+    Message.error({ content: result.message, resetOnHover: true })
   } else {
-    Message.success(result.message)
+    Message.success({ content: result.message, resetOnHover: true })
   }
   refresh()
   return true
@@ -200,9 +200,9 @@ const handleUpdateAll = async () => {
   updateAllLoading.value = true
   const result = await UpdateAll()
   if (!result.success) {
-    Message.error(result.message)
+    Message.error({ content: result.message, resetOnHover: true })
   } else {
-    Message.success(result.message)
+    Message.success({ content: result.message, resetOnHover: true })
   }
   refresh()
   updateAllLoading.value = false
@@ -210,7 +210,7 @@ const handleUpdateAll = async () => {
 
 const handleCopy = (text: string) => {
   copy(text)
-  Message.success(t('page.rule_management.ruleSubscribe.copySuccess'))
+  Message.success({ content: t('page.rule_management.ruleSubscribe.copySuccess'), resetOnHover: true })
 }
 </script>
 <style scoped>

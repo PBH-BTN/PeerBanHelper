@@ -101,7 +101,7 @@ const handleBeforeOk = async () => {
     // edit
     const result = await UpdateRuleItem(form)
     if (!result.success) {
-      Message.error(result.message)
+      Message.error({ content: result.message, resetOnHover: true })
       return true
     }
     if (callbackFn) callbackFn(form)
@@ -110,7 +110,7 @@ const handleBeforeOk = async () => {
     // new rule item
     const result = await AddRuleItem(form)
     if (!result.success) {
-      Message.error(result.message)
+      Message.error({ content: result.message, resetOnHover: true })
       return true
     }
     if (callbackFn) callbackFn(form)

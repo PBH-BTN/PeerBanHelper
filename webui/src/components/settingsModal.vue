@@ -95,13 +95,13 @@ watch(
     if (IncorrectTokenError.is(error) || NeedInitError.is(error)) {
       handleCancel()
     } else if (GetManifestError.is(error)) {
-      if (!error.isManual) Message.error(t(error.message))
+      if (!error.isManual) Message.error({ content: t(error.message), resetOnHover: true })
       if (!showModal.value && error.isApiWrong) {
         showModal.value = true
         initForm()
       }
     } else if (error) {
-      Message.error(`${t('settings.endpoint.error')},error:${error}`)
+      Message.error({ content: `${t('settings.endpoint.error')},error:${error}`, resetOnHover: true })
       if (!showModal.value) {
         showModal.value = true
         initForm()
