@@ -103,14 +103,11 @@ const handleOk = () => {
   downloader.value = ''
   tid.value = ''
 }
-const { data, loading, run, cancel } = useRequest(
-  getPeer,
-  {
-    defaultParams: [downloader.value, tid.value],
-    manual:true,
-    pollingInterval:1000
-  },
-)
+const { data, loading, run, cancel } = useRequest(getPeer, {
+  defaultParams: [downloader.value, tid.value],
+  manual: true,
+  pollingInterval: 1000
+})
 const columns = [
   {
     title: () => t('page.dashboard.peerList.column.address'),
