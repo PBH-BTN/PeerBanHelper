@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>6.0.4</version>
+    <version>6.1.0</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
