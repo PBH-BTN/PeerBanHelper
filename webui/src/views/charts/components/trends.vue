@@ -1,38 +1,29 @@
 <template>
   <a-card hoverable :title="t('page.charts.title.trends')">
     <template #extra>
-      <a-popover>
-        <a-link>{{ t('page.charts.options.more') }}</a-link>
-        <template #content>
-          <a-form :model="option">
-            <a-form-item
-              field="range"
-              :label="t('page.charts.options.days')"
-              label-col-flex="100px"
-            >
-              <a-range-picker
-                show-time
-                v-model="option.range"
-                value-format="Date"
-                :shortcuts="[
-                  {
-                    label: t('page.charts.options.shortcut.7days'),
-                    value: () => [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
-                  },
-                  {
-                    label: t('page.charts.options.shortcut.14days'),
-                    value: () => [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
-                  },
-                  {
-                    label: t('page.charts.options.shortcut.30days'),
-                    value: () => [dayjs().startOf('day').add(-30, 'day').toDate(), new Date()]
-                  }
-                ]"
-              />
-            </a-form-item>
-          </a-form>
-        </template>
-      </a-popover>
+      <a-form :model="option">
+        <a-form-item field="range" :label="t('page.charts.options.days')" style="margin-bottom: 0">
+          <a-range-picker
+            v-model="option.range"
+            value-format="Date"
+            style="width: 275px"
+            :shortcuts="[
+              {
+                label: t('page.charts.options.shortcut.7days'),
+                value: () => [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+              },
+              {
+                label: t('page.charts.options.shortcut.14days'),
+                value: () => [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
+              },
+              {
+                label: t('page.charts.options.shortcut.30days'),
+                value: () => [dayjs().startOf('day').add(-30, 'day').toDate(), new Date()]
+              }
+            ]"
+          />
+        </a-form-item>
+      </a-form>
     </template>
     <a-result
       v-if="err"
@@ -59,7 +50,7 @@
       class="chart"
       :option="chartOptions"
       :loading="loading"
-      :loadingOptions="loadingOptions"
+      :loading-options="loadingOptions"
       theme="ovilia-green"
       autoresize
       :init-options="{ renderer: 'svg' }"
@@ -68,17 +59,17 @@
 </template>
 
 <script lang="ts" setup>
-import dayjs from 'dayjs'
-import { useI18n } from 'vue-i18n'
 import { getTrends } from '@/service/charts'
-import { computed, reactive, ref, watch } from 'vue'
-import { useRequest } from 'vue-request'
 import { useDarkStore } from '@/stores/dark'
-import { use } from 'echarts/core'
+import dayjs from 'dayjs'
 import { LineChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
+import { computed, reactive, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 
 use([GridComponent, TooltipComponent, LineChart, SVGRenderer])
 

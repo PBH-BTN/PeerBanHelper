@@ -1,11 +1,11 @@
 <template>
   <a-modal
+    v-model:visible="visible"
     hide-cancel
     closable
-    v-model:visible="visible"
-    @ok="handleOk"
     unmount-on-close
     width="auto"
+    @ok="handleOk"
     @close="cancel()"
   >
     <template #title> {{ t('page.dashboard.peerList.title') + tname }} </template>
@@ -79,12 +79,11 @@
 </template>
 <script setup lang="ts">
 import { getPeer } from '@/service/downloaders'
-import { ref } from 'vue'
-import { useRequest } from 'vue-request'
 import { formatFileSize } from '@/utils/file'
 import countryFlag from '@/views/banlist/components/countryFlag.vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useRequest } from 'vue-request'
 const { t } = useI18n()
 const visible = ref(false)
 const downloader = ref('')
@@ -104,13 +103,11 @@ const handleOk = () => {
   downloader.value = ''
   tid.value = ''
 }
-const { data, loading, run, cancel } = useRequest(
-  getPeer,
-  {
-    defaultParams: [downloader.value, tid.value]
-  },
-  [useAutoUpdatePlugin]
-)
+const { data, loading, run, cancel } = useRequest(getPeer, {
+  defaultParams: [downloader.value, tid.value],
+  manual: true,
+  pollingInterval: 1000
+})
 const columns = [
   {
     title: () => t('page.dashboard.peerList.column.address'),

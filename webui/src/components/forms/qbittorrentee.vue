@@ -14,8 +14,18 @@
   <a-form-item field="config.password" :label="t('page.dashboard.editModal.label.password')">
     <a-input-password v-model="config.password" allow-clear></a-input-password>
   </a-form-item>
-  <a-form-item field="config.rpcUrl" label="RPC URL" required>
-    <a-input v-model="config.rpcUrl" allow-clear placeholder="/transmission/rpc"></a-input>
+  <a-form-item>
+    <a-checkbox v-model="useBasicAuth">
+      {{ t('page.dashboard.editModal.label.useBasicAuth') }}</a-checkbox
+    >
+  </a-form-item>
+  <a-form-item v-if="useBasicAuth" :content-flex="false">
+    <a-form-item field="config.basicAuth.user" label="User">
+      <a-input v-model="config.basicAuth.user" />
+    </a-form-item>
+    <a-form-item field="config.basicAuth.pass" label="Pass">
+      <a-input-password v-model="config.basicAuth.pass" />
+    </a-form-item>
   </a-form-item>
   <a-form-item field="config.httpVersion" :label="t('page.dashboard.editModal.label.httpVersion')">
     <a-radio-group v-model="config.httpVersion">
@@ -25,25 +35,51 @@
     <template #extra>{{ t('page.dashboard.editModal.label.httpVersion.description') }} </template>
   </a-form-item>
   <a-form-item
-    field="config.verifySsl"
+    field="config.incrementBan"
     default-checked
-    :label="t('page.dashboard.editModal.label.verifySsl')"
+    :label="t('page.dashboard.editModal.label.incrementBan')"
   >
-    <a-switch v-model="config.verifySsl" />
+    <a-switch v-model="config.incrementBan" />
+    <template #extra> {{ t('page.dashboard.editModal.label.incrementBan.description') }}</template>
+  </a-form-item>
+  <a-form-item
+    field="config.shadowBan"
+    default-checked
+    :label="t('page.dashboard.editModal.label.shadowBan')"
+  >
+    <a-switch v-model="config.useShadowBan" />
+    <template #extra>
+      <i18n-t keypath="page.dashboard.editModal.label.shadowBan.description">
+        <template #learnMore>
+          <a href="https://pbh-btn.github.io/pbh-docs/docs/downloader/qBittorrentEE">{{
+            t('page.dashboard.editModal.label.shadowBan.description.learnMore')
+          }}</a>
+        </template>
+      </i18n-t>
+    </template>
   </a-form-item>
   <a-form-item
     field="config.ignorePrivate"
     :label="t('page.dashboard.editModal.label.ignorePrivate')"
   >
     <a-switch v-model="config.ignorePrivate" />
+    <template #extra>{{ t('page.dashboard.editModal.label.ignorePrivate.description') }} </template>
+  </a-form-item>
+  <a-form-item
+    field="config.verifySsl"
+    default-checked
+    :label="t('page.dashboard.editModal.label.verifySsl')"
+  >
+    <a-switch v-model="config.verifySsl" />
   </a-form-item>
 </template>
 <script setup lang="ts">
-import type { transmissionConfig } from '@/api/model/downloader'
+import type { qBittorrentEEConfig } from '@/api/model/downloader'
 import type { FieldRule } from '@arco-design/web-vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-const config = defineModel<transmissionConfig>({ required: true })
+const config = defineModel<qBittorrentEEConfig>({ required: true })
 const urlRules: FieldRule<string> = {
   type: 'string',
   required: true,
@@ -59,5 +95,9 @@ const urlRules: FieldRule<string> = {
       callback(t('page.dashboard.editModal.label.endpoint.error.invalidUrl'))
     }
   }
+}
+const useBasicAuth = ref(false)
+if (config.value?.basicAuth.pass || config.value?.basicAuth.pass) {
+  useBasicAuth.value = true
 }
 </script>

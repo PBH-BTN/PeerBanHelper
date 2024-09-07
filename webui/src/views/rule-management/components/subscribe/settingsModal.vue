@@ -1,9 +1,23 @@
 <template>
-  <a-modal v-model:visible="showModal" :title="t('page.rule_management.ruleSubscribe.settingsModal.title')"
-    unmountOnClose :modal-style="{ width: '35vw' }" @before-ok="handleBeforeOk">
+  <a-modal
+    v-model:visible="showModal"
+    :title="t('page.rule_management.ruleSubscribe.settingsModal.title')"
+    unmount-on-close
+    :modal-style="{ width: '35vw' }"
+    @before-ok="handleBeforeOk"
+  >
     <a-form :model="form">
-      <a-form-item field="checkInterval" :label="t('page.rule_management.ruleSubscribe.settingsModal.checkInterval')">
-        <a-input-number v-model="form.checkInterval" :step="1000" :min="1000" :formatter="formatter" :parser="parser">
+      <a-form-item
+        field="checkInterval"
+        :label="t('page.rule_management.ruleSubscribe.settingsModal.checkInterval')"
+      >
+        <a-input-number
+          v-model="form.checkInterval"
+          :step="1000"
+          :min="1000"
+          :formatter="formatter"
+          :parser="parser"
+        >
           <template #suffix> ms </template>
         </a-input-number>
         <template #extra>

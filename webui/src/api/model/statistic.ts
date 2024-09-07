@@ -26,13 +26,9 @@ export interface Trends {
 }
 
 export interface Traffic {
-  allTimeUploaded: number
-  allTimeDownloaded: number
-  journal: {
-    timestamp: number
-    uploaded: number
-    downloaded: number
-  }[]
+  timestamp: number
+  dataOverallUploaded: number
+  dataOverallDownloaded: number
 }
 
 export interface GeoIP {

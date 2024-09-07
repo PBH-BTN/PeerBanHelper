@@ -11,8 +11,14 @@
     <a-form :model="config" style="margin-top: 15vh">
       <a-form-item label="Token" required>
         <a-space>
-          <a-input :style="{ width: '27em' }" placeholder="aa-bb-cc-dd-ee-ff" allow-clear v-model="config.token"
-            :rules="[{ required: true }]" validate-trigger="blur">
+          <a-input
+            v-model="config.token"
+            :style="{ width: '27em' }"
+            placeholder="aa-bb-cc-dd-ee-ff"
+            allow-clear
+            :rules="[{ required: true }]"
+            validate-trigger="blur"
+          >
             <template #prefix>
               <icon-lock />
             </template>

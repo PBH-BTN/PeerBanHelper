@@ -5,7 +5,7 @@ name: Java CI
 
 on:
   pull_request:
-    branches: [ "master", "release", "v6", "api-std" ]
+    branches: [ "master", "release" ]
   workflow_dispatch:
 jobs:
   WebUI:
@@ -66,3 +66,5 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

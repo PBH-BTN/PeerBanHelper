@@ -101,6 +101,10 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GIT_HASH=${{ github.sha }}
       # ---------------- ALIYUN ACR --------------------
       - name: Log in to Aliyun ACR
         uses: docker/login-action@v3
@@ -133,3 +137,5 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta-acr.outputs.tags }}
           labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

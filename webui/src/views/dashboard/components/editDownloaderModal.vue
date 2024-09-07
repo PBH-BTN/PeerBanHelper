@@ -5,23 +5,28 @@
     :title="
       newItem ? t('page.dashboard.editModal.title.new') : t('page.dashboard.editModal.title.edit')
     "
-    unmountOnClose
+    unmount-on-close
     @cancel="() => resetFields()"
     @before-ok="handleBeforeOk"
   >
     <a-form ref="formRef" :model="form" auto-label-width>
       <a-form-item field="config.type" :label="t('page.dashboard.editModal.label.type')" required>
-        <a-radio-group v-model="form.config.type" type="button">
+        <a-radio-group
+          v-model="form.config.type"
+          type="button"
+          style="overflow: scroll; overflow-y: hidden"
+        >
           <a-radio :value="ClientTypeEnum.qBittorrent">qBittorrent</a-radio>
+          <a-radio :value="ClientTypeEnum.qBittorrentEE">qBittorrentEE</a-radio>
+          <a-radio :value="ClientTypeEnum.BiglyBT">BiglyBT</a-radio>
+          <a-radio :value="ClientTypeEnum.Deluge">Deluge</a-radio>
           <a-tooltip :content="t('page.dashboard.editModal.transmission.discourage')">
             <a-radio :value="ClientTypeEnum.Transmission" disabled>Transmission</a-radio>
           </a-tooltip>
-          <a-radio :value="ClientTypeEnum.BiglyBT">BiglyBT</a-radio>
-          <a-radio :value="ClientTypeEnum.Deluge">Deluge</a-radio>
         </a-radio-group>
-        <template #extra v-if="form.config.type === ClientTypeEnum.BiglyBT">
+        <template v-if="form.config.type === ClientTypeEnum.BiglyBT" #extra>
           <i18n-t keypath="page.dashboard.editModal.biglybt">
-            <template v-slot:url>
+            <template #url>
               <a href="https://github.com/PBH-BTN/PBH-Adapter-BiglyBT">
                 {{ t('page.dashboard.editModal.biglybt.url') }}
               </a>
@@ -42,13 +47,14 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import {useI18n} from 'vue-i18n'
-import {defineAsyncComponent, reactive, ref} from 'vue'
-import {type Form, Message} from '@arco-design/web-vue'
-import {ClientTypeEnum, type downloaderConfig} from '@/api/model/downloader'
-import {CreateDownloader, TestDownloaderConfig, UpdateDownloader} from '@/service/downloaders'
+import { ClientTypeEnum, type downloaderConfig } from '@/api/model/downloader'
+import { CreateDownloader, TestDownloaderConfig, UpdateDownloader } from '@/service/downloaders'
+import { type Form, Message } from '@arco-design/web-vue'
+import { defineAsyncComponent, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
+const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
 const transmissionForm = defineAsyncComponent(() => import('@/components/forms/transmission.vue'))
 const biglybtForm = defineAsyncComponent(() => import('@/components/forms/biglybt.vue'))
 const delugeForm = defineAsyncComponent(() => import('@/components/forms/deluge.vue'))
@@ -59,6 +65,7 @@ const newItem = ref(false)
 
 const formMap = {
   [ClientTypeEnum.qBittorrent]: qbittorrentForm,
+  [ClientTypeEnum.qBittorrentEE]: qbittorrentEEForm,
   [ClientTypeEnum.Transmission]: transmissionForm,
   [ClientTypeEnum.BiglyBT]: biglybtForm,
   [ClientTypeEnum.Deluge]: delugeForm
@@ -117,8 +124,8 @@ const handleBeforeOk = async () => {
     } else {
       throw new Error(result.message)
     }
-  } catch (e: any) {
-    Message.error(e.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) Message.error(e.message)
     return false
   }
 }

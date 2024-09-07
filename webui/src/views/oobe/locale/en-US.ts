@@ -18,7 +18,7 @@ export default {
   'page.oobe.setToken.generate': 'Generate',
   'page.oobe.addDownloader.title': 'Add your first downloader',
   'page.oobe.addDownloader.description':
-    'Choose your downloader type first, then fill in the downloader\'s WebUI related authentication information.',
+    "Choose your downloader type first, then fill in the downloader's WebUI related authentication information.",
   'page.oobe.addDownloader.test': 'Test downloader',
   'page.oobe.addDownloader.test.success': 'Test success',
 

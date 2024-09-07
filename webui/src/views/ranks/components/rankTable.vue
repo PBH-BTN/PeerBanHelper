@@ -3,9 +3,9 @@
     <a-input-search
       :style="{ width: '250px' }"
       :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
-      @change="handleSearch"
       allow-clear
       search-button
+      @change="handleSearch"
     />
     <a-table
       stripe
