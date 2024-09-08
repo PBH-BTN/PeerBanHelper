@@ -34,9 +34,6 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
     private final PeerRecordDao peerRecordDao;
     private final Deque<PeerRecordDao.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
     private final TrafficJournalDao trafficJournalDao;
-    private ExecutorService taskWriteService;
-    private long dataRetentionTime;
-    private ScheduledExecutorService scheduleService;
     private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
     private final Cache<PeerRecordDao.BatchHandleTasks, Object> diskWriteCache = CacheBuilder
             .newBuilder()
@@ -44,6 +41,9 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             .maximumSize(3500)
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
+    private ExecutorService taskWriteService;
+    private long dataRetentionTime;
+    private ScheduledExecutorService scheduleService;
 
     public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao) {
         super();
@@ -123,10 +123,12 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         for (Downloader downloader : getServer().getDownloaders()) {
             try {
                 var entity = trafficJournalDao.getTodayJournal(downloader.getName());
-                var stats = downloader.getStatistics();
-                entity.setDataOverallUploaded(stats.totalUploaded());
-                entity.setDataOverallDownloaded(stats.totalDownloaded());
-                trafficJournalDao.update(entity);
+                if (downloader.login().success()) {
+                    var stats = downloader.getStatistics();
+                    entity.setDataOverallUploaded(stats.totalUploaded());
+                    entity.setDataOverallDownloaded(stats.totalDownloaded());
+                    trafficJournalDao.update(entity);
+                }
             } catch (Throwable e) {
                 log.error("Unable to write hourly traffic journal to database", e);
             }
