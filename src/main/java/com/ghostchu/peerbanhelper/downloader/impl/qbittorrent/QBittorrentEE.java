@@ -335,7 +335,7 @@ public class QBittorrentEE extends AbstractDownloader {
                                 .GET(apiEndpoint + "/transfer/shadowbanPeers")
                                 .header("Content-Type", "application/x-www-form-urlencoded")
                         , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                return request.statusCode() == 400;
+                return request.statusCode() != 404 && request.statusCode() != 403;
             } catch (IOException | InterruptedException e) {
                 throw new IllegalStateException(e);
             }
