@@ -1,0 +1,73 @@
+name: 'WebUI'
+description: '报告与 WebUI 有关的程序错误 - Report the errors that related to WebUI'
+
+title: '[WebUI] '
+labels:
+  - 'WebUI'
+body:
+  - type: 'markdown'
+    attributes:
+      value: |-
+        ## 请注意 - Caution
+        This form only used for WebUI, for any other cases, please [click here](https://github.com/PBH-BTN/PeerBanHelper/issues/new)  
+        此表单**仅用于反馈WebUI相关错误**，如果是其它类型的反馈，请[点击这里](https://github.com/PBH-BTN/PeerBanHelper/issues/new)。 
+        请尽可能完整且详细地填写所有表单项，以便我们以最高效率并准确的排查故障和诊断问题
+  - type: 'input'
+    attributes:
+      label: 'WebUI 版本号 - Version'
+      description: |-
+        Enter the PBH version that display on WebUI footer or GUI window title.  
+        输入您正在使用 WebUI 的版本号，可在 WebUI 页面的底部找到
+      placeholder: 'vX.X.X-(aabbccdd)'
+    validations:
+      required: true
+  - type: 'textarea'
+    attributes:
+      label: '问题描述 - Issue Description'
+      description: |-
+        Describe the problem you encounted.
+        在此详细的描述你所遇到的问题
+    validations:
+      required: true
+  - type: 'textarea'
+    attributes:
+      label: '复现步骤 - Reproduce steps'
+      description: |-
+        If you know how to reproduce the error, please type it in this text area.  
+        如果你清楚如何复现此故障，也欢迎告诉我们，帮助我们更快的复现它。如果它是一个偶尔才会出现的错误，请告诉我们它通常可能会在什么情况下出现。
+      placeholder: |-
+        1. 第一步
+        2. ...
+        3. 出现 BUG!
+    validations:
+      required: true
+  - type: 'textarea'
+    attributes:
+      label: '截图 - Screenshot  '
+      description: |-
+        Please upload screenshot here.  
+        请上传问题截图。
+      placeholder: '<截图文件>'
+    validations:
+      required: true
+  - type: 'textarea'
+    attributes:
+      label: '额外信息 - Addition Information'
+      description: |-
+        If you have any related informations, please insert them into this text area.
+        如果你还有其他觉得可能对排查和解决此问题有帮助的更多信息，可以在这里告诉我们
+      placeholder: '在此填写可能有用的额外信息...'
+  - type: checkboxes
+    id: check-list
+    attributes:
+      label: 检查清单 - Check list
+      description: |-
+        Check and tick checkboxes that listed below
+        检查并勾选所有需要勾选的框框
+      options:
+        - label: "PeerBanHelper 已更新到最新版本 (I'm running the latest version of PBH that can be found in Github Relases)"
+          required: false
+        - label: "我已检查过 [PBH 文档](https://pbh-btn.github.io/pbh-docs/)（特别是常见问题），且即使使用了搜索也没有找到与此有关的内容 (This not a question/or the question that not listed in README's FAQ or [PBH WIKI](https://pbh-btn.github.io/pbh-docs/))"
+          required: false
+        - label: "我没有检查这个检查清单，只是闭眼选中了所有的复选框，请关闭这个 Issue (I have not read these checkboxes and therefore I just ticked them all, Please close this issue)"
+          required: false
