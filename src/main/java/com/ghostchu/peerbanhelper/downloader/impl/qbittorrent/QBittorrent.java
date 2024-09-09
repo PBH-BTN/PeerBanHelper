@@ -102,13 +102,10 @@ public class QBittorrent extends AbstractDownloader {
                                                     .query("password", config.getPassword()).build())
                                     .header("Content-Type", "application/x-www-form-urlencoded")
                             , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() == 200) {
+            if (request.statusCode() == 200 && isLoggedIn()) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             }
-            if (request.statusCode() == 403) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
-            }
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
             // return request.statusCode() == 200;
         } catch (Exception e) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
