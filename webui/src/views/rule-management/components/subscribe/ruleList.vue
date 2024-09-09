@@ -210,7 +210,10 @@ const handleUpdateAll = async () => {
 
 const handleCopy = (text: string) => {
   copy(text)
-  Message.success({ content: t('page.rule_management.ruleSubscribe.copySuccess'), resetOnHover: true })
+  Message.success({
+    content: t('page.rule_management.ruleSubscribe.copySuccess'),
+    resetOnHover: true
+  })
 }
 </script>
 <style scoped>

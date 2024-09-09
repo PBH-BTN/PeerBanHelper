@@ -101,7 +101,10 @@ watch(
         initForm()
       }
     } else if (error) {
-      Message.error({ content: `${t('settings.endpoint.error')},error:${error}`, resetOnHover: true })
+      Message.error({
+        content: `${t('settings.endpoint.error')},error:${error}`,
+        resetOnHover: true
+      })
       if (!showModal.value) {
         showModal.value = true
         initForm()

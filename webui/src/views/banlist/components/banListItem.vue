@@ -183,10 +183,16 @@ const emits = defineEmits<{
 const handleUnban = async (address: string) => {
   const { count } = await (await unbanIP(address)).data
   if (!count || count < 1) {
-    Message.error({ content: t('page.banlist.banlist.listItem.unbanUnexcepted'), resetOnHover: true })
+    Message.error({
+      content: t('page.banlist.banlist.listItem.unbanUnexcepted'),
+      resetOnHover: true
+    })
     return false
   } else {
-    Message.success({ content: t('page.banlist.banlist.listItem.unbanSuccess', { count: count }), resetOnHover: true })
+    Message.success({
+      content: t('page.banlist.banlist.listItem.unbanSuccess', { count: count }),
+      resetOnHover: true
+    })
     emits('unban', address)
     return true
   }
