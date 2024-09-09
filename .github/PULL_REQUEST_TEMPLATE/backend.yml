@@ -1,0 +1,6 @@
+name: 'Core'
+description: 'Pull request for core service'
+
+title: '[BE] '
+labels:
+  - 'BE'
