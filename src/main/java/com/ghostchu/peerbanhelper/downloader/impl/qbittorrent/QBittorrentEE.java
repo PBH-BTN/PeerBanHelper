@@ -99,18 +99,17 @@ public class QBittorrentEE extends AbstractDownloader {
     }
 
     public DownloaderLoginResult login0() {
-        // 这个接口没登陆也会 400
-        try {
-            if (config.isUseShadowBan() && !banHandler.test()) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
+        if (isLoggedIn()) {
+            try {
+                if (config.isUseShadowBan() && !banHandler.test()) {
+                    return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
+                }
+            } catch (Exception e) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
             }
-        } catch (Exception e) {
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
-        }
-        if (isLoggedIn())
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
+        }
         try {
-
             HttpResponse<String> request = httpClient
                     .send(MutableRequest.POST(apiEndpoint + "/auth/login",
                                             FormBodyPublisher.newBuilder()
@@ -118,14 +117,17 @@ public class QBittorrentEE extends AbstractDownloader {
                                                     .query("password", config.getPassword()).build())
                                     .header("Content-Type", "application/x-www-form-urlencoded")
                             , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() == 200) {
+            if (request.statusCode() == 200 && isLoggedIn()) {
+                try {
+                    if (config.isUseShadowBan() && !banHandler.test()) {
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
+                    }
+                } catch (Exception e) {
+                    return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
+                }
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             }
-            if (request.statusCode() == 403) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
-            }
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
-            // return request.statusCode() == 200;
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
         } catch (Exception e) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
         }
@@ -321,6 +323,7 @@ public class QBittorrentEE extends AbstractDownloader {
         private final HttpClient httpClient;
         private final String name;
         private final String apiEndpoint;
+        private Boolean shadowBanEnabled = false; // 缓存 shadowBan 开关状态
 
         public BanHandlerShadowBan(HttpClient httpClient, String name, String apiEndpoint) {
             this.httpClient = httpClient;
@@ -330,12 +333,14 @@ public class QBittorrentEE extends AbstractDownloader {
 
         @Override
         public boolean test() {
+            if (shadowBanEnabled)
+                return true;
             try {
-                HttpResponse<String> request = httpClient.send(MutableRequest
-                                .GET(apiEndpoint + "/transfer/shadowbanPeers")
-                                .header("Content-Type", "application/x-www-form-urlencoded")
+                HttpResponse<String> request = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/preferences")
                         , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                return request.statusCode() != 404 && request.statusCode() != 403;
+                Preferences preferences = JsonUtil.getGson().fromJson(request.body(), Preferences.class);
+                shadowBanEnabled = preferences.getShadowBanEnabled() != null && preferences.getShadowBanEnabled();
+                return shadowBanEnabled;
             } catch (IOException | InterruptedException e) {
                 throw new IllegalStateException(e);
             }

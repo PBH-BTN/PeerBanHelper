@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public final class Preferences {
-
     @SerializedName("banned_IPs")
     private String bannedIps;
-
+    @SerializedName("shadow_ban_enabled")
+    private Boolean shadowBanEnabled;
 }
