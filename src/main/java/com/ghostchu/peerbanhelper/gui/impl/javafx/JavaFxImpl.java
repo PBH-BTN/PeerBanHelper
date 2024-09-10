@@ -23,6 +23,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -161,7 +162,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         this.logsView = controller.getLogsListView();
         this.logsView.setStyle("-fx-font-family: Consolas, Monospace");
         this.logsView.setItems(FXCollections.observableList(new CircularArrayList<>(SwingLoggerAppender.maxLinesSetting + 1)));
-        this.logsView.getItems().addListener((InvalidationListener) observable -> {
+        this.logsView.getItems().addListener((ListChangeListener<ListLogEntry>) change -> {
             while (logsView.getItems().size() > SwingLoggerAppender.maxLinesSetting) {
                 logsView.getItems().removeFirst();
             }
