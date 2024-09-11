@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>6.1.4</version>
+    <version>6.1.5</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -587,18 +587,18 @@
             <version>${javafx.version}</version>
             <scope>${javafx.scope}</scope>
         </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-media</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.openjfx</groupId>-->
+<!--            <artifactId>javafx-media</artifactId>-->
+<!--            <version>${javafx.version}</version>-->
+<!--            <scope>${javafx.scope}</scope>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.openjfx</groupId>-->
+<!--            <artifactId>javafx-web</artifactId>-->
+<!--            <version>${javafx.version}</version>-->
+<!--            <scope>${javafx.scope}</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>

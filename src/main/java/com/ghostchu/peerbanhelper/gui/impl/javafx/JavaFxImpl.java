@@ -108,28 +108,28 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     public void onPBHServerStarted(PBHServerStartedEvent event) {
         //Platform.runLater(() -> MainJavaFx.getStage().setTitle(tlUI(Lang.GUI_TITLE_LOADED, "JavaFx", Main.getMeta().getVersion(), Main.getMeta().getAbbrev())));
         scheduledService.scheduleWithFixedDelay(this::updateTitleFlags, 0, 5, TimeUnit.SECONDS);
-        if (Arrays.stream(Main.getStartupArgs()).noneMatch(s -> s.equalsIgnoreCase("enableWebview"))) {
-            log.info(tlUI(Lang.WEBVIEW_DEFAULT_DISABLED));
-            return;
-        }
-        try {
-            Main.loadDependencies("/libraries/javafx-web.maven");
-            CompletableFuture.runAsync(() -> {
-                Platform.runLater(() -> {
-                    if (isWebViewSupported()) {
-                        JFXWindowController controller = MainJavaFx.INSTANCE.getController();
-                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), tlUI(Lang.GUI_MENU_WEBUI), Main.getServer().getWebUiUrl(), Collections.emptyMap(), null);
-                        javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
-                        selectionModel.select(webuiTab);
-                        log.info(tlUI(Lang.WEBVIEW_ENABLED));
-                    } else {
-                        log.info(tlUI(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED));
-                    }
-                });
-            });
-        } catch (IOException e) {
-            log.error(tlUI(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED), e);
-        }
+//        if (Arrays.stream(Main.getStartupArgs()).noneMatch(s -> s.equalsIgnoreCase("enableWebview"))) {
+//            log.info(tlUI(Lang.WEBVIEW_DEFAULT_DISABLED));
+//            return;
+//        }
+//        try {
+//            Main.loadDependencies("/libraries/javafx-web.maven");
+//            CompletableFuture.runAsync(() -> {
+//                Platform.runLater(() -> {
+//                    if (isWebViewSupported()) {
+//                        JFXWindowController controller = MainJavaFx.INSTANCE.getController();
+//                        Tab webuiTab = JavaFxWebViewWrapper.installWebViewTab(controller.getTabPane(), tlUI(Lang.GUI_MENU_WEBUI), Main.getServer().getWebUiUrl(), Collections.emptyMap(), null);
+//                        javafx.scene.control.SingleSelectionModel<Tab> selectionModel = controller.getTabPane().getSelectionModel();
+//                        selectionModel.select(webuiTab);
+//                        log.info(tlUI(Lang.WEBVIEW_ENABLED));
+//                    } else {
+//                        log.info(tlUI(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED));
+//                    }
+//                });
+//            });
+//        } catch (IOException e) {
+//            log.error(tlUI(Lang.WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED), e);
+//        }
 
     }
 
