@@ -37,4 +37,6 @@ public final class ProgressCheatBlockerPersistEntity {
     private String downloader;
     @DatabaseField(canBeNull = false)
     private Timestamp banDelayWindowEndAt;
+    @DatabaseField(canBeNull = false)
+    private long fastPcbTestExecuteAt;
 }
