@@ -680,6 +680,11 @@
             <artifactId>preferencesfx-core</artifactId>
             <version>11.17.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.rollbar</groupId>
+            <artifactId>rollbar-java</artifactId>
+            <version>1.10.3</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.pixelduke</groupId>-->
 <!--            <artifactId>transit</artifactId>-->
