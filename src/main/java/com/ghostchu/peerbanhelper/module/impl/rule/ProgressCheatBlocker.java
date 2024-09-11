@@ -343,7 +343,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         // double = 8
         // int = 4
         // 对象头 = 12
-        return calcStringSize(clientTask.peerIp) + (5 * 8) + 8 + (2 * 4) + 12;
+        return calcStringSize(clientTask.peerIp) + (7 * 8) + (2 * 4) + 12;
     }
 
     private int calcClientSize(Client client) {
