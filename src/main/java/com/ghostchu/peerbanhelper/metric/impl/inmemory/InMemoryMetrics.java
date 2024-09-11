@@ -34,11 +34,17 @@ public class InMemoryMetrics implements BasicMetrics {
 
     @Override
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
+        if(metadata.isBanForDisconnect()){
+            return;
+        }
         bans++;
     }
 
     @Override
     public void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
+        if(metadata.isBanForDisconnect()){
+            return;
+        }
         unbans++;
     }
 

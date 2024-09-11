@@ -467,18 +467,18 @@ public class PeerBanHelperServer implements Reloadable {
                         List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
                         details.forEach(detail -> {
                             protect.getService().submit(() -> {
-                                if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.SILENT_BAN) {
+                                if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.BAN_FOR_DISCONNECT) {
                                     long actualBanDuration = banDuration;
                                     if (detail.banDuration() > 0) {
                                         actualBanDuration = detail.banDuration();
                                     }
                                     BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloader.getName(),
-                                            System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration,
+                                            System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                             detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                     bannedPeers.add(banMetadata);
                                     relaunch.add(detail.torrent());
                                     banPeer(banMetadata, detail.torrent(), detail.peer());
-                                    if (detail.result().action() != PeerAction.SILENT_BAN) {
+                                    if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
                                         log.warn(tlUI(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), tl(DEF_LOCALE, detail.result().reason())));
                                     }
                                 }
@@ -763,7 +763,7 @@ public class PeerBanHelperServer implements Reloadable {
                     result = r;
                     break; // 立刻离开循环，处理跳过
                 }
-                if (r.action() == PeerAction.BAN || r.action() == PeerAction.SILENT_BAN) {
+                if (r.action() == PeerAction.BAN || r.action() == PeerAction.BAN_FOR_DISCONNECT) {
                     result = r;
                 }
             }

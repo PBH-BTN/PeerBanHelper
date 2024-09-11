@@ -244,7 +244,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                     // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
                     if (actualUploaded >= fastPcbTestPercentage * torrentSize) {
                         clientTask.setFastPcbTestExecuteAt(actualUploaded);
-                        return new CheckResult(getClass(), PeerAction.SILENT_BAN, fastPcbTestBlockingDuration,
+                        return new CheckResult(getClass(), PeerAction.BAN_FOR_DISCONNECT, fastPcbTestBlockingDuration,
                                 new TranslationComponent(Lang.PCB_RULE_PEER_PROGRESS_CHEAT_TESTING),
                                 new TranslationComponent(Lang.PCB_DESCRIPTION_PEER_PROGRESS_CHEAT_TESTING)
                         );

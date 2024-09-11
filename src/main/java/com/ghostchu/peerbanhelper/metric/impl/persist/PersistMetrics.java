@@ -90,6 +90,9 @@ public class PersistMetrics implements BasicMetrics {
 
     @Override
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
+        if(metadata.isBanForDisconnect()){
+            return;
+        }
         inMemory.recordPeerBan(address, metadata);
         // 将数据库 IO 移动到虚拟线程上
         Thread.ofVirtual().start(() -> {
@@ -134,6 +137,9 @@ public class PersistMetrics implements BasicMetrics {
 
     @Override
     public void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
+        if(metadata.isBanForDisconnect()){
+            return;
+        }
         inMemory.recordPeerUnban(address, metadata);
         // no record
     }
