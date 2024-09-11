@@ -368,3 +368,5 @@ DOWNLOADER_TRANSMISSION_DISCOURAGE: "警告：Transmission 适配器已被废弃
 DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE: "您当前版本的 qBittorrentEE 不支持 ShadowBan 或未勾选 qBittorrentEE 设置中的 启用 ShadowBan，请关闭 ShadowBan 开关。"
 
 DOWNLOADER_FAILED_REQUEST_STATISTICS: "获取下载器 {} 的统计数据信息失败: {}"
+PCB_RULE_PEER_PROGRESS_CHEAT_TESTING: "Peer 作弊快速测试"
+PCB_DESCRIPTION_PEER_PROGRESS_CHEAT_TESTING: "PeerBanHelper 已短暂封禁此 Peer 以断开连接以便进行快速测试，它将很快在稍后解除封禁"

@@ -25,6 +25,12 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 19)
+    public void fastPcbTesting() {
+        conf.set("module.progress-cheat-blocker.fast-pcb-test-percentage", 0.1d);
+        conf.set("module.progress-cheat-blocker.fast-pcb-test-block-duration", 15000);
+    }
+
     @UpdateScript(version = 18)
     public void banDelayWait() {
         conf.set("module.progress-cheat-blocker.max-wait-duration", 30000);

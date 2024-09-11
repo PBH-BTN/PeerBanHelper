@@ -90,6 +90,9 @@ public class BtnAbilitySubmitBans implements BtnAbility {
             if (e.getValue().getBanAt() <= lastReport) {
                 continue;
             }
+            if(e.getValue().isBanForDisconnect()){
+                continue;
+            }
             BtnBan btnBan = new BtnBan();
             btnBan.setBtnBan(e.getValue().getContext().equals(BtnNetworkOnline.class.getName()));
             btnBan.setPeer(e.getKey());
