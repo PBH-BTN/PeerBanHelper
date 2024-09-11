@@ -54,6 +54,7 @@ public class BiglyBT extends AbstractDownloader {
     private final String apiEndpoint;
     private final HttpClient httpClient;
     private final Config config;
+    private final String connectorPayload;
 
     public BiglyBT(String name, Config config) {
         super(name);
@@ -77,6 +78,7 @@ public class BiglyBT extends AbstractDownloader {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
+        this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
     }
 
     public static BiglyBT loadFromConfig(String name, JsonObject section) {
@@ -105,7 +107,7 @@ public class BiglyBT extends AbstractDownloader {
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
             if (resp.statusCode() == 200) {
-                MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()))));
+                MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(connectorPayload));
                 try {
                     httpClient.send(request, HttpResponse.BodyHandlers.discarding());
                 } catch (Exception ignored) {
