@@ -188,7 +188,7 @@ module:
     # 更长的时间更容易使得恶意吸血者的临时记录从 LRU 缓存中逐出，以便 PBH 识别它；但也会影响正常下载者的速度和体验
     # The longer time can lead cheaters temp records be invalid and remove from LRU cache, then PBH can detect it; but it can also affect the normal peers speed and experience
     # 时间单位（Time Unit）: 毫秒（ms）
-    fast-pcb-test-block-duration: 30000
+    fast-pcb-test-block-duration: 15000
   # IP 地址/端口 封禁
   # IP address/port blacklist
   ip-address-blocker:
