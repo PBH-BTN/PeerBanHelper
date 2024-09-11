@@ -53,7 +53,7 @@ public class PBHMetadataController extends AbstractFeatureModule {
         data.put("modules", moduleManager.getModules().stream()
                 .filter(FeatureModule::isModuleEnabled)
                 .map(f -> new ModuleRecord(f.getClass().getName(), f.getConfigName())).toList());
-        data.put("installation-id", Main.getMainConfig().getString("installation-id", "not-initialized"));
+        data.put("installationId", Main.getMainConfig().getString("installation-id", "not-initialized"));
         ctx.json(new StdResp(true, null, data));
     }
 
