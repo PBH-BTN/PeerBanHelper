@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.BuildMeta;
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
@@ -52,6 +53,7 @@ public class PBHMetadataController extends AbstractFeatureModule {
         data.put("modules", moduleManager.getModules().stream()
                 .filter(FeatureModule::isModuleEnabled)
                 .map(f -> new ModuleRecord(f.getClass().getName(), f.getConfigName())).toList());
+        data.put("installationId", Main.getMainConfig().getString("installation-id", "not-initialized"));
         ctx.json(new StdResp(true, null, data));
     }
 

@@ -18,11 +18,21 @@ public class MainConfigUpdateScript {
     }
 
     private void validate() {
+        String installationId = conf.getString("installation-id");
+        if(installationId == null || installationId.isBlank()){
+            conf.set("installation-id", UUID.randomUUID().toString());
+        }
 //        String token = conf.getString("server.token");
 //        if (token == null || token.isBlank() || token.length() < 8) {
 //            conf.set("server.token", UUID.randomUUID().toString());
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
+    }
+
+
+    @UpdateScript(version = 19)
+    public void telemetryErrorReporting() {
+        conf.set("privacy.error-reporting", true);
     }
 
     @UpdateScript(version = 18)

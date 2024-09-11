@@ -26,6 +26,8 @@ import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.telemetry.ErrorReporter;
+import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -128,6 +130,10 @@ public class PeerBanHelperServer implements Reloadable {
     private HitRateMetric hitRateMetric = new HitRateMetric();
     @Autowired
     private BanListDao banListDao;
+    @Autowired
+    private ErrorReporter errorReporter;
+    @Autowired
+    private RollbarErrorReporter rollbarErrorReporter;
 
     public PeerBanHelperServer() {
         reloadConfig();
@@ -341,6 +347,7 @@ public class PeerBanHelperServer implements Reloadable {
             log.info(tlUI(Lang.SAVED_BANLIST, count));
         } catch (Exception e) {
             log.error(tlUI(Lang.SAVE_BANLIST_FAILED), e);
+            rollbarErrorReporter.error(e);
         }
     }
 
@@ -390,6 +397,7 @@ public class PeerBanHelperServer implements Reloadable {
             threadDump.append(MsgUtil.threadInfoToString(threadInfo));
         }
         log.info(threadDump.toString());
+        errorReporter.error("Timed out when complete the banWave", Map.of("thread_dump", threadDump));
         registerBanWaveTimer();
         Main.getGuiManager().createNotification(Level.WARNING, tlUI(Lang.BAN_WAVE_WATCH_DOG_TITLE), tlUI(Lang.BAN_WAVE_WATCH_DOG_DESCRIPTION));
     }
@@ -399,6 +407,7 @@ public class PeerBanHelperServer implements Reloadable {
      * 启动新的一轮封禁序列
      */
     public void banWave() {
+        rollbarErrorReporter.handleUncaughtErrors();
         try {
             if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
                 return;
@@ -488,6 +497,7 @@ public class PeerBanHelperServer implements Reloadable {
                         needRelaunched.put(downloader, relaunch);
                     } catch (Exception e) {
                         log.error("Unable to complete peer ban task, report to PBH developer!!!");
+                        rollbarErrorReporter.error(e);
                     }
                 });
             }
@@ -525,6 +535,7 @@ public class PeerBanHelperServer implements Reloadable {
             Thread.currentThread().interrupt();
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
+            rollbarErrorReporter.error(throwable);
         } finally {
             banWaveWatchDog.feed();
             metrics.recordCheck();

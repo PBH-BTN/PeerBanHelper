@@ -16,8 +16,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public class WindowsEcoQosAPI {
     private final YamlConfiguration config;
+    private final EcoMode ecoMode;
 
-    public WindowsEcoQosAPI() {
+    public WindowsEcoQosAPI(EcoMode ecoMode) {
+        this.ecoMode = ecoMode;
         this.config = Main.getMainConfig();
         if (this.config.getBoolean("performance.windows-ecoqos-api")) {
             installEcoQosApi();
@@ -27,7 +29,7 @@ public class WindowsEcoQosAPI {
     private void installEcoQosApi() {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         if (os.startsWith("win")) {
-            if (EcoMode.ecoMode(true)) {
+            if (ecoMode.ecoMode(true)) {
                 log.info(tlUI(Lang.IN_ECOMODE_DESCRIPTION));
                 ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag(10, tlUI(Lang.IN_ECOMODE_SHORT)));
             }
