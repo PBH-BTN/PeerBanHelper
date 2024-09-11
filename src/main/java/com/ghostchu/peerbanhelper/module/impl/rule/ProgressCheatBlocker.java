@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -77,6 +78,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
     private long maxWaitDuration;
     private long fastPcbTestBlockingDuration;
     private double fastPcbTestPercentage;
+    @Autowired
+    private RollbarErrorReporter rollbarErrorReporter;
 
     @Override
     public @NotNull String getName() {
@@ -105,6 +108,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             progressCheatBlockerPersistDao.cleanupDatabase(new Timestamp(System.currentTimeMillis() - persistDuration));
         } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
+            rollbarErrorReporter.warning(e);
         }
     }
 
@@ -118,9 +122,11 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 progressCheatBlockerPersistDao.flushDatabase(records);
             } catch (SQLException e) {
                 log.error("Unable flush records into database", e);
+                rollbarErrorReporter.error(e);
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
+            rollbarErrorReporter.error(throwable);
         }
     }
 
@@ -208,6 +214,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             lastRecordedProgress = progressRecorder.get(client, () -> loadClientTasks(client));
         } catch (ExecutionException e) {
             log.error("Unhandled exception during load cached record data", e);
+            rollbarErrorReporter.error(e);
         }
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
@@ -330,6 +337,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             }
         } catch (SQLException e) {
             log.error("Unable to load cached client tasks from database", e);
+            rollbarErrorReporter.error(e);
         }
         return new CopyOnWriteArrayList<>();
     }
