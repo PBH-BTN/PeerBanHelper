@@ -75,6 +75,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
     private boolean enablePersist;
     private long persistDuration;
     private long maxWaitDuration;
+    private long fastPcbTestBlockingDuration;
+    private double fastPcbTestPercentage;
 
     @Override
     public @NotNull String getName() {
@@ -179,6 +181,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         this.enablePersist = getConfig().getBoolean("enable-persist");
         this.persistDuration = getConfig().getLong("persist-duration");
         this.maxWaitDuration = getConfig().getLong("max-wait-duration");
+        this.fastPcbTestPercentage = getConfig().getDouble("fast-pcb-test-percentage");
+        this.fastPcbTestBlockingDuration = getConfig().getLong("fast-pcb-test-block-duration");
     }
 
 
@@ -208,7 +212,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
         if (clientTask == null) {
-            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getName(), 0L);
+            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getName(), 0L, 0L);
             lastRecordedProgress.add(clientTask);
         }
         long uploadedIncremental; // 上传增量
@@ -232,6 +236,22 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             if (torrentSize < torrentMinimumSize) {
                 return pass();
             }
+
+            // 是否需要进行快速 PCB 测试
+            if (fastPcbTestPercentage > 0) {
+                // 只在 <= 0（也就是从未测试过）的情况下对其进行测试
+                if (clientTask.getFastPcbTestExecuteAt() <= 0) {
+                    // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
+                    if (actualUploaded >= fastPcbTestPercentage * torrentSize) {
+                        clientTask.setFastPcbTestExecuteAt(actualUploaded);
+                        return new CheckResult(getClass(), PeerAction.BAN_FOR_DISCONNECT, fastPcbTestBlockingDuration,
+                                new TranslationComponent(Lang.PCB_RULE_PEER_PROGRESS_CHEAT_TESTING),
+                                new TranslationComponent(Lang.PCB_DESCRIPTION_PEER_PROGRESS_CHEAT_TESTING)
+                        );
+                    }
+                }
+            }
+
             // 计算进度信息
             final double actualProgress = (double) actualUploaded / torrentSize; // 实际进度
             final double clientProgress = peer.getProgress(); // 客户端汇报进度
@@ -277,7 +297,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                     clientTask.setBanDelayWindowEndAt(0L);
                     progressRecorder.invalidate(client); // 封禁时，移除缓存
                 }
-
                 return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
                         new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
                                 percent(clientProgress),
@@ -324,7 +343,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         // double = 8
         // int = 4
         // 对象头 = 12
-        return calcStringSize(clientTask.peerIp) + (5 * 8) + 8 + (2 * 4) + 12;
+        return calcStringSize(clientTask.peerIp) + (7 * 8) + (2 * 4) + 12;
     }
 
     private int calcClientSize(Client client) {
@@ -351,6 +370,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         private long lastTimeSeen;
         private String downloader;
         private long banDelayWindowEndAt;
+        private long fastPcbTestExecuteAt;
     }
 
     @AllArgsConstructor

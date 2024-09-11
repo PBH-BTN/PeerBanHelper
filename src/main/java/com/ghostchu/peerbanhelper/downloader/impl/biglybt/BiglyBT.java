@@ -1,8 +1,10 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
@@ -52,6 +54,7 @@ public class BiglyBT extends AbstractDownloader {
     private final String apiEndpoint;
     private final HttpClient httpClient;
     private final Config config;
+    private final String connectorPayload;
 
     public BiglyBT(String name, Config config) {
         super(name);
@@ -75,6 +78,7 @@ public class BiglyBT extends AbstractDownloader {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
+        this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
     }
 
     public static BiglyBT loadFromConfig(String name, JsonObject section) {
@@ -103,6 +107,11 @@ public class BiglyBT extends AbstractDownloader {
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
             if (resp.statusCode() == 200) {
+                MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(connectorPayload));
+                try {
+                    httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+                } catch (Exception ignored) {
+                }
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             }
             if (resp.statusCode() == 403) {
