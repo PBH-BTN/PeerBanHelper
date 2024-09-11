@@ -368,3 +368,5 @@ DOWNLOADER_TRANSMISSION_DISCOURAGE: "Warning: Use Transmission Adapter is discou
 DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE: "Your current version of qBittorrentEE does not support ShadowBan or has not enabled ShadowBan in the qBittorrentEE options. Please turn off the ShadowBan switch."
 
 DOWNLOADER_FAILED_REQUEST_STATISTICS: "Getting stats data from downloader {} failed: {}"
+PCB_RULE_PEER_PROGRESS_CHEAT_TESTING: "Peer Anti-Cheat fast test"
+PCB_DESCRIPTION_PEER_PROGRESS_CHEAT_TESTING: "PeerBanHelper banned Peer to disconnect it from downloader for anti-cheat fast test, It will be un-banned soon."
