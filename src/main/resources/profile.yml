@@ -180,11 +180,14 @@ module:
     # Can heat up progress reset check quickly
     # 设置为 -1 以禁用
     # Set to -1 for disable it
+    # 百分比为浮点百分比，0.5=50%; 1.0 = 100%
+    # Percentage in float, 0.5=50%; 1.0 = 100%
     fast-pcb-test-percentage: 0.1
     # 快速 PCB 测试断开连接持续时间
     # The disconnect duration for fast PCB test
     # 更长的时间更容易使得恶意吸血者的临时记录从 LRU 缓存中逐出，以便 PBH 识别它；但也会影响正常下载者的速度和体验
     # The longer time can lead cheaters temp records be invalid and remove from LRU cache, then PBH can detect it; but it can also affect the normal peers speed and experience
+    # 时间单位（Time Unit）: 毫秒（ms）
     fast-pcb-test-block-duration: 30000
   # IP 地址/端口 封禁
   # IP address/port blacklist
