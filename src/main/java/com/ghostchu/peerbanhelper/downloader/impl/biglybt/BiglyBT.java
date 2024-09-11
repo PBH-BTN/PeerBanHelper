@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
@@ -103,6 +104,11 @@ public class BiglyBT extends AbstractDownloader {
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
             if (resp.statusCode() == 200) {
+                MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()))));
+                try {
+                    httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+                } catch (Exception ignored) {
+                }
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             }
             if (resp.statusCode() == 403) {
