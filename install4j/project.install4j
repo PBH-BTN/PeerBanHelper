@@ -659,5 +659,6 @@ return console.askYesNo(message, true);
   <mediaSets>
     <windows name="Windows x64" id="38" architecture="64" />
     <windows name="Windows arm64" id="41" architecture="arm64" />
+    <macosFolder name="macOS Folder" id="94" architecture="universal" />
   </mediaSets>
 </install4j>
