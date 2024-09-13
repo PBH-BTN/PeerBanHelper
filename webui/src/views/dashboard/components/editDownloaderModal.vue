@@ -118,14 +118,14 @@ const handleBeforeOk = async () => {
       ? await CreateDownloader(form)
       : await UpdateDownloader(oldName.value, form)
     if (result.success) {
-      Message.success(result.message)
+      Message.success({ content: result.message, resetOnHover: true })
       emits('changed')
       return true
     } else {
       throw new Error(result.message)
     }
   } catch (e: unknown) {
-    if (e instanceof Error) Message.error(e.message)
+    if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
     return false
   }
 }

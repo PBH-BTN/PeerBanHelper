@@ -177,12 +177,12 @@ const handleDelete = async () => {
     if (!result.success) {
       throw new Error(result.message)
     } else {
-      Message.success(result.message)
+      Message.success({ content: result.message, resetOnHover: true })
       emits('downloader-deleted')
       return true
     }
   } catch (e: unknown) {
-    if (e instanceof Error) Message.error(e.message)
+    if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
     return false
   }
 }
