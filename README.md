@@ -63,6 +63,10 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 
 [![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
+
 ## Credit
 
 * [Cordelia](https://github.com/bochkov/cordelia)
