@@ -181,8 +181,7 @@ public class QBittorrent extends AbstractDownloader {
                             isPrivateSemaphore.release();
                         }
                     }, isPrivateExecutorService));
-                }
-                if (detail.getPrivateTorrent()) {
+                } else if (detail.getPrivateTorrent()) {
                     continue;
                 }
             }
