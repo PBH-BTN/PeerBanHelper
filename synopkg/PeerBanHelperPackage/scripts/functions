@@ -1,0 +1,132 @@
+
+### common installer functions and variables for synocommunity generic service installer
+# 
+# functions are common for all DSM versions
+#
+# The script must be sh/ash compatible and not use bash syntax.
+# SRM and DSM < 6.0 have only the busybox built-in shell an not bash
+# 
+
+# Tools shortcuts
+MV="/bin/mv -f"
+RM="/bin/rm -rf"
+CP="/bin/cp -rfp"
+MKDIR="/bin/mkdir -p"
+LN="/bin/ln -nsf"
+TEE="/usr/bin/tee -a"
+RSYNC="/bin/rsync -avh"
+TAR="/bin/tar"
+
+INST_ETC="/var/packages/${SYNOPKG_PKGNAME}/etc"
+INST_VARIABLES="${INST_ETC}/installer-variables"
+
+if [ -z "${SYNOPKG_PKGVAR}" ]; then
+    # define SYNOPKG_PKGVAR for compatibility with DSM7 (replaces former INST_VAR)
+    SYNOPKG_PKGVAR="${SYNOPKG_PKGDEST}/var"
+fi
+
+
+### Functions library
+
+log_step ()
+{
+    install_log "===> Step $1. STATUS=${SYNOPKG_PKG_STATUS} USER=$USER GROUP=$GROUP SHARE_PATH=${SHARE_PATH}"
+}
+
+
+initialize_variables ()
+{
+    # Expect user to be set from package specific variables
+    if [ -n "${USER}" -a -z "${USER_DESC}" ]; then
+        USER_DESC="User running $SYNOPKG_PKGNAME"
+    fi
+
+    # Default description if group name provided by UI
+    if [ -n "${GROUP}" -a -z "${GROUP_DESC}" ]; then
+        GROUP_DESC="SynoCommunity Package Group"
+    fi
+
+    # Extract share volume and share name from download location if provided
+    if [ -n "${SHARE_PATH}" ]; then
+        if [ -n "${wizard_volume}" ]; then
+            SHARE_PATH="${wizard_volume}/${SHARE_PATH}"
+        fi
+        SHARE_VOLUME=$(echo "${SHARE_PATH}" | awk -F/ '{print "/"$2}')
+        SHARE_NAME=$(echo "${SHARE_PATH}" | awk -F/ '{print $3}')
+    fi
+}
+
+
+install_python_virtualenv ()
+{
+    # Output Python version (confirming PATH)
+    python3 --version
+
+    # Create a Python virtualenv
+    python3 -m venv --system-site-packages ${SYNOPKG_PKGDEST}/env
+
+    # Update to latest pip package installer
+    python3 -m pip install --upgrade pip
+
+    if [ ${SYNOPKG_DSM_VERSION_MAJOR} -lt 7 ]; then
+        set_unix_permissions ${SYNOPKG_PKGDEST}/env
+    fi
+}
+
+
+install_python_wheels ()
+{
+    # default PATH to wheelhouse
+    cachedir=${SYNOPKG_PKGVAR}/pip-cache
+    wheelhouse=${SYNOPKG_PKGDEST}/share/wheelhouse
+    requirements=${wheelhouse}/requirements.txt
+
+    # Install the wheels
+    echo "Install packages from wheels"
+    if [ -s ${requirements} ]; then
+       echo "Install packages from wheels [${requirements}]"
+       pip install $([ $# -gt 0 ] && echo $*) \
+                   --force-reinstall \
+                   --cache-dir ${cachedir} \
+                   --find-links ${wheelhouse} \
+                   --requirement ${requirements}
+    fi
+
+    if [ ${SYNOPKG_DSM_VERSION_MAJOR} -lt 7 ]; then
+        set_unix_permissions ${SYNOPKG_PKGDEST}/env
+    fi
+
+    echo "Installed modules:"
+    pip freeze
+}
+
+
+# function to read and export variables from a text file
+# empty lines and lines starting with # are ignored
+# we cannot 'source' the file to load the variables, when values have special characters like <, >, ...
+load_variables_from_file ()
+{
+   if [ -n "$1" -a -r "$1" ]; then
+      while read -r _line; do
+        if [ "$(echo ${_line} | grep -v ^[/s]*#)" != "" ]; then
+           _key="$(echo ${_line} | cut --fields=1 --delimiter==)"
+           _value="$(echo ${_line} | cut --fields=2- --delimiter==)"
+           export "${_key}=${_value}"
+        fi
+      done < "$1"
+   fi
+}
+
+
+save_wizard_variables ()
+{
+    if [ -e "${INST_VARIABLES}" ]; then
+        $RM "${INST_VARIABLES}"
+    fi
+    if [ -n "${GROUP}" ]; then
+        echo "GROUP=${GROUP}" >> ${INST_VARIABLES}
+    fi
+    if [ -n "${SHARE_PATH}" ]; then
+        echo "SHARE_PATH=${SHARE_PATH}" >> ${INST_VARIABLES}
+    fi
+}

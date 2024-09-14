@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  peerbanhelper:
+    image: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v6.2.1
+    restart: always
+    container_name: "peerbanhelper"
+    volumes:
+      - /var/packages/peerbanhelper/shares/peerbanhelper:/app/data
+    ports:
+      - "9898:9898"
+    environment:
+      - user.country=cn
+      - user.language=zh

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+DOCKER_NAME="peerbanhelper"
+DOCKER_INSPECT="/usr/local/bin/docker_inspect"
+
+case "$1" in
+    start)
+        # docker start "$DOCKER_NAME"
+        ;;
+    stop)
+        # docker stop "$DOCKER_NAME"
+        ;;
+    status)
+        "$DOCKER_INSPECT" "$DOCKER_NAME" | grep -q "\"Status\": \"running\"," || exit 1
+        ;;
+    log)
+        echo ""
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

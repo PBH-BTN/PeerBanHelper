@@ -1,0 +1,6 @@
+#!/bin/sh
+. $(dirname $0)/installer
+$(basename $0) > $SYNOPKG_TEMP_LOGFILE
+
+IMAGE_TAG="registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:latest"
+/usr/local/bin/docker pull IMAGE_TAG
