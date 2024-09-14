@@ -198,8 +198,8 @@ public class QBittorrent extends AbstractDownloader {
 
     private void checkAndSetPrivateField(QBTorrent detail) {
         String hash = detail.getHash();
-        if (isPrivateCache.containsKey(hash)) {
-            Boolean isPrivate = isPrivateCache.get(hash);
+        if (isPrivateCacheMap.containsKey(hash)) {
+            Boolean isPrivate = isPrivateCacheMap.get(hash);
             detail.setPrivateTorrent(isPrivate);
             return;
         }
@@ -210,14 +210,14 @@ public class QBittorrent extends AbstractDownloader {
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
             );
             if (res.statusCode() == 200) {
-                QBTorrent newDetail = JsonUtil.getGson().fromJson(response.body(), QBTorrent.class);
+                QBTorrent newDetail = JsonUtil.getGson().fromJson(res.body(), QBTorrent.class);
                 Boolean isPrivate = newDetail.getPrivateTorrent();
                 synchronized (isPrivateCacheMap) {
                     isPrivateCacheMap.put(hash, isPrivate);
                 }
                 detail.setPrivateTorrent(isPrivate);
             } else {
-                log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, response.statusCode());
+                log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, res.statusCode());
             }
         } catch (Exception e) {
             log.error("Error fetching properties for torrent hash: {}", hash, e);
