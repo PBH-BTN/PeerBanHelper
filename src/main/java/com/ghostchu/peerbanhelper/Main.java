@@ -118,6 +118,7 @@ public class Main {
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         setupProxySettings();
         try {
+            log.info("Loading application context, this may need a while on low-end devices, please wait...");
             applicationContext = new AnnotationConfigApplicationContext();
             applicationContext.register(AppConfig.class);
             applicationContext.refresh();
