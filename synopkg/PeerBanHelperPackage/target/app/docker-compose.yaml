@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   peerbanhelper:
-    image: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v6.2.1
+    image: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:latest
     restart: always
     container_name: "peerbanhelper"
     volumes:
