@@ -204,6 +204,7 @@ public class QBittorrent extends AbstractDownloader {
         }
 
         try {
+            log.debug("Field is_private is not present and cache miss, query from properties api, hash: {}", hash);
             HttpResponse<String> res = httpClient.send(
                     MutableRequest.GET(apiEndpoint + "/torrents/properties?hash=" + hash),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
