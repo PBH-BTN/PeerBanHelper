@@ -165,13 +165,12 @@ public class QBittorrent extends AbstractDownloader {
         }
         List<QBTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBTorrent>>() {
         }.getType());
-        List<Torrent> torrents = new ArrayList<>();
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        List<CompletableFuture<QBTorrent>> futures = new ArrayList<>();
 
         for (QBTorrent detail : qbTorrent) {
             if (config.isIgnorePrivate()) {
-                if (detail.getPrivateTorrent() == null) {
-                    futures.add(CompletableFuture.runAsync(() -> {
+                CompletableFuture<QBTorrent> future = CompletableFuture.supplyAsync(() -> {
+                    if (detail.getPrivateTorrent() == null) {
                         try {
                             isPrivateSemaphore.acquire();
                             checkAndSetPrivateField(detail);
@@ -180,18 +179,31 @@ public class QBittorrent extends AbstractDownloader {
                         } finally {
                             isPrivateSemaphore.release();
                         }
-                    }, isPrivateExecutorService));
-                } else if (detail.getPrivateTorrent()) {
-                    continue;
-                }
+                    }
+                    return detail;
+                }, isPrivateExecutorService);
+                futures.add(future);
+            } else {
+                futures.add(CompletableFuture.completedFuture(detail));
             }
-
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(),
-                    detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(),
-                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
         }
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        List<Torrent> torrents = futures.stream()
+            .map(future -> {
+                try {
+                    return future.get();
+                } catch (Exception e) {
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .filter(detail -> !(config.isIgnorePrivate() && detail.getPrivateTorrent() != null && detail.getPrivateTorrent()))
+            .map(detail -> new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(),
+                    detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(),
+                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()))
+            .collect(Collectors.toList());
+
         return torrents;
     }
 
