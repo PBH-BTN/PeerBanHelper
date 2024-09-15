@@ -15,7 +15,7 @@ jobs:
   CI:
     uses: ./.github/workflows/build_maven.yml
     with:
-      install4j_license: ${{ secrets.INSTALL4J_LICENSE }}
+      i4j_license: ${{ secrets.INSTALL4J_LICENSE }}
   Build_Docker:
     needs: CI
     runs-on: ubuntu-latest

@@ -3,7 +3,7 @@ name: build Maven
 on:
   workflow_call:
     inputs:
-      install4j_license:
+      i4j_license:
         required: true
         type: string
 jobs:
@@ -30,7 +30,7 @@ jobs:
         name: Setup Install4j
         with:
           version: 10.0.8
-          license: ${{ inputs.install4j_license }}
+          license: ${{ inputs.i4j_license }}
       - name: Build with Maven
         run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
       - name: Upload build artifacts
