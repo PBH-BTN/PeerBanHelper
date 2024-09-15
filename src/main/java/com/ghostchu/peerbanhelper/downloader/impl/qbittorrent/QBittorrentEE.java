@@ -202,7 +202,7 @@ public class QBittorrentEE extends AbstractDownloader {
                     try {
                         isPrivateSemaphore.acquire();
                         String hash = detail.getHash();
-                        detail.setPrivateTorrent(isPrivateCache.get(hash, () -> fetchPrivateStatus(hash)));
+                        detail.setPrivateTorrent(isPrivateCache.get(hash, () -> getPrivateStatus(hash)));
                     } catch (Exception e) {
                         log.debug("Failed to load private cache", e);
                     } finally {
@@ -235,7 +235,7 @@ public class QBittorrentEE extends AbstractDownloader {
         return torrents;
     }
 
-    private Boolean fetchPrivateStatus(String hash) {
+    private Boolean getPrivateStatus(String hash) {
         try {
             log.debug("Field is_private is not present and cache miss, query from properties api, hash: {}", hash);
             HttpResponse<String> res = httpClient.send(
