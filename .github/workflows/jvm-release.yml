@@ -15,9 +15,8 @@ on:
       - published
 jobs:
   Build_Executable:
+    secrets: inherit
     uses: ./.github/workflows/build_maven.yml
-    with:
-      install4j_license: ${{ secrets.INSTALL4J_LICENSE }}
   Upload_Artifacts:
     runs-on: ubuntu-latest
     steps:
