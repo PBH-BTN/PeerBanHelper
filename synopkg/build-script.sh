@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 mkdir -p /tmp/pbh-packages
 cp -av synopkg/* /tmp/pbh-packages
