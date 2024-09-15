@@ -133,3 +133,9 @@ jobs:
           name: synology-spk
           path: |
             /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk
+      - uses: alexellis/upload-assets@0.4.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["/toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk"]'
+        id: project
