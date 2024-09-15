@@ -699,9 +699,11 @@
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-storage</artifactId>
             <version>0.8.9</version>
+        </dependency>
+        <dependency>
             <groupId>com.rollbar</groupId>
             <artifactId>rollbar-java</artifactId>
-          <version>1.10.3</version>
+            <version>1.10.3</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.pixelduke</groupId>-->
