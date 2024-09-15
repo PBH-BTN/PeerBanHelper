@@ -12,45 +12,17 @@ on:
   push:
   workflow_dispatch:
 jobs:
-  WebUI:
-    uses: ./.github/workflows/build_fe.yml
   CI:
-    needs: WebUI
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: webui-dist
-          path: src/main/resources/static
-      - name: Display structure of WebUI dist
-        run: ls src/main/resources/static
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "21"
-          cache: 'maven'
-          cache-dependency-path: '**/pom.xml'
-      - uses: luangong/setup-install4j@v1
-        name: Setup Install4j
-        with:
-          version: 10.0.8
-          license: ${{ secrets.INSTALL4J_LICENSE }}
-      - name: Build with Maven
-        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: maven-dist
-          path: |
-            target/*.jar
-            target/media/*.exe
-        id: project
+    uses: ./.github/workflows/build_maven.yml
   Build_Docker:
     needs: CI
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: maven-dist
+        path: target
     - name: Set Up QEMU
       uses: docker/setup-qemu-action@v3
     - name: Set Up Buildx
@@ -101,7 +73,7 @@ jobs:
       - name: Set Up Synology SDK
         run: |
           sudo mkdir -p /tmp/pbh-packages
-          sudo cp -aV synopkg/* /tmp/pbh-packages
+          sudo cp -av synopkg/* /tmp/pbh-packages
           sudo apt-get install git
           sudo mkdir -p /toolkit
           sudo cd /toolkit
@@ -113,7 +85,7 @@ jobs:
           sudo mkdir -p /toolkit/source
       - name: Prepare for package build
         run: |
-          sudo cp -aV /tmp/pbh-packages/* /toolkit/source/
+          sudo cp -av /tmp/pbh-packages/* /toolkit/source/
           sudo sed -i "s/@IMAGE@/ghostchu\/peerbanhelper-snapshot:sha-${{ github.sha }}/g" /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
           sudo cat /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
           sudo sed -i "s/@PBH_VERSION@/${{ steps.get-version.outputs.version }}/g" /toolkit/source/PeerBanHelperPackage/INFO.sh

@@ -14,49 +14,16 @@ on:
     types:
       - published
 jobs:
-  WebUI:
-    uses: ./.github/workflows/build_fe.yml
   Build_Executable:
-    needs: WebUI
-    permissions:
-      contents: write
-      checks: write
-      actions: read
-      issues: read
-      packages: write
-      pull-requests: read
-      repository-projects: read
-      statuses: read
+    uses: ./.github/workflows/build_maven.yml
+  Upload_Artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: webui-dist
-          path: src/main/resources/static
-      - name: Display structure of WebUI dist
-        run: ls src/main/resources/static
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "21"
-          cache: "maven"
-      - uses: luangong/setup-install4j@v1
-        name: Setup Install4j
-        with:
-          version: 10.0.8
-          license: ${{ secrets.INSTALL4J_LICENSE }}
-      - name: Build with Maven
-        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
           name: maven-dist
-          path: |
-            target/*.jar
-            target/media/*.exe
-      - name: Upload release binaries
-        uses: alexellis/upload-assets@0.4.1
+          path: target
+      - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -152,7 +119,7 @@ jobs:
       - name: Set Up Synology SDK
         run: |
           sudo mkdir -p /tmp/pbh-packages
-          sudo cp -aV synopkg/* /tmp/pbh-packages
+          sudo cp -av synopkg/* /tmp/pbh-packages
           sudo apt-get install git
           sudo mkdir -p /toolkit
           sudo cd /toolkit
@@ -164,7 +131,7 @@ jobs:
           sudo mkdir -p /toolkit/source
       - name: Prepare for package build
         run: |
-          sudo cp -aV /tmp/pbh-packages/* /toolkit/source/
+          sudo cp -av /tmp/pbh-packages/* /toolkit/source/
           sudo sed -i "s/@IMAGE@/registry.cn-hangzhou.aliyuncs.com\/ghostchu\/peerbanhelper:${{ GITHUB_REF#refs/tags/ }}/g" /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
           sudo cat /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
           sudo sed -i "s/@PBH_VERSION@/${{ steps.get-version.outputs.version }}/g" /toolkit/source/PeerBanHelperPackage/INFO.sh
