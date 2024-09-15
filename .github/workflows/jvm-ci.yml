@@ -12,45 +12,18 @@ on:
   push:
   workflow_dispatch:
 jobs:
-  WebUI:
-    uses: ./.github/workflows/build_fe.yml
   CI:
-    needs: WebUI
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: webui-dist
-          path: src/main/resources/static
-      - name: Display structure of WebUI dist
-        run: ls src/main/resources/static
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "21"
-          cache: 'maven'
-          cache-dependency-path: '**/pom.xml'
-      - uses: luangong/setup-install4j@v1
-        name: Setup Install4j
-        with:
-          version: 10.0.8
-          license: ${{ secrets.INSTALL4J_LICENSE }}
-      - name: Build with Maven
-        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: maven-dist
-          path: |
-            target/*.jar
-            target/media/*.exe
-        id: project
+    uses: ./.github/workflows/build_maven.yml
+    secrets: inherit
   Build_Docker:
     needs: CI
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: maven-dist
+        path: target
     - name: Set Up QEMU
       uses: docker/setup-qemu-action@v3
     - name: Set Up Buildx
@@ -98,32 +71,19 @@ jobs:
         with:
           name: maven-dist
           path: target/
-      - name: Set Up Synology SDK
+      - name: Set short git commit SHA
+        id: vars
         run: |
-          sudo mkdir -p /tmp/pbh-packages
-          sudo cp -aV synopkg/* /tmp/pbh-packages
-          sudo apt-get install git
-          sudo mkdir -p /toolkit
-          sudo cd /toolkit
-          sudo git clone https://github.com/SynologyOpenSource/pkgscripts-ng
-          sudo apt-get install cifs-utils python3 python3-pip
-          sudo cd /toolkit/pkgscripts-ng/
-          sudo git checkout DSM7.2
-          sudo ./EnvDeploy -v 7.2 -p apollolake
-          sudo mkdir -p /toolkit/source
-      - name: Prepare for package build
-        run: |
-          sudo cp -aV /tmp/pbh-packages/* /toolkit/source/
-          sudo sed -i "s/@IMAGE@/ghostchu\/peerbanhelper-snapshot:sha-${{ github.sha }}/g" /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
-          sudo cat /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
-          sudo sed -i "s/@PBH_VERSION@/${{ steps.get-version.outputs.version }}/g" /toolkit/source/PeerBanHelperPackage/INFO.sh
-          sudo cat /toolkit/source/PeerBanHelperPackage/INFO.sh
-      - name: Compile Synology SPK
-        run: |
-          sudo /toolkit/pkgscripts-ng/PkgCreate.py -v 7.2 -p apollolake -c PeerBanHelperPackage
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - name: Run build script
+        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash synopkg/build-script.sh
+        env:
+          PBH_VERSION: ${{ steps.get-version.outputs.version }}
+          IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SynologySPK-${{ github.sha }}
+          name: synology-spk
           path: |
             /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk

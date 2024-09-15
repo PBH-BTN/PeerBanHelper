@@ -260,7 +260,11 @@ public class IPDB implements AutoCloseable {
         Path tmp = Files.createTempFile(databaseName, ".mmdb");
         downloadFile(request, tmp, databaseName).join();
         if (!tmp.toFile().exists()) {
-            throw new IllegalStateException("Download mmdb database failed!");
+            if (isMmdbNeverDownloaded(target)) {
+                throw new IllegalStateException("Download mmdb database failed!");
+            } else {
+                log.warn(tlUI(Lang.IPDB_EXISTS_UPDATE_FAILED, databaseName));
+            }
         }
         Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
@@ -283,6 +287,9 @@ public class IPDB implements AutoCloseable {
                 .build();
     }
 
+    private boolean isMmdbNeverDownloaded(File target) {
+        return !target.exists();
+    }
 
     private boolean needUpdateMMDB(File target) {
         if (!target.exists()) {

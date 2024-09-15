@@ -1,16 +1,14 @@
-# 注意！！
-# 此 PR 禁止使用包含敏感数据或者发布型的操作，避免恶意用户通过 PR 对供应链发起攻击
-
-name: Java CI
+name: build Maven
 
 on:
-  pull_request:
-    branches: [ "master", "release" ]
-  workflow_dispatch:
+  workflow_call:
+    secrets:
+      INSTALL4J_LICENSE:
+        required: true
 jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
-  CI:
+  Maven:
     needs: WebUI
     runs-on: ubuntu-latest
     steps:
@@ -19,14 +17,21 @@ jobs:
         with:
           name: webui-dist
           path: src/main/resources/static
+      - name: Display structure of WebUI dist
+        run: ls src/main/resources/static
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "21"
           cache: 'maven'
           cache-dependency-path: '**/pom.xml'
+      - uses: luangong/setup-install4j@v1
+        name: Setup Install4j
+        with:
+          version: 10.0.8
+          license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Build with Maven
-        run: mvn -B clean package --file pom.xml -P thin-sqlite-packaging
+        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -34,3 +39,7 @@ jobs:
           path: |
             target/*.jar
             target/media/*.exe
+            target/media/*.dmg
+            target/media/*.rpm
+            target/media/*.deb
+        id: project
