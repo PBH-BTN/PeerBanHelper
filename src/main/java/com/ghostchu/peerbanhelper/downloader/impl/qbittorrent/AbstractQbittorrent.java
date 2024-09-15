@@ -4,11 +4,13 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentMainData;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPeer;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentTorrent;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -20,12 +22,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,19 +35,21 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class QBittorrent extends AbstractDownloader {
-    private final String apiEndpoint;
-    private final HttpClient httpClient;
-    private final Config config;
-    private final Cache<String, Boolean> isPrivateCache;
+public abstract class AbstractQbittorrent extends AbstractDownloader {
+    protected final String apiEndpoint;
+    protected final HttpClient httpClient;
+    protected final QBittorrentConfig config;
+    protected final Cache<String, Boolean> isPrivateCache;
 
-    public QBittorrent(String name, Config config) {
+    public AbstractQbittorrent(String name, QBittorrentConfig config) {
         super(name);
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
@@ -78,22 +78,12 @@ public class QBittorrent extends AbstractDownloader {
 
         YamlConfiguration profileConfig = Main.getProfileConfig();
         this.isPrivateCache = CacheBuilder.newBuilder()
-            .maximumSize(2000)
-            .expireAfterAccess(
-                profileConfig.getLong("check-interval", 5000) + (1000 * 60),
-                TimeUnit.MILLISECONDS
-            )
-            .build();
-    }
-
-    public static QBittorrent loadFromConfig(String name, JsonObject section) {
-        Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new QBittorrent(name, config);
-    }
-
-    public static QBittorrent loadFromConfig(String name, ConfigurationSection section) {
-        Config config = Config.readFromYaml(section);
-        return new QBittorrent(name, config);
+                .maximumSize(2000)
+                .expireAfterAccess(
+                        profileConfig.getLong("check-interval", 5000) + (1000 * 60),
+                        TimeUnit.MILLISECONDS
+                )
+                .build();
     }
 
     @Override
@@ -133,11 +123,6 @@ public class QBittorrent extends AbstractDownloader {
     }
 
 
-    @Override
-    public String getType() {
-        return "qBittorrent";
-    }
-
     public boolean isLoggedIn() {
         HttpResponse<Void> resp;
         try {
@@ -168,57 +153,57 @@ public class QBittorrent extends AbstractDownloader {
         if (request.statusCode() != 200) {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
         }
-        List<QBTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBTorrent>>() {
+        List<QBittorrentTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrent>>() {
         }.getType());
-        List<Torrent> torrents = new ArrayList<>();
-        Semaphore privateStatusLimit = new Semaphore(5);
 
-        try (ExecutorService service = Executors.newVirtualThreadPerTaskExecutor()) {
-            qbTorrent.forEach(detail -> service.submit(() -> {
-                if (config.isIgnorePrivate() && detail.getPrivateTorrent() == null) {
-                    try {
-                        privateStatusLimit.acquire();
-                        String hash = detail.getHash();
-                        detail.setPrivateTorrent(getPrivateStatus(hash));
-                    } catch (Exception e) {
-                        log.debug("Failed to load private cache", e);
-                    } finally {
-                        privateStatusLimit.release();
-                    }
-                }
-
-                if (config.isIgnorePrivate() && detail.getPrivateTorrent() != null && detail.getPrivateTorrent()) {
-                    return;
-                }
-                synchronized (torrents) {
-                    torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(),
-                        detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(),
-                        detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
-                }
-            }));
+        if (config.isIgnorePrivate()) {
+            fillTorrentPrivateField(qbTorrent);
         }
-
-        return torrents;
+        return qbTorrent.stream().map(t -> (Torrent) t)
+                .filter(t-> !config.isIgnorePrivate() || !t.isPrivate())
+                .toList();
     }
 
-    private Boolean getPrivateStatus(String hash) {
+    protected void fillTorrentPrivateField(List<QBittorrentTorrent> qbTorrent) {
+        Semaphore privateStatusLimit = new Semaphore(5);
+        try (ExecutorService service = Executors.newVirtualThreadPerTaskExecutor()) {
+            qbTorrent.stream()
+                    .filter(torrent -> torrent.getPrivateTorrent() == null)
+                    .forEach(detail -> service.submit(() -> {
+                        if (detail.getPrivateTorrent() == null) {
+                            try {
+                                privateStatusLimit.acquire();
+                                detail.setPrivateTorrent(getPrivateStatus(detail));
+                            } catch (Exception e) {
+                                log.debug("Failed to load private cache", e);
+                            } finally {
+                                privateStatusLimit.release();
+                            }
+                        }
+                    }));
+        }
+    }
+
+    protected Boolean getPrivateStatus(QBittorrentTorrent torrent) {
+        if (torrent.getPrivateTorrent() != null) {
+            return torrent.getPrivateTorrent();
+        }
         try {
-            return isPrivateCache.get(hash, () -> {
+            return isPrivateCache.get(torrent.getHash(), () -> {
                 try {
-                    log.debug("Field is_private is not present and cache miss, query from properties api, hash: {}", hash);
+                    log.debug("Field is_private is not present and cache miss, query from properties api, hash: {}", torrent.getHash());
                     HttpResponse<String> res = httpClient.send(
-                            MutableRequest.GET(apiEndpoint + "/torrents/properties?hash=" + hash),
+                            MutableRequest.GET(apiEndpoint + "/torrents/properties?hash=" + torrent.getHash()),
                             HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                     );
                     if (res.statusCode() == 200) {
-                        QBTorrent newDetail = JsonUtil.getGson().fromJson(res.body(), QBTorrent.class);
-                        Boolean isPrivate = newDetail.getPrivateTorrent();
-                        return isPrivate;
+                        var newDetail = JsonUtil.getGson().fromJson(res.body(), QBittorrentTorrent.class);
+                        return newDetail.getPrivateTorrent();
                     } else {
-                        log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, res.statusCode());
+                        log.warn("Error fetching properties for torrent hash: {}, status: {}", torrent.getHash(), res.statusCode());
                     }
                 } catch (Exception e) {
-                    log.warn("Error fetching properties for torrent hash: {}", hash, e);
+                    log.warn("Error fetching properties for torrent hash: {}", torrent.getHash(), e);
                 }
                 return null;
             });
@@ -238,7 +223,7 @@ public class QBittorrent extends AbstractDownloader {
         if (request.statusCode() != 200) {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, request.statusCode(), request.body()));
         }
-        QBMainData mainData = JsonUtil.getGson().fromJson(request.body(), QBMainData.class);
+        QBittorrentMainData mainData = JsonUtil.getGson().fromJson(request.body(), QBittorrentMainData.class);
         return new DownloaderStatistics(mainData.getServerState().getAlltimeUl(), mainData.getServerState().getAlltimeDl());
     }
 
@@ -260,7 +245,7 @@ public class QBittorrent extends AbstractDownloader {
         List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
-            QBPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBPeer.class);
+            QBittorrentPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentPeer.class);
             // 一个 QB 本地化问题的 Workaround
             if (qbPeer.getPeerId() == null || qbPeer.getPeerId().equals("Unknown") || qbPeer.getPeerId().equals("未知")) {
                 qbPeer.setPeerIdClient("");
@@ -277,7 +262,7 @@ public class QBittorrent extends AbstractDownloader {
         return peersList;
     }
 
-    private void setBanListIncrement(Collection<BanMetadata> added) {
+    protected void setBanListIncrement(Collection<BanMetadata> added) {
         Map<String, StringJoiner> banTasks = new HashMap<>();
         added.forEach(p -> {
             StringJoiner joiner = banTasks.getOrDefault(p.getTorrent().getHash(), new StringJoiner("|"));
@@ -303,7 +288,7 @@ public class QBittorrent extends AbstractDownloader {
         });
     }
 
-    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
+    protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
         try {
@@ -322,71 +307,11 @@ public class QBittorrent extends AbstractDownloader {
         }
     }
 
+
     @Override
     public void close() throws Exception {
 
     }
 
 
-    @NoArgsConstructor
-    @Data
-    public static class Config {
-
-        private String type;
-        private String endpoint;
-        private String username;
-        private String password;
-        private BasicauthDTO basicAuth;
-        private String httpVersion;
-        private boolean incrementBan;
-        private boolean useShadowBan;
-        private boolean verifySsl;
-        private boolean ignorePrivate;
-
-        public static Config readFromYaml(ConfigurationSection section) {
-            Config config = new Config();
-            config.setType("qbittorrent");
-            config.setEndpoint(section.getString("endpoint"));
-            if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
-                config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
-            }
-            config.setUsername(section.getString("username", ""));
-            config.setPassword(section.getString("password", ""));
-            Config.BasicauthDTO basicauthDTO = new BasicauthDTO();
-            basicauthDTO.setUser(section.getString("basic-auth.user"));
-            basicauthDTO.setPass(section.getString("basic-auth.pass"));
-            config.setBasicAuth(basicauthDTO);
-            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
-            config.setIncrementBan(section.getBoolean("increment-ban", false));
-            config.setUseShadowBan(section.getBoolean("use-shadow-ban", false));
-            config.setVerifySsl(section.getBoolean("verify-ssl", true));
-            config.setIgnorePrivate(section.getBoolean("ignore-private", false));
-            return config;
-        }
-
-        public YamlConfiguration saveToYaml() {
-            YamlConfiguration section = new YamlConfiguration();
-            section.set("type", "qbittorrent");
-            section.set("endpoint", endpoint);
-            section.set("username", username);
-            section.set("password", password);
-            section.set("basic-auth.user", Objects.requireNonNullElse(basicAuth.user, ""));
-            section.set("basic-auth.pass", Objects.requireNonNullElse(basicAuth.pass, ""));
-            section.set("http-version", httpVersion);
-            section.set("increment-ban", incrementBan);
-            section.set("use-shadow-ban", useShadowBan);
-            section.set("verify-ssl", verifySsl);
-            section.set("ignore-private", ignorePrivate);
-            return section;
-        }
-
-        @NoArgsConstructor
-        @Data
-        public static class BasicauthDTO {
-            @SerializedName("user")
-            private String user;
-            @SerializedName("pass")
-            private String pass;
-        }
-    }
 }

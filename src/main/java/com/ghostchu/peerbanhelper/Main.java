@@ -188,7 +188,7 @@ public class Main {
     }
 
     private static void setupLog4j2() {
-        PluginManager.addPackage("com.ghostchu.peerbanhelper.log4j2");
+        //PluginManager.addPackage("com.ghostchu.peerbanhelper.log4j2");
     }
 
     private static YamlConfiguration loadConfiguration(File file) {
