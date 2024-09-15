@@ -252,7 +252,7 @@ public class QBittorrentEE extends AbstractDownloader {
                 log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, res.statusCode());
             }
         } catch (Exception e) {
-            log.error("Error fetching properties for torrent hash: {}", hash, e);
+            log.warn("Error fetching properties for torrent hash: {}", hash, e);
         }
     }
 
