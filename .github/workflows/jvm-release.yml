@@ -111,7 +111,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
   Build_SPK:
-    needs: CI
+    needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
