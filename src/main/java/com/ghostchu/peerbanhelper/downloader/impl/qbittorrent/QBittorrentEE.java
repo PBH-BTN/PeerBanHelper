@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
@@ -49,9 +50,7 @@ public class QBittorrentEE extends AbstractDownloader {
     private final Config config;
     private final BanHandler banHandler;
 
-    private final Cache<String, Boolean> isPrivateCache = CacheBuilder.newBuilder()
-        .maximumSize(2000)
-        .build();
+    private final Cache<String, Boolean> isPrivateCache;
     private final ExecutorService isPrivateExecutorService = Executors.newVirtualThreadPerTaskExecutor();
     private final Semaphore isPrivateSemaphore = new Semaphore(5);
 
@@ -86,6 +85,15 @@ public class QBittorrentEE extends AbstractDownloader {
         } else {
             this.banHandler = new BanHandlerNormal(httpClient, name, apiEndpoint);
         }
+
+        YamlConfiguration profileConfig = Main.getProfileConfig();
+        this.isPrivateCache = CacheBuilder.newBuilder()
+            .maximumSize(2000)
+            .expireAfterAccess(
+                profileConfig.getLong("check-interval", 5000) + (1000 * 60),
+                TimeUnit.MILLISECONDS
+            )
+            .build();
     }
 
     public static QBittorrentEE loadFromConfig(String name, JsonObject section) {
