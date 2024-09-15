@@ -23,7 +23,7 @@
   </files>
   <launchers>
     <launcher name="PeerBanHelper" id="26" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
+      <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx386M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true">
@@ -659,5 +659,7 @@ return console.askYesNo(message, true);
   <mediaSets>
     <windows name="Windows x64" id="38" architecture="64" />
     <windows name="Windows arm64" id="41" architecture="arm64" />
+    <macosFolder name="macOS Folder" id="98" architecture="universal" />
+    <unixInstaller name="Unix Installer" id="103" require64BitVm="true" />
   </mediaSets>
 </install4j>
