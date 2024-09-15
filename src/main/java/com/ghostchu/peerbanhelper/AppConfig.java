@@ -11,6 +11,7 @@ import java.io.File;
 
 @Configuration
 @ComponentScan(value = "com.ghostchu.peerbanhelper", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
+@ComponentScan(value = "com.ghostchu.lib.jni", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
 @Slf4j
 public class AppConfig {
     @Bean

@@ -4,6 +4,7 @@ import lombok.Setter;
 
 @Setter
 public class TorrentImpl implements Torrent {
+    private boolean privateTorrent;
     private double progress;
     private long rtUploadSpeed;
     private long rtDownloadSpeed;
@@ -12,7 +13,7 @@ public class TorrentImpl implements Torrent {
     private String name;
     private long size;
 
-    public TorrentImpl(String id, String name, String hash, long size, double progress, long rtUploadSpeed, long rtDownloadSpeed) {
+    public TorrentImpl(String id, String name, String hash, long size, double progress, long rtUploadSpeed, long rtDownloadSpeed, boolean privateTorrent) {
         this.id = id;
         this.name = name;
         this.hash = hash;
@@ -20,6 +21,7 @@ public class TorrentImpl implements Torrent {
         this.progress = progress;
         this.rtUploadSpeed = rtUploadSpeed;
         this.rtDownloadSpeed = rtDownloadSpeed;
+        this.privateTorrent = privateTorrent;
     }
 
     @Override
@@ -55,5 +57,10 @@ public class TorrentImpl implements Torrent {
     @Override
     public long getRtDownloadSpeed() {
         return rtDownloadSpeed;
+    }
+
+    @Override
+    public boolean isPrivate() {
+        return privateTorrent;
     }
 }

@@ -53,6 +53,13 @@ public interface Torrent {
     long getRtDownloadSpeed();
 
     /**
+     * 是否是私有种子
+     *
+     * @return 私有种子
+     */
+    boolean isPrivate();
+
+    /**
      * 获取种子不可逆匿名识别符
      *
      * @return 不可逆匿名识别符

@@ -50,6 +50,11 @@ public final class TRTorrent implements Torrent {
         return backend.getRateDownload();
     }
 
+    @Override
+    public boolean isPrivate() {
+        return backend.getIsPrivate();
+    }
+
     @NotNull
     public List<Peer> getPeers() {
         return backend.getPeers().stream().map(TRPeer::new).collect(Collectors.toList());

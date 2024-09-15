@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.util.maven;
 
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MutableRequest;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -40,18 +42,10 @@ public class GeoUtil {
     }
 
     private static long sendGetTest(String urlStr) {
-        try (HttpClient client = Methanol.newBuilder()
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
-                .connectTimeout(Duration.of(5, ChronoUnit.SECONDS))
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .build()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(urlStr))
-                    .timeout(Duration.of(15, ChronoUnit.SECONDS))
-                    .GET()
-                    .build();
+        try  {
+            MutableRequest request = MutableRequest.GET(urlStr);
             long time = System.currentTimeMillis();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = HTTPUtil.getHttpClient(false,null).send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
                 return Long.MAX_VALUE;
             }

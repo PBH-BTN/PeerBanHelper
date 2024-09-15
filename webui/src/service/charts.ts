@@ -97,7 +97,7 @@ export async function getTrends(startAt: Date, endAt: Date): Promise<CommonRespo
   })
 }
 
-export async function getTraffic(startAt: Date, endAt: Date): Promise<CommonResponse<Traffic>> {
+export async function getTraffic(startAt: Date, endAt: Date): Promise<CommonResponse<Traffic[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const query = new URLSearchParams({

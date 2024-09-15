@@ -264,7 +264,9 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     }
 
     private void handleDownloaderList(@NotNull Context ctx) {
-        List<DownloaderWrapper> downloaders = getServer().getDownloaders().stream().map(d -> new DownloaderWrapper(d.getName(), d.getEndpoint(), d.getType().toLowerCase())).toList();
+        List<DownloaderWrapper> downloaders = getServer().getDownloaders()
+                .stream().map(d -> new DownloaderWrapper(d.getName(), d.getEndpoint(), d.getType().toLowerCase()))
+                .toList();
         ctx.json(new StdResp(true, null, downloaders));
     }
 

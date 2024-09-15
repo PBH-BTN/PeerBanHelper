@@ -92,10 +92,10 @@ useRequest(GetCheckInvervalSettings, {
 const handleBeforeOk = async () => {
   const result = await SetCheckInterval(form.checkInterval)
   if (result.success) {
-    Message.success(result.message)
+    Message.success({ content: result.message, resetOnHover: true })
     return true
   }
-  Message.error(result.message)
+  Message.error({ content: result.message, resetOnHover: true })
   return false
 }
 </script>

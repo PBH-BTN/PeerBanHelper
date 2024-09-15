@@ -10,11 +10,9 @@ body:
       value: |-
         ## 请注意 - Caution
         This form only used for bug report, for any other cases, please [click here](https://github.com/PBH-BTN/PeerBanHelper/issues/new)  
-        此表单**仅用于反馈错误**，如果是其它类型的反馈，请[点击这里](https://github.com/PBH-BTN/PeerBanHelper/issues/new)。
-        If you think the error is related PBH WebUI, please [report to here](https://github.com/PBH-BTN/pbh-fe)  
-        如果你认为此错误是一个 PBH WebUI，请[在此反馈](https://github.com/PBH-BTN/pbh-fe)。  
+        此表单**仅用于反馈错误**，如果是其它类型的反馈，请[点击这里](https://github.com/PBH-BTN/PeerBanHelper/issues/new)。 
         请尽可能完整且详细地填写所有表单项，以便我们以最高效率并准确的排查故障和诊断问题
-  - type: 'textarea'
+  - type: 'input'
     attributes:
       label: '版本号 - Version'
       description: |-
@@ -34,29 +32,40 @@ body:
       placeholder: '操作系统平台名称……'
     validations:
       required: true
-  - type: 'textarea'
+  - type: checkboxes
+    id: deploy-methods
     attributes:
-      label: '部署方式 - Deploy method'
+      label: '部署方式 - Deploy methods'
       description: |-
-        Enter the deploy method that you're using:
-        输入您部署 PeerBanHelper 方式，官方支持的有如下几种方式：
-        * Windows 安装程序（通过 .exe 安装） (Windows .EXE Installer)
-        * Windows 绿色懒人包（解压即用的 .zip 文件） (Windows .ZIP Portable)
-        * Docker 镜像 (Docker Container)
-      placeholder: '部署方式……'
+        Check and tick checkboxes that deploy methods that you're using
+        请检查并勾选你正在使用的 PeerBanHelper 部署方式
+      options:
+        - label: "Windows .exe 安装程序 (Windows .exe Installer)"
+          required: false
+        - label: "Windows .zip 绿色部署包 (Windows .zip Portable)"
+          required: false
+        - label: "Docker"
+          required: false
+        - label: "JAR 包直接启动 (Start via .JAR directly)"
+          required: false
     validations:
       required: true
-  - type: 'textarea'
+  - type: checkboxes
+    id: downloaders
     attributes:
-      label: '关联的下载器类型 - Downloader Type'
+      label: '添加的下载器 - Added Downloaders'
       description: |-
-        Enter the downloader type that you trying to connecting/connected to PBH (E.g):
-        输入您的 PBH 关联的下载器类型，例如：
-        * qBittorrent
-        * Transmission
-        * Deluge
-        * ... 等
-      placeholder: '我添加的下载器有……'
+        Check and tick checkboxes if you added those downloader(s) into your PeerBanHelper installation
+        请勾选被你添加到 PeerBanHelper 中的下载器类型
+      options:
+        - label: "qBittorrent"
+          required: false
+        - label: "BiglyBT/Azureus/Vuze"
+          required: false
+        - label: "Deluge"
+          required: false
+        - label: "Transmission"
+          required: false
     validations:
       required: true
   - type: 'textarea'
@@ -101,16 +110,15 @@ body:
       label: 检查清单 - Check list
       description: |-
         Check and tick checkboxes that listed below
+        检查并勾选所有需要勾选的框框
       options:
-        - label: "我确定正在运行 Github Releases 中的最新的正式版本 PeerBanHelper (I'm running the latest version of PBH that can be found in Github Relases)"
+        - label: "PeerBanHelper 已更新到最新版本 (I'm running the latest version of PBH that can be found in Github Relases)"
           required: false
-        - label: "我确定我所添加的下载器已满足 README 中的前置要求（如版本号和插件）(The downloaders that I've added already satisfied the requirements (E.g install plugins/adapters))"
+        - label: "所添加的下载器已满足 README 中的前置要求（如版本号和插件）(The downloaders that I've added already satisfied the requirements (E.g install plugins/adapters))"
           required: false
-        - label: "我确定我所提到的问题，均未在 README 和 WIKI 中有所解答 (This not a question/or the question that not listed in README's FAQ or WIKI)"
+        - label: "我已检查过 [PBH 文档](https://pbh-btn.github.io/pbh-docs/)（特别是常见问题），且即使使用了搜索也没有找到与此有关的内容 (This not a question/or the question that not listed in README's FAQ or [PBH WIKI](https://pbh-btn.github.io/pbh-docs/))"
           required: false
-        - label: "我确定我没有检查这个检查清单，只是闭眼选中了所有的复选框 (I have not read these checkboxes and therefore I just ticked them all)"
+        - label: "我没有检查这个检查清单，只是闭眼选中了所有的复选框，请关闭这个 Issue (I have not read these checkboxes and therefore I just ticked them all, Please close this issue)"
           required: false
-        - label: "我确定这不是一个与安全有关的安全漏洞，它可以被安全的公开报告 (This not a security related issue, can be safe report in public)"
-          required: false
-        - label: "我确定我已知悉，如果我没有正确地填写问题报告表单，则 Issue 可能会被关闭 (I know this issue may closed without any warnings if I didn't fill the form correctly)"
+        - label: "这不是一个安全漏洞，它可以被安全的公开报告。若需要报告安全漏洞，请[在此报告](https://github.com/PBH-BTN/PeerBanHelper/security/advisories/new) (This not a security related issue, can be safe report in public. If you want report a security exploit, please report it [here](https://github.com/PBH-BTN/PeerBanHelper/security/advisories/new))"
           required: false

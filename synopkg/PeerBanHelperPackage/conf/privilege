@@ -1,0 +1,7 @@
+{
+    "defaults": {
+        "run-as": "package"
+    },
+     "username": "docker-peerbanhelper",
+     "groupname": "docker-peerbanhelper"
+}

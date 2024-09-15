@@ -9,12 +9,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "traffic_journal")
+@DatabaseTable(tableName = "traffic_journal_v2")
 public final class TrafficJournalEntity {
-    @DatabaseField(id = true, unique = true, index = true)
+    @DatabaseField(generatedId = true, index = true)
+    private Long id;
+    @DatabaseField(index = true, uniqueCombo = true)
     private Long timestamp;
+    @DatabaseField(index = true, uniqueCombo = true)
+    private String downloader;
     @DatabaseField
-    private long uploaded;
+    private long dataOverallUploaded;
     @DatabaseField
-    private long downloaded;
+    private long dataOverallDownloaded;
+    @DatabaseField
+    private long protocolOverallUploaded;
+    @DatabaseField
+    private long protocolOverallDownloaded;
 }

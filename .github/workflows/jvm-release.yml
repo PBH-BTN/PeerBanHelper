@@ -14,50 +14,17 @@ on:
     types:
       - published
 jobs:
-  WebUI:
-    uses: ./.github/workflows/build_fe.yml
-  Build_Windows:
-    needs: WebUI
-    permissions:
-      contents: write
-      checks: write
-      actions: read
-      issues: read
-      packages: write
-      pull-requests: read
-      repository-projects: read
-      statuses: read
+  Build_Executable:
+    secrets: inherit
+    uses: ./.github/workflows/build_maven.yml
+  Upload_Artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: webui-dist
-          path: src/main/resources/static
-      - name: Display structure of WebUI dist
-        run: ls src/main/resources/static
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "21"
-          cache: "maven"
-      - uses: luangong/setup-install4j@v1
-        name: Setup Install4j
-        with:
-          version: 10.0.8
-          license: ${{ secrets.INSTALL4J_LICENSE }}
-      - name: Build with Maven
-        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Artifact-${{ github.sha }}
-          path: |
-            target/*.jar
-            target/peerbanhelper-binary
-            target/media/*.exe
-      - name: Upload release binaries
-        uses: alexellis/upload-assets@0.4.1
+          name: maven-dist
+          path: target
+      - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -101,6 +68,8 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
             GIT_HASH=${{ github.sha }}
       # ---------------- ALIYUN ACR --------------------
@@ -135,3 +104,38 @@ jobs:
             linux/arm64/v8
           tags: ${{ steps.meta-acr.outputs.tags }}
           labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  Build_SPK:
+    needs: CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: get-version
+        uses: jactions/maven-version@v1.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-dist
+          path: target/
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - name: Run build script
+        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash synopkg/build-script.sh
+        env:
+          PBH_VERSION: ${{ steps.get-version.outputs.version }}
+          IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: synology-spk
+          path: |
+            /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk
+      - uses: alexellis/upload-assets@0.4.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["/toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk"]'
+        id: project

@@ -1,12 +1,16 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerManagerRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerRecord;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.StatisticsRecord;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -18,7 +22,6 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
@@ -51,6 +54,7 @@ public class BiglyBT extends AbstractDownloader {
     private final String apiEndpoint;
     private final HttpClient httpClient;
     private final Config config;
+    private final String connectorPayload;
 
     public BiglyBT(String name, Config config) {
         super(name);
@@ -74,6 +78,7 @@ public class BiglyBT extends AbstractDownloader {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }
         this.httpClient = builder.build();
+        this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
     }
 
     public static BiglyBT loadFromConfig(String name, JsonObject section) {
@@ -102,6 +107,11 @@ public class BiglyBT extends AbstractDownloader {
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
             if (resp.statusCode() == 200) {
+                MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(connectorPayload));
+                try {
+                    httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+                } catch (Exception ignored) {
+                }
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             }
             if (resp.statusCode() == 403) {
@@ -151,6 +161,9 @@ public class BiglyBT extends AbstractDownloader {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (DownloadRecord detail : torrentDetail) {
+            if (config.isIgnorePrivate() && detail.getTorrent().isPrivateTorrent()) {
+                continue;
+            }
             torrents.add(new TorrentImpl(
                     detail.getTorrent().getInfoHash(),
                     detail.getName(),
@@ -158,19 +171,27 @@ public class BiglyBT extends AbstractDownloader {
                     detail.getTorrent().getSize(),
                     detail.getStats().getCompletedInThousandNotation() / 1000d,
                     detail.getStats().getRtUploadSpeed(),
-                    detail.getStats().getRtDownloadSpeed()));
+                    detail.getStats().getRtDownloadSpeed(),
+                    detail.getTorrent().isPrivateTorrent()));
         }
         return torrents;
     }
 
-    @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-
-    }
 
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-
+    public DownloaderStatistics getStatistics() {
+        HttpResponse<String> resp;
+        try {
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/statistics"),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (resp.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, resp.statusCode(), resp.body()));
+        }
+        StatisticsRecord statisticsRecord = JsonUtil.getGson().fromJson(resp.body(), StatisticsRecord.class);
+        return new DownloaderStatistics(statisticsRecord.getOverallDataBytesSent(), statisticsRecord.getOverallDataBytesReceived());
     }
 
     @Override
@@ -257,6 +278,7 @@ public class BiglyBT extends AbstractDownloader {
         private String httpVersion;
         private boolean incrementBan;
         private boolean verifySsl;
+        private boolean ignorePrivate;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -269,6 +291,7 @@ public class BiglyBT extends AbstractDownloader {
             config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
+            config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             return config;
         }
 
@@ -279,6 +302,7 @@ public class BiglyBT extends AbstractDownloader {
             section.set("token", token);
             section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
+            section.set("ignore-private", ignorePrivate);
             section.set("verify-ssl", verifySsl);
             return section;
         }

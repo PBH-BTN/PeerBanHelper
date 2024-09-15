@@ -120,4 +120,11 @@ public interface Downloader extends AutoCloseable {
      * @return 状态描述说明
      */
     TranslationComponent getLastStatusMessage();
+
+    /**
+     * 获取下载器的统计数据
+     *
+     * @return 统计数据
+     */
+    DownloaderStatistics getStatistics();
 }

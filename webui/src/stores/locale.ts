@@ -24,7 +24,7 @@ export default function useLocale() {
     i18.locale.value = value
     store.setLocale(value)
     document.querySelector('html')?.setAttribute('lang', value)
-    Message.success(i18.t('navbar.action.locale'))
+    Message.success({ content: i18.t('navbar.action.locale'), resetOnHover: true })
   }
   if (store.localeStore !== '' && i18.availableLocales.includes(store.localeStore)) {
     changeLocale(store.localeStore)

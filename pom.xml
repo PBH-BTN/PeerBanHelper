@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>6.0.4</version>
+    <version>6.2.1</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -17,7 +17,7 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.5.1</flatlafVersion>
-        <javafx.version>23-ea+27</javafx.version>
+        <javafx.version>24-ea+5</javafx.version>
         <javafx.scope>provided</javafx.scope>
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
@@ -142,7 +142,7 @@
                 <plugin>
                     <groupId>io.takari.maven.plugins</groupId>
                     <artifactId>takari-lifecycle-plugin</artifactId>
-                    <version>2.1.6</version>
+                    <version>2.2.0</version>
                     <extensions>true</extensions>
                     <configuration>
                         <proc>proc</proc>
@@ -474,7 +474,7 @@
         <dependency>
             <groupId>org.bspfsystems</groupId>
             <artifactId>yamlconfiguration</artifactId>
-            <version>2.0.2</version>
+            <version>3.0.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -529,12 +529,12 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.23.1</version>
+            <version>2.24.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
-            <version>2.23.1</version>
+            <version>2.24.0</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -552,6 +552,16 @@
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
             <version>4.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jackson-databind</artifactId>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jackson-core</artifactId>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.javalin</groupId>
@@ -631,7 +641,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.1.12</version>
+            <version>6.1.13</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
         <dependency>
@@ -689,6 +699,9 @@
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-storage</artifactId>
             <version>0.8.9</version>
+            <groupId>com.rollbar</groupId>
+            <artifactId>rollbar-java</artifactId>
+          <version>1.10.3</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.pixelduke</groupId>-->

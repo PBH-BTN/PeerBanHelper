@@ -74,7 +74,10 @@ const { data, loading } = useRequest(
 
 const handleCopy = (text: string) => {
   copy(text)
-  Message.success(t('page.rule_management.ruleSubscribe.copySuccess'))
+  Message.success({
+    content: t('page.rule_management.ruleSubscribe.copySuccess'),
+    resetOnHover: true
+  })
 }
 
 const peerList = ref<InstanceType<typeof peerListModal>>()

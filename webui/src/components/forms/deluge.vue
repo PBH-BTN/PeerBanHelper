@@ -34,6 +34,12 @@
     <template #extra>{{ t('page.dashboard.editModal.label.httpVersion.description') }} </template>
   </a-form-item>
   <a-form-item
+    field="config.ignorePrivate"
+    :label="t('page.dashboard.editModal.label.ignorePrivate')"
+  >
+    <a-switch v-model="config.ignorePrivate" />
+  </a-form-item>
+  <a-form-item
     field="config.verifySsl"
     default-checked
     :label="t('page.dashboard.editModal.label.verifySsl')"

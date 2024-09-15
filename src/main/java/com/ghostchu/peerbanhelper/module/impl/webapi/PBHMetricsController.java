@@ -5,11 +5,15 @@ import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -24,6 +28,8 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -54,20 +60,22 @@ public class PBHMetricsController extends AbstractFeatureModule {
     }
 
     private void handleHistoryDateAccess(Context ctx) throws Exception {
-        String startAtArg = ctx.queryParam("startAt");
-        String endAtArg = ctx.queryParam("endAt");
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String filter = Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0");
         String type = ctx.queryParam("type");
         String field = ctx.queryParam("field");
-        if (startAtArg == null) {
-            throw new IllegalArgumentException("startAt cannot be null");
-        }
-        if (endAtArg == null) {
-            throw new IllegalArgumentException("startAt cannot be null");
-        }
         if (field == null) {
             throw new IllegalArgumentException("startAt cannot be null");
         }
+
+        if(field.equalsIgnoreCase("banAt")){
+            if("day".equals(type)){
+                // 劫持单独处理以加快首屏请求
+                handlePeerBans(ctx);
+                return;
+            }
+        }
+
         Function<Calendar, Calendar> trimmer = switch (type) {
             case "year" -> (time) -> {
                 Calendar calendar = getZeroCalender();
@@ -122,8 +130,8 @@ public class PBHMetricsController extends AbstractFeatureModule {
             case "unbanAt" -> HistoryEntity::getUnbanAt;
             case null, default -> throw new IllegalArgumentException("Unexpected value: " + field);
         };
-        long startAt = Long.parseLong(startAtArg);
-        long endAt = Long.parseLong(endAtArg);
+        long startAt = timeQueryModel.startAt().getTime();
+        long endAt = timeQueryModel.endAt().getTime();
         double pctFilter = Double.parseDouble(filter);
 
         var results = historyDao.countDateField(startAt, endAt, timestampGetter, trimmer, pctFilter);
@@ -156,6 +164,23 @@ public class PBHMetricsController extends AbstractFeatureModule {
     }
 
 
+    private void handlePeerBans(Context ctx) throws Exception {
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
+        try (var it = historyDao.queryBuilder()
+                .selectColumns("id", "banAt")
+                .where()
+                .ge("banAt", timeQueryModel.startAt())
+                .and()
+                .le("banAt", timeQueryModel.endAt())
+                .iterator()) {
+            while (it.hasNext()) {
+                var startOfDay = MiscUtil.getStartOfToday(it.next().getBanAt().getTime());
+                bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
+            }
+        }
+        ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e)-> new HistoryDao.UniversalFieldDateResult(e.getKey(), e.getValue().intValue() , 0)).toList()));
+    }
     private void handleRules(Context ctx) {
         String locale = locale(ctx);
         Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(getServer().getHitRateMetric().getHitRateMetric().asMap());

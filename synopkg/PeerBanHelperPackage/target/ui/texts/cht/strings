@@ -1,0 +1,8 @@
+[wizard]
+port = "port"
+wizard_set_data_title = "Setting your data"
+
+[ui]
+db_new_password = "Password"
+db_confirm_password = "Confirm Password"
+invalid_user_password = "Password Invalid!! The minimum password length is 10 characters"

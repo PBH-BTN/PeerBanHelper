@@ -2,8 +2,11 @@ package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 
+import java.util.Collection;
 import java.util.Date;
 
 public abstract class AbstractDownloader implements Downloader {
@@ -31,7 +34,9 @@ public abstract class AbstractDownloader implements Downloader {
                 failedLoginAttempts = 0;
                 return result;
             }
-            failedLoginAttempts++;
+            if (result.getStatus() == DownloaderLoginResult.Status.INCORRECT_CREDENTIAL
+                    || result.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS)
+                failedLoginAttempts++;
             return result;
         } catch (Throwable e) {
             failedLoginAttempts++;
@@ -42,6 +47,16 @@ public abstract class AbstractDownloader implements Downloader {
                 failedLoginAttempts = 0;
             }
         }
+    }
+
+    @Override
+    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+
+    }
+
+    @Override
+    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
+
     }
 
     public abstract DownloaderLoginResult login0();
@@ -65,5 +80,10 @@ public abstract class AbstractDownloader implements Downloader {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public DownloaderStatistics getStatistics() {
+        return new DownloaderStatistics(0, 0);
     }
 }

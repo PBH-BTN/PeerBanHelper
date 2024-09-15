@@ -29,13 +29,11 @@ public class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
 
     @Override
     public synchronized TorrentEntity createIfNotExists(TorrentEntity data) throws SQLException {
-        List<TorrentEntity> list = queryForEq("infoHash", data.getInfoHash());
-        if (list.isEmpty()) {
-            long id = create(data);
-            data.setId(id);
+        var entity = queryBuilder().where().eq("infoHash", data.getInfoHash()).queryForFirst();
+        if (entity == null) {
+            create(data);
             return data;
         }
-        TorrentEntity entity = list.getFirst();
         boolean anyUpdated = false;
         if (!entity.getName().equals(data.getName())) {
             entity.setName(data.getName());
