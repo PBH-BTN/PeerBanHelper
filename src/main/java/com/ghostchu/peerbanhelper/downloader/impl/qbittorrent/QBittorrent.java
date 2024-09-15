@@ -35,6 +35,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -168,17 +169,15 @@ public class QBittorrent extends AbstractDownloader {
         List<CompletableFuture<QBTorrent>> futures = new ArrayList<>();
 
         for (QBTorrent detail : qbTorrent) {
-            if (config.isIgnorePrivate()) {
+            if (config.isIgnorePrivate() && detail.getPrivateTorrent() == null) {
                 CompletableFuture<QBTorrent> future = CompletableFuture.supplyAsync(() -> {
-                    if (detail.getPrivateTorrent() == null) {
-                        try {
-                            isPrivateSemaphore.acquire();
-                            checkAndSetPrivateField(detail);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        } finally {
-                            isPrivateSemaphore.release();
-                        }
+                    try {
+                        isPrivateSemaphore.acquire();
+                        checkAndSetPrivateField(detail);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        isPrivateSemaphore.release();
                     }
                     return detail;
                 }, isPrivateExecutorService);
