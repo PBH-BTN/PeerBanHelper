@@ -94,7 +94,7 @@ jobs:
 #        run: |
 #          sudo /toolkit/pkgscripts-ng/PkgCreate.py -v 7.2 -p apollolake -c PeerBanHelperPackage
       - name: Run build script
-        run: sudo sh synopkg/build-script.sh
+        run: sudo bash synopkg/build-script.sh
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
