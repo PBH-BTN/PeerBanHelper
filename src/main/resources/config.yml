@@ -76,7 +76,7 @@ btn:
   # 默认使用 PBH-BTN 社区 BTN 服务器，请前往 https://btn-prod.ghostchu-services.top 注册并获取一个账号
   # The BTN instance URL, you need find a BTN instance
   # By default, PBH-BTN official BTN instance will be used
-  config-url: "https://btn-prod.ghostchu-services.top/ping/config"
+  config-url: "https://sparkle.ghostchu.com/ping/config"
 # 封禁列表处理
 # PBH 能够除了调用 BT 客户端的封禁 API 外，还能够进行如下操作，以便适配更多其它客户端
 # Banlist invoker
