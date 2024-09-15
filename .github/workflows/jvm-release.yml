@@ -18,6 +18,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/build_maven.yml
   Upload_Artifacts:
+    needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -31,6 +32,7 @@ jobs:
           asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*"]'
         id: project
   Build_Docker:
+    needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
