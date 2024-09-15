@@ -1,26 +1,25 @@
-[
-    {
-        "step_title": "PeerBanHelper 安装注意事项",
-        "items": [
-            {
-                "desc": "PeerBanHelper 的容器数据文件将挂载在共享文件夹：<span style='font-weight:bold'>peerbanhelper</span>。<br><br><span style='color:red; font-weight:bold'>对此共享文件夹进行除更换存储空间以外的属性修改可能导致套件工作异常。</span>"
-            }
-        ]
-    },
-     {
-        "step_title": "查收 PeerBanHelper 用户文档",
-        "items": [
-            {
-                "desc": "请花一点时间记下此地址：<a style='font-weight:bold' href='https://pbh-btn.github.io/pbh-docs'>https://pbh-btn.github.io/pbh-docs</a><br><br>此文档将帮助你完成后续的配置步骤。"
-            }
-        ]
-    },
-    {
-        "step_title": "可选加入 BTN 威胁防护网络",
-        "items": [
-            {
-                "desc": "在安装完成后，您可以加入 <a href='https://pbh-btn.github.io/pbh-docs/docs/btn/intro/'>BTN 威胁防护网络</a>，与 BTN 服务器交换数据，以提升您和其他人的恶意 Peer 封禁能力。<br><br>您可以在<a href='https://pbh-btn.github.io/pbh-docs/docs/btn/connect'>这里</a>查看如何加入。"
-            }
-        ]
-    }
+[{
+		"step_title": "PeerBanHelper 安装注意事项",
+		"items": [{
+			"desc": "PeerBanHelper 的容器数据文件将挂载在共享文件夹：<span style='font-weight:bold'>peerbanhelper</span>。<br><br><span style='color:red; font-weight:bold'>对此共享文件夹进行除更换存储空间以外的属性修改可能导致套件工作异常。</span>"
+		}]
+	},
+	{
+		"step_title": "查收 PeerBanHelper 用户文档",
+		"items": [{
+			"desc": "请花一点时间记下此地址：<a style='font-weight:bold' href='https://pbh-btn.github.io/pbh-docs' target='_blank'>https://pbh-btn.github.io/pbh-docs</a><br><br>此文档将帮助你完成后续的配置步骤。"
+		}]
+	},
+	{
+		"step_title": "可选加入 BTN 威胁防护网络",
+		"items": [{
+			"desc": "在安装完成后，您可以加入 <a href='https://pbh-btn.github.io/pbh-docs/docs/btn/intro/' target='_blank'>BTN 威胁防护网络</a>，与 BTN 服务器交换数据，以提升您和其他人的恶意 Peer 封禁能力。<br><br>您可以在<a href='https://pbh-btn.github.io/pbh-docs/docs/btn/connect' target='_blank'>这里</a>查看如何加入。"
+		}]
+	},
+	{
+		"step_title": "安装即将开始",
+		"items": [{
+			"desc": "请保持 DSM 网络通畅。安装可能需要一些时间（取决于 Docker 容器镜像拉取速度），您可以从 Container Manager 中查看安装进度。"
+		}]
+	}
 ]
