@@ -35,6 +35,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -44,6 +46,15 @@ public class QBittorrentEE extends AbstractDownloader {
     private final HttpClient httpClient;
     private final Config config;
     private final BanHandler banHandler;
+
+    private final Map<String, Boolean> isPrivateCacheMap = new LinkedHashMap<>(2000, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Boolean> eldest) {
+            return size() > 2000;
+        }
+    };
+    private final ExecutorService isPrivateExecutorService = Executors.newFixedThreadPool(10); // Controls the number of concurrent API requests
+    private final Semaphore isPrivateSemaphore = new Semaphore(5); // Limits the concurrent access to 5
 
     public QBittorrentEE(String name, Config config) {
         super(name);
@@ -176,14 +187,73 @@ public class QBittorrentEE extends AbstractDownloader {
         }
         List<QBTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBTorrent>>() {
         }.getType());
-        List<Torrent> torrents = new ArrayList<>();
+        List<CompletableFuture<QBTorrent>> futures = new ArrayList<>();
+
         for (QBTorrent detail : qbTorrent) {
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(),
-                    detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(),
-                    detail.getDlspeed(),
-                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
+            if (config.isIgnorePrivate() && detail.getPrivateTorrent() == null) {
+                CompletableFuture<QBTorrent> future = CompletableFuture.supplyAsync(() -> {
+                    try {
+                        isPrivateSemaphore.acquire();
+                        checkAndSetPrivateField(detail);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        isPrivateSemaphore.release();
+                    }
+                    return detail;
+                }, isPrivateExecutorService);
+                futures.add(future);
+            } else {
+                futures.add(CompletableFuture.completedFuture(detail));
+            }
         }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        List<Torrent> torrents = futures.stream()
+            .map(future -> {
+                try {
+                    return future.get();
+                } catch (Exception e) {
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .filter(detail -> !(config.isIgnorePrivate() && detail.getPrivateTorrent() != null && detail.getPrivateTorrent()))
+            .map(detail -> new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(),
+                    detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(),
+                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()))
+            .collect(Collectors.toList());
+
         return torrents;
+    }
+
+    private void checkAndSetPrivateField(QBTorrent detail) {
+        String hash = detail.getHash();
+        if (isPrivateCacheMap.containsKey(hash)) {
+            Boolean isPrivate = isPrivateCacheMap.get(hash);
+            detail.setPrivateTorrent(isPrivate);
+            return;
+        }
+
+        try {
+            log.debug("Field is_private is not present and cache miss, query from properties api, hash: {}", hash);
+            HttpResponse<String> res = httpClient.send(
+                    MutableRequest.GET(apiEndpoint + "/torrents/properties?hash=" + hash),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+            );
+            if (res.statusCode() == 200) {
+                QBTorrent newDetail = JsonUtil.getGson().fromJson(res.body(), QBTorrent.class);
+                Boolean isPrivate = newDetail.getPrivateTorrent();
+                synchronized (isPrivateCacheMap) {
+                    isPrivateCacheMap.put(hash, isPrivate);
+                }
+                detail.setPrivateTorrent(isPrivate);
+            } else {
+                log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, res.statusCode());
+            }
+        } catch (Exception e) {
+            log.error("Error fetching properties for torrent hash: {}", hash, e);
+        }
     }
 
     @Override
@@ -408,6 +478,7 @@ public class QBittorrentEE extends AbstractDownloader {
         private boolean incrementBan;
         private boolean verifySsl;
         private boolean useShadowBan;
+        private boolean ignorePrivate;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -426,6 +497,7 @@ public class QBittorrentEE extends AbstractDownloader {
             config.setIncrementBan(section.getBoolean("increment-ban", false));
             config.setUseShadowBan(section.getBoolean("use-shadow-ban", false));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
+            config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             return config;
         }
 
@@ -441,6 +513,7 @@ public class QBittorrentEE extends AbstractDownloader {
             section.set("increment-ban", incrementBan);
             section.set("use-shadow-ban", useShadowBan);
             section.set("verify-ssl", verifySsl);
+            section.set("ignore-private", ignorePrivate);
             return section;
         }
 
