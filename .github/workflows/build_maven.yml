@@ -39,4 +39,7 @@ jobs:
           path: |
             target/*.jar
             target/media/*.exe
+            target/media/*.dmg
+            target/media/*.rpm
+            target/media/*.deb
         id: project
