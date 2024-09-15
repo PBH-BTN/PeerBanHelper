@@ -54,6 +54,7 @@
     :label="t('page.dashboard.editModal.label.ignorePrivate')"
   >
     <a-switch v-model="config.ignorePrivate" />
+    <template #extra>{{ t('page.dashboard.editModal.label.ignorePrivate.description') }} </template>
   </a-form-item>
 </template>
 <script setup lang="ts">
