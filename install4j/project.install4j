@@ -13,7 +13,7 @@
     </variables>
     <jreBundles jdkProviderId="Zulu" release="21/21.0.3" />
   </application>
-  <files>
+  <files keepModificationTimes="true">
     <mountPoints>
       <mountPoint id="24" />
     </mountPoints>
@@ -661,5 +661,7 @@ return console.askYesNo(message, true);
     <windows name="Windows arm64" id="41" architecture="arm64" />
     <macosFolder name="macOS Folder" id="98" architecture="universal" />
     <unixInstaller name="Unix Installer" id="103" require64BitVm="true" />
+    <linuxDeb name="Linux Deb Archive" id="104" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" description="PeerBanHelper with Java bundled for Debian" maintainerEmail="ghostchu@qq.com" />
+    <linuxRPM name="Linux RPM" id="106" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="amd64" />
   </mediaSets>
 </install4j>
