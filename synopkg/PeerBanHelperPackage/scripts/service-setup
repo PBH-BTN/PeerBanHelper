@@ -24,6 +24,6 @@ SHARE_PATH=$(realpath "/var/packages/${SYNOPKG_PKGNAME}/shares/peerbanhelper" 2>
 
 service_postinst ()
 {
-    echo -e "安装/升级成功！请访问 WebUI 以进行后续配置" | tee -a $SYNOPKG_TEMP_LOGFILE
+    echo -e "安装/升级成功！您可以从 DSM 主菜单 -> PeerBanHelper 进入 WebUI 进行后续配置。" | tee -a $SYNOPKG_TEMP_LOGFILE
 
 }
