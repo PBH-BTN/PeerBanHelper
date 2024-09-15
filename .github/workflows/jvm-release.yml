@@ -51,10 +51,9 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Artifact-${{ github.sha }}
+          name: maven-dist
           path: |
             target/*.jar
-            target/peerbanhelper-binary
             target/media/*.exe
       - name: Upload release binaries
         uses: alexellis/upload-assets@0.4.1
@@ -146,6 +145,10 @@ jobs:
       - uses: actions/checkout@v4
       - id: get-version
         uses: jactions/maven-version@v1.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-dist
+          path: target/
       - name: Set Up Synology SDK
         run: |
           sudo mkdir -p /tmp/pbh-packages
