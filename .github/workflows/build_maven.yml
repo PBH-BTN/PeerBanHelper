@@ -1,11 +1,15 @@
 name: build Maven
 
-on: workflow_call
-
+on:
+  workflow_call:
+    inputs:
+      install4j_license:
+        required: true
+        type: string
 jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
-  CI:
+  Maven:
     needs: WebUI
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +30,7 @@ jobs:
         name: Setup Install4j
         with:
           version: 10.0.8
-          license: ${{ secrets.INSTALL4J_LICENSE }}
+          license: ${{ inputs.install4j_license }}
       - name: Build with Maven
         run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
       - name: Upload build artifacts
