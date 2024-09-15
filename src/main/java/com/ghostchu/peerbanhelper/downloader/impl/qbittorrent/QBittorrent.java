@@ -181,7 +181,7 @@ public class QBittorrent extends AbstractDownloader {
                     try {
                         isPrivateSemaphore.acquire();
                         String hash = detail.getHash();
-                        detail.setPrivateTorrent(isPrivateCache.get(hash, () -> getPrivateStatus(hash)));
+                        detail.setPrivateTorrent(getPrivateStatus(hash));
                     } catch (Exception e) {
                         log.debug("Failed to load private cache", e);
                     } finally {
@@ -216,22 +216,28 @@ public class QBittorrent extends AbstractDownloader {
 
     private Boolean getPrivateStatus(String hash) {
         try {
-            log.debug("Field is_private is not present and cache miss, query from properties api, hash: {}", hash);
-            HttpResponse<String> res = httpClient.send(
-                    MutableRequest.GET(apiEndpoint + "/torrents/properties?hash=" + hash),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-            );
-            if (res.statusCode() == 200) {
-                QBTorrent newDetail = JsonUtil.getGson().fromJson(res.body(), QBTorrent.class);
-                Boolean isPrivate = newDetail.getPrivateTorrent();
-                return isPrivate;
-            } else {
-                log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, res.statusCode());
-            }
+            return isPrivateCache.get(hash, () -> {
+                try {
+                    log.debug("Field is_private is not present and cache miss, query from properties api, hash: {}", hash);
+                    HttpResponse<String> res = httpClient.send(
+                            MutableRequest.GET(apiEndpoint + "/torrents/properties?hash=" + hash),
+                            HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                    );
+                    if (res.statusCode() == 200) {
+                        QBTorrent newDetail = JsonUtil.getGson().fromJson(res.body(), QBTorrent.class);
+                        Boolean isPrivate = newDetail.getPrivateTorrent();
+                        return isPrivate;
+                    } else {
+                        log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, res.statusCode());
+                    }
+                } catch (Exception e) {
+                    log.warn("Error fetching properties for torrent hash: {}", hash, e);
+                }
+                return null;
+            });
         } catch (Exception e) {
-            log.warn("Error fetching properties for torrent hash: {}", hash, e);
+            return null;
         }
-        return null;
     }
 
     @Override
