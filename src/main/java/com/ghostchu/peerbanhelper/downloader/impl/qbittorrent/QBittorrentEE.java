@@ -15,6 +15,8 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.FormBodyPublisher;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
@@ -47,14 +49,11 @@ public class QBittorrentEE extends AbstractDownloader {
     private final Config config;
     private final BanHandler banHandler;
 
-    private final Map<String, Boolean> isPrivateCacheMap = new LinkedHashMap<>(2000, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Boolean> eldest) {
-            return size() > 2000;
-        }
-    };
-    private final ExecutorService isPrivateExecutorService = Executors.newFixedThreadPool(10); // Controls the number of concurrent API requests
-    private final Semaphore isPrivateSemaphore = new Semaphore(5); // Limits the concurrent access to 5
+    private final Cache<String, Boolean> isPrivateCache = CacheBuilder.newBuilder()
+        .maximumSize(2000)
+        .build();
+    private final ExecutorService isPrivateExecutorService = Executors.newVirtualThreadPerTaskExecutor();
+    private final Semaphore isPrivateSemaphore = new Semaphore(5);
 
     public QBittorrentEE(String name, Config config) {
         super(name);
@@ -229,8 +228,8 @@ public class QBittorrentEE extends AbstractDownloader {
 
     private void checkAndSetPrivateField(QBTorrent detail) {
         String hash = detail.getHash();
-        if (isPrivateCacheMap.containsKey(hash)) {
-            Boolean isPrivate = isPrivateCacheMap.get(hash);
+        Boolean isPrivate = isPrivateCache.getIfPresent(hash);
+        if (isPrivate != null || isPrivateCache.asMap().containsKey(hash)) {
             detail.setPrivateTorrent(isPrivate);
             return;
         }
@@ -243,11 +242,8 @@ public class QBittorrentEE extends AbstractDownloader {
             );
             if (res.statusCode() == 200) {
                 QBTorrent newDetail = JsonUtil.getGson().fromJson(res.body(), QBTorrent.class);
-                Boolean isPrivate = newDetail.getPrivateTorrent();
-                synchronized (isPrivateCacheMap) {
-                    isPrivateCacheMap.put(hash, isPrivate);
-                }
-                detail.setPrivateTorrent(isPrivate);
+                isPrivate = newDetail.getPrivateTorrent();
+                isPrivateCache.put(hash, isPrivate);
             } else {
                 log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, res.statusCode());
             }
@@ -312,7 +308,10 @@ public class QBittorrentEE extends AbstractDownloader {
 
     @Override
     public void close() throws Exception {
-
+        isPrivateExecutorService.shutdown();
+        if (!isPrivateExecutorService.awaitTermination(10, TimeUnit.SECONDS)) {
+            isPrivateExecutorService.shutdownNow();
+        }
     }
 
     interface BanHandler {
