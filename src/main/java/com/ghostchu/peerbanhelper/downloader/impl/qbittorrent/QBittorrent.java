@@ -47,10 +47,7 @@ public class QBittorrent extends AbstractDownloader {
     private final String apiEndpoint;
     private final HttpClient httpClient;
     private final Config config;
-
     private final Cache<String, Boolean> isPrivateCache;
-    private final ExecutorService isPrivateExecutorService = Executors.newVirtualThreadPerTaskExecutor();
-    private final Semaphore isPrivateSemaphore = new Semaphore(5);
 
     public QBittorrent(String name, Config config) {
         super(name);
@@ -173,43 +170,33 @@ public class QBittorrent extends AbstractDownloader {
         }
         List<QBTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBTorrent>>() {
         }.getType());
-        List<CompletableFuture<QBTorrent>> futures = new ArrayList<>();
+        List<Torrent> torrents = new ArrayList<>();
+        Semaphore privateStatusLimit = new Semaphore(5);
 
-        for (QBTorrent detail : qbTorrent) {
-            if (config.isIgnorePrivate() && detail.getPrivateTorrent() == null) {
-                CompletableFuture<QBTorrent> future = CompletableFuture.supplyAsync(() -> {
+        try (ExecutorService service = Executors.newVirtualThreadPerTaskExecutor()) {
+            qbTorrent.forEach(detail -> service.submit(() -> {
+                if (config.isIgnorePrivate() && detail.getPrivateTorrent() == null) {
                     try {
-                        isPrivateSemaphore.acquire();
+                        privateStatusLimit.acquire();
                         String hash = detail.getHash();
                         detail.setPrivateTorrent(getPrivateStatus(hash));
                     } catch (Exception e) {
                         log.debug("Failed to load private cache", e);
                     } finally {
-                        isPrivateSemaphore.release();
+                        privateStatusLimit.release();
                     }
-                    return detail;
-                }, isPrivateExecutorService);
-                futures.add(future);
-            } else {
-                futures.add(CompletableFuture.completedFuture(detail));
-            }
-        }
-
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        List<Torrent> torrents = futures.stream()
-            .map(future -> {
-                try {
-                    return future.get();
-                } catch (Exception e) {
-                    return null;
                 }
-            })
-            .filter(Objects::nonNull)
-            .filter(detail -> !(config.isIgnorePrivate() && detail.getPrivateTorrent() != null && detail.getPrivateTorrent()))
-            .map(detail -> new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(),
-                    detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(),
-                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()))
-            .collect(Collectors.toList());
+
+                if (config.isIgnorePrivate() && detail.getPrivateTorrent() != null && detail.getPrivateTorrent()) {
+                    return;
+                }
+                synchronized (torrents) {
+                    torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(), detail.getTotalSize(),
+                        detail.getProgress(), detail.getUpspeed(), detail.getDlspeed(),
+                        detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
+                }
+            }));
+        }
 
         return torrents;
     }
@@ -337,9 +324,7 @@ public class QBittorrent extends AbstractDownloader {
 
     @Override
     public void close() throws Exception {
-        if (!isPrivateExecutorService.isShutdown()) {
-            isPrivateExecutorService.shutdownNow();
-        }
+
     }
 
 
