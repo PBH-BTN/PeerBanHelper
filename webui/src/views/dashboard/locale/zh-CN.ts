@@ -50,7 +50,8 @@ export default {
   'page.dashboard.editModal.label.shadowBan.description.learnMore': '了解更多',
   'page.dashboard.editModal.label.verifySsl': '验证SSL证书',
   'page.dashboard.editModal.label.ignorePrivate': '忽略私有种子',
-  'page.dashboard.editModal.label.ignorePrivate.description': '在低于 qBittorrent 5.x 版本上时启用此开关可能增加下载器的 WebAPI 压力',
+  'page.dashboard.editModal.label.ignorePrivate.description':
+    '在低于 qBittorrent 5.x 版本上时启用此开关可能增加下载器的 WebAPI 压力',
   'page.dashboard.editModal.biglybt': '请先安装 {url}',
   'page.dashboard.editModal.biglybt.url': '插件',
   'page.dashboard.editModal.transmission.discourage':

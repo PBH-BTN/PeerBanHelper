@@ -49,7 +49,8 @@ export default {
   'page.dashboard.editModal.label.shadowBan.description.learnMore': 'Learn More',
   'page.dashboard.editModal.label.verifySsl': 'Verify SSL',
   'page.dashboard.editModal.label.ignorePrivate': 'Ignore Private Torrents',
-  'page.dashboard.editModal.label.ignorePrivate.description': 'May increase the WebAPI load on versions earlier than qBittorrent 5.x',
+  'page.dashboard.editModal.label.ignorePrivate.description':
+    'May increase the WebAPI load on versions earlier than qBittorrent 5.x',
   'page.dashboard.editModal.biglybt': 'Please install plugin at {url} first.',
   'page.dashboard.editModal.biglybt.url': 'here',
   'page.dashboard.editModal.transmission.discourage':
