@@ -110,7 +110,10 @@ public class Main {
         log.info("Current system language tag: {}", Locale.getDefault().toLanguageTag());
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
-            DEF_LOCALE = Locale.getDefault().toLanguageTag();
+            DEF_LOCALE = System.getenv("PBH_USER_LOCALE");
+            if(DEF_LOCALE == null) {
+                DEF_LOCALE = Locale.getDefault().toLanguageTag();
+            }
         }
         DEF_LOCALE = DEF_LOCALE.toLowerCase(Locale.ROOT).replace("-", "_");
         initGUI(args);
