@@ -26,7 +26,7 @@ jobs:
           aws_key_id: ${{ secrets.TENCENT_CLOUD_COS_PBH_STATIC_SECRET_ID }}
           aws_secret_access_key: ${{ secrets.TENCENT_CLOUD_COS_PBH_STATIC_SECRET_KEY }}
           aws_bucket: ${{ secrets.TENCENT_CLOUD_COS_PBH_STATIC_BUCKET_ID }}
-          endpoint: ${{ secret.TENCENT_CLOUD_COS_PBH_STATIC_ENDPOINT }}
+          endpoint: ${{ secrets.TENCENT_CLOUD_COS_PBH_STATIC_ENDPOINT }}
           source_dir: 'ipdb'
           destination_dir: 'ipdb'
 
