@@ -72,10 +72,10 @@ jobs:
           name: maven-dist
           path: target/
       - name: Run build script
-        run: sudo github_sha=${{ github.sha }} version=${{ steps.get-version.outputs.version }} image=ghostchu/peerbanhelper-snapshot:sha-${{ github_sha }} bash synopkg/build-script.sh
+        run: sudo github_sha=${{ github.sha }} version=${{ steps.get-version.outputs.version }} image=ghostchu/peerbanhelper-snapshot:sha-${{ github.sha }} bash synopkg/build-script.sh
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SynologySPK-${{ github.sha }}
+          name: SynologySPK
           path: |
             /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk
