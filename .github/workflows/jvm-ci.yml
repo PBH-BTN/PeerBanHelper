@@ -76,14 +76,13 @@ jobs:
           whoami
           mkdir -p /tmp/pbh-packages
           cp -av synopkg/* /tmp/pbh-packages
-          apt-get install git
           mkdir -p /toolkit
           cd /toolkit
           git clone https://github.com/SynologyOpenSource/pkgscripts-ng
-          apt-get install cifs-utils python3 python3-pip
+          sudo apt-get install cifs-utils python3 python3-pip
           cd /toolkit/pkgscripts-ng/
           git checkout DSM7.2
-          ./EnvDeploy -v 7.2 -p apollolake
+          sudo ./EnvDeploy -v 7.2 -p apollolake
           mkdir -p /toolkit/source
       - name: Prepare for package build
         run: |
@@ -94,7 +93,7 @@ jobs:
           cat /toolkit/source/PeerBanHelperPackage/INFO.sh
       - name: Compile Synology SPK
         run: |
-          /toolkit/pkgscripts-ng/PkgCreate.py -v 7.2 -p apollolake -c PeerBanHelperPackage
+          sudo /toolkit/pkgscripts-ng/PkgCreate.py -v 7.2 -p apollolake -c PeerBanHelperPackage
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
