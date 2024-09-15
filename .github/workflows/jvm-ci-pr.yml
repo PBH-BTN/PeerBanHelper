@@ -19,8 +19,6 @@ jobs:
         with:
           name: webui-dist
           path: src/main/resources/static
-      - name: Display structure of WebUI dist
-        run: ls src/main/resources/static
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
