@@ -193,9 +193,10 @@ public class QBittorrentEE extends AbstractDownloader {
                 CompletableFuture<QBTorrent> future = CompletableFuture.supplyAsync(() -> {
                     try {
                         isPrivateSemaphore.acquire();
-                        checkAndSetPrivateField(detail);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                        String hash = detail.getHash();
+                        detail.setPrivateTorrent(isPrivateCache.get(hash, () -> fetchPrivateStatus(hash)));
+                    } catch (Exception e) {
+                        log.debug("Failed to load private cache", e);
                     } finally {
                         isPrivateSemaphore.release();
                     }
@@ -226,14 +227,7 @@ public class QBittorrentEE extends AbstractDownloader {
         return torrents;
     }
 
-    private void checkAndSetPrivateField(QBTorrent detail) {
-        String hash = detail.getHash();
-        Boolean isPrivate = isPrivateCache.getIfPresent(hash);
-        if (isPrivate != null || isPrivateCache.asMap().containsKey(hash)) {
-            detail.setPrivateTorrent(isPrivate);
-            return;
-        }
-
+    private Boolean fetchPrivateStatus(String hash) {
         try {
             log.debug("Field is_private is not present and cache miss, query from properties api, hash: {}", hash);
             HttpResponse<String> res = httpClient.send(
@@ -242,14 +236,15 @@ public class QBittorrentEE extends AbstractDownloader {
             );
             if (res.statusCode() == 200) {
                 QBTorrent newDetail = JsonUtil.getGson().fromJson(res.body(), QBTorrent.class);
-                isPrivate = newDetail.getPrivateTorrent();
-                isPrivateCache.put(hash, isPrivate);
+                Boolean isPrivate = newDetail.getPrivateTorrent();
+                return isPrivate;
             } else {
                 log.warn("Error fetching properties for torrent hash: {}, status: {}", hash, res.statusCode());
             }
         } catch (Exception e) {
             log.warn("Error fetching properties for torrent hash: {}", hash, e);
         }
+        return null;
     }
 
     @Override
@@ -308,8 +303,7 @@ public class QBittorrentEE extends AbstractDownloader {
 
     @Override
     public void close() throws Exception {
-        isPrivateExecutorService.shutdown();
-        if (!isPrivateExecutorService.awaitTermination(10, TimeUnit.SECONDS)) {
+        if (!isPrivateExecutorService.isShutdown()) {
             isPrivateExecutorService.shutdownNow();
         }
     }
