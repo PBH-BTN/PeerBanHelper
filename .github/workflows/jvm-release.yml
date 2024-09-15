@@ -16,7 +16,7 @@ on:
 jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
-  Build_Windows:
+  Build_Executable:
     needs: WebUI
     permissions:
       contents: write
@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - id: get-version
+        uses: jactions/maven-version@v1
       - uses: actions/download-artifact@v4
         with:
           name: webui-dist
@@ -139,3 +141,37 @@ jobs:
           labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  Build_SPK:
+    needs: Build_Executable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set Up Synology SDK
+        run: |
+          sudo mkdir -p /tmp/pbh-packages
+          sudo cp -aV synopkg/* /tmp/pbh-packages
+          sudo apt-get install git
+          sudo mkdir -p /toolkit
+          sudo cd /toolkit
+          sudo git clone https://github.com/SynologyOpenSource/pkgscripts-ng
+          sudo apt-get install cifs-utils python3 python3-pip
+          sudo cd /toolkit/pkgscripts-ng/
+          sudo git checkout DSM7.2
+          sudo ./EnvDeploy -v 7.2 -p apollolake
+          sudo mkdir -p /toolkit/source
+      - name: Prepare for package build
+        run: |
+          sudo cp -aV /tmp/pbh-packages/* /toolkit/source/
+          sudo sed -i "s/@IMAGE@/registry.cn-hangzhou.aliyuncs.com\/ghostchu\/peerbanhelper:${{ GITHUB_REF#refs/tags/ }}/g" /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
+          sudo cat /toolkit/source/PeerBanHelperPackage/target/app/docker-compose.yaml
+          sudo sed -i "s/@PBH_VERSION@/${{ steps.get-version.outputs.version }}/g" /toolkit/source/PeerBanHelperPackage/INFO.sh
+          sudo cat /toolkit/source/PeerBanHelperPackage/INFO.sh
+      - name: Compile Synology SPK
+        run: |
+          sudo /toolkit/pkgscripts-ng/PkgCreate.py -v 7.2 -p apollolake -c PeerBanHelperPackage
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynologySPK-${{ github.sha }}
+          path: |
+            /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk
