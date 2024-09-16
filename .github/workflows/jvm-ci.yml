@@ -21,10 +21,10 @@ jobs:
     secrets: inherit
   Build_SPK:
     needs: CI
-    uses: ./.github/workflwws/build_spk.yml
+    uses: ./.github/workflows/build_spk.yml
   Build_DEB:
     needs: CI
-    uses: ./.github/workflwws/build_deb.yml
+    uses: ./.github/workflows/build_deb.yml
   Build_Docker:
     needs: CI
     runs-on: ubuntu-latest
