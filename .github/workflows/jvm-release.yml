@@ -30,7 +30,14 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_installers.yml
     secrets: inherit
+  Build_SPK:
+    needs: Build_Executable
+    uses: ./.github/workflwws/build_spk.yml
+  Build_DEB:
+    needs: CI
+    uses: ./.github/workflwws/build_deb.yml
   Upload_Artifacts:
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB]
     permissions:
       contents: write
       checks: write
@@ -40,7 +47,6 @@ jobs:
       pull-requests: read
       repository-projects: read
       statuses: read
-    needs: Build_Installers
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -51,11 +57,20 @@ jobs:
         with:
           name: installer-dist
           path: target/media
+      - uses: actions/download-artifact@v4
+        with:
+          name: spk-dist
+          path: target/media
+        id: project
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb-dist
+          path: target/media
       - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*"]'
+          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/*.spk", "target/media/*.deb"]'
         id: project
   Build_Docker:
     permissions:
@@ -147,81 +162,3 @@ jobs:
           labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  Build_SPK:
-    permissions:
-      contents: write
-      checks: write
-      actions: read
-      issues: read
-      packages: write
-      pull-requests: read
-      repository-projects: read
-      statuses: read
-    needs: Build_Executable
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - id: java_info
-        uses: YunaBraska/java-info-action@main
-      - uses: actions/download-artifact@v4
-        with:
-          name: maven-dist
-          path: target/
-      - name: Set short git commit SHA
-        id: vars
-        run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
-      - name: Run build script
-        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
-        env:
-          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
-          IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: synology-spk
-          path: |
-            /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk
-      - uses: alexellis/upload-assets@0.4.1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["/toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk"]'
-        id: project
-    Build_DEB:
-      permissions:
-        contents: write
-        checks: write
-        actions: read
-        issues: read
-        packages: write
-        pull-requests: read
-        repository-projects: read
-        statuses: read
-      needs: Build_Executable
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - id: get-version
-          uses: jactions/maven-version@v1.2.0
-        - uses: actions/download-artifact@v4
-          with:
-            name: maven-dist
-            path: target/
-        - name: Build Deb package
-          id: build-deb
-          run: |
-            calculatedSha=$(git rev-parse --short ${{ github.sha }})
-            echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
-            sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/deb/DEBIAN/control
-            cp target/PeerBanHelper.jar deb/usr/lib/peerbanhelper
-            cd pkg && dpkg -b deb peerbanhelper.${{ env.PBH_VERSION }}.deb
-          env:
-            PBH_VERSION: ${{ steps.get-version.outputs.version }}
-        - name: Upload build artifacts
-          uses: actions/upload-artifact@v4
-          with:
-            name: deb
-            path: |
-              pkg/*.deb
