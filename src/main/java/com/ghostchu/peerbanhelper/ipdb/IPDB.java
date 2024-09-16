@@ -280,7 +280,8 @@ public class IPDB implements AutoCloseable {
                 .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(3, ChronoUnit.MINUTES))
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
