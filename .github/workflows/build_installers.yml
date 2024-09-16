@@ -16,13 +16,6 @@ jobs:
         with:
           name: maven-dist
           path: target/
-      - name: debug
-        run: |
-          pwd
-          ls
-          cd target
-          pwd
-          ls
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
@@ -31,6 +24,7 @@ jobs:
       - name: Make installers
         run: |
           /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.project_version }} -g -d target/media -D jarPath=$(pwd)/target/PeerBanHelper.jar install4j/project.install4j
+      # jarPath=$(pwd) 是必须的，install4jc 不知道什么毛病，不支持相对路径，这太诡异了
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
