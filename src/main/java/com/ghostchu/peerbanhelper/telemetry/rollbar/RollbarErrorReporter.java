@@ -47,7 +47,8 @@ public class RollbarErrorReporter implements ErrorReporter {
                 .request(() -> new Request.Builder().userIp("anonymize").build())
                 .handleUncaughtErrors(false)
                 .custom(this::makeMapping)
-                .enabled(Main.getMainConfig().getBoolean("privacy.error-reporting", false))
+                //.enabled(Main.getMainConfig().getBoolean("privacy.error-reporting", false))
+                .enabled(false) // 有 BUG，先不开
                 .build());
         Main.getEventBus().register(this);
     }

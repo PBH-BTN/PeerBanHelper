@@ -17,15 +17,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
-import org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy;
-import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.config.plugins.util.PluginManager;
-import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
@@ -110,7 +102,10 @@ public class Main {
         log.info("Current system language tag: {}", Locale.getDefault().toLanguageTag());
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
-            DEF_LOCALE = Locale.getDefault().toLanguageTag();
+            DEF_LOCALE = System.getenv("PBH_USER_LOCALE");
+            if(DEF_LOCALE == null) {
+                DEF_LOCALE = Locale.getDefault().toLanguageTag();
+            }
         }
         DEF_LOCALE = DEF_LOCALE.toLowerCase(Locale.ROOT).replace("-", "_");
         initGUI(args);
@@ -118,6 +113,7 @@ public class Main {
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         setupProxySettings();
         try {
+            log.info("Loading application context, this may need a while on low-end devices, please wait...");
             applicationContext = new AnnotationConfigApplicationContext();
             applicationContext.register(AppConfig.class);
             applicationContext.refresh();
@@ -168,7 +164,13 @@ public class Main {
             if (osName.contains("Windows")) {
                 root = new File(System.getenv("LOCALAPPDATA"), "PeerBanHelper").getAbsolutePath();
             } else {
-                root = new File(new File(System.getProperty("user.home"), ".config"), "PeerBanHelper").getAbsolutePath();
+                var dataDirectory = new File(System.getProperty("user.home")).toPath();
+                if(osName.contains("mac")){
+                    dataDirectory = dataDirectory.resolve("/Library/Application Support");
+                }else{
+                    dataDirectory = dataDirectory.resolve(".config");
+                }
+                root = dataDirectory.resolve("PeerBanHelper").toAbsolutePath().toString();
             }
         }
         if (System.getProperty("pbh.datadir") != null) {
@@ -184,7 +186,7 @@ public class Main {
     }
 
     private static void setupLog4j2() {
-        PluginManager.addPackage("com.ghostchu.peerbanhelper.log4j2");
+        //PluginManager.addPackage("com.ghostchu.peerbanhelper.log4j2");
     }
 
     private static YamlConfiguration loadConfiguration(File file) {

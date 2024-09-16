@@ -370,3 +370,5 @@ DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE: "Your current version of qBi
 DOWNLOADER_FAILED_REQUEST_STATISTICS: "Getting stats data from downloader {} failed: {}"
 PCB_RULE_PEER_PROGRESS_CHEAT_TESTING: "Peer Anti-Cheat fast test"
 PCB_DESCRIPTION_PEER_PROGRESS_CHEAT_TESTING: "PeerBanHelper banned Peer to disconnect it from downloader for anti-cheat fast test, It will be un-banned soon."
+IPDB_EXISTS_UPDATE_FAILED: "IPDB database {} updated failed, using local cached data. The cached data may expired."
+IPDB_RETRY_WITH_BACKUP_SOURCE: "IPDB download failed or timed out, Re-trying with backup source..."

@@ -1,7 +1,7 @@
 # 注意！！
 # 此 PR 禁止使用包含敏感数据或者发布型的操作，避免恶意用户通过 PR 对供应链发起攻击
 
-name: Java CI
+name: Java CI (pull_request)
 
 on:
   pull_request:
@@ -19,8 +19,6 @@ jobs:
         with:
           name: webui-dist
           path: src/main/resources/static
-      - name: Display structure of WebUI dist
-        run: ls src/main/resources/static
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -32,39 +30,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: PullRequest-Artifact-${{ github.sha }}
+          name: maven-dist
           path: |
             target/*.jar
-            target/peerbanhelper-binary
             target/media/*.exe
-      - name: Set Up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set Up Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5.5.1
-        with:
-          images: ghostchu/peerbanhelper-snapshot
-          tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,ci-jvm-universal
-            type=raw,ci
-            type=sha
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6.7.0
-        with:
-          context: .
-          file: ./Dockerfile-CI
-          push: false
-          platforms: |
-            linux/amd64
-            linux/arm64/v8
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}-jvm-universal
-          cache-from: type=gha
-          cache-to: type=gha,mode=max

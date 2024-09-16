@@ -151,7 +151,10 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         return results;
     }
 
-    public List<UniversalFieldDateResult> countDateField(long startAt, long endAt, Function<HistoryEntity, Timestamp> timestampGetter, Function<Calendar, Calendar> timestampTrimmer, double percentFilter) throws Exception {
+    public List<UniversalFieldDateResult> countDateField(long startAt, long endAt,
+                                                         Function<HistoryEntity, Timestamp> timestampGetter,
+                                                         Function<Calendar, Calendar> timestampTrimmer,
+                                                         double percentFilter) throws Exception {
         Map<Long, AtomicLong> counterMap = new HashMap<>();
         try (var it = iterator()) {
             while (it.hasNext()) {

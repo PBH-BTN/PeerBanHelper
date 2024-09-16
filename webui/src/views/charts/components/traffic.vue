@@ -57,6 +57,11 @@
         >
       </template>
     </a-result>
+    <a-empty
+      v-else-if="!data?.data && !loading"
+      class="chart"
+      style="align-items: center; display: flex; justify-content: center; flex-direction: column"
+    />
     <v-chart
       v-else
       class="chart"
@@ -93,7 +98,7 @@ import { useRequest } from 'vue-request'
 use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, LineChart, SVGRenderer])
 
 const option = reactive({
-  range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+  range: [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
 })
 const darkStore = useDarkStore()
 const loadingOptions = computed(() => ({
@@ -167,7 +172,7 @@ watch(option, (v) => {
   run(v.range[0], v.range[1])
 })
 
-const { loading, run, refresh } = useRequest(getTraffic, {
+const { loading, run, refresh, data } = useRequest(getTraffic, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()],
   onSuccess: (data) => {
     if (data.data) {

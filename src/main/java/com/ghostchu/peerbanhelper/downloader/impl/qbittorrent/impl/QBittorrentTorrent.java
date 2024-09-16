@@ -1,5 +1,6 @@
-package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
+package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl;
 
+import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,8 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public final class QBTorrent {
-
+public final class QBittorrentTorrent implements Torrent {
     @SerializedName("added_on")
     private Long addedOn;
 
@@ -165,4 +165,48 @@ public final class QBTorrent {
     @SerializedName("is_private")
     private Boolean privateTorrent;
 
+    @Override
+    public String getId() {
+        return hash;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getHash() {
+        return hash;
+    }
+
+    @Override
+    public double getProgress() {
+        return progress;
+    }
+
+    @Override
+    public long getSize() {
+        return size;
+    }
+
+    @Override
+    public long getRtUploadSpeed() {
+        return upspeed;
+    }
+
+    @Override
+    public long getRtDownloadSpeed() {
+        return dlspeed;
+    }
+
+    @Override
+    public boolean isPrivate() {
+        return privateTorrent != null && privateTorrent;
+    }
+
+    @Override
+    public String getHashedIdentifier() {
+        return Torrent.super.getHashedIdentifier();
+    }
 }

@@ -1,0 +1,5 @@
+#!/bin/sh
+USER=peerbanhelper
+adduser --system $USER
+mkdir -p /etc/peerbanhelper
+chown $USER /etc/peerbanhelper

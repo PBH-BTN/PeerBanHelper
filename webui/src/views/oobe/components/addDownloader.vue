@@ -82,12 +82,12 @@ const handleTest = async () => {
     })
     if (!testResult.success) throw new Error(testResult.message)
   } catch (e: unknown) {
-    if (e instanceof Error) Message.error(e.message)
+    if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
     return false
   } finally {
     testing.value = false
   }
-  Message.success(t('page.oobe.addDownloader.test.success'))
+  Message.success({ content: t('page.oobe.addDownloader.test.success'), resetOnHover: true })
   config.value.valid = true
 }
 </script>

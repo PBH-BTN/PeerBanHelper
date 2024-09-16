@@ -143,7 +143,7 @@ const handleSubmit = async (index: number) => {
       if (!resp.success) {
         throw new Error(resp.message)
       }
-      Message.success(resp.message)
+      Message.success({ content: resp.message, resetOnHover: true })
     } else {
       // update item 先添加，再删除，避免添加失败
       let resp = await addBlackList(dataSource[index].data, type.value)
@@ -154,12 +154,12 @@ const handleSubmit = async (index: number) => {
       if (!resp.success) {
         throw new Error(resp.message)
       }
-      Message.success(resp.message)
+      Message.success({ content: resp.message, resetOnHover: true })
     }
     refresh()
   } catch (e: unknown) {
     if (e instanceof Error) {
-      Message.error(e.message)
+      Message.error({ content: e.message, resetOnHover: true })
     }
   }
 }
@@ -170,11 +170,11 @@ const handleDelete = async (target: number | string) => {
     if (!resp.success) {
       throw new Error(resp.message)
     }
-    Message.success(resp.message)
+    Message.success({ content: resp.message, resetOnHover: true })
     refresh()
     return true
   } catch (e: unknown) {
-    if (e instanceof Error) Message.error(e.message)
+    if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
     return false
   }
 }

@@ -1,0 +1,16 @@
+#!/bin/bash
+# Copyright (c) 2000-2022 Synology Inc. All rights reserved.
+
+case ${MakeClean} in
+    [Yy][Ee][Ss])
+        make clean
+        ;;
+esac
+
+case ${CleanOnly} in
+    [Yy][Ee][Ss])
+        return
+        ;;
+esac
+
+make ${MAKE_FLAGS}

@@ -213,6 +213,9 @@ public class BiglyBT extends AbstractDownloader {
             if (peerId.length() > 8) {
                 peerId = peerId.substring(0, 8);
             }
+            if(peer.getIp() == null || peer.getIp().isBlank()){
+                continue;
+            }
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
                     peer.getIp(),

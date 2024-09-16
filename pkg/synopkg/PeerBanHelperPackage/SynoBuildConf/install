@@ -1,0 +1,56 @@
+#!/bin/bash
+### Use PKG_DIR as working directory.
+PKG_DIR=/tmp/_PeerBanHelper_pkg
+rm -rf $PKG_DIR
+mkdir -p $PKG_DIR
+
+### get spk packing functions
+source /pkgscripts-ng/include/pkg_util.sh
+
+create_inner_tarball() {
+    local inner_tarball_dir=/tmp/_inner_tarball
+
+    ### clear destination directory
+    rm -rf $inner_tarball_dir && mkdir -p $inner_tarball_dir
+
+    ### install needed file into PKG_DIR
+    cp -av target/* $inner_tarball_dir
+
+    ### create package.txz: $1=source_dir, $2=dest_dir
+    pkg_make_package $inner_tarball_dir "${PKG_DIR}"
+}
+
+create_spk(){
+    local scripts_dir=$PKG_DIR/scripts
+    local conf_dir=$PKG_DIR/conf
+    local wizard_dir=$PKG_DIR/WIZARD_UIFILES
+
+    ### Copy Package Center scripts to PKG_DIR
+    mkdir -p $scripts_dir
+    cp -av scripts/* $scripts_dir
+
+    ### Copy package icon
+    cp -av PACKAGE_ICON*.PNG $PKG_DIR
+
+    ### Generate INFO file
+    ./INFO.sh > INFO
+    cp INFO $PKG_DIR/INFO
+
+    ### Copy conf
+    mkdir -p $conf_dir
+    cp -av conf/* $conf_dir
+
+    ### Copy wizard files
+    mkdir -p $wizard_dir
+    cp -av WIZARD_UIFILES/* $wizard_dir
+
+    ### Create the final spk.
+    # pkg_make_spk <source path> <dest path> <spk file name>
+    # Please put the result spk into /image/packages
+    # spk name functions: pkg_get_spk_name pkg_get_spk_unified_name pkg_get_spk_family_name
+    mkdir -p /image/packages
+    pkg_make_spk ${PKG_DIR} "/image/packages" $(pkg_get_spk_family_name)
+}
+
+create_inner_tarball
+create_spk

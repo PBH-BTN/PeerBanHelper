@@ -75,7 +75,7 @@ const handleSubmit: FormInstance['onSubmit'] = async ({ errors, values }) => {
   })
   try {
     await endpointStore.setAuthToken(token, rememberPassword)
-    Message.success(t('login.form.login.success'))
+    Message.success({ content: t('login.form.login.success'), resetOnHover: true })
   } catch (err) {
     loginForm.value?.setFields({
       token: {

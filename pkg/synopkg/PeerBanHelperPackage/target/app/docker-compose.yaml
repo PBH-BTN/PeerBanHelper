@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  peerbanhelper:
+    image: @IMAGE@
+    restart: always
+    container_name: "peerbanhelper"
+    volumes:
+      - /var/packages/peerbanhelper/shares/peerbanhelper:/app/data
+    ports:
+      - "9898:9898"
+    environment:
+      - PBH_USER_LOCALE=zh-CN

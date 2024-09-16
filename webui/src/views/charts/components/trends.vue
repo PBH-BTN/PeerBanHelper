@@ -76,7 +76,7 @@ use([GridComponent, TooltipComponent, LineChart, SVGRenderer])
 const { t } = useI18n()
 
 const option = reactive({
-  range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+  range: [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
 })
 
 const err = ref<Error>()

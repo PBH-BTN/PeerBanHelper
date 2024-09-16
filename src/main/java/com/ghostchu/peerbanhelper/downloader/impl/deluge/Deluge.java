@@ -122,7 +122,9 @@ public class Deluge extends AbstractDownloader {
                             peer.getProgress() / 100.0d,
                             parsePeerFlag(peer.getFlags(), peer.getSource())
                     );
-                    peers.add(delugePeer);
+                    if (delugePeer.getPeerAddress().getIp() != null && !delugePeer.getPeerAddress().getIp().isBlank()) {
+                        peers.add(delugePeer);
+                    }
                 }
                 Torrent torrent = new DelugeTorrent(
                         activeTorrent.getId(),

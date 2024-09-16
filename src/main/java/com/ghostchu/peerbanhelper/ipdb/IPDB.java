@@ -235,9 +235,10 @@ public class IPDB implements AutoCloseable {
 
     private void updateGeoCN(File mmdbGeoCNFile) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
-        MutableRequest request = MutableRequest.GET("https://github.com/ljxi/GeoCN/releases/download/Latest/GeoCN.mmdb");
+        MutableRequest main = MutableRequest.GET("https://github.com/ljxi/GeoCN/releases/download/Latest/GeoCN.mmdb");
+        MutableRequest backup = MutableRequest.GET("https://pbh-static.ghostchu.com/ipdb/GeoCN.mmdb");
         Path tmp = Files.createTempFile("GeoCN", ".mmdb");
-        downloadFile(request, tmp, "GeoCN").join();
+        downloadFile(main, backup, tmp, "GeoCN").join();
         if (!tmp.toFile().exists()) {
             throw new IllegalStateException("Download mmdb database failed!");
         }
@@ -256,11 +257,16 @@ public class IPDB implements AutoCloseable {
 
     private void updateMMDB(String databaseName, File target) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
-        MutableRequest request = MutableRequest.GET("https://github.com/P3TERX/GeoLite.mmdb/raw/download/" + databaseName + ".mmdb");
+        MutableRequest main = MutableRequest.GET("https://github.com/P3TERX/GeoLite.mmdb/raw/download/" + databaseName + ".mmdb");
+        MutableRequest backup = MutableRequest.GET("https://pbh-static.ghostchu.com/ipdb/" + databaseName + ".mmdb");
         Path tmp = Files.createTempFile(databaseName, ".mmdb");
-        downloadFile(request, tmp, databaseName).join();
+        downloadFile(main, backup, tmp, databaseName).join();
         if (!tmp.toFile().exists()) {
-            throw new IllegalStateException("Download mmdb database failed!");
+            if (isMmdbNeverDownloaded(target)) {
+                throw new IllegalStateException("Download mmdb database failed!");
+            } else {
+                log.warn(tlUI(Lang.IPDB_EXISTS_UPDATE_FAILED, databaseName));
+            }
         }
         Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
@@ -274,6 +280,8 @@ public class IPDB implements AutoCloseable {
                 .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
@@ -283,6 +291,9 @@ public class IPDB implements AutoCloseable {
                 .build();
     }
 
+    private boolean isMmdbNeverDownloaded(File target) {
+        return !target.exists();
+    }
 
     private boolean needUpdateMMDB(File target) {
         if (!target.exists()) {
@@ -294,16 +305,25 @@ public class IPDB implements AutoCloseable {
         return System.currentTimeMillis() - target.lastModified() > updateInterval;
     }
 
-    private CompletableFuture<Void> downloadFile(MutableRequest req, Path path, String databaseName) {
+    private CompletableFuture<Void> downloadFile(MutableRequest req, MutableRequest backupReq, Path path, String databaseName) {
         return HTTPUtil.retryableSendProgressTracking(httpClient, req, HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
                     if (r.statusCode() != 200) {
+                        if (backupReq != null) {
+                            log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
+                            downloadFile(backupReq, null, path, databaseName);
+                            return;
+                        }
                         log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body()));
                     } else {
                         log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                     }
                 })
                 .exceptionally(e -> {
+                    if (backupReq != null) {
+                        log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
+                        return downloadFile(backupReq, null, path, databaseName).join();
+                    }
                     log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, e.getMessage()), e);
                     File file = path.toFile();
                     if (file.exists()) {

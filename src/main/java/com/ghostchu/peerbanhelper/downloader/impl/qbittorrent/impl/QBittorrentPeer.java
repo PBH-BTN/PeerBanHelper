@@ -1,16 +1,15 @@
-package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
+package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl;
 
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
-import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
 @Setter
-public final class QBEEPeer implements Peer {
+public final class QBittorrentPeer implements Peer {
     @SerializedName("client")
     private String client;
     @SerializedName("connection")
@@ -43,13 +42,10 @@ public final class QBEEPeer implements Peer {
     private Long upSpeed;
     @SerializedName("uploaded")
     private Long uploaded;
-    @Getter
-    @SerializedName("shadowbanned")
-    private Boolean shadowBanned;
     private transient PeerAddress peerAddress;
     private String rawIp;
 
-    public QBEEPeer() {
+    public QBittorrentPeer() {
     }
 
     @Override
@@ -107,29 +103,26 @@ public final class QBEEPeer implements Peer {
         return rawIp == null ? ip : rawIp;
     }
 
-
     @Override
     public String toString() {
-        return "QBEEPeer{" +
-                "client='" + client + '\'' +
-                ", connection='" + connection + '\'' +
-                ", country='" + country + '\'' +
-                ", countryCode='" + countryCode + '\'' +
-                ", dlSpeed=" + dlSpeed +
-                ", downloaded=" + downloaded +
-                ", files='" + files + '\'' +
-                ", flags='" + flags + '\'' +
-                ", flagsDesc='" + flagsDesc + '\'' +
-                ", ip='" + ip + '\'' +
-                ", peerIdClient='" + peerIdClient + '\'' +
-                ", port=" + port +
-                ", progress=" + progress +
-                ", relevance=" + relevance +
-                ", upSpeed=" + upSpeed +
-                ", uploaded=" + uploaded +
-                ", shadowBanned=" + shadowBanned +
-                ", peerAddress=" + peerAddress +
-                ", rawIp='" + rawIp + '\'' +
-                '}';
+        return "SingleTorrentPeer{" +
+               "client='" + client + '\'' +
+               ", connection='" + connection + '\'' +
+               ", country='" + country + '\'' +
+               ", countryCode='" + countryCode + '\'' +
+               ", dlSpeed=" + dlSpeed +
+               ", downloaded=" + downloaded +
+               ", files='" + files + '\'' +
+               ", flags='" + flags + '\'' +
+               ", flagsDesc='" + flagsDesc + '\'' +
+               ", ip='" + ip + '\'' +
+               ", peerIdClient='" + peerIdClient + '\'' +
+               ", port=" + port +
+               ", progress=" + progress +
+               ", relevance=" + relevance +
+               ", upSpeed=" + upSpeed +
+               ", uploaded=" + uploaded +
+               '}';
     }
+
 }

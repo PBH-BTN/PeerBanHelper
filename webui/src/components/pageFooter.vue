@@ -35,7 +35,7 @@
         <a-descriptions-item label="WebUI Version">
           <a-space>
             {{ version }}
-            <div>
+            <div v-if="hash">
               (<a-link :href="`https://github.com/PBH-BTN/PeerBanHelper/tree/${hash}/webui`">
                 {{ hash.substring(0, 8) }} </a-link
               >)
@@ -51,11 +51,11 @@
 <script setup lang="ts">
 import { useEndpointStore } from '@/stores/endpoint'
 import { Button, Notification } from '@arco-design/web-vue'
-import { computed, h, ref, watch } from 'vue'
+import { RequestError } from '@octokit/request-error'
 import { compare } from 'compare-versions'
+import { computed, h, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import plusModal from './plusModal.vue'
-import { RequestError } from '@octokit/request-error'
 
 const { t } = useI18n()
 const version = __APP_VERSION__
