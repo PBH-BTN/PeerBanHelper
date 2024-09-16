@@ -28,9 +28,5 @@ jobs:
         with:
           name: installer-dist
           path: |
-            target/media/*.exe
-            target/media/*.dmg
-            target/media/*.rpm
-            target/media/*.deb
-            target/media/*.sh
+            target/media/PeerBanHelper_*
         id: project
