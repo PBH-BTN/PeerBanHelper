@@ -1,0 +1,23 @@
+{
+    "data-share": {
+        "shares": [
+            {
+                "name": "peerbanhelper",
+                "permission": {
+                    "rw": [
+                        "docker-peerbanhelper"
+                    ]
+                }
+            }
+        ]
+    },
+    "docker-project": {
+        "projects": [
+            {
+                "name": "peerbanhelper",
+                "path": "app"
+            }
+        ]
+    },
+    "systemd-unit": {}
+}

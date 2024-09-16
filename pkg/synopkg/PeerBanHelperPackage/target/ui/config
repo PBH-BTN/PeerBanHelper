@@ -1,0 +1,13 @@
+{
+    ".url": {
+        "SYNO.SDS.peerbanhelper.Application": {
+            "title": "PeerBanHelper",
+            "desc": "PeerBanHelper",
+            "icon": "images/{0}.png",
+            "type": "url",
+            "protocol": "http",
+            "port": "9898",
+            "allUsers": false
+        }
+    }
+}

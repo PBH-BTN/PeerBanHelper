@@ -1,0 +1,11 @@
+[Unit]
+Description=PeerBanHelper Service
+After=network.target
+[Service]
+User=peerbanhelper
+WorkingDirectory=/etc/peerbanhelper
+ExecStart=/usr/bin/java -Xmx386M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -jar /usr/lib/peerbanhelper/PeerBanHelper.jar
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+   

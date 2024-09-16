@@ -165,7 +165,7 @@ jobs:
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
       - name: Run build script
-        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash synopkg/build-script.sh
+        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
         env:
           PBH_VERSION: ${{ steps.get-version.outputs.version }}
           IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
