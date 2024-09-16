@@ -61,7 +61,6 @@ jobs:
         with:
           name: spk-dist
           path: target/media
-        id: project
       - uses: actions/download-artifact@v4
         with:
           name: deb-dist
@@ -70,8 +69,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/*.spk", "target/media/*.deb"]'
-        id: project
+          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/*.spk", "target/media/*.deb"]
   Build_Docker:
     permissions:
       contents: write
