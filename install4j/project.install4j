@@ -662,10 +662,10 @@ return console.askYesNo(message, true);
     <macosFolder name="macOS Folder" id="98" architecture="universal" />
     <unixInstaller name="Unix Installer" id="103" require64BitVm="true" />
     <linuxRPM name="Linux RPM" id="106" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="amd64" />
-    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_withoutjava" architecture="64">
+    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
       <jreBundle jreBundleSource="none" />
     </windows>
-    <windows name="Windows arm64 NoJava" id="112" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_withoutjava" architecture="arm64">
+    <windows name="Windows arm64 NoJava" id="112" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="arm64">
       <jreBundle jreBundleSource="none" />
     </windows>
     <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="universal">
