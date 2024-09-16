@@ -44,6 +44,7 @@ public class QBittorrentEEConfigImpl implements QBittorrentConfig {
         return config;
     }
 
+    @Override
     public YamlConfiguration saveToYaml() {
         YamlConfiguration section = new YamlConfiguration();
         section.set("type", "qbittorrentee");
