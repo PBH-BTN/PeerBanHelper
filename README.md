@@ -22,7 +22,7 @@
 
 ## 支持的客户端
 
-* qBittorrent
+* qBittorrent **4.5.0 或更高版本**
 * BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
 * Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
 * Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
