@@ -1,4 +1,4 @@
-name: NodeJS Build
+name: WebUI Build
 
 on:
   push:

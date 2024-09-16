@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI
+name: Java CI (push)
 
 on:
   push:
@@ -14,6 +14,10 @@ on:
 jobs:
   CI:
     uses: ./.github/workflows/build_maven.yml
+    secrets: inherit
+  Build_Installers:
+    needs: CI
+    uses: ./.github/workflows/build_installers.yml
     secrets: inherit
   Build_Docker:
     needs: CI
@@ -65,8 +69,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - id: get-version
-        uses: jactions/maven-version@v1.2.0
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
@@ -79,7 +83,7 @@ jobs:
       - name: Run build script
         run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
         env:
-          PBH_VERSION: ${{ steps.get-version.outputs.version }}
+          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
           IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

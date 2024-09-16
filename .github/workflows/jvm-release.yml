@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java Release
+name: Release
 
 on:
   workflow_dispatch:
@@ -26,6 +26,10 @@ jobs:
       statuses: read
     secrets: inherit
     uses: ./.github/workflows/build_maven.yml
+  Build_Installers:
+    needs: Build_Executable
+    uses: ./.github/workflows/build_installers.yml
+    secrets: inherit
   Upload_Artifacts:
     permissions:
       contents: write
@@ -36,13 +40,17 @@ jobs:
       pull-requests: read
       repository-projects: read
       statuses: read
-    needs: Build_Executable
+    needs: Build_Installers
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
-          path: target
+          path: target/
+      - uses: actions/download-artifact@v4
+        with:
+          name: installer-dist
+          path: target/media
       - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -153,8 +161,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - id: get-version
-        uses: jactions/maven-version@v1.2.0
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
@@ -167,7 +175,7 @@ jobs:
       - name: Run build script
         run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
         env:
-          PBH_VERSION: ${{ steps.get-version.outputs.version }}
+          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
           IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
