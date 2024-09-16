@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: get-version
-        uses: jactions/maven-version@v1.2.0
+        uses: andreacomo/maven-gav-extractor@v2
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
@@ -22,7 +22,9 @@ jobs:
           version: 10.0.8
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Make installers
-        run: /opt/install4j/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.get-version.outputs.version }} -d target/media -D jarPath=target/PeerBanHelper.jar install4j/project.install4j
+        run: |
+          ls /opt/install4j/
+          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.extract.outputs.version }} -d target/media -D jarPath=target/PeerBanHelper.jar install4j/project.install4j
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
