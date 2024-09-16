@@ -16,6 +16,11 @@ jobs:
         with:
           name: maven-dist
           path: target/
+      - name: debug
+        run: |
+          ls
+          cd target
+          ls
       - uses: luangong/setup-install4j@v1
         name: Setup Install4j
         with:
