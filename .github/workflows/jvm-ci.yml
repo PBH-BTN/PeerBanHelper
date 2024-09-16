@@ -18,10 +18,12 @@ jobs:
   Build_Installers:
     needs: CI
     uses: ./.github/workflows/build_installers.yml
-    secrets: inherit
+    secrets:
   Build_SPK:
     needs: CI
     uses: ./.github/workflows/build_spk.yml
+    with:
+      image: ghostchu/peerbanhelper-snapshot:sha-$(git rev-parse --short ${{ github.sha }})
   Build_DEB:
     needs: CI
     uses: ./.github/workflows/build_deb.yml

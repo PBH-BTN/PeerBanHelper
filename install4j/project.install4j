@@ -657,21 +657,27 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows x64" id="38" architecture="64" />
-    <windows name="Windows arm64" id="41" architecture="arm64" />
-    <macosFolder name="macOS Folder" id="98" architecture="universal" />
-    <unixInstaller name="Unix Installer" id="103" require64BitVm="true" />
-    <linuxRPM name="Linux RPM" id="106" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="amd64" />
-    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_withoutjava" architecture="64">
+    <windows name="Windows x64" id="38" architecture="64">
+      <jreBundle installOnlyIfNecessary="true" />
+    </windows>
+    <windows name="Windows arm64" id="41" architecture="arm64">
+      <jreBundle installOnlyIfNecessary="true" />
+    </windows>
+    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}" architecture="universal" />
+    <unixInstaller name="Unix Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64" />
+    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
       <jreBundle jreBundleSource="none" />
     </windows>
-    <windows name="Windows arm64 NoJava" id="112" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_withoutjava" architecture="arm64">
+    <windows name="Windows arm64 NoJava" id="112" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="arm64">
       <jreBundle jreBundleSource="none" />
     </windows>
-    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="universal">
+    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}_nojava" architecture="universal">
       <jreBundle jreBundleSource="none" />
     </macosFolder>
-    <unixInstaller name="Unix Installer NoJava" id="124" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" require64BitVm="true">
+    <unixInstaller name="Unix Installer NoJava" id="124" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}_nojava" require64BitVm="true">
       <jreBundle jreBundleSource="none" />
     </unixInstaller>
   </mediaSets>

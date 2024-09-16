@@ -79,6 +79,7 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
     private TrayIcon trayIcon;
     private ListView<ListLogEntry> logsView;
     private boolean persistFlagTrayMessageSent = false;
+    private final OsThemeDetector detector = OsThemeDetector.getDetector();
 
     public JavaFxImpl(String[] args) {
         super(args);
@@ -154,7 +155,6 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
 
     private void setupJFXWindow() {
         Stage st = MainJavaFx.getStage();
-        OsThemeDetector detector = OsThemeDetector.getDetector();
         detector.registerListener(this::updateTheme);
         updateTheme(detector.isDark());
         st.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, this::closeWindowEvent);
@@ -420,10 +420,12 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         Platform.runLater(() -> {
             if (b) {
                 MainJavaFx.getStage().show();
+                updateTheme(detector.isDark());
             } else {
                 MainJavaFx.getStage().hide();
             }
         });
+
     }
 
     @Override
