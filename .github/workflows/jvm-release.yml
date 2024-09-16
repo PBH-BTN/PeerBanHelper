@@ -34,7 +34,7 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
   Build_DEB:
-    needs: CI
+    needs: Build_Executable
     uses: ./.github/workflows/build_deb.yml
   Upload_Artifacts:
     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB]
