@@ -671,7 +671,7 @@ return console.askYesNo(message, true);
     <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="universal">
       <jreBundle jreBundleSource="none" />
     </macosFolder>
-    <unixInstaller name="Unix Installer NoJava" id="124" require64BitVm="true">
+    <unixInstaller name="Unix Installer NoJava" id="124" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" require64BitVm="true">
       <jreBundle jreBundleSource="none" />
     </unixInstaller>
   </mediaSets>
