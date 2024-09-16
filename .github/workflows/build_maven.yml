@@ -42,4 +42,5 @@ jobs:
             target/media/*.dmg
             target/media/*.rpm
             target/media/*.deb
+            target/media/*.sh
         id: project
