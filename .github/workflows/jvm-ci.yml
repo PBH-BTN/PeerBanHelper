@@ -81,7 +81,7 @@ jobs:
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
       - name: Run build script
-        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash synopkg/build-script.sh
+        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
           IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
@@ -91,3 +91,30 @@ jobs:
           name: synology-spk
           path: |
             /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk
+  Build_DEB:
+    needs: CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: get-version
+        uses: jactions/maven-version@v1.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-dist
+          path: target/
+      - name: Build Deb package
+        id: build-deb
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+          sed -i "s/<version>/${{ env.PBH_VERSION }}-$calculatedSha/g" pkg/deb/DEBIAN/control
+          cp target/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper
+          dpkg -b pkg/deb peerbanhelper.${{ env.PBH_VERSION }}_$calculatedSha.deb
+        env:
+          PBH_VERSION: ${{ steps.get-version.outputs.version }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: |
+            peerbanhelper*.deb
