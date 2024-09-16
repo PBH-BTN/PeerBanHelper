@@ -57,11 +57,6 @@
         >
       </template>
     </a-result>
-    <a-empty
-      v-else-if="data?.data && !loading"
-      class="chart"
-      style="align-items: center; display: flex; justify-content: center; flex-direction: column"
-    />
     <v-chart
       v-else
       class="chart"
@@ -172,7 +167,7 @@ watch(option, (v) => {
   run(v.range[0], v.range[1])
 })
 
-const { loading, run, refresh, data } = useRequest(getTraffic, {
+const { loading, run, refresh } = useRequest(getTraffic, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()],
   onSuccess: (data) => {
     if (data.data) {
