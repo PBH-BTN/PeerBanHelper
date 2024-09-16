@@ -6,12 +6,12 @@ on:
       INSTALL4J_LICENSE:
         required: true
 jobs:
-  Build_Installers:
+  install4jc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - id: extract
-        uses: andreacomo/maven-gav-extractor@v2
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
@@ -24,7 +24,7 @@ jobs:
       - name: Make installers
         run: |
           ls /opt/install4j/
-          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.extract.outputs.version }} -d target/media -D jarPath=target/PeerBanHelper.jar install4j/project.install4j
+          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.project_version }} -d target/media -D jarPath=target/PeerBanHelper.jar install4j/project.install4j
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
