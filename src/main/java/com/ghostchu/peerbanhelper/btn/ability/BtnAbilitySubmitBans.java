@@ -78,7 +78,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
                         return null;
                     });
         } catch (Throwable throwable) {
-            log.error("Unable to finish scheduled tasks", throwable);
+            log.error("Unable to submit bans", throwable);
         }
     }
 

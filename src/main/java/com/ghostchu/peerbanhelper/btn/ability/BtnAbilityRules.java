@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -85,14 +86,18 @@ public class BtnAbilityRules implements BtnAbility {
                     if (r.statusCode() != 200) {
                         log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                     } else {
-                        BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
-                        this.btnRule = new BtnRuleParsed(btr);
-                        Main.getEventBus().post(new BtnRuleUpdateEvent());
                         try {
-                            Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
-                        } catch (IOException ignored) {
+                            BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
+                            this.btnRule = new BtnRuleParsed(btr);
+                            Main.getEventBus().post(new BtnRuleUpdateEvent());
+                            try {
+                                Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
+                            } catch (IOException ignored) {
+                            }
+                            log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
+                        } catch (JsonSyntaxException e) {
+                            log.error("Unable to parse BtnRule as a valid Json object: {}-{}", r.statusCode(), r.body(), e);
                         }
-                        log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
                     }
                 })
                 .exceptionally((e) -> {

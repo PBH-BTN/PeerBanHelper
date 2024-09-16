@@ -72,7 +72,7 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
                         return null;
                     });
         } catch (Throwable throwable) {
-            log.error("Unable to finish scheduled tasks", throwable);
+            log.error("Unable to submit rules hit rate", throwable);
         }
     }
 
