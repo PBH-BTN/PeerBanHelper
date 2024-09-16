@@ -4,7 +4,6 @@ on:
   workflow_call:
 jobs:
   dpkg:
-    needs: CI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
