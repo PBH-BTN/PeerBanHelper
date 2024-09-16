@@ -33,5 +33,4 @@ jobs:
           name: maven-dist
           path: |
             target/*.jar
-            target/media/*.exe
         id: project

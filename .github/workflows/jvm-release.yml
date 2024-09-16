@@ -87,7 +87,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
-          path: target/
+          path: target
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set Up Buildx
