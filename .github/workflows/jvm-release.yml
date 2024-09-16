@@ -33,6 +33,8 @@ jobs:
   Build_SPK:
     needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
+    with:
+      image: ghostchu/peerbanhelper:${{ GITHUB_REF_NAME }}
   Build_DEB:
     needs: Build_Executable
     uses: ./.github/workflows/build_deb.yml

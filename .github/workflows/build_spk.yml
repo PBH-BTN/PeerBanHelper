@@ -2,6 +2,12 @@ name: SPK Package Build
 
 on:
   workflow_call:
+    inputs:
+      image:
+        description: 'The image name that for build docker container'
+        default: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
+        required: false
+        type: string
 jobs:
   pkgcreate:
     runs-on: ubuntu-latest
@@ -22,7 +28,7 @@ jobs:
         run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
-          IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
+          IMAGE: ${{ inputs.image }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
