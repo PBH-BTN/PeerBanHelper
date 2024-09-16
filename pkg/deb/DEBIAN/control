@@ -1,5 +1,5 @@
 Package: peerbanhelper
-Version: 6.2.2
+Version: <version>
 Depends: java-runtime (>=21)
 Section: universe/net
 Priority: optional
