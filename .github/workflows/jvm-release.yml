@@ -189,39 +189,39 @@ jobs:
         with:
           asset_paths: '["/toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk"]'
         id: project
-    Build_DEB:
-      permissions:
-        contents: write
-        checks: write
-        actions: read
-        issues: read
-        packages: write
-        pull-requests: read
-        repository-projects: read
-        statuses: read
-      needs: Build_Executable
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - id: get-version
-          uses: jactions/maven-version@v1.2.0
-        - uses: actions/download-artifact@v4
-          with:
-            name: maven-dist
-            path: target/
-        - name: Build Deb package
-          id: build-deb
-          run: |
-            calculatedSha=$(git rev-parse --short ${{ github.sha }})
-            echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
-            sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/deb/DEBIAN/control
-            cp target/PeerBanHelper.jar deb/usr/lib/peerbanhelper
-            cd pkg && dpkg -b deb peerbanhelper.${{ env.PBH_VERSION }}.deb
-          env:
-            PBH_VERSION: ${{ steps.get-version.outputs.version }}
-        - name: Upload build artifacts
-          uses: actions/upload-artifact@v4
-          with:
-            name: deb
-            path: |
-              pkg/*.deb
+  Build_DEB:
+    permissions:
+      contents: write
+      checks: write
+      actions: read
+      issues: read
+      packages: write
+      pull-requests: read
+      repository-projects: read
+      statuses: read
+    needs: Build_Executable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: get-version
+        uses: jactions/maven-version@v1.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-dist
+          path: target/
+      - name: Build Deb package
+        id: build-deb
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+          sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/deb/DEBIAN/control
+          cp target/PeerBanHelper.jar deb/usr/lib/peerbanhelper
+          dpkg -b pkg/deb peerbanhelper.${{ env.PBH_VERSION }}.deb
+        env:
+          PBH_VERSION: ${{ steps.get-version.outputs.version }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: |
+            peerbanhelper*.deb
