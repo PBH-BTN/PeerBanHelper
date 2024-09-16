@@ -104,8 +104,8 @@ jobs:
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
           sed -i "s/<version>/${{ env.PBH_VERSION }}-$calculatedSha/g" pkg/deb/DEBIAN/control
-          cp target/PeerBanHelper.jar deb/usr/lib/peerbanhelper
-          cd pkg && dpkg -b deb peerbanhelper.${{ env.PBH_VERSION }}_$calculatedSha.deb
+          cp target/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper
+          dpkg -b pkg/deb peerbanhelper.${{ env.PBH_VERSION }}_$calculatedSha.deb
         env:
           PBH_VERSION: ${{ steps.get-version.outputs.version }}
       - name: Upload build artifacts
