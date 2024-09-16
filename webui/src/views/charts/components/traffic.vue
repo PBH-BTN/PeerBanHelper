@@ -93,7 +93,7 @@ import { useRequest } from 'vue-request'
 use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, LineChart, SVGRenderer])
 
 const option = reactive({
-  range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+  range: [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
 })
 const darkStore = useDarkStore()
 const loadingOptions = computed(() => ({
