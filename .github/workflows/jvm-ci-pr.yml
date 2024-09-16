@@ -1,7 +1,7 @@
 # 注意！！
 # 此 PR 禁止使用包含敏感数据或者发布型的操作，避免恶意用户通过 PR 对供应链发起攻击
 
-name: Java CI
+name: Java CI (pull_request)
 
 on:
   pull_request:

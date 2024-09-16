@@ -1,4 +1,4 @@
-name: build Installers
+name: Installer Build
 
 on:
   workflow_call:
