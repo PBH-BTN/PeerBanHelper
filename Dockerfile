@@ -11,7 +11,7 @@ FROM maven:3-eclipse-temurin-21-alpine AS backend-build
 COPY pom.xml /build/pom.xml
 WORKDIR /build
 # fetch all dependencies
-RUN mvn dependency:go-offline -B -T 1.5C -Daether.dependencyCollector.impl=bf -Dmaven.artifact.threads=32
+RUN mvn dependency:go-offline -B -T 1.5C
 
 # 构建后端
 COPY src/ /build/
@@ -21,7 +21,7 @@ WORKDIR /build
 COPY --from=frontend-build /build/webui/dist src/main/resources/static
 RUN ls -l
 RUN apk add --update curl git && \
-    mvn -B clean package --file pom.xml -T 1.5C -Daether.dependencyCollector.impl=bf -Dmaven.artifact.threads=32
+    mvn -B clean package --file pom.xml -T 1.5C
 
 # 最终阶段,只要成品
 FROM docker.io/azul/zulu-openjdk-alpine:21.0.4-21.36-jre
