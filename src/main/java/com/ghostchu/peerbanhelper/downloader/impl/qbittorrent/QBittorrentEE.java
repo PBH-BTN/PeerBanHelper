@@ -220,6 +220,12 @@ public class QBittorrentEE extends AbstractDownloader {
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
             QBEEPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBEEPeer.class);
+            if(qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()){
+                continue;
+            }
+            if(qbPeer.getRawIp().contains(".onion") || qbPeer.getRawIp().contains(".i2p")){
+                continue;
+            }
             if (qbPeer.getShadowBanned()) {
                 continue; // 当做不存在处理
             }
