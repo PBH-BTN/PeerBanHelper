@@ -5,8 +5,7 @@ on:
     inputs:
       image:
         description: 'The image name that for build docker container'
-        default: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
-        required: false
+        required: true
         type: string
 jobs:
   pkgcreate:

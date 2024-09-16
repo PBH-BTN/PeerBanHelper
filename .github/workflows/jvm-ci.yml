@@ -22,6 +22,8 @@ jobs:
   Build_SPK:
     needs: CI
     uses: ./.github/workflows/build_spk.yml
+    with:
+      image: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
   Build_DEB:
     needs: CI
     uses: ./.github/workflows/build_deb.yml
