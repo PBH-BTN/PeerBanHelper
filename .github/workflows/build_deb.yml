@@ -19,7 +19,8 @@ jobs:
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
           sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/deb/DEBIAN/control
-          cp target/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper
+          mkdir -p pkg/deb/usr/lib/peerbanhelper
+          cp target/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper/
           cd pkg && dpkg -b deb PeerBanHelper_linux_${{ env.PBH_VERSION }}.deb
         # 上面那个文件名需要符合收集条件
         env:
@@ -30,4 +31,3 @@ jobs:
           name: deb-dist
           path: |
             pkg/*.deb
-
