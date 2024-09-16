@@ -25,13 +25,8 @@ jobs:
           java-version: "21"
           cache: 'maven'
           cache-dependency-path: '**/pom.xml'
-      - uses: luangong/setup-install4j@v1
-        name: Setup Install4j
-        with:
-          version: 10.0.8
-          license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Build with Maven
-        run: mvn -B clean package --file pom.xml -P install4j-ci,thin-sqlite-packaging
+        run: mvn -B clean package --file pom.xml -P thin-sqlite-packaging
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -39,8 +34,4 @@ jobs:
           path: |
             target/*.jar
             target/media/*.exe
-            target/media/*.dmg
-            target/media/*.rpm
-            target/media/*.deb
-            target/media/*.sh
         id: project

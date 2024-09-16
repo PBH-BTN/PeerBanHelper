@@ -26,6 +26,10 @@ jobs:
       statuses: read
     secrets: inherit
     uses: ./.github/workflows/build_maven.yml
+  Build_Installers:
+    needs: Build_Executable
+    uses: ./.github/workflows/build_installers.yml
+    secrets: inherit
   Upload_Artifacts:
     permissions:
       contents: write
@@ -36,13 +40,17 @@ jobs:
       pull-requests: read
       repository-projects: read
       statuses: read
-    needs: Build_Executable
+    needs: Build_Installers
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
-          path: target
+          path: target/
+      - uses: actions/download-artifact@v4
+        with:
+          name: installer-dist
+          path: target/media
       - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}

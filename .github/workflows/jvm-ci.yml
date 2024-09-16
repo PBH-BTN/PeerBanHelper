@@ -15,6 +15,10 @@ jobs:
   CI:
     uses: ./.github/workflows/build_maven.yml
     secrets: inherit
+  Build_Installers:
+    needs: CI
+    uses: ./.github/workflows/build_installers.yml
+    secrets: inherit
   Build_Docker:
     needs: CI
     runs-on: ubuntu-latest
