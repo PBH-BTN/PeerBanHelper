@@ -114,7 +114,7 @@ public class QBittorrentEE extends AbstractQbittorrent {
             if(qbPeer.getRawIp().contains(".onion") || qbPeer.getRawIp().contains(".i2p")){
                 continue;
             }
-            if (qbPeer.getShadowBanned()) {
+            if (qbPeer.getShadowBanned() != null && qbPeer.getShadowBanned()) {
                 continue; // 当做不存在处理
             }
             // 一个 QB 本地化问题的 Workaround
