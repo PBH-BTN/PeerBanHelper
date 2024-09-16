@@ -48,8 +48,12 @@ body:
           required: false
         - label: "JAR 包直接启动 (Start via .JAR directly)"
           required: false
-    validations:
-      required: true
+        - label: "群晖 DSM 套件 (Synology .spk package)"
+          required: false
+        - label: "Debian 软件包 (Debian .deb package)"
+          required: false
+        - label: "RedHat/Fedora 软件包 (RedHat/Fedora .rpm package)"
+          required: false
   - type: checkboxes
     id: downloaders
     attributes:
