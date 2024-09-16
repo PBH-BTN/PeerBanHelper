@@ -30,14 +30,7 @@ jobs:
           license: ${{ secrets.INSTALL4J_LICENSE }}
       - name: Make installers
         run: |
-          pwd
-          ls
-          cd target || exit
-          pwd
-          ls
-          cd ..
-          pwd
-          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.project_version }} -g -d target/media -D jarPath=target/PeerBanHelper.jar install4j/project.install4j
+          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.project_version }} -g -d target/media -D jarPath=$(pwd)/target/PeerBanHelper.jar install4j/project.install4j
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
