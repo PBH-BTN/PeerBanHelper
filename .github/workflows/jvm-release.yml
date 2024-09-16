@@ -15,9 +15,28 @@ on:
       - published
 jobs:
   Build_Executable:
+    permissions:
+      contents: write
+      checks: write
+      actions: read
+      issues: read
+      packages: write
+      pull-requests: read
+      repository-projects: read
+      statuses: read
     secrets: inherit
     uses: ./.github/workflows/build_maven.yml
   Upload_Artifacts:
+    permissions:
+      contents: write
+      checks: write
+      actions: read
+      issues: read
+      packages: write
+      pull-requests: read
+      repository-projects: read
+      statuses: read
+    needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -31,6 +50,16 @@ jobs:
           asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*"]'
         id: project
   Build_Docker:
+    permissions:
+      contents: write
+      checks: write
+      actions: read
+      issues: read
+      packages: write
+      pull-requests: read
+      repository-projects: read
+      statuses: read
+    needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -111,7 +140,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
   Build_SPK:
-    needs: CI
+    permissions:
+      contents: write
+      checks: write
+      actions: read
+      issues: read
+      packages: write
+      pull-requests: read
+      repository-projects: read
+      statuses: read
+    needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

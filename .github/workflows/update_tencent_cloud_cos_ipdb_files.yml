@@ -1,0 +1,32 @@
+# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
+
+name: 更新COS上的IPDB文件
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 1 * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download IPDB files
+        run: |
+          mkdir -p ipdb
+          cd ipdb
+          wget -O GeoCN.mmdb https://github.com/ljxi/GeoCN/releases/download/Latest/GeoCN.mmdb
+          wget -O GeoLite2-City.mmdb https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb
+          wget -O GeoLite2-ASN.mmdb https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb
+      - uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.TENCENT_CLOUD_COS_PBH_STATIC_SECRET_ID }}
+          aws_secret_access_key: ${{ secrets.TENCENT_CLOUD_COS_PBH_STATIC_SECRET_KEY }}
+          aws_bucket: ${{ secrets.TENCENT_CLOUD_COS_PBH_STATIC_BUCKET_ID }}
+          endpoint: ${{ secrets.TENCENT_CLOUD_COS_PBH_STATIC_ENDPOINT }}
+          source_dir: 'ipdb'
+          destination_dir: 'ipdb'
+
