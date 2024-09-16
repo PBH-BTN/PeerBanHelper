@@ -1,25 +1,23 @@
-package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
+package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced;
 
-import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
-import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.AbstractQbittorrent;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPreferences;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentConfigImpl;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.FormBodyPublisher;
-import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -28,49 +26,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class QBittorrentEE extends AbstractDownloader {
-    private final String apiEndpoint;
-    private final HttpClient httpClient;
-    private final Config config;
+public class QBittorrentEE extends AbstractQbittorrent {
     private final BanHandler banHandler;
 
-    public QBittorrentEE(String name, Config config) {
-        super(name);
-        this.config = config;
-        this.apiEndpoint = config.getEndpoint() + "/api/v2";
-        CookieManager cm = new CookieManager();
-        cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        Methanol.Builder builder = Methanol
-                .newBuilder()
-                .version(HttpClient.Version.valueOf(config.getHttpVersion()))
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .authenticator(new Authenticator() {
-                    @Override
-                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(config.getBasicAuth().getUser(), config.getBasicAuth().getPass().toCharArray());
-                    }
-                })
-                .cookieHandler(cm);
-        if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
-            builder.sslContext(HTTPUtil.getIgnoreSslContext());
-        }
-        this.httpClient = builder.build();
+    public QBittorrentEE(String name, QBittorrentEEConfigImpl config) {
+        super(name, config);
         if (config.isUseShadowBan()) {
             this.banHandler = new BanHandlerShadowBan(httpClient, name, apiEndpoint);
         } else {
@@ -79,45 +47,19 @@ public class QBittorrentEE extends AbstractDownloader {
     }
 
     public static QBittorrentEE loadFromConfig(String name, JsonObject section) {
-        Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
+        QBittorrentEEConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentEEConfigImpl.class);
         return new QBittorrentEE(name, config);
     }
 
     public static QBittorrentEE loadFromConfig(String name, ConfigurationSection section) {
-        Config config = Config.readFromYaml(section);
+        QBittorrentEEConfigImpl config = QBittorrentEEConfigImpl.readFromYaml(section);
         return new QBittorrentEE(name, config);
     }
 
-    @Override
-    public JsonObject saveDownloaderJson() {
-        return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
-    }
-
-    @Override
-    public YamlConfiguration saveDownloader() {
-        return config.saveToYaml();
-    }
-
     public DownloaderLoginResult login0() {
-        if (isLoggedIn()) {
-            try {
-                if (config.isUseShadowBan() && !banHandler.test()) {
-                    return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
-                }
-            } catch (Exception e) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
-            }
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
-        }
-        try {
-            HttpResponse<String> request = httpClient
-                    .send(MutableRequest.POST(apiEndpoint + "/auth/login",
-                                            FormBodyPublisher.newBuilder()
-                                                    .query("username", config.getUsername())
-                                                    .query("password", config.getPassword()).build())
-                                    .header("Content-Type", "application/x-www-form-urlencoded")
-                            , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() == 200 && isLoggedIn()) {
+        var result = super.login0();
+        if (result.success()) {
+            if (isLoggedIn()) {
                 try {
                     if (config.isUseShadowBan() && !banHandler.test()) {
                         return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
@@ -125,34 +67,17 @@ public class QBittorrentEE extends AbstractDownloader {
                 } catch (Exception e) {
                     return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
                 }
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
             }
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
-        } catch (Exception e) {
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
         }
+        return result;
     }
-
-    @Override
-    public String getEndpoint() {
-        return apiEndpoint;
-    }
-
 
     @Override
     public String getType() {
         return "qBittorrentEE";
     }
 
-    public boolean isLoggedIn() {
-        HttpResponse<Void> resp;
-        try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/version"), HttpResponse.BodyHandlers.discarding());
-        } catch (Exception e) {
-            return false;
-        }
-        return resp.statusCode() == 200;
-    }
 
     @Override
     public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
@@ -163,43 +88,6 @@ public class QBittorrentEE extends AbstractDownloader {
         }
     }
 
-    @Override
-    public List<Torrent> getTorrents() {
-        HttpResponse<String> request;
-        try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/torrents/info?filter=active"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (request.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
-        }
-        List<QBTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBTorrent>>() {
-        }.getType());
-        List<Torrent> torrents = new ArrayList<>();
-        for (QBTorrent detail : qbTorrent) {
-            torrents.add(new TorrentImpl(detail.getHash(), detail.getName(), detail.getHash(),
-                    detail.getTotalSize(), detail.getProgress(), detail.getUpspeed(),
-                    detail.getDlspeed(),
-                    detail.getPrivateTorrent() != null && detail.getPrivateTorrent()));
-        }
-        return torrents;
-    }
-
-    @Override
-    public DownloaderStatistics getStatistics() {
-        HttpResponse<String> request;
-        try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/maindata"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (request.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, request.statusCode(), request.body()));
-        }
-        QBMainData mainData = JsonUtil.getGson().fromJson(request.body(), QBMainData.class);
-        return new DownloaderStatistics(mainData.getServerState().getAlltimeUl(), mainData.getServerState().getAlltimeDl());
-    }
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
@@ -219,7 +107,7 @@ public class QBittorrentEE extends AbstractDownloader {
         List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
-            QBEEPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBEEPeer.class);
+            QBittorrentEEPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentEEPeer.class);
             if(qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()){
                 continue;
             }
@@ -243,12 +131,6 @@ public class QBittorrentEE extends AbstractDownloader {
             peersList.add(qbPeer);
         }
         return peersList;
-    }
-
-
-    @Override
-    public void close() throws Exception {
-
     }
 
     interface BanHandler {
@@ -344,7 +226,7 @@ public class QBittorrentEE extends AbstractDownloader {
             try {
                 HttpResponse<String> request = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/preferences")
                         , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                Preferences preferences = JsonUtil.getGson().fromJson(request.body(), Preferences.class);
+                QBittorrentPreferences preferences = JsonUtil.getGson().fromJson(request.body(), QBittorrentPreferences.class);
                 shadowBanEnabled = preferences.getShadowBanEnabled() != null && preferences.getShadowBanEnabled();
                 return shadowBanEnabled;
             } catch (IOException | InterruptedException e) {
@@ -397,66 +279,6 @@ public class QBittorrentEE extends AbstractDownloader {
                 log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
                 throw new IllegalStateException(e);
             }
-        }
-    }
-
-
-    @NoArgsConstructor
-    @Data
-    public static class Config {
-
-        private String type;
-        private String endpoint;
-        private String username;
-        private String password;
-        private BasicauthDTO basicAuth;
-        private String httpVersion;
-        private boolean incrementBan;
-        private boolean verifySsl;
-        private boolean useShadowBan;
-
-        public static Config readFromYaml(ConfigurationSection section) {
-            Config config = new Config();
-            config.setType("qbittorrentee");
-            config.setEndpoint(section.getString("endpoint"));
-            if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
-                config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
-            }
-            config.setUsername(section.getString("username", ""));
-            config.setPassword(section.getString("password", ""));
-            BasicauthDTO basicauthDTO = new BasicauthDTO();
-            basicauthDTO.setUser(section.getString("basic-auth.user"));
-            basicauthDTO.setPass(section.getString("basic-auth.pass"));
-            config.setBasicAuth(basicauthDTO);
-            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
-            config.setIncrementBan(section.getBoolean("increment-ban", false));
-            config.setUseShadowBan(section.getBoolean("use-shadow-ban", false));
-            config.setVerifySsl(section.getBoolean("verify-ssl", true));
-            return config;
-        }
-
-        public YamlConfiguration saveToYaml() {
-            YamlConfiguration section = new YamlConfiguration();
-            section.set("type", "qbittorrentee");
-            section.set("endpoint", endpoint);
-            section.set("username", username);
-            section.set("password", password);
-            section.set("basic-auth.user", Objects.requireNonNullElse(basicAuth.user, ""));
-            section.set("basic-auth.pass", Objects.requireNonNullElse(basicAuth.pass, ""));
-            section.set("http-version", httpVersion);
-            section.set("increment-ban", incrementBan);
-            section.set("use-shadow-ban", useShadowBan);
-            section.set("verify-ssl", verifySsl);
-            return section;
-        }
-
-        @NoArgsConstructor
-        @Data
-        public static class BasicauthDTO {
-            @SerializedName("user")
-            private String user;
-            @SerializedName("pass")
-            private String pass;
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
+package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl;
 
 
 import com.google.gson.annotations.SerializedName;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class QBMainData {
+public class QBittorrentMainData {
 
     @SerializedName("server_state")
     private ServerStateDTO serverState;

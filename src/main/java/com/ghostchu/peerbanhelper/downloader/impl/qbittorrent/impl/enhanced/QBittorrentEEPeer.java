@@ -1,15 +1,16 @@
-package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
+package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced;
 
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
 @Setter
-public final class QBPeer implements Peer {
+public final class QBittorrentEEPeer implements Peer {
     @SerializedName("client")
     private String client;
     @SerializedName("connection")
@@ -42,10 +43,13 @@ public final class QBPeer implements Peer {
     private Long upSpeed;
     @SerializedName("uploaded")
     private Long uploaded;
+    @Getter
+    @SerializedName("shadowbanned")
+    private Boolean shadowBanned;
     private transient PeerAddress peerAddress;
     private String rawIp;
 
-    public QBPeer() {
+    public QBittorrentEEPeer() {
     }
 
     @Override
@@ -103,9 +107,10 @@ public final class QBPeer implements Peer {
         return rawIp == null ? ip : rawIp;
     }
 
+
     @Override
     public String toString() {
-        return "SingleTorrentPeer{" +
+        return "QBEEPeer{" +
                "client='" + client + '\'' +
                ", connection='" + connection + '\'' +
                ", country='" + country + '\'' +
@@ -122,7 +127,9 @@ public final class QBPeer implements Peer {
                ", relevance=" + relevance +
                ", upSpeed=" + upSpeed +
                ", uploaded=" + uploaded +
+               ", shadowBanned=" + shadowBanned +
+               ", peerAddress=" + peerAddress +
+               ", rawIp='" + rawIp + '\'' +
                '}';
     }
-
 }
