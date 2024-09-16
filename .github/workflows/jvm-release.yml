@@ -32,10 +32,10 @@ jobs:
     secrets: inherit
   Build_SPK:
     needs: Build_Executable
-    uses: ./.github/workflwws/build_spk.yml
+    uses: ./.github/workflows/build_spk.yml
   Build_DEB:
     needs: CI
-    uses: ./.github/workflwws/build_deb.yml
+    uses: ./.github/workflows/build_deb.yml
   Upload_Artifacts:
     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB]
     permissions:
