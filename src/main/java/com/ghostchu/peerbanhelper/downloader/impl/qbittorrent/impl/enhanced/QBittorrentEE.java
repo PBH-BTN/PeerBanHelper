@@ -53,15 +53,12 @@ public class QBittorrentEE extends AbstractQbittorrent {
     public DownloaderLoginResult login0() {
         var result = super.login0();
         if (result.success()) {
-            if (isLoggedIn()) {
-                try {
-                    if (config.isUseShadowBan() && !banHandler.test()) {
-                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
-                    }
-                } catch (Exception e) {
-                    return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
+            try {
+                if (config.isUseShadowBan() && !banHandler.test()) {
+                    return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_QBITTORRENTEE_SHADOWBANAPI_TEST_FAILURE));
                 }
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
+            } catch (Exception e) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
             }
         }
         return result;
