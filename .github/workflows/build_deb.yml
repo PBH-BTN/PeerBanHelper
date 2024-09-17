@@ -21,7 +21,7 @@ jobs:
           sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/deb/DEBIAN/control
           mkdir -p pkg/deb/usr/lib/peerbanhelper
           cp target/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper/
-          cd pkg && dpkg -b deb PeerBanHelper_linux_${{ env.PBH_VERSION }}.deb
+          cd pkg && dpkg -b deb PeerBanHelper_linux_glibct_${{ env.PBH_VERSION }}.deb
         # 上面那个文件名需要符合收集条件
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
