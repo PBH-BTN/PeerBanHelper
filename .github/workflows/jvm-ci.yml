@@ -18,7 +18,7 @@ jobs:
   Build_Installers:
     needs: CI
     uses: ./.github/workflows/build_installers.yml
-    secrets:
+    secrets: inherit
   Build_SPK:
     needs: CI
     uses: ./.github/workflows/build_spk.yml
