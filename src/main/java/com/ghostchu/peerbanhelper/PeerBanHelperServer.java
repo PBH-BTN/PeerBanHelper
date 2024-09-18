@@ -835,7 +835,7 @@ public class PeerBanHelperServer implements Reloadable {
                 }
             });
         }
-        if(!firewall.ban(peer.getPeerAddress().getAddress())){
+        if(firewall.ban(peer.getPeerAddress().getAddress())){
             log.error("Unable ban {} via firewall", peer.getPeerAddress().getAddress().toString());
         }
         Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
