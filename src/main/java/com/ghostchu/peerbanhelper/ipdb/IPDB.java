@@ -23,6 +23,8 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.net.InetAddress;
@@ -40,6 +42,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -235,8 +238,8 @@ public class IPDB implements AutoCloseable {
 
     private void updateGeoCN(File mmdbGeoCNFile) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
-        MutableRequest main = MutableRequest.GET("https://github.com/ljxi/GeoCN/releases/download/Latest/GeoCN.mmdb");
-        MutableRequest backup = MutableRequest.GET("https://pbh-static.ghostchu.com/ipdb/GeoCN.mmdb");
+        IPDBDownloadSource main = new IPDBDownloadSource("https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
+        IPDBDownloadSource backup = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", "GeoCN", true);
         Path tmp = Files.createTempFile("GeoCN", ".mmdb");
         downloadFile(main, backup, tmp, "GeoCN").join();
         if (!tmp.toFile().exists()) {
@@ -257,8 +260,8 @@ public class IPDB implements AutoCloseable {
 
     private void updateMMDB(String databaseName, File target) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
-        MutableRequest main = MutableRequest.GET("https://github.com/P3TERX/GeoLite.mmdb/raw/download/" + databaseName + ".mmdb");
-        MutableRequest backup = MutableRequest.GET("https://pbh-static.ghostchu.com/ipdb/" + databaseName + ".mmdb");
+        IPDBDownloadSource main = new IPDBDownloadSource("https://github.com/P3TERX/GeoLite.mmdb/raw/download/", databaseName);
+        IPDBDownloadSource backup = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", databaseName, true);
         Path tmp = Files.createTempFile(databaseName, ".mmdb");
         downloadFile(main, backup, tmp, databaseName).join();
         if (!tmp.toFile().exists()) {
@@ -305,19 +308,38 @@ public class IPDB implements AutoCloseable {
         return System.currentTimeMillis() - target.lastModified() > updateInterval;
     }
 
-    private CompletableFuture<Void> downloadFile(MutableRequest req, MutableRequest backupReq, Path path, String databaseName) {
-        return HTTPUtil.retryableSendProgressTracking(httpClient, req, HttpResponse.BodyHandlers.ofFile(path))
+    private CompletableFuture<Void> downloadFile(IPDBDownloadSource req, IPDBDownloadSource backupReq, Path path, String databaseName) {
+        return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(req.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
-                    if (r.statusCode() != 200) {
-                        if (backupReq != null) {
-                            log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                            downloadFile(backupReq, null, path, databaseName);
+                    if (r.statusCode() == 200) {
+                        if (req.supportGzip()) {
+                            try {
+                                File tmp = File.createTempFile(databaseName, ".tmp");
+                                try (GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(r.body().toFile()));
+                                     FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
+                                        byte[] buffer = new byte[1024];
+                                        int len;
+                                        while ((len = gzipInputStream.read(buffer)) > 0) {
+                                            fileOutputStream.write(buffer, 0, len);
+                                        }
+                                }
+                                Files.move(tmp.toPath(), r.body(), StandardCopyOption.REPLACE_EXISTING);
+                                log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
+                                return;
+                            } catch (IOException e) { // 下方统一进行处理
+                                log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED));
+                            }
+                        } else { // 直接就是原始文件
+                            log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         }
-                        log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body()));
-                    } else {
-                        log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                     }
+                    if (backupReq != null) { // 非 200 状态码 或者 gzip 解压出错
+                        log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
+                        downloadFile(backupReq, null, path, databaseName);
+                        return;
+                    }
+                    log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body()));
                 })
                 .exceptionally(e -> {
                     if (backupReq != null) {
