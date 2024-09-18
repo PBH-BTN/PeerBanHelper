@@ -117,7 +117,7 @@ public class FirewallManager implements Reloadable {
         unload();
         ConfigurationSection section = server.getMainConfig().getConfigurationSection("firewall-integration");
         if (section == null) return;
-        if (section.getBoolean("windows-adv-firewall-dynamic-keyword")) {
+        if (false && section.getBoolean("windows-adv-firewall-dynamic-keyword") ) {
             var windowsAdvFirewall = new LocalWindowsAdvFirewall(server);
             if (windowsAdvFirewall.isApplicable()) {
                 enabledFirewalls.add(windowsAdvFirewall);
