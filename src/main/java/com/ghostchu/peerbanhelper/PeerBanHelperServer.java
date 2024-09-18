@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
+import com.ghostchu.peerbanhelper.firewall.FirewallManager;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
@@ -134,6 +135,8 @@ public class PeerBanHelperServer implements Reloadable {
     private ErrorReporter errorReporter;
     @Autowired
     private RollbarErrorReporter rollbarErrorReporter;
+    @Autowired
+    private FirewallManager firewall;
 
     public PeerBanHelperServer() {
         reloadConfig();
@@ -280,6 +283,9 @@ public class PeerBanHelperServer implements Reloadable {
             for (Downloader downloader : downloaders) {
                 downloader.login();
                 downloader.setBanList(Collections.emptyList(), null, null, true);
+            }
+            if(!firewall.reset()){
+                log.error("Unable to reset firewalls");
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.RESET_DOWNLOADER_FAILED), e);
@@ -829,6 +835,9 @@ public class PeerBanHelperServer implements Reloadable {
                 }
             });
         }
+        if(firewall.ban(peer.getPeerAddress().getAddress())){
+            log.error("Unable ban {} via firewall", peer.getPeerAddress().getAddress().toString());
+        }
         Main.getEventBus().post(new PeerBanEvent(peer.getPeerAddress(), banMetadata, torrentObj, peer));
     }
 
@@ -870,6 +879,9 @@ public class PeerBanHelperServer implements Reloadable {
         if (metadata != null) {
             metrics.recordPeerUnban(address, metadata);
             banListInvoker.forEach(i -> i.remove(address, metadata));
+        }
+        if(!firewall.unban(address.getAddress())){
+            log.error("Unable unban {} via firewall", address.getAddress());
         }
         Main.getEventBus().post(new PeerUnbanEvent(address, metadata));
         return metadata;

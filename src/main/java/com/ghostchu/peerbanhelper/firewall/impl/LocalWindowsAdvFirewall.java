@@ -14,31 +14,31 @@ import java.util.concurrent.TimeoutException;
 public class LocalWindowsAdvFirewall extends CommandBasedImpl implements Firewall {
     private static final String PBH_GUID = new UUID(7355608L, 1145141919810L).toString();
     private static final String CMD_TEST_START = """
-            New-NetFirewallRule -Id "peerbanhelper-test" -DisplayName "PeerBanHelperTest"
+            powershell New-NetFirewallRule -Id "peerbanhelper-test" -DisplayName "PeerBanHelperTest"
             """;
     private static final String CMD_TEST_END = """
-            New-NetFirewallRule -Id "peerbanhelper-test" -DisplayName "PeerBanHelperTest"
+            powershell New-NetFirewallRule -Id "peerbanhelper-test" -DisplayName "PeerBanHelperTest"
             """;
     private static final String CMD_REMOVE_FIREWALL_RULE = """
-            Remove-NetFirewallDynamicKeywordAddress -Id {%s}
+            powershell Remove-NetFirewallDynamicKeywordAddress -Id "{%s}"
             """;
     private static final String CMD_NEW_INBOUND_FIREWALL_RULE = """
-            New-NetFirewallRule -Id "peerbanhelper-inbound" -DisplayName "PeerBanHelper AdvFirewall Filter (Inbound)" -Direction Inbound -Action Block -RemoteDynamicKeywordAddresses "{%s}"
+            powershell New-NetFirewallRule -Id "peerbanhelper-inbound" -DisplayName "PeerBanHelper AdvFirewall Filter (Inbound)" -Direction Inbound -Action Block -RemoteDynamicKeywordAddresses "{%s}"
             """;
     private static final String CMD_REMOVE_INBOUND_FIREWALL_RULE = """
-            Remove-NetFirewallRule -Id "peerbanhelper-inbound"
+            powershell Remove-NetFirewallRule -Id "peerbanhelper-inbound"
             """;
     private static final String CMD_NEW_OUTBOUND_FIREWALL_RULE = """
-            New-NetFirewallRule Id "peerbanhelper-outbound" -DisplayName “PeerBanHelper AdvFirewall Filter (Outbound)” -Direction Outbound -Action Block -RemoteDynamicKeywordAddresses "{%s}"
+            powershell New-NetFirewallRule -Id "peerbanhelper-outbound" -DisplayName “PeerBanHelper AdvFirewall Filter (Outbound)” -Direction Outbound -Action Block -RemoteDynamicKeywordAddresses "{%s}"
             """;
     private static final String CMD_REMOVE_OUTBOUND_FIREWALL_RULE = """
-            Remove-NetFirewallRule -Id "peerbanhelper-outbound"
+            powershell Remove-NetFirewallRule -Id "peerbanhelper-outbound"
             """;
     private static final String CMD_CREATE_DYNAMIC_FIREWALL_KEYWORD = """
-            New-NetFirewallDynamicKeywordAddress -Id "{%s}" -Keyword "PBH-BanList" -Addresses "%s"
+            powershell New-NetFirewallDynamicKeywordAddress -Id "peerbanhelper-dynamic-keyword-address" -Keyword "PBH-BanList" -Addresses "%s"
             """;
     private static final String CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD = """
-            Remove-NetFirewallDynamicKeywordAddress -Id "{%s}"
+            powershell Remove-NetFirewallDynamicKeywordAddress -Id ""peerbanhelper-dynamic-keyword-address"
             """;
     private final PeerBanHelperServer server;
 
@@ -57,34 +57,34 @@ public class LocalWindowsAdvFirewall extends CommandBasedImpl implements Firewal
         try {
             invokeCommand(CMD_TEST_START, Collections.emptyMap());
             invokeCommand(CMD_TEST_END, Collections.emptyMap());
+            return true;
         } catch (IOException | ExecutionException | InterruptedException | TimeoutException e) {
             throw new RuntimeException(e);
         }
-        return false;
     }
 
     @Override
     public boolean ban(IPAddress address) throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        invokeCommand(String.format(CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD, PBH_GUID), Collections.emptyMap());
-        invokeCommand(String.format(CMD_CREATE_DYNAMIC_FIREWALL_KEYWORD, PBH_GUID, getAllAddress()), Collections.emptyMap());
+        invokeCommand(String.format(CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD), Collections.emptyMap());
+        invokeCommand(String.format(CMD_CREATE_DYNAMIC_FIREWALL_KEYWORD, getAllAddress()), Collections.emptyMap());
         return true;
     }
 
     @Override
     public boolean unban(IPAddress address) throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        invokeCommand(String.format(CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD, PBH_GUID), Collections.emptyMap());
-        invokeCommand(String.format(CMD_CREATE_DYNAMIC_FIREWALL_KEYWORD, PBH_GUID, getAllAddress()), Collections.emptyMap());
+        invokeCommand(String.format(CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD), Collections.emptyMap());
+        invokeCommand(String.format(CMD_CREATE_DYNAMIC_FIREWALL_KEYWORD, getAllAddress()), Collections.emptyMap());
         return true;
     }
 
     @Override
     public boolean reset() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        invokeCommand(String.format(CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD, PBH_GUID), Collections.emptyMap());
+        invokeCommand(String.format(CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD), Collections.emptyMap());
         invokeCommand(CMD_REMOVE_INBOUND_FIREWALL_RULE, Collections.emptyMap());
         invokeCommand(CMD_REMOVE_OUTBOUND_FIREWALL_RULE, Collections.emptyMap());
         invokeCommand(String.format(CMD_NEW_INBOUND_FIREWALL_RULE, PBH_GUID), Collections.emptyMap());
         invokeCommand(String.format(CMD_NEW_OUTBOUND_FIREWALL_RULE, PBH_GUID), Collections.emptyMap());
-        invokeCommand(String.format(CMD_CREATE_DYNAMIC_FIREWALL_KEYWORD, PBH_GUID, getAllAddress()), Collections.emptyMap());
+        invokeCommand(String.format(CMD_CREATE_DYNAMIC_FIREWALL_KEYWORD, getAllAddress()), Collections.emptyMap());
         return true;
     }
 
@@ -95,7 +95,7 @@ public class LocalWindowsAdvFirewall extends CommandBasedImpl implements Firewal
 
     @Override
     public boolean unload() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        invokeCommand(String.format(CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD, PBH_GUID), Collections.emptyMap());
+        invokeCommand(String.format(CMD_DELETE_DYNAMIC_FIREWALL_KEYWORD), Collections.emptyMap());
         invokeCommand(CMD_REMOVE_OUTBOUND_FIREWALL_RULE, Collections.emptyMap());
         invokeCommand(CMD_REMOVE_INBOUND_FIREWALL_RULE, Collections.emptyMap());
         return true;
