@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.firewall.impl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -22,7 +21,8 @@ public class CommandBasedImpl {
         for (int i = 0; st.hasMoreTokens(); i++) {
             cmdarray[i] = st.nextToken();
         }
-        ProcessBuilder builder = new ProcessBuilder(cmdarray).inheritIO();
+        ProcessBuilder builder = new ProcessBuilder(cmdarray)
+                .inheritIO();
         Map<String, String> liveEnv = builder.environment();
         liveEnv.putAll(env);
         Process p = builder.start();
@@ -32,7 +32,6 @@ public class CommandBasedImpl {
             log.error(tlUI(Lang.COMMAND_EXECUTOR_FAILED_TIMEOUT, command));
             return -9999;
         }
-        System.out.println(command+" "+process.exitValue());
         return process.exitValue();
     }
 }
