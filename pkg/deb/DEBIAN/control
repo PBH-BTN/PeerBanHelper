@@ -1,6 +1,6 @@
 Package: peerbanhelper
 Version: <version>
-Depends: java-runtime (>=21)
+Depends: java-runtime (>=21) libc(>=6)
 Section: universe/net
 Priority: optional
 Architecture: all
