@@ -19,7 +19,7 @@ public class MainConfigUpdateScript {
 
     private void validate() {
         String installationId = conf.getString("installation-id");
-        if (installationId == null || installationId.isBlank()) {
+        if(installationId == null || installationId.isBlank()){
             conf.set("installation-id", UUID.randomUUID().toString());
         }
 //        String token = conf.getString("server.token");
@@ -29,21 +29,6 @@ public class MainConfigUpdateScript {
 //        }
     }
 
-    @UpdateScript(version = 20)
-    public void enableIncrementBanForAllDownloaders() {
-        var clientSection = conf.getConfigurationSection("client");
-        if (clientSection == null) {
-            return;
-        }
-        for (String key : clientSection.getKeys(false)) {
-            var downloader = clientSection.getConfigurationSection(key);
-            if (downloader == null) continue;
-            ;
-            if (downloader.isSet("increment-ban")) {
-                downloader.set("increment-ban", true);
-            }
-        }
-    }
 
     @UpdateScript(version = 19)
     public void telemetryErrorReporting() {

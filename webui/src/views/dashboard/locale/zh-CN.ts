@@ -43,7 +43,7 @@ export default {
   'page.dashboard.editModal.label.httpVersion.description': '2.0性能更好，1.1兼容性更好',
   'page.dashboard.editModal.label.incrementBan': '增量封禁',
   'page.dashboard.editModal.label.incrementBan.description':
-    '有助于缓解保存封禁列表时的下载器压力，非特殊情况请保持开启',
+    '有助于缓解保存封禁列表时的下载器压力，但在部分下载器上可能会导致无法封禁Peers',
   'page.dashboard.editModal.label.shadowBan': 'ShadowBan',
   'page.dashboard.editModal.label.shadowBan.description':
     '使用 qBittorrent Enhanced Edition 提供的 ShadowBan API 来代替传统 IP 屏蔽列表。{learnMore}',
