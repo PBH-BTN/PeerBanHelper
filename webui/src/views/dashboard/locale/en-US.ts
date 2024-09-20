@@ -42,7 +42,7 @@ export default {
     '2.0 is faster, which 1.1 is more compatible',
   'page.dashboard.editModal.label.incrementBan': 'Incremental Ban',
   'page.dashboard.editModal.label.incrementBan.description':
-    'Helps to alleviate the downloader pressure when saving the ban list, but may cause the inability to ban Peers on some downloaders',
+    'Helps to alleviate the downloader pressure when saving the ban list, do not disable unless you know what you\'re doing',
   'page.dashboard.editModal.label.shadowBan': 'ShadowBan',
   'page.dashboard.editModal.label.shadowBan.description':
     "Use qBittorrent Enhanced Edition's ShadowBan API to replace the regular IP block list. {learnMore}",
