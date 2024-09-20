@@ -513,7 +513,9 @@ public class PeerBanHelperServer implements Reloadable {
                                     bannedPeers, unbannedPeers, false)));
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
+
                     downloaders.forEach(downloader -> protect.getService().submit(() -> {
+                        updateDownloader(downloader, true,Collections.emptyList(),null,null,true);
                         List<Torrent> torrents = downloader.getTorrents();
                         var list = BAN_LIST.values().stream().map(meta -> meta.getTorrent().getId()).toList();
                         torrents.removeIf(torrent -> !list.contains(torrent.getId()));
