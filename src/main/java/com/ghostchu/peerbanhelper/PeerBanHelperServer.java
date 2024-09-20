@@ -407,7 +407,6 @@ public class PeerBanHelperServer implements Reloadable {
      * 启动新的一轮封禁序列
      */
     public void banWave() {
-        rollbarErrorReporter.handleUncaughtErrors();
         try {
             if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
                 return;
