@@ -120,7 +120,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadabl
                 bannedAddress = bannedAddress.toPrefixBlock(ipv6Prefix);
             }
             if (bannedAddress.contains(peerAddress)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), addressType));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), bannedAddress.toString(), addressType));
             }
         }
         return pass();

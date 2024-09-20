@@ -71,7 +71,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/*.spk"]'
+          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/*.spk"]'
   Build_Docker:
     permissions:
       contents: write

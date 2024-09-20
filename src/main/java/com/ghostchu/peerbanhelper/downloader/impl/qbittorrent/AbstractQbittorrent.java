@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -161,7 +162,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         }
         return qbTorrent.stream().map(t -> (Torrent) t)
                 .filter(t-> !config.isIgnorePrivate() || !t.isPrivate())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     protected void fillTorrentPrivateField(List<QBittorrentTorrent> qbTorrent) {

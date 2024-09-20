@@ -55,7 +55,7 @@ DOWNLOADER_TR_INCOMPATIBILITY_BANAPI: "当前版本存在封禁 API 的已知问
 ERR_CONFIG_DIRECTORY_INCORRECT: "初始化失败：config 不是一个目录。如果您正在使用 Docker，请确保其正确挂载。"
 GUI_MENU_OPEN_DATA_DIRECTORY: "打开数据文件存储位置..."
 PBH_SHUTTING_DOWN: "[退出] 正在退出，请等待我们完成剩余的工作……"
-ARB_BANNED: "IP 地址 {} 与另一个已封禁的 IP 地址 {} 处于同一封禁区间内，执行连锁封禁操作。"
+ARB_BANNED: "IP 地址 {} 与另一个已封禁的 IP 地址 {} 处于同一封禁区间 {} 内，执行连锁封禁操作。"
 DATABASE_SETUP_FAILED: "[错误] 数据库初始化失败"
 DATABASE_SAVE_BUFFER_FAILED: "[错误] 刷写内存缓存的封禁日志时出现了 SQL 错误，未保存的数据已被丢弃"
 WEB_BANLOGS_INTERNAL_ERROR: "[错误] 读取封禁日志时遇到非预期错误"

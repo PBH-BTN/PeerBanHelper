@@ -4,7 +4,7 @@ export default {
   'login.form.password.placeholder': '请输入管理 Token',
   'login.form.rememberPassword': '记住 Token',
   'login.form.forgetPassword': '忘记 Token',
-  'login.form.password.errMsg': '请输入管理 Token',
+  'login.form.password.errMsg': '请输入有效的管理 Token',
   'login.form.login.failed': '登录失败：',
   'login.form.login': '登录'
 }
