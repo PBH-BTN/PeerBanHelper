@@ -329,7 +329,7 @@ public class PeerBanHelperServer implements Reloadable {
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
             downloaders.forEach(downloader -> {
                 downloader.login();
-                downloader.setBanList(BAN_LIST.keySet(), null, null, true);
+                downloader.setBanList(generateFullPeerAddress(), null, null, true);
             });
             Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
             downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
@@ -596,7 +596,7 @@ public class PeerBanHelperServer implements Reloadable {
             } else {
                 downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.getMessage());
             }
-            downloader.setBanList(BAN_LIST.keySet(), added, removed, applyFullList);
+            downloader.setBanList(generateFullPeerAddress(), added, removed, applyFullList);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint()), th);
@@ -888,6 +888,13 @@ public class PeerBanHelperServer implements Reloadable {
     @Deprecated
     public JavalinWebContainer getWebContainer() {
         return webContainer;
+    }
+
+    public Collection<PeerAddress> generateFullPeerAddress(){
+        Set<PeerAddress> addresses = new HashSet<>();
+        addresses.addAll(BAN_LIST.values().stream().map(ban -> new PeerAddress(ban.getPeer().getRawIp(), ban.getPeer().getAddress().getPort())).toList());
+        addresses.addAll(BAN_LIST.values().stream().map(ban -> new PeerAddress(ban.getPeer().getAddress().getIp(), ban.getPeer().getAddress().getPort())).toList());
+        return addresses;
     }
 
     public record IPDBResponse(
