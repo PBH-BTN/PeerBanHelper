@@ -10,6 +10,7 @@ import loginLocale from '@/views/login/locale/en-US'
 import oobeLocale from '@/views/oobe/locale/en-US'
 import ruleManageMentLocale from '@/views/rule-management/locale/en-US'
 import chartsLocale from '@/views/charts/locale/en-US'
+import configLocale from '@/views/config/locale/en-US'
 export default {
   'navbar.action.locale': 'Switch to English',
   'navbar.action.autoUpdate': 'Auto Update',
@@ -30,6 +31,8 @@ export default {
   'router.metrics.ruleMetrics': 'Rule Metrics',
   'router.metrics.charts': 'Charts',
   'router.rule_management': 'Rule Management',
+  'router.settings': "Settings",
+  'router.settings.config': "Config",
 
   'router.moduleNotEnable': '{moduleName} is not enabled',
   'router.moduleNotEnable.tips': 'Please enable the feature in the configuration file',
@@ -52,5 +55,6 @@ export default {
   ...loginLocale,
   ...oobeLocale,
   ...ruleManageMentLocale,
-  ...chartsLocale
+  ...chartsLocale,
+  ...configLocale
 }

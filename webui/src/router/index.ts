@@ -167,6 +167,25 @@ export const routerOptions: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/settings',
+    name: 'settings',
+    meta: {
+      label: 'router.settings',
+      needLogin: true
+    },
+    children: [
+      {
+        path: '/config',
+        name: 'settings_config',
+        meta: {
+          label: 'router.settings.config',
+          needLogin: true
+        },
+        component: () => import('@/views/config/index.vue')
+      }
+    ]
+  },
+  {
     path: '/init',
     name: 'init',
     meta: {

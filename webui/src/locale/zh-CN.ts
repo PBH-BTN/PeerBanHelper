@@ -10,6 +10,7 @@ import loginLocale from '@/views/login/locale/zh-CN'
 import oobeLocale from '@/views/oobe/locale/zh-CN'
 import ruleManageMentLocale from '@/views/rule-management/locale/zh-CN'
 import chartsLocale from '@/views/charts/locale/zh-CN'
+import configLocale from '@/views/config/locale/zh-CN'
 export default {
   'navbar.action.locale': '切换为中文',
   'navbar.action.autoUpdate': '自动刷新',
@@ -29,6 +30,9 @@ export default {
   'router.metrics.ruleMetrics': '规则统计',
   'router.metrics.charts': '图表',
   'router.rule_management': '规则管理',
+  'router.settings': "设置",
+  'router.settings.config': "配置文件",
+
 
   'router.moduleNotEnable': '{moduleName}功能未启用',
   'router.moduleNotEnable.tips': '请在配置文件中开启相关功能',
@@ -39,6 +43,8 @@ export default {
   'service.networkErrorRetry.second': '{count}秒',
   'service.networkErrorRetry.cancel': '取消重试',
   'service.networkErrorRetry.retry': '重试',
+
+
 
   ...settingsLocale,
   ...plusLocale,
@@ -51,5 +57,6 @@ export default {
   ...loginLocale,
   ...oobeLocale,
   ...ruleManageMentLocale,
-  ...chartsLocale
+  ...chartsLocale,
+  ...configLocale
 }

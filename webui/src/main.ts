@@ -8,6 +8,7 @@ import App from './App.vue'
 import router from './router'
 import i18n from './locale'
 import { setGlobalOptions } from 'vue-request'
+import {InstallCodeMirror} from "codemirror-editor-vue3";
 
 const app = createApp(App)
 Message._context = app._context
@@ -22,5 +23,6 @@ setGlobalOptions({
 app.use(createPinia())
 app.use(i18n)
 app.use(router)
+app.use(InstallCodeMirror)
 
 app.mount('#app')
