@@ -2,6 +2,9 @@ package com.ghostchu.peerbanhelper.btn;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +16,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Configuration
 @Slf4j
-public class BtnConfig {
+public class BtnConfig implements Reloadable {
     @Autowired
     private PeerBanHelperServer server;
     @Autowired
@@ -36,5 +39,10 @@ public class BtnConfig {
             log.info(tlUI(Lang.BTN_NETWORK_NOT_ENABLED));
             return null;
         }
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        return ReloadResult.builder().status(ReloadStatus.REQUIRE_RESTART).build();
     }
 }
