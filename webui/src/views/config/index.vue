@@ -55,14 +55,14 @@ export default defineComponent({
 
     // Load YAML content for the selected tab
     const loadTabContent = async (key: string | number) => {
-      const configId = key.toString(); // 确保 configId 是 string 类型
+      const configId = key.toString() // 确保 configId 是 string 类型
       if (!yamlContents.value[configId]) {
-        const response = await getConfigYamlContent(configId);
+        const response = await getConfigYamlContent(configId)
         if (response.success) {
-          yamlContents.value[configId] = response.data;
+          yamlContents.value[configId] = response.data
         }
       }
-    };
+    }
 
     const saveConfig = async (configId: string) => {
       const content = yamlContents.value[configId]
