@@ -53,7 +53,7 @@ public class IPDB implements AutoCloseable {
             .expireAfterAccess(5, TimeUnit.SECONDS)
             .build();
     private final File dataFolder;
-    private final long updateInterval = 2592000000L; // 30天
+    private final long updateInterval = 3888000000L; // 45天
     private final String accountId;
     private final String licenseKey;
     private final File directory;
