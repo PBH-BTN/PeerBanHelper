@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -40,6 +41,19 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
                "ip='" + ip + '\'' +
                ", port=" + port +
                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PeerAddress that = (PeerAddress) o;
+        return port == that.port && Objects.equals(ip, that.ip);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ip, port);
     }
 
     @Override

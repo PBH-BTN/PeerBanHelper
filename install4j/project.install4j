@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="10.0.8" transformSequenceNumber="10">
   <directoryPresets config="target/PeerBanHelper.jar" />
-  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shrinkRuntime="false" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="4.4.1" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="21">
+  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="4.4.1" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="21">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
@@ -13,7 +13,7 @@
     </variables>
     <jreBundles jdkProviderId="Zulu" release="21/21.0.3" />
   </application>
-  <files>
+  <files keepModificationTimes="true">
     <mountPoints>
       <mountPoint id="24" />
     </mountPoints>
@@ -23,7 +23,7 @@
   </files>
   <launchers>
     <launcher name="PeerBanHelper" id="26" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
+      <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx386M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true">
@@ -657,7 +657,28 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows x64" id="38" architecture="64" />
-    <windows name="Windows arm64" id="41" architecture="arm64" />
+    <windows name="Windows x64" id="38" architecture="64">
+      <jreBundle installOnlyIfNecessary="true" />
+    </windows>
+    <windows name="Windows arm64" id="41" architecture="arm64">
+      <jreBundle installOnlyIfNecessary="true" />
+    </windows>
+    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}" architecture="universal" />
+    <unixInstaller name="Unix Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64" />
+    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
+      <jreBundle jreBundleSource="none" />
+    </windows>
+    <windows name="Windows arm64 NoJava" id="112" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="arm64">
+      <jreBundle jreBundleSource="none" />
+    </windows>
+    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}_nojava" architecture="universal">
+      <jreBundle jreBundleSource="none" />
+    </macosFolder>
+    <unixInstaller name="Unix Installer NoJava" id="124" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}_nojava" require64BitVm="true">
+      <jreBundle jreBundleSource="none" />
+    </unixInstaller>
   </mediaSets>
 </install4j>

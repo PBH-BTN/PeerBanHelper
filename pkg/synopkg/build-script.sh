@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mkdir -p /tmp/pbh-packages
-cp -av synopkg/* /tmp/pbh-packages
+cp -av pkg/synopkg/* /tmp/pbh-packages
 mkdir -p /toolkit
 cd /toolkit || exit
 git clone https://github.com/SynologyOpenSource/pkgscripts-ng

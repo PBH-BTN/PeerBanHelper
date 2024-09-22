@@ -66,7 +66,7 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
                         return null;
                     });
         } catch (Throwable throwable) {
-            log.error("Unable to finish scheduled tasks", throwable);
+            log.error("Unable to submit peers", throwable);
         }
     }
 

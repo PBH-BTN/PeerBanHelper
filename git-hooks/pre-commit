@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# 检查 webui/ 目录是否有改动
+CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM webui/src/)
+
+# 如果没有修改 webui/ 下的文件，跳过检查
+if [ -z "$CHANGED_FILES" ]; then
+  echo "No changes in webui/, skipping prettier and eslint."
+  exit 0
+fi
+
+# 如果有修改，进入 webui 目录
+cd webui || exit 1
+
+# 执行 prettier 格式化
+pnpm prettier --write src/
+if [ $? -ne 0 ]; then
+  echo "Prettier formatting failed."
+  exit 1
+fi
+
+# 执行 eslint 检查
+pnpm eslint . --ignore-pattern 'dist/*' --fix
+if [ $? -ne 0 ]; then
+  echo "ESLint check failed."
+  exit 1
+fi
+
+# 返回初始目录
+cd ..
+
+# 将可能的修复结果添加到暂存区
+git add "$(git diff --name-only)"

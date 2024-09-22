@@ -2,6 +2,8 @@
 
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
+![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
+
 > [!NOTE]
 > PeerBanHelper 没有内建的更新检查程序，记得时常回来看看是否有新的版本更新，或者 Watch 本仓库以接收版本更新通知  
 > QQ 交流群：932978658，如果在使用过程中需要帮助，您可以在这里和他人一同交流。或者在 [Issue Tracker](https://github.com/Ghost-chu/PeerBanHelper/issues) 打开新问题
@@ -22,7 +24,7 @@
 
 ## 支持的客户端
 
-* qBittorrent
+* qBittorrent **4.5.0 或更高版本**
 * BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
 * Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
 * Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
@@ -69,6 +71,7 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 
 ## Credit
 
+### Backend
 * [Cordelia](https://github.com/bochkov/cordelia)
 * [IPAddress](https://github.com/seancfoley/IPAddress)
 * [YamlConfiguration](https://github.com/bspfsystems/YamlConfiguration)
@@ -76,3 +79,17 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 * [AviatorScript](https://github.com/killme2008/aviatorscript)
 * [javalin](https://javalin.io/)
 * [deluge-java](https://github.com/RangerRick/deluge-java)
+* [jSystemThemeDetector](https://github.com/Dansoftowner/jSystemThemeDetector)
+* [Methanol](https://github.com/mizosoft/methanol)
+* [Flatlaf](https://github.com/JFormDesigner/FlatLaf)
+* [GeoIP2](https://dev.maxmind.com/geoip)
+* [ormlite](https://ormlite.com/)
+* [SimpleReloadLib](https://github.com/Ghost-chu/SimpleReloadLib)
+* [AtlantaFx](https://github.com/mkpaz/atlantafx)
+* [FXThemes](https://github.com/dukke/FXThemes)
+* [PreferencesFX](https://github.com/dlsc-software-consulting-gmbh/PreferencesFX)
+  
+### WebUI
+* [Vue](https://vuejs.org/)
+* [ArcoDesign](https://arco.design/)
+* [ECharts](https://echarts.apache.org/en/index.html)

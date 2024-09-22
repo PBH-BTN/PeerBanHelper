@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>6.2.1</version>
+    <version>6.2.8</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -303,32 +303,6 @@
                 </plugins>
             </build>
         </profile>
-<!--        <profile>-->
-<!--            <id>webview</id>-->
-<!--            <dependencies>-->
-<!--                <dependency>-->
-<!--                    <groupId>org.openjfx</groupId>-->
-<!--                    <artifactId>javafx-web</artifactId>-->
-<!--                    <version>${javafx.version}</version>-->
-<!--                    <scope>compile</scope>-->
-<!--                    <classifier>linux</classifier>-->
-<!--                </dependency>-->
-<!--                <dependency>-->
-<!--                    <groupId>org.openjfx</groupId>-->
-<!--                    <artifactId>javafx-web</artifactId>-->
-<!--                    <version>${javafx.version}</version>-->
-<!--                    <scope>compile</scope>-->
-<!--                    <classifier>mac</classifier>-->
-<!--                </dependency>-->
-<!--                <dependency>-->
-<!--                    <groupId>org.openjfx</groupId>-->
-<!--                    <artifactId>javafx-web</artifactId>-->
-<!--                    <version>${javafx.version}</version>-->
-<!--                    <scope>compile</scope>-->
-<!--                    <classifier>win</classifier>-->
-<!--                </dependency>-->
-<!--            </dependencies>-->
-<!--        </profile>-->
         <profile>
             <id>include-javafx-jars</id>
             <properties>
@@ -384,6 +358,8 @@
                                     <variables>
                                         <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
                                     </variables>
+<!--                                    <incremental>true</incremental>-->
+                                    <jvmArguments>-Xmx2G</jvmArguments>
                                 </configuration>
                             </execution>
                         </executions>

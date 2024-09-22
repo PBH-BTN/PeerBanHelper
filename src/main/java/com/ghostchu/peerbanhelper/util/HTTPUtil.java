@@ -92,7 +92,7 @@ public class HTTPUtil {
                 .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .cookieHandler(cookieManager);
         if (ignoreSSL) {
             builder.sslContext(ignoreSslContext);

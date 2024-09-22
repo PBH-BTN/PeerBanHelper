@@ -35,6 +35,7 @@ public class IPAddressUtil {
      */
     @Nullable
     public static IPAddress getIPAddress(String ip) {
+        if (ip == null) return null;
         if (ip.startsWith("[") && ip.endsWith("]")) {
             ip = ip.substring(1, ip.length() - 1);
         }

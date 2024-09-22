@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI
+name: Java CI (push)
 
 on:
   push:
@@ -15,6 +15,18 @@ jobs:
   CI:
     uses: ./.github/workflows/build_maven.yml
     secrets: inherit
+  Build_Installers:
+    needs: CI
+    uses: ./.github/workflows/build_installers.yml
+    secrets: inherit
+  Build_SPK:
+    needs: CI
+    uses: ./.github/workflows/build_spk.yml
+    with:
+      image: ghostchu/peerbanhelper-snapshot:sha-$(git rev-parse --short ${{ github.sha }})
+  Build_DEB:
+    needs: CI
+    uses: ./.github/workflows/build_deb.yml
   Build_Docker:
     needs: CI
     runs-on: ubuntu-latest
@@ -51,7 +63,7 @@ jobs:
       uses: docker/build-push-action@v6.7.0
       with:
         context: .
-        file: ./Dockerfile-CI
+        file: ./Dockerfile
         push: true
         platforms: |
           linux/amd64
@@ -60,30 +72,3 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha
         cache-to: type=gha,mode=max
-  Build_SPK:
-    needs: CI
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - id: get-version
-        uses: jactions/maven-version@v1.2.0
-      - uses: actions/download-artifact@v4
-        with:
-          name: maven-dist
-          path: target/
-      - name: Set short git commit SHA
-        id: vars
-        run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
-      - name: Run build script
-        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash synopkg/build-script.sh
-        env:
-          PBH_VERSION: ${{ steps.get-version.outputs.version }}
-          IMAGE: ghostchu/peerbanhelper-snapshot:sha-${{ env.COMMIT_SHORT_SHA }}
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: synology-spk
-          path: |
-            /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk

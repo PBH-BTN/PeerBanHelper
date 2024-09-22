@@ -58,7 +58,7 @@
       </template>
     </a-result>
     <a-empty
-      v-else-if="data?.data && !loading"
+      v-else-if="!data?.data && !loading"
       class="chart"
       style="align-items: center; display: flex; justify-content: center; flex-direction: column"
     />
@@ -98,7 +98,7 @@ import { useRequest } from 'vue-request'
 use([TooltipComponent, LegendComponent, ToolboxComponent, GridComponent, LineChart, SVGRenderer])
 
 const option = reactive({
-  range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+  range: [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
 })
 const darkStore = useDarkStore()
 const loadingOptions = computed(() => ({

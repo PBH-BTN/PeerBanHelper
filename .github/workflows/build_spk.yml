@@ -1,0 +1,31 @@
+name: SPK Package Build
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: 'The image name that for build docker container'
+        required: true
+        type: string
+jobs:
+  pkgcreate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-dist
+          path: target/
+      - name: Run build script
+        run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
+        env:
+          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+          IMAGE: ${{ inputs.image }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: spk-dist
+          path: |
+            /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk

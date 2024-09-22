@@ -1,0 +1,34 @@
+name: Installer Build
+
+on:
+  workflow_call:
+    secrets:
+      INSTALL4J_LICENSE:
+        required: true
+jobs:
+  install4jc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-dist
+          path: target/
+      - uses: luangong/setup-install4j@v1
+        name: Setup Install4j
+        with:
+          version: 10.0.8
+          license: ${{ secrets.INSTALL4J_LICENSE }}
+      - name: Make installers
+        run: |
+          /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.project_version }} -g -d target/media -D jarPath=$(pwd)/target/PeerBanHelper.jar install4j/project.install4j
+      # jarPath=$(pwd) 是必须的，install4jc 不知道什么毛病，不支持相对路径，这太诡异了
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-dist
+          path: |
+            target/media/PeerBanHelper_*
+        id: project

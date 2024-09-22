@@ -8,8 +8,8 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
 import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrent;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrentEE;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrent;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced.QBittorrentEE;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
@@ -407,7 +407,6 @@ public class PeerBanHelperServer implements Reloadable {
      * 启动新的一轮封禁序列
      */
     public void banWave() {
-        rollbarErrorReporter.handleUncaughtErrors();
         try {
             if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
                 return;
@@ -619,8 +618,9 @@ public class PeerBanHelperServer implements Reloadable {
             }
         }
         removeBan.forEach(this::unbanPeer);
-        if (!removeBan.isEmpty()) {
-            log.info(tlUI(Lang.PEER_UNBAN_WAVE, removeBan.size()));
+        long normalUnbanCount = metadata.stream().filter(meta -> !meta.isBanForDisconnect()).count();
+        if (normalUnbanCount > 0) {
+            log.info(tlUI(Lang.PEER_UNBAN_WAVE, normalUnbanCount));
         }
         return metadata;
     }

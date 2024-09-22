@@ -370,9 +370,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      */
     public ConfigurationSection saveRuleSubInfo(@NotNull RuleSubInfoEntity ruleSubInfo) throws IOException {
         ConfigurationSection rules = getRuleSubsConfig();
-        String ruleId = ruleSubInfo.getRuleId();
+        String ruleId = ruleSubInfo.getRuleId().trim();
+        if(ruleId.contains(".")){
+            throw new IllegalArgumentException("Character '.' is not allowed.");
+        }
         rules.set(ruleId + ".enabled", ruleSubInfo.isEnabled());
-        rules.set(ruleId + ".name", ruleSubInfo.getRuleName());
+        rules.set(ruleId + ".name", ruleSubInfo.getRuleName().trim());
         rules.set(ruleId + ".url", ruleSubInfo.getSubUrl());
         saveConfig();
         return rules.getConfigurationSection(ruleId);

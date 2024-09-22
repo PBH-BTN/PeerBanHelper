@@ -120,7 +120,7 @@ const option = reactive({
   field: 'isp' as 'isp' | 'province' | 'city' | 'region',
   enableThreshold: true,
   bannedOnly: true,
-  range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+  range: [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
 })
 
 const loadingOptions = computed(() => ({

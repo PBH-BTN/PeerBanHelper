@@ -16,7 +16,20 @@
             :style="{ width: '27em' }"
             placeholder="aa-bb-cc-dd-ee-ff"
             allow-clear
-            :rules="[{ required: true }]"
+            :rules="
+              [
+                { required: true, message: t('login.form.password.errMsg') },
+                {
+                  validator: (value, callback) => {
+                    if (/[a-zA-Z0-9-_]+/.test(value)) {
+                      callback()
+                    } else {
+                      callback(t('login.form.password.errMsg'))
+                    }
+                  }
+                }
+              ] as FieldRule[]
+            "
             validate-trigger="blur"
           >
             <template #prefix>
@@ -38,6 +51,7 @@
 
 <script lang="ts" setup>
 import type { InitConfig } from '@/api/model/oobe'
+import type { FieldRule } from '@arco-design/web-vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })

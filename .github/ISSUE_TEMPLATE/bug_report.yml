@@ -48,8 +48,12 @@ body:
           required: false
         - label: "JAR 包直接启动 (Start via .JAR directly)"
           required: false
-    validations:
-      required: true
+        - label: "群晖 DSM 套件 (Synology .spk package)"
+          required: false
+        - label: "Debian 软件包 (Debian .deb package)"
+          required: false
+        - label: "RedHat/Fedora 软件包 (RedHat/Fedora .rpm package)"
+          required: false
   - type: checkboxes
     id: downloaders
     attributes:
@@ -112,7 +116,7 @@ body:
         Check and tick checkboxes that listed below
         检查并勾选所有需要勾选的框框
       options:
-        - label: "PeerBanHelper 已更新到最新版本 (I'm running the latest version of PBH that can be found in Github Relases)"
+        - label: "PeerBanHelper 已更新到最新版本，非最新版本不接受任何错误反馈 (I'm running the latest version of PBH that can be found in Github Relases, non-latest release won't receive any support)"
           required: false
         - label: "所添加的下载器已满足 README 中的前置要求（如版本号和插件）(The downloaders that I've added already satisfied the requirements (E.g install plugins/adapters))"
           required: false
