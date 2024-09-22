@@ -11,7 +11,6 @@
         @ready="onReady(configId)"
         @focus="onFocus"
       />
-      <!-- 这里的 t 引用报错 -->
       <a-button type="primary" @click="saveConfig(configId)">{{ t('page.config.save') }}</a-button>
     </a-tab-pane>
   </a-tabs>
@@ -125,7 +124,7 @@ export default defineComponent({
       cmOptions,
       loadTabContent,
       saveConfig,
-      onReady: (configId: string) => (cm: Editor) => {
+      onReady: (configId: string) => () => {
         console.log(`Codemirror instance ready for ${configId}`)
       },
       onChange: (configId: string) => (value: string) => {
