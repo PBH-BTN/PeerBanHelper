@@ -618,8 +618,9 @@ public class PeerBanHelperServer implements Reloadable {
             }
         }
         removeBan.forEach(this::unbanPeer);
-        if (!removeBan.isEmpty()) {
-            log.info(tlUI(Lang.PEER_UNBAN_WAVE, removeBan.size()));
+        long normalUnbanCount = metadata.stream().filter(meta -> !meta.isBanForDisconnect()).count();
+        if (normalUnbanCount > 0) {
+            log.info(tlUI(Lang.PEER_UNBAN_WAVE, normalUnbanCount));
         }
         return metadata;
     }

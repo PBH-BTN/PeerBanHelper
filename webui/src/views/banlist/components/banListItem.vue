@@ -100,7 +100,9 @@
         <a-tooltip
           :content="
             t('page.banlist.banlist.listItem.asn.subnet') +
-            item.banMetadata.geo?.as?.network?.ipAddress
+            item.banMetadata.geo?.as?.network?.ipAddress +
+            '/' +
+            item.banMetadata.geo?.as?.network?.prefixLength
           "
         >
           <a-link
