@@ -85,13 +85,16 @@ public class PBHTorrentController extends AbstractFeatureModule {
     private void handleTorrentQuery(Context ctx) throws SQLException {
         Pageable pageable = new Pageable(ctx);
         if (ctx.queryParam("keyword") == null) {
-            ctx.json(new StdResp(true, null, torrentDao.queryByPaging(pageable)));
+            ctx.json(new StdResp(true, null, torrentDao.queryByPaging(
+                    torrentDao.queryBuilder()
+                            .orderBy("id", false),
+                    pageable)));
         } else {
             ctx.json(new StdResp(true, null, torrentDao.queryByPaging(
-                    torrentDao
-                            .queryBuilder()
+                    torrentDao.queryBuilder()
+                            .orderBy("id", false)
                             .where()
-                            .like("name", "%"+ctx.queryParam("keyword")+"%")
+                            .like("name", "%" + ctx.queryParam("keyword") + "%")
                             .or()
                             .like("infoHash", "%" + ctx.queryParam("keyword") + "%")
                             .queryBuilder()
