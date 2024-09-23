@@ -14,7 +14,6 @@ import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
@@ -65,14 +64,11 @@ public class PBHTorrentController extends AbstractFeatureModule {
                 //.get("/api/torrent", this::handleTorrentQuery, Role.USER_READ)
                 .get("/api/torrent/query", this::handleTorrentQuery, Role.USER_READ)
                 .get("/api/torrent/{infoHash}", this::handleTorrentInfo, Role.USER_READ)
-                .get("/api/torrent/{infoHash}/accessHistory", this::handleConnectHistory, Role.USER_READ)
-                .get("/api/torrent/{infoHash}/banHistory", this::handleBanHistory, Role.USER_READ);
+                .get("/api/torrent/{infoHash}/accessHistory", this::handleConnectHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/torrent/{infoHash}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS);
     }
 
-    private void handleBanHistory(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
-        if (!activationManager.isActivated()) {
-            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
-        }
+    private void handleBanHistory(Context ctx) throws SQLException {
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
         if (torrent.isEmpty()) {
             ctx.status(404);
@@ -152,10 +148,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
                 peerBanCount, peerAccessCount)));
     }
 
-    private void handleConnectHistory(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
-        if (!activationManager.isActivated()) {
-            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
-        }
+    private void handleConnectHistory(Context ctx) throws SQLException {
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
         if (torrent.isEmpty()) {
             ctx.status(404);

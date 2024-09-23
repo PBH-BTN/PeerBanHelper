@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -61,12 +60,12 @@ public class PBHPeerController extends AbstractFeatureModule {
     public void onEnable() {
         javalinWebContainer.javalin()
                 .get("/api/peer/{ip}", this::handleInfo, Role.USER_READ)
-                .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ)
-                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ);
+                .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS);
 
     }
 
-    private void handleInfo(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
+    private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
         @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
@@ -123,10 +122,7 @@ public class PBHPeerController extends AbstractFeatureModule {
     }
 
 
-    private void handleBanHistory(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
-        if (!activationManager.isActivated()) {
-            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
-        }
+    private void handleBanHistory(Context ctx) throws SQLException {
         @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
@@ -141,10 +137,7 @@ public class PBHPeerController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
-    private void handleAccessHistory(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
-        if (!activationManager.isActivated()) {
-            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
-        }
+    private void handleAccessHistory(Context ctx) throws SQLException {
         @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
