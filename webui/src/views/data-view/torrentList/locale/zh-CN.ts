@@ -7,6 +7,7 @@ export default {
   'page.torrentList.accessHistory.title': '{name} 的访问记录',
   'page.torrentList.accessHistory.searchPlaceholder': '搜索种子名...',
   'page.torrentList.accessHistory.description': '此处记录了该种子有关联的所有 Peer 的访问记录',
+  'page.torrentList.accessHistory.empty': '暂无访问记录',
   'page.torrentList.accessHistory.column.downloader': '下载器',
   'page.torrentList.accessHistory.column.address': '地址',
   'page.torrentList.accessHistory.column.traffic': '流量',

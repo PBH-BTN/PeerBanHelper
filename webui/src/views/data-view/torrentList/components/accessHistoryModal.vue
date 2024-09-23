@@ -12,6 +12,7 @@
         {{ t('page.torrentList.accessHistory.description') }}
       </a-typography-text>
       <a-table
+        v-if="!(data?.data.results) && !tableLoading"
         :stripe="true"
         :columns="columns"
         :data="data?.data.results"
@@ -100,6 +101,9 @@
           </a-space>
         </template>
       </a-table>
+      <a-empty v-else  style="height: 20vh;align-items: center; display: flex; justify-content: center; flex-direction: column">
+        {{ t('page.torrentList.accessHistory.empty') }}
+      </a-empty>
     </a-space>
   </a-modal>
 </template>

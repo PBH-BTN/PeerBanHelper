@@ -8,6 +8,7 @@ export default {
   'page.torrentList.accessHistory.searchPlaceholder': 'Search torrents...',
   'page.torrentList.accessHistory.description':
     'Here records all the access history of peers related to this torrent',
+  'page.torrentList.accessHistory.empty': 'There is no access history yet',
   'page.torrentList.accessHistory.column.downloader': 'Downloader',
   'page.torrentList.accessHistory.column.address': 'Address',
   'page.torrentList.accessHistory.column.traffic': 'Traffic',
