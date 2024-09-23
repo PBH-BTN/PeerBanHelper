@@ -7,12 +7,14 @@ import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
@@ -31,12 +33,14 @@ public class PBHTorrentController extends AbstractFeatureModule {
     private final TorrentDao torrentDao;
     private final PeerRecordDao peerRecordDao;
     private final HistoryDao historyDao;
+    private final ActivationManager activationManager;
 
-    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao) {
+    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, ActivationManager activationManager) {
         this.javalinWebContainer = javalinWebContainer;
         this.torrentDao = torrentDao;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
+        this.activationManager = activationManager;
     }
 
     @Override
@@ -65,7 +69,10 @@ public class PBHTorrentController extends AbstractFeatureModule {
                 .get("/api/torrent/{infoHash}/banHistory", this::handleBanHistory, Role.USER_READ);
     }
 
-    private void handleBanHistory(Context ctx) throws SQLException {
+    private void handleBanHistory(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
+        if (!activationManager.isActivated()) {
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+        }
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
         if (torrent.isEmpty()) {
             ctx.status(404);
@@ -145,7 +152,10 @@ public class PBHTorrentController extends AbstractFeatureModule {
                 peerBanCount, peerAccessCount)));
     }
 
-    private void handleConnectHistory(Context ctx) throws SQLException {
+    private void handleConnectHistory(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
+        if (!activationManager.isActivated()) {
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+        }
         var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
         if (torrent.isEmpty()) {
             ctx.status(404);

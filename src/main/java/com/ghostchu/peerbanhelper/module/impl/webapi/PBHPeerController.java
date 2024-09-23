@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -12,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +32,14 @@ public class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryDao historyDao;
     private final PeerRecordDao peerRecordDao;
+    private final ActivationManager activationManager;
 
-    public PBHPeerController(JavalinWebContainer javalinWebContainer, HistoryDao historyDao, PeerRecordDao peerRecordDao) {
+    public PBHPeerController(JavalinWebContainer javalinWebContainer, HistoryDao historyDao, PeerRecordDao peerRecordDao, ActivationManager activationManager) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
+        this.activationManager = activationManager;
     }
 
     @Override
@@ -62,7 +66,7 @@ public class PBHPeerController extends AbstractFeatureModule {
 
     }
 
-    private void handleInfo(Context ctx) throws SQLException {
+    private void handleInfo(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
         // 转换 IP 格式到 PBH 统一内部格式
         @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
@@ -119,7 +123,10 @@ public class PBHPeerController extends AbstractFeatureModule {
     }
 
 
-    private void handleBanHistory(Context ctx) throws SQLException {
+    private void handleBanHistory(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
+        if (!activationManager.isActivated()) {
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+        }
         @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
@@ -134,7 +141,10 @@ public class PBHPeerController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
-    private void handleAccessHistory(Context ctx) throws SQLException {
+    private void handleAccessHistory(Context ctx) throws SQLException, RequirePBHPlusLicenseException {
+        if (!activationManager.isActivated()) {
+            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
+        }
         @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
