@@ -1,3 +1,11 @@
+import { genIconComponent } from '@/components/iconFont'
+import BanList from '@/views/banlist/index.vue'
+import Ranks from '@/views/ranks/index.vue'
+import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
+import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
+import RuleMetric from '@/views/rule-metrics/index.vue'
+import { IconCloud, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
+import { computed, h } from 'vue'
 import {
   createRouter,
   createWebHistory,
@@ -6,15 +14,6 @@ import {
   type RouteRecordRaw
 } from 'vue-router'
 import Dashboard from '../views/dashboard/index.vue'
-import { computed, h } from 'vue'
-import BanList from '@/views/banlist/index.vue'
-import BanLog from '@/views/banlog/index.vue'
-import Ranks from '@/views/ranks/index.vue'
-import RuleMetric from '@/views/rule-metrics/index.vue'
-import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
-import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
-import { genIconComponent } from '@/components/iconFont'
-import { IconCloud, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
 export const routerOptions: RouteRecordRaw[] = [
   {
     path: '/dashboard',
@@ -35,13 +34,32 @@ export const routerOptions: RouteRecordRaw[] = [
     component: BanList
   },
   {
-    path: '/log',
-    name: 'banlogs',
+    path: '/data',
+    name: 'data',
     meta: {
-      label: 'router.banlogs',
+      label: 'router.data',
       needLogin: true
     },
-    component: BanLog
+    children: [
+      {
+        path: '/log',
+        name: 'banlogs',
+        meta: {
+          label: 'router.data.banlogs',
+          needLogin: true
+        },
+        component: () => import('@/views/data-view/banlog/index.vue')
+      },
+      {
+        path: '/dataTorrent',
+        name: 'torrent',
+        meta: {
+          label: 'router.data.torrent',
+          needLogin: true
+        },
+        component: () => import('@/views/data-view/torrentList/index.vue')
+      }
+    ]
   },
   {
     path: '/rule',
