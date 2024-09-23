@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
+import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -18,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -78,19 +81,21 @@ public class PBHTorrentController extends AbstractFeatureModule {
                         .eq("torrent_id", t)
                         .queryBuilder()
                 , pageable);
-        ctx.json(new StdResp(true, null, page));
+        var result = page.getResults().stream().map(r -> new PBHBanController.BanLogResponse(locale(ctx), r)).toList();
+        ctx.json(new StdResp(true, null, result));
     }
 
 
     private void handleTorrentQuery(Context ctx) throws SQLException {
         Pageable pageable = new Pageable(ctx);
+        Page<TorrentEntity> torrentEntityPage;
         if (ctx.queryParam("keyword") == null) {
-            ctx.json(new StdResp(true, null, torrentDao.queryByPaging(
+            torrentEntityPage = torrentDao.queryByPaging(
                     torrentDao.queryBuilder()
                             .orderBy("id", false),
-                    pageable)));
+                    pageable);
         } else {
-            ctx.json(new StdResp(true, null, torrentDao.queryByPaging(
+            torrentEntityPage = torrentDao.queryByPaging(
                     torrentDao.queryBuilder()
                             .orderBy("id", false)
                             .where()
@@ -98,8 +103,22 @@ public class PBHTorrentController extends AbstractFeatureModule {
                             .or()
                             .like("infoHash", "%" + ctx.queryParam("keyword") + "%")
                             .queryBuilder()
-                    , pageable)));
+                    , pageable);
         }
+        List<TorrentInfo> infoList = new ArrayList<>();
+        for (TorrentEntity result : torrentEntityPage.getResults()) {
+            var peerBanCount = historyDao.queryBuilder()
+                    .where()
+                    .eq("torrent_id", result.getId())
+                    .countOf();
+            var peerAccessCount = peerRecordDao.queryBuilder()
+                    .orderBy("lastTimeSeen", false)
+                    .where()
+                    .eq("torrent_id", result.getId())
+                    .countOf();
+            infoList.add(new TorrentInfo(result.getInfoHash(), result.getName(), result.getSize(), peerBanCount, peerAccessCount));
+        }
+        ctx.json(new StdResp(true, null, infoList));
     }
 
 
