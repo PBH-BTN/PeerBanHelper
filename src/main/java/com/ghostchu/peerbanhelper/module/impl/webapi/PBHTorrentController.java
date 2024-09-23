@@ -93,7 +93,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
                             .where()
                             .like("name", "%"+ctx.queryParam("keyword")+"%")
                             .or()
-                            .like("hash", "%"+ctx.queryParam("keyword")+"%")
+                            .like("infoHash", "%" + ctx.queryParam("keyword") + "%")
                             .queryBuilder()
                     , pageable)));
         }
