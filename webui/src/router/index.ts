@@ -9,12 +9,11 @@ import { computed, h } from 'vue'
 import {
   createRouter,
   createWebHistory,
-  type RouteRecordRaw,
   useRoute,
-  useRouter
+  useRouter,
+  type RouteRecordRaw
 } from 'vue-router'
 import Dashboard from '../views/dashboard/index.vue'
-
 export const routerOptions: RouteRecordRaw[] = [
   {
     path: '/dashboard',

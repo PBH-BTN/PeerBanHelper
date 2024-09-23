@@ -84,7 +84,6 @@ import countryFlag from '@/views/banlist/components/countryFlag.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-
 const { t } = useI18n()
 const visible = ref(false)
 const downloader = ref('')

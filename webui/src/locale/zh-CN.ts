@@ -10,7 +10,6 @@ import ruleManageMentLocale from '@/views/rule-management/locale/zh-CN'
 import ruleMetricsLocale from '@/views/rule-metrics/locale/zh-CN'
 import plusLocale from './zh-CN/plus'
 import settingsLocale from './zh-CN/settings'
-
 export default {
   'navbar.action.locale': '切换为中文',
   'navbar.action.autoUpdate': '自动刷新',

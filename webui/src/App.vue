@@ -58,7 +58,7 @@ import pageFooter from './components/pageFooter.vue'
 import pageHeader from './components/pageHeader.vue'
 import { useI18n } from 'vue-i18n'
 import { ArcoI18nMessages } from './locale'
-import { isModuleEnable, useEndpointStore } from './stores/endpoint'
+import { useEndpointStore, isModuleEnable } from './stores/endpoint'
 import { computed, defineAsyncComponent } from 'vue'
 import './transition.less'
 

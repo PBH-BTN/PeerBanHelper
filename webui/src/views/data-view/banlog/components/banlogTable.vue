@@ -78,7 +78,6 @@ import { usePagination } from 'vue-request'
 import { getBanlogs } from '@/service/banLogs'
 import { formatFileSize } from '@/utils/file'
 import { useI18n } from 'vue-i18n'
-
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()

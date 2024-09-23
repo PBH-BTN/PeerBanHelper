@@ -61,11 +61,10 @@
 
 <script lang="ts" setup>
 import { useEndpointStore } from '@/stores/endpoint'
-import { type FieldRule, type FormInstance, Message } from '@arco-design/web-vue'
+import { Message, type FieldRule, type FormInstance } from '@arco-design/web-vue'
 import { onMounted, ref, type UnwrapRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-
 const endpointStore = useEndpointStore()
 const { t } = useI18n()
 const loading = ref(false)

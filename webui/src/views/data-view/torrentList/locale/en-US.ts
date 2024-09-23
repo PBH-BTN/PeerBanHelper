@@ -1,6 +1,5 @@
 export default {
-  'page.torrentList.description':
-    'This page shows the torrent data observed by PeerBanHelper during running.',
+  'page.torrentList.description': 'This page shows the torrent data observed by PeerBanHelper.',
   'page.torrentList.column.name': 'Name',
   'page.torrentList.column.size': 'Size',
   'page.torrentList.column.actions': 'Actions',

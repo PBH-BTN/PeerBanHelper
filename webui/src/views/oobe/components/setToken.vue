@@ -53,7 +53,6 @@
 import type { InitConfig } from '@/api/model/oobe'
 import type { FieldRule } from '@arco-design/web-vue'
 import { useI18n } from 'vue-i18n'
-
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })
 const generateToken = async () => {

@@ -114,8 +114,8 @@
 </template>
 <script setup lang="ts">
 import {
-  type ClientStatus,
   ClientStatusEnum,
+  type ClientStatus,
   type Downloader,
   type downloaderConfig
 } from '@/api/model/downloader'
@@ -126,7 +126,6 @@ import { Message } from '@arco-design/web-vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-
 const { t } = useI18n()
 const statusMap: Record<ClientStatusEnum, [string, string]> = {
   [ClientStatusEnum.HEALTHY]: ['success', 'page.dashboard.clientStatus.card.status.normal'],
