@@ -55,8 +55,8 @@ public class PBHTorrentController extends AbstractFeatureModule {
     public void onEnable() {
         javalinWebContainer
                 .javalin()
-                .get("/api/torrent", this::handleTorrentList, Role.USER_READ)
-                .get("/api/torrent/query", this::handleTorrentSearch, Role.USER_READ)
+                //.get("/api/torrent", this::handleTorrentQuery, Role.USER_READ)
+                .get("/api/torrent/query", this::handleTorrentQuery, Role.USER_READ)
                 .get("/api/torrent/{infoHash}", this::handleTorrentInfo, Role.USER_READ)
                 .get("/api/torrent/{infoHash}/accessHistory", this::handleConnectHistory, Role.USER_READ)
                 .get("/api/torrent/{infoHash}/banHistory", this::handleBanHistory, Role.USER_READ);
@@ -81,15 +81,8 @@ public class PBHTorrentController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, page));
     }
 
-    private void handleTorrentSearch(Context ctx) throws SQLException {
-        Pageable pageable = new Pageable(ctx);
-        String keyword = ctx.queryParam("keyword");
-        var builder = torrentDao.queryBuilder();
-        builder.setWhere(builder.where().like("name", "%" + keyword + "%"));
-        ctx.json(new StdResp(true, null, torrentDao.queryByPaging(builder, pageable)));
-    }
 
-    private void handleTorrentList(Context ctx) throws SQLException {
+    private void handleTorrentQuery(Context ctx) throws SQLException {
         Pageable pageable = new Pageable(ctx);
         if (ctx.queryParam("keyword") == null) {
             ctx.json(new StdResp(true, null, torrentDao.queryByPaging(pageable)));
@@ -98,9 +91,9 @@ public class PBHTorrentController extends AbstractFeatureModule {
                     torrentDao
                             .queryBuilder()
                             .where()
-                            .like("name", ctx.queryParam("keyword"))
+                            .like("name", "%"+ctx.queryParam("keyword")+"%")
                             .or()
-                            .like("hash", ctx.queryParam("keyword"))
+                            .like("hash", "%"+ctx.queryParam("keyword")+"%")
                             .queryBuilder()
                     , pageable)));
         }
