@@ -130,6 +130,7 @@ import copy from 'copy-to-clipboard'
 import { defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+
 const EditRuleModal = defineAsyncComponent(() => import('./editRuleItemModal.vue'))
 const SettingsModal = defineAsyncComponent(() => import('./settingsModal.vue'))
 const UpdateLog = defineAsyncComponent(() => import('./logModal.vue'))

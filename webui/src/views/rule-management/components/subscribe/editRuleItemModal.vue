@@ -40,9 +40,10 @@
 import type { ruleBrief } from '@/api/model/ruleSubscribe'
 import { useI18n } from 'vue-i18n'
 import { reactive, ref } from 'vue'
-import { Message, type FieldRule, type Form } from '@arco-design/web-vue'
+import { type FieldRule, type Form, Message } from '@arco-design/web-vue'
 import { AddRuleItem, UpdateRuleItem } from '@/service/ruleSubscribe'
 import path from 'path'
+
 const { t } = useI18n()
 const showModal = ref(false)
 const newItem = ref(false)

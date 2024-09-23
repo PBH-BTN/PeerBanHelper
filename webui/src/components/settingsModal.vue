@@ -58,6 +58,7 @@ import { Message } from '@arco-design/web-vue'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+
 const endPointStore = useEndpointStore()
 const autoUpdateState = useAutoUpdate()
 const showModal = ref(false)
