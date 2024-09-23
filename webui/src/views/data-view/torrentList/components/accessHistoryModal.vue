@@ -1,7 +1,7 @@
 <template>
   <a-modal v-model:visible="visible" hide-cancel closable unmount-on-close width="auto">
     <template #title>
-      <i18n-t keypath="page.torrentList.accessHisotry.title">
+      <i18n-t keypath="page.torrentList.accessHistory.title">
         <template #name>
           {{ name }}
         </template>
@@ -9,7 +9,7 @@
     </template>
     <a-space direction="vertical" fill>
       <a-typography-text style="font-size: 1.2em">
-        {{ t('page.torrentList.accessHisotry.description') }}
+        {{ t('page.torrentList.accessHistory.description') }}
       </a-typography-text>
       <a-table
         :stripe="true"
@@ -90,11 +90,11 @@
         <template #time="{ record }">
           <a-space fill direction="vertical">
             <a-typography-text>
-              {{ t('page.torrentList.accessHisotry.column.timeseen.first') }}:
+              {{ t('page.torrentList.accessHistory.column.timeseen.first') }}:
               {{ d(record.firstTimeSeen, 'long') }}</a-typography-text
             >
             <a-typography-text>
-              {{ t('page.torrentList.accessHisotry.column.timeseen.last') }}:
+              {{ t('page.torrentList.accessHistory.column.timeseen.last') }}:
               {{ d(record.lastTimeSeen, 'long') }}</a-typography-text
             >
           </a-space>
@@ -151,11 +151,11 @@ const columns = [
     dataIndex: 'id'
   },
   {
-    title: () => t('page.torrentList.accessHisotry.column.downloader'),
+    title: () => t('page.torrentList.accessHistory.column.downloader'),
     slotName: 'downloader'
   },
   {
-    title: () => t('page.torrentList.accessHisotry.column.address'),
+    title: () => t('page.torrentList.accessHistory.column.address'),
     slotName: 'address'
   },
   {
@@ -163,17 +163,17 @@ const columns = [
     slotName: 'peerId'
   },
   {
-    title: () => t('page.torrentList.accessHisotry.column.traffic'),
+    title: () => t('page.torrentList.accessHistory.column.traffic'),
     slotName: 'traffic'
   },
   {
     title: () =>
       h(Space, [
-        t('page.torrentList.accessHisotry.column.offset'),
+        t('page.torrentList.accessHistory.column.offset'),
         h(
           Popover,
           {
-            content: t('page.torrentList.accessHisotry.column.offsetDescription')
+            content: t('page.torrentList.accessHistory.column.offsetDescription')
           },
           () => h(IconInfoCircle)
         )
@@ -184,7 +184,7 @@ const columns = [
     title: 'Flags',
     slotName: 'flags'
   },
-  { title: () => t('page.torrentList.accessHisotry.column.timeseen'), slotName: 'time' }
+  { title: () => t('page.torrentList.accessHistory.column.timeseen'), slotName: 'time' }
 ]
 const parseFlags = (flags: string) =>
   flags

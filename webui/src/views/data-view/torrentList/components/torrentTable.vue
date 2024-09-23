@@ -3,7 +3,7 @@
     <a-space class="align-right" fill>
       <a-input-search
         :style="{ width: '250px' }"
-        :placeholder="t('page.torrentList.accessHisotry.searchPlaceholder')"
+        :placeholder="t('page.torrentList.accessHistory.searchPlaceholder')"
         allow-clear
         search-button
         @search="handleSearch"
