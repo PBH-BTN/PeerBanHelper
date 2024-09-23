@@ -23,7 +23,7 @@
                   }
                 }
               }
-            ]"
+            ] as FieldRule[]"
             :validate-trigger="['change', 'input']"
             hide-label
           >
@@ -59,7 +59,7 @@
 
 <script lang="ts" setup>
 import { useEndpointStore } from '@/stores/endpoint'
-import { Message, type FormInstance } from '@arco-design/web-vue'
+import { Message, type FieldRule, type FormInstance } from '@arco-design/web-vue'
 import { onMounted, ref, type UnwrapRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
