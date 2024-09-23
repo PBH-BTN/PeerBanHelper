@@ -1,5 +1,5 @@
-import type { CommonResponseWithPage } from '@/api/model/common'
-import type { AccessHistory, TorrentInfo } from '@/api/model/data'
+import type { CommonResponse, CommonResponseWithPage } from '@/api/model/common'
+import type { AccessHistory, IPBasicInfo, TorrentInfo } from '@/api/model/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -43,6 +43,18 @@ export async function GetAccessHistoryList(params: {
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))
   }
+
+  return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
+  })
+}
+
+export async function GetIPBasicData(ip: string): Promise<CommonResponse<IPBasicInfo>> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(urlJoin(endpointStore.endpoint, `api/peer/${ip}`), location.href)
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)

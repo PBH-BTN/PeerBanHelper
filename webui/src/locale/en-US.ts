@@ -28,6 +28,7 @@ export default {
   'router.data': 'Data',
   'router.data.banlogs': 'Ban Logs',
   'router.data.torrent': 'Torrents',
+  'router.data.ipHistory': 'IP Query',
   'router.metrics': 'Metrics',
   'router.metrics.ruleMetrics': 'Rule Metrics',
   'router.metrics.charts': 'Charts',

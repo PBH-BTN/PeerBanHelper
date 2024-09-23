@@ -39,7 +39,7 @@
         }}</a-typography-text>
       </template>
       <template #action="{ record }">
-        <a-space warp>
+        <a-space wrap>
           <a-tooltip :content="t('page.torrentList.column.actions.history')" position="top" mini>
             <a-button
               class="edit-btn"

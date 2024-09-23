@@ -26,6 +26,7 @@ export default {
   'router.data': '数据透视',
   'router.data.banlogs': '封禁日志',
   'router.data.torrent': '种子',
+  'router.data.ipHistory': 'IP 查询',
   'router.rank': '排行',
   'router.metrics': '统计',
   'router.metrics.ruleMetrics': '规则统计',

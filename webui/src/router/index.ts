@@ -58,6 +58,15 @@ export const routerOptions: RouteRecordRaw[] = [
           needLogin: true
         },
         component: () => import('@/views/data-view/torrentList/index.vue')
+      },
+      {
+        path: '/ipHistory',
+        name: 'ipHistory',
+        meta: {
+          label: 'router.data.ipHistory',
+          needLogin: true
+        },
+        component: () => import('@/views/data-view/ipList/index.vue')
       }
     ]
   },

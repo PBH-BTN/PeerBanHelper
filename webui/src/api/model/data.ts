@@ -1,3 +1,4 @@
+import type { IPGeoData } from './banlist'
 export interface TorrentInfo {
   id: number
   infoHash: string
@@ -55,4 +56,18 @@ export interface AccessHistory {
    * 最后一次上传量记录，偏移
    */
   uploadedOffset: number
+}
+
+export interface IPBasicInfo {
+  address: string
+  banCount: number
+  downloadedFromPeer: number
+  firstTimeSeen: number
+  /**
+   * GeoIP 信息，可能为空
+   */
+  geo?: null | IPGeoData
+  lastTimeSeen: number
+  torrentAccessCount: number
+  uploadedToPeer: number
 }
