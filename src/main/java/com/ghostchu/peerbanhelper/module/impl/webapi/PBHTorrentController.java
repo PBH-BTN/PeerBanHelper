@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
+import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -54,23 +55,51 @@ public class PBHTorrentController extends AbstractFeatureModule {
     public void onEnable() {
         javalinWebContainer
                 .javalin()
-                .get("/api/torrent", this::handleTorrentList, Role.USER_READ)
-                .get("/api/torrent/search", this::handleTorrentSearch, Role.USER_READ)
+                //.get("/api/torrent", this::handleTorrentQuery, Role.USER_READ)
+                .get("/api/torrent/query", this::handleTorrentQuery, Role.USER_READ)
                 .get("/api/torrent/{infoHash}", this::handleTorrentInfo, Role.USER_READ)
-                .get("/api/torrent/{infoHash}/accessHistory", this::handleConnectHistory, Role.USER_READ);
+                .get("/api/torrent/{infoHash}/accessHistory", this::handleConnectHistory, Role.USER_READ)
+                .get("/api/torrent/{infoHash}/banHistory", this::handleBanHistory, Role.USER_READ);
     }
 
-    private void handleTorrentSearch(Context ctx) throws SQLException {
+    private void handleBanHistory(Context ctx) throws SQLException {
+        var torrent = torrentDao.queryByInfoHash(ctx.pathParam("infoHash"));
+        if (torrent.isEmpty()) {
+            ctx.status(404);
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.TORRENT_NOT_FOUND), null));
+            return;
+        }
         Pageable pageable = new Pageable(ctx);
-        String keyword = ctx.queryParam("keyword");
-        var builder = torrentDao.queryBuilder();
-        builder.setWhere(builder.where().like("name", "%" + keyword + "%"));
-        ctx.json(new StdResp(true, null, torrentDao.queryByPaging(builder, pageable)));
+        var t = torrent.get();
+        Page<HistoryEntity> page = historyDao.queryByPaging(
+                historyDao.queryBuilder()
+                        .orderBy("banAt", false)
+                        .where()
+                        .eq("torrent_id", t)
+                        .queryBuilder()
+                , pageable);
+        ctx.json(new StdResp(true, null, page));
     }
 
-    private void handleTorrentList(Context ctx) throws SQLException {
+
+    private void handleTorrentQuery(Context ctx) throws SQLException {
         Pageable pageable = new Pageable(ctx);
-        ctx.json(new StdResp(true, null, torrentDao.queryByPaging(pageable)));
+        if (ctx.queryParam("keyword") == null) {
+            ctx.json(new StdResp(true, null, torrentDao.queryByPaging(
+                    torrentDao.queryBuilder()
+                            .orderBy("id", false),
+                    pageable)));
+        } else {
+            ctx.json(new StdResp(true, null, torrentDao.queryByPaging(
+                    torrentDao.queryBuilder()
+                            .orderBy("id", false)
+                            .where()
+                            .like("name", "%" + ctx.queryParam("keyword") + "%")
+                            .or()
+                            .like("infoHash", "%" + ctx.queryParam("keyword") + "%")
+                            .queryBuilder()
+                    , pageable)));
+        }
     }
 
 
@@ -113,6 +142,11 @@ public class PBHTorrentController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, page));
     }
 
+    @Override
+    public void onDisable() {
+
+    }
+
     public record TorrentInfo(
             String infoHash,
             String name,
@@ -120,11 +154,6 @@ public class PBHTorrentController extends AbstractFeatureModule {
             long peerBanCount,
             long peerAccessCount
     ) {
-
-    }
-
-    @Override
-    public void onDisable() {
 
     }
 }
