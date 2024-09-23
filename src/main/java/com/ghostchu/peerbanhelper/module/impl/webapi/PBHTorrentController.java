@@ -78,7 +78,8 @@ public class PBHTorrentController extends AbstractFeatureModule {
                         .eq("torrent_id", t)
                         .queryBuilder()
                 , pageable);
-        ctx.json(new StdResp(true, null, page));
+        var result = page.getResults().stream().map(r -> new PBHBanController.BanLogResponse(locale(ctx), r)).toList();
+        ctx.json(new StdResp(true, null, result));
     }
 
 
