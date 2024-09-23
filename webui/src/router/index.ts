@@ -42,7 +42,7 @@ export const routerOptions: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: '/log',
+        path: 'log',
         name: 'banlogs',
         meta: {
           label: 'router.data.banlogs',
@@ -51,7 +51,7 @@ export const routerOptions: RouteRecordRaw[] = [
         component: () => import('@/views/data-view/banlog/index.vue')
       },
       {
-        path: '/dataTorrent',
+        path: 'torrent',
         name: 'torrent',
         meta: {
           label: 'router.data.torrent',

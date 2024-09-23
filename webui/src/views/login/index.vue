@@ -12,18 +12,20 @@
         >
           <a-form-item
             field="token"
-            :rules="[
-              { required: true, message: t('login.form.password.errMsg') },
-              {
-                validator: (value: string, callback) => {
-                  if (/[a-zA-Z0-9-_]+/.test(value)) {
-                    callback()
-                  } else {
-                    callback(t('login.form.password.errMsg'))
+            :rules="
+              [
+                { required: true, message: t('login.form.password.errMsg') },
+                {
+                  validator: (value: string, callback) => {
+                    if (/[a-zA-Z0-9-_]+/.test(value)) {
+                      callback()
+                    } else {
+                      callback(t('login.form.password.errMsg'))
+                    }
                   }
                 }
-              }
-            ] as FieldRule[]"
+              ] as FieldRule[]
+            "
             :validate-trigger="['change', 'input']"
             hide-label
           >
