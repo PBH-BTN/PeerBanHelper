@@ -52,6 +52,7 @@
     "eslint": "^9.11.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-vue": "^9.28.0",
+    "husky": "^9.1.6",
     "less": "^4.2.0",
     "mockjs": "^1.1.0",
     "npm-run-all2": "^6.2.3",

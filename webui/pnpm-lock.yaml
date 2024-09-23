@@ -66,7 +66,7 @@ importers:
         version: 3.0.5(typescript@5.6.2)(vite@5.4.7(@types/node@22.5.5)(less@4.2.0)(sass@1.77.8))
       vue-echarts:
         specifier: ^7.0.3
-        version: 7.0.3(@vue/runtime-core@3.5.6)(echarts@5.5.1)(vue@3.5.8(typescript@5.6.2))
+        version: 7.0.3(@vue/runtime-core@3.5.8)(echarts@5.5.1)(vue@3.5.8(typescript@5.6.2))
       vue-i18n:
         specifier: ^10.0.3
         version: 10.0.3(vue@3.5.8(typescript@5.6.2))
@@ -122,6 +122,9 @@ importers:
       eslint-plugin-vue:
         specifier: ^9.28.0
         version: 9.28.0(eslint@9.11.0)
+      husky:
+        specifier: ^9.1.6
+        version: 9.1.6
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -922,14 +925,8 @@ packages:
       typescript:
         optional: true
 
-  '@vue/reactivity@3.5.6':
-    resolution: {integrity: sha512-shZ+KtBoHna5GyUxWfoFVBCVd7k56m6lGhk5e+J9AKjheHF6yob5eukssHRI+rzvHBiU1sWs/1ZhNbLExc5oYQ==, tarball: https://registry.npmjs.org/@vue/reactivity/-/reactivity-3.5.6.tgz}
-
   '@vue/reactivity@3.5.8':
     resolution: {integrity: sha512-mlgUyFHLCUZcAYkqvzYnlBRCh0t5ZQfLYit7nukn1GR96gc48Bp4B7OIcSfVSvlG1k3BPfD+p22gi1t2n9tsXg==, tarball: https://registry.npmjs.org/@vue/reactivity/-/reactivity-3.5.8.tgz}
-
-  '@vue/runtime-core@3.5.6':
-    resolution: {integrity: sha512-FpFULR6+c2lI+m1fIGONLDqPQO34jxV8g6A4wBOgne8eSRHP6PQL27+kWFIx5wNhhjkO7B4rgtsHAmWv7qKvbg==, tarball: https://registry.npmjs.org/@vue/runtime-core/-/runtime-core-3.5.6.tgz}
 
   '@vue/runtime-core@3.5.8':
     resolution: {integrity: sha512-fJuPelh64agZ8vKkZgp5iCkPaEqFJsYzxLk9vSC0X3G8ppknclNDr61gDc45yBGTaN5Xqc1qZWU3/NoaBMHcjQ==, tarball: https://registry.npmjs.org/@vue/runtime-core/-/runtime-core-3.5.8.tgz}
@@ -947,9 +944,6 @@ packages:
 
   '@vue/shared@3.5.3':
     resolution: {integrity: sha512-Jp2v8nylKBT+PlOUjun2Wp/f++TfJVFjshLzNtJDdmFJabJa7noGMncqXRM1vXGX+Yo2V7WykQFNxusSim8SCA==}
-
-  '@vue/shared@3.5.6':
-    resolution: {integrity: sha512-eidH0HInnL39z6wAt6SFIwBrvGOpDWsDxlw3rCgo1B+CQ1781WzQUSU3YjxgdkcJo9Q8S6LmXTkvI+cLHGkQfA==, tarball: https://registry.npmjs.org/@vue/shared/-/shared-3.5.6.tgz}
 
   '@vue/shared@3.5.8':
     resolution: {integrity: sha512-mJleSWbAGySd2RJdX1RBtcrUBX6snyOc0qHpgk3lGi4l9/P/3ny3ELqFWqYdkXIwwNN/kdm8nD9ky8o6l/Lx2A==, tarball: https://registry.npmjs.org/@vue/shared/-/shared-3.5.8.tgz}
@@ -1537,6 +1531,11 @@ packages:
   human-signals@5.0.0:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
     engines: {node: '>=16.17.0'}
+
+  husky@9.1.6:
+    resolution: {integrity: sha512-sqbjZKK7kf44hfdE94EoX8MZNk0n7HeW37O4YrVGCF4wzgQjp+akPAkfUK5LZ6KuR/6sqeAVuXHji+RzQgOn5A==, tarball: https://registry.npmjs.org/husky/-/husky-9.1.6.tgz}
+    engines: {node: '>=18'}
+    hasBin: true
 
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
@@ -3323,20 +3322,9 @@ snapshots:
     optionalDependencies:
       typescript: 5.6.2
 
-  '@vue/reactivity@3.5.6':
-    dependencies:
-      '@vue/shared': 3.5.6
-    optional: true
-
   '@vue/reactivity@3.5.8':
     dependencies:
       '@vue/shared': 3.5.8
-
-  '@vue/runtime-core@3.5.6':
-    dependencies:
-      '@vue/reactivity': 3.5.6
-      '@vue/shared': 3.5.6
-    optional: true
 
   '@vue/runtime-core@3.5.8':
     dependencies:
@@ -3359,9 +3347,6 @@ snapshots:
   '@vue/shared@3.4.38': {}
 
   '@vue/shared@3.5.3': {}
-
-  '@vue/shared@3.5.6':
-    optional: true
 
   '@vue/shared@3.5.8': {}
 
@@ -4052,6 +4037,8 @@ snapshots:
   https-browserify@1.0.0: {}
 
   human-signals@5.0.0: {}
+
+  husky@9.1.6: {}
 
   iconv-lite@0.6.3:
     dependencies:
@@ -4878,13 +4865,13 @@ snapshots:
     dependencies:
       vue: 3.5.8(typescript@5.6.2)
 
-  vue-echarts@7.0.3(@vue/runtime-core@3.5.6)(echarts@5.5.1)(vue@3.5.8(typescript@5.6.2)):
+  vue-echarts@7.0.3(@vue/runtime-core@3.5.8)(echarts@5.5.1)(vue@3.5.8(typescript@5.6.2)):
     dependencies:
       echarts: 5.5.1
       vue: 3.5.8(typescript@5.6.2)
       vue-demi: 0.13.11(vue@3.5.8(typescript@5.6.2))
     optionalDependencies:
-      '@vue/runtime-core': 3.5.6
+      '@vue/runtime-core': 3.5.8
     transitivePeerDependencies:
       - '@vue/composition-api'
 
