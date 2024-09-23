@@ -56,7 +56,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
         javalinWebContainer
                 .javalin()
                 .get("/api/torrent", this::handleTorrentList, Role.USER_READ)
-                .get("/api/torrent/search", this::handleTorrentSearch, Role.USER_READ)
+                .get("/api/torrent/query", this::handleTorrentSearch, Role.USER_READ)
                 .get("/api/torrent/{infoHash}", this::handleTorrentInfo, Role.USER_READ)
                 .get("/api/torrent/{infoHash}/accessHistory", this::handleConnectHistory, Role.USER_READ)
                 .get("/api/torrent/{infoHash}/banHistory", this::handleBanHistory, Role.USER_READ);
