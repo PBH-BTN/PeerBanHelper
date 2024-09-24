@@ -1,41 +1,41 @@
-import settingsLocale from './zh-CN/settings';
-import plusLocale from './zh-CN/plus';
-import dashboardPageLocale from '@/views/dashboard/locale/zh-CN';
-import banListPageLocale from '@/views/banlist/locale/zh-CN';
-import banLogPageLocale from '@/views/banlog/locale/zh-CN';
-import topBanPageLocale from '@/views/ranks/locale/zh-CN';
-import ruleMetricsLocale from '@/views/rule-metrics/locale/zh-CN';
-import serviceLocale from '@/service/locale/zh-CN';
-import loginLocale from '@/views/login/locale/zh-CN';
-import oobeLocale from '@/views/oobe/locale/zh-CN';
-import ruleManageMentLocale from '@/views/rule-management/locale/zh-CN';
-import chartsLocale from '@/views/charts/locale/zh-CN';
+import settingsLocale from './en-US/settings';
+import plusLocale from './en-US/plus';
+import dashboardPageLocale from '@/views/dashboard/locale/en-US';
+import banListPageLocale from '@/views/banlist/locale/en-US';
+import banLogPageLocale from '@/views/banlog/locale/en-US';
+import topBanPageLocale from '@/views/ranks/locale/en-US';
+import ruleMetricsLocale from '@/views/rule-metrics/locale/en-US';
+import serviceLocale from '@/service/locale/en-US';
+import loginLocale from '@/views/login/locale/en-US';
+import oobeLocale from '@/views/oobe/locale/en-US';
+import ruleManageMentLocale from '@/views/rule-management/locale/en-US';
+import chartsLocale from '@/views/charts/locale/en-US';
 export default {
-  'navbar.action.locale': '切换为中文',
-  'navbar.action.autoUpdate': '自动刷新',
-  'navbar.action.autoUpdate.lastUpdate': '最后更新于：',
-  'main.workInProgressTips': '请注意，此功能仍在施工中，目前记录和展示的数据较为有限。',
-  'footer.newVersion': '发现新版本！',
-  'footer.newVersion.body': '{version} 已发布，点击查看',
-  'footer.newVersionTips': '有新版本 {version} 可用，点击查看',
-  'footer.newVersion.updateNow': '立即更新',
-  'router.login': '登录',
-  'router.dashboard': '状态',
-  'router.banlist': '封禁名单',
-  'router.banlogs': '封禁日志',
-  'router.rank': '排行',
-  'router.metrics': '统计',
-  'router.metrics.ruleMetrics': '规则统计',
-  'router.metrics.charts': '图表',
-  'router.rule_management': '规则管理',
-  'router.moduleNotEnable': '{moduleName}功能未启用',
-  'router.moduleNotEnable.tips': '请在配置文件中开启相关功能',
-  'router.moduleNotEnable.viewDoc': '查看文档',
-  'service.networkErrorRetry': '网络连接失败，将于{time}后重试',
-  'service.networkErrorRetry.loading': '网络连接失败，正在重新连接',
-  'service.networkErrorRetry.second': '{count}秒',
-  'service.networkErrorRetry.cancel': '取消重试',
-  'service.networkErrorRetry.retry': '重试',
+  'navbar.action.locale': 'Switch to English',
+  'navbar.action.autoUpdate': 'Auto Update',
+  'navbar.action.autoUpdate.lastUpdate': 'Last updated at: ',
+  'main.workInProgressTips': 'This feature is still working in progress, and the data currently recorded and displayed is relatively limited',
+  'footer.newVersion': 'New Version Found!',
+  'footer.newVersion.body': '{version} is available, click to view',
+  'footer.newVersionTips': 'New version {version} is available, click to view',
+  'footer.newVersion.updateNow': 'Update Now',
+  'router.login': 'Login',
+  'router.dashboard': 'Status',
+  'router.banlist': 'Ban List',
+  'router.banlogs': 'Ban Logs',
+  'router.rank': 'Ranks',
+  'router.metrics': 'Metrics',
+  'router.metrics.ruleMetrics': 'Rule Metrics',
+  'router.metrics.charts': 'Charts',
+  'router.rule_management': 'Rule Management',
+  'router.moduleNotEnable': '{moduleName} is not enabled',
+  'router.moduleNotEnable.tips': 'Please enable the feature in the configuration file',
+  'router.moduleNotEnable.viewDoc': 'View Documentation',
+  'service.networkErrorRetry': 'Network failure, will retry in {time}.',
+  'service.networkErrorRetry.loading': 'Network failure, try to reloading...',
+  'service.networkErrorRetry.second': '1 second | {count} seconds',
+  'service.networkErrorRetry.cancel': 'Cancel Retry',
+  'service.networkErrorRetry.retry': 'Retry',
   ...settingsLocale,
   ...plusLocale,
   ...dashboardPageLocale,
