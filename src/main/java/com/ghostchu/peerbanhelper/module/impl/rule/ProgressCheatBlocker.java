@@ -114,12 +114,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
 
     private void flushDatabase() {
         try {
-            List<ClientTaskRecord> records = new ArrayList<>();
-            while (!pendingPersistQueue.isEmpty()) {
-                records.add(pendingPersistQueue.poll());
-            }
             try {
-                progressCheatBlockerPersistDao.flushDatabase(records);
+                progressCheatBlockerPersistDao.flushDatabase(pendingPersistQueue);
             } catch (SQLException e) {
                 log.error("Unable flush records into database", e);
                 rollbarErrorReporter.error(e);

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -26,7 +27,7 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
 
     public List<ProgressCheatBlocker.ClientTask> fetchFromDatabase(ProgressCheatBlocker.Client client, Timestamp after) throws SQLException {
         IPAddress address = IPAddressUtil.getIPAddress(client.getPeerPrefix());
-        if(address == null) return Collections.emptyList();
+        if (address == null) return Collections.emptyList();
         List<ProgressCheatBlockerPersistEntity> entities = queryBuilder()
                 .where()
                 .eq("torrentId", client.getTorrentId())
@@ -52,9 +53,10 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
         ).collect(Collectors.toCollection(CopyOnWriteArrayList::new)); // 可变 List，需要并发安全
     }
 
-    public void flushDatabase(List<ProgressCheatBlocker.ClientTaskRecord> records) throws SQLException {
+    public void flushDatabase(Deque<ProgressCheatBlocker.ClientTaskRecord> records) throws SQLException {
         callBatchTasks(() -> {
-            records.forEach(record -> {
+            while (!records.isEmpty()) {
+                var record = records.pop();
                 String torrentId = record.client().getTorrentId();
                 record.task().forEach(task -> {
                     try {
@@ -88,7 +90,7 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                         log.error("Unable write PCB persist data into database", e);
                     }
                 });
-            });
+            }
             return null;
         });
     }
