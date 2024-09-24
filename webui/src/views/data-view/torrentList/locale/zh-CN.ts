@@ -1,5 +1,5 @@
 export default {
-  'page.torrentList.description': '这个页面展示 PeerBanHelpe 在运行过程中观测到的种子数据。',
+  'page.torrentList.description': '这个页面展示 PeerBanHelper 在运行过程中观测到的种子数据。',
   'page.torrentList.column.name': '名称',
   'page.torrentList.column.size': '大小',
   'page.torrentList.column.count': '统计',
@@ -7,6 +7,9 @@ export default {
   'page.torrentList.column.count.access': '访问次数',
   'page.torrentList.column.actions': '操作',
   'page.torrentList.column.actions.history': '访问历史',
+  'page.torrentList.column.actions.ban': '封禁历史',
+  'page.torrentList.banHistory.title': '{name} 的封禁历史',
+  'page.torrentList.banHistory.description': '此处记录了该种子的封禁历史',
   'page.torrentList.accessHistory.title': '{name} 的访问记录',
   'page.torrentList.accessHistory.searchPlaceholder': '搜索种子名...',
   'page.torrentList.accessHistory.description': '此处记录了该种子有关联的所有 Peer 的访问记录',

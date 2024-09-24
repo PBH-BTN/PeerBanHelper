@@ -78,21 +78,44 @@
               </template>
             </a-button>
           </a-tooltip>
+          <a-tooltip
+            :content="
+              plusStatus ? t('page.torrentList.column.actions.ban') : t('page.ipList.plusLock')
+            "
+            position="top"
+            mini
+          >
+            <a-button
+              class="edit-btn"
+              shape="circle"
+              type="text"
+              :disabled="!plusStatus"
+              @click="banHistoryModal?.showModal(record.infoHash, record.name)"
+            >
+              <template #icon>
+                <icon-stop v-if="plusStatus" />
+                <icon-lock v-else />
+              </template>
+            </a-button>
+          </a-tooltip>
         </a-space>
       </template>
     </a-table>
   </a-space>
   <AccessHistoryModal ref="accessHistoryModal" />
+  <BanHistoryModal ref="banHistoryModal" />
 </template>
 <script lang="ts" setup>
 import { GetTorrentInfoList } from '@/service/data'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
-import { computed, defineAsyncComponent, ref, watch } from 'vue'
+import { debounce } from 'lodash'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
-const AccessHistoryModal = defineAsyncComponent(() => import('./accessHistoryModal.vue'))
+import AccessHistoryModal from './accessHistoryModal.vue'
+import BanHistoryModal from './banHistoryModal.vue'
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t } = useI18n()
@@ -159,9 +182,11 @@ const columns = [
 ]
 const list = computed(() => data.value?.data.results)
 const accessHistoryModal = ref<InstanceType<typeof AccessHistoryModal>>()
-const handleSearch = (value: string) => {
+const banHistoryModal = ref<InstanceType<typeof BanHistoryModal>>()
+
+const handleSearch = debounce((value: string) => {
   run({ page: current.value, pageSize: pageSize.value, keyword: value })
-}
+}, 300)
 
 const endpointStore = useEndpointStore()
 const plusStatus = computed(() => endpointStore.plusStatus)

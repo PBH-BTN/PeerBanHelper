@@ -7,6 +7,9 @@ export default {
   'page.torrentList.column.count.access': 'Access Count',
   'page.torrentList.column.actions': 'Actions',
   'page.torrentList.column.actions.history': 'Access History',
+  'page.torrentList.column.actions.ban': 'Ban History',
+  'page.torrentList.banHistory.title': 'Ban History of {name}',
+  'page.torrentList.banHistory.description': 'Here records all the ban history of this torrent',
   'page.torrentList.accessHistory.title': 'Access History of {name}',
   'page.torrentList.accessHistory.searchPlaceholder': 'Search torrents...',
   'page.torrentList.accessHistory.description':
