@@ -109,7 +109,7 @@
               class="collapse-table"
             >
               <template #expand-icon>
-                <icon-plus v-if="plusStatus" />
+                <icon-plus v-if="plusStatus?.activated" />
                 <icon-lock v-else />
               </template>
               <template v-if="!plusStatus" #extra>
@@ -125,7 +125,7 @@
               :disabled="!plusStatus"
             >
               <template #expand-icon>
-                <icon-plus v-if="plusStatus" />
+                <icon-plus v-if="plusStatus?.activated" />
                 <icon-lock v-else />
               </template>
               <template v-if="!plusStatus" #extra>

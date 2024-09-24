@@ -73,7 +73,7 @@
               @click="accessHistoryModal?.showModal(record.infoHash, record.name)"
             >
               <template #icon>
-                <icon-history v-if="plusStatus" />
+                <icon-history v-if="plusStatus?.activated" />
                 <icon-lock v-else />
               </template>
             </a-button>
@@ -93,7 +93,7 @@
               @click="banHistoryModal?.showModal(record.infoHash, record.name)"
             >
               <template #icon>
-                <icon-stop v-if="plusStatus" />
+                <icon-stop v-if="plusStatus?.activated" />
                 <icon-lock v-else />
               </template>
             </a-button>
