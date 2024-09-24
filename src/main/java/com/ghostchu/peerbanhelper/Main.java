@@ -13,11 +13,12 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.util.PBHLibrariesLoader;
 import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
 import com.ghostchu.simplereloadlib.ReloadManager;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadableContainer;
 import com.google.common.eventbus.EventBus;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.core.config.plugins.util.PluginManager;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
@@ -103,7 +104,7 @@ public class Main {
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
             DEF_LOCALE = System.getenv("PBH_USER_LOCALE");
-            if(DEF_LOCALE == null) {
+            if (DEF_LOCALE == null) {
                 DEF_LOCALE = Locale.getDefault().toLanguageTag();
             }
         }
@@ -165,9 +166,9 @@ public class Main {
                 root = new File(System.getenv("LOCALAPPDATA"), "PeerBanHelper").getAbsolutePath();
             } else {
                 var dataDirectory = new File(System.getProperty("user.home")).toPath();
-                if(osName.contains("mac")){
+                if (osName.contains("mac")) {
                     dataDirectory = dataDirectory.resolve("/Library/Application Support");
-                }else{
+                } else {
                     dataDirectory = dataDirectory.resolve(".config");
                 }
                 root = dataDirectory.resolve("PeerBanHelper").toAbsolutePath().toString();
@@ -342,7 +343,7 @@ public class Main {
             return name;
         }
         if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
-                Character.isUpperCase(name.charAt(0))) {
+            Character.isUpperCase(name.charAt(0))) {
             return name;
         }
         char chars[] = name.toCharArray();
@@ -391,4 +392,10 @@ public class Main {
         defaultListableBeanFactory.removeBeanDefinition(beanName);
     }
 
+    public static Map<ReloadableContainer, ReloadResult> reloadConfig() {
+        mainConfig = loadConfiguration(mainConfigFile);
+        profileConfig = loadConfiguration(profileConfigFile);
+        setupProxySettings();
+       return reloadManager.reload();
+    }
 }
