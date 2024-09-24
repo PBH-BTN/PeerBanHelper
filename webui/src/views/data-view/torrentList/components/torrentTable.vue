@@ -60,7 +60,9 @@
         <a-space wrap>
           <a-tooltip
             :content="
-              plusStatus ? t('page.torrentList.column.actions.history') : t('page.ipList.plusLock')
+              plusStatus?.activated
+                ? t('page.torrentList.column.actions.history')
+                : t('page.ipList.plusLock')
             "
             position="top"
             mini
@@ -69,7 +71,7 @@
               class="edit-btn"
               shape="circle"
               type="text"
-              :disabled="!plusStatus"
+              :disabled="!plusStatus?.activated"
               @click="accessHistoryModal?.showModal(record.infoHash, record.name)"
             >
               <template #icon>
@@ -80,7 +82,9 @@
           </a-tooltip>
           <a-tooltip
             :content="
-              plusStatus ? t('page.torrentList.column.actions.ban') : t('page.ipList.plusLock')
+              plusStatus?.activated
+                ? t('page.torrentList.column.actions.ban')
+                : t('page.ipList.plusLock')
             "
             position="top"
             mini
@@ -89,7 +93,7 @@
               class="edit-btn"
               shape="circle"
               type="text"
-              :disabled="!plusStatus"
+              :disabled="!plusStatus?.activated"
               @click="banHistoryModal?.showModal(record.infoHash, record.name)"
             >
               <template #icon>

@@ -105,14 +105,14 @@
             <a-collapse-item
               key="1"
               :header="t('page.ipList.label.accessHistory')"
-              :disabled="!plusStatus"
+              :disabled="!plusStatus?.activated"
               class="collapse-table"
             >
               <template #expand-icon>
                 <icon-plus v-if="plusStatus?.activated" />
                 <icon-lock v-else />
               </template>
-              <template v-if="!plusStatus" #extra>
+              <template v-if="!plusStatus?.activated" #extra>
                 <a-popover :content="t('page.ipList.plusLock')">
                   <a-tag size="small">Plus</a-tag>
                 </a-popover>
@@ -122,13 +122,13 @@
             <a-collapse-item
               key="2"
               :header="t('page.ipList.label.banHistory')"
-              :disabled="!plusStatus"
+              :disabled="!plusStatus?.activated"
             >
               <template #expand-icon>
                 <icon-plus v-if="plusStatus?.activated" />
                 <icon-lock v-else />
               </template>
-              <template v-if="!plusStatus" #extra>
+              <template v-if="!plusStatus?.activated" #extra>
                 <a-popover :content="t('page.ipList.plusLock')">
                   <a-tag size="small">Plus</a-tag>
                 </a-popover>
