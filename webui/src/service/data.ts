@@ -55,7 +55,10 @@ export async function GetIPBasicData(ip: string): Promise<CommonResponse<IPBasic
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
-  const url = new URL(urlJoin(endpointStore.endpoint, `api/peer/${ip}`), location.href)
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(ip)}`),
+    location.href
+  )
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
@@ -72,7 +75,7 @@ export async function GetIPtAccessHistoryList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/peer/${params.ip}/accessHistory`),
+    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(params.ip)}/accessHistory`),
     location.href
   )
   url.searchParams.set('page', String(params.page))
@@ -95,7 +98,7 @@ export async function GetIPBanHistoryList(params: {
   await endpointStore.serverAvailable
 
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/peer/${params.ip}/banHistory`),
+    urlJoin(endpointStore.endpoint, `api/peer/${encodeURIComponent(params.ip)}/banHistory`),
     location.href
   )
   url.searchParams.set('page', String(params.page))
