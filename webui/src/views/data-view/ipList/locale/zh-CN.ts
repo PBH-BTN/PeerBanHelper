@@ -10,5 +10,5 @@ export default {
   'page.ipList.label.downloadedFromPeer': '从 Peer 下载',
   'page.ipList.label.accessHistory': '访问历史',
   'page.ipList.label.banHistory': '封禁历史',
-  'page.ipList.plusLock': '这个功能需要激活 Plus 许可证后才可使用'
+  'page.ipList.plusLock': '这个功能需要一个激活的 Plus 许可证'
 }

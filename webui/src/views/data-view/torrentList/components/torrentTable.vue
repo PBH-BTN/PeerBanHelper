@@ -58,15 +58,23 @@
       </template>
       <template #action="{ record }">
         <a-space wrap>
-          <a-tooltip :content="t('page.torrentList.column.actions.history')" position="top" mini>
+          <a-tooltip
+            :content="
+              plusStatus ? t('page.torrentList.column.actions.history') : t('page.ipList.plusLock')
+            "
+            position="top"
+            mini
+          >
             <a-button
               class="edit-btn"
               shape="circle"
               type="text"
+              :disabled="!plusStatus"
               @click="accessHistoryModal?.showModal(record.infoHash, record.name)"
             >
               <template #icon>
-                <icon-history />
+                <icon-history v-if="plusStatus" />
+                <icon-lock v-else />
               </template>
             </a-button>
           </a-tooltip>
@@ -81,10 +89,10 @@ import { GetTorrentInfoList } from '@/service/data'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
-import AccessHistoryModal from './accessHistoryModal.vue'
+const AccessHistoryModal = defineAsyncComponent(() => import('./accessHistoryModal.vue'))
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t } = useI18n()
@@ -154,10 +162,13 @@ const accessHistoryModal = ref<InstanceType<typeof AccessHistoryModal>>()
 const handleSearch = (value: string) => {
   run({ page: current.value, pageSize: pageSize.value, keyword: value })
 }
+
+const endpointStore = useEndpointStore()
+const plusStatus = computed(() => endpointStore.plusStatus)
 </script>
 <style scoped>
 .edit-btn {
-  color: rgb(var(--gray-8));
+  color: rgb(var(--gray-8)) !important;
   font-size: 16px;
 }
 
