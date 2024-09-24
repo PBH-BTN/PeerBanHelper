@@ -1,9 +1,10 @@
 export default {
-  'page.topban.description': '此页面展示 PeerBanHelper 储存的封禁历史排名信息。',
-  'page.topban.usage': '这是从数据库中记录的的封禁历史中分析得来的数据。如果某些 IP 地址持续被多次封禁，则可以考虑使用系统防火墙屏蔽这些 IP，或者向其他人分享这些恶意 IP 地址，以帮助更多人改善他们的屏蔽规则。',
-  'page.topban.onlyShow': '只展示前',
-  'page.topban.onlyShow.number': '个',
-  'page.topban.top50Table.searchPlaceholder': '搜索IP地址...',
-  'page.topban.top50Table.column.ipaddress': 'IP 地址',
-  'page.topban.top50Table.column.historyCount': '历史封禁次数'
+  'page.topban.description': 'This page shows the ban history rank stored by PeerBanHelper.',
+  'page.topban.title': 'Top {topNumber} most frequently banned IP addresses',
+  'page.topban.usage': 'This data is analyzed from the ban history recorded in the database. If some IP addresses are repeatedly banned, you may consider using the system firewall to block these IPs, or share these malicious IP addresses with others to help more people improve their blocking rules.',
+  'page.topban.onlyShow': 'Only show the first',
+  'page.topban.onlyShow.number': '',
+  'page.topban.top50Table.searchPlaceholder': 'Search IP address...',
+  'page.topban.top50Table.column.ipaddress': 'IP Address',
+  'page.topban.top50Table.column.historyCount': 'History Ban Count'
 };
