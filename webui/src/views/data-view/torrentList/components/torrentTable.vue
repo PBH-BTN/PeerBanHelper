@@ -38,6 +38,24 @@
           record.infoHash
         }}</a-typography-text>
       </template>
+      <template #count="{ record }">
+        <a-space fill direction="vertical">
+          <a-popover :content="`${t('page.torrentList.column.count.ban')}: ${record.peerBanCount}`">
+            <a-typography-text>
+              <icon-stop />
+              {{ record.peerBanCount }}
+            </a-typography-text>
+          </a-popover>
+          <a-popover
+            :content="`${t('page.torrentList.column.count.access')}: ${record.peerAccessCount}`"
+          >
+            <a-typography-text>
+              <icon-check-circle />
+              {{ record.peerAccessCount }}
+            </a-typography-text>
+          </a-popover>
+        </a-space>
+      </template>
       <template #action="{ record }">
         <a-space wrap>
           <a-tooltip :content="t('page.torrentList.column.actions.history')" position="top" mini>
@@ -106,16 +124,11 @@ const tableLoading = computed(() => {
 
 const columns = [
   {
-    title: 'ID',
-    dataIndex: 'id',
-    width: 60
-  },
-  {
     title: () => t('page.torrentList.column.name'),
     dataIndex: 'name',
     ellipsis: true,
     tooltip: true,
-    width: 600
+    width: 500
   },
   {
     title: 'Hash',
@@ -126,6 +139,10 @@ const columns = [
     title: () => t('page.torrentList.column.size'),
     slotName: 'size',
     width: 120
+  },
+  {
+    title: () => t('page.torrentList.column.count'),
+    slotName: 'count'
   },
   {
     title: () => t('page.torrentList.column.actions'),

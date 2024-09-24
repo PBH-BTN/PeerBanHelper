@@ -7,5 +7,8 @@ export default {
   'page.ipList.label.banCount': 'Ban Count',
   'page.ipList.label.torrentAccessCount': 'Torrent Access Count',
   'page.ipList.label.uploadedToPeer': 'Uploaded to Peer',
-  'page.ipList.label.downloadedFromPeer': 'Downloaded from Peer'
+  'page.ipList.label.downloadedFromPeer': 'Downloaded from Peer',
+  'page.ipList.label.accessHistory': 'Access History',
+  'page.ipList.label.banHistory': 'Ban History',
+  'page.ipList.plusLock': 'This feature requires an activated Plus license to use'
 }

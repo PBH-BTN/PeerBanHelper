@@ -4,6 +4,8 @@ export interface TorrentInfo {
   infoHash: string
   name: string
   size: number
+  peerBanCount: number
+  peerAccessCount: number
 }
 
 export interface AccessHistory {

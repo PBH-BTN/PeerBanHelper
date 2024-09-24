@@ -12,7 +12,7 @@
         {{ t('page.torrentList.accessHistory.description') }}
       </a-typography-text>
       <a-table
-        v-if="!data?.data.results && !tableLoading"
+        v-if="data?.data.results || tableLoading"
         :stripe="true"
         :columns="columns"
         :data="data?.data.results"
@@ -32,9 +32,14 @@
         @page-size-change="changePageSize"
       >
         <template #address="{ record }">
-          <a-typography-text code copyable style="white-space: nowrap">{{
-            record.address
-          }}</a-typography-text>
+          <a-typography-text code copyable style="white-space: nowrap">
+            <a
+              style="text-decoration: none; cursor: pointer; color: var(--color-text-2)"
+              :href="`ipHistory?ip=${record.address}`"
+            >
+              {{ record.address }}
+            </a>
+          </a-typography-text>
         </template>
         <template #downloader="{ record }">
           <a-tag :color="getColor(record.downloader)">{{ record.downloader }}</a-tag>
@@ -117,7 +122,7 @@
   </a-modal>
 </template>
 <script lang="ts" setup>
-import { GetAccessHistoryList } from '@/service/data'
+import { GetTorrentAccessHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
@@ -126,6 +131,7 @@ import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
 import { h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
+
 const { t, d } = useI18n()
 const endpointState = useEndpointStore()
 
@@ -147,7 +153,7 @@ const {
   changeCurrent,
   changePageSize,
   runAsync
-} = usePagination(GetAccessHistoryList, {
+} = usePagination(GetTorrentAccessHistoryList, {
   pagination: {
     currentKey: 'page',
     pageSizeKey: 'pageSize',

@@ -78,9 +78,9 @@
   </a-modal>
 </template>
 <script setup lang="ts">
+import countryFlag from '@/components/countryFlag.vue'
 import { getPeer } from '@/service/downloaders'
 import { formatFileSize } from '@/utils/file'
-import countryFlag from '@/views/banlist/components/countryFlag.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
