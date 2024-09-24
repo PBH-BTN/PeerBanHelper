@@ -1,0 +1,3 @@
+files:
+  - source: /src/main/resources/lang/messages_fallback.yml
+    translation: /crowdin/%locale_with_underscore%/messages.yml
