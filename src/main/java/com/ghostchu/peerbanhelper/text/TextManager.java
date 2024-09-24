@@ -130,6 +130,7 @@ public class TextManager implements Reloadable {
         languageFilesManager.deploy("en_us", loadBuiltInFallback());
         // second, load the bundled language files
         loadBundled().forEach(languageFilesManager::deploy);
+        loadBundledCrowdin().forEach(languageFilesManager::deploy);
         // then, load the translations from Crowdin
         // and don't forget fix missing
         languageFilesManager.fillMissing(loadBuiltInFallback());
@@ -225,6 +226,34 @@ public class TextManager implements Reloadable {
                 availableLang.put(langName.toLowerCase(Locale.ROOT).replace("-", "_"), configuration);
             } catch (IOException | InvalidConfigurationException e) {
                 log.warn("Failed to load bundled translation.", e);
+            }
+        }
+        return availableLang;
+    }
+
+    /**
+     * Loading translations from bundled resources
+     *
+     * @return The bundled translations, empty hash map if nothing can be load.
+     */
+    @NotNull
+    @SneakyThrows
+    private Map<String, YamlConfiguration> loadBundledCrowdin() {
+        Map<String, YamlConfiguration> availableLang = new HashMap<>();
+        URL url = Main.class.getClassLoader().getResource("");
+        if (url == null) {
+            return availableLang;
+        }
+        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
+        var res = resourcePatternResolver.getResources("classpath:crowdin/**/*.yml");
+        for (Resource re : res) {
+            String langName = URLUtil.getParentName(re.getURI());
+            try {
+                YamlConfiguration configuration = new YamlConfiguration();
+                configuration.loadFromString(new String(re.getContentAsByteArray(), StandardCharsets.UTF_8));
+                availableLang.put(langName.toLowerCase(Locale.ROOT).replace("-", "_"), configuration);
+            } catch (IOException | InvalidConfigurationException e) {
+                log.warn("Failed to load bundled Crowdin translation.", e);
             }
         }
         return availableLang;
