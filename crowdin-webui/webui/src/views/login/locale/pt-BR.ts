@@ -1,10 +1,10 @@
 export default {
-  'login.form.login.success': '登录成功',
-  'login.form.title': '登录到 PeerBanHelper',
-  'login.form.password.placeholder': '请输入管理 Token',
-  'login.form.rememberPassword': '记住 Token',
-  'login.form.forgetPassword': '忘记 Token',
-  'login.form.password.errMsg': '请输入有效的管理 Token',
-  'login.form.login.failed': '登录失败：',
-  'login.form.login': '登录'
+  'login.form.login.success': 'Login success',
+  'login.form.title': 'Login to PeerBanHelper',
+  'login.form.password.placeholder': 'Please enter the management token',
+  'login.form.rememberPassword': 'Remember token',
+  'login.form.forgetPassword': 'Forget token',
+  'login.form.password.errMsg': 'Please enter the valid management token',
+  'login.form.login.failed': 'Login Failed:',
+  'login.form.login': 'Login'
 };
