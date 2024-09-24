@@ -1,5 +1,6 @@
 export default {
-  'page.torrentList.description': '这个页面展示 PeerBanHelper 在运行过程中观测到的种子数据。',
+  'page.torrentList.description':
+    '这个页面展示 PeerBanHelper 在运行过程中观测到的种子数据。这些数据不与下载器绑定，并独立存储。存储时长由您的配置文件和 Torrents/Peers 的活动决定。',
   'page.torrentList.column.name': '名称',
   'page.torrentList.column.size': '大小',
   'page.torrentList.column.count': '统计',

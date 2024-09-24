@@ -1,5 +1,6 @@
 export default {
-  'page.torrentList.description': 'This page shows the torrent data observed by PeerBanHelper.',
+  'page.torrentList.description':
+    'This page shows the torrent data observed by PeerBanHelper. This data is not tied to the downloader and is stored independently. The storage length is determined by your profile and the activity of Torrents/Peers.',
   'page.torrentList.column.name': 'Name',
   'page.torrentList.column.size': 'Size',
   'page.torrentList.column.count': 'Count',
