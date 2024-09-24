@@ -21,8 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.sql.SQLException;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+import java.sql.Timestamp;
 
 @Component
 @Slf4j
@@ -85,29 +84,37 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .where()
                 .eq("address", ip)
                 .queryRawFirst();
-        if (upDownResult == null) {
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PEER_NOT_FOUND), null));
-            return;
-        }
-        if (upDownResult.length == 2) {
-            uploadedToPeer = Long.parseLong(upDownResult[0]);
-            downloadedFromPeer = Long.parseLong(upDownResult[1]);
+        if (upDownResult != null) {
+            if (upDownResult.length == 2) {
+                uploadedToPeer = Long.parseLong(upDownResult[0]);
+                downloadedFromPeer = Long.parseLong(upDownResult[1]);
+            } else {
+                uploadedToPeer = -1;
+                downloadedFromPeer = -1;
+            }
         } else {
             uploadedToPeer = -1;
             downloadedFromPeer = -1;
         }
+        long firstTimeSeenTS = -1;
+        long lastTimeSeenTS = -1;
         // 单独做查询，因为一个 IP 可能有多条记录（当 torrent 或者 下载器不同时）
         var firstTimeSeen = peerRecordDao.queryBuilder()
                 .orderBy("firstTimeSeen", true)
                 .where()
                 .eq("address", ip)
-                .queryForFirst().getFirstTimeSeen();
+                .queryForFirst();
         var lastTimeSeen = peerRecordDao.queryBuilder()
                 .orderBy("lastTimeSeen", false)
                 .where()
                 .eq("address", ip)
-                .queryForFirst().getLastTimeSeen();
-
+                .queryForFirst();
+        if (firstTimeSeen != null) {
+            firstTimeSeenTS = new Timestamp(firstTimeSeen.getFirstTimeSeen().getTime()).getTime();
+        }
+        if (lastTimeSeen != null) {
+            lastTimeSeenTS = new Timestamp(lastTimeSeen.getLastTimeSeen().getTime()).getTime();
+        }
         IPDB ipdb = getServer().getIpdb();
         IPGeoData geoIP = null;
         try {
@@ -117,7 +124,7 @@ public class PBHPeerController extends AbstractFeatureModule {
         } catch (Exception e) {
             log.warn("Unable to perform GeoIP query for ip {}", ip);
         }
-        var info = new PeerInfo(ip, firstTimeSeen.getTime(), lastTimeSeen.getTime(), banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP);
+        var info = new PeerInfo(ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP);
         ctx.json(new StdResp(true, null, info));
     }
 
