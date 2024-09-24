@@ -1,14 +1,14 @@
 export default {
-  'page.banlog.description': 'This page shows the ban log information stored by PeerBanHelper.',
-  'page.banlog.banlogTable.notUnbanned': 'Not Unbanned yet',
-  'page.banlog.banlogTable.column.banTime': 'Ban Time',
-  'page.banlog.banlogTable.column.unbanTime': 'Unban Time',
-  'page.banlog.banlogTable.column.peerAddress': 'Peer Address',
+  'page.banlog.description': " 此页面展示 PeerBanHelper 储存的封禁历史记录信息。",
+  'page.banlog.banlogTable.notUnbanned': "未解封",
+  'page.banlog.banlogTable.column.banTime': "封禁时间",
+  'page.banlog.banlogTable.column.unbanTime': "解封时间",
+  'page.banlog.banlogTable.column.peerAddress': "Peer 地址",
   'page.banlog.banlogTable.column.peerId': 'Peer ID',
-  'page.banlog.banlogTable.column.trafficSnapshot': 'Traffic Snapshot',
-  'page.banlog.banlogTable.column.torrentName': 'Torrent Name',
-  'page.banlog.banlogTable.column.torrentSize': 'Size',
-  'page.banlog.banlogTable.column.description': 'Description',
-  'page.banlog.radio.viewMode': 'View Mode',
-  'page.banlog.radio.table': 'Table'
+  'page.banlog.banlogTable.column.trafficSnapshot': "流量快照",
+  'page.banlog.banlogTable.column.torrentName': "种子名",
+  'page.banlog.banlogTable.column.torrentSize': "大小",
+  'page.banlog.banlogTable.column.description': "描述",
+  'page.banlog.radio.viewMode': "视图模式",
+  'page.banlog.radio.table': "表格"
 };
