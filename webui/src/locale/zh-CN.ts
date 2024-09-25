@@ -43,6 +43,8 @@ export default {
   'service.networkErrorRetry.cancel': '取消重试',
   'service.networkErrorRetry.retry': '重试',
 
+  'queryLink.title': '点击查询 IP',
+
   ...settingsLocale,
   ...plusLocale,
   ...dashboardPageLocale,

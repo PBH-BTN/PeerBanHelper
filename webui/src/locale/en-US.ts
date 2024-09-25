@@ -44,6 +44,8 @@ export default {
   'service.networkErrorRetry.cancel': 'Cancel Retry',
   'service.networkErrorRetry.retry': 'Retry',
 
+  'queryLink.title': 'Click to query this IP',
+
   ...settingsLocale,
   ...plusLocale,
   ...dashboardPageLocale,

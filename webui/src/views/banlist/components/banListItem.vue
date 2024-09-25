@@ -9,7 +9,9 @@
       <a-space fill style="display: flex; justify-content: space-between">
         <a-space wrap>
           <a-typography-text bold copyable>
-            {{ item.banMetadata.peer.address.ip }}:{{ item.banMetadata.peer.address.port }}
+            <queryIpLink :ip="item.banMetadata.peer.address.ip" style="color: var(--color-text-1)">
+              {{ item.banMetadata.peer.address.ip }}:{{ item.banMetadata.peer.address.port }}
+            </queryIpLink>
           </a-typography-text>
           <a-tooltip
             :content="
@@ -160,6 +162,8 @@
 <script setup lang="ts">
 import type { BanList } from '@/api/model/banlist'
 import AsyncMethod from '@/components/asyncMethod.vue'
+import CountryFlag from '@/components/countryFlag.vue'
+import queryIpLink from '@/components/queryIpLink.vue'
 import { unbanIP } from '@/service/banList'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
@@ -167,7 +171,6 @@ import { Message } from '@arco-design/web-vue'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import CountryFlag from '../../../components/countryFlag.vue'
 
 const { t, d } = useI18n()
 defineProps<{

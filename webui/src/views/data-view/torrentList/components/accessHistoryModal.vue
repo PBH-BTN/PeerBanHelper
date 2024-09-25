@@ -33,12 +33,9 @@
       >
         <template #address="{ record }">
           <a-typography-text code copyable style="white-space: nowrap">
-            <a
-              style="text-decoration: none; cursor: pointer; color: var(--color-text-2)"
-              :href="`ipHistory?ip=${record.address}`"
-            >
+            <queryIpLink :ip="record.address"  style="color: var(--color-text-2);">
               {{ record.address }}
-            </a>
+            </queryIpLink>
           </a-typography-text>
         </template>
         <template #downloader="{ record }">
@@ -122,6 +119,7 @@
   </a-modal>
 </template>
 <script lang="ts" setup>
+import queryIpLink from '@/components/queryIpLink.vue'
 import { GetTorrentAccessHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'

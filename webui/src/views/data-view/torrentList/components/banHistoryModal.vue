@@ -44,12 +44,9 @@
         </template>
         <template #peerAddress="{ record }">
           <a-typography-text code>
-            <a
-              style="text-decoration: none; cursor: pointer; color: var(--color-text-2)"
-              :href="`ipHistory?ip=${record.peerIp}`"
-            >
+           <queryIpLink :ip="record.peerIp"  style="color: var(--color-text-2);">
               {{ record.peerIp }}:{{ record.peerPort }}
-            </a>
+           </queryIpLink>
           </a-typography-text>
         </template>
         <template #peerStatus="{ record }">
@@ -88,6 +85,7 @@
   </a-modal>
 </template>
 <script setup lang="ts">
+import queryIpLink from '@/components/queryIpLink.vue'
 import { GetTorrentBanHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
