@@ -142,8 +142,8 @@
                   </a-popover> </a-space
               ></template>
               <a-space>
-                <a-button :href="`https://x.threatbook.com/v5/ip/${searchInput}`" type="outline">
-                  ThreatBook
+                <a-button :href="`https://ip.ping0.cc/ip/${searchInput}`" type="outline">
+                  ping0
                 </a-button>
                 <a-button :href="`https://search.censys.io/hosts/${searchInput}`" type="outline">
                   Censys
