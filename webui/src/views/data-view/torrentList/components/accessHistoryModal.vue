@@ -33,7 +33,7 @@
       >
         <template #address="{ record }">
           <a-typography-text code copyable style="white-space: nowrap">
-            <queryIpLink :ip="record.address"  style="color: var(--color-text-2);">
+            <queryIpLink :ip="record.address" style="color: var(--color-text-2)">
               {{ record.address }}
             </queryIpLink>
           </a-typography-text>

@@ -22,7 +22,7 @@
             v-if="record.geo && record.geo.countryRegion"
             :iso="record.geo.countryRegion"
           />
-          <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2);">
+          <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
             {{ record.peer.address.ip }}
           </queryIpLink>
         </a-typography-text>

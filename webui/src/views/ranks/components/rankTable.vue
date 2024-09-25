@@ -43,11 +43,11 @@
         </div>
       </template>
       <template #address="{ record }">
-          <a-typography-text  style="white-space: nowrap">
-            <queryIpLink :ip="record.peerIp"  style="color: var(--color-text-1);">
-              {{ record.peerIp }}
-            </queryIpLink>
-          </a-typography-text>
+        <a-typography-text style="white-space: nowrap">
+          <queryIpLink :ip="record.peerIp" style="color: var(--color-text-1)">
+            {{ record.peerIp }}
+          </queryIpLink>
+        </a-typography-text>
       </template>
     </a-table>
   </a-space>

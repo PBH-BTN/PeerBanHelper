@@ -44,9 +44,9 @@
         </template>
         <template #peerAddress="{ record }">
           <a-typography-text code>
-           <queryIpLink :ip="record.peerIp"  style="color: var(--color-text-2);">
+            <queryIpLink :ip="record.peerIp" style="color: var(--color-text-2)">
               {{ record.peerIp }}:{{ record.peerPort }}
-           </queryIpLink>
+            </queryIpLink>
           </a-typography-text>
         </template>
         <template #peerStatus="{ record }">
