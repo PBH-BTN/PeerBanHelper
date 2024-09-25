@@ -61,6 +61,7 @@ export interface AccessHistory {
 }
 
 export interface IPBasicInfo {
+  found: boolean
   address: string
   banCount: number
   downloadedFromPeer: number

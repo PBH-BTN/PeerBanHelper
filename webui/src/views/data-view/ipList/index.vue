@@ -19,44 +19,73 @@
     <div class="result-container center">
       <a-card v-show="data?.data || error" class="result-card" hoverable>
         <a-space v-if="!error" direction="vertical" fill>
-          <a-descriptions :title="data?.data.address">
-            <a-descriptions-item :label="t('page.ipList.label.banCount')" :span="2">
+          <a-descriptions>
+            <template #title>
+              <a-space>
+                {{ data?.data.address }}
+                <a-popover v-if="!data?.data.found" :content="t('page.ipList.notfound.tips')">
+                  <a-tag>Not found</a-tag>
+                </a-popover>
+              </a-space>
+            </template>
+            <a-descriptions-item
+              v-if="data?.data.found"
+              :label="t('page.ipList.label.banCount')"
+              :span="2"
+            >
               {{ data?.data.banCount }}
             </a-descriptions-item>
-            <a-descriptions-item :label="t('page.ipList.label.torrentAccessCount')" :span="2">
+            <a-descriptions-item
+              v-if="data?.data.found"
+              :label="t('page.ipList.label.torrentAccessCount')"
+              :span="2"
+            >
               {{ data?.data.torrentAccessCount }}
             </a-descriptions-item>
-            <a-descriptions-item :label="t('page.ipList.label.uploadedToPeer')" :span="2">
+            <a-descriptions-item
+              v-if="data?.data.found"
+              :label="t('page.ipList.label.uploadedToPeer')"
+              :span="2"
+            >
               <a-typography-text>
                 <icon-arrow-up class="green" />
                 {{ formatFileSize(data?.data.uploadedToPeer ?? 0) }}</a-typography-text
               >
             </a-descriptions-item>
-            <a-descriptions-item :label="t('page.ipList.label.downloadedFromPeer')" :span="2">
+            <a-descriptions-item
+              v-if="data?.data.found"
+              :label="t('page.ipList.label.downloadedFromPeer')"
+              :span="2"
+            >
               <a-typography-text>
                 <icon-arrow-down class="red" />
                 {{ formatFileSize(data?.data.downloadedFromPeer ?? 0) }}</a-typography-text
               >
             </a-descriptions-item>
-            <a-descriptions-item :label="t('page.ipList.label.firstTimeSeen')" :span="2">
+            <a-descriptions-item
+              v-if="data?.data.found"
+              :label="t('page.ipList.label.firstTimeSeen')"
+              :span="2"
+            >
               {{ d(data?.data.firstTimeSeen ?? 0, 'long') }}
             </a-descriptions-item>
-            <a-descriptions-item :label="t('page.ipList.label.lastTimeSeen')" :span="2">
+            <a-descriptions-item
+              v-if="data?.data.found"
+              :label="t('page.ipList.label.lastTimeSeen')"
+              :span="2"
+            >
               {{ d(data?.data.lastTimeSeen ?? 0, 'long') }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.geo"
+              v-if="data?.data.geo?.country || data?.data.geo?.city"
               :label="t('page.banlist.banlist.listItem.geo')"
               :span="2"
             >
               <CountryFlag
-                :iso="data.data.geo?.country?.iso ?? t('page.banlist.banlist.listItem.empty')"
+                v-if="data.data.geo?.country?.iso"
+                :iso="data.data.geo?.country?.iso ?? ''"
               />
-              {{
-                `${data.data.geo?.country?.name} ${
-                  data.data.geo?.city?.name ?? t('page.banlist.banlist.listItem.empty')
-                }`
-              }}
+              {{ `${data.data.geo?.country?.name ?? ''} ${data.data.geo?.city?.name ?? ''}` }}
             </a-descriptions-item>
             <a-descriptions-item
               v-if="data?.data.geo?.network?.isp"
@@ -99,9 +128,25 @@
                 </a-tooltip>
               </a-space>
             </a-descriptions-item>
+            <a-descriptions-item :span="8">
+              <template #label>
+                <a-space>
+                  {{ t('page.ipList.shortcut') }}
+                  <a-popover :content="t('page.ipList.shortcut.tips')">
+                    <icon-info-circle />
+                  </a-popover> </a-space
+              ></template>
+              <a-space>
+                <a-button :href="`https://x.threatbook.com/v5/ip/${searchInput}`" type="outline">
+                  ThreatBook
+                </a-button>
+                <a-button :href="`https://search.censys.io/hosts/${searchInput}`" type="outline">
+                  Censys
+                </a-button>
+              </a-space>
+            </a-descriptions-item>
           </a-descriptions>
-          <a-space></a-space>
-          <a-collapse :bordered="false" destroy-on-hide>
+          <a-collapse v-if="data?.data.found" :bordered="false" destroy-on-hide>
             <a-collapse-item
               key="1"
               :header="t('page.ipList.label.accessHistory')"

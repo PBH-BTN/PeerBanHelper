@@ -10,6 +10,11 @@ export default {
   'page.ipList.label.downloadedFromPeer': 'Downloaded from Peer',
   'page.ipList.label.accessHistory': 'Access History',
   'page.ipList.label.banHistory': 'Ban History',
+  'page.ipList.shortcut': 'Shortcut',
+  'page.ipList.shortcut.tips':
+    'Here are some external dependency analysis shortcuts for reference. Caution: PBH-BTN knows nothing about the content of external links and is not responsible for any results',
   'page.ipList.plusLock': 'This feature requires an activated Plus license to use',
-  'page.ipList.error': 'Error occurred!'
+  'page.ipList.error': 'Error occurred!',
+  'page.ipList.notfound.tips':
+    'This IP has not been observed, but you can still view some information at here'
 }
