@@ -50,7 +50,7 @@
             :content="`${t('page.torrentList.column.count.access')}: ${record.peerAccessCount}`"
           >
             <a-typography-text>
-              <icon-check-circle />
+              <icon-link />
               {{ record.peerAccessCount }}
             </a-typography-text>
           </a-popover>
