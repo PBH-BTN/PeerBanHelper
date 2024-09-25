@@ -164,10 +164,6 @@ const {
 
 const columns = [
   {
-    title: 'ID',
-    dataIndex: 'id'
-  },
-  {
     title: () => t('page.torrentList.accessHistory.column.downloader'),
     slotName: 'downloader'
   },
