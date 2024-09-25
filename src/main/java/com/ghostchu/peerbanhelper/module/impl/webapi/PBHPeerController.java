@@ -120,7 +120,9 @@ public class PBHPeerController extends AbstractFeatureModule {
         } catch (Exception e) {
             log.warn("Unable to perform GeoIP query for ip {}", ip);
         }
-        var info = new PeerInfo(ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP);
+        var info = new PeerInfo(
+                upDownResult != null,
+                ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP);
         ctx.json(new StdResp(true, null, info));
     }
 
@@ -160,6 +162,7 @@ public class PBHPeerController extends AbstractFeatureModule {
     }
 
     public record PeerInfo(
+            boolean found,
             String address,
             long firstTimeSeen,
             long lastTimeSeen,
