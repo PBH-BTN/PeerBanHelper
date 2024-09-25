@@ -77,7 +77,7 @@
               {{ d(data?.data.lastTimeSeen ?? 0, 'long') }}
             </a-descriptions-item>
             <a-descriptions-item
-              v-if="data?.data.geo?.country || data?.data.geo?.city"
+              v-if="data?.data.geo?.country?.iso || data?.data.geo?.city?.name"
               :label="t('page.banlist.banlist.listItem.geo')"
               :span="2"
             >
