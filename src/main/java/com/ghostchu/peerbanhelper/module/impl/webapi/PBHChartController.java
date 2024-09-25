@@ -42,8 +42,6 @@ public class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private ActivationManager activationManager;
-    @Autowired
     private PeerRecordDao peerRecordDao;
     @Autowired
     private HistoryDao historyDao;

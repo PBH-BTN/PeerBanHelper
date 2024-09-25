@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
@@ -32,14 +31,12 @@ public class PBHTorrentController extends AbstractFeatureModule {
     private final TorrentDao torrentDao;
     private final PeerRecordDao peerRecordDao;
     private final HistoryDao historyDao;
-    private final ActivationManager activationManager;
 
-    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, ActivationManager activationManager) {
+    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao) {
         this.javalinWebContainer = javalinWebContainer;
         this.torrentDao = torrentDao;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
-        this.activationManager = activationManager;
     }
 
     @Override
