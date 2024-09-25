@@ -89,7 +89,7 @@ export async function GetIPBasicData(ip: string): Promise<CommonResponse<IPBasic
   })
 }
 
-export async function GetIPtAccessHistoryList(params: {
+export async function GetIPAccessHistoryList(params: {
   ip: string
   page: number
   pageSize?: number

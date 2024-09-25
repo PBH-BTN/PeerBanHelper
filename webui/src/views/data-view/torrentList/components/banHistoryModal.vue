@@ -42,6 +42,16 @@
             >
           </a-space>
         </template>
+        <template #peerAddress="{ record }">
+          <a-typography-text code>
+            <a
+              style="text-decoration: none; cursor: pointer; color: var(--color-text-2)"
+              :href="`ipHistory?ip=${record.peerIp}`"
+            >
+              {{ record.peerIp }}:{{ record.peerPort }}
+            </a>
+          </a-typography-text>
+        </template>
         <template #peerStatus="{ record }">
           <a-space fill style="justify-content: space-between">
             <a-space fill direction="vertical">
@@ -119,9 +129,9 @@ const columns = [
     width: 210
   },
   {
-    title: () => t('page.banlog.banlogTable.column.peerPort'),
-    dataIndex: 'peerPort',
-    width: 80
+    title: () => t('page.banlog.banlogTable.column.peerAddress'),
+    slotName: 'peerAddress',
+    width: 200
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerId'),

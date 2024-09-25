@@ -97,7 +97,7 @@
   </a-empty>
 </template>
 <script lang="ts" setup>
-import { GetIPtAccessHistoryList } from '@/service/data'
+import { GetIPAccessHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
@@ -120,7 +120,7 @@ const {
   pageSize,
   changeCurrent,
   changePageSize
-} = usePagination(GetIPtAccessHistoryList, {
+} = usePagination(GetIPAccessHistoryList, {
   defaultParams: [
     {
       ip: ip,
