@@ -17,7 +17,12 @@
       />
     </div>
     <div class="result-container center">
-      <a-card v-show="data?.data || error" class="result-card" hoverable>
+      <a-card
+        v-show="data?.data || error"
+        class="result-card"
+        :style="{ minWidth: data?.data.found ? '1150px' : '400px' }"
+        hoverable
+      >
         <a-space v-if="!error" direction="vertical" fill>
           <a-descriptions>
             <template #title>
@@ -243,7 +248,6 @@ onMounted(() => {
   margin-top: 1em;
 }
 .result-card {
-  min-width: 1150px;
   transition-property: all;
   padding: 2em;
 }
