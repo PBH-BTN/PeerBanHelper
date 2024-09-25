@@ -275,6 +275,11 @@
                 <targetPath>native</targetPath>
                 <filtering>false</filtering>
             </resource>
+            <resource>
+                <directory>crowdin</directory>
+                <targetPath>crowdin</targetPath>
+                <filtering>false</filtering>
+            </resource>
         </resources>
     </build>
 
