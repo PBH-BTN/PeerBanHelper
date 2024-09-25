@@ -4,6 +4,7 @@ export default {
   'page.banlog.banlogTable.column.banTime': '封禁时间',
   'page.banlog.banlogTable.column.unbanTime': '解封时间',
   'page.banlog.banlogTable.column.peerAddress': 'Peer 地址',
+  'page.banlog.banlogTable.column.peerPort': '端口',
   'page.banlog.banlogTable.column.peerId': 'Peer ID',
   'page.banlog.banlogTable.column.trafficSnapshot': '流量快照',
   'page.banlog.banlogTable.column.torrentName': '种子名',

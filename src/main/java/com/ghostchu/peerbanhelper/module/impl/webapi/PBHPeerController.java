@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
@@ -28,12 +29,14 @@ public class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryDao historyDao;
     private final PeerRecordDao peerRecordDao;
+    private final ActivationManager activationManager;
 
-    public PBHPeerController(JavalinWebContainer javalinWebContainer, HistoryDao historyDao, PeerRecordDao peerRecordDao) {
+    public PBHPeerController(JavalinWebContainer javalinWebContainer, HistoryDao historyDao, PeerRecordDao peerRecordDao, ActivationManager activationManager) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
+        this.activationManager = activationManager;
     }
 
     @Override
@@ -55,8 +58,8 @@ public class PBHPeerController extends AbstractFeatureModule {
     public void onEnable() {
         javalinWebContainer.javalin()
                 .get("/api/peer/{ip}", this::handleInfo, Role.USER_READ)
-                .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ)
-                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ);
+                .get("/api/peer/{ip}/accessHistory", this::handleAccessHistory, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/peer/{ip}/banHistory", this::handleBanHistory, Role.USER_READ, Role.PBH_PLUS);
 
     }
 

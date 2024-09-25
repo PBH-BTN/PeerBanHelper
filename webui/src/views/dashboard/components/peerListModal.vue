@@ -22,7 +22,9 @@
             v-if="record.geo && record.geo.countryRegion"
             :iso="record.geo.countryRegion"
           />
-          {{ record.peer.address.ip }}
+          <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
+            {{ record.peer.address.ip }}
+          </queryIpLink>
         </a-typography-text>
       </template>
       <template #speed="{ record }">
@@ -78,9 +80,10 @@
   </a-modal>
 </template>
 <script setup lang="ts">
+import countryFlag from '@/components/countryFlag.vue'
+import queryIpLink from '@/components/queryIpLink.vue'
 import { getPeer } from '@/service/downloaders'
 import { formatFileSize } from '@/utils/file'
-import countryFlag from '@/views/banlist/components/countryFlag.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'

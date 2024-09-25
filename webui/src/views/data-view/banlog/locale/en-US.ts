@@ -4,6 +4,7 @@ export default {
   'page.banlog.banlogTable.column.banTime': 'Ban Time',
   'page.banlog.banlogTable.column.unbanTime': 'Unban Time',
   'page.banlog.banlogTable.column.peerAddress': 'Peer Address',
+  'page.banlog.banlogTable.column.peerPort': 'Port',
   'page.banlog.banlogTable.column.peerId': 'Peer ID',
   'page.banlog.banlogTable.column.trafficSnapshot': 'Traffic Snapshot',
   'page.banlog.banlogTable.column.torrentName': 'Torrent Name',
