@@ -10,5 +10,6 @@ export default {
   'page.ipList.label.downloadedFromPeer': 'Downloaded from Peer',
   'page.ipList.label.accessHistory': 'Access History',
   'page.ipList.label.banHistory': 'Ban History',
-  'page.ipList.plusLock': 'This feature requires an activated Plus license to use'
+  'page.ipList.plusLock': 'This feature requires an activated Plus license to use',
+  'page.ipList.error': 'Error occurred!'
 }

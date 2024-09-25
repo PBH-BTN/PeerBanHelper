@@ -17,8 +17,8 @@
       />
     </div>
     <div class="result-container center">
-      <a-card v-show="data?.data" class="result-card" hoverable>
-        <a-space direction="vertical" fill>
+      <a-card v-show="data?.data || error" class="result-card" hoverable>
+        <a-space v-if="!error" direction="vertical" fill>
           <a-descriptions :title="data?.data.address">
             <a-descriptions-item :label="t('page.ipList.label.banCount')" :span="2">
               {{ data?.data.banCount }}
@@ -137,6 +137,14 @@
             </a-collapse-item>
           </a-collapse>
         </a-space>
+        <a-result v-else status="500" :title="t('page.ipList.error')" :subtitle="error.message">
+          <a-typography style="background: var(--color-fill-2); padding: 24px">
+            <a-typography-paragraph>Details:</a-typography-paragraph>
+            <ul>
+              <li v-for="line of error.stack?.split('\n')" :key="line">{{ line }}</li>
+            </ul>
+          </a-typography>
+        </a-result>
       </a-card>
     </div>
   </a-space>
@@ -157,7 +165,7 @@ import banHistoryTable from './components/banHistoryTable.vue'
 
 const searchInput = ref('')
 const { t, d } = useI18n()
-const { data, loading, run } = useRequest(GetIPBasicData, {
+const { data, loading, run, error } = useRequest(GetIPBasicData, {
   manual: true
 })
 
