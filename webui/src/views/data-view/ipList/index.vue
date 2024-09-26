@@ -158,8 +158,9 @@
               :disabled="!plusStatus?.activated"
               class="collapse-table"
             >
-              <template #expand-icon>
-                <icon-plus v-if="plusStatus?.activated" />
+              <template #expand-icon="{ active }">
+                <icon-plus v-if="plusStatus?.activated && !active" />
+                <icon-minus v-else-if="plusStatus?.activated && active" />
                 <icon-lock v-else />
               </template>
               <template v-if="!plusStatus?.activated" #extra>
@@ -174,8 +175,9 @@
               :header="t('page.ipList.label.banHistory')"
               :disabled="!plusStatus?.activated"
             >
-              <template #expand-icon>
-                <icon-plus v-if="plusStatus?.activated" />
+              <template #expand-icon="{ active }">
+                <icon-plus v-if="plusStatus?.activated && !active" />
+                <icon-minus v-else-if="plusStatus?.activated && active" />
                 <icon-lock v-else />
               </template>
               <template v-if="!plusStatus?.activated" #extra>
