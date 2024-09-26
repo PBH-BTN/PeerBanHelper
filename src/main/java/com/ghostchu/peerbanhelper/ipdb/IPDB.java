@@ -53,7 +53,7 @@ public class IPDB implements AutoCloseable {
             .expireAfterAccess(5, TimeUnit.SECONDS)
             .build();
     private final File dataFolder;
-    private final long updateInterval = 2592000000L; // 30天
+    private final long updateInterval = 3888000000L; // 45天
     private final String accountId;
     private final String licenseKey;
     private final File directory;
@@ -166,27 +166,28 @@ public class IPDB implements AutoCloseable {
                 networkData.setNetType(tlUI(component));
             }
             geoData.setNetwork(networkData);
-        } catch (Exception e) {
-            log.error("Unable to execute IPDB query", e);
+        } catch (Exception ignored) {
         }
     }
 
     private IPGeoData.NetworkData queryNetwork(InetAddress address) {
-        IPGeoData.NetworkData networkData = new IPGeoData.NetworkData();
         try {
+            IPGeoData.NetworkData networkData = new IPGeoData.NetworkData();
             AsnResponse asnResponse = mmdbASN.asn(address);
             networkData.setIsp(asnResponse.getAutonomousSystemOrganization());
             networkData.setNetType(null);
+            return networkData;
         } catch (Exception ignored) {
+            return null;
         }
-        return networkData;
     }
 
 
     private IPGeoData.CityData queryCity(InetAddress address) {
-        IPGeoData.CityData cityData = new IPGeoData.CityData();
-        IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
+
         try {
+            IPGeoData.CityData cityData = new IPGeoData.CityData();
+            IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
             CityResponse cityResponse = mmdbCity.city(address);
             City city = cityResponse.getCity();
             Location location = cityResponse.getLocation();
@@ -197,14 +198,16 @@ public class IPDB implements AutoCloseable {
             locationData.setLatitude(location.getLatitude());
             locationData.setAccuracyRadius(location.getAccuracyRadius());
             cityData.setLocation(locationData);
+            return cityData;
         } catch (Exception e) {
+            return null;
         }
-        return cityData;
+
     }
 
     private IPGeoData.CountryData queryCountry(InetAddress address) {
-        IPGeoData.CountryData countryData = new IPGeoData.CountryData();
         try {
+            IPGeoData.CountryData countryData = new IPGeoData.CountryData();
             CountryResponse countryResponse = mmdbCity.country(address);
             Country country = countryResponse.getCountry();
             countryData.setIso(country.getIsoCode());
@@ -214,15 +217,16 @@ public class IPDB implements AutoCloseable {
                 countryRegionName = "中国" + countryRegionName;
             }
             countryData.setName(countryRegionName);
+            return countryData;
         } catch (Exception ignored) {
+            return null;
         }
-        return countryData;
     }
 
 
     private IPGeoData.ASData queryAS(InetAddress address) {
-        IPGeoData.ASData asData = new IPGeoData.ASData();
         try {
+            IPGeoData.ASData asData = new IPGeoData.ASData();
             AsnResponse asnResponse = mmdbASN.asn(address);
             IPGeoData.ASData.ASNetwork network = new IPGeoData.ASData.ASNetwork();
             network.setPrefixLength(asnResponse.getNetwork().getPrefixLength());
@@ -231,9 +235,10 @@ public class IPDB implements AutoCloseable {
             asData.setOrganization(asnResponse.getAutonomousSystemOrganization());
             asData.setIpAddress(asnResponse.getIpAddress());
             asData.setNetwork(network);
+            return asData;
         } catch (Exception ignored) {
+            return null;
         }
-        return asData;
     }
 
     private void updateGeoCN(File mmdbGeoCNFile) throws IOException {

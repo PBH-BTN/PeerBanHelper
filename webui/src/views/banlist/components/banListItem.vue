@@ -9,6 +9,7 @@
       <a-space fill style="display: flex; justify-content: space-between">
         <a-space wrap>
           <a-typography-text bold copyable>
+            <!-- TODO: 这里vue-i18n会有一个离奇的报错，Need to install with app.use function，修不好，只能先不用 -->
             {{ item.banMetadata.peer.address.ip }}:{{ item.banMetadata.peer.address.port }}
           </a-typography-text>
           <a-tooltip
@@ -42,10 +43,7 @@
               <a-button
                 type="outline"
                 target="_blank"
-                :href="
-                  t('page.banlist.banlist.listItem.threatAnalyse.link') +
-                  item.banMetadata.peer.address.ip
-                "
+                :href="'ipHistory?ip=' + item.banMetadata.peer.address.ip"
               >
                 <template #icon><icon-search /></template>
               </a-button>
@@ -100,7 +98,9 @@
         <a-tooltip
           :content="
             t('page.banlist.banlist.listItem.asn.subnet') +
-            item.banMetadata.geo?.as?.network?.ipAddress
+            item.banMetadata.geo?.as?.network?.ipAddress +
+            '/' +
+            item.banMetadata.geo?.as?.network?.prefixLength
           "
         >
           <a-link
@@ -156,16 +156,16 @@
   </a-descriptions>
 </template>
 <script setup lang="ts">
-import { formatFileSize } from '@/utils/file'
-import { getColor } from '@/utils/color'
-import CountryFlag from './countryFlag.vue'
 import type { BanList } from '@/api/model/banlist'
-import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
-import { useI18n } from 'vue-i18n'
-import { Message } from '@arco-design/web-vue'
-import { ref } from 'vue'
-import { unbanIP } from '@/service/banList'
 import AsyncMethod from '@/components/asyncMethod.vue'
+import CountryFlag from '@/components/countryFlag.vue'
+import { unbanIP } from '@/service/banList'
+import { getColor } from '@/utils/color'
+import { formatFileSize } from '@/utils/file'
+import { Message } from '@arco-design/web-vue'
+import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t, d } = useI18n()
 defineProps<{

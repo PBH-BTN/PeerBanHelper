@@ -13,17 +13,19 @@
       :columns="columns"
       :data="data?.data"
       :loading="!loading && !data"
+      style="width: 1600px"
       :virtual-list-props="{ height: 500 }"
       :pagination="false"
     >
       <template #peerAddress="{ record }">
-        <a-typography-text copyable code>
-          <countryFlag
-            v-if="record.geo && record.geo.countryRegion"
-            :iso="record.geo.countryRegion"
-          />
-          {{ record.peer.address.ip }}
-        </a-typography-text>
+        <a-space :wrap="false">
+          <countryFlag v-if="record.geo?.country?.iso" :iso="record.geo.country.iso" />
+          <a-typography-text copyable code>
+            <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
+              {{ record.peer.address.ip }}:{{ record.peer.address.port }}
+            </queryIpLink>
+          </a-typography-text>
+        </a-space>
       </template>
       <template #speed="{ record }">
         <a-space fill style="justify-content: space-between">
@@ -78,9 +80,10 @@
   </a-modal>
 </template>
 <script setup lang="ts">
+import countryFlag from '@/components/countryFlag.vue'
+import queryIpLink from '@/components/queryIpLink.vue'
 import { getPeer } from '@/service/downloaders'
 import { formatFileSize } from '@/utils/file'
-import countryFlag from '@/views/banlist/components/countryFlag.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
@@ -112,35 +115,37 @@ const columns = [
   {
     title: () => t('page.dashboard.peerList.column.address'),
     slotName: 'peerAddress',
-    width: 330
-  },
-  {
-    title: () => t('page.dashboard.peerList.column.port'),
-    dataIndex: 'peer.address.port'
+    width: 300
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
-    slotName: 'flags'
+    slotName: 'flags',
+    width: 110
   },
   {
     title: 'Peer ID',
-    dataIndex: 'peer.id'
+    dataIndex: 'peer.id',
+    width: 100
   },
   {
     title: () => t('page.dashboard.peerList.column.clientName'),
-    dataIndex: 'peer.clientName'
+    dataIndex: 'peer.clientName',
+    width: 300
   },
   {
     title: () => t('page.dashboard.peerList.column.speed'),
-    slotName: 'speed'
+    slotName: 'speed',
+    width: 140
   },
   {
     title: () => t('page.dashboard.peerList.column.uploadedDownloaded'),
-    slotName: 'uploadDownload'
+    slotName: 'uploadDownload',
+    width: 140
   },
   {
     title: () => t('page.dashboard.peerList.column.progress'),
-    slotName: 'progress'
+    slotName: 'progress',
+    width: 100
   }
 ]
 const parseFlags = (flags: string) =>

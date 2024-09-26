@@ -42,20 +42,28 @@
           </a-space>
         </div>
       </template>
+      <template #address="{ record }">
+        <a-typography-text style="white-space: nowrap">
+          <queryIpLink :ip="record.peerIp" style="color: var(--color-text-1)">
+            {{ record.peerIp }}
+          </queryIpLink>
+        </a-typography-text>
+      </template>
     </a-table>
   </a-space>
 </template>
 <script setup lang="ts">
+import queryIpLink from '@/components/queryIpLink.vue'
 import { getRanks } from '@/service/ranks'
-import { usePagination } from 'vue-request'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
-import { useI18n } from 'vue-i18n'
 import type { TableColumnData } from '@arco-design/web-vue'
+import { useI18n } from 'vue-i18n'
+import { usePagination } from 'vue-request'
 const { t } = useI18n()
 const columns: TableColumnData[] = [
   {
     title: () => t('page.topban.top50Table.column.ipaddress'),
-    dataIndex: 'peerIp'
+    slotName: 'address'
   },
   {
     title: () => t('page.topban.top50Table.column.historyCount'),

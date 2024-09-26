@@ -6,3 +6,4 @@ Priority: optional
 Architecture: all
 Maintainer: Ghost_chu
 Description: PeerBanHelper is a tool to auto ban peers on the bitorrent network
+Homepage: https://github.com/PBH-BTN/PeerBanHelper

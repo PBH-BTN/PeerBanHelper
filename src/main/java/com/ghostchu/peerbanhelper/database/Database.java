@@ -48,7 +48,7 @@ public class Database {
         if (System.getProperty("disableSQLitePragmaSettings") == null) {
             try (var stmt = rawConnection.createStatement()) {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
-                stmt.executeUpdate("PRAGMA journal_mode = TRUNCATE");
+                stmt.executeUpdate("PRAGMA journal_mode = WAL");
             } catch (Exception e) {
                 log.warn("Unable to set SQLite optimized PRAGMA arguments", e);
             }
