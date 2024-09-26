@@ -10,6 +10,7 @@ export default {
   'page.ipList.label.downloadedFromPeer': '从 Peer 下载',
   'page.ipList.label.accessHistory': '访问历史',
   'page.ipList.label.banHistory': '封禁历史',
+  'page.ipList.accessHistory.column.torrent': '种子',
   'page.ipList.shortcut': '快捷链接',
   'page.ipList.shortcut.tips':
     '这里提供了一些外部依赖分析快捷链接可供参考。注意：PBH-BTN 对外部链接的内容一无所知，也不对其任何结果负责',

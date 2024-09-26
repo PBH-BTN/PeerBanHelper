@@ -10,6 +10,7 @@ export default {
   'page.ipList.label.downloadedFromPeer': 'Downloaded from Peer',
   'page.ipList.label.accessHistory': 'Access History',
   'page.ipList.label.banHistory': 'Ban History',
+  'page.ipList.accessHistory.column.torrent': 'Torrent',
   'page.ipList.shortcut': 'Shortcut',
   'page.ipList.shortcut.tips':
     'Here are some external dependency analysis shortcuts for reference. Caution: PBH-BTN knows nothing about the content of external links and is not responsible for any results',

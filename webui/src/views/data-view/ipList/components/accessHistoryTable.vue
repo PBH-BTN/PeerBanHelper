@@ -139,10 +139,6 @@ const {
 
 const columns = [
   {
-    title: 'ID',
-    dataIndex: 'id'
-  },
-  {
     title: () => t('page.torrentList.accessHistory.column.downloader'),
     slotName: 'downloader'
   },
@@ -152,7 +148,8 @@ const columns = [
   },
   {
     title: () => t('page.torrentList.accessHistory.column.traffic'),
-    slotName: 'traffic'
+    slotName: 'traffic',
+    width: 120
   },
   {
     title: () =>
@@ -166,13 +163,25 @@ const columns = [
           () => h(IconInfoCircle)
         )
       ]),
-    slotName: 'offset'
+    slotName: 'offset',
+    width: 120
   },
   {
     title: 'Flags',
-    slotName: 'flags'
+    slotName: 'flags',
+    width: 120
   },
-  { title: () => t('page.torrentList.accessHistory.column.timeseen'), slotName: 'time' }
+  {
+    title: () => t('page.torrentList.accessHistory.column.timeseen'),
+    slotName: 'time',
+    width: 260
+  },
+  {
+    title: () => t('page.ipList.accessHistory.column.torrent'),
+    dataIndex: 'torrent.name',
+    ellipsis: true,
+    tooltip: true
+  }
 ]
 const parseFlags = (flags: string) =>
   flags
