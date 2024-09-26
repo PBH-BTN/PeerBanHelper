@@ -1,3 +1,5 @@
+import type { IPGeoData } from './banlist'
+
 export interface ClientStatus {
   activePeers: number
   activeTorrents: number
@@ -49,7 +51,7 @@ export interface PeerInfo {
   /**
    * Peer 地理位置信息
    */
-  geo: Geo
+  geo: IPGeoData
   /**
    * Peer 信息
    */
@@ -84,36 +86,6 @@ interface Asn {
    * AS所属组织
    */
   asOrganization: string
-}
-
-/**
- * Peer 地理位置信息
- */
-interface Geo {
-  /**
-   * 精确半径
-   */
-  accuracyRadius: number
-  /**
-   * 城市 显示名称
-   */
-  city?: string
-  /**
-   * 国家/地区 显示名称
-   */
-  countryRegion: string
-  /**
-   * 国家/地区 ISO 代码，ZH, JP, TW
-   */
-  iso: string
-  /**
-   * 纬度
-   */
-  latitude: number
-  /**
-   * 经度
-   */
-  longitude: number
 }
 
 /**
