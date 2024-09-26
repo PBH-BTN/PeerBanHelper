@@ -167,7 +167,7 @@ const columns = [
     width: 120
   },
   {
-    title: 'Flags',
+    title: () => t('page.dashboard.peerList.column.flag'),
     slotName: 'flags',
     width: 120
   },
