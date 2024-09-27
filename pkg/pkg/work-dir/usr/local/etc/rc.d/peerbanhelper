@@ -14,11 +14,10 @@ load_rc_config $name
 : ${peerbanhelper_enable:=NO}
 : ${peerbanhelper_user:="root"}
 : ${peerbanhelper_dir:="/usr/local/etc/peerbanhelper"}
-: ${peerbanhelper_command:="/usr/local/bin/java"}
 : ${peerbanhelper_classpath:="/usr/local/lib/peerbanhelper/PeerBanHelper.jar"}
-: ${peerbanhelper_jvm_flags:="-Dpbh.datadir=${peerbanhelper_dir} -Xmx386M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -jar ${peerbanhelper_classpath}"}
+: ${peerbanhelper_jvm_flags:="-Dpbh.datadir=${peerbanhelper_dir} -Xmx386M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"}
+: ${peerbanhelper_command:="/usr/local/bin/java ${peerbanhelper_jvm_flags} -jar ${peerbanhelper_classpath}"}
 
 command="/usr/sbin/daemon"
-command_args="-f -p /var/run/${name}.pid -u ${peerbanhelper_user} ${peerbanhelper_command} ${peerbanhelper_jvm_flags}"
-echo "run command: ${command} ${command_args}"
+command_args="-f -p /var/run/${name}.pid -u ${peerbanhelper_user} ${peerbanhelper_command}"
 run_rc_command "$1"
