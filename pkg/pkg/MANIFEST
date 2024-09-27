@@ -15,5 +15,10 @@
     "categories": ["net"],
     "prefix":"/usr/local",
     "licenselogic": "single",
-    "licenses": ["BSD"]
+    "licenses": [
+        "BSD"
+    ],
+    "scripts": {
+        "post-install": "post-install"
+    }
 }
