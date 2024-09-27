@@ -20,6 +20,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
+import inet.ipaddr.HostName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.InetAddress;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -38,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.Lang.DOWNLOADER_BC_FAILED_SAVE_BANLIST;
@@ -89,9 +92,8 @@ public class BitComet extends AbstractDownloader {
 
     private static PeerAddress parseAddress(String address, int port, int listenPort) {
         address = address.trim();
-        address = address.replace(":" + port, "");
-        address = address.replace(":" + listenPort, "");
-        return new PeerAddress(IPAddressUtil.getIPAddress(address).toString(), port);
+        HostName host = new HostName(address);
+        return new PeerAddress(host.getHost(), port);
     }
 
     @Override
@@ -244,7 +246,7 @@ public class BitComet extends AbstractDownloader {
                         torrent.getTask().getTaskName(),
                         torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
                         torrent.getTaskDetail().getTotalSize(),
-                        torrent.getTaskStatus().getDownloadPermillage() / 100.0d,
+                        torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
                         -1,
                         -1,
                         torrent.getTaskDetail().getTorrentPrivate()

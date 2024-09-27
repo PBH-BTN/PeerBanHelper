@@ -190,7 +190,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
-                .filter(p -> p.getTorrent().getHash().equals(torrentId))
+                .filter(p -> p.getTorrent().getId().equals(torrentId))
                 .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
                 .map(this::populatePeerDTO)
                 .toList();
