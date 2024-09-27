@@ -20,7 +20,7 @@
       <template #peerAddress="{ record }">
         <a-space :wrap="false">
           <countryFlag v-if="record.geo?.country?.iso" :iso="record.geo.country.iso" />
-          <a-typography-text copyable code>
+          <a-typography-text copyable code style="white-space: nowrap">
             <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
               {{ record.peer.address.ip }}:{{ record.peer.address.port }}
             </queryIpLink>
@@ -115,7 +115,7 @@ const columns = [
   {
     title: () => t('page.dashboard.peerList.column.address'),
     slotName: 'peerAddress',
-    width: 300
+    width: 320
   },
   {
     title: () => t('page.dashboard.peerList.column.flag'),
