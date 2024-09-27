@@ -45,7 +45,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 public class BitComet extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(BitComet.class);
-    private static final UUID clientId = UUID.randomUUID();
+    private static final UUID clientId = UUID.nameUUIDFromBytes("PeerBanHelper".getBytes(StandardCharsets.UTF_8));
     protected final String apiEndpoint;
     protected final HttpClient httpClient;
     private final Config config;
