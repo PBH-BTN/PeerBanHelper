@@ -21,6 +21,7 @@ export enum ClientTypeEnum {
   Transmission = 'transmission',
   BiglyBT = 'biglybt',
   Deluge = 'deluge',
+  BitComet = 'BitComet',
   Unknown = 'Unknown'
 }
 
@@ -253,6 +254,17 @@ export interface delugeConfig {
   verifySsl: boolean
   ignorePrivate: boolean
   rpcUrl: string
+}
+
+export interface bitCometConfig {
+  type: ClientTypeEnum.BitComet
+  endpoint: string
+  username: string
+  password: string
+  httpVersion: string
+  incrementBan: boolean
+  verifySsl: boolean
+  ignorePrivate: boolean
 }
 
 export interface CreateDownloadRequest {
