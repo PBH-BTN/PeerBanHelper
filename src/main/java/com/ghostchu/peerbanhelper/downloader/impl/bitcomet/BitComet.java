@@ -342,7 +342,6 @@ public class BitComet extends AbstractDownloader {
         private boolean incrementBan;
         private String httpVersion;
         private boolean verifySsl;
-        private String rpcUrl;
         private boolean ignorePrivate;
 
         public static Config readFromYaml(ConfigurationSection section) {
@@ -367,7 +366,6 @@ public class BitComet extends AbstractDownloader {
             section.set("endpoint", endpoint);
             section.set("username", username);
             section.set("password", password);
-            section.set("rpc-url", rpcUrl);
             section.set("increment-ban", incrementBan);
             section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
