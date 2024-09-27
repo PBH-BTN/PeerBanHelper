@@ -40,7 +40,7 @@ public abstract class AbstractDownloader implements Downloader {
             return result;
         } catch (Throwable e) {
             failedLoginAttempts++;
-            throw e;
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(e.getMessage()));
         } finally {
             if (failedLoginAttempts >= 15) {
                 nextLoginTry = System.currentTimeMillis() + (1000 * 60 * 30);
@@ -59,7 +59,7 @@ public abstract class AbstractDownloader implements Downloader {
 
     }
 
-    public abstract DownloaderLoginResult login0();
+    public abstract DownloaderLoginResult login0() throws Exception;
 
     @Override
     public DownloaderLastStatus getLastStatus() {
