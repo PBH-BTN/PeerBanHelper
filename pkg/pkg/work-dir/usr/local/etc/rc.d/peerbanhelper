@@ -13,7 +13,7 @@ load_rc_config $name
 
 : ${peerbanhelper_enable:=NO}
 : ${peerbanhelper_user:="root"}
-: ${peerbanhelper_dir:="/usr/local/etc/peerbanhelper"}
+: ${peerbanhelper_dir:="/usr/local/var/db/peerbanhelper"}
 : ${peerbanhelper_classpath:="/usr/local/lib/peerbanhelper/PeerBanHelper.jar"}
 : ${peerbanhelper_jvm_flags:="-Dpbh.datadir=${peerbanhelper_dir} -Xmx386M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"}
 : ${peerbanhelper_command:="/usr/local/bin/java ${peerbanhelper_jvm_flags} -jar ${peerbanhelper_classpath}"}
