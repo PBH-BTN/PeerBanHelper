@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.resp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,91 +11,91 @@ import java.util.List;
 @Data
 public class BCTaskPeersResponse {
 
-    @JsonProperty("error_code")
+    @SerializedName("error_code")
     private String errorCode;
-    @JsonProperty("peer_count")
+    @SerializedName("peer_count")
     private PeerCountDTO peerCount;
-    @JsonProperty("peers")
+    @SerializedName("peers")
     private List<PeersDTO> peers;
-    @JsonProperty("task")
+    @SerializedName("task")
     private TaskDTO task;
-    @JsonProperty("version")
+    @SerializedName("version")
     private String version;
 
     @NoArgsConstructor
     @Data
     public static class PeerCountDTO {
-        @JsonProperty("peers_connected")
-        private Integer peersConnected;
-        @JsonProperty("peers_connecting")
-        private Integer peersConnecting;
-        @JsonProperty("ltseed_connected")
-        private Integer ltseedConnected;
-        @JsonProperty("ltseed_connecting")
-        private Integer ltseedConnecting;
+        @SerializedName("peers_connected")
+        private Long peersConnected;
+        @SerializedName("peers_connecting")
+        private Long peersConnecting;
+        @SerializedName("ltseed_connected")
+        private Long ltseedConnected;
+        @SerializedName("ltseed_connecting")
+        private Long ltseedConnecting;
     }
 
     @NoArgsConstructor
     @Data
     public static class TaskDTO {
-        @JsonProperty("task_id")
-        private Integer taskId;
-        @JsonProperty("task_guid")
+        @SerializedName("task_id")
+        private Long taskId;
+        @SerializedName("task_guid")
         private String taskGuid;
-        @JsonProperty("type")
+        @SerializedName("type")
         private String type;
-        @JsonProperty("task_name")
+        @SerializedName("task_name")
         private String taskName;
-        @JsonProperty("status")
+        @SerializedName("status")
         private String status;
-        @JsonProperty("total_size")
+        @SerializedName("total_size")
         private Long totalSize;
-        @JsonProperty("selected_size")
+        @SerializedName("selected_size")
         private Long selectedSize;
-        @JsonProperty("selected_downloaded_size")
+        @SerializedName("selected_downloaded_size")
         private Integer selectedDownloadedSize;
-        @JsonProperty("download_rate")
+        @SerializedName("download_rate")
         private Integer downloadRate;
-        @JsonProperty("upload_rate")
+        @SerializedName("upload_rate")
         private Integer uploadRate;
-        @JsonProperty("error_code")
+        @SerializedName("error_code")
         private String errorCode;
-        @JsonProperty("error_message")
+        @SerializedName("error_message")
         private String errorMessage;
-        @JsonProperty("permillage")
+        @SerializedName("permillage")
         private Integer permillage;
-        @JsonProperty("left_time")
+        @SerializedName("left_time")
         private String leftTime;
     }
 
     @NoArgsConstructor
     @Data
     public static class PeersDTO {
-        @JsonProperty("ip")
+        @SerializedName("ip")
         private String ip;
-        @JsonProperty("progress")
+        @SerializedName("progress")
         private String progress;
-        @JsonProperty("dl_speed")
+        @SerializedName("dl_speed")
         private String dlSpeed;
-        @JsonProperty("up_speed")
+        @SerializedName("up_speed")
         private String upSpeed;
-        @JsonProperty("client_type")
+        @SerializedName("client_type")
         private String clientType;
-        @JsonProperty("flag")
+        @SerializedName("flag")
         private String flag;
-        @JsonProperty("log_id")
-        private Integer logId;
-        @JsonProperty("remote_port")
+        @SerializedName("log_id")
+        private Long logId;
+        @SerializedName("remote_port")
         private Integer remotePort;
-        @JsonProperty("listen_port")
+        @SerializedName("listen_port")
         private Integer listenPort;
-        @JsonProperty("permillage")
-        private Integer permillage;
-        @JsonProperty("dl_rate")
+        @SerializedName("permillage")
+        private Long permillage;
+        @SerializedName("dl_rate")
         private Long dlRate;
-        @JsonProperty("up_rate")
+        @SerializedName("up_rate")
         private Long upRate;
-        @JsonProperty("peer_id")
+        @SerializedName("peer_id")
         private String peerId;
     }
 }

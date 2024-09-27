@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -53,10 +54,6 @@ public class BitComet extends AbstractDownloader {
     private String serverVersion;
     private String serverName;
 
-    /*
-            API 受限，实际实现起来意义不大
-
-            */
     public BitComet(String name, Config config) {
         super(name);
         this.config = config;
@@ -90,21 +87,11 @@ public class BitComet extends AbstractDownloader {
         return new BitComet(name, config);
     }
 
-    private static PeerAddress parseAddress(String address) {
-        String ip;
-        String port;
-        if (address.startsWith("[")) {
-            // 处理 IPv6 地址
-            int endIndex = address.indexOf(']');
-            ip = address.substring(1, endIndex);
-            port = address.substring(endIndex + 2);
-        } else {
-            // 处理 IPv4 地址
-            int colonIndex = address.indexOf(':');
-            ip = address.substring(0, colonIndex);
-            port = address.substring(colonIndex + 1);
-        }
-        return new PeerAddress(ip, Integer.parseInt(port));
+    private static PeerAddress parseAddress(String address, int port, int listenPort) {
+        address = address.trim();
+        address = address.replace(":" + port, "");
+        address = address.replace(":" + listenPort, "");
+        return new PeerAddress(IPAddressUtil.getIPAddress(address).toString(), port);
     }
 
     @Override
@@ -133,8 +120,11 @@ public class BitComet extends AbstractDownloader {
                             HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(loginJsonObject)))
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             var loginResponse = JsonUtil.standard().fromJson(request.body(), BCLoginResponse.class);
-            if (loginResponse.getErrorCode().equals("PASSWORD_ERROR")) {
+            if (loginResponse.getErrorCode().equalsIgnoreCase("PASSWORD_ERROR")) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
+            }
+            if (!loginResponse.getErrorCode().equalsIgnoreCase("ok")) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
             }
             Map<String, String> inviteTokenRetrievePayload = new HashMap<>();
             inviteTokenRetrievePayload.put("device_id", clientId.toString());
@@ -146,12 +136,14 @@ public class BitComet extends AbstractDownloader {
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(inviteTokenRetrievePayload)))
                             .header("Authorization", "Bearer " + loginResponse.getInviteToken()),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            System.out.println("Retrieve device token: " + retrieveDeviceToken.body());
             var deviceTokenResponse = JsonUtil.standard().fromJson(retrieveDeviceToken.body(), BCDeviceTokenResult.class);
             this.deviceToken = deviceTokenResponse.getDeviceToken();
             this.serverId = deviceTokenResponse.getServerId();
             this.serverVersion = deviceTokenResponse.getVersion();
             this.serverName = deviceTokenResponse.getServerName();
+            if (queryNeedReConfigureIpFilter()) {
+                enableIpFilter();
+            }
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             // return request.statusCode() == 200;
         } catch (Exception e) {
@@ -178,16 +170,20 @@ public class BitComet extends AbstractDownloader {
         }
     }
 
-    @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
-//        if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
-//            setBanListIncrement(added);
-//        } else {
-        setBanListFull(fullList);
-        //}
+    private boolean queryNeedReConfigureIpFilter() throws IOException, InterruptedException {
+        HttpResponse<String> query =
+                httpClient.send(
+                        MutableRequest.POST(apiEndpoint + BCEndpoint.GET_IP_FILTER_CONFIG.getEndpoint(),
+                                        HttpRequest.BodyPublishers.ofString("{}"))
+                                .header("Authorization", "Bearer " + this.deviceToken),
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+        var resp = JsonUtil.standard().fromJson(query.body(), BCIpFilterResponse.class);
+        return !resp.getIpFilterConfig().getEnableIpFilter() || resp.getIpFilterConfig().getEnableWhitelistMode();
     }
 
     private void enableIpFilter() throws IOException, InterruptedException {
+        log.info(tlUI(Lang.DOWNLOADER_BC_CONFIG_IP_FILTER));
         Map<String, Object> settings = new HashMap<>() {{
             put("ip_filter_config", new HashMap<>() {{
                 put("enable_ip_filter", true);
@@ -201,6 +197,12 @@ public class BitComet extends AbstractDownloader {
                                 .header("Authorization", "Bearer " + this.deviceToken),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
+        var configResp = JsonUtil.standard().fromJson(updatePreferencesToEnableIpFilter.body(), BCConfigSetResponse.class);
+        if ("ok".equalsIgnoreCase(configResp.getErrorCode())) {
+            log.info(tlUI(Lang.DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS));
+        } else {
+            log.error(tlUI(Lang.DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED));
+        }
     }
 
     @Override
@@ -225,27 +227,28 @@ public class BitComet extends AbstractDownloader {
         }
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
         return response.getTasks().stream().map(torrent -> {
-            try {
-                Map<String, String> taskIds = new HashMap<>();
-                taskIds.put("task_id", torrent.getTaskId().toString());
-                HttpResponse<String> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
-                                        HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
-                                .header("Authorization", "Bearer " + this.deviceToken),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                return JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
-            } catch (IOException | InterruptedException e) {
-                log.warn("Unable to fetch task summary", e);
-                return null;
-            }
-        }).filter(Objects::nonNull).map(torrent -> new TorrentImpl(torrent.getTask().getTaskId().toString(),
-                torrent.getTask().getTaskName(),
-                torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
-                torrent.getTaskDetail().getTotalSize(),
-                Double.parseDouble(torrent.getTaskStatus().getProgress().replaceFirst("%", "")) / 100,
-                -1,
-                -1,
-                torrent.getTaskDetail().getTorrentPrivate()
-        )).collect(Collectors.toList());
+                    try {
+                        Map<String, String> taskIds = new HashMap<>();
+                        taskIds.put("task_id", torrent.getTaskId().toString());
+                        HttpResponse<String> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
+                                                HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
+                                        .header("Authorization", "Bearer " + this.deviceToken),
+                                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                        return JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
+                    } catch (IOException | InterruptedException e) {
+                        System.out.println("null");
+                        return null;
+                    }
+                }).filter(Objects::nonNull)
+                .map(torrent -> new TorrentImpl(torrent.getTask().getTaskId().toString(),
+                        torrent.getTask().getTaskName(),
+                        torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
+                        torrent.getTaskDetail().getTotalSize(),
+                        torrent.getTaskStatus().getDownloadPermillage() / 100.0d,
+                        -1,
+                        -1,
+                        torrent.getTaskDetail().getTorrentPrivate()
+                )).collect(Collectors.toList());
     }
 
     @Override
@@ -270,7 +273,7 @@ public class BitComet extends AbstractDownloader {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
         var peers = JsonUtil.standard().fromJson(resp.body(), BCTaskPeersResponse.class);
-        return peers.getPeers().stream().map(peer -> new PeerImpl(parseAddress(peer.getIp()),
+        return peers.getPeers().stream().map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
                 peer.getIp(),
                 new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
                 peer.getClientType(),
@@ -278,18 +281,36 @@ public class BitComet extends AbstractDownloader {
                 -1,
                 peer.getUpRate(),
                 -1,
-                Double.parseDouble(peer.getProgress().replaceFirst("%", "")) / 100, null)
+                peer.getPermillage() / 1000.0d, null)
         ).collect(Collectors.toList());
     }
 
+    @Override
+    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+        if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
+            setBanListIncrement(added);
+        } else {
+            setBanListFull(fullList);
+        }
+    }
+
+    private void setBanListIncrement(Collection<BanMetadata> added) {
+        StringJoiner joiner = new StringJoiner("\n");
+        added.forEach(p -> joiner.add(p.getPeer().getAddress().getIp()));
+        operateBanList("merge", joiner.toString());
+    }
+
     protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
-        Map<String, String> banListSettings = new HashMap<>();
-        banListSettings.put("import_type", "replace");
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
-        banListSettings.put("content_base64", Base64.getEncoder().encodeToString(joiner.toString().getBytes(StandardCharsets.UTF_8)));
+        operateBanList("replace", joiner.toString());
+    }
+
+    private void operateBanList(String mode, String content) {
+        Map<String, String> banListSettings = new HashMap<>();
+        banListSettings.put("import_type", mode);
+        banListSettings.put("content_base64", Base64.getEncoder().encodeToString(content.getBytes(StandardCharsets.UTF_8)));
         try {
-            enableIpFilter();
             HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.IP_FILTER_UPLOAD.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(banListSettings)))
                             .header("Authorization", "Bearer " + this.deviceToken),
@@ -318,6 +339,7 @@ public class BitComet extends AbstractDownloader {
         private String endpoint;
         private String username;
         private String password;
+        private boolean incrementBan;
         private String httpVersion;
         private boolean verifySsl;
         private String rpcUrl;
@@ -332,6 +354,7 @@ public class BitComet extends AbstractDownloader {
             }
             config.setUsername(section.getString("username", ""));
             config.setPassword(section.getString("password", ""));
+            config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
@@ -345,6 +368,7 @@ public class BitComet extends AbstractDownloader {
             section.set("username", username);
             section.set("password", password);
             section.set("rpc-url", rpcUrl);
+            section.set("increment-ban", incrementBan);
             section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);

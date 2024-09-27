@@ -694,9 +694,12 @@ public class PeerBanHelperServer implements Reloadable {
             torrents.forEach(torrent -> protect.getService().submit(() -> {
                 try {
                     parallelReqRestrict.acquire();
-                    peers.put(torrent, downloader.getPeers(torrent));
+                    var p =  downloader.getPeers(torrent);
+                    peers.put(torrent,p);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                }  catch (Exception e) {
+                    log.error("Unable to retrieve peers", e);
                 } finally {
                     parallelReqRestrict.release();
                 }

@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.resp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,12 +9,12 @@ import lombok.NoArgsConstructor;
 @Data
 public class BCDeviceTokenResult {
 
-    @JsonProperty("device_token")
+    @SerializedName("device_token")
     private String deviceToken;
-    @JsonProperty("server_id")
+    @SerializedName("server_id")
     private String serverId;
-    @JsonProperty("server_name")
+    @SerializedName("server_name")
     private String serverName;
-    @JsonProperty("version")
+    @SerializedName("version")
     private String version;
 }

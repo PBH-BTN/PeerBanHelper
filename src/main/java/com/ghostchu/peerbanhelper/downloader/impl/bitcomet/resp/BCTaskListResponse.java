@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.resp;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,41 +10,41 @@ import java.util.List;
 @Data
 public class BCTaskListResponse {
 
-    @JsonProperty("tasks")
+    @SerializedName("tasks")
     private List<TasksDTO> tasks;
-    @JsonProperty("version")
+    @SerializedName("version")
     private String version;
 
     @NoArgsConstructor
     @Data
     public static class TasksDTO {
-        @JsonProperty("task_id")
-        private Integer taskId;
-        @JsonProperty("task_guid")
+        @SerializedName("task_id")
+        private Long taskId;
+        @SerializedName("task_guid")
         private String taskGuid;
-        @JsonProperty("type")
+        @SerializedName("type")
         private String type;
-        @JsonProperty("task_name")
+        @SerializedName("task_name")
         private String taskName;
-        @JsonProperty("status")
+        @SerializedName("status")
         private String status;
-        @JsonProperty("total_size")
-        private Integer totalSize;
-        @JsonProperty("selected_size")
-        private Integer selectedSize;
-        @JsonProperty("selected_downloaded_size")
-        private Integer selectedDownloadedSize;
-        @JsonProperty("download_rate")
-        private Integer downloadRate;
-        @JsonProperty("upload_rate")
-        private Integer uploadRate;
-        @JsonProperty("error_code")
+        @SerializedName("total_size")
+        private Long totalSize;
+        @SerializedName("selected_size")
+        private Long selectedSize;
+        @SerializedName("selected_downloaded_size")
+        private Long selectedDownloadedSize;
+        @SerializedName("download_rate")
+        private Long downloadRate;
+        @SerializedName("upload_rate")
+        private Long uploadRate;
+        @SerializedName("error_code")
         private String errorCode;
-        @JsonProperty("error_message")
+        @SerializedName("error_message")
         private String errorMessage;
-        @JsonProperty("permillage")
-        private Integer permillage;
-        @JsonProperty("left_time")
+        @SerializedName("permillage")
+        private Long permillage;
+        @SerializedName("left_time")
         private String leftTime;
     }
 }

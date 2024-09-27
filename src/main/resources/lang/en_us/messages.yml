@@ -379,3 +379,6 @@ DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST: "Failed to request torrents list - {}
 DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT: "Failed to request peers list in torrent - {} - {}"
 DOWNLOADER_BC_API_PREFERENCES_ERR: "BitComet's preferences API returned non expected response - {} - {}"
 DOWNLOADER_BC_FAILED_SAVE_BANLIST: "Failed to save banlist for {} ({}): {} - {}\n{}"
+DOWNLOADER_BC_CONFIG_IP_FILTER: "Detected incorrect BitComet IpFilter configuration, run autofix..."
+DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter configuration autofix success."
+DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter configuration autofix failed."

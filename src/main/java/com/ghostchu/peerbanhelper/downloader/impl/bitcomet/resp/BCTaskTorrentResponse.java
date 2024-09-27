@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.resp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,154 +11,154 @@ import java.util.List;
 @Data
 public class BCTaskTorrentResponse {
 
-    @JsonProperty("error_code")
+    @SerializedName("error_code")
     private String errorCode;
-    @JsonProperty("task_detail")
+    @SerializedName("task_detail")
     private TaskDetailDTO taskDetail;
-    @JsonProperty("task_status")
+    @SerializedName("task_status")
     private TaskStatusDTO taskStatus;
-    @JsonProperty("task_summary")
+    @SerializedName("task_summary")
     private TaskSummaryDTO taskSummary;
-    @JsonProperty("task")
+    @SerializedName("task")
     private TaskDTO task;
-    @JsonProperty("version")
+    @SerializedName("version")
     private String version;
 
     @NoArgsConstructor
     @Data
     public static class TaskDetailDTO {
-        @JsonProperty("type")
+        @SerializedName("type")
         private String type;
-        @JsonProperty("infohash")
+        @SerializedName("infohash")
         private String infohash;
-        @JsonProperty("infohash_v2")
+        @SerializedName("infohash_v2")
         private String infohashV2;
-        @JsonProperty("download_link")
+        @SerializedName("download_link")
         private String downloadLink;
-        @JsonProperty("task_name")
+        @SerializedName("task_name")
         private String taskName;
-        @JsonProperty("save_folder")
+        @SerializedName("save_folder")
         private String saveFolder;
-        @JsonProperty("total_size")
+        @SerializedName("total_size")
         private Long totalSize;
-        @JsonProperty("file_num")
+        @SerializedName("file_num")
         private String fileNum;
-        @JsonProperty("added_time")
+        @SerializedName("added_time")
         private String addedTime;
-        @JsonProperty("finish_time")
+        @SerializedName("finish_time")
         private String finishTime;
-        @JsonProperty("created_by")
+        @SerializedName("created_by")
         private String createdBy;
-        @JsonProperty("creation_time")
+        @SerializedName("creation_time")
         private String creationTime;
-        @JsonProperty("description")
+        @SerializedName("description")
         private String description;
-        @JsonProperty("publisher")
+        @SerializedName("publisher")
         private String publisher;
-        @JsonProperty("publisher_url")
+        @SerializedName("publisher_url")
         private String publisherUrl;
-        @JsonProperty("torrent_private")
+        @SerializedName("torrent_private")
         private Boolean torrentPrivate;
     }
 
     @NoArgsConstructor
     @Data
     public static class TaskStatusDTO {
-        @JsonProperty("status")
+        @SerializedName("status")
         private String status;
-        @JsonProperty("dl_speed")
+        @SerializedName("dl_speed")
         private String dlSpeed;
-        @JsonProperty("up_speed")
+        @SerializedName("up_speed")
         private String upSpeed;
-        @JsonProperty("dl_size")
-        private Integer dlSize;
-        @JsonProperty("up_size")
-        private Integer upSize;
-        @JsonProperty("total_size")
+        @SerializedName("dl_size")
+        private Long dlSize;
+        @SerializedName("up_size")
+        private Long upSize;
+        @SerializedName("total_size")
         private Long totalSize;
-        @JsonProperty("progress")
+        @SerializedName("progress")
         private String progress;
-        @JsonProperty("share_ratio")
+        @SerializedName("share_ratio")
         private String shareRatio;
-        @JsonProperty("left_time")
+        @SerializedName("left_time")
         private String leftTime;
-        @JsonProperty("peers_num")
+        @SerializedName("peers_num")
         private String peersNum;
-        @JsonProperty("seeders_num")
+        @SerializedName("seeders_num")
         private String seedersNum;
-        @JsonProperty("active_time")
+        @SerializedName("active_time")
         private String activeTime;
-        @JsonProperty("seeding_time")
+        @SerializedName("seeding_time")
         private String seedingTime;
-        @JsonProperty("availability")
+        @SerializedName("availability")
         private String availability;
-        @JsonProperty("piece_num")
+        @SerializedName("piece_num")
         private String pieceNum;
-        @JsonProperty("ltseed_upload_size")
-        private Integer ltseedUploadSize;
-        @JsonProperty("ltseed_upload_speed")
+        @SerializedName("ltseed_upload_size")
+        private Long ltseedUploadSize;
+        @SerializedName("ltseed_upload_speed")
         private String ltseedUploadSpeed;
-        @JsonProperty("size_left")
+        @SerializedName("size_left")
         private Long sizeLeft;
-        @JsonProperty("download_permillage")
-        private Integer downloadPermillage;
-        @JsonProperty("dl_time")
+        @SerializedName("download_permillage")
+        private Long downloadPermillage;
+        @SerializedName("dl_time")
         private String dlTime;
-        @JsonProperty("dl_time_all")
+        @SerializedName("dl_time_all")
         private String dlTimeAll;
-        @JsonProperty("files_selected")
-        private Integer filesSelected;
-        @JsonProperty("piece_hashes")
+        @SerializedName("files_selected")
+        private Long filesSelected;
+        @SerializedName("piece_hashes")
         private String pieceHashes;
-        @JsonProperty("file_alignment")
+        @SerializedName("file_alignment")
         private String fileAlignment;
-        @JsonProperty("ltseed_share_ratio")
+        @SerializedName("ltseed_share_ratio")
         private String ltseedShareRatio;
     }
 
     @NoArgsConstructor
     @Data
     public static class TaskSummaryDTO {
-        @JsonProperty("tags")
+        @SerializedName("tags")
         private String tags;
-        @JsonProperty("speed_list")
-        private List<Integer> speedList;
-        @JsonProperty("downloaded_pieces")
+        @SerializedName("speed_list")
+        private List<Long> speedList;
+        @SerializedName("downloaded_pieces")
         private List<Boolean> downloadedPieces;
-        @JsonProperty("available_pieces")
+        @SerializedName("available_pieces")
         private List<Integer> availablePieces;
     }
 
     @NoArgsConstructor
     @Data
     public static class TaskDTO {
-        @JsonProperty("task_id")
-        private Integer taskId;
-        @JsonProperty("task_guid")
+        @SerializedName("task_id")
+        private Long taskId;
+        @SerializedName("task_guid")
         private String taskGuid;
-        @JsonProperty("type")
+        @SerializedName("type")
         private String type;
-        @JsonProperty("task_name")
+        @SerializedName("task_name")
         private String taskName;
-        @JsonProperty("status")
+        @SerializedName("status")
         private String status;
-        @JsonProperty("total_size")
+        @SerializedName("total_size")
         private Long totalSize;
-        @JsonProperty("selected_size")
+        @SerializedName("selected_size")
         private Long selectedSize;
-        @JsonProperty("selected_downloaded_size")
-        private Integer selectedDownloadedSize;
-        @JsonProperty("download_rate")
-        private Integer downloadRate;
-        @JsonProperty("upload_rate")
-        private Integer uploadRate;
-        @JsonProperty("error_code")
+        @SerializedName("selected_downloaded_size")
+        private Long selectedDownloadedSize;
+        @SerializedName("download_rate")
+        private Long downloadRate;
+        @SerializedName("upload_rate")
+        private Long uploadRate;
+        @SerializedName("error_code")
         private String errorCode;
-        @JsonProperty("error_message")
+        @SerializedName("error_message")
         private String errorMessage;
-        @JsonProperty("permillage")
-        private Integer permillage;
-        @JsonProperty("left_time")
+        @SerializedName("permillage")
+        private Long permillage;
+        @SerializedName("left_time")
         private String leftTime;
     }
 }

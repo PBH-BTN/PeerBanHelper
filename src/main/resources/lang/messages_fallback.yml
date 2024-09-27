@@ -378,3 +378,6 @@ DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST: "请求 Torrents 列表失败 - {} - 
 DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT: "请求 Torrent 的 Peers 列表失败 - {} - {}"
 DOWNLOADER_BC_API_PREFERENCES_ERR: "BitComet API 返回了非预期响应 - {} - {}"
 DOWNLOADER_BC_FAILED_SAVE_BANLIST: "无法保存 {} ({}) 的 Banlist！{} - {}\n{}"
+DOWNLOADER_BC_CONFIG_IP_FILTER: "检测到 BitComet IpFilter 配置不正确，正在自动修正……"
+DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter 配置自动修正成功"
+DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter 配置自动修正失败"
