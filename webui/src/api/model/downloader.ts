@@ -21,7 +21,7 @@ export enum ClientTypeEnum {
   Transmission = 'transmission',
   BiglyBT = 'biglybt',
   Deluge = 'deluge',
-  BitComet = 'BitComet',
+  BitComet = 'bitcomet',
   Unknown = 'Unknown'
 }
 
