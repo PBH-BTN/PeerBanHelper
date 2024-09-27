@@ -1,7 +1,7 @@
 export default {
   'plus.status': '状态',
   'plus.subscription': '当前订阅',
-  'plus.status.activated': '已激活，感谢支持 ;)',
+  'plus.status.activated': '已激活，感谢支持 :)',
   'plus.status.inactive': '未激活',
   'plus.key': '许可证',
   'plus.licenseTo': '授权给',
