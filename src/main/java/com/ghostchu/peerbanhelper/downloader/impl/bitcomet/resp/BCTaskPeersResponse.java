@@ -95,6 +95,10 @@ public class BCTaskPeersResponse {
         private Long dlRate;
         @SerializedName("up_rate")
         private Long upRate;
+        @SerializedName("dl_size")
+        private Long dlSize;
+        @SerializedName("up_size")
+        private Long upSize;
         @SerializedName("peer_id")
         private String peerId;
     }
