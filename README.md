@@ -29,6 +29,7 @@
 * Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
 * Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
 * Transmission **(3.00-20 或更高版本，不建议使用)**
+* BitComet **v2.10 Beta6 [20240928] 或更高版本**
 
 ## 注意事项
 
