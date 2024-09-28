@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.resp;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -53,11 +52,11 @@ public class BCTaskPeersResponse {
         @SerializedName("selected_size")
         private Long selectedSize;
         @SerializedName("selected_downloaded_size")
-        private Integer selectedDownloadedSize;
+        private Long selectedDownloadedSize;
         @SerializedName("download_rate")
-        private Integer downloadRate;
+        private Long downloadRate;
         @SerializedName("upload_rate")
-        private Integer uploadRate;
+        private Long uploadRate;
         @SerializedName("error_code")
         private String errorCode;
         @SerializedName("error_message")
