@@ -19,6 +19,7 @@
           <a-radio :value="ClientTypeEnum.qBittorrentEE">qBittorrentEE</a-radio>
           <a-radio :value="ClientTypeEnum.BiglyBT">BiglyBT</a-radio>
           <a-radio :value="ClientTypeEnum.Deluge">Deluge</a-radio>
+          <a-radio :value="ClientTypeEnum.BitComet">BitComet</a-radio>
           <a-tooltip :content="t('page.dashboard.editModal.transmission.discourage')">
             <a-radio :value="ClientTypeEnum.Transmission" disabled>Transmission</a-radio>
           </a-tooltip>
@@ -61,13 +62,15 @@ const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/
 const transmissionForm = defineAsyncComponent(() => import('@/components/forms/transmission.vue'))
 const biglybtForm = defineAsyncComponent(() => import('@/components/forms/biglybt.vue'))
 const delugeForm = defineAsyncComponent(() => import('@/components/forms/deluge.vue'))
+const bitCometForm = defineAsyncComponent(() => import('@/components/forms/bitcomet.vue'))
 
 const formMap = {
   [ClientTypeEnum.qBittorrent]: qbittorrentForm,
   [ClientTypeEnum.qBittorrentEE]: qbittorrentEEForm,
   [ClientTypeEnum.Transmission]: transmissionForm,
   [ClientTypeEnum.BiglyBT]: biglybtForm,
-  [ClientTypeEnum.Deluge]: delugeForm
+  [ClientTypeEnum.Deluge]: delugeForm,
+  [ClientTypeEnum.BitComet]: bitCometForm
 }
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })
