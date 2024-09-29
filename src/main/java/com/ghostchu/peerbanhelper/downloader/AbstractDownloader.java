@@ -34,8 +34,7 @@ public abstract class AbstractDownloader implements Downloader {
                 failedLoginAttempts = 0;
                 return result;
             }
-            if (result.getStatus() == DownloaderLoginResult.Status.INCORRECT_CREDENTIAL
-                    || result.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS)
+            if (result.getStatus() == DownloaderLoginResult.Status.INCORRECT_CREDENTIAL)
                 failedLoginAttempts++;
             return result;
         } catch (Throwable e) {

@@ -19,6 +19,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
+import com.vdurmont.semver4j.Semver;
 import inet.ipaddr.HostName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -126,6 +127,22 @@ public class BitComet extends AbstractDownloader {
             if (!loginResponse.getErrorCode().equalsIgnoreCase("ok")) {
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
             }
+            // 进行版本检查
+            boolean bcVerAcceptable = false;
+            var bcSemver = new Semver(loginResponse.getVersion(), Semver.SemverType.LOOSE);
+            if (bcSemver.getMajor() > 2) {
+                bcVerAcceptable = true;
+            } else {
+                if (bcSemver.getMajor() == 2) {
+                    if (bcSemver.getMinor() >= 10) {
+                        bcVerAcceptable = true;
+                    }
+                }
+            }
+            if (!bcVerAcceptable) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.MISSING_COMPONENTS, new TranslationComponent(Lang.DOWNLOADER_BC_VERSION_UNACCEPTABLE, request.body()));
+            }
+            // 版本检查结束
             Map<String, String> inviteTokenRetrievePayload = new HashMap<>();
             inviteTokenRetrievePayload.put("device_id", clientId.toString());
             inviteTokenRetrievePayload.put("device_name", "PeerBanHelper - BitComet Adapter");
