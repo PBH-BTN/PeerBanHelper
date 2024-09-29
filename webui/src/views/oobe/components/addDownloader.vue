@@ -10,20 +10,20 @@
     </a-typography>
     <a-form :model="config.downloaderConfig" auto-label-width>
       <a-form-item field="config.type" :label="t('page.dashboard.editModal.label.type')" required>
-        <a-radio-group
+        <a-select
           v-model="config.downloaderConfig.config.type"
-          type="button"
-          style="overflow: scroll; overflow-y: hidden"
+          style="width: 10em"
+          :trigger-props="{ autoFitPopupMinWidth: true }"
         >
-          <a-radio :value="ClientTypeEnum.qBittorrent">qBittorrent</a-radio>
-          <a-radio :value="ClientTypeEnum.qBittorrentEE">qBittorrentEE</a-radio>
-          <a-radio :value="ClientTypeEnum.BiglyBT">BiglyBT</a-radio>
-          <a-radio :value="ClientTypeEnum.Deluge">Deluge</a-radio>
-          <a-radio :value="ClientTypeEnum.BitComet">BitComet</a-radio>
+          <a-option :value="ClientTypeEnum.qBittorrent">qBittorrent</a-option>
+          <a-option :value="ClientTypeEnum.qBittorrentEE">qBittorrentEE</a-option>
+          <a-option :value="ClientTypeEnum.BiglyBT">BiglyBT</a-option>
+          <a-option :value="ClientTypeEnum.Deluge">Deluge</a-option>
+          <a-option :value="ClientTypeEnum.BitComet">BitComet</a-option>
           <a-tooltip :content="t('page.dashboard.editModal.transmission.discourage')">
-            <a-radio :value="ClientTypeEnum.Transmission" disabled>Transmission</a-radio>
+            <a-option :value="ClientTypeEnum.Transmission" disabled>Transmission</a-option>
           </a-tooltip>
-        </a-radio-group>
+        </a-select>
         <template v-if="config.downloaderConfig.config.type === ClientTypeEnum.BiglyBT" #extra>
           <i18n-t keypath="page.dashboard.editModal.biglybt">
             <template #url>
