@@ -1,4 +1,4 @@
 #!/bin/sh
-echo "Thansk for using peerbanhelper. Your config file will be placed at /usr/local/etc/peerbanhelper"
+echo "Thanks for using peerbanhelper. Your config file will be placed at /usr/local/etc/peerbanhelper"
 echo "To auto start peerbanhelper, please run: sysrc peerbanhelper_enable=YES"
 mkdir -p /usr/local/var/db/peerbanhelper
