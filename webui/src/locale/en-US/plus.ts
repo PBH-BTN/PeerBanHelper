@@ -1,7 +1,7 @@
 export default {
   'plus.status': 'Status',
   'plus.subscription': 'Subscription',
-  'plus.status.activated': 'Activated, thanks for supporting us ;)',
+  'plus.status.activated': 'Activated, thanks for supporting us :)',
   'plus.status.inactive': 'Inactive',
   'plus.key': 'License',
   'plus.licenseTo': 'License to',

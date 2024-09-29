@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
+import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.BitComet;
 import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced.QBittorrentEE;
@@ -212,6 +213,7 @@ public class PeerBanHelperServer implements Reloadable {
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
             case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
+            case "bitcomet"->downloader = BitComet.loadFromConfig(client, downloaderSection);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -230,6 +232,7 @@ public class PeerBanHelperServer implements Reloadable {
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
             case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
+            case "bitcomet"->downloader = BitComet.loadFromConfig(client, downloaderSection);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -328,7 +331,7 @@ public class PeerBanHelperServer implements Reloadable {
             this.BAN_LIST.putAll(data);
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
             downloaders.forEach(downloader -> {
-                downloader.login();
+               downloader.login();
                 downloader.setBanList(BAN_LIST.keySet(), null, null, true);
             });
             Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
@@ -691,9 +694,12 @@ public class PeerBanHelperServer implements Reloadable {
             torrents.forEach(torrent -> protect.getService().submit(() -> {
                 try {
                     parallelReqRestrict.acquire();
-                    peers.put(torrent, downloader.getPeers(torrent));
+                    var p =  downloader.getPeers(torrent);
+                    peers.put(torrent,p);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                }  catch (Exception e) {
+                    log.error("Unable to retrieve peers", e);
                 } finally {
                     parallelReqRestrict.release();
                 }
