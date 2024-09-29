@@ -381,3 +381,4 @@ DOWNLOADER_BC_FAILED_SAVE_BANLIST: "无法保存 {} ({}) 的 Banlist！{} - {}\n
 DOWNLOADER_BC_CONFIG_IP_FILTER: "检测到 BitComet IpFilter 配置不正确，正在自动修正……"
 DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter 配置自动修正成功"
 DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter 配置自动修正失败"
+DOWNLOADER_BC_VERSION_UNACCEPTABLE: "当前使用的 BitComet 版本不受支持，请升级到 2.10 或者更高版本"

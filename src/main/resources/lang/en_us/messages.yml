@@ -382,3 +382,4 @@ DOWNLOADER_BC_FAILED_SAVE_BANLIST: "Failed to save banlist for {} ({}): {} - {}\
 DOWNLOADER_BC_CONFIG_IP_FILTER: "Detected incorrect BitComet IpFilter configuration, run autofix..."
 DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter configuration autofix success."
 DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter configuration autofix failed."
+DOWNLOADER_BC_VERSION_UNACCEPTABLE: "The current BitComet version is not supported, please upgrade to 2.10 or higher."
