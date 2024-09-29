@@ -29,6 +29,8 @@ jobs:
             cp target/PeerBanHelper.jar pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
             pkg create -M pkg/pkg/MANIFEST -r pkg/pkg/work-dir -p pkg/pkg/pkg-plist -o pkg/ 
             pkg info -F pkg/peerbanhelper-${{ env.PBH_VERSION }}.pkg
+        env:
+          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
