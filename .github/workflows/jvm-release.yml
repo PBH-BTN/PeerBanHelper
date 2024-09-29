@@ -42,7 +42,7 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
   Upload_Artifacts:
-    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB]
+    needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG ]
     permissions:
       contents: write
       checks: write
