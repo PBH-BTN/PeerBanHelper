@@ -83,7 +83,7 @@ public class BitComet extends AbstractDownloader {
     }
 
     public static BitComet loadFromConfig(String name, JsonObject section) {
-        Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
+        Config config = JsonUtil.getGson().fromJson(section, Config.class);
         return new BitComet(name, config);
     }
 
