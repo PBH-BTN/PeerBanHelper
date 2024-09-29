@@ -63,7 +63,7 @@ public class BitComet extends AbstractDownloader {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         Methanol.Builder builder = Methanol.newBuilder()
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
-                //.defaultHeader("Accept-Encoding", "gzip,deflate")
+                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("Client-Type", "BitComet WebUI")
                 .defaultHeader("User-Agent", "PeerBanHelper BitComet Adapter")
@@ -107,7 +107,6 @@ public class BitComet extends AbstractDownloader {
     public DownloaderLoginResult login0() throws Exception {
         if (isLoggedIn())
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
-        long time = System.currentTimeMillis();
         Map<String, String> loginAttemptCred = new HashMap<>();
         loginAttemptCred.put("username", config.getUsername());
         loginAttemptCred.put("password", config.getPassword());
@@ -188,7 +187,6 @@ public class BitComet extends AbstractDownloader {
     }
 
     private boolean queryNeedReConfigureIpFilter() throws IOException, InterruptedException {
-        long time = System.currentTimeMillis();
         HttpResponse<String> query =
                 httpClient.send(
                         MutableRequest.POST(apiEndpoint + BCEndpoint.GET_IP_FILTER_CONFIG.getEndpoint(),
