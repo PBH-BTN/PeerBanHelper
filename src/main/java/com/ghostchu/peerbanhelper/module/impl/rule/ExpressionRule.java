@@ -59,6 +59,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     private final Map<ExpressionMetadata, ReentrantLock> threadLocks = new HashMap<>();
     private Map<Expression, ExpressionMetadata> expressions = new HashMap<>();
     private long banDuration;
+    private final static String VERSION = "2";
 
     @Override
     public boolean isConfigurable() {
@@ -329,7 +330,12 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
 
     private void initScripts() throws IOException {
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
-        if (scriptDir.exists()) {
+        File versionFile = new File(scriptDir,"version");
+        if(!versionFile.exists()){
+            versionFile.createNewFile();
+        }
+        var version = Files.readString(versionFile.toPath(), StandardCharsets.UTF_8);
+        if(VERSION.equals(version)){
             return;
         }
         scriptDir.mkdirs();
@@ -338,9 +344,11 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         for (Resource re : res) {
             String content = new String(re.getContentAsByteArray(), StandardCharsets.UTF_8);
             File file = new File(scriptDir, re.getFilename());
+            if(file.exists()) continue;
             file.createNewFile();
             Files.writeString(file.toPath(), content);
         }
+        Files.writeString(versionFile.toPath(), VERSION, StandardCharsets.UTF_8);
     }
 
     record ExpressionMetadata(String name, String author, boolean cacheable, boolean threadSafe, String version,
