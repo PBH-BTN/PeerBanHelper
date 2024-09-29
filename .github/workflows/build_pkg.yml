@@ -1,0 +1,39 @@
+name: FreeBSD pkg Package Build
+
+on:
+  workflow_call:
+jobs:
+  pkg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-dist
+          path: target/
+      - name: Replace pkg version
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+          sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/pkg/MANIFEST
+        env:
+          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+      - name: Build FreeBSD pkg
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          run: |
+            mkdir -p pkg/pkg/work-dir/usr/local/lib/peerbanhelper
+            cp target/PeerBanHelper.jar pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
+            pkg create -M pkg/pkg/MANIFEST -r pkg/pkg/work-dir -p pkg/pkg/pkg-plist -o pkg/ 
+            pkg info -F pkg/peerbanhelper-${{ env.PBH_VERSION }}.pkg
+        env:
+          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkg-dist
+          path: |
+            pkg/*.pkg
