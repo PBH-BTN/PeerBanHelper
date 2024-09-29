@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.resp;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
