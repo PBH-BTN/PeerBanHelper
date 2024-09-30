@@ -330,6 +330,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
 
     private void initScripts() throws IOException {
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
+        scriptDir.mkdirs();
         File versionFile = new File(scriptDir,"version");
         if(!versionFile.exists()){
             versionFile.createNewFile();
@@ -338,7 +339,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         if(VERSION.equals(version)){
             return;
         }
-        scriptDir.mkdirs();
         PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
         var res = resourcePatternResolver.getResources("classpath:scripts/**/*.*");
         for (Resource re : res) {
