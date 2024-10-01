@@ -11,7 +11,7 @@
     <variables>
       <variable name="registerSystemService" value="registerSystemService" />
     </variables>
-    <jreBundles jdkProviderId="Adoptium" release="21/jdk-21.0.4+7" />
+    <jreBundles jdkProviderId="JBR" release="21/21.0.4-b613.2" />
   </application>
   <files keepModificationTimes="true">
     <mountPoints>
