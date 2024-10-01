@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="10.0.8" transformSequenceNumber="10">
   <directoryPresets config="target/PeerBanHelper.jar" />
-  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="4.4.1" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="21">
+  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="4.4.1" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="21" javaMaxVersion="23">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
