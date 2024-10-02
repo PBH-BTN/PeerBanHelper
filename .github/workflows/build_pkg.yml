@@ -26,6 +26,7 @@ jobs:
           usesh: true
           run: |
             mkdir -p pkg/pkg/work-dir/usr/local/lib/peerbanhelper
+            mkdir -p pkg/pkg/work-dir/usr/local/var/db/peerbanhelper/
             cp target/PeerBanHelper.jar pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
             pkg create -M pkg/pkg/MANIFEST -r pkg/pkg/work-dir -p pkg/pkg/pkg-plist -o pkg/ 
             pkg info -F pkg/peerbanhelper-${{ env.PBH_VERSION }}.pkg
