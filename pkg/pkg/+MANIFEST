@@ -1,6 +1,6 @@
 {
     "name": "peerbanhelper",
-    "version": "<version>",
+    "version": "v6.4.1",
     "origin": "net/peerbanhelper",
     "comment": "Tool to auto ban peers on the bittorrent network",
     "desc": "PeerBanHelper is a tool to auto ban peers on the bittorrent network",
@@ -18,8 +18,5 @@
     "licenselogic": "single",
     "licenses": [
         "GPLv3"
-    ],
-    "scripts": {
-        "post-install": "post-install"
-    }
+    ]
 }

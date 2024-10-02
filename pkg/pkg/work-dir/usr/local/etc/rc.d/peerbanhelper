@@ -9,7 +9,6 @@
 name="peerbanhelper"
 rcvar=peerbanhelper_enable
 
-load_rc_config $name
 
 : ${peerbanhelper_enable:=NO}
 : ${peerbanhelper_user:="root"}
@@ -20,4 +19,6 @@ load_rc_config $name
 
 command="/usr/sbin/daemon"
 command_args="-f -p /var/run/${name}.pid -u ${peerbanhelper_user} ${peerbanhelper_command}"
+
+load_rc_config $name
 run_rc_command "$1"
