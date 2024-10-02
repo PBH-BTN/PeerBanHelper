@@ -11,7 +11,7 @@
     <variables>
       <variable name="registerSystemService" value="registerSystemService" />
     </variables>
-    <jreBundles jdkProviderId="JBR" release="21/21.0.4-b613.2" />
+    <jreBundles jdkProviderId="AdoptOpenJDK" release="21/jdk-21.0.4+7" />
   </application>
   <files keepModificationTimes="true">
     <mountPoints>
@@ -658,9 +658,6 @@ return console.askYesNo(message, true);
   </installerGui>
   <mediaSets>
     <windows name="Windows x64" id="38" architecture="64">
-      <jreBundle installOnlyIfNecessary="true" />
-    </windows>
-    <windows name="Windows arm64" id="41" architecture="arm64">
       <jreBundle installOnlyIfNecessary="true" />
     </windows>
     <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}" architecture="universal" />
