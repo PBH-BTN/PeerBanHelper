@@ -33,8 +33,8 @@ jobs:
             mkdir -p pkg/pkg/work-dir/usr/local/var/db/peerbanhelper/
             cp target/PeerBanHelper.jar pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
             pkg create -m pkg/pkg/ -r pkg/pkg/work-dir -p pkg/pkg/pkg-plist -o pkg/ 
-            pkg info -F pkg/peerbanhelper-${{ env.PBH_VERSION }}.pkg
-            mv pkg/peerbanhelper-${{ env.PBH_VERSION }}.pkg pkg/peerbanhelper-${{ env.PBH_VERSION }}-$(uname -o)-$(uname -r).pkg
+            pkg info -F pkg/peerbanhelper-v${{ env.PBH_VERSION }}.pkg
+            mv pkg/peerbanhelper-v${{ env.PBH_VERSION }}.pkg pkg/peerbanhelper-v${{ env.PBH_VERSION }}-$(uname -o)-$(uname -r).pkg
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
       - name: Upload build artifacts
