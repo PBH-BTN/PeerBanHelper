@@ -22,7 +22,6 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
     public PeerRecordDao(@Autowired Database database, TorrentDao torrentDao) throws SQLException {
         super(database.getDataSource(), PeerRecordEntity.class);
         this.torrentDao = torrentDao;
-        setObjectCache(true);
     }
 
     public void syncPendingTasks(Deque<BatchHandleTasks> tasks) throws SQLException {
