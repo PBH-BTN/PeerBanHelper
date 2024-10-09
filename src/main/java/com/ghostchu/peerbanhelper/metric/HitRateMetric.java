@@ -14,6 +14,8 @@ public class HitRateMetric {
             CacheBuilder
                     .newBuilder()
                     .expireAfterAccess(3, TimeUnit.DAYS)
+                    .softValues()
+                    .weakKeys()
                     .build();
 
     @SneakyThrows
