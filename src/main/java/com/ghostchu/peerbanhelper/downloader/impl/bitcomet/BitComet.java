@@ -242,7 +242,9 @@ public class BitComet extends AbstractDownloader {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
         }
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
-        return response.getTasks().stream().map(torrent -> {
+        return response.getTasks().stream()
+                .filter(t -> t.getType().equals("BT"))
+                .map(torrent -> {
                     try {
                         Map<String, String> taskIds = new HashMap<>();
                         taskIds.put("task_id", torrent.getTaskId().toString());
