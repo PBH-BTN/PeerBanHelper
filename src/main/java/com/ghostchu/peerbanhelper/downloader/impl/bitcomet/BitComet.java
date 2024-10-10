@@ -294,7 +294,14 @@ public class BitComet extends AbstractDownloader {
         if (peers.getPeers() == null) {
             return Collections.emptyList();
         }
-        return peers.getPeers().stream().map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
+        var noGroupField = peers.getPeers().stream().noneMatch(dto -> dto.getGroup() != null);
+        var stream = peers.getPeers().stream();
+
+        if (!noGroupField) { // 对于新版本，添加一个 group 过滤
+            stream = stream.filter(dto -> dto.getGroup().equals("connected"));
+        }
+
+        return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
                 peer.getIp(),
                 new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
                 peer.getClientType(),
