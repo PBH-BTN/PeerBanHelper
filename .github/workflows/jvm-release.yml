@@ -42,7 +42,7 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
   Upload_Artifacts:
-    needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG ]
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG]
     permissions:
       contents: write
       checks: write
@@ -72,7 +72,11 @@ jobs:
           path: target/media
       - uses: actions/download-artifact@v4
         with:
-          name: pkg-dist
+          name: freebsd-pkg-13.4-dist
+          path: target/media
+      - uses: actions/download-artifact@v4
+        with:
+          name: freebsd-pkg-14.1-dist
           path: target/media
       - uses: alexellis/upload-assets@0.4.1
         env:
@@ -121,7 +125,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6.8.0
+        uses: docker/build-push-action@v6.9.0
         with:
           context: .
           file: ./Dockerfile
@@ -157,7 +161,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Aliyun ACR
-        uses: docker/build-push-action@v6.8.0
+        uses: docker/build-push-action@v6.9.0
         with:
           context: .
           file: ./Dockerfile-Release

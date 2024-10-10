@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
@@ -23,6 +24,7 @@ import com.vdurmont.semver4j.Semver;
 import inet.ipaddr.HostName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +38,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.Security;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -54,9 +57,18 @@ public class BitComet extends AbstractDownloader {
     private String serverId;
     private String serverVersion;
     private String serverName;
+    private boolean dependenciesLoaded = false;
 
     public BitComet(String name, Config config) {
         super(name);
+        try {
+            loadRequiredDependencies();
+            Security.addProvider(new BouncyCastleProvider());
+            dependenciesLoaded = true;
+        } catch (IOException e) {
+            log.error(tlUI(Lang.DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED));
+        }
+        Security.addProvider(new BouncyCastleProvider());
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
@@ -94,6 +106,10 @@ public class BitComet extends AbstractDownloader {
         return new PeerAddress(host.getHost(), port);
     }
 
+    private void loadRequiredDependencies() throws IOException {
+        Main.loadDependencies("/libraries/bitcomet.maven");
+    }
+
     @Override
     public JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
@@ -105,6 +121,8 @@ public class BitComet extends AbstractDownloader {
     }
 
     public DownloaderLoginResult login0() throws Exception {
+        if (!dependenciesLoaded)
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED));
         if (isLoggedIn())
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
         Map<String, String> loginAttemptCred = new HashMap<>();
@@ -242,7 +260,9 @@ public class BitComet extends AbstractDownloader {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
         }
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
-        return response.getTasks().stream().map(torrent -> {
+        return response.getTasks().stream()
+                .filter(t -> t.getType().equals("BT"))
+                .map(torrent -> {
                     try {
                         Map<String, String> taskIds = new HashMap<>();
                         taskIds.put("task_id", torrent.getTaskId().toString());
@@ -292,14 +312,21 @@ public class BitComet extends AbstractDownloader {
         if (peers.getPeers() == null) {
             return Collections.emptyList();
         }
-        return peers.getPeers().stream().map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
+        var noGroupField = peers.getPeers().stream().noneMatch(dto -> dto.getGroup() != null);
+        var stream = peers.getPeers().stream();
+
+        if (!noGroupField) { // 对于新版本，添加一个 group 过滤
+            stream = stream.filter(dto -> dto.getGroup().equals("connected"));
+        }
+
+        return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
                 peer.getIp(),
                 new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
                 peer.getClientType(),
                 peer.getDlRate(),
-                -1,
+                peer.getDlSize() != null ? peer.getDlSize() : -1,
                 peer.getUpRate(),
-                -1,
+                peer.getUpSize() != null ? peer.getUpSize() : -1,
                 peer.getPermillage() / 1000.0d, null)
         ).collect(Collectors.toList());
     }

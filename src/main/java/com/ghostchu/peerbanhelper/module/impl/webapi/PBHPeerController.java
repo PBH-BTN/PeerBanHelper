@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.rule.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
@@ -28,12 +29,16 @@ public class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryDao historyDao;
     private final PeerRecordDao peerRecordDao;
+    private final ActiveMonitoringModule activeMonitoringModule;
 
-    public PBHPeerController(JavalinWebContainer javalinWebContainer, HistoryDao historyDao, PeerRecordDao peerRecordDao) {
+    public PBHPeerController(JavalinWebContainer javalinWebContainer,
+                             HistoryDao historyDao, PeerRecordDao peerRecordDao,
+                             ActiveMonitoringModule activeMonitoringModule) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
+        this.activeMonitoringModule = activeMonitoringModule;
     }
 
     @Override
@@ -62,6 +67,7 @@ public class PBHPeerController extends AbstractFeatureModule {
 
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
+        activeMonitoringModule.flush();
         @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         long banCount = historyDao.queryBuilder()
@@ -121,7 +127,7 @@ public class PBHPeerController extends AbstractFeatureModule {
             log.warn("Unable to perform GeoIP query for ip {}", ip);
         }
         var info = new PeerInfo(
-                upDownResult != null,
+                upDownResult != null || banCount > 0 || torrentAccessCount > 0,
                 ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP);
         ctx.json(new StdResp(true, null, info));
     }
@@ -143,6 +149,7 @@ public class PBHPeerController extends AbstractFeatureModule {
     }
 
     private void handleAccessHistory(Context ctx) throws SQLException {
+        activeMonitoringModule.flush();
         @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);

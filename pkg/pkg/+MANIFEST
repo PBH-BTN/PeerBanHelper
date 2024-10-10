@@ -12,13 +12,11 @@
             "version": "21.0"
         }
     },
+    "arch": "all",
     "categories": ["net"],
     "prefix":"/usr/local",
     "licenselogic": "single",
     "licenses": [
-        "BSD"
-    ],
-    "scripts": {
-        "post-install": "post-install"
-    }
+        "GPLv3"
+    ]
 }

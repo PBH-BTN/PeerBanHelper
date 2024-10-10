@@ -28,12 +28,13 @@
 * BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
 * Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
 * Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
-* Transmission **(3.00-20 或更高版本，不建议使用)**
+* Transmission **(不建议使用；3.00-20 或更高版本)**
 * BitComet **v2.10 Beta6 [20240928] 或更高版本**
 
 ## 注意事项
 
-请不要打开下载器中的 "允许来自同一 IP 地址的多个连接" 选项，这会干扰 PBH 计算数据，并导致错误封禁。
+请不要打开下载器中的 "允许来自同一 IP 地址的多个连接" 选项，这会干扰 PBH 计算数据，并导致错误封禁。  
+如果您的下载器存在 PT 站种子，在添加下载器时建议开启 “忽略私有种子”。
   
 ## 功能介绍
 

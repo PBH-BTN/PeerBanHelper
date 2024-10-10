@@ -36,6 +36,7 @@ public class ActivationManager implements Reloadable {
         if (keyText == null || keyText.isBlank()) {
             return;
         }
+        keyText = keyText.trim();
         this.keyData = ActivationKeyUtil.fromKey(this.keyText);
         if (keyData != null) {
             if (this.isActivated()) {

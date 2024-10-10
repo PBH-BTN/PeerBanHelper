@@ -1,2 +1,3 @@
 /usr/local/lib/peerbanhelper/PeerBanHelper.jar
 /usr/local/etc/rc.d/peerbanhelper
+@dir /usr/local/var/db/peerbanhelper

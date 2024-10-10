@@ -27,7 +27,7 @@
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
+/.nb-gradle
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -47,3 +47,6 @@ build/
 
 src/main/resources/static
 dependency-reduced-pom.xml
+
+PeerBanHelper.jar
+*.pkg

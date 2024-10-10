@@ -100,5 +100,7 @@ public class BCTaskPeersResponse {
         private Long upSize;
         @SerializedName("peer_id")
         private String peerId;
+        @SerializedName("group")
+        private String group;
     }
 }

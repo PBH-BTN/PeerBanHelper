@@ -1,7 +1,5 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.crypto;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;
@@ -10,13 +8,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.Base64;
 
 public class BCAESTool {
-    static {
-        Security.addProvider(new BouncyCastleProvider());
-    }
 
     public static String credential(String json, String cid) throws Exception {
         // Ensure Bouncy Castle is added to your project for PBKDF2

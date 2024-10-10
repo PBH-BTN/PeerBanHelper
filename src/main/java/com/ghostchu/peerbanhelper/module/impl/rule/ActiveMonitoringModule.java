@@ -137,7 +137,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         }
     }
 
-    private void flush() {
+    public void flush() {
         try {
             try {
                 peerRecordDao.syncPendingTasks(dataBuffer);
