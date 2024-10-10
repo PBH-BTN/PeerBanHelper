@@ -1,6 +1,6 @@
 {
     "name": "peerbanhelper",
-    "version": "v6.4.1",
+    "version": "<version>",
     "origin": "net/peerbanhelper",
     "comment": "Tool to auto ban peers on the bittorrent network",
     "desc": "PeerBanHelper is a tool to auto ban peers on the bittorrent network",
