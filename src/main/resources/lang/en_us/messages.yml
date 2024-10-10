@@ -384,3 +384,6 @@ DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter configuration autofix
 DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter configuration autofix failed."
 DOWNLOADER_BC_VERSION_UNACCEPTABLE: "The current BitComet version is not supported, please upgrade to 2.10 or higher."
 DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED: "Failed to download necessary libraries (BouncyCastle) that required to connect BitComet. Operation cancelled, please check console logs for details."
+
+JAVALIN_PORT_IN_USE: "Bind to port {} already in use. It could caused by: (1)More than one PBH instance is running (for example: Install as System Service); (2)Other application using this port (e.g Uplay, Ubisoft connect)"
+JAVALIN_PORT_REQUIRE_PRIVILEGES: "Bind to port {} failed (system require privileges on this port). Pick another WebUI port or run PeerBanHelper as Administrator/root."
