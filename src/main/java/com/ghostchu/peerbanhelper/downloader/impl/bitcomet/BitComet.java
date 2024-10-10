@@ -24,7 +24,6 @@ import com.vdurmont.semver4j.Semver;
 import inet.ipaddr.HostName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +37,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.security.Security;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -63,12 +61,11 @@ public class BitComet extends AbstractDownloader {
         super(name);
         try {
             loadRequiredDependencies();
-            Security.addProvider(new BouncyCastleProvider());
+            BCAESTool.init();
             dependenciesLoaded = true;
         } catch (IOException e) {
             log.error(tlUI(Lang.DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED));
         }
-        Security.addProvider(new BouncyCastleProvider());
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
