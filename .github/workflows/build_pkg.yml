@@ -20,7 +20,7 @@ jobs:
         run: |
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
-          sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/pkg/+MANIFEST
+          sed -i "s/<version>/v${{ env.PBH_VERSION }}/g" pkg/pkg/+MANIFEST
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
       - name: Build FreeBSD pkg
