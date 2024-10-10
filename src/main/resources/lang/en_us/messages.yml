@@ -383,3 +383,4 @@ DOWNLOADER_BC_CONFIG_IP_FILTER: "Detected incorrect BitComet IpFilter configurat
 DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter configuration autofix success."
 DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter configuration autofix failed."
 DOWNLOADER_BC_VERSION_UNACCEPTABLE: "The current BitComet version is not supported, please upgrade to 2.10 or higher."
+DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED: "Failed to download necessary libraries (BouncyCastle) that required to connect BitComet. Operation cancelled, please check console logs for details."

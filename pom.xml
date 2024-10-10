@@ -665,6 +665,7 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
             <version>1.78.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
