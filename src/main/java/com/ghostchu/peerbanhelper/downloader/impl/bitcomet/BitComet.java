@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.http.HttpClient;
@@ -65,6 +66,9 @@ public class BitComet extends AbstractDownloader {
             dependenciesLoaded = true;
         } catch (IOException e) {
             log.error(tlUI(Lang.DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED));
+        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException e) {
+            log.error("Unable to load BCAESTool");
         }
         this.config = config;
         this.apiEndpoint = config.getEndpoint();

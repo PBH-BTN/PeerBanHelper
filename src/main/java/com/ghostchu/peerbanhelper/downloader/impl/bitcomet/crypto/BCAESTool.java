@@ -1,22 +1,22 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.crypto;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Base64;
 
 public class BCAESTool {
 
-    public static void init() {
-        Security.addProvider(new BouncyCastleProvider());
+    public static void init() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        Security.addProvider((Provider) Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider").getDeclaredConstructor().newInstance());
     }
 
     public static String credential(String json, String cid) throws Exception {
