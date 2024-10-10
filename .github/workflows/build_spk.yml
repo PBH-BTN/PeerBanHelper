@@ -29,3 +29,4 @@ jobs:
           name: spk-dist
           path: |
             /toolkit/build_env/ds.apollolake-7.2/image/packages/*.spk
+            !/toolkit/build_env/ds.apollolake-7.2/image/packages/*_debug.spk
