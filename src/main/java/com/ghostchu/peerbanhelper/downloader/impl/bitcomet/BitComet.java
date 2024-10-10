@@ -306,9 +306,9 @@ public class BitComet extends AbstractDownloader {
                 new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
                 peer.getClientType(),
                 peer.getDlRate(),
-                -1,
+                peer.getDlSize() != null ? peer.getDlSize() : -1,
                 peer.getUpRate(),
-                -1,
+                peer.getUpSize() != null ? peer.getUpSize() : -1,
                 peer.getPermillage() / 1000.0d, null)
         ).collect(Collectors.toList());
     }
