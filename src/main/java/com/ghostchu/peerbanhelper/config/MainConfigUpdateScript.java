@@ -29,6 +29,9 @@ public class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 20)
+    public void addPushProvider(YamlConfiguration bundle) {
+        conf.set("push-notification", bundle.get("push-notification"));
 
     @UpdateScript(version = 19)
     public void telemetryErrorReporting() {
