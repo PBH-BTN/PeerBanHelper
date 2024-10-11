@@ -88,8 +88,9 @@ public class Main {
                 new Slf4jLogAppender(),
                 Main.getDataDirectory().toPath(), "libraries"
         );
+        boolean nogui = !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"));
         libraryManager.setLogLevel(LogLevel.ERROR);
-        librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath);
+        librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath, nogui);
         meta = buildMeta();
         setupConfiguration();
         mainConfigFile = new File(configDirectory, "config.yml");

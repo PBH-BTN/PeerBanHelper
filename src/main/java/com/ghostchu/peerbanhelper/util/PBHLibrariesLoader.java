@@ -19,26 +19,30 @@ import java.util.Map;
 public class PBHLibrariesLoader {
     private final LibraryManager manager;
     private final Path librariesPath;
+    private final boolean guiAvailable;
     private boolean repoAdded = false;
 
-    public PBHLibrariesLoader(LibraryManager manager, Path librariesPath) {
+    public PBHLibrariesLoader(LibraryManager manager, Path librariesPath, boolean guiAvailable) {
         this.manager = manager;
         this.librariesPath = librariesPath;
-
+        this.guiAvailable = guiAvailable; // This stupid thing need to be improved
     }
 
     private void addRepositories() {
         if (repoAdded) return;
-        FlatIntelliJLaf.setup();
-        CrossDownloaderDialog downloaderDialog = new CrossDownloaderDialog();
-        downloaderDialog.setTitle("Testing the best mirror server...");
-        downloaderDialog.getTaskTitle().setText("Testing the best mirror server...");
-        downloaderDialog.getTooltip().setText("We're testing fastest mirror for downloading libraries....");
-        downloaderDialog.getDescription().setText(String.format("PBH libraries testing %s mirrors, soon™!", MavenCentralMirror.values().length));
-        downloaderDialog.getProgressBar().setIndeterminate(true);
-        downloaderDialog.getProgressBar().setString("Please wait up to 15 seconds...");
-        downloaderDialog.getProgressBar().setStringPainted(true);
-        downloaderDialog.setVisible(true);
+        CrossDownloaderDialog downloaderDialog = null;
+        if (guiAvailable) {
+            FlatIntelliJLaf.setup();
+            downloaderDialog = new CrossDownloaderDialog();
+            downloaderDialog.setTitle("Testing the best mirror server...");
+            downloaderDialog.getTaskTitle().setText("Testing the best mirror server...");
+            downloaderDialog.getTooltip().setText("We're testing fastest mirror for downloading libraries....");
+            downloaderDialog.getDescription().setText(String.format("PBH libraries testing %s mirrors, soon™!", MavenCentralMirror.values().length));
+            downloaderDialog.getProgressBar().setIndeterminate(true);
+            downloaderDialog.getProgressBar().setString("Please wait up to 15 seconds...");
+            downloaderDialog.getProgressBar().setStringPainted(true);
+            downloaderDialog.setVisible(true);
+        }
         try {
             List<MavenCentralMirror> mirrors = GeoUtil.determineBestMirrorServer(log);
             // 全部测试失败，这得是什么网络……
@@ -51,29 +55,40 @@ public class PBHLibrariesLoader {
                 manager.addRepository(mirrors.getFirst().getRepoUrl());
             }
         } finally {
-            downloaderDialog.dispose();
+            if (guiAvailable) {
+                downloaderDialog.dispose();
+            }
         }
     }
 
     public void loadLibraries(List<String> libraries, Map<String, String> env) throws RuntimeException {
-        FlatIntelliJLaf.setup();
-        CrossDownloaderDialog downloaderDialog = new CrossDownloaderDialog();
-        downloaderDialog.setTitle("Downloading libraries...");
-        downloaderDialog.getTaskTitle().setText("Downloading libraries...");
-        downloaderDialog.getTooltip().setText("PeerBanHelper download necessary libraries...");
-        downloaderDialog.getProgressBar().setValue(0);
+        CrossDownloaderDialog downloaderDialog;
+        if (guiAvailable) {
+            FlatIntelliJLaf.setup();
+            downloaderDialog = new CrossDownloaderDialog();
+            downloaderDialog.setTitle("Downloading libraries...");
+            downloaderDialog.getTaskTitle().setText("Downloading libraries...");
+            downloaderDialog.getTooltip().setText("PeerBanHelper download necessary libraries...");
+            downloaderDialog.getProgressBar().setValue(0);
+        } else {
+            downloaderDialog = null;
+        }
         try {
             loadLibraries0(libraries, env, (dependency, pos, total) -> SwingUtilities.invokeLater(() -> {
-                if (!downloaderDialog.isVisible()) {
-                    downloaderDialog.setVisible(true);
+                if (guiAvailable) {
+                    if (!downloaderDialog.isVisible()) {
+                        downloaderDialog.setVisible(true);
+                    }
+                    downloaderDialog.getDescription().setText(String.format("Downloading: %s", dependency));
+                    downloaderDialog.getProgressBar().setString(String.format("Progress: %s/%s", pos, total));
+                    downloaderDialog.getProgressBar().setMaximum(total);
+                    downloaderDialog.getProgressBar().setValue(pos);
                 }
-                downloaderDialog.getDescription().setText(String.format("Downloading: %s", dependency));
-                downloaderDialog.getProgressBar().setString(String.format("Progress: %s/%s", pos, total));
-                downloaderDialog.getProgressBar().setMaximum(total);
-                downloaderDialog.getProgressBar().setValue(pos);
             }));
         } finally {
-            downloaderDialog.dispose();
+            if (guiAvailable) {
+                downloaderDialog.dispose();
+            }
         }
     }
 
