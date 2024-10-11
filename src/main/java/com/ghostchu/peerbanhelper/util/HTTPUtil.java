@@ -1,26 +1,26 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.ProgressTracker;
-import com.github.mizosoft.methanol.WritableBodyPublisher;
-import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
+import okio.Buffer;
+import okio.BufferedSource;
+import okio.ForwardingSource;
+import okio.Okio;
+import okio.Source;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
-import java.io.ByteArrayInputStream;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.CookieManager;
 import java.net.ProxySelector;
 import java.net.Socket;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
@@ -29,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
-import java.util.zip.GZIPOutputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -40,13 +39,10 @@ public class HTTPUtil {
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     @Getter
     private static SSLContext ignoreSslContext;
-    private static final ProgressTracker tracker = ProgressTracker.newBuilder()
-            .bytesTransferredThreshold(60 * 1024) // 60 kB
-            .timePassedThreshold(Duration.of(3, ChronoUnit.SECONDS))
-            .build();
+    private static X509TrustManager ignoreTrustManager;
 
     static {
-        TrustManager trustManager = new X509ExtendedTrustManager() {
+        X509TrustManager trustManager = new X509ExtendedTrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
                 return new X509Certificate[]{};
@@ -80,112 +76,154 @@ public class HTTPUtil {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
             ignoreSslContext = sslContext;
+            ignoreTrustManager = trustManager;
         } catch (Exception e) {
             log.error(tlUI(Lang.MODULE_AP_SSL_CONTEXT_FAILURE), e);
         }
     }
 
-    public static HttpClient getHttpClient(boolean ignoreSSL, ProxySelector proxySelector) {
-        Methanol.Builder builder = Methanol
+    public static OkHttpClient getHttpClient(boolean ignoreSSL, ProxySelector proxySelector) {
+        OkHttpClient.Builder builder = new OkHttpClient()
                 .newBuilder()
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
+                .followRedirects(true)
+                .followSslRedirects(true)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .cookieHandler(cookieManager);
+                .cookieJar(new JavaNetCookieJar(cookieManager));
         if (ignoreSSL) {
-            builder.sslContext(ignoreSslContext);
+            builder.sslSocketFactory(ignoreSslContext.getSocketFactory(), ignoreTrustManager);
         }
         if (proxySelector != null) {
-            builder.proxy(proxySelector);
+            builder.proxySelector(proxySelector);
         }
         return builder.build();
     }
 
-    public static WritableBodyPublisher gzipBody(byte[] bytes) {
-        WritableBodyPublisher requestBody = WritableBodyPublisher.create();
-        try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream());
-             InputStream in = new ByteArrayInputStream(bytes)) {
-            ByteStreams.copy(in, gzipOut);
-        } catch (IOException ioe) {
-            requestBody.closeExceptionally(ioe);
-            log.error("Failed to compress request body", ioe);
-        }
-        return requestBody;
+    public static RequestBody gzipBody(byte[] bytes) {
+        return RequestBody.gzip(RequestBody.create(bytes));
     }
 
-    public static WritableBodyPublisher gzipBody(InputStream is) {
-        WritableBodyPublisher requestBody = WritableBodyPublisher.create();
-        try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream())) {
-            ByteStreams.copy(is, gzipOut);
-        } catch (IOException ioe) {
-            requestBody.closeExceptionally(ioe);
-            log.error("Failed to compress request body", ioe);
-        }
-        return requestBody;
+    public static Callback newFutureCallback(CompletableFuture<Response> future) {
+        return new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                future.complete(response);
+            }
+        };
     }
 
-    public static void onProgress(ProgressTracker.Progress progress) {
-        if (progress.determinate()) { // Overall progress can be measured
-            var percent = 100 * progress.value();
-            log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, progress.totalBytesTransferred(), progress.contentLength(), String.format("%.2f", percent)));
-        } else {
-            log.info(tlUI(Lang.DOWNLOAD_PROGRESS, progress.totalBytesTransferred()));
-        }
-        if (progress.done()) {
-            log.info(tlUI(Lang.DOWNLOAD_COMPLETED, progress.totalBytesTransferred()));
-        }
+    public static ProgressListener newProgressListener() {
+        return (totalBytesTransferred, contentLength, done) -> {
+            if (contentLength != -1) {
+                var percent = (100 * totalBytesTransferred) / contentLength;
+                log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, totalBytesTransferred, contentLength, String.format("%d%%", percent)));
+            } else {
+                log.info(tlUI(Lang.DOWNLOAD_PROGRESS, totalBytesTransferred));
+            }
+            if (done) {
+                log.info(tlUI(Lang.DOWNLOAD_COMPLETED, totalBytesTransferred));
+            }
+        };
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
-        return client.sendAsync(request, bodyHandler)
-                .handleAsync((r, t) -> tryResend(client, request, bodyHandler, MAX_RESEND, r, t), executor)
+    public static ResponseBody newProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener) {
+        return new ResponseBody() {
+            private BufferedSource bufferedSource;
+
+            @Override
+            public @Nullable MediaType contentType() {
+                return responseBody.contentType();
+            }
+
+            @Override
+            public long contentLength() {
+                return responseBody.contentLength();
+            }
+
+            @Override
+            public @NotNull BufferedSource source() {
+                if (bufferedSource == null) {
+                    bufferedSource = Okio.buffer(source(responseBody.source()));
+                }
+                return bufferedSource;
+            }
+
+            private Source source(Source source) {
+                return new ForwardingSource(source) {
+                    long totalBytesRead = 0L;
+
+                    @Override public long read(Buffer sink, long byteCount) throws IOException {
+                        long bytesRead = super.read(sink, byteCount);
+                        // read() returns the number of bytes read, or -1 if this source is exhausted.
+                        totalBytesRead += bytesRead != -1 ? bytesRead : 0;
+                        progressListener.update(totalBytesRead, responseBody.contentLength(), bytesRead == -1);
+                        return bytesRead;
+                    }
+                };
+            }
+        };
+    }
+
+    public static CompletableFuture<Response> nonRetryableSend(OkHttpClient client, Request request) {
+        CompletableFuture<Response> future = new CompletableFuture<>();
+        client.newCall(request).enqueue(newFutureCallback(future));
+        return future.handleAsync((r, t) -> tryResend(client, request, MAX_RESEND, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
-        return client.sendAsync(request, bodyHandler)
-                .handleAsync((r, t) -> tryResend(client, request, bodyHandler, 1, r, t), executor)
+    public static CompletableFuture<Response> retryableSend(OkHttpClient client, Request request) {
+        CompletableFuture<Response> future = new CompletableFuture<>();
+        client.newCall(request).enqueue(newFutureCallback(future));
+        return future.handleAsync((r, t) -> tryResend(client, request, 1, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
-        bodyHandler = tracker.tracking(bodyHandler, HTTPUtil::onProgress);
-        HttpResponse.BodyHandler<T> finalBodyHandler = bodyHandler;
-        return client.sendAsync(request, bodyHandler)
-                .handleAsync((r, t) -> tryResend(client, request, finalBodyHandler, 1, r, t), executor)
+    public static CompletableFuture<Response> retryableSendProgressTracking(OkHttpClient client, Request request) {
+        CompletableFuture<Response> future = new CompletableFuture<>();
+        OkHttpClient newClient = client.newBuilder().addNetworkInterceptor(chain -> {
+            Response originalResponse = chain.proceed(chain.request());
+            return originalResponse.newBuilder()
+                    .body(newProgressResponseBody(originalResponse.body(), newProgressListener()))
+                    .build();
+        }).build();
+        newClient.newCall(request).enqueue(newFutureCallback(future));
+        return future.handleAsync((r, t) -> tryResend(client, request, 1, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
 
 
-    public static boolean shouldRetry(HttpResponse<?> r, Throwable t, int count) {
+    public static boolean shouldRetry(Response r, Throwable t, int count) {
         if (count >= MAX_RESEND) {
             return false;
         }
         if (r != null) {
-            return r.statusCode() == 500
-                   || r.statusCode() == 502
-                   || r.statusCode() == 503
-                   || r.statusCode() == 504;
+            return r.code() == 500
+                   || r.code() == 502
+                   || r.code() == 503
+                   || r.code() == 504;
         }
         return false;
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> tryResend(HttpClient client, HttpRequest request,
-                                                                   HttpResponse.BodyHandler<T> handler, int count,
-                                                                   HttpResponse<T> resp, Throwable t) {
+    public static CompletableFuture<Response> tryResend(OkHttpClient client, Request request,
+                                                        int count, Response resp, Throwable t) {
         if (shouldRetry(resp, t, count)) {
             if (resp == null) {
-                log.warn("Request to {} failed, retry {}/{}: {}", request.uri().toString(), count, MAX_RESEND, t.getClass().getName() + ": " + t.getMessage());
+                log.warn("Request to {} failed, retry {}/{}: {}", request.url(), count, MAX_RESEND, t.getClass().getName() + ": " + t.getMessage());
             } else {
-                log.warn("Request to {} failed, retry {}/{}: {} ", request.uri().toString(), count, MAX_RESEND, resp.statusCode() + " - " + resp.body());
+                log.warn("Request to {} failed, retry {}/{}: {} ", request.url(), count, MAX_RESEND, resp.code() + " - " + resp.body());
             }
-            return client.sendAsync(request, handler)
-                    .handleAsync((r, x) -> tryResend(client, request, handler, count + 1, r, x), executor)
+            CompletableFuture<Response> future = new CompletableFuture<>();
+            client.newCall(request).enqueue(newFutureCallback(future));
+            return future.handleAsync((r, x) -> tryResend(client, request, count + 1, r, x), executor)
                     .thenCompose(Function.identity());
         } else if (t != null) {
             return CompletableFuture.failedFuture(t);
@@ -194,4 +232,7 @@ public class HTTPUtil {
         }
     }
 
+    public interface ProgressListener {
+        void update(long bytesRead, long contentLength, boolean done);
+    }
 }
