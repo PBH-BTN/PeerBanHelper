@@ -11,7 +11,7 @@
     <variables>
       <variable name="registerSystemService" value="registerSystemService" />
     </variables>
-    <jreBundles jdkProviderId="Zulu" release="21/21.0.4" />
+    <jreBundles jdkProviderId="Zulu" release="23/23.0.0" />
   </application>
   <files keepModificationTimes="true">
     <mountPoints>
