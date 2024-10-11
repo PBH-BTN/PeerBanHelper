@@ -667,6 +667,16 @@
             <artifactId>semver4j</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>5.0.0-alpha.14</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-urlconnection</artifactId>
+            <version>5.0.0-alpha.14</version>
+        </dependency>
         <!--        <dependency>-->
 <!--            <groupId>com.pixelduke</groupId>-->
 <!--            <artifactId>transit</artifactId>-->
