@@ -95,9 +95,6 @@ importers:
       '@types/lodash':
         specifier: ^4.17.10
         version: 4.17.10
-      '@types/mockjs':
-        specifier: ^1.0.10
-        version: 1.0.10
       '@types/node':
         specifier: ^22.7.5
         version: 22.7.5
@@ -128,9 +125,6 @@ importers:
       less:
         specifier: ^4.2.0
         version: 4.2.0
-      mockjs:
-        specifier: ^1.1.0
-        version: 1.1.0
       npm-run-all2:
         specifier: ^6.2.3
         version: 6.2.3
@@ -775,9 +769,6 @@ packages:
   '@types/lodash@4.17.10':
     resolution: {integrity: sha512-YpS0zzoduEhuOWjAotS6A5AVCva7X4lVlYLF0FYHAY9sdraBfnatttHItlWeZdGhuEkf+OzMNg2ZYAx8t+52uQ==}
 
-  '@types/mockjs@1.0.10':
-    resolution: {integrity: sha512-SXgrhajHG7boLv6oU93CcmdDm0HYRiceuz6b+7z+/2lCJPTWDv0V5YiwFHT2ejE4bQqgSXQiVPQYPWv7LGsK1g==}
-
   '@types/node@16.18.112':
     resolution: {integrity: sha512-EKrbKUGJROm17+dY/gMi31aJlGLJ75e1IkTojt9n6u+hnaTBDs+M1bIdOawpk2m6YUAXq/R2W0SxCng1tndHCg==}
 
@@ -1119,10 +1110,6 @@ packages:
 
   color@3.2.1:
     resolution: {integrity: sha512-aBl7dZI9ENN6fUGC7mWpMTPNHmWUSNan9tuWN6ahh5ZLNk9baLJOnSMlrQkHcrfFgz2/RigjUVAjdx36VcemKA==}
-
-  commander@12.0.0:
-    resolution: {integrity: sha512-MwVNWlYjDTtOjX5PiD7o5pK0UrFU/OYgcJfjjK4RaHZETNtjJqrZa9Y9ds88+A+f+d5lv+561eZ+yCKoS3gbAA==}
-    engines: {node: '>=18'}
 
   compare-versions@6.1.1:
     resolution: {integrity: sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==}
@@ -1743,10 +1730,6 @@ packages:
 
   mitt@3.0.1:
     resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
-
-  mockjs@1.1.0:
-    resolution: {integrity: sha512-eQsKcWzIaZzEZ07NuEyO4Nw65g0hdWAyurVol1IPl1gahRwY+svqzfgfey8U8dahLwG44d6/RwEzuK52rSa/JQ==}
-    hasBin: true
 
   mrmime@2.0.0:
     resolution: {integrity: sha512-eu38+hdgojoyq63s+yTpN4XMBdt5l8HhMhc4VKLO9KM5caLIBvUm4thi7fFaxyTmCKeNnXZ5pAlBwCUnhA09uw==}
@@ -3033,8 +3016,6 @@ snapshots:
 
   '@types/lodash@4.17.10': {}
 
-  '@types/mockjs@1.0.10': {}
-
   '@types/node@16.18.112': {}
 
   '@types/node@22.7.5':
@@ -3510,8 +3491,6 @@ snapshots:
     dependencies:
       color-convert: 1.9.3
       color-string: 1.9.1
-
-  commander@12.0.0: {}
 
   compare-versions@6.1.1: {}
 
@@ -4161,10 +4140,6 @@ snapshots:
       brace-expansion: 2.0.1
 
   mitt@3.0.1: {}
-
-  mockjs@1.1.0:
-    dependencies:
-      commander: 12.0.0
 
   mrmime@2.0.0: {}
 
