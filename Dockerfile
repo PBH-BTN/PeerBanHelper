@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-23-alpine AS build
+FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21-alpine AS build
 
 COPY . /build
 WORKDIR /build
