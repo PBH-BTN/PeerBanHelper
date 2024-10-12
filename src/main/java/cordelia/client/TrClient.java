@@ -136,7 +136,6 @@ public final class TrClient {
 
     }
 
-    @SneakyThrows(URISyntaxException.class)
     private Session session(boolean forceUpdate) {
         if (sessionStore.isEmpty() || forceUpdate) {
             try (Response resp = httpClient.newCall(new Request.Builder().url(url).build()).execute()) {

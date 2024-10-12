@@ -166,7 +166,7 @@ public class BiglyBT extends AbstractDownloader {
                         + "&filter=" + BiglyBTDownloadStateConst.ST_ERROR)
                 .build()).execute()) {
             if (resp.code() != 200) {
-                throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, resp.code(), resp.body()));
+                throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, resp.code(), resp.body().string()));
             }
             torrentDetail = JsonUtil.getGson().fromJson(resp.body().string(), new TypeToken<List<DownloadRecord>>() {
             }.getType());
