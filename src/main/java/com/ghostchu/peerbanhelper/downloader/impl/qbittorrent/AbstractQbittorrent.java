@@ -66,14 +66,21 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 .followRedirects(true)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .authenticator(new Authenticator(){
+                .cookieJar(new JavaNetCookieJar(cm))
+                .addInterceptor(new Interceptor() {
                     @Override
-                    public Request authenticate(@Nullable Route route, @NotNull Response response) {
-                        String credential = Credentials.basic(config.getBasicAuth().getUser(), config.getBasicAuth().getPass());
-                        return response.request().newBuilder().header("Authorization", credential).build();
+                    public Response intercept(Interceptor.Chain chain) throws IOException {
+                        Request original = chain.request();
+                        Request request = original.newBuilder()
+                                .header("Accept", "application/json")
+                                //.header("Accept-Encoding", "gzip,deflate")
+                                .header("Content-Type", "application/json")
+                                .header("Authorization", Credentials.basic(config.getBasicAuth().getUser(), config.getBasicAuth().getPass()))
+                                .method(original.method(), original.body())
+                                .build();
+                        return chain.proceed(request);
                     }
-                })
-                .cookieJar(new JavaNetCookieJar(cm));
+                });
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSSLSocketFactory() != null) {
             builder.sslSocketFactory(HTTPUtil.getIgnoreSSLSocketFactory(), HTTPUtil.getIgnoreTrustManager());
         }

@@ -75,14 +75,18 @@ public final class TrClient {
                 .followRedirects(true)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .authenticator(new Authenticator(){
+                .cookieJar(new JavaNetCookieJar(cm))
+                .addInterceptor(new Interceptor() {
                     @Override
-                    public Request authenticate(@Nullable Route route, @NotNull Response response) {
-                        String credential = Credentials.basic(user, password == null ? "" : password);
-                        return response.request().newBuilder().header("Authorization", credential).build();
+                    public Response intercept(Interceptor.Chain chain) throws IOException {
+                        Request original = chain.request();
+                        Request request = original.newBuilder()
+                                .header("Authorization", Credentials.basic(user, password == null ? "" : password))
+                                .method(original.method(), original.body())
+                                .build();
+                        return chain.proceed(request);
                     }
-                })
-                .cookieJar(new JavaNetCookieJar(cm));
+                });
         if (!verifySSL && HTTPUtil.getIgnoreSSLSocketFactory() != null) {
             builder.sslSocketFactory(HTTPUtil.getIgnoreSSLSocketFactory(), HTTPUtil.getIgnoreTrustManager());
         }
@@ -109,7 +113,7 @@ public final class TrClient {
                 throw new IllegalStateException("Session invalid, re-created, please try again.");
             }
             jsonBuffer = resp.body().string();
-            RawResponse raw = om.fromJson(resp.body().string(), RawResponse.class);
+            RawResponse raw = om.fromJson(jsonBuffer, RawResponse.class);
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
         } catch (JsonSyntaxException jsonSyntaxException) {

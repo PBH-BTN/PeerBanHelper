@@ -231,6 +231,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                         sink.writeAll(pathHttpResponse.body().source());
                         sink.close();
                     } catch (IOException e) { // 下方统一进行处理
+                        tempFile.delete();
                         throw new RuntimeException(e);
                     }
                 }

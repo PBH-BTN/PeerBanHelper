@@ -41,13 +41,6 @@ public class DelugeServer {
                 .followRedirects(true)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .authenticator(new Authenticator(){
-                    @Override
-                    public Request authenticate(@Nullable Route route, @NotNull Response response) {
-                        String credential = Credentials.basic(baUser, baPassword);
-                        return response.request().newBuilder().header("Authorization", credential).build();
-                    }
-                })
                 .cookieJar(new JavaNetCookieJar(m_cookieManager))
                 .addInterceptor(new Interceptor() {
                     @Override
@@ -57,6 +50,7 @@ public class DelugeServer {
                                 .header("Accept", "application/json")
                                 //.header("Accept-Encoding", "gzip,deflate")
                                 .header("Content-Type", "application/json")
+                                .header("Authorization", Credentials.basic(baUser, baPassword))
                                 .method(original.method(), original.body())
                                 .build();
                         return chain.proceed(request);
