@@ -79,7 +79,7 @@ public class BiglyBT extends AbstractDownloader {
                         Request request = original.newBuilder()
                                 .header("Authorization", "Bearer " + config.getToken())
                                 .header("Content-Type", "application/json")
-                                .header("Accept-Encoding", "gzip,deflate")
+                                //.header("Accept-Encoding", "gzip,deflate")
                                 .method(original.method(), original.body())
                                 .build();
                         return chain.proceed(request);

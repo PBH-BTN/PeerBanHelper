@@ -55,7 +55,7 @@ public class DelugeServer {
                         Request original = chain.request();
                         Request request = original.newBuilder()
                                 .header("Accept", "application/json")
-                                .header("Accept-Encoding", "gzip,deflate")
+                                //.header("Accept-Encoding", "gzip,deflate")
                                 .header("Content-Type", "application/json")
                                 .method(original.method(), original.body())
                                 .build();

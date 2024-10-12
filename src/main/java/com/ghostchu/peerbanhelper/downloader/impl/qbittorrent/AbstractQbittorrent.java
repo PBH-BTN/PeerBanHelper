@@ -73,18 +73,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                         return response.request().newBuilder().header("Authorization", credential).build();
                     }
                 })
-                .cookieJar(new JavaNetCookieJar(cm))
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Interceptor.Chain chain) throws IOException {
-                        Request original = chain.request();
-                        Request request = original.newBuilder()
-                                .header("Accept-Encoding", "gzip,deflate")
-                                .method(original.method(), original.body())
-                                .build();
-                        return chain.proceed(request);
-                    }
-                });
+                .cookieJar(new JavaNetCookieJar(cm));
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSSLSocketFactory() != null) {
             builder.sslSocketFactory(HTTPUtil.getIgnoreSSLSocketFactory(), HTTPUtil.getIgnoreTrustManager());
         }
@@ -316,7 +305,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
         try (Response resp = httpClient.newCall(new Request.Builder()
-                .url(apiEndpoint + "/transfer/setPreferences")
+                .url(apiEndpoint + "/app/setPreferences")
                 .post(new FormBody.Builder()
                         .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())))
                         .build())

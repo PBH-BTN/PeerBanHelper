@@ -146,7 +146,7 @@ public class BtnNetwork {
                         Request original = chain.request();
                         Request request = original.newBuilder()
                                 .header("User-Agent", userAgent)
-                                .header("Accept-Encoding", "gzip,deflate")
+                                //.header("Accept-Encoding", "gzip,deflate")
                                 .header("Content-Type", "application/json")
                                 .header("BTN-AppID", appId)
                                 .header("BTN-AppSecret", appSecret)

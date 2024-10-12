@@ -217,7 +217,7 @@ public class QBittorrentEE extends AbstractQbittorrent {
             StringJoiner joiner = new StringJoiner("\n");
             peerAddresses.forEach(p -> joiner.add(p.getIp()));
             try (Response resp = httpClient.newCall(new Request.Builder()
-                    .url(apiEndpoint + "/transfer/setPreferences")
+                    .url(apiEndpoint + "/app/setPreferences")
                     .post(new FormBody.Builder()
                             .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", joiner.toString())))
                             .build())

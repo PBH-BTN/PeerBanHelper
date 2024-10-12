@@ -82,18 +82,7 @@ public final class TrClient {
                         return response.request().newBuilder().header("Authorization", credential).build();
                     }
                 })
-                .cookieJar(new JavaNetCookieJar(cm))
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Interceptor.Chain chain) throws IOException {
-                        Request original = chain.request();
-                        Request request = original.newBuilder()
-                                .header("Accept-Encoding", "gzip,deflate")
-                                .method(original.method(), original.body())
-                                .build();
-                        return chain.proceed(request);
-                    }
-                });
+                .cookieJar(new JavaNetCookieJar(cm));
         if (!verifySSL && HTTPUtil.getIgnoreSSLSocketFactory() != null) {
             builder.sslSocketFactory(HTTPUtil.getIgnoreSSLSocketFactory(), HTTPUtil.getIgnoreTrustManager());
         }

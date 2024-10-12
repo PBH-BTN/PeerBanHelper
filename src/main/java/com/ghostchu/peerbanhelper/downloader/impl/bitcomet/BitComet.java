@@ -88,7 +88,7 @@ public class BitComet extends AbstractDownloader {
                     public Response intercept(Interceptor.Chain chain) throws IOException {
                         Request original = chain.request();
                         Request request = original.newBuilder()
-                                .header("Accept-Encoding", "gzip,deflate")
+                                //.header("Accept-Encoding", "gzip,deflate")
                                 .header("Content-Type", "application/json")
                                 .header("Client-Type", "BitComet WebUI")
                                 .header("User-Agent", "PeerBanHelper BitComet Adapter")
