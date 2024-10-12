@@ -1,22 +1,25 @@
 package com.ghostchu.peerbanhelper.btn;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Interceptor;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +43,7 @@ public class BtnNetwork {
     private String appId;
     private String appSecret;
     @Getter
-    private HttpClient httpClient;
+    private OkHttpClient httpClient;
     @Autowired
     @Qualifier("userAgent")
     private String userAgent;
@@ -68,13 +71,12 @@ public class BtnNetwork {
     }
 
     public void configBtnNetwork() {
-        try {
-            HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
-            if (resp.statusCode() != 200) {
-                log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body(), 600));
+        try (Response resp = HTTPUtil.retryableSend(httpClient, new Request.Builder().url(configUrl).build()).join()) {
+            if (resp.code() != 200) {
+                log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.code() + " - " + resp.body().string(), 600));
                 return;
             }
-            JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
+            JsonObject json = JsonParser.parseString(resp.body().string()).getAsJsonObject();
             if (!json.has("min_protocol_version")) {
                 throw new IllegalStateException("Server config response missing min_protocol_version field");
             }
@@ -132,20 +134,31 @@ public class BtnNetwork {
     private void setupHttpClient() {
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        this.httpClient = Methanol
-                .newBuilder()
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(userAgent)
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
-                .defaultHeader("Content-Type", "application/json")
-                .defaultHeader("BTN-AppID", appId)
-                .defaultHeader("BTN-AppSecret", appSecret)
-                .defaultHeader("X-BTN-AppID", appId)
-                .defaultHeader("X-BTN-AppSecret", appSecret)
-                .defaultHeader("Authentication", "Bearer " + appId + "@" + appSecret)
-                .requestTimeout(Duration.ofMinutes(1))
+        this.httpClient = Main.getSharedHttpClient().newBuilder()
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .readTimeout(Duration.ofMinutes(1))
                 .connectTimeout(Duration.ofSeconds(10))
-                .cookieHandler(cm).build();
+                .cookieJar(new JavaNetCookieJar(cm))
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Interceptor.Chain chain) throws IOException {
+                        Request original = chain.request();
+                        Request request = original.newBuilder()
+                                .header("User-Agent", userAgent)
+                                .header("Accept-Encoding", "gzip,deflate")
+                                .header("Content-Type", "application/json")
+                                .header("BTN-AppID", appId)
+                                .header("BTN-AppSecret", appSecret)
+                                .header("X-BTN-AppID", appId)
+                                .header("X-BTN-AppSecret", appSecret)
+                                .header("Authentication", "Bearer " + appId + "@" + appSecret)
+                                .method(original.method(), original.body())
+                                .build();
+                        return chain.proceed(request);
+                    }
+                })
+                .build();
     }
 
     public void close() {
