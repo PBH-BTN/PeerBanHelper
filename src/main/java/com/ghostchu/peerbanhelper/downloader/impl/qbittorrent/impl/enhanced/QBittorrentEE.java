@@ -10,19 +10,18 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.github.mizosoft.methanol.FormBodyPublisher;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -82,18 +81,19 @@ public class QBittorrentEE extends AbstractQbittorrent {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<String> resp;
-        try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId()),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
+        String body;
+        try (Response resp = httpClient.newCall(new Request.Builder()
+                .url(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId())
+                .build()).execute()) {
+            if (resp.code() != 200) {
+                throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.code(), resp.body().string()));
+            }
+            body = resp.body().string();
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
-        }
 
-        JsonObject object = JsonParser.parseString(resp.body()).getAsJsonObject();
+        JsonObject object = JsonParser.parseString(body).getAsJsonObject();
         JsonObject peers = object.getAsJsonObject("peers");
         List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
@@ -158,12 +158,12 @@ public class QBittorrentEE extends AbstractQbittorrent {
 
     public static class BanHandlerShadowBan implements BanHandler {
 
-        private final HttpClient httpClient;
+        private final OkHttpClient httpClient;
         private final String name;
         private final String apiEndpoint;
         private Boolean shadowBanEnabled = false; // 缓存 shadowBan 开关状态
 
-        public BanHandlerShadowBan(HttpClient httpClient, String name, String apiEndpoint) {
+        public BanHandlerShadowBan(OkHttpClient httpClient, String name, String apiEndpoint) {
             this.httpClient = httpClient;
             this.name = name;
             this.apiEndpoint = apiEndpoint;
@@ -173,13 +173,13 @@ public class QBittorrentEE extends AbstractQbittorrent {
         public boolean test() {
             if (shadowBanEnabled)
                 return true;
-            try {
-                HttpResponse<String> request = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/preferences")
-                        , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                QBittorrentPreferences preferences = JsonUtil.getGson().fromJson(request.body(), QBittorrentPreferences.class);
+            try (Response resp = httpClient.newCall(new Request.Builder()
+                    .url(apiEndpoint + "/app/preferences")
+                    .build()).execute()) {
+                QBittorrentPreferences preferences = JsonUtil.getGson().fromJson(resp.body().string(), QBittorrentPreferences.class);
                 shadowBanEnabled = preferences.getShadowBanEnabled() != null && preferences.getShadowBanEnabled();
                 return shadowBanEnabled;
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -193,18 +193,19 @@ public class QBittorrentEE extends AbstractQbittorrent {
                 banTasks.put(p.getTorrent().getHash(), joiner);
             });
             banTasks.forEach((hash, peers) -> {
-                try {
-                    HttpResponse<String> request = httpClient.send(MutableRequest
-                                    .POST(apiEndpoint + "/transfer/shadowbanPeers", FormBodyPublisher.newBuilder()
-                                            .query("hash", hash)
-                                            .query("peers", peers.toString()).build())
-                                    .header("Content-Type", "application/x-www-form-urlencoded")
-                            , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                    if (request.statusCode() != 200) {
-                        log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-                        throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + request.statusCode());
+                try (Response resp = httpClient.newCall(new Request.Builder()
+                        .url(apiEndpoint + "/transfer/shadowbanPeers")
+                        .post(new FormBody.Builder()
+                                .add("hash", hash)
+                                .add("peers", peers.toString())
+                                .build())
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .build()).execute()) {
+                    if (resp.code() != 200) {
+                        log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, resp.code(), "HTTP ERROR", resp.body().string()));
+                        throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + resp.code());
                     }
-                } catch (Exception e) {
+                } catch (IOException e) {
                     log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
                     throw new IllegalStateException(e);
                 }
@@ -215,17 +216,18 @@ public class QBittorrentEE extends AbstractQbittorrent {
         public void setBanListFull(Collection<PeerAddress> peerAddresses) {
             StringJoiner joiner = new StringJoiner("\n");
             peerAddresses.forEach(p -> joiner.add(p.getIp()));
-            try {
-                HttpResponse<String> request = httpClient.send(MutableRequest
-                                .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()
-                                        .query("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", joiner.toString()))).build())
-                                .header("Content-Type", "application/x-www-form-urlencoded")
-                        , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                if (request.statusCode() != 200) {
-                    log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-                    throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + request.statusCode());
+            try (Response resp = httpClient.newCall(new Request.Builder()
+                    .url(apiEndpoint + "/transfer/setPreferences")
+                    .post(new FormBody.Builder()
+                            .add("json", JsonUtil.getGson().toJson(Map.of("shadow_banned_IPs", joiner.toString())))
+                            .build())
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .build()).execute()) {
+                if (resp.code() != 200) {
+                    log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, resp.code(), "HTTP ERROR", resp.body().string()));
+                    throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + resp.code());
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
                 throw new IllegalStateException(e);
             }
