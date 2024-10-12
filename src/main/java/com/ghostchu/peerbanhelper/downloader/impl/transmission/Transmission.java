@@ -30,7 +30,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -55,7 +54,7 @@ public class Transmission extends AbstractDownloader {
     public Transmission(String name, String blocklistUrl, Config config) {
         super(name);
         this.config = config;
-        this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
+        this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), config.getHttpVersion());
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
         log.warn(tlUI(Lang.DOWNLOADER_TRANSMISSION_DISCOURAGE));

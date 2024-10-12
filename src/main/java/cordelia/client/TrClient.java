@@ -1,10 +1,9 @@
 package cordelia.client;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -17,17 +16,27 @@ import cordelia.rpc.RsArguments;
 import cordelia.rpc.types.Status;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Interceptor;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.Route;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+import static com.ghostchu.peerbanhelper.util.HTTPUtil.MEDIA_TYPE_JSON;
 
 @Slf4j
 public final class TrClient {
@@ -55,30 +64,41 @@ public final class TrClient {
                 }
             })
             .create();
-    private final HttpClient httpClient;
+    private final OkHttpClient httpClient;
 
-    public TrClient(String url, String user, String password, boolean verifySSL, HttpClient.Version httpVersion) {
+    public TrClient(String url, String user, String password, boolean verifySSL, String httpVersion) {
         this.url = url;
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        HttpClient.Builder builder = Methanol
+        OkHttpClient.Builder builder = Main.getSharedHttpClient()
                 .newBuilder()
-                .version(httpVersion)
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
+                .followRedirects(true)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .authenticator(new Authenticator() {
+                .authenticator(new Authenticator(){
                     @Override
-                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(user, password == null ? new char[0] : password.toCharArray());
+                    public Request authenticate(@Nullable Route route, @NotNull Response response) {
+                        String credential = Credentials.basic(user, password == null ? "" : password);
+                        return response.request().newBuilder().header("Authorization", credential).build();
                     }
                 })
-                .cookieHandler(cm);
-        if (!verifySSL && HTTPUtil.getIgnoreSslContext() != null) {
-            builder = builder.sslContext(HTTPUtil.getIgnoreSslContext());
+                .cookieJar(new JavaNetCookieJar(cm))
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Interceptor.Chain chain) throws IOException {
+                        Request original = chain.request();
+                        Request request = original.newBuilder()
+                                .header("Accept-Encoding", "gzip,deflate")
+                                .method(original.method(), original.body())
+                                .build();
+                        return chain.proceed(request);
+                    }
+                });
+        if (!verifySSL && HTTPUtil.getIgnoreSSLSocketFactory() != null) {
+            builder.sslSocketFactory(HTTPUtil.getIgnoreSSLSocketFactory(), HTTPUtil.getIgnoreTrustManager());
+        }
+        if (httpVersion.equals("HTTP_1_1")) {
+            builder.protocols(Arrays.asList(Protocol.HTTP_1_1));
         }
         this.httpClient = builder.build();
     }
@@ -89,25 +109,24 @@ public final class TrClient {
 
     public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req, Long tag) {
         String jsonBuffer = null;
-        try {
-            HttpResponse<String> resp = httpClient.send(
-                    MutableRequest.POST(url, HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(req.toReq(tag))))
-                            .header("Content-Type", "application/json")
-                            .header(Session.SESSION_ID, session(false).id())
-                    , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-            );
-            if (resp.statusCode() == 409) {
+        try (Response resp = httpClient.newCall(new Request.Builder()
+                .url(url)
+                .post(RequestBody.create(JsonUtil.getGson().toJson(req.toReq(tag)), MEDIA_TYPE_JSON))
+                .header("Content-Type", "application/json")
+                .header(Session.SESSION_ID, session(false).id())
+                .build()).execute()) {
+            if (resp.code() == 409) {
                 session(true); // force renew
                 throw new IllegalStateException("Session invalid, re-created, please try again.");
             }
-            jsonBuffer = resp.body();
-            RawResponse raw = om.fromJson(resp.body(), RawResponse.class);
+            jsonBuffer = resp.body().string();
+            RawResponse raw = om.fromJson(resp.body().string(), RawResponse.class);
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
         } catch (JsonSyntaxException jsonSyntaxException) {
             log.error(tlUI(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException));
             throw new IllegalStateException(jsonSyntaxException);
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             log.error("Request Transmission JsonRPC failure", e);
             throw new IllegalStateException(e);
         }
@@ -120,10 +139,13 @@ public final class TrClient {
     @SneakyThrows(URISyntaxException.class)
     private Session session(boolean forceUpdate) {
         if (sessionStore.isEmpty() || forceUpdate) {
-            try {
-                HttpResponse<Void> resp = httpClient.send(java.net.http.HttpRequest.newBuilder(new URI(url)).GET().build(), java.net.http.HttpResponse.BodyHandlers.discarding());
-                String sessionId = resp.headers().firstValue(Session.SESSION_ID).orElseThrow();
-                sessionStore.set(new Session(sessionId));
+            try (Response resp = httpClient.newCall(new Request.Builder().url(url).build()).execute()) {
+                String sessionId = resp.headers().get(Session.SESSION_ID);
+                if (sessionId != null) {
+                    sessionStore.set(new Session(sessionId));
+                } else {
+                    throw new InterruptedException();
+                }
             } catch (IOException | InterruptedException e) {
                 log.error(tlUI(Lang.TRCLIENT_API_ERROR, e.getClass().getName()), e.getMessage());
                 throw new IllegalStateException(e);
