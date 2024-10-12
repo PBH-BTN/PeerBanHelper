@@ -21,6 +21,7 @@ import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.ProxySelector;
 import java.net.Socket;
 import java.security.SecureRandom;
@@ -46,6 +47,7 @@ public class HTTPUtil {
     private static X509TrustManager ignoreTrustManager;
 
     static {
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         X509TrustManager trustManager = new X509ExtendedTrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
