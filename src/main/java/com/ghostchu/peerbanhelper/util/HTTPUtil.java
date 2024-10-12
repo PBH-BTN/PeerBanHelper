@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -38,8 +39,10 @@ public class HTTPUtil {
     private static final int MAX_RESEND = 5;
     private static final CookieManager cookieManager = new CookieManager();
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
     @Getter
-    private static SSLContext ignoreSslContext;
+    private static SSLSocketFactory ignoreSSLSocketFactory;
+    @Getter
     private static X509TrustManager ignoreTrustManager;
 
     static {
@@ -76,7 +79,7 @@ public class HTTPUtil {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
-            ignoreSslContext = sslContext;
+            ignoreSSLSocketFactory = sslContext.getSocketFactory();
             ignoreTrustManager = trustManager;
         } catch (Exception e) {
             log.error(tlUI(Lang.MODULE_AP_SSL_CONTEXT_FAILURE), e);
@@ -90,8 +93,8 @@ public class HTTPUtil {
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .cookieJar(new JavaNetCookieJar(cookieManager));
-        if (ignoreSSL) {
-            builder.sslSocketFactory(ignoreSslContext.getSocketFactory(), ignoreTrustManager);
+        if (ignoreSSL && ignoreSSLSocketFactory != null) {
+            builder.sslSocketFactory(ignoreSSLSocketFactory, ignoreTrustManager);
         }
         if (proxySelector != null) {
             builder.proxySelector(proxySelector);
