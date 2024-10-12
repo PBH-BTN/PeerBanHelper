@@ -202,9 +202,7 @@ public class HTTPUtil {
     public static CompletableFuture<Response> nonRetryableSend(OkHttpClient client, Request request) {
         CompletableFuture<Response> future = new CompletableFuture<>();
         client.newCall(request).enqueue(newFutureCallback(future));
-        return future.handleAsync((r, t) -> tryResend(client, request, MAX_RESEND, r, t), executor)
-                .thenCompose(Function.identity());
-
+        return future;
     }
 
     public static CompletableFuture<Response> retryableSend(OkHttpClient client, Request request) {
@@ -212,7 +210,6 @@ public class HTTPUtil {
         client.newCall(request).enqueue(newFutureCallback(future));
         return future.handleAsync((r, t) -> tryResend(client, request, 1, r, t), executor)
                 .thenCompose(Function.identity());
-
     }
 
     public static boolean shouldRetry(Response r, Throwable t, int count) {
