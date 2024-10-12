@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,10 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
             HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request)
                     .thenAccept(r -> {
                         if (r.code() != 200) {
-                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body()));
+                            try {
+                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body().string()));
+                            } catch (IOException ignored) {
+                            }
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_PEERS, btnPeers.size()));
                         }

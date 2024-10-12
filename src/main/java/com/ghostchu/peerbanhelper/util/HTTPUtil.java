@@ -215,7 +215,10 @@ public class HTTPUtil {
             if (resp == null) {
                 log.warn("Request to {} failed, retry {}/{}: {}", request.url(), count, MAX_RESEND, t.getClass().getName() + ": " + t.getMessage());
             } else {
-                log.warn("Request to {} failed, retry {}/{}: {} ", request.url(), count, MAX_RESEND, resp.code() + " - " + resp.body());
+                try {
+                    log.warn("Request to {} failed, retry {}/{}: {} ", request.url(), count, MAX_RESEND, resp.code() + " - " + resp.body().string());
+                } catch (IOException ignored) {
+                }
             }
             CompletableFuture<Response> future = new CompletableFuture<>();
             client.newCall(request).enqueue(newFutureCallback(future));

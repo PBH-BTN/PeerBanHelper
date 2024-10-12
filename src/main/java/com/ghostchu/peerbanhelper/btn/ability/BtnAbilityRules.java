@@ -81,7 +81,10 @@ public class BtnAbilityRules implements BtnAbility {
                         return;
                     }
                     if (r.code() != 200) {
-                        log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body()));
+                        try {
+                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body().string()));
+                        } catch (IOException ignored) {
+                        }
                     } else {
                         try {
                             String btrString = r.body().string();
@@ -94,7 +97,10 @@ public class BtnAbilityRules implements BtnAbility {
                             }
                             log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
                         } catch (JsonSyntaxException | IOException e) {
-                            log.error("Unable to parse BtnRule as a valid Json object: {}-{}", r.code(), r.body(), e);
+                            try {
+                                log.error("Unable to parse BtnRule as a valid Json object: {}-{}", r.code(), r.body().string(), e);
+                            } catch (IOException ignored) {
+                            }
                         }
                     }
                 })

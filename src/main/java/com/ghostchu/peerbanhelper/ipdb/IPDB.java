@@ -336,7 +336,10 @@ public class IPDB implements AutoCloseable {
                         downloadFile(backupReq, null, path, databaseName);
                         return;
                     }
-                    log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.code() + " - " + r.body()));
+                    try {
+                        log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.code() + " - " + r.body().string()));
+                    } catch (IOException ignored) {
+                    }
                 })
                 .exceptionally(e -> {
                     if (backupReq != null) {
