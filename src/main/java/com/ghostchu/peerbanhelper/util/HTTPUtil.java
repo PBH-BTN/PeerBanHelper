@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -83,8 +84,7 @@ public class HTTPUtil {
     }
 
     public static OkHttpClient getHttpClient(boolean ignoreSSL, ProxySelector proxySelector) {
-        OkHttpClient.Builder builder = new OkHttpClient()
-                .newBuilder()
+        OkHttpClient.Builder builder = Main.getSharedHttpClient().newBuilder()
                 .followRedirects(true)
                 .followSslRedirects(true)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
@@ -188,10 +188,11 @@ public class HTTPUtil {
     public static CompletableFuture<Response> retryableSendProgressTracking(OkHttpClient client, Request request) {
         CompletableFuture<Response> future = new CompletableFuture<>();
         OkHttpClient newClient = client.newBuilder().addNetworkInterceptor(chain -> {
-            Response originalResponse = chain.proceed(chain.request());
-            return originalResponse.newBuilder()
-                    .body(newProgressResponseBody(originalResponse.body(), newProgressListener()))
-                    .build();
+            try (Response originalResponse = chain.proceed(chain.request())) {
+                return originalResponse.newBuilder()
+                        .body(newProgressResponseBody(originalResponse.body(), newProgressListener()))
+                        .build();
+            }
         }).build();
         newClient.newCall(request).enqueue(newFutureCallback(future));
         return future.handleAsync((r, t) -> tryResend(client, request, 1, r, t), executor)

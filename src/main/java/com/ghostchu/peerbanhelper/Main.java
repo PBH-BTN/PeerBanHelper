@@ -17,6 +17,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
@@ -78,6 +79,8 @@ public class Main {
     private static BuildMeta meta;
     @Getter
     private static String[] startupArgs;
+    @Getter
+    private static OkHttpClient sharedHttpClient;
 
     public static void main(String[] args) {
         startupArgs = args;
@@ -112,6 +115,7 @@ public class Main {
         guiManager.createMainWindow();
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         setupProxySettings();
+        sharedHttpClient = new OkHttpClient();
         try {
             log.info("Loading application context, this may need a while on low-end devices, please wait...");
             applicationContext = new AnnotationConfigApplicationContext();
