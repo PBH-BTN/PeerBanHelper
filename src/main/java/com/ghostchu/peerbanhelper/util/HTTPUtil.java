@@ -125,8 +125,8 @@ public class HTTPUtil {
     public static ProgressListener newProgressListener() {
         return (totalBytesTransferred, contentLength, done) -> {
             if (contentLength != -1) {
-                var percent = (100 * totalBytesTransferred) / contentLength;
-                log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, totalBytesTransferred, contentLength, String.format("%d%%", percent)));
+                var percent = (100 * totalBytesTransferred) / (float) contentLength;
+                log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, totalBytesTransferred, contentLength, String.format("%.2f", percent)));
             } else {
                 log.info(tlUI(Lang.DOWNLOAD_PROGRESS, totalBytesTransferred));
             }
@@ -161,12 +161,18 @@ public class HTTPUtil {
             private Source source(Source source) {
                 return new ForwardingSource(source) {
                     long totalBytesRead = 0L;
+                    long lastBytesRead = 0L;
+                    long lastUpdateTime = System.currentTimeMillis();
 
                     @Override public long read(Buffer sink, long byteCount) throws IOException {
                         long bytesRead = super.read(sink, byteCount);
                         // read() returns the number of bytes read, or -1 if this source is exhausted.
                         totalBytesRead += bytesRead != -1 ? bytesRead : 0;
-                        progressListener.update(totalBytesRead, responseBody.contentLength(), bytesRead == -1);
+                        if (System.currentTimeMillis() - lastUpdateTime >= 3_000 && totalBytesRead - lastBytesRead >= 60 * 1024) {
+                            lastUpdateTime = System.currentTimeMillis();
+                            lastBytesRead = totalBytesRead;
+                            progressListener.update(totalBytesRead, responseBody.contentLength(), bytesRead == -1);
+                        }
                         return bytesRead;
                     }
                 };
@@ -189,22 +195,6 @@ public class HTTPUtil {
                 .thenCompose(Function.identity());
 
     }
-
-    public static CompletableFuture<Response> retryableSendProgressTracking(OkHttpClient client, Request request) {
-        CompletableFuture<Response> future = new CompletableFuture<>();
-        OkHttpClient newClient = client.newBuilder().addNetworkInterceptor(chain -> {
-            try (Response originalResponse = chain.proceed(chain.request())) {
-                return originalResponse.newBuilder()
-                        .body(newProgressResponseBody(originalResponse.body(), newProgressListener()))
-                        .build();
-            }
-        }).build();
-        newClient.newCall(request).enqueue(newFutureCallback(future));
-        return future.handleAsync((r, t) -> tryResend(client, request, 1, r, t), executor)
-                .thenCompose(Function.identity());
-
-    }
-
 
     public static boolean shouldRetry(Response r, Throwable t, int count) {
         if (count >= MAX_RESEND) {

@@ -24,10 +24,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okio.BufferedSink;
+import okio.GzipSource;
 import okio.Okio;
+import okio.Source;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -40,7 +41,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPInputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -314,36 +314,21 @@ public class IPDB implements AutoCloseable {
     }
 
     private CompletableFuture<Void> downloadFile(IPDBDownloadSource req, IPDBDownloadSource backupReq, Path path, String databaseName) {
-        return HTTPUtil.retryableSendProgressTracking(httpClient, new Request.Builder().url(req.getIPDBUrl()).build())
+        return HTTPUtil.retryableSend(httpClient, new Request.Builder().url(req.getIPDBUrl()).build())
                 .thenAccept(r -> {
                     if (r.code() == 200) {
+                        Source source = HTTPUtil.newProgressResponseBody(r.body(),HTTPUtil.newProgressListener()).source();
                         if (req.supportGzip()) {
-                            try {
-                                File tmp = File.createTempFile(databaseName, ".tmp");
-                                try (GZIPInputStream gzipInputStream = new GZIPInputStream(r.body().byteStream());
-                                     FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
-                                        byte[] buffer = new byte[1024];
-                                        int len;
-                                        while ((len = gzipInputStream.read(buffer)) > 0) {
-                                            fileOutputStream.write(buffer, 0, len);
-                                        }
-                                }
-                                Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                                log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
-                                return;
-                            } catch (IOException e) { // 下方统一进行处理
-                                log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED));
-                            }
-                        } else { // 直接就是原始文件
-                            try {
-                                BufferedSink sink = Okio.buffer(Okio.sink(path));
-                                sink.writeAll(r.body().source());
-                                sink.close();
-                                log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
-                                return;
-                            } catch (IOException e) { // 下方统一进行处理
-                                log.warn(tlUI(Lang.IPDB_UPDATE_FAILED));
-                            }
+                            source = new GzipSource(source);
+                        }
+                        try {
+                            BufferedSink sink = Okio.buffer(Okio.sink(path));
+                            sink.writeAll(source);
+                            sink.close();
+                            log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
+                            return;
+                        } catch (IOException e) { // 下方统一进行处理
+                            log.warn(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.code() + " - " + e));
                         }
                     }
                     if (backupReq != null) { // 非 200 状态码 或者 gzip 解压出错
