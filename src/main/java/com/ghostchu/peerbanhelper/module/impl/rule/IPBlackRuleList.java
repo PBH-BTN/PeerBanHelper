@@ -24,22 +24,22 @@ import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
+import okio.BufferedSink;
+import okio.Okio;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,7 +201,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             File tempFile = new File(dir, "temp_" + ruleFileName);
             File ruleFile = new File(dir, ruleFileName);
             List<IPAddress> ipAddresses = new ArrayList<>();
-            HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null), MutableRequest.GET(url), HttpResponse.BodyHandlers.ofFile(Path.of(tempFile.getPath()))).whenComplete((pathHttpResponse, throwable) -> {
+            HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null), new Request.Builder().url(url).build()).whenComplete((pathHttpResponse, throwable) -> {
                 if (throwable != null) {
                     tempFile.delete();
                     // 加载远程订阅文件出错,尝试从本地缓存中加载
@@ -225,6 +225,14 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                         result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_LOAD_FAILED, name), null));
                     }
                     throw new RuntimeException(throwable);
+                } else {
+                    try {
+                        BufferedSink sink = Okio.buffer(Okio.sink(tempFile));
+                        sink.writeAll(pathHttpResponse.body().source());
+                        sink.close();
+                    } catch (IOException e) { // 下方统一进行处理
+                        throw new RuntimeException(e);
+                    }
                 }
                 try {
                     HashCode ruleHash = null;
