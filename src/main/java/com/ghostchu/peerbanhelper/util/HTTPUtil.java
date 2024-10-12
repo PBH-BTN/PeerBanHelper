@@ -2,14 +2,11 @@ package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.ForwardingSource;
-import okio.Okio;
-import okio.Source;
+import okio.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +16,10 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.ProxySelector;
@@ -32,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.zip.GZIPOutputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -104,8 +105,26 @@ public class HTTPUtil {
         return builder.build();
     }
 
+    private static RequestBody gzip(final RequestBody body) {
+        return new RequestBody() {
+            @Override public MediaType contentType() {
+                return body.contentType();
+            }
+
+            @Override public long contentLength() {
+                return -1; // We don't know the compressed length in advance!
+            }
+
+            @Override public void writeTo(BufferedSink sink) throws IOException {
+                BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
+                body.writeTo(gzipSink);
+                gzipSink.close();
+            }
+        };
+    }
+
     public static RequestBody gzipBody(byte[] bytes) {
-        return RequestBody.gzip(RequestBody.create(bytes));
+        return gzip(RequestBody.create(bytes));
     }
 
     public static Callback newFutureCallback(CompletableFuture<Response> future) {
