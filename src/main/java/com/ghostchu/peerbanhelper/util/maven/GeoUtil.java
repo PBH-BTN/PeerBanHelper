@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -36,17 +35,25 @@ public class GeoUtil {
     }
 
     private static long sendGetTest(String urlStr) {
-        try  {
-            MutableRequest request = MutableRequest.GET(urlStr);
-            long time = System.currentTimeMillis();
-            HttpResponse<String> response = HTTPUtil.getHttpClient(false,null).send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
+        var req = CompletableFuture.supplyAsync(() -> {
+            try {
+                MutableRequest request = MutableRequest.GET(urlStr);
+                long time = System.currentTimeMillis();
+                HttpResponse<String> response = HTTPUtil.getHttpClient(false, null).send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 200) {
+                    return Long.MAX_VALUE;
+                }
+                return System.currentTimeMillis() - time;
+            } catch (Throwable e) {
                 return Long.MAX_VALUE;
             }
-            return System.currentTimeMillis() - time;
-        } catch (Throwable e) {
+        });
+        try {
+            return req.get(15, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             return Long.MAX_VALUE;
         }
+
     }
 
     @NotNull
