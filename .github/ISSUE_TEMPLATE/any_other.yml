@@ -1,19 +1,10 @@
-name: '任何其它 - Any Other'
+name: '任何其它 - Other'
 description: '报告其它分类均无关的问题'
 
-title: '[WebUI] '
+title: '[Other] '
 labels:
-  - 'WebUI'
+  - 'Other'
 body:
-  - type: 'input'
-    attributes:
-      label: 'WebUI 版本号 - Version'
-      description: |-
-        Enter the PBH version that display on WebUI footer or GUI window title.  
-        输入您正在使用 WebUI 的版本号，可在 WebUI 页面的底部找到
-      placeholder: 'vX.X.X-(aabbccdd)'
-    validations:
-      required: true
   - type: 'textarea'
     attributes:
       label: '问题描述 - Issue Description'
