@@ -246,7 +246,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         getConfig().set("ips", ips.stream().map(Address::toString).toList());
         getConfig().set("ports", List.copyOf(ports));
         getConfig().set("asns", List.copyOf(asns));
-        getConfig().set("region", List.copyOf(regions));
+        getConfig().set("regions", List.copyOf(regions));
         getConfig().set("cities", List.copyOf(cities));
         super.saveConfig();
     }
