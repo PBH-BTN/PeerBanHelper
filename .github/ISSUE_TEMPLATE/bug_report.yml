@@ -10,7 +10,7 @@ body:
       value: |-
         ## 请注意 - Caution
         This form only used for bug report, for any other cases, please [click here](https://github.com/PBH-BTN/PeerBanHelper/issues/new)  
-        此表单**仅用于反馈错误**，如果是其它类型的反馈，请[点击这里](https://github.com/PBH-BTN/PeerBanHelper/issues/new)。 
+        此表单**仅用于反馈错误**，如果是其它类型的反馈，请[点击这里以重新选择](https://github.com/PBH-BTN/PeerBanHelper/issues/new/choose)。 
         请尽可能完整且详细地填写所有表单项，以便我们以最高效率并准确的排查故障和诊断问题。
         **错误填写或者没有仔细检查末尾的检查清单，将导致此 Issue 被立刻关闭。**
         **只有最新版本的 PeerBanHelper 才会得到支持，任何非最新版本的 Issue 将被 立 刻 关 闭，不会有人给您提供任何支持** [在此查看最新版本的版本号](https://github.com/PBH-BTN/PeerBanHelper/releases/latest)
