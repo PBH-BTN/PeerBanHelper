@@ -10,7 +10,7 @@ body:
       value: |-
         ## 请注意 - Caution
         This form only used for WebUI, for any other cases, please [click here](https://github.com/PBH-BTN/PeerBanHelper/issues/new)  
-        此表单**仅用于反馈WebUI相关错误**，如果是其它类型的反馈，请[点击这里](https://github.com/PBH-BTN/PeerBanHelper/issues/new)。 
+        此表单**仅用于反馈WebUI相关错误**，如果是其它类型的反馈，请[点击这里以重新选择](https://github.com/PBH-BTN/PeerBanHelper/issues/new/choose)。 
         请尽可能完整且详细地填写所有表单项，以便我们以最高效率并准确的排查故障和诊断问题
   - type: 'input'
     attributes:
