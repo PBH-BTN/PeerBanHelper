@@ -19,7 +19,7 @@ export default {
 
   'page.oobe.addDownloader.title': '添加你的第一个下载器',
   'page.oobe.addDownloader.description':
-    '首先选择你的下载器类型，随后填写下载器的 WebUI 的相关认证信息。请注意 URL 后面不要以 / 结尾。',
+    '首先选择你的下载器类型，随后填写下载器的 WebUI 的相关认证信息。请注意 URL（地址）不能以 / 结尾。',
   'page.oobe.addDownloader.test': '测试下载器',
   'page.oobe.addDownloader.test.success': '测试成功',
 
