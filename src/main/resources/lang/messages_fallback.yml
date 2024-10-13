@@ -65,7 +65,7 @@ CONFIGURATION_OUTDATED_MODULE_DISABLED: "[警告] 无法确认功能模块 {} �
 BTN_DOWNLOADER_GENERAL_FAILURE: "[BTN 网络] 从下载器 {} 获取当前 Torrent 任务信息失败，跳过……"
 BTN_UPDATE_RULES_SUCCESSES: "[BTN 网络] 规则数据更新成功，当前数据版本：{}"
 BTN_REQUEST_FAILS: "[BTN 网络] 请求时出现错误，操作已取消 {}"
-BTN_CONFIG_FAILS: "[BTN 网络] 所连接的 BTN 网络实例未返回有效配置响应，BTN 网络功能可能不会正常工作 {}，将在 {} 秒后重试"
+BTN_CONFIG_FAILS: "[BTN 网络] 所连接的 BTN 网络实例未返回有效配置响应，BTN 网络功能可能不会正常工作，将在 {} 秒后重试"
 MODULE_BTN_BAN: "[BTN 封禁] 匹配 {} 规则集（{}）：{}"
 BTN_NETWORK_CONNECTING: "[BTN 网络] 请等待我们连接到 BTN 网络……"
 BTN_NETWORK_NOT_ENABLED: "[BTN 网络] 未启用 BTN 功能：此 PeerBanHelper 客户端未加入 BTN 网络"
