@@ -244,7 +244,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             }
 
             // 是否需要进行快速 PCB 测试
-            if (fastPcbTestPercentage > 0) {
+            if (fastPcbTestPercentage > 0 && downloader.getType().equalsIgnoreCase("BitComet")) {
                 // 只在 <= 0（也就是从未测试过）的情况下对其进行测试
                 if (clientTask.getFastPcbTestExecuteAt() <= 0) {
                     // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
