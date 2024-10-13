@@ -239,12 +239,9 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             if (torrentSize <= 0) {
                 return pass();
             }
-            if (torrentSize < torrentMinimumSize) {
-                return pass();
-            }
 
             // 是否需要进行快速 PCB 测试
-            if (fastPcbTestPercentage > 0 && downloader.getType().equalsIgnoreCase("BitComet")) {
+            if (fastPcbTestPercentage > 0 && !fileTooSmall(torrentSize)  && downloader.getType().equalsIgnoreCase("BitComet")) {
                 // 只在 <= 0（也就是从未测试过）的情况下对其进行测试
                 if (clientTask.getFastPcbTestExecuteAt() <= 0) {
                     // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
@@ -281,7 +278,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             }
             // 计算进度差异
             double difference = Math.abs(actualProgress - clientProgress);
-            if (difference > maximumDifference) {
+            if (difference > maximumDifference && !fileTooSmall(torrentSize)) {
                 if (banPeerIfConditionReached(clientTask)) {
                     clientTask.setProgressDifferenceCounter(clientTask.getProgressDifferenceCounter() + 1);
                     clientTask.setBanDelayWindowEndAt(0L);
@@ -294,7 +291,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 }
 
             }
-            if (rewindMaximumDifference > 0) {
+            if (rewindMaximumDifference > 0 && !fileTooSmall(torrentSize)) {
                 double lastRecord = clientTask.getLastReportProgress();
                 double rewind = lastRecord - peer.getProgress();
                 boolean ban = rewind > rewindMaximumDifference;
@@ -319,6 +316,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             clientTask.setLastReportProgress(peer.getProgress());
             progressRecorder.put(client, lastRecordedProgress);
         }
+    }
+
+    private boolean fileTooSmall(long torrentSize) {
+        return torrentSize < torrentMinimumSize;
     }
 
     private boolean banPeerIfConditionReached(ClientTask clientTask) {
