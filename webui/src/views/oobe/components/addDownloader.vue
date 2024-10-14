@@ -78,6 +78,7 @@ const config = defineModel<InitConfig>({ required: true })
 const testing = ref(false)
 const handleTest = async () => {
   testing.value = true
+  config.value.downloaderConfig.config.endpoint.replace(/\/$/, '')
   try {
     const testResult = await TestDownloaderConfig({
       name: config.value.downloaderConfig.name,
