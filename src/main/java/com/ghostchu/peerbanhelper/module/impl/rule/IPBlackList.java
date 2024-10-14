@@ -83,7 +83,12 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     private void handleCitiesDelete(Context context) throws IOException {
-        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        if (regions.removeIf(city -> city.equals(context.bodyAsClass(UserCityRequest.class).city()))) {
+            //context.status(HttpStatus.OK);
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        } else {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        }
         saveConfig();
     }
 
@@ -241,7 +246,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         getConfig().set("ips", ips.stream().map(Address::toString).toList());
         getConfig().set("ports", List.copyOf(ports));
         getConfig().set("asns", List.copyOf(asns));
-        getConfig().set("region", List.copyOf(regions));
+        getConfig().set("regions", List.copyOf(regions));
         getConfig().set("cities", List.copyOf(cities));
         super.saveConfig();
     }

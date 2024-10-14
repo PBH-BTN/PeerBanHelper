@@ -208,7 +208,11 @@ public class BiglyBT extends AbstractDownloader {
     @Override
     public List<Peer> getPeers(Torrent torrent) {
         PeerManagerRecord peerManagerRecord;
+        List<Peer> peersList = new ArrayList<>(); // 不能为不可变列表
         try (Response resp = httpClient.newCall(new Request.Builder().url(apiEndpoint + "/download/" + torrent.getId() + "/peers").build()).execute()) {
+            if (resp.code() == 404) { // 种子被删除或者种子错误时会返回 404
+                return peersList;
+            }
             if (resp.code() != 200) {
                 throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.code(), resp.body().string()));
             }
@@ -216,7 +220,6 @@ public class BiglyBT extends AbstractDownloader {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        List<Peer> peersList = new ArrayList<>();
         for (PeerRecord peer : peerManagerRecord.getPeers()) {
             var peerId = new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1);
             if (peerId.length() > 8) {
