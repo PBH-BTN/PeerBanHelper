@@ -132,7 +132,11 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     private void handlePortDelete(Context context) throws IOException {
-        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        if (ports.removeIf(p -> p == context.bodyAsClass(UserPortRequest.class).port())) {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        } else {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        }
         saveConfig();
     }
 
