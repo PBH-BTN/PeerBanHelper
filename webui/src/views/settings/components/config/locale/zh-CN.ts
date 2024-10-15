@@ -57,7 +57,7 @@ export default {
   'page.settings.tab.config.module.progressCheatBlocker.banDuration': '封禁持续时间',
   'page.settings.tab.config.module.progressCheatBlocker.enablePersist': '启用持久化记录',
   'page.settings.tab.config.module.progressCheatBlocker.enablePersist.tips':
-    '启用此功能可能增加磁盘 I/O 并可能影响性能，嵌入式设备上甚至可能带来缓存磨损',
+    '启用此功能可能增加磁盘 I/O 并可能影响性能，嵌入式设备上甚至可能带来闪存磨损',
   'page.settings.tab.config.module.progressCheatBlocker.persistDuration': '持久化时间',
   'page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration': '封禁前等待时间',
   'page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration.tips':

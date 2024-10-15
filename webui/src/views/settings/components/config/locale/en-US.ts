@@ -61,7 +61,7 @@ export default {
   'page.settings.tab.config.module.progressCheatBlocker.banDuration': 'Ban Duration',
   'page.settings.tab.config.module.progressCheatBlocker.enablePersist': 'Enable persist recording',
   'page.settings.tab.config.module.progressCheatBlocker.enablePersist.tips':
-    'Enable this feature may increase disk I/O and may affect performance, even may cause cache wear on embedded devices',
+    'Enable this feature may increase disk I/O and may affect performance, even may cause flash wear on embedded devices',
   'page.settings.tab.config.module.progressCheatBlocker.persistDuration': 'Persist duration',
   'page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration':
     'Max wait duration before ban',
