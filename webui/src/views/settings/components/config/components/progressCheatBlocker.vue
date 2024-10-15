@@ -68,32 +68,110 @@
     <a-form-item
       :label="t('page.settings.tab.config.module.progressCheatBlocker.block_excessive_clients')"
       field="model.block_excessive_clients"
-      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.block_excessive_clients.tips')">
-        <a-switch v-model="model.block_excessive_clients"></a-switch>
+      :tooltip="
+        t('page.settings.tab.config.module.progressCheatBlocker.block_excessive_clients.tips')
+      "
+    >
+      <a-switch v-model="model.block_excessive_clients"></a-switch>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.config.module.progressCheatBlocker.excessive_threshold')"
       field="model.excessive_threshold"
-      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.excessive_threshold.tips')">
-        <a-input-number v-model="model.excessive_threshold" style="width: 100px;"></a-input-number>
+      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.excessive_threshold.tips')"
+    >
+      <a-input-number v-model="model.excessive_threshold" style="width: 100px"></a-input-number>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.config.module.progressCheatBlocker.ipv4prefixlength')"
       field="model.ipv4_prefix_length"
-      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.ipprefixLength.tips')">
-        <a-input-number v-model="model.ipv4_prefix_length" style="width: 100px;"></a-input-number>
+      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.ipprefixLength.tips')"
+    >
+      <a-input-number v-model="model.ipv4_prefix_length" style="width: 100px"></a-input-number>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.config.module.progressCheatBlocker.ipv4prefixlength')"
       field="model.ipv6_prefix_length"
-      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.ipprefixLength.tips')">
-        <a-input-number v-model="model.ipv6_prefix_length" style="width: 100px;"></a-input-number>
+      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.ipprefixLength.tips')"
+    >
+      <a-input-number v-model="model.ipv6_prefix_length" style="width: 100px"></a-input-number>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.progressCheatBlocker.banDuration')"
+      field="model.ban_duration"
+    >
+      <a-input-number v-model="model.ban_duration" style="width: 200px">
+        <template #suffix> {{ t('page.settings.tab.config.unit.ms') }} </template>
+      </a-input-number>
+      <template #extra> ={{ formatMilliseconds(model.ban_duration) }} </template>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.progressCheatBlocker.enablePersist')"
+      field="model.enable_persist"
+    >
+      <a-switch v-model="model.enable_persist"></a-switch>
+      <template v-if="model.enable_persist" #extra>
+        <a-typography-text type="danger">{{
+          t('启用此功能可能增加磁盘 I/O 并可能影响性能，嵌入式设备上甚至可能带来缓存磨损')
+        }}</a-typography-text></template
+      >
+    </a-form-item>
+    <a-form-item
+      v-if="model.enable_persist"
+      :label="t('page.settings.tab.config.module.progressCheatBlocker.persistDuration')"
+      field="model.persist_duration"
+    >
+      <a-input-number v-model="model.persist_duration" style="width: 200px">
+        <template #suffix> {{ t('page.settings.tab.config.unit.ms') }} </template>
+      </a-input-number>
+      <template #extra> ={{ formatMilliseconds(model.persist_duration) }} </template>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration')"
+      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration.tips')"
+      field="model.max_wait_duration"
+    >
+      <a-input-number v-model="model.max_wait_duration" style="width: 200px">
+        <template #suffix> {{ t('page.settings.tab.config.unit.ms') }} </template>
+      </a-input-number>
+      <template #extra> ={{ formatMilliseconds(model.max_wait_duration) }} </template>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest')"
+      :tooltip="t('page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest.tips')"
+    >
+      <a-switch
+        :default-checked="model.fast_pcb_test_percentage !== -1"
+        @change="
+          (value) => {
+            if (value) model.fast_pcb_test_percentage = 10
+            else model.fast_pcb_test_percentage = -1
+          }
+        "
+      />
+    </a-form-item>
+    <a-form-item
+      v-if="model.fast_pcb_test_percentage !== -1"
+      :label="t('page.settings.tab.config.module.progressCheatBlocker.fastPCBTestPercentage')"
+      field="model.fast_pcb_test_percentage"
+    >
+      <a-space>
+        <a-slider
+          v-model="model.fast_pcb_test_percentage"
+          style="width: 250px"
+          :step="1"
+          :min="0"
+          :max="100"
+          :format-tooltip="(value: number) => `${value}%`"
+        ></a-slider>
+        <br />{{ model.fast_pcb_test_percentage }}%
+      </a-space>
     </a-form-item>
   </a-space>
 </template>
 <script setup lang="ts">
 import type { ProgressCheatBlocker } from '@/api/model/settings';
 import { formatFileSize } from '@/utils/file';
+import { formatMilliseconds } from '@/utils/time';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n()

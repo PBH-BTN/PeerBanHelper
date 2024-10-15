@@ -57,5 +57,17 @@ export default {
   'page.settings.tab.config.module.progressCheatBlocker.ipv4prefixlength': 'IPv4 prefix length',
   'page.settings.tab.config.module.progressCheatBlocker.ipv6prefixlength': 'IPv6 prefix length',
   'page.settings.tab.config.module.progressCheatBlocker.ipprefixLength.tips':
-    'IPs from the same subnet are considered as the same user'
+    'IPs from the same subnet are considered as the same user',
+  'page.settings.tab.config.module.progressCheatBlocker.banDuration': 'Ban Duration',
+  'page.settings.tab.config.module.progressCheatBlocker.enablePersist': 'Enable persist recording',
+  'page.settings.tab.config.module.progressCheatBlocker.enablePersist.tips':
+    'Enable this feature may increase disk I/O and may affect performance, even may cause cache wear on embedded devices',
+  'page.settings.tab.config.module.progressCheatBlocker.persistDuration': 'Persist duration',
+  'page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration':
+    'Max wait duration before ban',
+  'page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration.tips':
+    "Sometimes due the network issue, the peer may cannot sync the progress information on time, When a Peer reached ban condition, the timer will start and Peer will be banned after timer timed out if Peer's progress not update to excepted value on time ",
+  'page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest': 'Enable fast PCB test',
+  'page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest.tips':
+    'This option will allow PCB ban the Peer from downloader for disconnect it, this will heat up progress reset check quickly.'
 }

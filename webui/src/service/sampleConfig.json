@@ -211,7 +211,7 @@
             "enable_persist": true,
             "persist_duration": 1209600000,
             "max_wait_duration": 30000,
-            "fast_pcb_test_percentage": 0.1,
+            "fast_pcb_test_percentage": 10,
             "fast_pcb_test_block_duration": 15000
         },
         "ip_address_blocker": {

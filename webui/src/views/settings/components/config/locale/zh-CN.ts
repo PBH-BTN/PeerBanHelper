@@ -53,5 +53,18 @@ export default {
   'page.settings.tab.config.module.progressCheatBlocker.ipv4prefixlength': 'IPv4 前缀长度',
   'page.settings.tab.config.module.progressCheatBlocker.ipv6prefixlength': 'IPv6 前缀长度',
   'page.settings.tab.config.module.progressCheatBlocker.ipprefixLength.tips':
-    '来自同一子网的 IP 视为同一用户'
+    '来自同一子网的 IP 视为同一用户',
+  'page.settings.tab.config.module.progressCheatBlocker.banDuration': '封禁持续时间',
+  'page.settings.tab.config.module.progressCheatBlocker.enablePersist': '启用持久化记录',
+  'page.settings.tab.config.module.progressCheatBlocker.enablePersist.tips':
+    '启用此功能可能增加磁盘 I/O 并可能影响性能，嵌入式设备上甚至可能带来缓存磨损',
+  'page.settings.tab.config.module.progressCheatBlocker.persistDuration': '持久化时间',
+  'page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration': '封禁前等待时间',
+  'page.settings.tab.config.module.progressCheatBlocker.maxWaitDuration.tips':
+    '有时由于下载器网络原因，Peer 可能无法及时同步其进度信息，当 Peer 达到封禁阈值后开始计时，如果 Peer 未在给定时间内更新自己的进度到正常水平，则将被封禁',
+  'page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest': '启用快速 PCB 测试',
+  'page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest.tips':
+    '此选项将允许 PCB 在 Peer 下载指定量的数据后，将其短暂的封禁一段时间以便断开其连接，这有助于快速预热进度重置检查',
+  'page.settings.tab.config.module.progressCheatBlocker.fastPCBTestPercentage':
+    '快速 PCB 测试启动阈值'
 }
