@@ -2,5 +2,32 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true,
+      "automergeType": "pr",
+      "schedule": [
+        "before 4am on monday"
+      ],
+      "groupName": "default"
+    },
+    {
+      "depTypeList": [
+        "devDependencies"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "groupName": "all devDependencies"
+    }
   ]
 }

@@ -38,8 +38,11 @@ jobs:
   Build_DEB:
     needs: Build_Executable
     uses: ./.github/workflows/build_deb.yml
+  Build_PKG:
+    needs: Build_Executable
+    uses: ./.github/workflows/build_pkg.yml
   Upload_Artifacts:
-    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB]
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG]
     permissions:
       contents: write
       checks: write
@@ -67,11 +70,19 @@ jobs:
         with:
           name: deb-dist
           path: target/media
+      - uses: actions/download-artifact@v4
+        with:
+          name: freebsd-pkg-13.4-dist
+          path: target/media
+      - uses: actions/download-artifact@v4
+        with:
+          name: freebsd-pkg-14.1-dist
+          path: target/media
       - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/*.spk"]'
+          asset_paths: '["target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*"]'
   Build_Docker:
     permissions:
       contents: write
@@ -114,7 +125,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6.7.0
+        uses: docker/build-push-action@v6.9.0
         with:
           context: .
           file: ./Dockerfile
@@ -150,7 +161,7 @@ jobs:
             type=raw,latest
             type=sha
       - name: Build and push Aliyun ACR
-        uses: docker/build-push-action@v6.7.0
+        uses: docker/build-push-action@v6.9.0
         with:
           context: .
           file: ./Dockerfile-Release

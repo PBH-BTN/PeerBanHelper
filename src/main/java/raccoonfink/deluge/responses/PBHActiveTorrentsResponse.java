@@ -42,9 +42,9 @@ public class PBHActiveTorrentsResponse extends DelugeResponse {
         @SerializedName("size")
         private Long size;
         @SerializedName("upload_payload_rate")
-        private Integer uploadPayloadRate;
+        private Long uploadPayloadRate;
         @SerializedName("download_payload_rate")
-        private Integer downloadPayloadRate;
+        private Long downloadPayloadRate;
         @SerializedName("priv")
         private Boolean priv;
         @SerializedName("peers")
@@ -62,17 +62,17 @@ public class PBHActiveTorrentsResponse extends DelugeResponse {
             @SerializedName("client_name")
             private String clientName;
             @SerializedName("up_speed")
-            private Integer upSpeed;
+            private Long upSpeed;
             @SerializedName("down_speed")
-            private Integer downSpeed;
+            private Long downSpeed;
             @SerializedName("payload_up_speed")
-            private Integer payloadUpSpeed;
+            private Long payloadUpSpeed;
             @SerializedName("payload_down_speed")
-            private Integer payloadDownSpeed;
+            private Long payloadDownSpeed;
             @SerializedName("total_upload")
-            private Integer totalUpload;
+            private Long totalUpload;
             @SerializedName("total_download")
-            private Integer totalDownload;
+            private Long totalDownload;
             @SerializedName("progress")
             private Double progress;
             @SerializedName("flags")
@@ -84,39 +84,39 @@ public class PBHActiveTorrentsResponse extends DelugeResponse {
             @SerializedName("local_endpoint_port")
             private Integer localEndpointPort;
             @SerializedName("queue_bytes")
-            private Integer queueBytes;
+            private Long queueBytes;
             @SerializedName("request_timeout")
-            private Integer requestTimeout;
+            private Long requestTimeout;
             @SerializedName("num_hashfails")
-            private Integer numHashfails;
+            private Long numHashfails;
             @SerializedName("download_queue_length")
-            private Integer downloadQueueLength;
+            private Long downloadQueueLength;
             @SerializedName("upload_queue_length")
-            private Integer uploadQueueLength;
+            private Long uploadQueueLength;
             @SerializedName("failcount")
-            private Integer failcount;
+            private Long failcount;
             @SerializedName("downloading_block_index")
-            private Integer downloadingBlockIndex;
+            private Long downloadingBlockIndex;
             @SerializedName("downloading_progress")
-            private Integer downloadingProgress;
+            private Long downloadingProgress;
             @SerializedName("downloading_total")
-            private Integer downloadingTotal;
+            private Long downloadingTotal;
             @SerializedName("connection_type")
-            private Integer connectionType;
+            private Long connectionType;
             @SerializedName("send_quota")
-            private Integer sendQuota;
+            private Long sendQuota;
             @SerializedName("receive_quota")
-            private Integer receiveQuota;
+            private Long receiveQuota;
             @SerializedName("rtt")
-            private Integer rtt;
+            private Long rtt;
             @SerializedName("num_pieces")
-            private Integer numPieces;
+            private Long numPieces;
             @SerializedName("download_rate_peak")
-            private Integer downloadRatePeak;
+            private Long downloadRatePeak;
             @SerializedName("upload_rate_peak")
-            private Integer uploadRatePeak;
+            private Long uploadRatePeak;
             @SerializedName("progress_ppm")
-            private Integer progressPpm;
+            private Long progressPpm;
         }
     }
 }

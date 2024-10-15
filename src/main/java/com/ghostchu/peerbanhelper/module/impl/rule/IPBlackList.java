@@ -83,7 +83,8 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     private void handleCitiesDelete(Context context) throws IOException {
-        if (cities.removeIf(cities -> cities.equals(context.bodyAsClass(UserCityRequest.class).city()))) {
+        if (regions.removeIf(city -> city.equals(context.bodyAsClass(UserCityRequest.class).city()))) {
+            //context.status(HttpStatus.OK);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
@@ -92,7 +93,10 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     private void handleCities(Context context) throws IOException {
-        cities.add(context.bodyAsClass(UserCityRequest.class).city());
+        var city = context.bodyAsClass(UserCityRequest.class).city();
+        if (city == null || city.isBlank())
+            throw new IllegalArgumentException("Argument city cannot be null or blank");
+        cities.add(city);
         context.status(HttpStatus.CREATED);
         context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
@@ -128,16 +132,14 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     private void handlePortDelete(Context context) throws IOException {
-        if (ports.removeIf(p -> p == context.bodyAsClass(UserPortRequest.class).port())) {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
-        } else {
-            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
-        }
+        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
     }
 
     private void handleIPDelete(Context context) throws IOException {
         var parsed = IPAddressUtil.getIPAddress(context.bodyAsClass(UserIPRequest.class).ip());
+        if (parsed == null)
+            throw new IllegalArgumentException("Argument ip parse failed");
         if (ips.removeIf(ipAddress -> ipAddress.equals(parsed))) {
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
@@ -148,7 +150,10 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
 
 
     private void handleRegion(Context ctx) throws IOException {
-        regions.add(ctx.bodyAsClass(UserRegionRequest.class).region());
+        var region = ctx.bodyAsClass(UserRegionRequest.class).region();
+        if (region == null || region.isBlank())
+            throw new IllegalArgumentException("Argument region cannot be null or blank");
+        regions.add(region);
         ctx.status(HttpStatus.CREATED);
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
@@ -241,7 +246,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         getConfig().set("ips", ips.stream().map(Address::toString).toList());
         getConfig().set("ports", List.copyOf(ports));
         getConfig().set("asns", List.copyOf(asns));
-        getConfig().set("region", List.copyOf(regions));
+        getConfig().set("regions", List.copyOf(regions));
         getConfig().set("cities", List.copyOf(cities));
         super.saveConfig();
     }

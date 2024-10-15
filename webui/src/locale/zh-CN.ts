@@ -1,16 +1,17 @@
-import settingsLocale from './zh-CN/settings'
-import plusLocale from './zh-CN/plus'
-import dashboardPageLocale from '@/views/dashboard/locale/zh-CN'
-import banListPageLocale from '@/views/banlist/locale/zh-CN'
-import banLogPageLocale from '@/views/banlog/locale/zh-CN'
-import topBanPageLocale from '@/views/ranks/locale/zh-CN'
-import ruleMetricsLocale from '@/views/rule-metrics/locale/zh-CN'
 import serviceLocale from '@/service/locale/zh-CN'
+import banListPageLocale from '@/views/banlist/locale/zh-CN'
+import chartsLocale from '@/views/charts/locale/zh-CN'
+import dashboardPageLocale from '@/views/dashboard/locale/zh-CN'
+import dataLocale from '@/views/data-view/locale/zh-CN'
 import loginLocale from '@/views/login/locale/zh-CN'
 import oobeLocale from '@/views/oobe/locale/zh-CN'
+import topBanPageLocale from '@/views/ranks/locale/zh-CN'
 import ruleManageMentLocale from '@/views/rule-management/locale/zh-CN'
 import chartsLocale from '@/views/charts/locale/zh-CN'
 import configLocale from '@/views/config/locale/zh-CN'
+import ruleMetricsLocale from '@/views/rule-metrics/locale/zh-CN'
+import plusLocale from './zh-CN/plus'
+import settingsLocale from './zh-CN/settings'
 export default {
   'navbar.action.locale': '切换为中文',
   'navbar.action.autoUpdate': '自动刷新',
@@ -24,7 +25,10 @@ export default {
   'router.login': '登录',
   'router.dashboard': '状态',
   'router.banlist': '封禁名单',
-  'router.banlogs': '封禁日志',
+  'router.data': '数据透视',
+  'router.data.banlogs': '封禁日志',
+  'router.data.torrent': '种子',
+  'router.data.ipHistory': 'IP 查询',
   'router.rank': '排行',
   'router.metrics': '统计',
   'router.metrics.ruleMetrics': '规则统计',
@@ -43,11 +47,13 @@ export default {
   'service.networkErrorRetry.cancel': '取消重试',
   'service.networkErrorRetry.retry': '重试',
 
+  'queryLink.title': '点击查询 IP',
+
   ...settingsLocale,
   ...plusLocale,
   ...dashboardPageLocale,
   ...banListPageLocale,
-  ...banLogPageLocale,
+  ...dataLocale,
   ...topBanPageLocale,
   ...ruleMetricsLocale,
   ...serviceLocale,

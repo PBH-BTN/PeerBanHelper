@@ -373,3 +373,17 @@ PCB_DESCRIPTION_PEER_PROGRESS_CHEAT_TESTING: "PeerBanHelper banned Peer to disco
 IPDB_EXISTS_UPDATE_FAILED: "IPDB database {} updated failed, using local cached data. The cached data may expired."
 IPDB_RETRY_WITH_BACKUP_SOURCE: "IPDB download failed or timed out, Re-trying with backup source..."
 IPDB_UNGZIP_FAILED: "IPDB database {} decompression failed"
+
+DOWNLOADER_BC_LOGIN_FAILED: "Failed to log in to {}: {} - {}: {}"
+DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST: "Failed to request torrents list - {} - {}"
+DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT: "Failed to request peers list in torrent - {} - {}"
+DOWNLOADER_BC_API_PREFERENCES_ERR: "BitComet's preferences API returned non expected response - {} - {}"
+DOWNLOADER_BC_FAILED_SAVE_BANLIST: "Failed to save banlist for {} ({}): {} - {}\n{}"
+DOWNLOADER_BC_CONFIG_IP_FILTER: "Detected incorrect BitComet IpFilter configuration, run autofix..."
+DOWNLOADER_BC_CONFIG_IP_FILTER_SUCCESS: "BitComet IpFilter configuration autofix success."
+DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter configuration autofix failed."
+DOWNLOADER_BC_VERSION_UNACCEPTABLE: "The current BitComet version is not supported, please upgrade to 2.10 or higher."
+DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED: "Failed to download necessary libraries (BouncyCastle) that required to connect BitComet. Operation cancelled, please check console logs for details."
+
+JAVALIN_PORT_IN_USE: "Bind to port {} already in use. It could caused by: (1)More than one PBH instance is running (for example: Install as System Service); (2)Other application using this port (e.g Uplay, Ubisoft connect)"
+JAVALIN_PORT_REQUIRE_PRIVILEGES: "Bind to port {} failed (system require privileges on this port). Pick another WebUI port or run PeerBanHelper as Administrator/root."

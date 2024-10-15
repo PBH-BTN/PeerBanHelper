@@ -27,6 +27,9 @@ jobs:
   Build_DEB:
     needs: CI
     uses: ./.github/workflows/build_deb.yml
+  Build_PKG:
+    needs: CI
+    uses: ./.github/workflows/build_pkg.yml
   Build_Docker:
     needs: CI
     runs-on: ubuntu-latest
@@ -60,7 +63,7 @@ jobs:
           type=raw,ci
           type=sha
     - name: Build and push Docker image
-      uses: docker/build-push-action@v6.7.0
+      uses: docker/build-push-action@v6.9.0
       with:
         context: .
         file: ./Dockerfile

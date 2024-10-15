@@ -1,0 +1,22 @@
+{
+    "name": "peerbanhelper",
+    "version": "<version>",
+    "origin": "net/peerbanhelper",
+    "comment": "Tool to auto ban peers on the bittorrent network",
+    "desc": "PeerBanHelper is a tool to auto ban peers on the bittorrent network",
+    "maintainer": "ghostchu@111.com",
+    "www": "https://github.com/PBH-BTN/PeerBanHelper",
+    "deps": {
+        "openjdk21": {
+            "origin": "java/openjdk21",
+            "version": "21.0"
+        }
+    },
+    "arch": "all",
+    "categories": ["net"],
+    "prefix":"/usr/local",
+    "licenselogic": "single",
+    "licenses": [
+        "GPLv3"
+    ]
+}

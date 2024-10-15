@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
+import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.BitComet;
 import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced.QBittorrentEE;
@@ -46,6 +47,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import inet.ipaddr.IPAddress;
+import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -212,6 +214,7 @@ public class PeerBanHelperServer implements Reloadable {
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
             case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, downloaderSection);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -230,6 +233,7 @@ public class PeerBanHelperServer implements Reloadable {
                     downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
             case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
             case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, downloaderSection);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -363,7 +367,17 @@ public class PeerBanHelperServer implements Reloadable {
         if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
             host = null;
         }
-        webContainer.start(host, httpdPort, token);
+        try {
+            webContainer.start(host, httpdPort, token);
+        } catch (JavalinBindException e) {
+            if (e.getMessage().contains("Port already in use")) {
+                log.error(tlUI(Lang.JAVALIN_PORT_IN_USE));
+                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE), e);
+            } else if (e.getMessage().contains("require elevated privileges")) {
+                log.error(tlUI(Lang.JAVALIN_PORT_IN_USE));
+                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES), e);
+            }
+        }
     }
 
     private void registerTimer() {
@@ -692,9 +706,12 @@ public class PeerBanHelperServer implements Reloadable {
             torrents.forEach(torrent -> protect.getService().submit(() -> {
                 try {
                     parallelReqRestrict.acquire();
-                    peers.put(torrent, downloader.getPeers(torrent));
+                    var p = downloader.getPeers(torrent);
+                    peers.put(torrent, p);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    log.error("Unable to retrieve peers", e);
                 } finally {
                     parallelReqRestrict.release();
                 }

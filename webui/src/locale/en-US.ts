@@ -1,16 +1,17 @@
-import settingsLocale from './en-US/settings'
-import plusLocale from './en-US/plus'
-import dashboardPageLocale from '@/views/dashboard/locale/en-US'
-import banListPageLocale from '@/views/banlist/locale/en-US'
-import banLogPageLocale from '@/views/banlog/locale/en-US'
-import topBanPageLocale from '@/views/ranks/locale/en-US'
-import ruleMetricsLocale from '@/views/rule-metrics/locale/en-US'
 import serviceLocale from '@/service/locale/en-US'
+import banListPageLocale from '@/views/banlist/locale/en-US'
+import chartsLocale from '@/views/charts/locale/en-US'
+import dashboardPageLocale from '@/views/dashboard/locale/en-US'
+import dataLocale from '@/views/data-view/locale/en-US'
 import loginLocale from '@/views/login/locale/en-US'
 import oobeLocale from '@/views/oobe/locale/en-US'
+import topBanPageLocale from '@/views/ranks/locale/en-US'
 import ruleManageMentLocale from '@/views/rule-management/locale/en-US'
 import chartsLocale from '@/views/charts/locale/en-US'
 import configLocale from '@/views/config/locale/en-US'
+import ruleMetricsLocale from '@/views/rule-metrics/locale/en-US'
+import plusLocale from './en-US/plus'
+import settingsLocale from './en-US/settings'
 export default {
   'navbar.action.locale': 'Switch to English',
   'navbar.action.autoUpdate': 'Auto Update',
@@ -25,8 +26,11 @@ export default {
   'router.login': 'Login',
   'router.dashboard': 'Status',
   'router.banlist': 'Ban List',
-  'router.banlogs': 'Ban Logs',
   'router.rank': 'Ranks',
+  'router.data': 'Data',
+  'router.data.banlogs': 'Ban Logs',
+  'router.data.torrent': 'Torrents',
+  'router.data.ipHistory': 'IP Query',
   'router.metrics': 'Metrics',
   'router.metrics.ruleMetrics': 'Rule Metrics',
   'router.metrics.charts': 'Charts',
@@ -44,11 +48,13 @@ export default {
   'service.networkErrorRetry.cancel': 'Cancel Retry',
   'service.networkErrorRetry.retry': 'Retry',
 
+  'queryLink.title': 'Click to query this IP',
+
   ...settingsLocale,
   ...plusLocale,
   ...dashboardPageLocale,
   ...banListPageLocale,
-  ...banLogPageLocale,
+  ...dataLocale,
   ...topBanPageLocale,
   ...ruleMetricsLocale,
   ...serviceLocale,

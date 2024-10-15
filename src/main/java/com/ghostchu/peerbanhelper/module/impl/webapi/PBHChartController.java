@@ -6,14 +6,12 @@ import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +41,6 @@ public class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private ActivationManager activationManager;
-    @Autowired
     private PeerRecordDao peerRecordDao;
     @Autowired
     private HistoryDao historyDao;
@@ -69,16 +65,13 @@ public class PBHChartController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.javalin()
-                .get("/api/chart/geoIpInfo", this::handleGeoIP, Role.USER_READ)
-                .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ)
-                .get("/api/chart/traffic", this::handleTrafficClassic, Role.USER_READ)
+                .get("/api/chart/geoIpInfo", this::handleGeoIP, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/trend", this::handlePeerTrends, Role.USER_READ, Role.PBH_PLUS)
+                .get("/api/chart/traffic", this::handleTrafficClassic, Role.USER_READ, Role.PBH_PLUS)
         ;
     }
 
     private void handleTraffic(Context ctx) throws Exception {
-        if (!activationManager.isActivated()) {
-            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
-        }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
 
         String downloader = ctx.queryParam("downloader");
@@ -90,9 +83,6 @@ public class PBHChartController extends AbstractFeatureModule {
     }
 
     private void handleTrafficClassic(Context ctx) throws Exception {
-        if (!activationManager.isActivated()) {
-            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
-        }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         List<TrafficJournalDao.TrafficData> results = null;
 
@@ -141,9 +131,6 @@ public class PBHChartController extends AbstractFeatureModule {
     }
 
     private void handlePeerTrends(Context ctx) throws Exception {
-        if (!activationManager.isActivated()) {
-            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
-        }
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         Map<Long, AtomicInteger> connectedPeerTrends = new ConcurrentHashMap<>();
         Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
@@ -184,9 +171,6 @@ public class PBHChartController extends AbstractFeatureModule {
     }
 
     private void handleGeoIP(Context ctx) throws Exception {
-        if (!activationManager.isActivated()) {
-            throw new RequirePBHPlusLicenseException(tl(locale(ctx), Lang.PBHPLUS_LICENSE_FAILED));
-        }
         IPDB ipdb = getServer().getIpdb();
         if (ipdb == null) {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.CHARTS_IPDB_NEED_INIT), null));

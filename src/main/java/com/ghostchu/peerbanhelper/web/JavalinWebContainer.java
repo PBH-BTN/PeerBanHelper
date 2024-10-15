@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.web;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -43,7 +44,7 @@ public class JavalinWebContainer {
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
 
-    public JavalinWebContainer() {
+    public JavalinWebContainer(ActivationManager activationManager) {
         JsonMapper gsonMapper = new JsonMapper() {
             @Override
             public @NotNull String toJsonString(@NotNull Object obj, @NotNull Type type) {
@@ -124,6 +125,11 @@ public class JavalinWebContainer {
                     if (ctx.routeRoles().contains(Role.ANYONE)) {
                         return;
                     }
+                    if (ctx.routeRoles().contains(Role.PBH_PLUS)) {
+                        if (!activationManager.isActivated()) {
+                            throw new RequirePBHPlusLicenseException("PBH Plus License not activated");
+                        }
+                    }
                     if (ctx.path().startsWith("/init")) {
                         return;
                     }
@@ -152,7 +158,6 @@ public class JavalinWebContainer {
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200));
-
     }
 
     public void start(String host, int port, String token) {

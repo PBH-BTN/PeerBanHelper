@@ -203,6 +203,9 @@ public class BiglyBT extends AbstractDownloader {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+        if (resp.statusCode() == 404) { // 种子被删除或者种子错误时会返回 404
+            return new ArrayList<>(); // 不能为不可变列表
+        }
         if (resp.statusCode() != 200) {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
@@ -213,7 +216,7 @@ public class BiglyBT extends AbstractDownloader {
             if (peerId.length() > 8) {
                 peerId = peerId.substring(0, 8);
             }
-            if(peer.getIp() == null || peer.getIp().isBlank()){
+            if (peer.getIp() == null || peer.getIp().isBlank()) {
                 continue;
             }
             peersList.add(new PeerImpl(

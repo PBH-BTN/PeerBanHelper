@@ -20,10 +20,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.List;
 import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -139,14 +137,10 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         }
     }
 
-    private void flush() {
+    public void flush() {
         try {
-            List<PeerRecordDao.BatchHandleTasks> tasks = new ArrayList<>();
-            while (!dataBuffer.isEmpty()) {
-                tasks.add(dataBuffer.poll());
-            }
             try {
-                peerRecordDao.syncPendingTasks(tasks);
+                peerRecordDao.syncPendingTasks(dataBuffer);
             } catch (SQLException e) {
                 log.warn("Unable sync peers data to database", e);
                 rollbarErrorReporter.warning(e);
