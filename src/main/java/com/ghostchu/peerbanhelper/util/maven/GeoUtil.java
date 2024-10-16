@@ -2,7 +2,8 @@ package com.ghostchu.peerbanhelper.util.maven;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.github.mizosoft.methanol.MutableRequest;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -10,7 +11,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,15 +36,14 @@ public class GeoUtil {
 
     private static long sendGetTest(String urlStr) {
         var req = CompletableFuture.supplyAsync(() -> {
-            try {
-                MutableRequest request = MutableRequest.GET(urlStr);
-                long time = System.currentTimeMillis();
-                HttpResponse<String> response = HTTPUtil.getHttpClient(false, null).send(request, HttpResponse.BodyHandlers.ofString());
-                if (response.statusCode() != 200) {
+            Request request = new Request.Builder().url(urlStr).build();
+            long time = System.currentTimeMillis();
+            try (Response response = HTTPUtil.getHttpClient(false, null).newCall(request).execute()) {
+                if (response.code() != 200) {
                     return Long.MAX_VALUE;
                 }
                 return System.currentTimeMillis() - time;
-            } catch (Throwable e) {
+            } catch (IOException e) {
                 return Long.MAX_VALUE;
             }
         });

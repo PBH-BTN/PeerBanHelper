@@ -10,11 +10,11 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
 
-import java.net.http.HttpResponse;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -61,13 +61,18 @@ public class BtnAbilitySubmitBans implements BtnAbility {
                     System.currentTimeMillis(),
                     btnPeers
             );
-            MutableRequest request = MutableRequest.POST(endpoint
-                    , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
-            ).header("Content-Encoding", "gzip");
-            HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
+            Request request = new Request.Builder()
+                    .url(endpoint)
+                    .post(HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8)))
+                    .header("Content-Encoding", "gzip")
+                    .build();
+            HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request)
                     .thenAccept(r -> {
-                        if (r.statusCode() != 200) {
-                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
+                        if (r.code() != 200) {
+                            try {
+                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body().string()));
+                            } catch (IOException ignored) {
+                            }
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
                             lastReport = System.currentTimeMillis();

@@ -6,14 +6,14 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
 
-import java.net.http.HttpResponse;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -56,13 +56,18 @@ public class BtnAbilitySubmitRulesHitRate implements BtnAbility {
                     .map(obj -> new RuleData(obj.getKey().getClass().getSimpleName(), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata()))
                     .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
                     .toList();
-            MutableRequest request = MutableRequest.POST(endpoint
-                    , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(dat).getBytes(StandardCharsets.UTF_8))
-            ).header("Content-Encoding", "gzip");
-            HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
+            Request request = new Request.Builder()
+                    .url(endpoint)
+                    .post(HTTPUtil.gzipBody(JsonUtil.getGson().toJson(dat).getBytes(StandardCharsets.UTF_8)))
+                    .header("Content-Encoding", "gzip")
+                    .build();
+            HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request)
                     .thenAccept(r -> {
-                        if (r.statusCode() != 200) {
-                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
+                        if (r.code() != 200) {
+                            try {
+                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body().string()));
+                            } catch (IOException ignored) {
+                            }
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_HITRATE, dat.size()));
                         }

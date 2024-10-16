@@ -27,7 +27,6 @@ import raccoonfink.deluge.responses.DelugeListMethodsResponse;
 import raccoonfink.deluge.responses.PBHActiveTorrentsResponse;
 import raccoonfink.deluge.responses.PBHStatisticsResponse;
 
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -50,7 +49,7 @@ public class Deluge extends AbstractDownloader {
         super(name);
         this.name = name;
         this.config = config;
-        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
+        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), config.getHttpVersion(), null, null);
     }
 
     public static Deluge loadFromConfig(String name, ConfigurationSection section) {
