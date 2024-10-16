@@ -43,9 +43,7 @@
       <a-input-number v-model="model.cache_lifespan" style="width: 100px">
         <template #suffix> {{ t('page.settings.tab.config.unit.s') }} </template>
       </a-input-number>
-      <template #extra>
-        ={{ formatSeconds(model.cache_lifespan) }}
-      </template>
+      <template #extra> ={{ formatSeconds(model.cache_lifespan) }} </template>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.config.module.multiDialingBlocker.keep-hunting')"
@@ -62,17 +60,15 @@
       <a-input-number v-model="model.keep_hunting_time" style="width: 150px">
         <template #suffix> {{ t('page.settings.tab.config.unit.s') }} </template>
       </a-input-number>
-      <template #extra>
-        ={{ formatSeconds(model.keep_hunting_time) }}
-      </template>
+      <template #extra> ={{ formatSeconds(model.keep_hunting_time) }} </template>
     </a-form-item>
   </a-space>
 </template>
 <script setup lang="ts">
-import type { MultiDialingBlocker } from '@/api/model/settings';
-import { formatMilliseconds, formatSeconds } from '@/utils/time';
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import type { MultiDialingBlocker } from '@/api/model/settings'
+import { formatMilliseconds, formatSeconds } from '@/utils/time'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 

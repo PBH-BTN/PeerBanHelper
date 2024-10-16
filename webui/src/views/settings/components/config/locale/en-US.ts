@@ -111,5 +111,13 @@ export default {
   'page.settings.tab.config.module.ruleSubscribe.individualBanTime': 'Use global ban duration',
   'page.settings.tab.config.module.ruleSubscribe.subscribe':
     'For other configurations, please go to the {link} page',
-  'page.settings.tab.config.module.ruleSubscribe.subscribe.link': 'Rule Subscribe'
+  'page.settings.tab.config.module.ruleSubscribe.subscribe.link': 'Rule Subscribe',
+
+  'page.settings.tab.config.module.activeMonitoring.title': 'Active monitoring',
+  'page.settings.tab.config.module.activeMonitor.disable.tips':
+    'This function is required by some charts.',
+  'page.settings.tab.config.module.activeMonitor.dataRetentionTime': 'Retention time',
+  'page.settings.tab.config.module.activeMonitor.dataRetentionTime.tips':
+    "Deleted records won't free the disk space, but new data will reuse those parts of space due SQLite internal design",
+  'page.settings.tab.config.module.activeMonitor.dataCleanupInterval': 'Cleanup interval'
 }

@@ -29,7 +29,7 @@
         </a-button>
         <a-list
           style="min-width: 800px"
-          :virtual-list-props="{ threshold: 8, height: 500, fixedSize: true ,buffer:4}"
+          :virtual-list-props="{ threshold: 8, height: 500, fixedSize: true, buffer: 4 }"
           :data="model.banned_peer_id"
         >
           <template #item="{ index: i }">

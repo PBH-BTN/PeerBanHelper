@@ -24,10 +24,10 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import type { ExpressionEngine } from '@/api/model/settings';
-import { formatMilliseconds } from '@/utils/time';
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import type { ExpressionEngine } from '@/api/model/settings'
+import { formatMilliseconds } from '@/utils/time'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 

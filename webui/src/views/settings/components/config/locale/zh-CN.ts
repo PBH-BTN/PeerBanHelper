@@ -103,5 +103,12 @@ export default {
   'page.settings.tab.config.module.ruleSubscribe.title': '规则订阅',
   'page.settings.tab.config.module.ruleSubscribe.individualBanTime': '使用全局封禁时间',
   'page.settings.tab.config.module.ruleSubscribe.subscribe': '其他配置请前往{link}页面',
-  'page.settings.tab.config.module.ruleSubscribe.subscribe.link': '规则订阅'
+  'page.settings.tab.config.module.ruleSubscribe.subscribe.link': '规则订阅',
+
+  'page.settings.tab.config.module.activeMonitor.title': '主动监控',
+  'page.settings.tab.config.module.activeMonitor.disable.tips': '关闭后部分图表功能不可用',
+  'page.settings.tab.config.module.activeMonitor.dataRetentionTime': '数据记录周期',
+  'page.settings.tab.config.module.activeMonitor.dataRetentionTime.tips':
+    'SQLite 的特性，记录被删除后不会释放磁盘空间，但后续新数据记录会重新利用此部分空间',
+  'page.settings.tab.config.module.activeMonitor.dataCleanupInterval': '清理周期'
 }

@@ -80,7 +80,13 @@
             key="8"
             :header="t('page.settings.tab.config.module.ruleSubscribe.title')"
           >
-            <RuleSubscribe v-model="form.module.ip_address_blocker_rules" />
+            <ruleSubscribe v-model="form.module.ip_address_blocker_rules" />
+          </a-collapse-item>
+          <a-collapse-item
+            key="9"
+            :header="t('page.settings.tab.config.module.activeMonitor.title')"
+          >
+            <activeMonitoring v-model="form.module.active_monitoring" />
           </a-collapse-item>
         </a-collapse>
       </a-space>
@@ -94,6 +100,7 @@ import { GetSettings } from '@/service/settings'
 import { formatMilliseconds } from '@/utils/time'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import activeMonitoring from './components/activeMonitoring.vue'
 import autoRangeBan from './components/autoRangeBan.vue'
 import clientNameBlackList from './components/clientNameBlackList.vue'
 import expressionEngine from './components/expressionEngine.vue'
@@ -102,7 +109,7 @@ import ipAddressBlocker from './components/ipAddressBlocker.vue'
 import multiDialogBlocker from './components/multiDialogBlocker.vue'
 import peerIdBlackList from './components/peerIdBlackList.vue'
 import progressCheatBlocker from './components/progressCheatBlocker.vue'
-import RuleSubscribe from './components/ruleSubscribe.vue'
+import ruleSubscribe from './components/ruleSubscribe.vue'
 
 const { t } = useI18n()
 const form = ref({
