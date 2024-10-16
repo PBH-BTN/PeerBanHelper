@@ -111,7 +111,7 @@
       <a-switch v-model="model.enable_persist"></a-switch>
       <template v-if="model.enable_persist" #extra>
         <a-typography-text type="danger">{{
-          t('启用此功能可能增加磁盘 I/O 并可能影响性能，嵌入式设备上甚至可能带来缓存磨损')
+          t('page.settings.tab.config.module.progressCheatBlocker.enablePersist.tips')
         }}</a-typography-text></template
       >
     </a-form-item>

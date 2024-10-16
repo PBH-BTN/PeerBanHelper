@@ -69,5 +69,20 @@ export default {
     "Sometimes due the network issue, the peer may cannot sync the progress information on time, When a Peer reached ban condition, the timer will start and Peer will be banned after timer timed out if Peer's progress not update to excepted value on time ",
   'page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest': 'Enable fast PCB test',
   'page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest.tips':
-    'This option will allow PCB ban the Peer from downloader for disconnect it, this will heat up progress reset check quickly.'
+    'This option will allow PCB ban the Peer from downloader for disconnect it, this will heat up progress reset check quickly.',
+  'page.settings.tab.config.module.progressCheatBlocker.fastPCBTestPercentage':
+    'Fast PCB test threshold',
+
+  'page.settings.tab.config.module.ipAddressBlocker.title': 'IP address/port blacklist',
+  'page.settings.tab.config.module.ipAddressBlocker.individualBanTime': 'Use global ban duration',
+  'page.settings.tab.config.module.ipAddressBlocker.rules':
+    'Configure rules please go to the {link} page',
+  'page.settings.tab.config.module.ipAddressBlocker.rules.link': 'Rule Configuration',
+
+  'page.settings.tab.config.module.autoRangeBan.title': 'Range ban',
+  'page.settings.tab.config.module.autoRangeBan.tips':
+    'After a peer got banned, other connected peers that in same range with banned peers will also get banned.',
+  'page.settings.tab.config.module.autoRangeBan.individualBanTime': 'Use global ban duration',
+  'page.settings.tab.config.module.autoRangeBan.ipv4Prefix': 'IPv4 prefix length',
+  'page.settings.tab.config.module.autoRangeBan.ipv6Prefix': 'IPv6 prefix length'
 }

@@ -24,34 +24,40 @@
       :label="t('page.settings.tab.config.module.peerIdBlackList.banPeerId')"
       field="model.ban_duration"
     >
-    <a-space direction="vertical">
-      <a-button @click="model.banned_client_name.push()">
-        <template #icon>
-          <icon-plus />
-        </template>
-      </a-button>
-      <a-list style="min-width: 200px">
-        <a-list-item v-for="(_, i) in model.banned_client_name" :key="i">
-          <a-space>
-            <banRuleListItem v-model="model.banned_client_name[i]" />
-            <br />
-          </a-space>
-          <template #actions>
-            <a-button
-              class="edit-btn"
-              status="danger"
-              shape="circle"
-              type="text"
-              @click="model.banned_client_name.splice(i, 1)"
-            >
-              <template #icon>
-                <icon-delete />
-              </template>
-            </a-button>
+      <a-space direction="vertical">
+        <a-button @click="model.banned_client_name.push()">
+          <template #icon>
+            <icon-plus />
           </template>
-        </a-list-item>
-      </a-list>
-    </a-space>
+        </a-button>
+        <a-list
+          style="min-width: 800px"
+          :virtual-list-props="{ threshold: 8, height: 600, fixedSize: true }"
+          :data="model.banned_client_name"
+        >
+          <template #item="{ index: i }">
+            <a-list-item  style="min-width: 250px">
+              <a-space>
+                <banRuleListItem v-model="model.banned_client_name[i]" />
+                <br />
+              </a-space>
+              <template #actions>
+                <a-button
+                  class="edit-btn"
+                  status="danger"
+                  shape="circle"
+                  type="text"
+                  @click="model.banned_client_name.splice(i, 1)"
+                >
+                  <template #icon>
+                    <icon-delete />
+                  </template>
+                </a-button>
+              </template>
+            </a-list-item>
+          </template>
+        </a-list>
+      </a-space>
     </a-form-item>
   </a-space>
 </template>
@@ -61,10 +67,8 @@ import { formatMilliseconds } from '@/utils/time';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import banRuleListItem from './banRuleListItem.vue';
-
 const { t } = useI18n()
 const model = defineModel<ClientNameBlacklist>({ required: true })
-
 const individualBanTime = ref(model.value.ban_duration === 'default')
 const changeIndividualBanTime = (value: string | number | boolean) => {
   if (value) {

@@ -59,7 +59,7 @@ export interface ProgressCheatBlocker {
 
 export interface IpAddressBlocker {
   enabled: boolean
-  ban_duration: number
+  ban_duration: number | 'default'
   ips: string[]
   ports: number[]
   asns: string[]
@@ -82,7 +82,7 @@ export interface NetType {
 
 export interface AutoRangeBan {
   enabled: boolean
-  ban_duration: number
+  ban_duration: number | 'default'
   ipv4: number
   ipv6: number
 }

@@ -12,8 +12,9 @@
           <icon-plus />
         </template>
       </a-button>
-      <a-list style="min-width: 200px">
-        <a-list-item v-for="(_, i) in model" :key="i">
+      <a-list style="min-width: 200px" :virtual-list-props="props.virtualListProps" :data="model">
+        <template #item="{index:i}">
+        <a-list-item >
           <a-space>
             <a-input v-model="model[i]" />
             <br />
@@ -32,17 +33,22 @@
             </a-button>
           </template>
         </a-list-item>
+    </template>
       </a-list>
     </a-space>
   </a-form-item>
 </template>
 <script setup lang="ts">
+import type { VirtualListProps } from '@arco-design/web-vue/es/_components/virtual-list-v2/interface';
+
+
 type Value = string
 const model = defineModel<Value[]>({ required: true })
 const props = defineProps<{
   label: string
   required?: boolean
-  tooltip?: string
+  tooltip?: string,
+  virtualListProps?:VirtualListProps
 }>()
 </script>
 <style scoped>

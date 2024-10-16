@@ -30,26 +30,28 @@
             <icon-plus />
           </template>
         </a-button>
-        <a-list style="min-width: 200px">
-          <a-list-item v-for="(_, i) in model.banned_peer_id" :key="i">
-            <a-space>
-              <banRuleListItem v-model="model.banned_peer_id[i]" />
-              <br />
-            </a-space>
-            <template #actions>
-              <a-button
-                class="edit-btn"
-                status="danger"
-                shape="circle"
-                type="text"
-                @click="model.banned_peer_id.splice(i, 1)"
-              >
-                <template #icon>
-                  <icon-delete />
-                </template>
-              </a-button>
-            </template>
-          </a-list-item>
+        <a-list style="min-width: 800px" :virtual-list-props="{ threshold: 8,height:500 }" :data="model.banned_peer_id">
+          <template #item="{ index: i }">
+            <a-list-item>
+              <a-space>
+                <banRuleListItem v-model="model.banned_peer_id[i]" />
+                <br />
+              </a-space>
+              <template #actions>
+                <a-button
+                  class="edit-btn"
+                  status="danger"
+                  shape="circle"
+                  type="text"
+                  @click="model.banned_peer_id.splice(i, 1)"
+                >
+                  <template #icon>
+                    <icon-delete />
+                  </template>
+                </a-button>
+              </template>
+            </a-list-item>
+          </template>
         </a-list>
       </a-space>
     </a-form-item>

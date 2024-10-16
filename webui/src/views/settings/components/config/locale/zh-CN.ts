@@ -66,5 +66,17 @@ export default {
   'page.settings.tab.config.module.progressCheatBlocker.enableFastPCBTest.tips':
     '此选项将允许 PCB 在 Peer 下载指定量的数据后，将其短暂的封禁一段时间以便断开其连接，这有助于快速预热进度重置检查',
   'page.settings.tab.config.module.progressCheatBlocker.fastPCBTestPercentage':
-    '快速 PCB 测试启动阈值'
+    '快速 PCB 测试启动阈值',
+
+  'page.settings.tab.config.module.ipAddressBlocker.title': 'IP 地址封禁',
+  'page.settings.tab.config.module.ipAddressBlocker.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.config.module.ipAddressBlocker.rules': '配置规则请前往{link}页面',
+  'page.settings.tab.config.module.ipAddressBlocker.rules.link': '规则配置',
+
+  'page.settings.tab.config.module.autoRangeBan.title': '范围 IP 段封禁',
+  'page.settings.tab.config.module.autoRangeBan.tips':
+    '在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁',
+  'page.settings.tab.config.module.autoRangeBan.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.config.module.autoRangeBan.ipv4Prefix': 'IPv4 前缀长度',
+  'page.settings.tab.config.module.autoRangeBan.ipv6Prefix': 'IPv6 前缀长度'
 }
