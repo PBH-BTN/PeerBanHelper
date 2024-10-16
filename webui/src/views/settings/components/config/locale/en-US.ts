@@ -1,4 +1,5 @@
 export default {
+  'page.settings.tab.config.save': 'Save',
   'page.settings.tab.config.base.title': 'Base Config',
   'page.settings.tab.config.form.checkInterval': 'Check Interval',
   'page.settings.tab.config.unit.ms': 'ms',

@@ -1,4 +1,5 @@
 export default {
+  'page.settings.tab.config.save': '保存',
   'page.settings.tab.config.base.title': '基础配置',
   'page.settings.tab.config.form.checkInterval': '检查频率',
   'page.settings.tab.config.unit.ms': '毫秒',
