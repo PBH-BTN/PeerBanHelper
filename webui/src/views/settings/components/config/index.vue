@@ -28,7 +28,7 @@
           v-model="form.ignore_peers_from_addresses"
           :label="t('page.settings.tab.config.form.ingoreAddress')"
           :tooltip="t('page.settings.tab.config.form.ingoreAddress.tooltip')"
-          :virtual-list-props="{ threshold: 8,height:500 }"
+          :virtual-list-props="{ threshold: 8, height: 500 }"
         />
       </a-space>
       <a-divider />
@@ -65,10 +65,10 @@ import progressCheatBlocker from './components/progressCheatBlocker.vue'
 
 const { t } = useI18n()
 const form = ref({
-    config_version: 0,
-    check_interval: 0,
-    ban_duration: 0,
-    ignore_peers_from_addresses:[] as string[],
+  config_version: 0,
+  check_interval: 0,
+  ban_duration: 0,
+  ignore_peers_from_addresses: [] as string[]
 } as Config)
 GetSettings().then((data) => (form.value = data.data))
 </script>

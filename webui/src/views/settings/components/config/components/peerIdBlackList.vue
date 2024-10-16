@@ -30,7 +30,11 @@
             <icon-plus />
           </template>
         </a-button>
-        <a-list style="min-width: 800px" :virtual-list-props="{ threshold: 8,height:500 }" :data="model.banned_peer_id">
+        <a-list
+          style="min-width: 800px"
+          :virtual-list-props="{ threshold: 8, height: 500 }"
+          :data="model.banned_peer_id"
+        >
           <template #item="{ index: i }">
             <a-list-item>
               <a-space>

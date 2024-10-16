@@ -36,7 +36,7 @@
           :data="model.banned_client_name"
         >
           <template #item="{ index: i }">
-            <a-list-item  style="min-width: 250px">
+            <a-list-item style="min-width: 250px">
               <a-space>
                 <banRuleListItem v-model="model.banned_client_name[i]" />
                 <br />
@@ -62,11 +62,11 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { type ClientNameBlacklist } from '@/api/model/settings';
-import { formatMilliseconds } from '@/utils/time';
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import banRuleListItem from './banRuleListItem.vue';
+import { type ClientNameBlacklist } from '@/api/model/settings'
+import { formatMilliseconds } from '@/utils/time'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import banRuleListItem from './banRuleListItem.vue'
 const { t } = useI18n()
 const model = defineModel<ClientNameBlacklist>({ required: true })
 const individualBanTime = ref(model.value.ban_duration === 'default')

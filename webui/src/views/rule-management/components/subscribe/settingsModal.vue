@@ -54,7 +54,6 @@ const parser = (value: string) => {
   return value.replace(/,/g, '')
 }
 
-
 const form = reactive({
   checkInterval: 0
 })
