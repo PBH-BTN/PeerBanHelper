@@ -2,6 +2,7 @@ export default {
   'page.settings.tab.config.base.title': '基础配置',
   'page.settings.tab.config.form.checkInterval': '检查频率',
   'page.settings.tab.config.unit.ms': '毫秒',
+  'page.settings.tab.config.unit.s': '秒',
   'page.settings.tab.config.form.banDuration': '封禁持续时间',
   'page.settings.tab.config.form.ingoreAddress': '忽略地址',
   'page.settings.tab.config.form.ingoreAddress.tooltip':
@@ -78,5 +79,29 @@ export default {
     '在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁',
   'page.settings.tab.config.module.autoRangeBan.individualBanTime': '使用全局封禁时间',
   'page.settings.tab.config.module.autoRangeBan.ipv4Prefix': 'IPv4 前缀长度',
-  'page.settings.tab.config.module.autoRangeBan.ipv6Prefix': 'IPv6 前缀长度'
+  'page.settings.tab.config.module.autoRangeBan.ipv6Prefix': 'IPv6 前缀长度',
+
+  'page.settings.tab.config.module.multiDialingBlocker.title': '多播封禁',
+  'page.settings.tab.config.module.multiDialingBlocker.individualBanTime': '使用全局封禁时间',
+
+  'page.settings.tab.config.module.multiDialingBlocker.subnet-mask-length': '子网掩码长度',
+  'page.settings.tab.config.module.multiDialingBlocker.subnet-mask-v6-length': 'IPv6子网掩码长度',
+  'page.settings.tab.config.module.multiDialingBlocker.tolerate-num': '封禁阈值',
+  'page.settings.tab.config.module.multiDialingBlocker.tolerate-num.tips':
+    '容许同一网段下载同一种子的IP数量，防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判',
+  'page.settings.tab.config.module.multiDialingBlocker.timeWindow': '检测窗口',
+  'page.settings.tab.config.module.multiDialingBlocker.keep-hunting': '是否追猎',
+  'page.settings.tab.config.module.multiDialingBlocker.keep-hunting.tips':
+    '如果某IP已判定为多拨，无视缓存时间限制继续搜寻其同伙',
+  'page.settings.tab.config.module.multiDialingBlocker.keep-hunting-time': '追猎时间',
+
+  'page.settings.tab.config.module.expressionEngine.title': 'AviatorScript 规则引擎',
+  'page.settings.tab.config.module.expressionEngine.tips':
+    '启用此功能可以使用 AviatorScript 语言编写复杂的规则，以实现更多的自定义功能',
+  'page.settings.tab.config.module.expressionEngine.individualBanTime': '使用全局封禁时间',
+
+  'page.settings.tab.config.module.ruleSubscribe.title': '规则订阅',
+  'page.settings.tab.config.module.ruleSubscribe.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.config.module.ruleSubscribe.subscribe': '其他配置请前往{link}页面',
+  'page.settings.tab.config.module.ruleSubscribe.subscribe.link': '规则订阅'
 }

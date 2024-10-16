@@ -94,7 +94,7 @@ export interface Btn {
 
 export interface MultiDialingBlocker {
   enabled: boolean
-  ban_duration: number
+  ban_duration: number | 'default'
   subnet_mask_length: number
   subnet_mask_v6_length: number
   tolerate_num: number
@@ -105,12 +105,12 @@ export interface MultiDialingBlocker {
 
 export interface ExpressionEngine {
   enabled: boolean
-  ban_duration: string
+  ban_duration: number | 'default'
 }
 
 export interface IpAddressBlockerRules {
   enabled: boolean
-  ban_duration: number
+  ban_duration: number | 'default'
   check_interval: number
   rules: Rules
 }

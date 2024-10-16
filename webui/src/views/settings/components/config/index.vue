@@ -1,7 +1,7 @@
 <template>
-  <div id="#top">
+  <div id="#top" style="position: relative">
     <a-form :model="form">
-      <a-space direction="vertical" fill style="width: 80%">
+      <a-space direction="vertical" fill style="width: 100%">
         <a-typography-title id="id" :heading="3">{{
           t('page.settings.tab.config.base.title')
         }}</a-typography-title>
@@ -32,7 +32,7 @@
         />
       </a-space>
       <a-divider />
-      <a-space v-if="form.module" direction="vertical" fill style="width: 80%">
+      <a-space v-if="form.module" direction="vertical" fill style="width: 90%">
         <a-typography-title id="module" :heading="3">{{
           t('page.settings.tab.config.module.title')
         }}</a-typography-title>
@@ -64,6 +64,24 @@
           >
             <autoRangeBan v-model="form.module.auto_range_ban" />
           </a-collapse-item>
+          <a-collapse-item
+            key="6"
+            :header="t('page.settings.tab.config.module.multiDialingBlocker.title')"
+          >
+            <multiDialogBlocker v-model="form.module.multi_dialing_blocker" />
+          </a-collapse-item>
+          <a-collapse-item
+            key="7"
+            :header="t('page.settings.tab.config.module.expressionEngine.title')"
+          >
+            <expressionEngine v-model="form.module.expression_engine" />
+          </a-collapse-item>
+          <a-collapse-item
+            key="8"
+            :header="t('page.settings.tab.config.module.ruleSubscribe.title')"
+          >
+            <RuleSubscribe v-model="form.module.ip_address_blocker_rules" />
+          </a-collapse-item>
         </a-collapse>
       </a-space>
     </a-form>
@@ -78,10 +96,13 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import autoRangeBan from './components/autoRangeBan.vue'
 import clientNameBlackList from './components/clientNameBlackList.vue'
+import expressionEngine from './components/expressionEngine.vue'
 import formArray from './components/formArray.vue'
 import ipAddressBlocker from './components/ipAddressBlocker.vue'
+import multiDialogBlocker from './components/multiDialogBlocker.vue'
 import peerIdBlackList from './components/peerIdBlackList.vue'
 import progressCheatBlocker from './components/progressCheatBlocker.vue'
+import RuleSubscribe from './components/ruleSubscribe.vue'
 
 const { t } = useI18n()
 const form = ref({

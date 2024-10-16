@@ -23,3 +23,7 @@ export function formatMilliseconds(ms: number): string {
 
   return result.trim()
 }
+
+export function formatSeconds(seconds: number): string {
+  return formatMilliseconds(seconds * 1000)
+}

@@ -1,0 +1,88 @@
+<template>
+  <a-space direction="vertical" fill>
+    <a-form-item :label="t('page.settings.tab.config.module.enable')" field="model.enabled">
+      <a-switch v-model="model.enabled" />
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.multiDialingBlocker.individualBanTime')"
+      field="model.ban_duration"
+    >
+      <a-space>
+        <a-switch v-model="individualBanTime" @change="changeIndividualBanTime" />
+        <a-input-number v-if="!individualBanTime" v-model="model.ban_duration as number">
+          <template #suffix> {{ t('page.settings.tab.config.unit.ms') }} </template>
+        </a-input-number>
+      </a-space>
+      <template v-if="model.ban_duration !== 'default'" #extra>
+        ={{ formatMilliseconds(model.ban_duration) }}
+      </template>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.multiDialingBlocker.subnet-mask-length')"
+      field="model.subnet_mask_length"
+    >
+      <a-input-number v-model="model.subnet_mask_length" style="width: 100px"></a-input-number>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.multiDialingBlocker.subnet-mask-v6-length')"
+      field="model.subnet_mask_length"
+    >
+      <a-input-number v-model="model.subnet_mask_length" style="width: 100px"></a-input-number>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.multiDialingBlocker.tolerate-num')"
+      :tooltip="t('page.settings.tab.config.module.multiDialingBlocker.tolerate-num.tips')"
+      field="model.tolerate_num"
+    >
+      <a-input-number v-model="model.tolerate_num" style="width: 100px"></a-input-number>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.multiDialingBlocker.timeWindow')"
+      field="model.cache_lifespan"
+    >
+      <a-input-number v-model="model.cache_lifespan" style="width: 100px">
+        <template #suffix> {{ t('page.settings.tab.config.unit.s') }} </template>
+      </a-input-number>
+      <template #extra>
+        ={{ formatSeconds(model.cache_lifespan) }}
+      </template>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.config.module.multiDialingBlocker.keep-hunting')"
+      :tooltip="t('page.settings.tab.config.module.multiDialingBlocker.keep-hunting.tips')"
+      field="model.keep_hunting"
+    >
+      <a-switch v-model="model.keep_hunting" />
+    </a-form-item>
+    <a-form-item
+      v-if="model.keep_hunting"
+      :label="t('page.settings.tab.config.module.multiDialingBlocker.keep-hunting-time')"
+      field="model.keep_hunting_time"
+    >
+      <a-input-number v-model="model.keep_hunting_time" style="width: 150px">
+        <template #suffix> {{ t('page.settings.tab.config.unit.s') }} </template>
+      </a-input-number>
+      <template #extra>
+        ={{ formatSeconds(model.keep_hunting_time) }}
+      </template>
+    </a-form-item>
+  </a-space>
+</template>
+<script setup lang="ts">
+import type { MultiDialingBlocker } from '@/api/model/settings';
+import { formatMilliseconds, formatSeconds } from '@/utils/time';
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n()
+
+const model = defineModel<MultiDialingBlocker>({ required: true })
+const individualBanTime = ref(model.value.ban_duration === 'default')
+const changeIndividualBanTime = (value: string | number | boolean) => {
+  if (value) {
+    model.value.ban_duration = 'default'
+  } else {
+    model.value.ban_duration = 259200000
+  }
+}
+</script>

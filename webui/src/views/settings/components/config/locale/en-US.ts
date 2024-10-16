@@ -2,6 +2,7 @@ export default {
   'page.settings.tab.config.base.title': 'Base Config',
   'page.settings.tab.config.form.checkInterval': 'Check Interval',
   'page.settings.tab.config.unit.ms': 'ms',
+  'page.settings.tab.config.unit.s': 'seconds',
   'page.settings.tab.config.form.banDuration': 'Ban Duration',
   'page.settings.tab.config.form.ingoreAddress': 'Ignore Address',
   'page.settings.tab.config.form.ingoreAddress.tooltip':
@@ -84,5 +85,31 @@ export default {
     'After a peer got banned, other connected peers that in same range with banned peers will also get banned.',
   'page.settings.tab.config.module.autoRangeBan.individualBanTime': 'Use global ban duration',
   'page.settings.tab.config.module.autoRangeBan.ipv4Prefix': 'IPv4 prefix length',
-  'page.settings.tab.config.module.autoRangeBan.ipv6Prefix': 'IPv6 prefix length'
+  'page.settings.tab.config.module.autoRangeBan.ipv6Prefix': 'IPv6 prefix length',
+
+  'page.settings.tab.config.module.multiDialingBlocker.title': 'Multi-dialing blocker',
+  'page.settings.tab.config.module.multiDialingBlocker.individualBanTime':
+    'Use global ban duration',
+  'page.settings.tab.config.module.multiDialingBlocker.subnet-mask-length': 'Subnet mask length',
+  'page.settings.tab.config.module.multiDialingBlocker.subnet-mask-v6-length':
+    'IPv6 subnet mask length',
+  'page.settings.tab.config.module.multiDialingBlocker.tolerate-num': 'Tolerate number',
+  'page.settings.tab.config.module.multiDialingBlocker.tolerate-num.tips':
+    'The allowed maximum amount of ips in same subnet, to avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same ISP',
+  'page.settings.tab.config.module.multiDialingBlocker.timeWindow': 'Detection window',
+  'page.settings.tab.config.module.multiDialingBlocker.keep-hunting': 'Keep hunting',
+  'page.settings.tab.config.module.multiDialingBlocker.keep-hunting.tips':
+    'If a specific IP flagged multi-dialing, ignore the caching span and keep searching other IPs in same subnet',
+  'page.settings.tab.config.module.multiDialingBlocker.keep-hunting-time': 'Keep hunting time',
+
+  'page.settings.tab.config.module.expressionEngine.title': 'AviatorScript rule engine',
+  'page.settings.tab.config.module.expressionEngine.tips':
+    'Enable this feature can use AviatorScript language to write complex rules to achieve more custom functions',
+  'page.settings.tab.config.module.expressionEngine.individualBanTime': 'Use global ban duration',
+
+  'page.settings.tab.config.module.ruleSubscribe.title': 'Rule subscribe',
+  'page.settings.tab.config.module.ruleSubscribe.individualBanTime': 'Use global ban duration',
+  'page.settings.tab.config.module.ruleSubscribe.subscribe':
+    'For other configurations, please go to the {link} page',
+  'page.settings.tab.config.module.ruleSubscribe.subscribe.link': 'Rule Subscribe'
 }
