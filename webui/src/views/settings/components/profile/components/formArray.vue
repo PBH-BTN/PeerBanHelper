@@ -12,7 +12,12 @@
           <icon-plus />
         </template>
       </a-button>
-      <a-list style="min-width: 200px" :virtual-list-props="props.virtualListProps" :data="dataWithIndex" :pagination-props="props.paginationProps">
+      <a-list
+        style="min-width: 200px"
+        :virtual-list-props="props.virtualListProps"
+        :data="dataWithIndex"
+        :pagination-props="props.paginationProps"
+      >
         <template #item="{ item }">
           <a-list-item>
             <a-space>
@@ -39,9 +44,9 @@
   </a-form-item>
 </template>
 <script setup lang="ts">
-import type { PaginationProps } from '@arco-design/web-vue';
-import type { VirtualListProps } from '@arco-design/web-vue/es/_components/virtual-list-v2/interface';
-import { computed } from 'vue';
+import type { PaginationProps } from '@arco-design/web-vue'
+import type { VirtualListProps } from '@arco-design/web-vue/es/_components/virtual-list-v2/interface'
+import { computed } from 'vue'
 
 type Value = string
 const model = defineModel<Value[]>({ required: true })
@@ -49,7 +54,7 @@ const props = defineProps<{
   label: string
   required?: boolean
   tooltip?: string
-  virtualListProps?: VirtualListProps,
+  virtualListProps?: VirtualListProps
   paginationProps?: PaginationProps
 }>()
 const dataWithIndex = computed(() => {

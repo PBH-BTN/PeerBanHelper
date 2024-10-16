@@ -30,7 +30,7 @@
               v-model="form.ignore_peers_from_addresses"
               :label="t('page.settings.tab.profile.form.ingoreAddress')"
               :tooltip="t('page.settings.tab.profile.form.ingoreAddress.tooltip')"
-              :pagination-props="{ pageSize:10, total: form.ignore_peers_from_addresses.length }"
+              :pagination-props="{ pageSize: 10, total: form.ignore_peers_from_addresses.length }"
             />
           </a-space>
           <a-divider />
