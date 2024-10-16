@@ -1,16 +1,16 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-form-item :label="t('page.settings.tab.config.module.enable')" field="model.enabled">
+    <a-form-item :label="t('page.settings.tab.profile.module.enable')" field="model.enabled">
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.config.module.peerIdBlackList.individualBanTime')"
+      :label="t('page.settings.tab.profile.module.peerIdBlackList.individualBanTime')"
       field="model.ban_duration"
     >
       <a-space>
         <a-switch v-model="individualBanTime" @change="changeIndividualBanTime" />
         <a-input-number v-if="!individualBanTime" v-model="model.ban_duration as number">
-          <template #suffix> {{ t('page.settings.tab.config.unit.ms') }} </template>
+          <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
       <template v-if="model.ban_duration !== 'default'" #extra>
@@ -18,11 +18,11 @@
       </template>
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.config.module.peerIdBlackList.banPeerId')"
+      :label="t('page.settings.tab.profile.module.peerIdBlackList.banPeerId')"
       field="model.ban_duration"
     >
       <a-space direction="vertical">
-        <a-button @click="model.banned_client_name.push()">
+        <a-button @click="model.banned_peer_id.push()">
           <template #icon>
             <icon-plus />
           </template>
@@ -30,12 +30,12 @@
         <a-list
           style="min-width: 800px"
           :virtual-list-props="{ threshold: 8, height: 500, fixedSize: true, buffer: 4 }"
-          :data="model.banned_client_name"
+          :data="model.banned_peer_id"
         >
           <template #item="{ index: i }">
-            <a-list-item style="min-width: 250px">
+            <a-list-item>
               <a-space>
-                <banRuleListItem v-model="model.banned_client_name[i]" />
+                <banRuleListItem v-model="model.banned_peer_id[i]" />
                 <br />
               </a-space>
               <template #actions>
@@ -44,7 +44,7 @@
                   status="danger"
                   shape="circle"
                   type="text"
-                  @click="model.banned_client_name.splice(i, 1)"
+                  @click="model.banned_peer_id.splice(i, 1)"
                 >
                   <template #icon>
                     <icon-delete />
@@ -59,13 +59,15 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { type ClientNameBlacklist } from '@/api/model/settings'
+import { type PeerIdBlacklist } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import banRuleListItem from './banRuleListItem.vue'
+
 const { t } = useI18n()
-const model = defineModel<ClientNameBlacklist>({ required: true })
+const model = defineModel<PeerIdBlacklist>({ required: true })
+
 const individualBanTime = ref(model.value.ban_duration === 'default')
 const changeIndividualBanTime = (value: string | number | boolean) => {
   if (value) {

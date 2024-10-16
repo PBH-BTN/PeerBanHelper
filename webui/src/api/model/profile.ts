@@ -1,4 +1,4 @@
-export interface Config {
+export interface Profile {
   config_version: number
   check_interval: number
   ban_duration: number

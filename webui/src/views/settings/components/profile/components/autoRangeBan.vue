@@ -1,43 +1,48 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-form-item :label="t('page.settings.tab.config.module.enable')" field="model.enabled">
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.enable')"
+      field="model.enabled"
+      :tooltip="t('page.settings.tab.profile.module.autoRangeBan.tips')"
+    >
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.config.module.ipAddressBlocker.individualBanTime')"
+      :label="t('page.settings.tab.profile.module.autoRangeBan.individualBanTime')"
       field="model.ban_duration"
     >
       <a-space>
         <a-switch v-model="individualBanTime" @change="changeIndividualBanTime" />
         <a-input-number v-if="!individualBanTime" v-model="model.ban_duration as number">
-          <template #suffix> {{ t('page.settings.tab.config.unit.ms') }} </template>
+          <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
       <template v-if="model.ban_duration !== 'default'" #extra>
         ={{ formatMilliseconds(model.ban_duration) }}
       </template>
     </a-form-item>
-    <a-typography-text>
-      <i18n-t keypath="page.settings.tab.config.module.ipAddressBlocker.rules">
-        <template #link>
-          <a-link @click="goto('rule_management_ip')">{{
-            t('page.settings.tab.config.module.ipAddressBlocker.rules.link')
-          }}</a-link>
-        </template>
-      </i18n-t>
-    </a-typography-text>
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.autoRangeBan.ipv4Prefix')"
+      field="model.ipv4"
+    >
+      <a-input-number v-model="model.ipv4" style="width: 100px"></a-input-number>
+    </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.autoRangeBan.ipv6Prefix')"
+      field="model.ipv6"
+    >
+      <a-input-number v-model="model.ipv6" style="width: 100px"></a-input-number>
+    </a-form-item>
   </a-space>
 </template>
 <script setup lang="ts">
-import { type IpAddressBlocker } from '@/api/model/settings'
-import { useViewRoute } from '@/router'
+import { type AutoRangeBan } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-const [_, _currentName, goto] = useViewRoute()
 
 const { t } = useI18n()
-const model = defineModel<IpAddressBlocker>({ required: true })
+const model = defineModel<AutoRangeBan>({ required: true })
 const individualBanTime = ref(model.value.ban_duration === 'default')
 const changeIndividualBanTime = (value: string | number | boolean) => {
   if (value) {
