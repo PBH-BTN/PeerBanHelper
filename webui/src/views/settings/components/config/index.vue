@@ -33,11 +33,6 @@
               {{ t('page.settings.tab.config.plus.button') }}
             </a-button>
           </a-form-item>
-          <a-form-item label="PBH Plus key">
-            <a-button type="primary" @click="endpointStore.emmitter.emit('open-plus-modal')">
-              {{ t('page.settings.tab.config.plus.button') }}
-            </a-button>
-          </a-form-item>
           <a-form-item
             :label="t('page.settings.tab.config.privacy.errorReport')"
             field="privacy.error_reporting"
