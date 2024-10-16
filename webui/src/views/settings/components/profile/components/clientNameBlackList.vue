@@ -4,12 +4,12 @@
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.peerIdBlackList.individualBanTime')"
+      :label="t('page.settings.tab.profile.module.clientNameBlackList.individualBanTime')"
       field="model.ban_duration"
     >
       <a-space>
-        <a-switch v-model="individualBanTime" @change="changeIndividualBanTime" />
-        <a-input-number v-if="!individualBanTime" v-model="model.ban_duration as number">
+        <a-switch v-model="useGlobalBanTime" />
+        <a-input-number v-if="!useGlobalBanTime" v-model.number="model.ban_duration as number">
           <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
@@ -18,11 +18,12 @@
       </template>
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.peerIdBlackList.banPeerId')"
+      :label="t('page.settings.tab.profile.module.clientNameBlackList.banClientName')"
       field="model.ban_duration"
+      :rules="[{ validator: nonEmptyValidator }]"
     >
       <a-space direction="vertical">
-        <a-button @click="model.banned_client_name.push()">
+        <a-button @click="model.banned_client_name.push({ method: 'STARTS_WITH', content: '' })">
           <template #icon>
             <icon-plus />
           </template>
@@ -61,20 +62,23 @@
 <script setup lang="ts">
 import { type ClientNameBlacklist } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import banRuleListItem from './banRuleListItem.vue'
 const { t } = useI18n()
 const model = defineModel<ClientNameBlacklist>({ required: true })
-const individualBanTime = ref(model.value.ban_duration === 'default')
-const changeIndividualBanTime = (value: string | number | boolean) => {
-  if (value) {
-    model.value.ban_duration = 'default'
-  } else {
-    model.value.ban_duration = 259200000
+const useGlobalBanTime = computed({
+  get: () => model.value.ban_duration === 'default',
+  set: (value: boolean) => {
+    model.value.ban_duration = value ? 'default' : 259200000
   }
-}
+})
 const dataWithIndex = computed(() => {
   return model.value.banned_client_name.map((item, index) => ({ ...item, index }))
 })
+const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
+  if (model.value.banned_client_name.filter((item) => item.content === '').length > 0)
+    cb('Please fill in the blank field')
+  else cb()
+}
 </script>

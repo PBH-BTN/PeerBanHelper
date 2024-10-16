@@ -28,8 +28,8 @@
             </a-form-item>
             <formArray
               v-model="form.ignore_peers_from_addresses"
-              :label="t('page.settings.tab.profile.form.ingoreAddress')"
-              :tooltip="t('page.settings.tab.profile.form.ingoreAddress.tooltip')"
+              :label="t('page.settings.tab.profile.form.ignoreAddress')"
+              :tooltip="t('page.settings.tab.profile.form.ignoreAddress.tooltip')"
               :pagination-props="{ pageSize: 10, total: form.ignore_peers_from_addresses.length }"
             />
           </a-space>
@@ -73,7 +73,7 @@
                 key="6"
                 :header="t('page.settings.tab.profile.module.multiDialingBlocker.title')"
               >
-                <multiDialogBlocker v-model="form.module.multi_dialing_blocker" />
+                <multiDialingBlocker v-model="form.module.multi_dialing_blocker" />
               </a-collapse-item>
               <a-collapse-item
                 key="7"
@@ -122,7 +122,7 @@ import clientNameBlackList from './components/clientNameBlackList.vue'
 import expressionEngine from './components/expressionEngine.vue'
 import formArray from './components/formArray.vue'
 import ipAddressBlocker from './components/ipAddressBlocker.vue'
-import multiDialogBlocker from './components/multiDialogBlocker.vue'
+import multiDialingBlocker from './components/multiDialingBlocker.vue'
 import peerIdBlackList from './components/peerIdBlackList.vue'
 import progressCheatBlocker from './components/progressCheatBlocker.vue'
 import ruleSubscribe from './components/ruleSubscribe.vue'

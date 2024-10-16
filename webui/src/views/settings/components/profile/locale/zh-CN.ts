@@ -5,8 +5,8 @@ export default {
   'page.settings.tab.profile.unit.ms': '毫秒',
   'page.settings.tab.profile.unit.s': '秒',
   'page.settings.tab.profile.form.banDuration': '封禁持续时间',
-  'page.settings.tab.profile.form.ingoreAddress': '忽略地址',
-  'page.settings.tab.profile.form.ingoreAddress.tooltip':
+  'page.settings.tab.profile.form.ignoreAddress': '忽略地址',
+  'page.settings.tab.profile.form.ignoreAddress.tooltip':
     '来自这些 IP 地址的 Peers 不会被 PBH 检查，绕过所有检查规则',
   'page.settings.tab.profile.module.title': '模块配置',
   'page.settings.tab.profile.module.enable': '启用',
@@ -32,6 +32,9 @@ export default {
   'page.settings.tab.profile.module.peerIdBlackList.rule': '规则',
 
   'page.settings.tab.profile.module.clientNameBlackList': '客户端名称封禁',
+  'page.settings.tab.profile.module.clientNameBlackList.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.profile.module.clientNameBlackList.banClientName': '封禁客户端名称',
+  'page.settings.tab.profile.module.clientNameBlackList.rule': '规则',
 
   'page.settings.tab.profile.module.progressCheatBlocker': '进度作弊检查器',
   'page.settings.tab.profile.module.progressCheatBlocker.tips':

@@ -3,10 +3,7 @@
     <a-typography-title id="id" :heading="3">{{
       t('page.settings.tab.config.persist.title')
     }}</a-typography-title>
-    <a-form-item
-      :label="t('page.settings.tab.config.persist.banlist')"
-      field="persist.ban_logs_keep_days"
-    >
+    <a-form-item :label="t('page.settings.tab.config.persist.banlist')" field="persist.banlist">
       <a-switch v-model="model.banlist" />
     </a-form-item>
     <a-form-item

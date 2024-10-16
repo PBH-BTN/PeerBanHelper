@@ -8,8 +8,8 @@
       field="model.ban_duration"
     >
       <a-space>
-        <a-switch v-model="individualBanTime" @change="changeIndividualBanTime" />
-        <a-input-number v-if="!individualBanTime" v-model="model.ban_duration as number">
+        <a-switch v-model="useGlobalBanTime" />
+        <a-input-number v-if="!useGlobalBanTime" v-model="model.ban_duration as number">
           <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
@@ -25,9 +25,9 @@
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length')"
-      field="model.subnet_mask_length"
+      field="model.subnet_mask_v6_length"
     >
-      <a-input-number v-model="model.subnet_mask_length" style="width: 100px"></a-input-number>
+      <a-input-number v-model="model.subnet_mask_v6_length" style="width: 100px"></a-input-number>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.multiDialingBlocker.tolerate-num')"
@@ -67,18 +67,16 @@
 <script setup lang="ts">
 import type { MultiDialingBlocker } from '@/api/model/profile'
 import { formatMilliseconds, formatSeconds } from '@/utils/time'
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const model = defineModel<MultiDialingBlocker>({ required: true })
-const individualBanTime = ref(model.value.ban_duration === 'default')
-const changeIndividualBanTime = (value: string | number | boolean) => {
-  if (value) {
-    model.value.ban_duration = 'default'
-  } else {
-    model.value.ban_duration = 259200000
+const useGlobalBanTime = computed({
+  get: () => model.value.ban_duration === 'default',
+  set: (value: boolean) => {
+    model.value.ban_duration = value ? 'default' : 259200000
   }
-}
+})
 </script>

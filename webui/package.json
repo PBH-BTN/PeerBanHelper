@@ -11,6 +11,7 @@
     "analyze": "ANALYZE=true vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "prettier -c src/ && eslint . --ignore-pattern 'dist/*'",
+    "fix-lint": "eslint . --ignore-pattern 'dist/*' --fix",
     "format": "prettier --write src/"
   },
   "dependencies": {

@@ -34,7 +34,7 @@ export default {
   'router.metrics.ruleMetrics': 'Rule Metrics',
   'router.metrics.charts': 'Charts',
   'router.rule_management': 'Rule',
-  'router.config': 'Perferences',
+  'router.config': 'Preferences',
 
   'router.moduleNotEnable': '{moduleName} is not enabled',
   'router.moduleNotEnable.tips': 'Please enable the feature in the configuration file',

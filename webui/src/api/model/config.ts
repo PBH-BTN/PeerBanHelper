@@ -1,6 +1,6 @@
 export interface Config {
   config_version: number
-  language: string
+  language: 'en_us' | 'zh_cn' | 'default'
   pbh_plus_key: string
   server: Server
   logger: Logger

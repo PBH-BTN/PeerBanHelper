@@ -10,7 +10,7 @@ export async function GetProfile(): Promise<CommonResponse<Profile>> {
       res({
         success: true,
         message: 'success',
-        data: sampleProfile
+        data: sampleProfile as Profile
       })
     }, 3000)
   })
@@ -34,7 +34,7 @@ export async function GetConfig(): Promise<CommonResponse<Config>> {
       res({
         success: true,
         message: 'success',
-        data: sampleConfig
+        data: sampleConfig as Config
       })
     }, 3000)
   })

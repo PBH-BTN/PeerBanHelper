@@ -8,8 +8,8 @@
       field="model.ban_duration"
     >
       <a-space>
-        <a-switch v-model="individualBanTime" @change="changeIndividualBanTime" />
-        <a-input-number v-if="!individualBanTime" v-model="model.ban_duration as number">
+        <a-switch v-model="useGlobalBanTime" />
+        <a-input-number v-if="!useGlobalBanTime" v-model.number="model.ban_duration as number">
           <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
@@ -19,7 +19,8 @@
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.peerIdBlackList.banPeerId')"
-      field="model.ban_duration"
+      field="model.banned_peer_id"
+      :rules="[{ validator: nonEmptyValidator }]"
     >
       <a-space direction="vertical">
         <a-button @click="model.banned_peer_id.push({ method: 'STARTS_WITH', content: '' })">
@@ -62,7 +63,7 @@
 <script setup lang="ts">
 import { type PeerIdBlacklist } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import banRuleListItem from './banRuleListItem.vue'
 
@@ -72,12 +73,16 @@ const model = defineModel<PeerIdBlacklist>({ required: true })
 const dataWithIndex = computed(() => {
   return model.value.banned_peer_id.map((item, index) => ({ ...item, index }))
 })
-const individualBanTime = ref(model.value.ban_duration === 'default')
-const changeIndividualBanTime = (value: string | number | boolean) => {
-  if (value) {
-    model.value.ban_duration = 'default'
-  } else {
-    model.value.ban_duration = 259200000
+const useGlobalBanTime = computed({
+  get: () => model.value.ban_duration === 'default',
+  set: (value: boolean) => {
+    model.value.ban_duration = value ? 'default' : 259200000
   }
+})
+
+const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
+  if (model.value.banned_peer_id.filter((item) => item.content === '').length > 0)
+    cb('Please fill in the blank field')
+  else cb()
 }
 </script>

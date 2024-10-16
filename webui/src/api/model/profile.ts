@@ -6,6 +6,8 @@ export interface Profile {
   module: Module
 }
 
+type BanDuration = number | 'default'
+
 export interface Module {
   peer_id_blacklist: PeerIdBlacklist
   client_name_blacklist: ClientNameBlacklist
@@ -21,13 +23,12 @@ export interface Module {
 
 export interface PeerIdBlacklist {
   enabled: boolean
-  ban_duration: number | 'default'
+  ban_duration: BanDuration
   banned_peer_id: PeerRule[]
 }
 
 export interface PeerRule {
-  // method:'STARTS_WITH' | 'ENDS_WITH' | 'LENGTH' | 'CONTAINS' | 'EQUALS' | 'REGEX'
-  method: string
+  method: 'STARTS_WITH' | 'ENDS_WITH' | 'LENGTH' | 'CONTAINS' | 'EQUALS' | 'REGEX'
   content: string
   if?: PeerRule
   hit?: 'TRUE' | 'FALSE' | 'DEFAULT'
@@ -36,7 +37,7 @@ export interface PeerRule {
 
 export interface ClientNameBlacklist {
   enabled: boolean
-  ban_duration: number | 'default'
+  ban_duration: BanDuration
   banned_client_name: PeerRule[]
 }
 
@@ -59,7 +60,7 @@ export interface ProgressCheatBlocker {
 
 export interface IpAddressBlocker {
   enabled: boolean
-  ban_duration: number | 'default'
+  ban_duration: BanDuration
   ips: string[]
   ports: number[]
   asns: string[]
@@ -82,7 +83,7 @@ export interface NetType {
 
 export interface AutoRangeBan {
   enabled: boolean
-  ban_duration: number | 'default'
+  ban_duration: BanDuration
   ipv4: number
   ipv6: number
 }
@@ -94,7 +95,7 @@ export interface Btn {
 
 export interface MultiDialingBlocker {
   enabled: boolean
-  ban_duration: number | 'default'
+  ban_duration: BanDuration
   subnet_mask_length: number
   subnet_mask_v6_length: number
   tolerate_num: number
@@ -105,12 +106,12 @@ export interface MultiDialingBlocker {
 
 export interface ExpressionEngine {
   enabled: boolean
-  ban_duration: number | 'default'
+  ban_duration: BanDuration
 }
 
 export interface IpAddressBlockerRules {
   enabled: boolean
-  ban_duration: number | 'default'
+  ban_duration: BanDuration
   check_interval: number
   rules: Rules
 }

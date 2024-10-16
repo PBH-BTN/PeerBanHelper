@@ -29,7 +29,7 @@
             </template>
           </a-form-item>
           <a-form-item label="PBH Plus key">
-            <a-button type="primary" @click="endpointStore.emmitter.emit('open-plus-modal')">
+            <a-button type="primary" @click="endpointStore.emitter.emit('open-plus-modal')">
               {{ t('page.settings.tab.config.plus.button') }}
             </a-button>
           </a-form-item>
@@ -46,7 +46,7 @@
           <a-divider />
           <lookup v-model="form.lookup" />
           <a-divider />
-          <presist v-model="form.persist" />
+          <persist v-model="form.persist" />
           <a-divider />
           <btn v-model="form.btn" />
           <a-divider />
@@ -81,7 +81,7 @@ import ipDatabase from './components/ipDatabase.vue'
 import logger from './components/logger.vue'
 import lookup from './components/lookup.vue'
 import performance from './components/performance.vue'
-import presist from './components/presist.vue'
+import persist from './components/persist.vue'
 import proxy from './components/proxy.vue'
 import webui from './components/webui.vue'
 

@@ -5,8 +5,8 @@ export default {
   'page.settings.tab.profile.unit.ms': 'ms',
   'page.settings.tab.profile.unit.s': 'seconds',
   'page.settings.tab.profile.form.banDuration': 'Ban Duration',
-  'page.settings.tab.profile.form.ingoreAddress': 'Ignore Address',
-  'page.settings.tab.profile.form.ingoreAddress.tooltip':
+  'page.settings.tab.profile.form.ignoreAddress': 'Ignore Address',
+  'page.settings.tab.profile.form.ignoreAddress.tooltip':
     'Bypass list, all peers comes from those IPs will bypass all checks',
   'page.settings.tab.profile.module.title': 'Module Config',
   'page.settings.tab.profile.module.enable': 'Enable',
@@ -31,6 +31,10 @@ export default {
   'page.settings.tab.profile.module.peerIdBlackList.rule': 'Rule',
 
   'page.settings.tab.profile.module.clientNameBlackList': 'ClientName blacklist',
+  'page.settings.tab.profile.module.clientNameBlackList.individualBanTime':
+    'Use global ban duration',
+  'page.settings.tab.profile.module.clientNameBlackList.banClientName': 'Banned ClientName',
+  'page.settings.tab.profile.module.clientNameBlackList.rule': 'Rule',
 
   'page.settings.tab.profile.module.progressCheatBlocker': 'Cheatting Progress blocker',
   'page.settings.tab.profile.module.progressCheatBlocker.tips':

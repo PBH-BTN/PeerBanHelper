@@ -14,7 +14,6 @@
       :label="t('page.settings.tab.config.proxy.host')"
       field="proxy.host"
       validate-trigger="focus"
-      :rules="[{ type: 'ip' }]"
       :disabled="model.setting < ProxySetting.HTTP_PROXY"
     >
       <a-input v-model="model.host" style="width: 150px" />

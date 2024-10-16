@@ -5,6 +5,11 @@
     field="model"
     :show-header="false"
     :tooltip="props.tooltip"
+    :rules="[
+      {
+        validator: nonEmptyValidator
+      }
+    ]"
   >
     <a-space direction="vertical">
       <a-button @click="model.push('')">
@@ -19,7 +24,7 @@
         :pagination-props="props.paginationProps"
       >
         <template #item="{ item }">
-          <a-list-item>
+          <a-list-item :key="item.index">
             <a-space>
               <a-input v-model="model[item.index]" />
               <br />
@@ -60,6 +65,11 @@ const props = defineProps<{
 const dataWithIndex = computed(() => {
   return model.value.map((item, index) => ({ item, index }))
 })
+const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
+  if (model.value.filter((item: string) => item === '').length > 0)
+    cb('Please fill in the blank field')
+  else cb()
+}
 </script>
 <style scoped>
 .edit-btn {
