@@ -22,20 +22,21 @@
       field="model.ban_duration"
     >
       <a-space direction="vertical">
-        <a-button @click="model.banned_peer_id.push()">
+        <a-button @click="model.banned_peer_id.push({ method: 'STARTS_WITH', content: '' })">
           <template #icon>
             <icon-plus />
           </template>
         </a-button>
         <a-list
+          ref="list"
           style="min-width: 800px"
-          :virtual-list-props="{ threshold: 8, height: 500, fixedSize: true, buffer: 4 }"
-          :data="model.banned_peer_id"
+          :pagination-props="{ pageSize: 5, total: model.banned_peer_id.length }"
+          :data="dataWithIndex"
         >
-          <template #item="{ index: i }">
+          <template #item="{ item }">
             <a-list-item>
               <a-space>
-                <banRuleListItem v-model="model.banned_peer_id[i]" />
+                <banRuleListItem v-model="model.banned_peer_id[item.index]" />
                 <br />
               </a-space>
               <template #actions>
@@ -44,7 +45,7 @@
                   status="danger"
                   shape="circle"
                   type="text"
-                  @click="model.banned_peer_id.splice(i, 1)"
+                  @click="model.banned_peer_id.splice(item.index, 1)"
                 >
                   <template #icon>
                     <icon-delete />
@@ -61,13 +62,16 @@
 <script setup lang="ts">
 import { type PeerIdBlacklist } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import banRuleListItem from './banRuleListItem.vue'
 
 const { t } = useI18n()
 const model = defineModel<PeerIdBlacklist>({ required: true })
 
+const dataWithIndex = computed(() => {
+  return model.value.banned_peer_id.map((item, index) => ({ ...item, index }))
+})
 const individualBanTime = ref(model.value.ban_duration === 'default')
 const changeIndividualBanTime = (value: string | number | boolean) => {
   if (value) {

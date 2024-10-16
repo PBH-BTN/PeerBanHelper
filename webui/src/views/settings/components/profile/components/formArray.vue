@@ -12,11 +12,11 @@
           <icon-plus />
         </template>
       </a-button>
-      <a-list style="min-width: 200px" :virtual-list-props="props.virtualListProps" :data="model">
-        <template #item="{ index: i }">
+      <a-list style="min-width: 200px" :virtual-list-props="props.virtualListProps" :data="dataWithIndex" :pagination-props="props.paginationProps">
+        <template #item="{ item }">
           <a-list-item>
             <a-space>
-              <a-input v-model="model[i]" />
+              <a-input v-model="model[item.index]" />
               <br />
             </a-space>
             <template #actions>
@@ -25,7 +25,7 @@
                 status="danger"
                 shape="circle"
                 type="text"
-                @click="model.splice(i, 1)"
+                @click="model.splice(item.index, 1)"
               >
                 <template #icon>
                   <icon-delete />
@@ -39,7 +39,9 @@
   </a-form-item>
 </template>
 <script setup lang="ts">
-import type { VirtualListProps } from '@arco-design/web-vue/es/_components/virtual-list-v2/interface'
+import type { PaginationProps } from '@arco-design/web-vue';
+import type { VirtualListProps } from '@arco-design/web-vue/es/_components/virtual-list-v2/interface';
+import { computed } from 'vue';
 
 type Value = string
 const model = defineModel<Value[]>({ required: true })
@@ -47,8 +49,12 @@ const props = defineProps<{
   label: string
   required?: boolean
   tooltip?: string
-  virtualListProps?: VirtualListProps
+  virtualListProps?: VirtualListProps,
+  paginationProps?: PaginationProps
 }>()
+const dataWithIndex = computed(() => {
+  return model.value.map((item, index) => ({ item, index }))
+})
 </script>
 <style scoped>
 .edit-btn {

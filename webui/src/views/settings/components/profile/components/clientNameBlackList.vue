@@ -29,13 +29,13 @@
         </a-button>
         <a-list
           style="min-width: 800px"
-          :virtual-list-props="{ threshold: 8, height: 500, fixedSize: true, buffer: 4 }"
-          :data="model.banned_client_name"
+          :pagination-props="{ pageSize: 5, total: model.banned_client_name.length }"
+          :data="dataWithIndex"
         >
-          <template #item="{ index: i }">
+          <template #item="{ item }">
             <a-list-item style="min-width: 250px">
               <a-space>
-                <banRuleListItem v-model="model.banned_client_name[i]" />
+                <banRuleListItem v-model="model.banned_client_name[item.index]" />
                 <br />
               </a-space>
               <template #actions>
@@ -44,7 +44,7 @@
                   status="danger"
                   shape="circle"
                   type="text"
-                  @click="model.banned_client_name.splice(i, 1)"
+                  @click="model.banned_client_name.splice(item.index, 1)"
                 >
                   <template #icon>
                     <icon-delete />
@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { type ClientNameBlacklist } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import banRuleListItem from './banRuleListItem.vue'
 const { t } = useI18n()
@@ -74,4 +74,7 @@ const changeIndividualBanTime = (value: string | number | boolean) => {
     model.value.ban_duration = 259200000
   }
 }
+const dataWithIndex = computed(() => {
+  return model.value.banned_client_name.map((item, index) => ({ ...item, index }))
+})
 </script>
