@@ -1,8 +1,5 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-typography-title id="module" :heading="3">{{
-      t('page.settings.tab.config.module.clientNameBlackList')
-    }}</a-typography-title>
     <a-form-item :label="t('page.settings.tab.config.module.enable')" field="model.enabled">
       <a-switch v-model="model.enabled" />
     </a-form-item>

@@ -1,8 +1,5 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-typography-title id="module" :heading="3">{{
-      t('page.settings.tab.config.module.progressCheatBlocker')
-    }}</a-typography-title>
     <a-alert>{{ t('page.settings.tab.config.module.progressCheatBlocker.tips') }}</a-alert>
     <a-form-item :label="t('page.settings.tab.config.module.enable')" field="model.enabled">
       <a-switch v-model="model.enabled" />
@@ -169,10 +166,10 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import type { ProgressCheatBlocker } from '@/api/model/settings'
-import { formatFileSize } from '@/utils/file'
-import { formatMilliseconds } from '@/utils/time'
-import { useI18n } from 'vue-i18n'
+import type { ProgressCheatBlocker } from '@/api/model/settings';
+import { formatFileSize } from '@/utils/file';
+import { formatMilliseconds } from '@/utils/time';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n()
 const model = defineModel<ProgressCheatBlocker>({ required: true })

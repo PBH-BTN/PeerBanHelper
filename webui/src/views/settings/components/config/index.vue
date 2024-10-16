@@ -36,15 +36,35 @@
         <a-typography-title id="module" :heading="3">{{
           t('page.settings.tab.config.module.title')
         }}</a-typography-title>
-        <peerIdBlackList v-model="form.module.peer_id_blacklist" />
-        <a-divider />
-        <clientNameBlackList v-model="form.module.client_name_blacklist" />
-        <a-divider />
-        <progressCheatBlocker v-model="form.module.progress_cheat_blocker" />
-        <a-divider />
-        <ipAddressBlocker v-model="form.module.ip_address_blocker" />
-        <a-divider />
-        <autoRangeBan v-model="form.module.auto_range_ban" />
+        <a-collapse destroy-on-hide>
+          <a-collapse-item key="1" :header="t('page.settings.tab.config.module.peerIdBlackList')">
+            <peerIdBlackList v-model="form.module.peer_id_blacklist" />
+          </a-collapse-item>
+          <a-collapse-item
+            key="2"
+            :header="t('page.settings.tab.config.module.clientNameBlackList')"
+          >
+            <clientNameBlackList v-model="form.module.client_name_blacklist" />
+          </a-collapse-item>
+          <a-collapse-item
+            key="3"
+            :header="t('page.settings.tab.config.module.progressCheatBlocker')"
+          >
+            <progressCheatBlocker v-model="form.module.progress_cheat_blocker" />
+          </a-collapse-item>
+          <a-collapse-item
+            key="4"
+            :header="t('page.settings.tab.config.module.ipAddressBlocker.title')"
+          >
+            <ipAddressBlocker v-model="form.module.ip_address_blocker" />
+          </a-collapse-item>
+          <a-collapse-item
+            key="5"
+            :header="t('page.settings.tab.config.module.autoRangeBan.title')"
+          >
+            <autoRangeBan v-model="form.module.auto_range_ban" />
+          </a-collapse-item>
+        </a-collapse>
       </a-space>
     </a-form>
   </div>
