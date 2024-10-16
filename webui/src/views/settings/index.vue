@@ -22,9 +22,9 @@
   </a-tabs>
 </template>
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import ConfigForm from './components/config/index.vue';
-import ProfileForm from './components/profile/index.vue';
+import { useI18n } from 'vue-i18n'
+import ConfigForm from './components/config/index.vue'
+import ProfileForm from './components/profile/index.vue'
 
 const { t } = useI18n()
 </script>
