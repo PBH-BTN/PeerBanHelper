@@ -166,10 +166,10 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import type { ProgressCheatBlocker } from '@/api/model/settings';
-import { formatFileSize } from '@/utils/file';
-import { formatMilliseconds } from '@/utils/time';
-import { useI18n } from 'vue-i18n';
+import type { ProgressCheatBlocker } from '@/api/model/settings'
+import { formatFileSize } from '@/utils/file'
+import { formatMilliseconds } from '@/utils/time'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const model = defineModel<ProgressCheatBlocker>({ required: true })

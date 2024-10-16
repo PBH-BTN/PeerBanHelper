@@ -36,10 +36,10 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { type AutoRangeBan } from '@/api/model/settings';
-import { formatMilliseconds } from '@/utils/time';
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { type AutoRangeBan } from '@/api/model/settings'
+import { formatMilliseconds } from '@/utils/time'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const model = defineModel<AutoRangeBan>({ required: true })
