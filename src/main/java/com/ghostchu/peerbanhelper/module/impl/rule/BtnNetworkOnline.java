@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,13 +77,14 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     private void status(Context context) {
         Map<String, Object> info = new HashMap<>();
         info.put("configSuccess", btnNetwork.getConfigSuccess());
-        Map<String, Object> abilities = new HashMap<>();
+        var abilities = new ArrayList<>();
         for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {
             Map<String, Object> abilityStatus = new HashMap<>();
+            abilityStatus.put("name", entry.getKey().getSimpleName());
             abilityStatus.put("lastSuccess", entry.getValue().lastStatus());
             abilityStatus.put("lastMessage", entry.getValue().lastMessage());
             abilityStatus.put("lastUpdateAt", entry.getValue().lastStatusAt());
-            abilities.put(entry.getKey().getName(), abilityStatus);
+            abilities.add(abilityStatus);
         }
         info.put("abilities", abilities);
         context.json(new StdResp(true, null, info));
