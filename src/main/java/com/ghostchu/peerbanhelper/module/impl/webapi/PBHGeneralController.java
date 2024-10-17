@@ -160,7 +160,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
     private ConfigurationSection mergeYaml(ConfigurationSection originalConfig, Map<String, Object> newMap) {
         for (Map.Entry<String, Object> entry : newMap.entrySet()) {
             String originalKey = entry.getKey().replace("_", "-");
-            // 字符串列表转为对象列表
+            // 对象列表转为字符串列表
             if (originalKey.equals("banned-peer-id") || originalKey.equals("banned-client-name")) {
                 List<Map<String, String>> bannedPeerIdList = (List<Map<String, String>>) entry.getValue();
                 List<String> parsedBannedPeerIdList = bannedPeerIdList.stream()
@@ -170,21 +170,14 @@ public class PBHGeneralController extends AbstractFeatureModule {
             }
             // 如果值是 Map，递归替换子 Map 中的键
             else if (entry.getValue() instanceof Map<?, ?>) {
+                if (!originalConfig.isConfigurationSection(originalKey)) {
+                    originalConfig.createSection(originalKey);
+                }
                 originalConfig.set(originalKey, mergeYaml((ConfigurationSection) originalConfig.get(originalKey), (Map<String, Object>) entry.getValue()));
             }
-            // 如果值是 List，检查其中的元素是否是 Map，如果是也进行递归处理
-            else if (entry.getValue() instanceof List<?>) {
-                List<Object> updatedList = new ArrayList<>();
-                for (Object item : (List<?>) entry.getValue()) {
-                    if (item instanceof Map<?, ?>) {
-                        updatedList.add(mergeYaml((ConfigurationSection) originalConfig.get(originalKey), (Map<String, Object>) item));
-                    } else {
-                        updatedList.add(item); // 不是 Map 的元素直接添加
-                    }
-                }
-                originalConfig.set(originalKey, updatedList);
-            } else {
-                originalConfig.set(originalKey, entry.getValue()); // 直接添加非 Map 和非 List 的值
+            // 如果值是 List 或者其他，直接替换
+            else {
+                originalConfig.set(originalKey, entry.getValue()); // 直接添加
             }
         }
 
