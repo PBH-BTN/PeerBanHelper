@@ -188,6 +188,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         this.maxWaitDuration = getConfig().getLong("max-wait-duration");
         this.fastPcbTestPercentage = getConfig().getDouble("fast-pcb-test-percentage");
         this.fastPcbTestBlockingDuration = getConfig().getLong("fast-pcb-test-block-duration");
+        getCache().invalidateAll();
     }
 
 

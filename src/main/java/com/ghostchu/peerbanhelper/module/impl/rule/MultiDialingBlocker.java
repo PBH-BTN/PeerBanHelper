@@ -137,6 +137,7 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
                 maximumSize(TORRENT_PEER_MAX_NUM).
                 softValues().
                 build();
+        getCache().invalidateAll();
     }
 
     @Override

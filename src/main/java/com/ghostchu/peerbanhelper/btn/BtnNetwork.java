@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
@@ -46,6 +47,8 @@ public class BtnNetwork {
     private String userAgent;
     private PeerBanHelperServer server;
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
+    @Autowired
+    private ModuleMatchCache moduleMatchCache;
 
     public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret) {
         this.server = server;

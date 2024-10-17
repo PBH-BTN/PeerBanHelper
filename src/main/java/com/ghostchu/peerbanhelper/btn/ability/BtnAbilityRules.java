@@ -102,6 +102,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                             }
                             log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
                             setLastStatus(true, "Loaded from remote, version: " + this.btnRule.getVersion());
+                            btnNetwork.getModuleMatchCache().invalidateAll();
                         } catch (JsonSyntaxException e) {
                             setLastStatus(false, "Unable parse remote JSON response: " + r.statusCode() + " - " + r.body());
                             log.error("Unable to parse BtnRule as a valid Json object: {}-{}", r.statusCode(), r.body(), e);

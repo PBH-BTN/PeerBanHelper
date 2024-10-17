@@ -168,6 +168,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                 }
                 log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
             }
+            getCache().invalidateAll();
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
             rollbarErrorReporter.error(throwable);
