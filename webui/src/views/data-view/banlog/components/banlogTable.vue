@@ -31,7 +31,9 @@
     </template>
     <template #peerAddress="{ record }">
       <a-typography-text copyable code>
-        {{ record.peerIp }}:{{ record.peerPort }}
+        <queryIpLink :ip="record.peerIp" style="color: var(--color-text-2)">
+          {{ record.peerIp }}:{{ record.peerPort }}
+        </queryIpLink>
       </a-typography-text>
     </template>
     <template #peerStatus="{ record }">
@@ -71,13 +73,14 @@
   </a-table>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import queryIpLink from '@/components/queryIpLink.vue'
+import { getBanlogs } from '@/service/banLogs'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
-import { usePagination } from 'vue-request'
-import { getBanlogs } from '@/service/banLogs'
 import { formatFileSize } from '@/utils/file'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { usePagination } from 'vue-request'
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()

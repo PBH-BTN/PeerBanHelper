@@ -44,9 +44,11 @@
           direction="vertical"
           style="display: flex; flex-direction: column; text-align: center"
         >
-          <a-typography-text>{{ t('plus.begging') }}</a-typography-text>
+          <a-typography-paragraph style="max-width: 50em; text-align: left">
+            {{ t('plus.begging') }}
+          </a-typography-paragraph>
           <a href="https://afdian.com/a/Ghost_chu?tab=shop" target="_blank">
-            <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 30%" />
+            <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" />
           </a>
         </a-space>
         <a-space v-if="!status?.activated" direction="vertical" size="small">

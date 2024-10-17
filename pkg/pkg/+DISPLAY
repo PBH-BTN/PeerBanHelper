@@ -1,0 +1,2 @@
+Thanks for using peerbanhelper. Your config file will be placed at /usr/local/etc/peerbanhelper
+To auto start peerbanhelper, please run: sysrc peerbanhelper_enable=YES

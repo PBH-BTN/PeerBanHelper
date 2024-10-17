@@ -1,0 +1,14 @@
+## @NAME IPV6 2e0:61ff:fe 随机后缀刷流 Peer 特征识别
+## @AUTHOR PBH-BTN Community
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
+ipAddress = peer.peerAddress.address;
+strIp = toString(ipAddress);
+
+if(string.contains(strIp, ":2e0:61ff:fe")){
+    return "2e0:61ff:fe 特征段随机后缀 IPv6 识别";
+}
+
+return false;

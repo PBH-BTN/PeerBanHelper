@@ -30,4 +30,4 @@ fi
 cd ..
 
 # 将可能的修复结果添加到暂存区
-git add "$(git diff --name-only)"
+git diff --name-only | xargs git add

@@ -11,12 +11,13 @@ RUN apk add --update npm curl git && \
     mv webui/dist src/main/resources/static && \
     mvn -B clean package --file pom.xml -T 1.5C -P thin-sqlite-packaging
 
-FROM docker.io/azul/zulu-openjdk-alpine:21.0.4-21.36-jre
+FROM docker.io/eclipse-temurin:23-jre-alpine
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 ENV TZ=UTC
+ENV JAVA_OPTS="-Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
-ENTRYPOINT ["java","-Xmx386M","-XX:+UseG1GC", "-XX:+UseStringDeduplication","-XX:+ShrinkHeapInSteps","-jar","PeerBanHelper.jar"]
+ENTRYPOINT ${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar

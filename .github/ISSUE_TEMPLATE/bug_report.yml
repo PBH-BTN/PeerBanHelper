@@ -10,8 +10,10 @@ body:
       value: |-
         ## 请注意 - Caution
         This form only used for bug report, for any other cases, please [click here](https://github.com/PBH-BTN/PeerBanHelper/issues/new)  
-        此表单**仅用于反馈错误**，如果是其它类型的反馈，请[点击这里](https://github.com/PBH-BTN/PeerBanHelper/issues/new)。 
-        请尽可能完整且详细地填写所有表单项，以便我们以最高效率并准确的排查故障和诊断问题
+        此表单**仅用于反馈错误**，如果是其它类型的反馈，请[点击这里以重新选择](https://github.com/PBH-BTN/PeerBanHelper/issues/new/choose)。 
+        请尽可能完整且详细地填写所有表单项，以便我们以最高效率并准确的排查故障和诊断问题。
+        **错误填写或者没有仔细检查末尾的检查清单，将导致此 Issue 被立刻关闭。**
+        **只有最新版本的 PeerBanHelper 才会得到支持，任何非最新版本的 Issue 将被 立 刻 关 闭，不会有人给您提供任何支持** [在此查看最新版本的版本号](https://github.com/PBH-BTN/PeerBanHelper/releases/latest)
   - type: 'input'
     attributes:
       label: '版本号 - Version'
@@ -70,6 +72,8 @@ body:
           required: false
         - label: "Transmission"
           required: false
+        - label: "BitComet"
+          required: false
     validations:
       required: true
   - type: 'textarea'
@@ -116,7 +120,7 @@ body:
         Check and tick checkboxes that listed below
         检查并勾选所有需要勾选的框框
       options:
-        - label: "PeerBanHelper 已更新到最新版本，非最新版本不接受任何错误反馈 (I'm running the latest version of PBH that can be found in Github Relases, non-latest release won't receive any support)"
+        - label: "PeerBanHelper 已更新到最新版本，非最新版本不接受任何错误反馈，任何非最新版本的 Issue 将被 立 刻 关 闭，不会有人给您提供任何支持 (I'm running the latest version of PBH that can be found in Github Relases, non-latest release won't receive any support)"
           required: false
         - label: "所添加的下载器已满足 README 中的前置要求（如版本号和插件）(The downloaders that I've added already satisfied the requirements (E.g install plugins/adapters))"
           required: false
@@ -125,4 +129,6 @@ body:
         - label: "我没有检查这个检查清单，只是闭眼选中了所有的复选框，请关闭这个 Issue (I have not read these checkboxes and therefore I just ticked them all, Please close this issue)"
           required: false
         - label: "这不是一个安全漏洞，它可以被安全的公开报告。若需要报告安全漏洞，请[在此报告](https://github.com/PBH-BTN/PeerBanHelper/security/advisories/new) (This not a security related issue, can be safe report in public. If you want report a security exploit, please report it [here](https://github.com/PBH-BTN/PeerBanHelper/security/advisories/new))"
+          required: false
+        - label: "我同意遵守 PBH-BTN 包容性条约，不发布 “嘲讽、骂战、引战、开盒（有时也称为人肉搜索）、人身攻击、仇恨、暴力、侮辱性言辞、违法违规、黑灰产、危害国家安全、实施或帮助他人实施电信犯罪” 等内容。并已知晓如果仍旧发布了这些内容，我的账号将立刻从包括但不限于 PBH-BTN 组织、社交软件中封禁。所有主题、内容都将被立刻删除或折叠，撤销、删除和收回您所做出的一切贡献，并封禁 BTN 网络的中账号权限、排除您所提交的所有数据。在您违反相关规则时，PBH-BTN 将会将您的注册、登录、和最近访问的 IP 地址、电子邮件地址、以及其它可能追踪您或将您去匿名化的信息从定期删除转为永不删除，并在任何国家或地区的政府、公安机关或有关部门需要时无通知的提供这些数据。 (I agree to abide by the PBH-BTN Inclusivity Pact by not posting content such as “taunting, name-calling, war-mongering, open-boxing (sometimes referred to as mansplaining), personal attacks, hatred, violence, insulting language, illegal activities, black and grey business, endangering national security, and committing or assisting others in committing telecommunication crimes”. I am aware that if I continue to post such content, my account will be immediately banned from organizations including but not limited to PBH-BTN, social software. All topics and content will be immediately deleted or collapsed, all contributions will be revoked, deleted and retracted, and you will be banned from the BTN network and all data you have submitted will be excluded. In the event of a violation of these rules, PBH-BTN will delete your registration, login, and most recent IP address, email address, and any other information that may be used to track you or de-anonymize you from regular to permanent deletion, and will make this data available to the government, public security, or other relevant authorities without notice if they request it, no matter what country or region.)"
           required: false

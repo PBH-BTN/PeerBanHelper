@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.util.maven;
 
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -11,18 +10,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -42,17 +35,25 @@ public class GeoUtil {
     }
 
     private static long sendGetTest(String urlStr) {
-        try  {
-            MutableRequest request = MutableRequest.GET(urlStr);
-            long time = System.currentTimeMillis();
-            HttpResponse<String> response = HTTPUtil.getHttpClient(false,null).send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
+        var req = CompletableFuture.supplyAsync(() -> {
+            try {
+                MutableRequest request = MutableRequest.GET(urlStr);
+                long time = System.currentTimeMillis();
+                HttpResponse<String> response = HTTPUtil.getHttpClient(false, null).send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 200) {
+                    return Long.MAX_VALUE;
+                }
+                return System.currentTimeMillis() - time;
+            } catch (Throwable e) {
                 return Long.MAX_VALUE;
             }
-            return System.currentTimeMillis() - time;
-        } catch (Throwable e) {
+        });
+        try {
+            return req.get(15, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             return Long.MAX_VALUE;
         }
+
     }
 
     @NotNull

@@ -39,11 +39,13 @@ public class BanListDao extends AbstractPBHDao<BanListEntity, String> {
     public int saveBanList(Map<PeerAddress, BanMetadata> banlist) throws SQLException {
 //        TableUtils.dropTable(this, true);
 //        TableUtils.createTableIfNotExists(getConnectionSource(), BanListEntity.class);
-        TableUtils.clearTable(getConnectionSource(), BanListEntity.class);
-        List<BanListEntity> entityList = new ArrayList<>();
-        banlist.forEach((key, value) -> entityList.add(new BanListEntity(
-                JsonUtil.standard().toJson(key)
-                , JsonUtil.standard().toJson(value))));
-        return create(entityList);
+        return callBatchTasks(() -> {
+            List<BanListEntity> entityList = new ArrayList<>();
+            banlist.forEach((key, value) -> entityList.add(new BanListEntity(
+                    JsonUtil.standard().toJson(key)
+                    , JsonUtil.standard().toJson(value))));
+            TableUtils.clearTable(getConnectionSource(), BanListEntity.class);
+            return create(entityList);
+        });
     }
 }

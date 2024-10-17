@@ -12,7 +12,6 @@ import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import lombok.Data;

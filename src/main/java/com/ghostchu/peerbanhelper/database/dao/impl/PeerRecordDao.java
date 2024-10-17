@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.Deque;
 
 @Component
 @Slf4j
@@ -22,18 +22,18 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
     public PeerRecordDao(@Autowired Database database, TorrentDao torrentDao) throws SQLException {
         super(database.getDataSource(), PeerRecordEntity.class);
         this.torrentDao = torrentDao;
-        setObjectCache(true);
     }
 
-    public void syncPendingTasks(List<BatchHandleTasks> tasks) throws SQLException {
+    public void syncPendingTasks(Deque<BatchHandleTasks> tasks) throws SQLException {
         callBatchTasks(() -> {
-            tasks.forEach(t -> {
+            while (!tasks.isEmpty()) {
+                var t = tasks.pop();
                 try {
                     writeToDatabase(t.timestamp, t.downloader, t.torrent, t.peer);
                 } catch (SQLException e) {
                     log.error("Unable save peer record to database, please report to developer: {}, {}, {}, {}", t.timestamp, t.downloader, t.torrent, t.peer);
                 }
-            });
+            }
             return null;
         });
     }

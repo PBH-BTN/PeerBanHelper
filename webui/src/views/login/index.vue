@@ -12,18 +12,20 @@
         >
           <a-form-item
             field="token"
-            :rules="[
-              { required: true, message: t('login.form.password.errMsg') },
-              {
-                validator: (value: string, callback) => {
-                  if (/[a-zA-Z0-9-_]+/.test(value)) {
-                    callback()
-                  } else {
-                    callback(t('login.form.password.errMsg'))
+            :rules="
+              [
+                { required: true, message: t('login.form.password.errMsg') },
+                {
+                  validator: (value: string, callback) => {
+                    if (/[a-zA-Z0-9-_]+/.test(value)) {
+                      callback()
+                    } else {
+                      callback(t('login.form.password.errMsg'))
+                    }
                   }
                 }
-              }
-            ]"
+              ] as FieldRule[]
+            "
             :validate-trigger="['change', 'input']"
             hide-label
           >
@@ -59,7 +61,7 @@
 
 <script lang="ts" setup>
 import { useEndpointStore } from '@/stores/endpoint'
-import { Message, type FormInstance } from '@arco-design/web-vue'
+import { Message, type FieldRule, type FormInstance } from '@arco-design/web-vue'
 import { onMounted, ref, type UnwrapRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
