@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
+import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityRules;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
@@ -17,16 +18,22 @@ import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
+import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
+import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
@@ -37,6 +44,10 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     @Autowired(required = false)
     private BtnNetwork manager;
     private long banDuration;
+    @Autowired
+    private JavalinWebContainer javalinWebContainer;
+    @Autowired
+    private BtnNetwork btnNetwork;
 
     @Override
     public @NotNull String getName() {
@@ -57,6 +68,32 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     public void onEnable() {
         reloadConfig();
         Main.getReloadManager().register(this);
+        javalinWebContainer.javalin()
+                .get("/api/modules/btn", this::info, Role.USER_READ)
+                .get("/api/modules/btn/status", this::status, Role.USER_READ);
+    }
+
+    private void status(Context context) {
+        Map<String, Object> info = new HashMap<>();
+        info.put("configSuccess", btnNetwork.getConfigSuccess());
+        Map<String, Object> abilities = new HashMap<>();
+        for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {
+            Map<String, Object> abilityStatus = new HashMap<>();
+            abilityStatus.put("lastSuccess", entry.getValue().lastStatus());
+            abilityStatus.put("lastMessage", entry.getValue().lastMessage());
+            abilityStatus.put("lastUpdateAt", entry.getValue().lastStatusAt());
+            abilities.put(entry.getKey().getName(), abilityStatus);
+        }
+        info.put("abilities", abilities);
+        context.json(new StdResp(true, null, info));
+    }
+
+    private void info(Context context) {
+        Map<String, Object> info = new HashMap<>();
+        info.put("appId", btnNetwork.getAppId());
+        info.put("appSecret", btnNetwork.getAppSecret());
+        info.put("configUrl", btnNetwork.getConfigUrl());
+        context.json(new StdResp(true, null, info));
     }
 
     @Override
