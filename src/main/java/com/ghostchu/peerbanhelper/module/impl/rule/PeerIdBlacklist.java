@@ -84,6 +84,7 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule implements Reload
     public void reloadConfig() {
         this.banDuration = getConfig().getLong("ban-duration", 0);
         this.bannedPeers = RuleParser.parse(getConfig().getStringList("banned-peer-id"));
+        getCache().invalidateAll();
     }
 
 
