@@ -81,6 +81,8 @@ BTN_SUBMITTING_BANS: "[BTN Network] Scheduled task submitting new ban entries si
 BTN_SUBMITTED_BANS: "[BTN Network] Submitted {} ban records to BTN network, thank you for supporting the BTN network!"
 BTN_SUBMITTING_HITRATE: "[BTN Network] Scheduled task reporting rule hit rate data to BTN network, please wait"
 BTN_SUBMITTED_HITRATE: "[BTN Network] Reported hit rate data of {} rules to BTN network, thank you for supporting the BTN network!"
+BTN_SUBMITTING_HISTORIES: "[BTN Network] Scheduled task submitting {} peers history activities to network, please wait..."
+BTN_SUBMITTED_HISTORIES: "[BTN Network] Submitted {} peers history activities, thank you for supporting the BTN network!"
 CONFIG_CHECKING: "[Configuration Upgrade Utility] Please wait while we check configuration file updates..."
 CONFIG_MIGRATING: "[Configuration Upgrade Utility] Migrating configuration file: from {} to {} ..."
 CONFIG_EXECUTE_MIGRATE: "[Configuration Upgrade Utility] Executing configuration file upgrade script: {}"
