@@ -8,12 +8,12 @@
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.expressionEngine.individualBanTime')"
+      :label="t('page.settings.tab.profile.module.expressionEngine.useGlobalBanTime')"
       field="model.ban_duration"
     >
       <a-space>
-        <a-switch v-model="individualBanTime" @change="changeIndividualBanTime" />
-        <a-input-number v-if="!individualBanTime" v-model="model.ban_duration as number">
+        <a-switch v-model="useGlobalBanTime" />
+        <a-input-number v-if="!useGlobalBanTime" v-model="model.ban_duration as number">
           <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
@@ -26,18 +26,17 @@
 <script setup lang="ts">
 import type { ExpressionEngine } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const model = defineModel<ExpressionEngine>({ required: true })
-const individualBanTime = ref(model.value.ban_duration === 'default')
-const changeIndividualBanTime = (value: string | number | boolean) => {
-  if (value) {
-    model.value.ban_duration = 'default'
-  } else {
-    model.value.ban_duration = 259200000
+
+const useGlobalBanTime = computed({
+  get: () => model.value.ban_duration === 'default',
+  set: (value: boolean) => {
+    model.value.ban_duration = value ? 'default' : 259200000
   }
-}
+})
 </script>

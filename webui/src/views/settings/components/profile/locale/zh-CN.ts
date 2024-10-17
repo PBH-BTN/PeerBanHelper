@@ -31,12 +31,12 @@ export default {
   'page.settings.tab.profile.module.banRuleTips.empty': '存在为空的条目',
 
   'page.settings.tab.profile.module.peerIdBlackList': 'PeerId 封禁',
-  'page.settings.tab.profile.module.peerIdBlackList.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.profile.module.peerIdBlackList.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.peerIdBlackList.banPeerId': '封禁 PeerId',
   'page.settings.tab.profile.module.peerIdBlackList.rule': '规则',
 
   'page.settings.tab.profile.module.clientNameBlackList': '客户端名称封禁',
-  'page.settings.tab.profile.module.clientNameBlackList.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.profile.module.clientNameBlackList.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.clientNameBlackList.banClientName': '封禁客户端名称',
   'page.settings.tab.profile.module.clientNameBlackList.rule': '规则',
 
@@ -78,19 +78,19 @@ export default {
     '快速 PCB 测试启动阈值',
 
   'page.settings.tab.profile.module.ipAddressBlocker.title': 'IP 地址封禁',
-  'page.settings.tab.profile.module.ipAddressBlocker.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.profile.module.ipAddressBlocker.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.ipAddressBlocker.rules': '配置规则请前往{link}页面',
   'page.settings.tab.profile.module.ipAddressBlocker.rules.link': '规则配置',
 
   'page.settings.tab.profile.module.autoRangeBan.title': '范围 IP 段封禁',
   'page.settings.tab.profile.module.autoRangeBan.tips':
     '在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁',
-  'page.settings.tab.profile.module.autoRangeBan.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.profile.module.autoRangeBan.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 前缀长度',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 前缀长度',
 
   'page.settings.tab.profile.module.multiDialingBlocker.title': '多播封禁',
-  'page.settings.tab.profile.module.multiDialingBlocker.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime': '使用全局封禁时间',
 
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-length': '子网掩码长度',
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length': 'IPv6子网掩码长度',
@@ -106,10 +106,10 @@ export default {
   'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript 规则引擎',
   'page.settings.tab.profile.module.expressionEngine.tips':
     '启用此功能可以使用 AviatorScript 语言编写复杂的规则，以实现更多的自定义功能',
-  'page.settings.tab.profile.module.expressionEngine.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': '使用全局封禁时间',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '规则订阅',
-  'page.settings.tab.profile.module.ruleSubscribe.individualBanTime': '使用全局封禁时间',
+  'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置请前往{link}页面',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': '规则订阅',
 

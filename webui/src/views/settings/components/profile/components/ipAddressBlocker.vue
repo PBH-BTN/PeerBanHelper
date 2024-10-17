@@ -4,12 +4,12 @@
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.ipAddressBlocker.individualBanTime')"
+      :label="t('page.settings.tab.profile.module.ipAddressBlocker.useGlobalBanTime')"
       field="model.ban_duration"
     >
       <a-space>
-        <a-switch v-model="individualBanTime" @change="changeIndividualBanTime" />
-        <a-input-number v-if="!individualBanTime" v-model="model.ban_duration as number">
+        <a-switch v-model="useGlobalBanTime" />
+        <a-input-number v-if="!useGlobalBanTime" v-model="model.ban_duration as number">
           <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
@@ -32,18 +32,16 @@
 import { type IpAddressBlocker } from '@/api/model/profile'
 import { useViewRoute } from '@/router'
 import { formatMilliseconds } from '@/utils/time'
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 const [_, _currentName, goto] = useViewRoute()
 
 const { t } = useI18n()
 const model = defineModel<IpAddressBlocker>({ required: true })
-const individualBanTime = ref(model.value.ban_duration === 'default')
-const changeIndividualBanTime = (value: string | number | boolean) => {
-  if (value) {
-    model.value.ban_duration = 'default'
-  } else {
-    model.value.ban_duration = 259200000
+const useGlobalBanTime = computed({
+  get: () => model.value.ban_duration === 'default',
+  set: (value: boolean) => {
+    model.value.ban_duration = value ? 'default' : 259200000
   }
-}
+})
 </script>

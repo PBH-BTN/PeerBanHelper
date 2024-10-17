@@ -1,6 +1,6 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-typography-title id="id" :heading="3">{{
+    <a-typography-title :heading="3">{{
       t('page.settings.tab.config.persist.title')
     }}</a-typography-title>
     <a-form-item :label="t('page.settings.tab.config.persist.banlist')" field="persist.banlist">

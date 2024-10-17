@@ -4,7 +4,7 @@
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.clientNameBlackList.individualBanTime')"
+      :label="t('page.settings.tab.profile.module.clientNameBlackList.useGlobalBanTime')"
       field="model.ban_duration"
     >
       <a-space>

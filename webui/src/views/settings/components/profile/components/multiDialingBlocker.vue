@@ -4,7 +4,7 @@
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.multiDialingBlocker.individualBanTime')"
+      :label="t('page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime')"
       field="model.ban_duration"
     >
       <a-space>

@@ -1,6 +1,6 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-typography-title id="id" :heading="3"> BTN </a-typography-title>
+    <a-typography-title :heading="3"> BTN </a-typography-title>
     <a-alert>
       {{ t('page.settings.tab.config.btn.doc') }}
       <a-link target="_blank" href="https://pbh-btn.github.io/pbh-docs/docs/btn/intro/">

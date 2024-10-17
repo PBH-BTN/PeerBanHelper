@@ -20,7 +20,7 @@ export default {
   'page.settings.tab.config.server.address': '地址',
   'page.settings.tab.config.server.prefix': '前缀',
   'page.settings.tab.config.server.prefix.tips':
-    'When PBH need pass the URL of blocklist to downloader, it will use this address as prefix, make sure this URL can be access from your downloader.',
+    '当 PBH 需要将阻止列表的 URL 传递给下载器时，它将使用此地址作为前缀。请确保您的下载器可以访问此 URL',
   'page.settings.tab.config.server.prefix.error': '前缀不能以 "/" 结尾',
   'page.settings.tab.config.server.cors': '允许 CORS',
   'page.settings.tab.config.server.cors.tips':

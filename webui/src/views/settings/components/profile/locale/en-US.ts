@@ -31,12 +31,12 @@ export default {
   'page.settings.tab.profile.module.banRuleTips.empty': 'Please fill the empty fields',
 
   'page.settings.tab.profile.module.peerIdBlackList': 'PeerId blacklist',
-  'page.settings.tab.profile.module.peerIdBlackList.individualBanTime': 'Use global ban duration',
+  'page.settings.tab.profile.module.peerIdBlackList.useGlobalBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.peerIdBlackList.banPeerId': 'Banned PeerId',
   'page.settings.tab.profile.module.peerIdBlackList.rule': 'Rule',
 
   'page.settings.tab.profile.module.clientNameBlackList': 'ClientName blacklist',
-  'page.settings.tab.profile.module.clientNameBlackList.individualBanTime':
+  'page.settings.tab.profile.module.clientNameBlackList.useGlobalBanTime':
     'Use global ban duration',
   'page.settings.tab.profile.module.clientNameBlackList.banClientName': 'Banned ClientName',
   'page.settings.tab.profile.module.clientNameBlackList.rule': 'Rule',
@@ -85,7 +85,7 @@ export default {
     'Fast PCB test threshold',
 
   'page.settings.tab.profile.module.ipAddressBlocker.title': 'IP address/port blacklist',
-  'page.settings.tab.profile.module.ipAddressBlocker.individualBanTime': 'Use global ban duration',
+  'page.settings.tab.profile.module.ipAddressBlocker.useGlobalBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.ipAddressBlocker.rules':
     'Configure rules please go to the {link} page',
   'page.settings.tab.profile.module.ipAddressBlocker.rules.link': 'Rule Configuration',
@@ -93,12 +93,12 @@ export default {
   'page.settings.tab.profile.module.autoRangeBan.title': 'Range ban',
   'page.settings.tab.profile.module.autoRangeBan.tips':
     'After a peer got banned, other connected peers that in same range with banned peers will also get banned.',
-  'page.settings.tab.profile.module.autoRangeBan.individualBanTime': 'Use global ban duration',
+  'page.settings.tab.profile.module.autoRangeBan.useGlobalBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 prefix length',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 prefix length',
 
   'page.settings.tab.profile.module.multiDialingBlocker.title': 'Multi-dialing blocker',
-  'page.settings.tab.profile.module.multiDialingBlocker.individualBanTime':
+  'page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime':
     'Use global ban duration',
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-length': 'Subnet mask length',
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length':
@@ -115,10 +115,10 @@ export default {
   'page.settings.tab.profile.module.expressionEngine.title': 'AviatorScript rule engine',
   'page.settings.tab.profile.module.expressionEngine.tips':
     'Enable this feature can use AviatorScript language to write complex rules to achieve more custom functions',
-  'page.settings.tab.profile.module.expressionEngine.individualBanTime': 'Use global ban duration',
+  'page.settings.tab.profile.module.expressionEngine.useGlobalBanTime': 'Use global ban duration',
 
   'page.settings.tab.profile.module.ruleSubscribe.title': 'Rule subscribe',
-  'page.settings.tab.profile.module.ruleSubscribe.individualBanTime': 'Use global ban duration',
+  'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe':
     'For other configurations, please go to the {link} page',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': 'Rule Subscribe',

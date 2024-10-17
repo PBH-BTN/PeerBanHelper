@@ -1,8 +1,6 @@
 <template>
   <a-space direction="vertical" fill>
-    <a-typography-title id="id" :heading="3">{{
-      t('page.settings.tab.config.proxy')
-    }}</a-typography-title>
+    <a-typography-title :heading="3">{{ t('page.settings.tab.config.proxy') }}</a-typography-title>
     <a-form-item :label="t('page.settings.tab.config.proxy.type')" field="proxy.setting">
       <a-radio-group v-model="model.setting" type="button">
         <a-radio v-for="type in supportedProxyType" :key="type" :value="type">{{
