@@ -55,7 +55,7 @@
       :label="t('page.settings.tab.profile.module.multiDialingBlocker.timeWindow')"
       field="model.cache_lifespan"
     >
-      <a-input-number v-model="model.cache_lifespan" style="width: 100px">
+      <a-input-number v-model="model.cache_lifespan" style="width: 100px" :min="0">
         <template #suffix> {{ t('page.settings.tab.profile.unit.s') }} </template>
       </a-input-number>
       <template #extra> ={{ formatSeconds(model.cache_lifespan) }} </template>
