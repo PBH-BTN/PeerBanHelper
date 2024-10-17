@@ -25,10 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -123,65 +120,62 @@ public class PBHGeneralController extends AbstractFeatureModule {
     }
 
     private Map<String, Object> replaceKeys(Map<String, Object> originalMap) {
-        Map<String, Object> updatedMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
-            String updatedKey = entry.getKey().replace("-", "_");
-            // 字符串列表转为对象列表
-            if (updatedKey.equals("banned_peer_id") || updatedKey.equals("banned_client_name")) {
-                List<String> bannedPeerIdList = (List<String>) entry.getValue();
-                List<Map<String, String>> parsedBannedPeerIdList = bannedPeerIdList.stream()
-                        .map(bannedPeer -> (Map<String, String>) GSON.fromJson(bannedPeer, new TypeToken<Map<String, String>>() {}.getType()))// 将字符串转换成对象
-                        .toList();
-                updatedMap.put(updatedKey, parsedBannedPeerIdList); // 替换为对象列表
-            }
-            // 如果值是 Map，递归替换子 Map 中的键
-            else if (entry.getValue() instanceof Map<?, ?>) {
-                updatedMap.put(updatedKey, replaceKeys((Map<String, Object>) entry.getValue()));
-            }
-            // 如果值是 List，检查其中的元素是否是 Map，如果是也进行递归处理
-            else if (entry.getValue() instanceof List<?>) {
-                List<Object> updatedList = new ArrayList<>();
-                for (Object item : (List<?>) entry.getValue()) {
-                    if (item instanceof Map<?, ?>) {
-                        updatedList.add(replaceKeys((Map<String, Object>) item));
-                    } else {
-                        updatedList.add(item); // 不是 Map 的元素直接添加
+        return originalMap.entrySet().stream()
+                .collect(LinkedHashMap::new, (map, entry) -> {
+                    String updatedKey = entry.getKey().replace("-", "_");
+                    Object value = entry.getValue();
+                    // 字符串列表转为对象列表
+                    if (updatedKey.equals("banned_peer_id") || updatedKey.equals("banned_client_name")) {
+                        if (value instanceof List<?> list) {
+                            List<Map<String, String>> parsedBannedPeerIdList = list.stream()
+                                    .filter(String.class::isInstance)
+                                    .map(String.class::cast)
+                                    .map(item -> (Map<String, String>) GSON.fromJson(item, new TypeToken<Map<String, String>>() {}.getType()))
+                                    .toList();
+                            map.put(updatedKey, parsedBannedPeerIdList); // 替换为对象列表
+                        }
                     }
-                }
-                updatedMap.put(updatedKey, updatedList);
-            } else {
-                updatedMap.put(updatedKey, entry.getValue()); // 直接添加非 Map 和非 List 的值
-            }
-        }
-
-        return updatedMap;
+                    // 如果值是 Map，递归替换子 Map 中的键
+                    else if (value instanceof Map<?, ?>) {
+                        map.put(updatedKey, replaceKeys((Map<String, Object>) value));
+                    }
+                    // 如果值是 List，检查其中的元素是否是 Map，如果是也进行递归处理
+                    else if (value instanceof List<?> list) {
+                        List<Object> updatedList = list.stream()
+                                .map(item -> item instanceof Map<?, ?> ? replaceKeys((Map<String, Object>) item) : item)
+                                .toList();
+                        map.put(updatedKey, updatedList);
+                    } else {
+                        map.put(updatedKey, value); // 直接添加非 Map 和非 List 的值
+                    }
+                }, LinkedHashMap::putAll);
     }
 
-    private ConfigurationSection mergeYaml(ConfigurationSection originalConfig, Map<String, Object> newMap) {
-        for (Map.Entry<String, Object> entry : newMap.entrySet()) {
-            String originalKey = entry.getKey().replace("_", "-");
+    private void mergeYaml(ConfigurationSection originalConfig, Map<String, Object> newMap) {
+        newMap.forEach((key, value) -> {
+            String originalKey = key.replace("_", "-");
             // 对象列表转为字符串列表
             if (originalKey.equals("banned-peer-id") || originalKey.equals("banned-client-name")) {
-                List<Map<String, String>> bannedPeerIdList = (List<Map<String, String>>) entry.getValue();
-                List<String> parsedBannedPeerIdList = bannedPeerIdList.stream()
-                        .map(bannedPeer -> GSON.toJson(bannedPeer))
-                        .toList();
-                originalConfig.set(originalKey, parsedBannedPeerIdList);
+                if (value instanceof List<?> list) {
+                    List<String> parsedList = list.stream()
+                            .filter(item -> item instanceof Map)
+                            .map(GSON::toJson)
+                            .toList();
+                    originalConfig.set(originalKey, parsedList);
+                }
             }
             // 如果值是 Map，递归替换子 Map 中的键
-            else if (entry.getValue() instanceof Map<?, ?>) {
-                if (!originalConfig.isConfigurationSection(originalKey)) {
-                    originalConfig.createSection(originalKey);
-                }
-                originalConfig.set(originalKey, mergeYaml((ConfigurationSection) originalConfig.get(originalKey), (Map<String, Object>) entry.getValue()));
+            else if (value instanceof Map<?, ?> map) {
+                ConfigurationSection section = Optional.ofNullable(originalConfig.getConfigurationSection(originalKey))
+                        .orElseGet(() -> originalConfig.createSection(originalKey));
+                mergeYaml(section, (Map<String, Object>) map);
+                originalConfig.set(originalKey, section);
             }
             // 如果值是 List 或者其他，直接替换
             else {
-                originalConfig.set(originalKey, entry.getValue()); // 直接添加
+                originalConfig.set(originalKey, value); // 直接添加
             }
-        }
-
-        return originalConfig;
+        });
     }
 
     @Override
