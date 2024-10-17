@@ -52,6 +52,9 @@
 import type { PaginationProps } from '@arco-design/web-vue'
 import type { VirtualListProps } from '@arco-design/web-vue/es/_components/virtual-list-v2/interface'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 type Value = string
 const model = defineModel<Value[]>({ required: true })
@@ -66,8 +69,8 @@ const dataWithIndex = computed(() => {
   return model.value.map((item, index) => ({ item, index }))
 })
 const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
-  if (model.value.filter((item: string) => item === '').length > 0)
-    cb('Please fill in the blank field')
+  if (model.value.some((item: string) => item.trim() === ''))
+    cb(t('page.settings.tab.profile.formArray.emptyTips'))
   else cb()
 }
 </script>

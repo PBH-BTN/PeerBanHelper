@@ -34,15 +34,7 @@
     <a-form-item
       :label="t('page.settings.tab.profile.module.progressCheatBlocker.progressRewindDetection')"
     >
-      <a-switch
-        :default-checked="model.rewind_maximum_difference !== -1"
-        @change="
-          (value) => {
-            if (value) model.rewind_maximum_difference = 7
-            else model.rewind_maximum_difference = -1
-          }
-        "
-      />
+      <a-switch v-model="rewindDetectionEnabled" />
     </a-form-item>
     <a-form-item
       v-if="model.rewind_maximum_difference !== -1"
@@ -96,10 +88,15 @@
       :label="t('page.settings.tab.profile.module.progressCheatBlocker.banDuration')"
       field="model.ban_duration"
     >
-      <a-input-number v-model="model.ban_duration" style="width: 200px">
-        <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
-      </a-input-number>
-      <template #extra> ={{ formatMilliseconds(model.ban_duration) }} </template>
+      <a-space>
+        <a-switch v-model="useGlobalBanTime" />
+        <a-input-number v-if="!useGlobalBanTime" v-model.number="model.ban_duration as number">
+          <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
+        </a-input-number>
+      </a-space>
+      <template v-if="model.ban_duration !== 'default'" #extra>
+        ={{ formatMilliseconds(model.ban_duration) }}
+      </template>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.progressCheatBlocker.enablePersist')"
@@ -136,15 +133,7 @@
       :label="t('page.settings.tab.profile.module.progressCheatBlocker.enableFastPCBTest')"
       :tooltip="t('page.settings.tab.profile.module.progressCheatBlocker.enableFastPCBTest.tips')"
     >
-      <a-switch
-        :default-checked="model.fast_pcb_test_percentage !== -1"
-        @change="
-          (value) => {
-            if (value) model.fast_pcb_test_percentage = 10
-            else model.fast_pcb_test_percentage = -1
-          }
-        "
-      />
+      <a-switch v-model="fastPCBTestEnabled" />
     </a-form-item>
     <a-form-item
       v-if="model.fast_pcb_test_percentage !== -1"
@@ -169,8 +158,28 @@
 import type { ProgressCheatBlocker } from '@/api/model/profile'
 import { formatFileSize } from '@/utils/file'
 import { formatMilliseconds } from '@/utils/time'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const model = defineModel<ProgressCheatBlocker>({ required: true })
+
+const useGlobalBanTime = computed({
+  get: () => model.value.ban_duration === 'default',
+  set: (value: boolean) => {
+    model.value.ban_duration = value ? 'default' : 259200000
+  }
+})
+const fastPCBTestEnabled = computed({
+  get: () => model.value.fast_pcb_test_percentage !== -1,
+  set: (value) => {
+    model.value.fast_pcb_test_percentage = value ? 10 : -1
+  }
+})
+const rewindDetectionEnabled = computed({
+  get: () => model.value.rewind_maximum_difference !== -1,
+  set: (value) => {
+    model.value.rewind_maximum_difference = value ? 7 : -1
+  }
+})
 </script>

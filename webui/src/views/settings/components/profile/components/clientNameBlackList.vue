@@ -19,7 +19,7 @@
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.clientNameBlackList.banClientName')"
-      field="model.ban_duration"
+      field="model.banned_client_name"
       :rules="[{ validator: nonEmptyValidator }]"
     >
       <a-space direction="vertical">
@@ -78,7 +78,7 @@ const dataWithIndex = computed(() => {
 })
 const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
   if (model.value.banned_client_name.filter((item) => item.content === '').length > 0)
-    cb('Please fill in the blank field')
+    cb(t('page.settings.tab.profile.module.banRuleTips.empty'))
   else cb()
 }
 </script>

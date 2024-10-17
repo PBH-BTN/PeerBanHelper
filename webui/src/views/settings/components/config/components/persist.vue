@@ -10,7 +10,7 @@
       :label="t('page.settings.tab.config.persist.ban_logs_keep_days')"
       field="persist.ban_logs_keep_days"
     >
-      <a-input-number v-model="model.ban_logs_keep_days" style="width: 100px">
+      <a-input-number v-model="model.ban_logs_keep_days" style="width: 100px" :precision="0">
         <template #suffix> {{ t('page.settings.tab.config.unit.day') }} </template>
       </a-input-number>
     </a-form-item>

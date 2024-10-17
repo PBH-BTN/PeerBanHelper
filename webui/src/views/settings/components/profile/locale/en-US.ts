@@ -11,6 +11,9 @@ export default {
   'page.settings.tab.profile.module.title': 'Module Config',
   'page.settings.tab.profile.module.enable': 'Enable',
 
+  'page.settings.tab.profile.formArray.emptyTips':
+    'Please fill in all fields with non-whitespace content',
+
   'page.settings.tab.profile.module.peerIdBlackList.if': 'If',
   'page.settings.tab.profile.module.peerIdBlackList.hit': 'Hit',
   'page.settings.tab.profile.module.peerIdBlackList.miss': 'Miss',
@@ -25,6 +28,8 @@ export default {
   'page.settings.tab.profile.module.banRuleTips.TRUE': 'Ban',
   'page.settings.tab.profile.module.banRuleTips.FALSE': 'Exclude',
 
+  'page.settings.tab.profile.module.banRuleTips.empty': 'Please fill the empty fields',
+
   'page.settings.tab.profile.module.peerIdBlackList': 'PeerId blacklist',
   'page.settings.tab.profile.module.peerIdBlackList.individualBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.peerIdBlackList.banPeerId': 'Banned PeerId',
@@ -36,12 +41,12 @@ export default {
   'page.settings.tab.profile.module.clientNameBlackList.banClientName': 'Banned ClientName',
   'page.settings.tab.profile.module.clientNameBlackList.rule': 'Rule',
 
-  'page.settings.tab.profile.module.progressCheatBlocker': 'Cheatting Progress blocker',
+  'page.settings.tab.profile.module.progressCheatBlocker': 'Cheating Progress blocker',
   'page.settings.tab.profile.module.progressCheatBlocker.tips':
-    'Note: Sometimes it may incorrectly ban some clients who enabled "Super Seeding", but in most cases, it can accurately detect the cheatting/bad peers.',
+    'Note: Sometimes it may incorrectly ban some clients who enabled "Super Seeding", but in most cases, it can accurately detect the cheating/bad peers.',
   'page.settings.tab.profile.module.progressCheatBlocker.minSize': 'Minimum file size',
   'page.settings.tab.profile.module.progressCheatBlocker.minSize.tips':
-    'Skip the check if torrent smaller than this value, unit: bytes, peer may have to no chance to sync the progress',
+    'Skip the check if torrent smaller than this value, unit: bytes, peer may have no chance to sync the progress',
   'page.settings.tab.profile.module.progressCheatBlocker.maxDifference':
     'Maximum progress difference',
   'page.settings.tab.profile.module.progressCheatBlocker.maxDifference.tips':
@@ -51,7 +56,7 @@ export default {
   'page.settings.tab.profile.module.progressCheatBlocker.rewindMaxDifference':
     'Maximum rewind progress difference',
   'page.settings.tab.profile.module.progressCheatBlocker.rewindMaxDifference.tips':
-    'Sometimes the pisces may break during transfer, client may drop those pisces, we allow client have rewind in reasonable range',
+    'Sometimes the pieces may break during transfer, client may drop those pieces, we allow client have rewind in reasonable range',
   'page.settings.tab.profile.module.progressCheatBlocker.block_excessive_clients':
     'Block excessive clients',
   'page.settings.tab.profile.module.progressCheatBlocker.block_excessive_clients.tips':

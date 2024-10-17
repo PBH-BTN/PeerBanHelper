@@ -73,9 +73,9 @@ export enum ProxySetting {
 
 export interface Proxy {
   setting: ProxySetting
-  host: string
-  port: number
-  non_proxy_hosts: string
+  host?: string
+  port?: number
+  non_proxy_hosts?: string // non-proxy hosts, split by |
 }
 
 export interface Privacy {

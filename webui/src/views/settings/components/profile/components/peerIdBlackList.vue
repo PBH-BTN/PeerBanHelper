@@ -82,7 +82,7 @@ const useGlobalBanTime = computed({
 
 const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
   if (model.value.banned_peer_id.filter((item) => item.content === '').length > 0)
-    cb('Please fill in the blank field')
+    cb(t('page.settings.tab.profile.module.banRuleTips.empty'))
   else cb()
 }
 </script>

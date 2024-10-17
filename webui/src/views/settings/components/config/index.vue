@@ -1,10 +1,10 @@
 <template>
   <a-spin style="width: 100%" :loading="loading" dot>
-    <div id="#top" style="position: relative">
+    <div id="top" style="position: relative">
       <a-form :model="form" :scroll-to-first-error="true">
         <a-space direction="vertical" fill size="large">
           <a-space direction="vertical" fill style="width: 100%">
-            <a-typography-title id="id" :heading="3">{{
+            <a-typography-title :heading="3">{{
               t('page.settings.tab.config.title')
             }}</a-typography-title>
             <a-typography-text>

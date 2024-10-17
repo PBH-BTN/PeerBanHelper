@@ -11,6 +11,8 @@ export default {
   'page.settings.tab.profile.module.title': '模块配置',
   'page.settings.tab.profile.module.enable': '启用',
 
+  'page.settings.tab.profile.formArray.emptyTips': '请填写非空字符串',
+
   'page.settings.tab.profile.module.peerIdBlackList.if': '如果',
   'page.settings.tab.profile.module.peerIdBlackList.hit': '命中',
   'page.settings.tab.profile.module.peerIdBlackList.miss': '未命中',
@@ -26,6 +28,8 @@ export default {
   'page.settings.tab.profile.module.banRuleTips.TRUE': '封禁',
   'page.settings.tab.profile.module.banRuleTips.FALSE': '排除',
 
+  'page.settings.tab.profile.module.banRuleTips.empty': '存在为空的条目',
+
   'page.settings.tab.profile.module.peerIdBlackList': 'PeerId 封禁',
   'page.settings.tab.profile.module.peerIdBlackList.individualBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.peerIdBlackList.banPeerId': '封禁 PeerId',
@@ -36,7 +40,7 @@ export default {
   'page.settings.tab.profile.module.clientNameBlackList.banClientName': '封禁客户端名称',
   'page.settings.tab.profile.module.clientNameBlackList.rule': '规则',
 
-  'page.settings.tab.profile.module.progressCheatBlocker': '进度作弊检查器',
+  'page.settings.tab.profile.module.progressCheatBlocker': '进度作弊检查',
   'page.settings.tab.profile.module.progressCheatBlocker.tips':
     '有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。',
   'page.settings.tab.profile.module.progressCheatBlocker.minSize': '最小文件大小',

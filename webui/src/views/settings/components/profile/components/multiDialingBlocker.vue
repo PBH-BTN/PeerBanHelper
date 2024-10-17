@@ -9,7 +9,7 @@
     >
       <a-space>
         <a-switch v-model="useGlobalBanTime" />
-        <a-input-number v-if="!useGlobalBanTime" v-model="model.ban_duration as number">
+        <a-input-number v-if="!useGlobalBanTime" v-model.number="model.ban_duration as number">
           <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
@@ -21,20 +21,35 @@
       :label="t('page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-length')"
       field="model.subnet_mask_length"
     >
-      <a-input-number v-model="model.subnet_mask_length" style="width: 100px"></a-input-number>
+      <a-input-number
+        v-model="model.subnet_mask_length"
+        style="width: 100px"
+        :min="0"
+        :max="32"
+      ></a-input-number>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length')"
       field="model.subnet_mask_v6_length"
     >
-      <a-input-number v-model="model.subnet_mask_v6_length" style="width: 100px"></a-input-number>
+      <a-input-number
+        v-model="model.subnet_mask_v6_length"
+        style="width: 100px"
+        :min="0"
+        :max="128"
+      ></a-input-number>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.multiDialingBlocker.tolerate-num')"
       :tooltip="t('page.settings.tab.profile.module.multiDialingBlocker.tolerate-num.tips')"
       field="model.tolerate_num"
     >
-      <a-input-number v-model="model.tolerate_num" style="width: 100px"></a-input-number>
+      <a-input-number
+        v-model="model.tolerate_num"
+        style="width: 100px"
+        :min="0"
+        :step="1"
+      ></a-input-number>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.multiDialingBlocker.timeWindow')"
@@ -57,7 +72,7 @@
       :label="t('page.settings.tab.profile.module.multiDialingBlocker.keep-hunting-time')"
       field="model.keep_hunting_time"
     >
-      <a-input-number v-model="model.keep_hunting_time" style="width: 150px">
+      <a-input-number v-model="model.keep_hunting_time" :min="0" style="width: 150px">
         <template #suffix> {{ t('page.settings.tab.profile.unit.s') }} </template>
       </a-input-number>
       <template #extra> ={{ formatSeconds(model.keep_hunting_time) }} </template>

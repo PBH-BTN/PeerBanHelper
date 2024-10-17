@@ -50,7 +50,7 @@ export interface ProgressCheatBlocker {
   excessive_threshold: number
   ipv4_prefix_length: number
   ipv6_prefix_length: number
-  ban_duration: number
+  ban_duration: BanDuration
   enable_persist: boolean
   persist_duration: number
   max_wait_duration: number
@@ -90,7 +90,7 @@ export interface AutoRangeBan {
 
 export interface Btn {
   enabled: boolean
-  ban_duration: number
+  ban_duration: BanDuration
 }
 
 export interface MultiDialingBlocker {

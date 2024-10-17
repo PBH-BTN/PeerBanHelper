@@ -1,10 +1,10 @@
 <template>
   <a-spin style="width: 100%" :loading="loading" dot>
-    <div id="#top" style="position: relative">
+    <div id="top" style="position: relative">
       <a-form :model="form">
         <a-space direction="vertical" fill>
           <a-space direction="vertical" fill style="width: 100%">
-            <a-typography-title id="id" :heading="3">{{
+            <a-typography-title :heading="3">{{
               t('page.settings.tab.profile.base.title')
             }}</a-typography-title>
             <a-form-item
@@ -69,26 +69,29 @@
               >
                 <autoRangeBan v-model="form.module.auto_range_ban" />
               </a-collapse-item>
+              <a-collapse-item key="6" header="BTN">
+                <btn v-model="form.module.btn" />
+              </a-collapse-item>
               <a-collapse-item
-                key="6"
+                key="7"
                 :header="t('page.settings.tab.profile.module.multiDialingBlocker.title')"
               >
                 <multiDialingBlocker v-model="form.module.multi_dialing_blocker" />
               </a-collapse-item>
               <a-collapse-item
-                key="7"
+                key="8"
                 :header="t('page.settings.tab.profile.module.expressionEngine.title')"
               >
                 <expressionEngine v-model="form.module.expression_engine" />
               </a-collapse-item>
               <a-collapse-item
-                key="8"
+                key="9"
                 :header="t('page.settings.tab.profile.module.ruleSubscribe.title')"
               >
                 <ruleSubscribe v-model="form.module.ip_address_blocker_rules" />
               </a-collapse-item>
               <a-collapse-item
-                key="9"
+                key="10"
                 :header="t('page.settings.tab.profile.module.activeMonitor.title')"
               >
                 <activeMonitoring v-model="form.module.active_monitoring" />
@@ -118,6 +121,7 @@ import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import activeMonitoring from './components/activeMonitoring.vue'
 import autoRangeBan from './components/autoRangeBan.vue'
+import btn from './components/btn.vue'
 import clientNameBlackList from './components/clientNameBlackList.vue'
 import expressionEngine from './components/expressionEngine.vue'
 import formArray from './components/formArray.vue'
@@ -140,18 +144,20 @@ const { loading } = useRequest(GetProfile, {
   }
 })
 const saving = ref(false)
-const submitConfig = () => {
+const submitConfig = async () => {
   saving.value = true
-  SaveProfile(form)
-    .then((data) => {
+  try {
+    const data = await SaveProfile(form)
+    if (data.success) {
       Message.success(data.message)
-    })
-    .catch((err) => {
-      Message.error(err.message)
-    })
-    .finally(() => {
-      saving.value = false
-    })
+    } else {
+      Message.error(data.message)
+    }
+  } catch (error) {
+    Message.error((error as Error).message)
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 <style scoped>
