@@ -89,7 +89,7 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     @Override
-    public List<DownloaderFeatureFlag> getDownloaderFeatureFlags() {
+    public List<DownloaderFeatureFlag> getFeatureFlags() {
         return Collections.emptyList();
     }
 }

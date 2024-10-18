@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
@@ -79,6 +80,11 @@ public class BiglyBT extends AbstractDownloader {
         }
         this.httpClient = builder.build();
         this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+    }
+
+    @Override
+    public List<DownloaderFeatureFlag> getFeatureFlags() {
+        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS);
     }
 
     public static BiglyBT loadFromConfig(String name, JsonObject section) {

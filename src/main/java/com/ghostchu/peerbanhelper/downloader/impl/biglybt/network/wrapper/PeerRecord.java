@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /*
 com.biglybt.pif.peers.Peer.java
  */
@@ -36,4 +38,6 @@ public final class PeerRecord {
     private boolean optimisticUnchoke;
     private boolean supportsMessaging;
     private boolean priorityConnection;
+    private byte[] handshakeReservedBytes;
+    private List<String> peerSupportedMessages;
 }
