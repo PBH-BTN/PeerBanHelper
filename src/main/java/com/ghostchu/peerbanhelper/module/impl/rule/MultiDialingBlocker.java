@@ -210,6 +210,8 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
                 maximumSize(PEER_MAX_NUM_PER_SUBNET).
                 softValues().
                 build();
+
+        getCache().invalidateAll();
     }
 
     /**

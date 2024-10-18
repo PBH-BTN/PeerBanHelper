@@ -306,6 +306,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         if (getConfig().getBoolean("net-type.datacenter")) {
             this.netTypes.add("数据中心");
         }
+        getCache().invalidateAll();
     }
 
     @Override

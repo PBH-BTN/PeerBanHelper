@@ -150,6 +150,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      * Reload the configuration for this module.
      */
     private void reloadConfig() {
+        getCache().invalidateAll();
         try {
             this.banDuration = getConfig().getLong("ban-duration", 0);
             if (null == ipBanMatchers) {
