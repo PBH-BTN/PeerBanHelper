@@ -15,7 +15,7 @@ FROM docker.io/eclipse-temurin:23-jre-alpine
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 ENV TZ=UTC
-ENV JAVA_OPTS="-Xmx512M -XX:+UseZGC -XX:+ZGenerational -XX:+ShrinkHeapInSteps"
+ENV JAVA_OPTS="-Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
