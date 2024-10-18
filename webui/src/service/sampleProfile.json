@@ -201,8 +201,8 @@
     "progress_cheat_blocker": {
       "enabled": true,
       "minimum_size": 50000000,
-      "maximum_difference": 10,
-      "rewind_maximum_difference": 7,
+      "maximum_difference": 0.1,
+      "rewind_maximum_difference": 0.07,
       "block_excessive_clients": true,
       "excessive_threshold": 1.5,
       "ipv4_prefix_length": 32,
@@ -211,7 +211,7 @@
       "enable_persist": true,
       "persist_duration": 1209600000,
       "max_wait_duration": 30000,
-      "fast_pcb_test_percentage": 10,
+      "fast_pcb_test_percentage": 0.1,
       "fast_pcb_test_block_duration": 15000
     },
     "ip_address_blocker": {
