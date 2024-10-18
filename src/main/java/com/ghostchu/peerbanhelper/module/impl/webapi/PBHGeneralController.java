@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -12,6 +13,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.Gson;
 import com.google.gson.ToNumberPolicy;
 import com.google.gson.reflect.TypeToken;
+import com.sun.management.HotSpotDiagnosticMXBean;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -21,13 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import javax.management.MBeanServer;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadInfo;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,9 +62,32 @@ public class PBHGeneralController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
+                .post("/api/general/heapdump", this::handleHeapDump, Role.USER_READ)
                 .post("/api/general/reload", this::handleReloading, Role.USER_READ)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleHeapDump(Context context) throws IOException {
+        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+        HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
+                server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+        File hprof = Files.createTempFile("heapdump", ".hprof").toFile();
+        hprof.delete();
+        File finalHprof = new File(Main.getDebugDirectory(), System.currentTimeMillis() + ".hprof.gz");
+        System.gc();
+        mxBean.dumpHeap(hprof.getAbsolutePath(), true);
+        if (!finalHprof.exists())
+            finalHprof.createNewFile();
+        try (var filein = new FileInputStream(hprof);
+             var fileout = new FileOutputStream(finalHprof)) {
+            MiscUtil.gzip(filein, fileout);
+            context.header("Content-Disposition", "attachment; filename=\"" + finalHprof.getName() + "\"");
+            context.header("Content-Length", String.valueOf(finalHprof.length()));
+            context.header("Content-Type", "application/octet-stream");
+            var stream = new FileInputStream(finalHprof);
+            context.result(stream);
+        }
     }
 
     private void handleStatusGet(Context context) {
@@ -167,7 +191,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 return;
             }
         }
-        Map<String, Object> newData = GSON.fromJson(context.body(),Map.class);
+        Map<String, Object> newData = GSON.fromJson(context.body(), Map.class);
         mergeYaml(config, newData);
         config.save(configFile);
         //moduleMatchCache.invalidateAll();
@@ -187,7 +211,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
                             List<Map<String, String>> parsedBannedPeerIdList = list.stream()
                                     .filter(String.class::isInstance)
                                     .map(String.class::cast)
-                                    .map(item -> (Map<String, String>) GSON.fromJson(item, new TypeToken<Map<String, String>>() {}.getType()))
+                                    .map(item -> (Map<String, String>) GSON.fromJson(item, new TypeToken<Map<String, String>>() {
+                                    }.getType()))
                                     .toList();
                             map.put(updatedKey, parsedBannedPeerIdList); // 替换为对象列表
                         }
