@@ -48,6 +48,7 @@ public class BtnAbilityReconfigure extends AbstractBtnAbility {
             }
             json = JsonParser.parseString(body).getAsJsonObject();
         } catch (IOException e) {
+            setLastStatus(false, "IO Error");
             return;
         }
         JsonObject ability = json.get("ability").getAsJsonObject();

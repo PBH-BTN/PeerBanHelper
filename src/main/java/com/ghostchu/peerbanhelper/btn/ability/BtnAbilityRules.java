@@ -90,6 +90,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                             log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + body));
                             setLastStatus(false, "HTTP Error: " + r.code() + " - " + body);
                         } catch (IOException ignored) {
+                            setLastStatus(false, "IO Error");
                         }
                     } else {
                         try {
@@ -110,6 +111,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                                 setLastStatus(false, "Unable parse remote JSON response: " + r.code() + " - " + body);
                                 log.error("Unable to parse BtnRule as a valid Json object: {}-{}", r.code(), body, e);
                             } catch (IOException ignored) {
+                                setLastStatus(false, "Unable parse remote JSON response");
                             }
                         }
                     }
