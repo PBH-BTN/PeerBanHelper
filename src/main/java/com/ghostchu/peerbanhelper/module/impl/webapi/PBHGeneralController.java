@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -37,6 +38,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
             .create();
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private ModuleMatchCache moduleMatchCache;
 
     @Override
     public boolean isConfigurable() {
@@ -78,6 +81,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
             }
             entryList.add(new ReloadEntry(entryName, r.getStatus().name()));
         });
+        moduleMatchCache.invalidateAll();
         context.json(new StdResp(true, null, entryList));
     }
 
@@ -115,6 +119,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
         Map<String, Object> newData = GSON.fromJson(context.body(),Map.class);
         mergeYaml(config, newData);
         config.save(configFile);
+        moduleMatchCache.invalidateAll();
         context.status(HttpStatus.CREATED);
         context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
     }
