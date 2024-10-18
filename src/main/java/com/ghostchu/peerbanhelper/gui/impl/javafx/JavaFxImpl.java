@@ -22,7 +22,6 @@ import com.sun.management.HotSpotDiagnosticMXBean;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -163,11 +162,6 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
         this.logsView = controller.getLogsListView();
         this.logsView.setStyle("-fx-font-family: Consolas, Monospace");
         this.logsView.setItems(FXCollections.observableList(new CircularArrayList<>(SwingLoggerAppender.maxLinesSetting + 1)));
-        this.logsView.getItems().addListener((ListChangeListener<ListLogEntry>) change -> {
-            while (logsView.getItems().size() > SwingLoggerAppender.maxLinesSetting) {
-                logsView.getItems().removeFirst();
-            }
-        });
         Holder<Object> lastCell = new Holder<>();
         Styles.addStyleClass(this.logsView, Styles.DENSE);
         Styles.addStyleClass(this.logsView, Styles.STRIPED);
@@ -368,6 +362,9 @@ public class JavaFxImpl extends ConsoleGuiImpl implements GuiImpl {
                     logsView.getItems().add(new ListLogEntry(loggerEvent.message(), loggerEvent.level()));
                     if (!logsView.getItems().isEmpty()) {
                         logsView.scrollTo(logsView.getItems().size() - 1);
+                    }
+                    while (logsView.getItems().size() > 100) {
+                        logsView.getItems().removeFirst();
                     }
                 });
             } catch (IllegalStateException exception) {
