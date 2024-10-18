@@ -359,15 +359,6 @@
                                                 <exclude>org/sqlite/native/Windows/x86/**</exclude>
                                                 <exclude>org/sqlite/native/Linux-Musl/x86/**</exclude>
                                                 <exclude>org/sqlite/native/FreeBSD/x86/**</exclude>
-                                                <exclude>META-INF/*.SF</exclude>
-                                                <exclude>META-INF/*.DSA</exclude>
-                                                <exclude>META-INF/*.RSA</exclude>
-                                                <exclude>META-INF/*.kotlin_module</exclude>
-                                                <exclude>META-INF/*.txt</exclude>
-                                                <exclude>META-INF/proguard/*</exclude>
-                                                <exclude>META-INF/versions/9/*</exclude>
-                                                <exclude>*License*</exclude>
-                                                <exclude>*LICENSE*</exclude>
                                             </excludes>
                                         </filter>
                                     </filters>
