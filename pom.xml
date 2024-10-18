@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>6.4.6</version>
+    <version>6.4.7</version>
     <packaging>takari-jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -482,7 +482,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>26.0.0</version>
+            <version>26.0.1</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-jdk14 -->
@@ -504,7 +504,7 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>5.1.0</version>
+            <version>6.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.mizosoft.methanol</groupId>
@@ -597,14 +597,14 @@
             <version>5.4.3</version>
         </dependency>
         <dependency>
-            <groupId>com.ghostchu.lib.unofficial.com.alessiodp.libby</groupId>
+            <groupId>com.alessiodp.libby</groupId>
             <artifactId>libby-core</artifactId> <!-- Replace bukkit if you're using another platform -->
-            <version>2.0.2-SNAPSHOT</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.ghostchu.lib.unofficial.com.alessiodp.libby</groupId>
+            <groupId>com.alessiodp.libby</groupId>
             <artifactId>libby-standalone</artifactId> <!-- Replace bukkit if you're using another platform -->
-            <version>2.0.2-SNAPSHOT</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>

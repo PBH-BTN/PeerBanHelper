@@ -4,7 +4,7 @@ public enum MavenCentralMirror {
     CENTRAL("US", "https://repo1.maven.org/maven2", "https://repo1.maven.org/maven2/net/kyori/adventure-api/4.9.1/adventure-api-4.9.1.jar"),
     APACHE("US", "https://repo.maven.apache.org/maven2", "https://repo.maven.apache.org/maven2/net/kyori/adventure-api/4.9.1/adventure-api-4.9.1.jar"),
     ALIYUN("CN", "https://maven.aliyun.com/repository/public", "https://maven.aliyun.com/repository/central/net/kyori/adventure-api/4.9.1/adventure-api-4.9.1.jar"),
-    NETEASE163("CN", "http://mirrors.163.com/maven/repository/maven-public", "http://mirrors.163.com/maven/repository/maven-public/net/kyori/adventure-api/4.9.1/adventure-api-4.9.1.jar"),
+    //NETEASE163("CN", "http://mirrors.163.com/maven/repository/maven-public", "http://mirrors.163.com/maven/repository/maven-public/net/kyori/adventure-api/4.9.1/adventure-api-4.9.1.jar"),
     TENCENT("CN", "https://mirrors.cloud.tencent.com/nexus/repository/maven-public", "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/net/kyori/adventure-api/4.9.1/adventure-api-4.9.1.jar");
 
     private final String region;
