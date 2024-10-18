@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 public class PeerImpl implements Peer {
     private PeerAddress peerAddress;
@@ -15,8 +17,9 @@ public class PeerImpl implements Peer {
     private long uploaded;
     private double progress;
     private PeerFlag flags;
+    private List<PeerMessage> supportedMessages;
 
-    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags) {
+    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, List<PeerMessage> supportedMessages) {
         this.peerAddress = peerAddress;
         this.rawIp = rawIp;
         this.peerId = peerId;
@@ -27,6 +30,7 @@ public class PeerImpl implements Peer {
         this.uploaded = uploaded;
         this.progress = progress;
         this.flags = flags;
+        this.supportedMessages = supportedMessages;
     }
 
     @Override
@@ -77,5 +81,10 @@ public class PeerImpl implements Peer {
     @Override
     public String getRawIp() {
         return rawIp;
+    }
+
+    @Override
+    public List<PeerMessage> getSupportedMessages() {
+        return supportedMessages;
     }
 }

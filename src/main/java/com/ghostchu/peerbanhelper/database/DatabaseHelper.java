@@ -43,6 +43,7 @@ public class DatabaseHelper {
         TableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class);
+        TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
     }
 
     private void performUpgrade() throws SQLException {

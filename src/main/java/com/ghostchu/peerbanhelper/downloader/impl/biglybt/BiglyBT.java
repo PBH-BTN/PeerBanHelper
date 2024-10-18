@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
@@ -13,6 +14,7 @@ import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerRe
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.StatisticsRecord;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerImpl;
+import com.ghostchu.peerbanhelper.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -43,9 +45,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -89,6 +89,11 @@ public class BiglyBT extends AbstractDownloader {
     public static BiglyBT loadFromConfig(String name, ConfigurationSection section) {
         Config config = Config.readFromYaml(section);
         return new BiglyBT(name, config);
+    }
+
+    @Override
+    public List<DownloaderFeatureFlag> getFeatureFlags() {
+        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS);
     }
 
     @Override
@@ -219,6 +224,13 @@ public class BiglyBT extends AbstractDownloader {
             if (peer.getIp() == null || peer.getIp().isBlank()) {
                 continue;
             }
+            var supportedMessages = peer.getPeerSupportedMessages().stream().map(str -> {
+                try {
+                    return PeerMessage.valueOf(str.toUpperCase(Locale.ROOT).replace("-", "_"));
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
+            }).filter(Objects::nonNull).toList();
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
                     peer.getIp(),
@@ -229,7 +241,8 @@ public class BiglyBT extends AbstractDownloader {
                     peer.getStats().getRtUploadSpeed(),
                     peer.getStats().getTotalSent(),
                     peer.getPercentDoneInThousandNotation() / 1000d,
-                    null
+                    null,
+                    supportedMessages
             ));
         }
         return peersList;

@@ -210,6 +210,15 @@ export const routerOptions: RouteRecordRaw[] = [
       disableAutoUpdate: true
     },
     component: () => import('@/views/login/index.vue')
+  },
+  {
+    path: '/config',
+    name: 'config',
+    meta: {
+      label: 'router.config',
+      needLogin: true
+    },
+    component: () => import('@/views/settings/index.vue')
   }
 ]
 

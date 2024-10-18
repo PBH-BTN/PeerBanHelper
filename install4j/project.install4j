@@ -10,8 +10,9 @@
     </languages>
     <variables>
       <variable name="registerSystemService" value="registerSystemService" />
+      <variable name="jarPath" value="../target/PeerBanHelper.jar" />
     </variables>
-    <jreBundles jdkProviderId="Zulu" release="23/23.0.0" />
+    <jreBundles jdkProviderId="Zulu" release="23/23.0.1" />
   </application>
   <files keepModificationTimes="true">
     <mountPoints>

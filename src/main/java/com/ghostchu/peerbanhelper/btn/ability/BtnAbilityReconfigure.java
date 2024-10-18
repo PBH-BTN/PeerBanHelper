@@ -9,7 +9,7 @@ import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpResponse;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -33,7 +33,7 @@ public class BtnAbilityReconfigure extends AbstractBtnAbility {
     @Override
     public void load() {
         setLastStatus(true, "Stand by");
-        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::checkIfReconfigure, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::checkIfReconfigure, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void checkIfReconfigure() {
