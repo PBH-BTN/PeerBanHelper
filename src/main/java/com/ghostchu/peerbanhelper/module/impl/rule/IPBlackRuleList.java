@@ -150,6 +150,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      * Reload the configuration for this module.
      */
     private void reloadConfig() {
+        getCache().invalidateAll();
         try {
             this.banDuration = getConfig().getLong("ban-duration", 0);
             if (null == ipBanMatchers) {
@@ -168,6 +169,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                 }
                 log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_FINISH));
             }
+            getCache().invalidateAll();
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
             rollbarErrorReporter.error(throwable);

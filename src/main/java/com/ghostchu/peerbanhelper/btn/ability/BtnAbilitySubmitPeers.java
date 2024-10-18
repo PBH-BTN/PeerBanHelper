@@ -14,13 +14,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class BtnAbilitySubmitPeers implements BtnAbility {
+public class BtnAbilitySubmitPeers extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;
@@ -36,7 +36,8 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
 
     @Override
     public void load() {
-        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        setLastStatus(true, "No content reported to remote yet");
+        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void submit() {
@@ -44,6 +45,7 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_PEERS));
             List<BtnPeer> btnPeers = generatePing();
             if (btnPeers.isEmpty()) {
+                setLastStatus(true, "Last report is empty, skipped.");
                 return;
             }
             BtnPeerPing ping = new BtnPeerPing(
@@ -59,19 +61,25 @@ public class BtnAbilitySubmitPeers implements BtnAbility {
                     .thenAccept(r -> {
                         if (r.code() != 200) {
                             try {
-                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body().string()));
+                                String body = r.body().string();
+                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + body));
+                                setLastStatus(false, "HTTP Error: " + r.code() + " - " + body);
                             } catch (IOException ignored) {
+                                setLastStatus(false, "IO Error");
                             }
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_PEERS, btnPeers.size()));
+                            setLastStatus(true, "Reported " + btnPeers.size() + " entries.");
                         }
                     })
                     .exceptionally(e -> {
                         log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
+                        setLastStatus(false, e.getClass().getName() + ": " + e.getMessage());
                         return null;
                     });
-        } catch (Throwable throwable) {
-            log.error("Unable to submit peers", throwable);
+        } catch (Throwable e) {
+            log.error("Unable to submit peers", e);
+            setLastStatus(false, "Unknown Error: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
 

@@ -292,6 +292,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             }
         }
         expressions = Map.copyOf(userRules);
+        getCache().invalidateAll();
         log.info(tlUI(Lang.MODULE_EXPRESSION_RULE_COMPILED, expressions.size(), System.currentTimeMillis() - start));
     }
 

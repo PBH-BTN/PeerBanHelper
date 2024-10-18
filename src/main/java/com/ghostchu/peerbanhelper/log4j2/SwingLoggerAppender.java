@@ -21,7 +21,7 @@ import static org.apache.logging.log4j.core.layout.PatternLayout.createDefaultLa
 public class SwingLoggerAppender extends AbstractAppender {
     private static final Set<Consumer<LoggerEvent>> listeners = new HashSet<>();
 
-    public static int maxLinesSetting = 300;
+    public static int maxLinesSetting = 10;
 
     private SwingLoggerAppender(String name, Layout<?> layout, Filter filter, int maxLines, boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions, new Property[0]);

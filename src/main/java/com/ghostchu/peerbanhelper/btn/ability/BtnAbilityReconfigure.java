@@ -9,18 +9,20 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.io.IOException;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class BtnAbilityReconfigure implements BtnAbility {
+public class BtnAbilityReconfigure extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final long randomInitialDelay;
     private final String version;
+    private boolean lastStatus;
+    private String lastErrorMsg;
 
     public BtnAbilityReconfigure(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
@@ -31,28 +33,35 @@ public class BtnAbilityReconfigure implements BtnAbility {
 
     @Override
     public void load() {
-        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::checkIfReconfigure, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        setLastStatus(true, "Stand by");
+        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::checkIfReconfigure, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void checkIfReconfigure() {
         JsonObject json;
         try (Response resp = HTTPUtil.retryableSend(btnNetwork.getHttpClient(), new Request.Builder().url(btnNetwork.getConfigUrl()).build()).join()) {
+            String body = resp.body().string();
             if (resp.code() != 200) {
-                log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.code() + " - " + resp.body().string()));
+                setLastStatus(false, "HTTP Error: " + resp.code() + " - " + body);
+                log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.code() + " - " + body));
                 return;
             }
-            json = JsonParser.parseString(resp.body().string()).getAsJsonObject();
+            json = JsonParser.parseString(body).getAsJsonObject();
         } catch (IOException e) {
             return;
         }
         JsonObject ability = json.get("ability").getAsJsonObject();
         if (!ability.has("reconfigure")) {
+            setLastStatus(true, "Disabled Reconfigure");
             return;
         }
         JsonObject reconfigure = ability.get("reconfigure").getAsJsonObject();
+        setLastStatus(true, "Detected new version, preparing for reconfigure");
         if (!reconfigure.get("version").getAsString().equals(this.version)) {
             log.info(tlUI(Lang.BTN_RECONFIGURING));
+            setLastStatus(true, "Reconfiguring");
             btnNetwork.configBtnNetwork();
+            setLastStatus(true, "Reconfigured");
         }
     }
 

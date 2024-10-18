@@ -55,8 +55,8 @@ public class PBHConfigUpdater {
                     if (method.getParameterCount() == 0) {
                         method.invoke(configUpdateScript);
                     } else {
-                        if (method.getParameterCount() == 1 && (method.getParameterTypes()[0] == int.class || method.getParameterTypes()[0] == Integer.class)) {
-                            method.invoke(configUpdateScript, current);
+                        if (method.getParameterCount() == 1 && (method.getParameterTypes()[0] == YamlConfiguration.class)) {
+                            method.invoke(configUpdateScript, bundle);
                         }
                     }
                 } catch (Exception e) {

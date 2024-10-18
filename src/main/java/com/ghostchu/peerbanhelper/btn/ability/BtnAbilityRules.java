@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class BtnAbilityRules implements BtnAbility {
+public class BtnAbilityRules extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;
@@ -40,6 +40,7 @@ public class BtnAbilityRules implements BtnAbility {
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+        setLastStatus(true, "Stand by");
     }
 
     private void loadCacheFile() throws IOException {
@@ -61,10 +62,12 @@ public class BtnAbilityRules implements BtnAbility {
     public void load() {
         try {
             loadCacheFile();
+            setLastStatus(true, "Loaded from disk cache");
         } catch (Exception e) {
             log.error("Unable to load cached BTN rules into memory");
+            setLastStatus(false, e.getClass().getName() + ": " + e.getMessage());
         }
-        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::updateRule, new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::updateRule, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void updateRule() {
@@ -78,11 +81,14 @@ public class BtnAbilityRules implements BtnAbility {
                         new Request.Builder().url(URLUtil.appendUrl(endpoint, Map.of("rev", version))).build())
                 .thenAccept(r -> {
                     if (r.code() == 204) {
+                        setLastStatus(true, "Not modified");
                         return;
                     }
                     if (r.code() != 200) {
                         try {
-                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body().string()));
+                            String body = r.body().string();
+                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + body));
+                            setLastStatus(false, "HTTP Error: " + r.code() + " - " + body);
                         } catch (IOException ignored) {
                         }
                     } else {
@@ -96,9 +102,13 @@ public class BtnAbilityRules implements BtnAbility {
                             } catch (IOException ignored) {
                             }
                             log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
+                            setLastStatus(true, "Loaded from remote, version: " + this.btnRule.getVersion());
+                            btnNetwork.getModuleMatchCache().invalidateAll();
                         } catch (JsonSyntaxException | IOException e) {
                             try {
-                                log.error("Unable to parse BtnRule as a valid Json object: {}-{}", r.code(), r.body().string(), e);
+                                String body = r.body().string();
+                                setLastStatus(false, "Unable parse remote JSON response: " + r.code() + " - " + body);
+                                log.error("Unable to parse BtnRule as a valid Json object: {}-{}", r.code(), body, e);
                             } catch (IOException ignored) {
                             }
                         }
@@ -106,6 +116,7 @@ public class BtnAbilityRules implements BtnAbility {
                 })
                 .exceptionally((e) -> {
                     log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
+                    setLastStatus(false, "Unknown Error: " + e.getClass().getName() + ": " + e.getMessage());
                     return null;
                 });
     }

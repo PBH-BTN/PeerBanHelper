@@ -84,6 +84,7 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule implements Re
     private void reloadConfig() {
         this.bannedPeers = RuleParser.parse(getConfig().getStringList("banned-client-name"));
         this.banDuration = getConfig().getLong("ban-duration", 0);
+        getCache().invalidateAll();
     }
 
     @Override

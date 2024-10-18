@@ -17,13 +17,14 @@ import okhttp3.Request;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class BtnAbilitySubmitBans implements BtnAbility {
+public class BtnAbilitySubmitBans extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;
@@ -40,7 +41,8 @@ public class BtnAbilitySubmitBans implements BtnAbility {
     @Override
     public void load() {
         Main.getEventBus().register(this);
-        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        setLastStatus(true, "No content reported to remote yet");
+        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -54,6 +56,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             List<BtnBan> btnPeers = generateBans();
             if (btnPeers.isEmpty()) {
+                setLastStatus(true, "Last report is empty, skipped.");
                 lastReport = System.currentTimeMillis();
                 return;
             }
@@ -70,20 +73,26 @@ public class BtnAbilitySubmitBans implements BtnAbility {
                     .thenAccept(r -> {
                         if (r.code() != 200) {
                             try {
-                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + r.body().string()));
+                                String body = r.body().string();
+                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.code() + " - " + body));
+                                setLastStatus(false, "HTTP Error: " + r.code() + " - " + body);
                             } catch (IOException ignored) {
+                                setLastStatus(false, "IO Error");
                             }
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
+                            setLastStatus(true, "Reported " + btnPeers.size() + " entries.");
                             lastReport = System.currentTimeMillis();
                         }
                     })
                     .exceptionally(e -> {
                         log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
+                        setLastStatus(false, e.getClass().getName() + ": " + e.getMessage());
                         return null;
                     });
-        } catch (Throwable throwable) {
-            log.error("Unable to submit bans", throwable);
+        } catch (Throwable e) {
+            log.error("Unable to submit bans", e);
+            setLastStatus(false, "Unknown Error: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
 
@@ -95,7 +104,7 @@ public class BtnAbilitySubmitBans implements BtnAbility {
             if (e.getValue().getBanAt() <= lastReport) {
                 continue;
             }
-            if(e.getValue().isBanForDisconnect()){
+            if (e.getValue().isBanForDisconnect()) {
                 continue;
             }
             BtnBan btnBan = new BtnBan();
