@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -20,6 +21,8 @@ import java.util.List;
 public class PBHGeneralController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private ModuleMatchCache moduleMatchCache;
 
     @Override
     public boolean isConfigurable() {
@@ -59,6 +62,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
             }
             entryList.add(new ReloadEntry(entryName, r.getStatus().name()));
         });
+        moduleMatchCache.invalidateAll();
         context.json(new StdResp(true, null, entryList));
     }
 

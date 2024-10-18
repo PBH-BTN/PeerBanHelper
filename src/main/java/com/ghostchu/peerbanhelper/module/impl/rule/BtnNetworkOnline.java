@@ -111,6 +111,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
 
     public void reloadConfig() {
         this.banDuration = getConfig().getLong("ban-duration", 0);
+        getCache().invalidateAll();
     }
 
     @Override
