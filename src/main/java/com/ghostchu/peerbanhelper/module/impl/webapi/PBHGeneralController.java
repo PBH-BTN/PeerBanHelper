@@ -27,7 +27,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
+import java.lang.management.ThreadInfo;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @IgnoreScan
@@ -66,6 +68,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
 
     private void handleStatusGet(Context context) {
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
+        var runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+        var threadsMXBean = ManagementFactory.getThreadMXBean();
         Map<String, Object> data = new HashMap<>();
         Map<String, Object> os = new HashMap<>();
         os.put("name", osMXBean.getName());
@@ -75,9 +79,9 @@ public class PBHGeneralController extends AbstractFeatureModule {
         os.put("systemLoadAverage", osMXBean.getSystemLoadAverage());
         data.put("os", os);
         Map<String, Object> jvm = new HashMap<>();
-        jvm.put("specification", System.getProperty("java.specification.name"));
-        jvm.put("version", System.getProperty("java.vm.version"));
-        jvm.put("vendor", System.getProperty("java.vm.vendor"));
+        jvm.put("specification", runtimeMXBean.getSpecName());
+        jvm.put("version", runtimeMXBean.getVmVersion());
+        jvm.put("vendor", runtimeMXBean.getVmVendor());
         jvm.put("classVersion", System.getProperty("java.class.version"));
         jvm.put("installDir", System.getProperty("java.home"));
         jvm.put("tmpDir", System.getProperty("java.io.tmpdir"));
@@ -91,8 +95,16 @@ public class PBHGeneralController extends AbstractFeatureModule {
         pbh.put("guiAvailable", Main.getGuiManager().isGuiAvailable());
         pbh.put("defaultLocale", Main.DEF_LOCALE);
         data.put("peerbanhelper", pbh);
+        Map<String, Object> threads = new HashMap<>();
+        threads.put("count", threadsMXBean.getThreadCount());
+        threads.put("daemonCount", threadsMXBean.getDaemonThreadCount());
+        threads.put("peakCount", threadsMXBean.getPeakThreadCount());
+        threads.put("totalStartedThreadCount", threadsMXBean.getTotalStartedThreadCount());
+        threads.put("details", Arrays.stream(threadsMXBean.dumpAllThreads(true, true)).map(ThreadInfo::toString).collect(Collectors.joining("\n\n")));
+        data.put("threads", threads);
         context.json(new StdResp(true, null, data));
     }
+
 
     private Map<String, Object> generateMemoryData(MemoryUsage heapMemoryMXBean) {
         Map<String, Object> nonHeapMem = new HashMap<>();
