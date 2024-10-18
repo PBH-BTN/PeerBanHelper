@@ -4,16 +4,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.push.PushProvider;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.github.mizosoft.methanol.MutableRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.ghostchu.peerbanhelper.util.HTTPUtil.MEDIA_TYPE_JSON;
 
 public class TelegramPushProvider implements PushProvider {
 
@@ -34,15 +35,16 @@ public class TelegramPushProvider implements PushProvider {
         map.put("text", markdown);
         map.put("photo", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
         map.put("parse_mode", "Markdown");
-        HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
-                MutableRequest.POST("https://api.telegram.org/bot" + token + "/sendPhoto"
-                                , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
+        try (Response resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
+                new Request.Builder().url("https://api.telegram.org/bot" + token + "/sendPhoto")
+                        .post(RequestBody.create(JsonUtil.getGson().toJson(map),MEDIA_TYPE_JSON))
                         .header("Content-Type", "application/json")
-                , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-        ).join();
-        if (resp.statusCode() != 200) {
-            TelegramErrResponse tgr = JsonUtil.getGson().fromJson(resp.body(), TelegramErrResponse.class);
-            throw new IllegalStateException("HTTP Failed while sending push messages to Telegram: " + tgr.getDescription());
+                        .build()
+        ).join()) {
+            if (resp.code() != 200) {
+                TelegramErrResponse tgr = JsonUtil.getGson().fromJson(resp.body().string(), TelegramErrResponse.class);
+                throw new IllegalStateException("HTTP Failed while sending push messages to Telegram: " + tgr.getDescription());
+            }
         }
         return true;
     }

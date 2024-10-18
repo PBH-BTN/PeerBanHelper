@@ -3,13 +3,14 @@ package com.ghostchu.peerbanhelper.btn.ability;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
+import okhttp3.Response;
 
-import java.net.http.HttpResponse;
 import java.util.concurrent.ThreadLocalRandom;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -37,13 +38,19 @@ public class BtnAbilityReconfigure extends AbstractBtnAbility {
     }
 
     private void checkIfReconfigure() {
-        HttpResponse<String> resp = HTTPUtil.retryableSend(btnNetwork.getHttpClient(), MutableRequest.GET(btnNetwork.getConfigUrl()), HttpResponse.BodyHandlers.ofString()).join();
-        if (resp.statusCode() != 200) {
-            setLastStatus(false, "HTTP Error: " + resp.statusCode() + " - " + resp.body());
-            log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.statusCode() + " - " + resp.body()));
+        JsonObject json;
+        try (Response resp = HTTPUtil.retryableSend(btnNetwork.getHttpClient(), new Request.Builder().url(btnNetwork.getConfigUrl()).build()).join()) {
+            String body = resp.body().string();
+            if (resp.code() != 200) {
+                setLastStatus(false, "HTTP Error: " + resp.code() + " - " + body);
+                log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.code() + " - " + body));
+                return;
+            }
+            json = JsonParser.parseString(body).getAsJsonObject();
+        } catch (IOException e) {
+            setLastStatus(false, "IO Error");
             return;
         }
-        JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
         JsonObject ability = json.get("ability").getAsJsonObject();
         if (!ability.has("reconfigure")) {
             setLastStatus(true, "Disabled Reconfigure");

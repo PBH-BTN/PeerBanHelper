@@ -4,8 +4,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.MaxMindDbConstructor;
@@ -21,17 +19,18 @@ import com.maxmind.geoip2.record.Location;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okio.BufferedSink;
+import okio.GzipSource;
+import okio.Okio;
+import okio.Source;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.Authenticator;
 import java.net.InetAddress;
-import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -42,7 +41,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPInputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -62,7 +60,7 @@ public class IPDB implements AutoCloseable {
     private final boolean autoUpdate;
     private final String userAgent;
     private final File mmdbGeoCNFile;
-    private Methanol httpClient;
+    private OkHttpClient httpClient;
     @Getter
     private DatabaseReader mmdbCity;
     @Getter
@@ -280,20 +278,22 @@ public class IPDB implements AutoCloseable {
     }
 
     private void setupHttpClient() {
-        this.httpClient = Methanol
-                .newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(userAgent)
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
+        this.httpClient = Main.getSharedHttpClient().newBuilder()
+                .followRedirects(true)
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
-                .authenticator(new Authenticator() {
+                .callTimeout(Duration.of(2, ChronoUnit.MINUTES))
+                .addInterceptor(new Interceptor() {
                     @Override
-                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(accountId, licenseKey.toCharArray());
+                    public Response intercept(Interceptor.Chain chain) throws IOException {
+                        Request original = chain.request();
+                        Request request = original.newBuilder()
+                                .header("User-Agent", userAgent)
+                                //.header("Accept-Encoding", "gzip,deflate")
+                                .header("Content-Type", "application/json")
+                                .method(original.method(), original.body())
+                                .build();
+                        return chain.proceed(request);
                     }
                 })
                 .build();
@@ -314,29 +314,21 @@ public class IPDB implements AutoCloseable {
     }
 
     private CompletableFuture<Void> downloadFile(IPDBDownloadSource req, IPDBDownloadSource backupReq, Path path, String databaseName) {
-        return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(req.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
+        return HTTPUtil.retryableSend(httpClient, new Request.Builder().url(req.getIPDBUrl()).build())
                 .thenAccept(r -> {
-                    if (r.statusCode() == 200) {
+                    if (r.code() == 200) {
+                        Source source = HTTPUtil.newProgressResponseBody(r.body(),HTTPUtil.newProgressListener()).source();
                         if (req.supportGzip()) {
-                            try {
-                                File tmp = File.createTempFile(databaseName, ".tmp");
-                                try (GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(r.body().toFile()));
-                                     FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
-                                        byte[] buffer = new byte[1024];
-                                        int len;
-                                        while ((len = gzipInputStream.read(buffer)) > 0) {
-                                            fileOutputStream.write(buffer, 0, len);
-                                        }
-                                }
-                                Files.move(tmp.toPath(), r.body(), StandardCopyOption.REPLACE_EXISTING);
-                                log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
-                                return;
-                            } catch (IOException e) { // 下方统一进行处理
-                                log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED));
-                            }
-                        } else { // 直接就是原始文件
+                            source = new GzipSource(source);
+                        }
+                        try {
+                            BufferedSink sink = Okio.buffer(Okio.sink(path));
+                            sink.writeAll(source);
+                            sink.close();
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
+                        } catch (IOException e) { // 下方统一进行处理
+                            log.warn(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.code() + " - " + e));
                         }
                     }
                     if (backupReq != null) { // 非 200 状态码 或者 gzip 解压出错
@@ -344,7 +336,10 @@ public class IPDB implements AutoCloseable {
                         downloadFile(backupReq, null, path, databaseName);
                         return;
                     }
-                    log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body()));
+                    try {
+                        log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.code() + " - " + r.body().string()));
+                    } catch (IOException ignored) {
+                    }
                 })
                 .exceptionally(e -> {
                     if (backupReq != null) {
