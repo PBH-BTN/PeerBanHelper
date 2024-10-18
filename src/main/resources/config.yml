@@ -154,3 +154,57 @@ performance:
   # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
+
+push-notification:
+  # 邮件推送服务 - Email push notification
+  smtp:
+    # 启用 SMTP 邮件推送服务
+    # Enable SMTP push service
+    enabled: false
+    # SMTP 服务器主机名 - SMTP Server Hostname
+    host: "smtp.example.com"
+    # SMTP 端口号 - SMTP Port
+    port: "587"
+    # 使用 SSL - SSL
+    ssl: "true"
+    # SMTP 用户名 - SMTP Username
+    # 通常为邮箱地址 - Usually is email address
+    username: "example@example.com"
+    # 发送者名称 - Sender name
+    # 通常为邮箱地址 - Usually is email address
+    sender: "example@example.com"
+    # 发件者名称
+    # Sender name
+    name: "PeerBanHelper"
+    # SMTP 密码 - SMTP Password
+    # 通常为授权码（而非邮箱密码），请参阅您的邮件服务提供商的说明
+    # Usually is Access Token (not Email password), please refer to your email provider instruction
+    password: "password"
+    # 收件人列表 - Receiver list
+    # 推送的消息将发送到下面的所有邮件地址 - Messages will send to all address that listed below
+    receiver:
+      - "example@exmaple.com"
+
+  # PushPlus - 推送加（Chinese user only）
+  pushplus:
+    # 启用 Push Plus 推送加服务
+    enabled: false
+    # PushPlus Token
+    token: ""
+    # 群组编码，不清楚这是什么请留空
+    topic: ""
+    # 发送模板，不清楚这是什么请留空
+    template: ""
+    # 发送渠道。不清楚这是什么请留空；https://www.pushplus.plus/doc/channel/#%E5%BC%95%E8%A8%80
+    channel: ""
+
+  # ServerChan - Server酱
+  serverchan:
+    # 启用 ServerChan Server酱 推送加服务
+    enabled: false
+    # 发送密钥 (SendKey/AppKey)
+    send-key: ""
+    # 消息通道
+    channel: ""
+    # 消息抄送的 openid
+    openid: ""
