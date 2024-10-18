@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.push.impl.PushPlusPushProvider;
 import com.ghostchu.peerbanhelper.push.impl.ServerChanPushProvider;
 import com.ghostchu.peerbanhelper.push.impl.SmtpPushProvider;
+import com.ghostchu.peerbanhelper.push.impl.TelegramPushProvider;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class PushManager implements Reloadable {
                     case "smtp" -> registered.add(new SmtpPushProvider(section));
                     case "pushplus" -> registered.add(new PushPlusPushProvider(section));
                     case "serverchan" -> registered.add(new ServerChanPushProvider(section));
+                    case "telegram" -> registered.add(new TelegramPushProvider(section));
                 }
             }
         });
