@@ -87,6 +87,7 @@ public class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadabl
         this.ipv4Prefix = getConfig().getInt("ipv4");
         this.ipv6Prefix = getConfig().getInt("ipv6");
         this.banDuration = getConfig().getLong("ban-duration", 0);
+        getCache().invalidateAll();
     }
 
     @Override
