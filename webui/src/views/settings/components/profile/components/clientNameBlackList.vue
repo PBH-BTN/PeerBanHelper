@@ -77,7 +77,7 @@ const dataWithIndex = computed(() => {
   return model.value.banned_client_name.map((item, index) => ({ ...item, index }))
 })
 const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
-  if (model.value.banned_client_name.filter((item) => item.content === '').length > 0)
+  if (model.value.banned_client_name.some((item) => item.content === ''))
     cb(t('page.settings.tab.profile.module.banRuleTips.empty'))
   else cb()
 }
