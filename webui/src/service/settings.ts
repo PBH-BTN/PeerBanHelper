@@ -1,18 +1,18 @@
 import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 import type { Config } from '@/api/model/config'
 import type { Profile } from '@/api/model/profile'
-import sampleConfig from './sampleConfig.json'
-import sampleProfile from './sampleProfile.json'
+import { useEndpointStore } from '@/stores/endpoint'
+import urlJoin from 'url-join'
+import { getCommonHeader } from './utils'
 
 export async function GetProfile(): Promise<CommonResponse<Profile>> {
-  return new Promise((res) => {
-    setTimeout(() => {
-      res({
-        success: true,
-        message: 'success',
-        data: sampleProfile as Profile
-      })
-    }, 3000)
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(urlJoin(endpointStore.endpoint, 'api/config/profile.yml'), location.href)
+  return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
   })
 }
 
@@ -29,14 +29,16 @@ export async function SaveProfile(config: Profile): Promise<CommonResponseWithou
 }
 
 export async function GetConfig(): Promise<CommonResponse<Config>> {
-  return new Promise((res) => {
-    setTimeout(() => {
-      res({
-        success: true,
-        message: 'success',
-        data: sampleConfig as Config
-      })
-    }, 3000)
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, 'api/config/config/profile.yml'),
+    location.href
+  )
+  return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
   })
 }
 
