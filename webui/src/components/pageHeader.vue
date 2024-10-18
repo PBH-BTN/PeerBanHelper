@@ -194,7 +194,7 @@ const props = withDefaults(
 )
 const endpointStore = useEndpointStore()
 
-endpointStore.emmitter.on('open-settings-modal', () => {
+endpointStore.emitter.on('open-settings-modal', () => {
   settingsModalRef.value?.showModal()
 })
 
