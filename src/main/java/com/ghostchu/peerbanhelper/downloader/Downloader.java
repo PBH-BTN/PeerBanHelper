@@ -132,5 +132,5 @@ public interface Downloader extends AutoCloseable {
      * 获取下载器扩展特性标记
      * @return 扩展特性标记列表
      */
-    List<DownloaderFeatureFlag> getDownloaderFeatureFlags();
+    List<DownloaderFeatureFlag> getFeatureFlags();
 }
