@@ -84,7 +84,7 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
 
     @SneakyThrows
     private List<BtnPeerHistory> generatePing() {
-        Pageable pageable = new Pageable(0, 100000); // 再多的话，担心爆内存
+        Pageable pageable = new Pageable(0, 10000); // 再多的话，担心爆内存
         return btnNetwork.getPeerRecordDao().getPendingSubmitPeerRecords(pageable,
                         new Timestamp(lastSubmitAt)).getResults().stream()
                 .map(BtnPeerHistory::from).collect(Collectors.toList());
