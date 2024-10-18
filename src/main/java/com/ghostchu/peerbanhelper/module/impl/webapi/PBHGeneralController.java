@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -26,9 +25,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryUsage;
 import java.util.*;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @IgnoreScan
@@ -59,9 +58,49 @@ public class PBHGeneralController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.javalin()
+                .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
                 .post("/api/general/reload", this::handleReloading, Role.USER_READ)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleStatusGet(Context context) {
+        var osMXBean = ManagementFactory.getOperatingSystemMXBean();
+        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> os = new HashMap<>();
+        os.put("name", osMXBean.getName());
+        os.put("version", osMXBean.getVersion());
+        os.put("availableProcessors", osMXBean.getAvailableProcessors());
+        os.put("arch", osMXBean.getArch());
+        os.put("systemLoadAverage", osMXBean.getSystemLoadAverage());
+        data.put("os", os);
+        Map<String, Object> jvm = new HashMap<>();
+        jvm.put("specification", System.getProperty("java.specification.name"));
+        jvm.put("version", System.getProperty("java.vm.version"));
+        jvm.put("vendor", System.getProperty("java.vm.vendor"));
+        jvm.put("classVersion", System.getProperty("java.class.version"));
+        jvm.put("installDir", System.getProperty("java.home"));
+        jvm.put("tmpDir", System.getProperty("java.io.tmpdir"));
+        data.put("jvm", jvm);
+        data.put("heapMemory", generateMemoryData(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));
+        data.put("nonHeapMemory", generateMemoryData(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage()));
+        Map<String, Object> pbh = new HashMap<>();
+        pbh.put("dataDir", Main.getDataDirectory().getAbsolutePath());
+        pbh.put("userAgent", Main.getUserAgent());
+        pbh.put("startupArgs", String.join(" ", Main.getStartupArgs()));
+        pbh.put("guiAvailable", Main.getGuiManager().isGuiAvailable());
+        pbh.put("defaultLocale", Main.DEF_LOCALE);
+        data.put("peerbanhelper", pbh);
+        context.json(new StdResp(true, null, data));
+    }
+
+    private Map<String, Object> generateMemoryData(MemoryUsage heapMemoryMXBean) {
+        Map<String, Object> nonHeapMem = new HashMap<>();
+        nonHeapMem.put("init", heapMemoryMXBean.getInit());
+        nonHeapMem.put("max", heapMemoryMXBean.getMax());
+        nonHeapMem.put("used", heapMemoryMXBean.getUsed());
+        nonHeapMem.put("committed", heapMemoryMXBean.getCommitted());
+        return nonHeapMem;
     }
 
     private void handleReloading(Context context) {
