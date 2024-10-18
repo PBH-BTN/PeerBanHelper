@@ -3,16 +3,17 @@ package com.ghostchu.peerbanhelper.push.impl;
 import com.ghostchu.peerbanhelper.push.PushProvider;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.github.mizosoft.methanol.MutableRequest;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
 import java.io.IOException;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.ghostchu.peerbanhelper.util.HTTPUtil.MEDIA_TYPE_JSON;
 
 @Slf4j
 public class PushPlusPushProvider implements PushProvider {
@@ -53,14 +54,15 @@ public class PushPlusPushProvider implements PushProvider {
             put("title", title);
             put("content", content);
         }};
-        HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
-                MutableRequest.POST("https://www.pushplus.plus/send"
-                                , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(args)))
+        try (Response resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
+                new Request.Builder().url("https://www.pushplus.plus/send")
+                        .post(RequestBody.create(JsonUtil.getGson().toJson(args),MEDIA_TYPE_JSON))
                         .header("Content-Type", "application/json")
-                , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-        ).join();
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + resp.body());
+                        .build()
+                ).join()) {
+            if (resp.code() != 200) {
+                throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + resp.body().string());
+            }
         }
         return true;
     }

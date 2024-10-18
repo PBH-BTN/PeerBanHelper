@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -16,10 +15,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.ProxySelector;
@@ -32,7 +28,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
-import java.util.zip.GZIPOutputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
