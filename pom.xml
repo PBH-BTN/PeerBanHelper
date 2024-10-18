@@ -7,7 +7,7 @@
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
     <version>6.4.7</version>
-    <packaging>takari-jar</packaging>
+    <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
 
@@ -29,166 +29,112 @@
         </pluginRepository>
     </pluginRepositories>
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
-                    <configuration>
-                        <skip>true</skip>
-                        <skipMain>true</skipMain>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.6.0</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.logging.log4j</groupId>
-                            <artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>
-                            <version>0.1.0</version>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>shade</goal>
-                            </goals>
-                            <configuration>
-                                <finalName>${project.name}</finalName>
-                                <createDependencyReducedPom>true</createDependencyReducedPom>
-                                <minimizeJar>false</minimizeJar>
-                                <createSourcesJar>false</createSourcesJar>
-                                <createTestSourcesJar>false</createTestSourcesJar>
-                                <shadeSourcesContent>true</shadeSourcesContent>
-                                <shadedArtifactAttached>true</shadedArtifactAttached>
-                                <transformers>
-                                    <transformer
-                                            implementation="org.apache.logging.log4j.maven.plugins.shade.transformer.Log4j2PluginCacheFileTransformer"/>
-                                    <transformer
-                                            implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                    <transformer
-                                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <mainClass>${mainClass}</mainClass>
-                                        <manifestEntries>
-                                            <Multi-Release>true</Multi-Release>
-                                        </manifestEntries>
-                                    </transformer>
-                                </transformers>
-                                <filters>
-                                    <filter>
-                                        <artifact>*:*</artifact>
-                                        <excludes>
-                                            <!--                                            <exclude>META-INF/*.SF</exclude>-->
-                                            <!--                                            <exclude>META-INF/*.DSA</exclude>-->
-                                            <!--                                            <exclude>META-INF/*.RSA</exclude>-->
-                                            <!--                                            <exclude>META-INF/*.kotlin_module</exclude>-->
-                                            <!--                                            <exclude>META-INF/*.txt</exclude>-->
-                                            <!--                                            <exclude>META-INF/proguard/*</exclude>-->
-                                            <!--                                            <exclude>META-INF/services/*</exclude>-->
-                                            <!--                                            <exclude>META-INF/versions/9/*</exclude>-->
-                                            <!--                                            <exclude>*License*</exclude>-->
-                                            <!--                                            <exclude>*LICENSE*</exclude>-->
-                                        </excludes>
-                                    </filter>
-                                </filters>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                </plugin>
-                <plugin>
-                    <groupId>io.github.git-commit-id</groupId>
-                    <artifactId>git-commit-id-maven-plugin</artifactId>
-                    <version>9.0.1</version>
-                    <executions>
-                        <execution>
-                            <id>get-the-git-infos</id>
-                            <phase>initialize</phase>
-                            <goals>
-                                <goal>revision</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                        <verbose>false</verbose>
-                        <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
-                        <prefix>git</prefix>
-                        <format>json</format>
-                        <gitDescribe>
-                            <skip>false</skip>
-                            <always>false</always>
-                            <dirty>-dirty</dirty>
-                        </gitDescribe>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-maven-plugin</artifactId>
-                    <version>0.0.8</version>
-                    <configuration>
-                        <mainClass>com.ghostchu.peerbanhelper.MainJavaFx</mainClass>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>io.takari.maven.plugins</groupId>
-                    <artifactId>takari-lifecycle-plugin</artifactId>
-                    <version>2.2.0</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <proc>proc</proc>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <!--                    <skip>true</skip>-->
+                    <!--                    <skipMain>true</skipMain>-->
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.34</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.6.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>
+                        <version>0.1.0</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.name}</finalName>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <minimizeJar>false</minimizeJar>
+                            <createSourcesJar>false</createSourcesJar>
+                            <createTestSourcesJar>false</createTestSourcesJar>
+                            <shadeSourcesContent>true</shadeSourcesContent>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.logging.log4j.maven.plugins.shade.transformer.Log4j2PluginCacheFileTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${mainClass}</mainClass>
+                                    <manifestEntries>
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <!--                                            <exclude>META-INF/*.SF</exclude>-->
+                                        <!--                                            <exclude>META-INF/*.DSA</exclude>-->
+                                        <!--                                            <exclude>META-INF/*.RSA</exclude>-->
+                                        <!--                                            <exclude>META-INF/*.kotlin_module</exclude>-->
+                                        <!--                                            <exclude>META-INF/*.txt</exclude>-->
+                                        <!--                                            <exclude>META-INF/proguard/*</exclude>-->
+                                        <!--                                            <exclude>META-INF/services/*</exclude>-->
+                                        <!--                                            <exclude>META-INF/versions/9/*</exclude>-->
+                                        <!--                                            <exclude>*License*</exclude>-->
+                                        <!--                                            <exclude>*LICENSE*</exclude>-->
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
             </plugin>
             <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-resources-plugin</artifactId>-->
-            <!--                <version>3.3.1</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>copy-resources</id>-->
-            <!--                        <phase>initialize</phase>-->
-            <!--                        <goals>-->
-            <!--                            <goal>copy-resources</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <outputDirectory>${basedir}/target/extra-resources</outputDirectory>-->
-            <!--                            <resources>-->
-            <!--                                <resource>-->
-            <!--                                    <directory>src/main/resources</directory>-->
-            <!--                                    <filtering>true</filtering>-->
-            <!--                                    <includes>-->
-            <!--                                        <include>*</include>-->
-            <!--                                    </includes>-->
-            <!--                                </resource>-->
-            <!--                            </resources>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
+            <!--                <groupId>io.takari.maven.plugins</groupId>-->
+            <!--                <artifactId>takari-lifecycle-plugin</artifactId>-->
+            <!--                <version>2.2.0</version>-->
+            <!--                <extensions>true</extensions>-->
+            <!--                <configuration>-->
+            <!--                    <proc>proc</proc>-->
+            <!--                    <source>${java.version}</source>-->
+            <!--                    <target>${java.version}</target>-->
+            <!--                </configuration>-->
             <!--            </plugin>-->
-
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
@@ -222,10 +168,6 @@
                 <artifactId>javafx-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>io.takari.maven.plugins</groupId>
-                <artifactId>takari-lifecycle-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.8.0</version>
                 <executions>
@@ -240,6 +182,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
         </plugins>
         <resources>
             <resource>
@@ -358,7 +308,7 @@
                                     <variables>
                                         <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
                                     </variables>
-<!--                                    <incremental>true</incremental>-->
+                                    <!--                                    <incremental>true</incremental>-->
                                     <jvmArguments>-Xmx2G</jvmArguments>
                                 </configuration>
                             </execution>
@@ -693,10 +643,10 @@
             <version>3.1.0</version>
         </dependency>
         <!--        <dependency>-->
-<!--            <groupId>com.pixelduke</groupId>-->
-<!--            <artifactId>transit</artifactId>-->
-<!--            <version>2.0.0</version>-->
-<!--        </dependency>-->
+        <!--            <groupId>com.pixelduke</groupId>-->
+        <!--            <artifactId>transit</artifactId>-->
+        <!--            <version>2.0.0</version>-->
+        <!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
         <!--        <dependency>-->
         <!--            <groupId>org.jfxtras</groupId>-->
