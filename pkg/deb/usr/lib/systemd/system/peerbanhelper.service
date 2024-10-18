@@ -4,7 +4,7 @@ After=network.target
 [Service]
 User=peerbanhelper
 WorkingDirectory=/etc/peerbanhelper
-ExecStart=/usr/bin/java -Dpbh.datadir=/etc/peerbanhelper -Xmx386M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -jar /usr/lib/peerbanhelper/PeerBanHelper.jar
+ExecStart=/usr/bin/java -Dpbh.datadir=/etc/peerbanhelper -Xmx512M -Xss512K -XX:+UseZGC -XX:+ZGenerational -XX:+ShrinkHeapInSteps -jar /usr/lib/peerbanhelper/PeerBanHelper.jar
 Restart=on-failure
 [Install]
 WantedBy=multi-user.target

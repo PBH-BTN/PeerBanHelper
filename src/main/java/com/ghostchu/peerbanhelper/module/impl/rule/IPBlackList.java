@@ -90,6 +90,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
+        getCache().invalidateAll();
     }
 
     private void handleCities(Context context) throws IOException {
@@ -100,6 +101,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         context.status(HttpStatus.CREATED);
         context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
+        getCache().invalidateAll();
     }
 //
 //    private void handleNetTypeDelete(Context context) throws IOException {
@@ -120,6 +122,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
+        getCache().invalidateAll();
     }
 
     private void handleASNDelete(Context context) throws IOException {
@@ -129,11 +132,17 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
+        getCache().invalidateAll();
     }
 
     private void handlePortDelete(Context context) throws IOException {
-        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        if (ports.removeIf(p -> p == context.bodyAsClass(UserPortRequest.class).port())) {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        } else {
+            context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        }
         saveConfig();
+        getCache().invalidateAll();
     }
 
     private void handleIPDelete(Context context) throws IOException {
@@ -146,6 +155,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         }
         saveConfig();
+        getCache().invalidateAll();
     }
 
 
@@ -157,6 +167,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         ctx.status(HttpStatus.CREATED);
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
+        getCache().invalidateAll();
     }
 
     private void handleASN(Context ctx) throws IOException {
@@ -165,6 +176,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         ctx.status(HttpStatus.CREATED);
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
+        getCache().invalidateAll();
     }
 
 
@@ -174,6 +186,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         ctx.status(HttpStatus.CREATED);
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
+        getCache().invalidateAll();
     }
 
     private void handleIPPut(Context context) throws IOException {
@@ -182,6 +195,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         context.status(HttpStatus.CREATED);
         context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         saveConfig();
+        getCache().invalidateAll();
     }
 
     private void handleIPTest(Context context) throws IOException {
@@ -195,6 +209,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
                 ipAddress.getCount().toString());
         context.json(new StdResp(true, null, testResult));
         saveConfig();
+        getCache().invalidateAll();
     }
 
     private IPAddress parseIPAddressFromReq(Context ctx) throws IllegalArgumentException {
@@ -291,6 +306,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
         if (getConfig().getBoolean("net-type.datacenter")) {
             this.netTypes.add("数据中心");
         }
+        getCache().invalidateAll();
     }
 
     @Override
