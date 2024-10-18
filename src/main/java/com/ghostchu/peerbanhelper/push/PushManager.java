@@ -29,11 +29,12 @@ public class PushManager implements Reloadable {
         config.getKeys(false).forEach(provider -> {
             var section = config.getConfigurationSection(provider);
             if (section.getBoolean("enabled")) {
-                switch (provider) {
+                switch (section.getString("type")) {
                     case "smtp" -> registered.add(new SmtpPushProvider(section));
                     case "pushplus" -> registered.add(new PushPlusPushProvider(section));
                     case "serverchan" -> registered.add(new ServerChanPushProvider(section));
                     case "telegram" -> registered.add(new TelegramPushProvider(section));
+                    default -> log.warn("Unknown push-notification type {}:{}", provider, section.getString("type"));
                 }
             }
         });

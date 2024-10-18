@@ -119,9 +119,10 @@ public class PBHGeneralController extends AbstractFeatureModule {
         Map<String, Object> newData = GSON.fromJson(context.body(),Map.class);
         mergeYaml(config, newData);
         config.save(configFile);
-        moduleMatchCache.invalidateAll();
+        //moduleMatchCache.invalidateAll();
         context.status(HttpStatus.CREATED);
-        context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        //context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
+        handleReloading(context);
     }
 
     private Map<String, Object> replaceKeys(Map<String, Object> originalMap) {

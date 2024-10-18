@@ -157,7 +157,8 @@ performance:
 
 push-notification:
   # 邮件推送服务 - Email push notification
-  smtp:
+  email-example:
+    type: smtp
     # 启用 SMTP 邮件推送服务
     # Enable SMTP push service
     enabled: false
@@ -166,7 +167,7 @@ push-notification:
     # SMTP 端口号 - SMTP Port
     port: "587"
     # 使用 SSL - SSL
-    ssl: "true"
+    ssl: true
     # SMTP 用户名 - SMTP Username
     # 通常为邮箱地址 - Usually is email address
     username: "example@example.com"
@@ -186,7 +187,8 @@ push-notification:
       - "example@exmaple.com"
 
   # PushPlus - 推送加（Chinese user only）
-  pushplus:
+  pushplus-example:
+    type: pushplus
     # 启用 Push Plus 推送加服务
     enabled: false
     # PushPlus Token
@@ -199,7 +201,8 @@ push-notification:
     channel: ""
 
   # ServerChan - Server酱
-  serverchan:
+  serverchan-example:
+    type: serverchan
     # 启用 ServerChan Server酱 推送加服务
     enabled: false
     # 发送密钥 (SendKey/AppKey)
@@ -208,3 +211,13 @@ push-notification:
     channel: ""
     # 消息抄送的 openid
     openid: ""
+
+  # Telegram - Bot 推送
+  telegram-example:
+    type: telegram
+    # 启用 Telegram Bot 推送服务
+    enabled: false
+    # HTTP API Token 一般为 1234567890:XXXXXXXXXX 形式，不能有空格。联系 @BotFather 获取，参阅下方链接：
+    token: ""
+    # 聊天 Chat ID；https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a
+    chat-id: ""
