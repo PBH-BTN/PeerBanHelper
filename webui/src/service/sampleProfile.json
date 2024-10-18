@@ -1,0 +1,279 @@
+{
+  "config_version": 19,
+  "check_interval": 5000,
+  "ban_duration": 1209600000,
+  "ignore_peers_from_addresses": [
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16",
+    "fc00::/7",
+    "fd00::/8",
+    "100.64.0.0/10",
+    "169.254.0.0/16",
+    "127.0.0.0/8",
+    "fe80::/10"
+  ],
+  "module": {
+    "peer_id_blacklist": {
+      "enabled": true,
+      "ban_duration": 259200000,
+      "banned_peer_id": [
+        {
+          "method": "STARTS_WITH",
+          "content": "_xl"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_hp"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_xm"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_dt"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_gt0002"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_gt0003"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "_rn0.0.0"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_sd"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_xf"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_qd"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_bn"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_dl"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_ts"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_fg"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_tt"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_nx"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "cacao"
+        }
+      ]
+    },
+    "client_name_blacklist": {
+      "enabled": true,
+      "ban_duration": 259200000,
+      "banned_client_name": [
+        {
+          "method": "CONTAINS",
+          "content": "xunlei"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_xl"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "hp/torrent"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "hp "
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "dt/torrent"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "dt "
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "xm/torrent"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "xm "
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "go.torrent"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "taipei_torrent"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "rain 0.0.0"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "gopeed dev"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "xfplay"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "StellarPlayer"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "SP "
+        },
+        {
+          "method": "CONTAINS",
+          "content": "flashget"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "tudou"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "torrentstorm"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "qqdownload"
+        },
+        {
+          "method": "CONTAINS",
+          "content": "anacrolix/torrent"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "qbittorrent/3.3.15"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "github.com/thank423/trafficconsume"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "ޭ__"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "ljyun.cn/hangzhou/monitoring"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "taipei_torrent"
+        },
+        {
+          "method": "STARTS_WITH",
+          "content": "_XL"
+        }
+      ]
+    },
+    "progress_cheat_blocker": {
+      "enabled": true,
+      "minimum_size": 50000000,
+      "maximum_difference": 10,
+      "rewind_maximum_difference": 7,
+      "block_excessive_clients": true,
+      "excessive_threshold": 1.5,
+      "ipv4_prefix_length": 32,
+      "ipv6_prefix_length": 60,
+      "ban_duration": 2592000000,
+      "enable_persist": true,
+      "persist_duration": 1209600000,
+      "max_wait_duration": 30000,
+      "fast_pcb_test_percentage": 10,
+      "fast_pcb_test_block_duration": 15000
+    },
+    "ip_address_blocker": {
+      "enabled": true,
+      "ban_duration": 259200000,
+      "ips": ["0.0.0.0"],
+      "ports": [0],
+      "asns": ["0"],
+      "regions": ["0"],
+      "cities": ["示例海南"],
+      "net_type": {
+        "wideband": false,
+        "base_station": false,
+        "government_and_enterprise_line": false,
+        "business_platform": false,
+        "backbone_network": false,
+        "ip_private_network": false,
+        "internet_cafe": false,
+        "iot": false,
+        "datacenter": false
+      }
+    },
+    "auto_range_ban": {
+      "enabled": true,
+      "ban_duration": 604800000,
+      "ipv4": 30,
+      "ipv6": 60
+    },
+    "btn": {
+      "enabled": true,
+      "ban_duration": 259200000
+    },
+    "multi_dialing_blocker": {
+      "enabled": true,
+      "ban_duration": 1296000000,
+      "subnet_mask_length": 24,
+      "subnet_mask_v6_length": 60,
+      "tolerate_num": 5,
+      "cache_lifespan": 86400,
+      "keep_hunting": true,
+      "keep_hunting_time": 2592000
+    },
+    "expression_engine": {
+      "enabled": true,
+      "ban_duration": 259200000
+    },
+    "ip_address_blocker_rules": {
+      "enabled": true,
+      "ban_duration": 259200000,
+      "check_interval": 14400000,
+      "rules": {
+        "all_in_one": {
+          "enabled": true,
+          "name": "all_in_one",
+          "url": "https://bcr.pbh_btn.ghorg.ghostchu_services.top/combine/all.txt"
+        }
+      }
+    },
+    "active_monitoring": {
+      "enabled": true,
+      "data_retention_time": 5184000000,
+      "data_cleanup_interval": 604800000
+    }
+  }
+}
