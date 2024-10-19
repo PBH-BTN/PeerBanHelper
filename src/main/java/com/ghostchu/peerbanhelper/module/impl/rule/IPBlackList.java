@@ -83,7 +83,7 @@ public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable
     }
 
     private void handleCitiesDelete(Context context) throws IOException {
-        if (regions.removeIf(city -> city.equals(context.bodyAsClass(UserCityRequest.class).city()))) {
+        if (cities.removeIf(city -> city.equals(context.bodyAsClass(UserCityRequest.class).city()))) {
             //context.status(HttpStatus.OK);
             context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         } else {
