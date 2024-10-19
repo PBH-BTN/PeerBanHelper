@@ -51,6 +51,16 @@
                             <artifactId>lombok</artifactId>
                             <version>1.18.34</version>
                         </path>
+                        <path>
+                            <groupId>org.apache.logging.log4j</groupId>
+                            <artifactId>log4j-core</artifactId>
+                            <version>2.24.1</version>
+                        </path>
+                        <path>
+                            <groupId>org.apache.logging.log4j</groupId>
+                            <artifactId>log4j-slf4j2-impl</artifactId>
+                            <version>2.24.1</version>
+                        </path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
