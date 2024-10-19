@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
 import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
-import com.ghostchu.peerbanhelper.gui.impl.javafx.JavaFxImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.util.PBHLibrariesLoader;
 import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
@@ -250,24 +249,13 @@ public class Main {
     }
 
     private static void initGUI(String[] args) {
-        String guiType = "javafx";
+        String guiType = "swing";
         if (!Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
             guiType = "console";
         } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
             guiType = "swing";
         }
-        if ("javafx".equals(guiType)) {
-            try {
-                if (!loadDependencies("/libraries/javafx.maven")) {
-                    guiType = "swing";
-                }
-            } catch (IOException e) {
-                log.error("Failed to load JavaFx dependencies", e);
-                guiType = "swing";
-            }
-        }
         switch (guiType) {
-            case "javafx" -> guiManager = new PBHGuiManager(new JavaFxImpl(args));
             case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
             case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         }

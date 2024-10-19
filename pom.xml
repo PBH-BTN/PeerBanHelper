@@ -17,8 +17,6 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <flatlafVersion>3.5.1</flatlafVersion>
-        <javafx.version>24-ea+5</javafx.version>
-        <javafx.scope>provided</javafx.scope>
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
     </properties>
@@ -165,10 +163,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.8.0</version>
                 <executions>
@@ -199,7 +193,6 @@
                 <excludes>
                     <exclude>static/**</exclude>
                     <exclude>assets/**</exclude>
-                    <exclude>javafx/**</exclude>
                     <exclude>native/**</exclude>
                 </excludes>
             </resource>
@@ -209,11 +202,6 @@
                     <exclude>.git/</exclude>
                 </excludes>
                 <targetPath>static</targetPath>
-                <filtering>false</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources/javafx</directory>
-                <targetPath>javafx</targetPath>
                 <filtering>false</filtering>
             </resource>
             <resource>
@@ -253,12 +241,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>include-javafx-jars</id>
-            <properties>
-                <javafx.scope>compile</javafx.scope>
-            </properties>
         </profile>
         <profile>
             <id>install4j-ci</id>
@@ -485,49 +467,6 @@
             <artifactId>javalin</artifactId>
             <version>6.3.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-media</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>${javafx.version}</version>
-            <scope>${javafx.scope}</scope>
-        </dependency>
         <!--        <dependency>-->
         <!--            <groupId>com.dlsc.preferencesfx</groupId>-->
         <!--            <artifactId>preferencesfx-core</artifactId>-->
@@ -578,24 +517,9 @@
             <version>1.1.2</version>
         </dependency>
         <dependency>
-            <groupId>io.github.mkpaz</groupId>
-            <artifactId>atlantafx-base</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <dependency>
             <groupId>com.github.Dansoftowner</groupId>
             <artifactId>jSystemThemeDetector</artifactId>
             <version>3.9.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.pixelduke</groupId>
-            <artifactId>fxthemes</artifactId>
-            <version>1.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dlsc.preferencesfx</groupId>
-            <artifactId>preferencesfx-core</artifactId>
-            <version>11.17.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -634,30 +558,5 @@
             <artifactId>semver4j</artifactId>
             <version>3.1.0</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>com.pixelduke</groupId>-->
-        <!--            <artifactId>transit</artifactId>-->
-        <!--            <version>2.0.0</version>-->
-        <!--        </dependency>-->
-        <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
-        <!--        <dependency>-->
-        <!--            <groupId>org.jfxtras</groupId>-->
-        <!--            <artifactId>jmetro</artifactId>-->
-        <!--            <version>11.6.16</version>-->
-        <!--            <exclusions>-->
-        <!--                <exclusion>-->
-        <!--                <groupId>org.openjfx</groupId>-->
-        <!--                <artifactId>javafx-graphics</artifactId>-->
-        <!--                </exclusion>-->
-        <!--                <exclusion>-->
-        <!--                    <groupId>org.openjfx</groupId>-->
-        <!--                    <artifactId>javafx-controls</artifactId>-->
-        <!--                </exclusion>-->
-        <!--                <exclusion>-->
-        <!--                    <groupId>org.openjfx</groupId>-->
-        <!--                    <artifactId>javafx-base</artifactId>-->
-        <!--                </exclusion>-->
-        <!--            </exclusions>-->
-        <!--        </dependency>-->
     </dependencies>
 </project>
