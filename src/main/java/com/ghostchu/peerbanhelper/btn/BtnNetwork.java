@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.btn;
 
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -31,7 +32,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Getter
 public class BtnNetwork {
-    private static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 7;
+    private static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 8;
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     @Getter
@@ -48,6 +49,7 @@ public class BtnNetwork {
     private PeerBanHelperServer server;
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
     @Autowired
+    private PeerRecordDao peerRecordDao;
     private ModuleMatchCache moduleMatchCache;
 
     public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret) {
@@ -98,6 +100,9 @@ public class BtnNetwork {
             }
             if (ability.has("submit_bans") && submit) {
                 abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
+            }
+            if (ability.has("submit_histories") && submit) {
+                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject()));
             }
 //            if (ability.has("submit_hitrate") && submit) {
 //                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));
