@@ -41,10 +41,6 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <release>${java.version}</release>
-                    <annotationProcessors>
-                        <annotationProcessor>org.apache.logging.log4j.core.config.plugins.processor.PluginProcessor
-                        </annotationProcessor>
-                    </annotationProcessors>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
