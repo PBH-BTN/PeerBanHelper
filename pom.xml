@@ -41,6 +41,10 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <release>${java.version}</release>
+                    <annotationProcessors>
+                        <annotationProcessor>org.apache.logging.log4j.core.config.plugins.processor.PluginProcessor
+                        </annotationProcessor>
+                    </annotationProcessors>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -50,77 +54,65 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>
-                        <version>0.1.0</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${project.name}</finalName>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
-                            <minimizeJar>false</minimizeJar>
-                            <createSourcesJar>false</createSourcesJar>
-                            <createTestSourcesJar>false</createTestSourcesJar>
-                            <shadeSourcesContent>true</shadeSourcesContent>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.logging.log4j.maven.plugins.shade.transformer.Log4j2PluginCacheFileTransformer"/>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>${mainClass}</mainClass>
-                                    <manifestEntries>
-                                        <Multi-Release>true</Multi-Release>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <!--                                            <exclude>META-INF/*.SF</exclude>-->
-                                        <!--                                            <exclude>META-INF/*.DSA</exclude>-->
-                                        <!--                                            <exclude>META-INF/*.RSA</exclude>-->
-                                        <!--                                            <exclude>META-INF/*.kotlin_module</exclude>-->
-                                        <!--                                            <exclude>META-INF/*.txt</exclude>-->
-                                        <!--                                            <exclude>META-INF/proguard/*</exclude>-->
-                                        <!--                                            <exclude>META-INF/services/*</exclude>-->
-                                        <!--                                            <exclude>META-INF/versions/9/*</exclude>-->
-                                        <!--                                            <exclude>*License*</exclude>-->
-                                        <!--                                            <exclude>*LICENSE*</exclude>-->
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-shade-plugin</artifactId>-->
+            <!--                <version>3.6.0</version>-->
+            <!--                <dependencies>-->
+            <!--                    <dependency>-->
+            <!--                        <groupId>org.apache.logging.log4j</groupId>-->
+            <!--                        <artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>-->
+            <!--                        <version>0.1.0</version>-->
+            <!--                    </dependency>-->
+            <!--                </dependencies>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <phase>package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>shade</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <finalName>${project.name}</finalName>-->
+            <!--                            <createDependencyReducedPom>true</createDependencyReducedPom>-->
+            <!--                            <minimizeJar>false</minimizeJar>-->
+            <!--                            <createSourcesJar>false</createSourcesJar>-->
+            <!--                            <createTestSourcesJar>false</createTestSourcesJar>-->
+            <!--                            <shadeSourcesContent>true</shadeSourcesContent>-->
+            <!--                            <shadedArtifactAttached>true</shadedArtifactAttached>-->
+            <!--                            <transformers>-->
+            <!--                                <transformer-->
+            <!--                                        implementation="org.apache.logging.log4j.maven.plugins.shade.transformer.Log4j2PluginCacheFileTransformer"/>-->
+            <!--                                <transformer-->
+            <!--                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>-->
+            <!--                                <transformer-->
+            <!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+            <!--                                    <mainClass>${mainClass}</mainClass>-->
+            <!--                                    <manifestEntries>-->
+            <!--                                        <Multi-Release>true</Multi-Release>-->
+            <!--                                    </manifestEntries>-->
+            <!--                                </transformer>-->
+            <!--                            </transformers>-->
+            <!--                            <filters>-->
+            <!--                                <filter>-->
+            <!--&lt;!&ndash;                                    <artifact>*:*</artifact>&ndash;&gt;-->
+            <!--                                    <excludes>-->
+            <!--                                        &lt;!&ndash;                                            <exclude>META-INF/*.SF</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>META-INF/*.DSA</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>META-INF/*.RSA</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>META-INF/*.kotlin_module</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>META-INF/*.txt</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>META-INF/proguard/*</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>META-INF/services/*</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>META-INF/versions/9/*</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>*License*</exclude>&ndash;&gt;-->
+            <!--                                        &lt;!&ndash;                                            <exclude>*LICENSE*</exclude>&ndash;&gt;-->
+            <!--                                    </excludes>-->
+            <!--                                </filter>-->
+            <!--                            </filters>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
@@ -169,28 +161,50 @@
                 <artifactId>javafx-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.8.0</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>build-classpath</goal>
-                        </goals>
-                        <configuration>
-                            <outputProperty>pbh.classpath</outputProperty>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.3.1</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/libraries</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <outputDirectory>${project.basedir}/target/libraries</outputDirectory>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
+                            <!-- <classpathPrefix>lib</classpathPrefix> -->
+                            <!-- <mainClass>test.org.Cliente</mainClass> -->
+                        </manifest>
+                        <manifestEntries>
+                            <Class-Path>libraries/</Class-Path>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -234,23 +248,23 @@
             <id>local-snapshot</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
-                                </goals>
-                                <configuration>
-                                    <finalName>
-                                        ${project.name}-SNAPSHOT-${maven.build.timestamp}-${git.commit.id.abbrev}
-                                    </finalName>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+                    <!--                    <plugin>-->
+                    <!--                        <groupId>org.apache.maven.plugins</groupId>-->
+                    <!--                        <artifactId>maven-shade-plugin</artifactId>-->
+                    <!--                        <executions>-->
+                    <!--                            <execution>-->
+                    <!--                                <phase>package</phase>-->
+                    <!--                                <goals>-->
+                    <!--                                    <goal>shade</goal>-->
+                    <!--                                </goals>-->
+                    <!--                                <configuration>-->
+                    <!--                                    <finalName>-->
+                    <!--                                        ${project.name}-SNAPSHOT-${maven.build.timestamp}-${git.commit.id.abbrev}-->
+                    <!--                                    </finalName>-->
+                    <!--                                </configuration>-->
+                    <!--                            </execution>-->
+                    <!--                        </executions>-->
+                    <!--                    </plugin>-->
                 </plugins>
             </build>
         </profile>
@@ -279,6 +293,7 @@
                                     <installDir>${install4j.home}</installDir>
                                     <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
                                     <variables>
+                                        <librariesPath>${project.basedir}/target/libraries</librariesPath>
                                         <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
                                     </variables>
                                 </configuration>
@@ -307,6 +322,7 @@
                                     <installDir>${install4j.home}</installDir>
                                     <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
                                     <variables>
+                                        <librariesPath>${project.basedir}/target/libraries</librariesPath>
                                         <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
                                     </variables>
                                     <!--                                    <incremental>true</incremental>-->
@@ -320,55 +336,6 @@
             <properties>
                 <install4j.home>C:\Program Files\install4j10</install4j.home>
             </properties>
-        </profile>
-        <profile>
-            <!--精简打包，排除不受支持的平台-->
-            <id>thin-sqlite-packaging</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.apache.logging.log4j</groupId>
-                                <artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>
-                                <version>0.1.0</version>
-                            </dependency>
-                        </dependencies>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
-                                </goals>
-                                <configuration>
-                                    <filters>
-                                        <filter>
-                                            <artifact>*:*</artifact>
-                                            <excludes>
-                                                <exclude>org/sqlite/native/Linux-Android/**</exclude>
-                                                <exclude>org/sqlite/native/Linux/x86/**</exclude>
-                                                <exclude>org/sqlite/native/Linux/arm/**</exclude>
-                                                <exclude>org/sqlite/native/Linux/armv7/**</exclude>
-                                                <exclude>org/sqlite/native/Linux/armv6/**</exclude>
-                                                <exclude>org/sqlite/native/Windows/armv7/**</exclude>
-                                                <exclude>org/sqlite/native/Windows/x86/**</exclude>
-                                                <exclude>org/sqlite/native/Linux-Musl/x86/**</exclude>
-                                                <exclude>org/sqlite/native/FreeBSD/x86/**</exclude>
-                                            </excludes>
-                                        </filter>
-                                    </filters>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 

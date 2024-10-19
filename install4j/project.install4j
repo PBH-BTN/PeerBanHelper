@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="10.0.8" transformSequenceNumber="10">
   <directoryPresets config="target/PeerBanHelper.jar" />
-  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="4.4.1" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="23">
+  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="7.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="23">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
@@ -11,6 +11,7 @@
     <variables>
       <variable name="registerSystemService" value="registerSystemService" />
       <variable name="jarPath" value="../target/PeerBanHelper.jar" />
+      <variable name="librariesPath" value="../target/libraries" />
     </variables>
     <jreBundles jdkProviderId="Zulu" release="23/23.0.1" />
   </application>
@@ -19,7 +20,7 @@
       <mountPoint id="24" />
     </mountPoints>
     <entries>
-      <variableEntry mountPoint="24" name="jarPath" />
+      <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
     </entries>
   </files>
   <launchers>
@@ -29,7 +30,7 @@
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -XX:+UseZGC -Xss256K -XX:+ZGenerational -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true">
         <classPath>
-          <archive location="PeerBanHelper.jar" failOnError="false" />
+          <scanDirectory location="libraries" failOnError="false" />
         </classPath>
       </java>
       <iconImageFiles>
@@ -42,7 +43,7 @@
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512K -XX:+UseZGC -XX:+ZGenerational -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="swing">
         <classPath>
-          <archive location="PeerBanHelper.jar" failOnError="false" />
+          <scanDirectory location="libraries" failOnError="false" />
         </classPath>
       </java>
       <iconImageFiles>
@@ -55,7 +56,7 @@
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512K -XX:+UseZGC -XX:+ZGenerational -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="silent">
         <classPath>
-          <archive location="PeerBanHelper.jar" failOnError="false" />
+          <scanDirectory location="libraries" failOnError="false" />
         </classPath>
       </java>
       <iconImageFiles>
@@ -68,7 +69,7 @@
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512K -XX:+UseZGC -XX:+ZGenerational -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="nogui">
         <classPath>
-          <archive location="PeerBanHelper.jar" failOnError="false" />
+          <scanDirectory location="libraries" failOnError="false" />
         </classPath>
       </java>
       <iconImageFiles>
@@ -81,7 +82,7 @@
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512K -XX:+UseZGC -XX:+ZGenerational -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="nogui">
         <classPath>
-          <archive location="PeerBanHelper.jar" failOnError="false" />
+          <scanDirectory location="libraries" failOnError="false" />
         </classPath>
       </java>
       <iconImageFiles>
