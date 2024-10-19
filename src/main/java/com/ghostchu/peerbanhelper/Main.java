@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 import com.alessiodp.libby.LibraryManager;
 import com.alessiodp.libby.logging.LogLevel;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
@@ -19,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -81,7 +86,7 @@ public class Main {
     public static void main(String[] args) {
         startupArgs = args;
         setupConfDirectory(args);
-        setupLog4j2();
+        //setupLogback();
         Path librariesPath = dataDirectory.toPath().toAbsolutePath().resolve("libraries");
         libraryManager = new PBHLibraryManager(
                 new Slf4jLogAppender(),
@@ -184,8 +189,34 @@ public class Main {
         debugDirectory = new File(dataDirectory, "debug");
     }
 
-    private static void setupLog4j2() {
-        //PluginManager.addPackage("com.ghostchu.peerbanhelper.log4j2");
+    private static void setupLogback() {
+        // 确保目录存在
+        if (!logsDirectory.exists()) {
+            boolean created = logsDirectory.mkdirs(); // 尝试创建目录
+            if (!created) {
+                System.err.println("Failed to create logs directory: " + logsDirectory.getAbsolutePath());
+                return;
+            }
+        }
+
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ch.qos.logback.classic.Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+        RollingFileAppender<?> rollingFileAppender = (RollingFileAppender<?>) logger.getAppender("FILE");
+
+        if (rollingFileAppender != null) {
+            String newLogFilePath = new File(logsDirectory, "latest.log").getAbsolutePath();
+            rollingFileAppender.setFile(newLogFilePath); // 更新文件路径
+
+            TimeBasedRollingPolicy<?> rollingPolicy = (TimeBasedRollingPolicy<?>) rollingFileAppender.getRollingPolicy();
+            String newFileNamePattern = new File(logsDirectory, "%d{yyyy-MM-dd}-%i.log.gz").getAbsolutePath(); // 更新文件名模式
+            rollingPolicy.setFileNamePattern(newFileNamePattern); // 更新文件名模式
+
+            // 重新启动策略和 appender
+            rollingPolicy.start(); // 启动新的滚动策略
+            rollingFileAppender.start(); // 启动新的 rollingFileAppender
+        } else {
+            System.err.println("RollingFileAppender not found.");
+        }
     }
 
     private static YamlConfiguration loadConfiguration(File file) {

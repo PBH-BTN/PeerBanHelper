@@ -5,7 +5,8 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
-import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
+import com.ghostchu.peerbanhelper.util.logger.JListAppender;
+import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +15,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
-
-import static javax.swing.SwingUtilities.invokeLater;
 
 @Getter
 @Slf4j
@@ -69,25 +70,47 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     private void initLoggerRedirection() {
-        SwingLoggerAppender.registerListener(event -> {
-            try {
-                invokeLater(() -> {
-                    JTextArea textArea = mainWindow.getLoggerTextArea();
-                    try {
-                        textArea.append(event.message() + "\n");
-                        int linesToCut = (textArea.getLineCount() - event.maxLines()) + (event.maxLines() / 5);
-                        linesToCut = Math.min(linesToCut, textArea.getLineCount());
-                        if (linesToCut > 0) {
-                            int posOfLastLineToTrunk = textArea.getLineEndOffset(linesToCut - 1);
-                            textArea.replaceRange("", 0, posOfLastLineToTrunk);
+        JScrollPane scrollPane = mainWindow.getLoggerScrollPane();  // 获取 JList 所在的 JScrollPane
+        JList<LogEntry> logList = mainWindow.getLoggerTextList();
+        BoundedRangeModel scrollModel = scrollPane.getVerticalScrollBar().getModel();
+
+        // 用于追踪用户是否在最底部
+        AtomicBoolean autoScroll = new AtomicBoolean(true);
+
+        // 监听滚动条的变化，判断用户是否在最底部
+        scrollModel.addChangeListener(e -> {
+            int max = scrollModel.getMaximum();
+            int extent = scrollModel.getExtent();
+            int current = scrollModel.getValue();
+
+            // 如果滚动条到达底部，启用自动滚动
+            // 如果用户滚动到了其他位置，禁用自动滚动
+            autoScroll.set(current + extent == max);
+        });
+
+        // 日志插入线程
+        Thread.ofVirtual().start(() -> {
+            while (true) {
+                try {
+                    var logEntry = JListAppender.logEntryDeque.poll(1, TimeUnit.HOURS);
+                    if (logEntry == null) continue;
+                    SwingUtilities.invokeLater(() -> {
+                        DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
+                        model.addElement(logEntry);
+
+                        // 限制最大元素数量为 500
+                        while (model.size() > 500) {
+                            model.removeElementAt(0);
                         }
-                        textArea.setCaretPosition(textArea.getDocument().getLength());
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                });
-            } catch (IllegalStateException exception) {
-                exception.printStackTrace();
+
+                        // 如果用户在底部，则自动滚动
+                        if (autoScroll.get()) {
+                            logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

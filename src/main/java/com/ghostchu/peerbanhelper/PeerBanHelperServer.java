@@ -661,7 +661,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHDownloaderController.class);
         moduleManager.register(RuleSubController.class);
         moduleManager.register(PBHAuthenticateController.class);
-        moduleManager.register(PBHLogsController.class);
+        //moduleManager.register(PBHLogsController.class);
         moduleManager.register(ActiveMonitoringModule.class);
         moduleManager.register(PBHPlusController.class);
         moduleManager.register(PBHOOBEController.class);
