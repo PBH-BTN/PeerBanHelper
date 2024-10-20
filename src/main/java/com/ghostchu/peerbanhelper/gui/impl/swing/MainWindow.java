@@ -45,6 +45,7 @@ public class MainWindow extends JFrame {
         System.setProperty("apple.awt.application.appearance", "system");
         if (SystemInfo.isMacFullWindowContentSupported)
             getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
+        setTitle(tlUI(Lang.GUI_TITLE_LOADING, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         setJMenuBar(setupMenuBar());
         setSize(1000, 600);
         setContentPane(mainPanel);

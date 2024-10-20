@@ -10,6 +10,8 @@ import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
@@ -111,7 +113,7 @@ public class Main {
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         setupProxySettings();
         try {
-            log.info("Loading application context, this may need a while on low-end devices, please wait...");
+            log.info(TextManager.tlUI(Lang.SPRING_CONTEXT_LOADING));
             applicationContext = new AnnotationConfigApplicationContext();
             applicationContext.register(AppConfig.class);
             applicationContext.refresh();
@@ -122,7 +124,7 @@ public class Main {
             server = applicationContext.getBean(PeerBanHelperServer.class);
             server.start();
         } catch (Exception e) {
-            log.error("Failed to startup PeerBanHelper, FATAL ERROR", e);
+            log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
             throw new RuntimeException(e);
         }
         guiManager.onPBHFullyStarted(server);
@@ -290,30 +292,6 @@ public class Main {
     public static String getUserAgent() {
         return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.2";
     }
-
-//    public static boolean loadDependencies(String mavenManifestPath) throws IOException {
-//        try (var is = Main.class.getResourceAsStream(mavenManifestPath)) {
-//            String str = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
-//            String[] libraries = str.split("\n");
-//            String osName = System.getProperty("os.name").toLowerCase();
-//            String sysArch = "win";
-//            if (osName.contains("linux")) {
-//                sysArch = "linux";
-//            } else if (osName.contains("mac")) {
-//                sysArch = "mac";
-//            }
-//            try {
-//                librariesLoader.loadLibraries(Arrays.stream(libraries).toList(),
-//                        Map.of("system.platform", sysArch, "javafx.version",
-//                                Main.getMeta().getJavafx()));
-//                return true;
-//            } catch (Exception e) {
-//                log.error("Unable to load JavaFx dependencies", e);
-//                return false;
-//            }
-//        }
-//    }
-
 
     private static void handleCommand(String input) {
 

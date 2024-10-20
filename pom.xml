@@ -49,6 +49,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
+                <version>3.4.0</version>
             </plugin>
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
@@ -88,6 +89,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.8.0</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -108,14 +110,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
                 <configuration>
                     <outputDirectory>${project.basedir}/target/libraries</outputDirectory>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
-                            <!-- <classpathPrefix>lib</classpathPrefix> -->
-                            <!-- <mainClass>test.org.Cliente</mainClass> -->
                         </manifest>
                         <manifestEntries>
                             <Class-Path>libraries/</Class-Path>

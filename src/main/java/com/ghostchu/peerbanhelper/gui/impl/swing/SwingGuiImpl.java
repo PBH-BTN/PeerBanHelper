@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
@@ -38,17 +39,17 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         super(args);
         this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
         this.scheduled = Executors.newScheduledThreadPool(1);
-        this.scheduled.scheduleWithFixedDelay(this::updateTitle, 0, 1, TimeUnit.SECONDS);
     }
 
     private void updateTitle() {
         StringBuilder builder = new StringBuilder();
         builder.append(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
-        StringJoiner joiner = new StringJoiner(" ", "[", "]");
+        StringJoiner joiner = new StringJoiner("", " [", "]");
+        joiner.setEmptyValue("");
         ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
         SwingUtilities.invokeLater(() -> {
             if (mainWindow != null) {
-                mainWindow.setTitle(builder.append(" ").append(joiner).toString());
+                mainWindow.setTitle(builder.append(joiner).toString());
             }
         });
     }
@@ -62,6 +63,11 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         OsThemeDetector detector = OsThemeDetector.getDetector();
         detector.registerListener(this::updateTheme);
         updateTheme(detector.isDark());
+    }
+
+    @Override
+    public void onPBHFullyStarted(PeerBanHelperServer server) {
+        this.scheduled.scheduleWithFixedDelay(this::updateTitle, 0, 1, TimeUnit.SECONDS);
     }
 
     private void updateTheme(Boolean isDark) {

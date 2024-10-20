@@ -363,7 +363,7 @@ RELOADING_MODULE: "[Reload] {}: {}"
 TORRENT_NOT_FOUND: "No records found by given InfoHash"
 PEER_NOT_FOUND: "No records found by given Peer"
 
-IN_ECOMODE_SHORT: "🍃EcoQoS"
+IN_ECOMODE_SHORT: "🍃Efficiency mode"
 IN_ECOMODE_DESCRIPTION: "EcoQoS API load successfully，Windows Efficiency Mode now applied to PeerBanHelper for saving power usage."
 
 DOWNLOADER_TRANSMISSION_DISCOURAGE: "Warning: Use Transmission Adapter is discourage. Frequent starting and stopping of torrents on seeds that are often subject to bans can result in frequent updates to the tracker server, indirectly triggering DoS attacks. This increases the load on the tracker server and may lead to your IP address being banned by the tracker. We encourage you to migrate to other downloaders whenever possible. https://github.com/PBH-BTN/PeerBanHelper/issues/382"
@@ -389,3 +389,5 @@ DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED: "Failed to download necessary librar
 
 JAVALIN_PORT_IN_USE: "Bind to port {} already in use. It could caused by: (1)More than one PBH instance is running (for example: Install as System Service); (2)Other application using this port (e.g Uplay, Ubisoft connect)"
 JAVALIN_PORT_REQUIRE_PRIVILEGES: "Bind to port {} failed (system require privileges on this port). Pick another WebUI port or run PeerBanHelper as Administrator/root."
+SPRING_CONTEXT_LOADING: "Spring Context initializing context to start PeerBanHelper up, it may take a while on low-end devices"
+PBH_STARTUP_FATAL_ERROR: "PeerBanHelper encountered fatal error during startup, unable to continue"
