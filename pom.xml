@@ -112,15 +112,17 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.2</version>
                 <configuration>
-                    <outputDirectory>${project.basedir}/target/libraries</outputDirectory>
+                    <finalName>PeerBanHelper</finalName>
+                    <!--                    <outputDirectory>${project.basedir}/target</outputDirectory>-->
                     <archive>
                         <manifest>
-                            <addClasspath>true</addClasspath>
                             <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>libraries/</classpathPrefix>
                         </manifest>
-                        <manifestEntries>
-                            <Class-Path>libraries/</Class-Path>
-                        </manifestEntries>
+                        <!--                        <manifestEntries>-->
+                        <!--                            <Class-Path>libraries/</Class-Path>-->
+                        <!--                        </manifestEntries>-->
                     </archive>
                 </configuration>
             </plugin>

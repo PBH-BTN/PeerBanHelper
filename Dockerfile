@@ -19,5 +19,6 @@ ENV JAVA_OPTS="-Xmx512M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+S
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/libraries /app/libraries
+COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
-ENTRYPOINT ${JAVA_HOME}/bin/java ${JAVA_OPTS} -cp /app/libraries/* com.ghostchu.peerbanhelper.MainJumpLoader
+ENTRYPOINT ${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar

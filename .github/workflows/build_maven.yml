@@ -33,4 +33,4 @@ jobs:
           name: maven-dist
           path: |
             target/libraries
-        id: project
+            target/*.jar
