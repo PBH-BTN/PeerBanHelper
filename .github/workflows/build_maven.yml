@@ -26,7 +26,7 @@ jobs:
           cache: 'maven'
           cache-dependency-path: '**/pom.xml'
       - name: Build with Maven
-        run: mvn -B clean package --file pom.xml -P thin-sqlite-packaging
+        run: mvn -B clean package --file pom.xml
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
