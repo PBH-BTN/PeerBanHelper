@@ -62,8 +62,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
-                .post("/api/general/heapdump", this::handleHeapDump, Role.USER_READ)
-                .post("/api/general/reload", this::handleReloading, Role.USER_READ)
+                .post("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
+                .post("/api/general/reload", this::handleReloading, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
     }
