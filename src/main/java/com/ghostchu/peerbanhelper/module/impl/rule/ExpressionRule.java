@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.googlecode.aviator.AviatorEvaluator;
@@ -54,10 +55,60 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @IgnoreScan
 public class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
-    private final long maxScriptExecuteTime = 1500
+    private final static String VERSION = "2";
+    private final long maxScriptExecuteTime = 1500;
+    private final JavalinWebContainer javalinWebContainer;
     private Map<Expression, ExpressionMetadata> expressions = new HashMap<>();
     private long banDuration;
-    private final static String VERSION = "2";
+
+    public ExpressionRule(JavalinWebContainer javalinWebContainer) {
+        super();
+        this.javalinWebContainer = javalinWebContainer;
+    }
+
+
+    @Override
+    public void onEnable() {
+        // 默认启用脚本编译缓存
+        AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
+        // ASM 性能优先
+        AviatorEvaluator.getInstance().setOption(Options.EVAL_MODE, EvalMode.ASM);
+        // EVAL 性能优先
+        AviatorEvaluator.getInstance().setOption(Options.OPTIMIZE_LEVEL, AviatorEvaluator.EVAL);
+        // 降低浮点计算精度
+        AviatorEvaluator.getInstance().setOption(Options.MATH_CONTEXT, MathContext.DECIMAL32);
+        // 启用变量语法糖
+        AviatorEvaluator.getInstance().setOption(Options.ENABLE_PROPERTY_SYNTAX_SUGAR, true);
+//        // 表达式允许序列化和反序列化
+//        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
+        // 用户规则写糊保护
+        AviatorEvaluator.getInstance().setOption(Options.MAX_LOOP_COUNT, 5000);
+        AviatorEvaluator.getInstance().setOption(Options.EVAL_TIMEOUT_MS, maxScriptExecuteTime);
+        // 启用反射方法查找
+        AviatorEvaluator.getInstance().setFunctionMissing(JavaMethodReflectionFunctionMissing.getInstance());
+        // 注册反射调用
+        registerFunctions(IPAddressUtil.class);
+        registerFunctions(HTTPUtil.class);
+        registerFunctions(JsonUtil.class);
+        registerFunctions(Lang.class);
+        registerFunctions(StrUtil.class);
+        registerFunctions(PeerBanHelperServer.class);
+        registerFunctions(InfoHashUtil.class);
+        registerFunctions(Main.class);
+        try {
+            reloadConfig();
+        } catch (Exception e) {
+            log.error("Failed to load scripts", e);
+            System.exit(1);
+        }
+//        test code
+//        Torrent torrent = new TorrentImpl("1", "","",1,1.00d, 1,1);
+//        Peer peer = new PeerImpl(new PeerAddress("2408:8214:1551:bf20::1", 51413),
+//                "2408:8214:1551:bf20::1","-TR2940-", "Transmission 2.94",
+//                1,1,1,1,0.0d,null);
+//        System.out.println(shouldBanPeer(torrent,peer, Executors.newVirtualThreadPerTaskExecutor()));
+    }
+
 
     @Override
     public boolean isConfigurable() {
@@ -199,48 +250,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     @Override
-    public void onEnable() {
-        // 默认启用脚本编译缓存
-        AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
-        // ASM 性能优先
-        AviatorEvaluator.getInstance().setOption(Options.EVAL_MODE, EvalMode.ASM);
-        // EVAL 性能优先
-        AviatorEvaluator.getInstance().setOption(Options.OPTIMIZE_LEVEL, AviatorEvaluator.EVAL);
-        // 降低浮点计算精度
-        AviatorEvaluator.getInstance().setOption(Options.MATH_CONTEXT, MathContext.DECIMAL32);
-        // 启用变量语法糖
-        AviatorEvaluator.getInstance().setOption(Options.ENABLE_PROPERTY_SYNTAX_SUGAR, true);
-//        // 表达式允许序列化和反序列化
-//        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
-        // 用户规则写糊保护
-        AviatorEvaluator.getInstance().setOption(Options.MAX_LOOP_COUNT, 5000);
-        AviatorEvaluator.getInstance().setOption(Options.EVAL_TIMEOUT_MS, maxScriptExecuteTime);
-        // 启用反射方法查找
-        AviatorEvaluator.getInstance().setFunctionMissing(JavaMethodReflectionFunctionMissing.getInstance());
-        // 注册反射调用
-        registerFunctions(IPAddressUtil.class);
-        registerFunctions(HTTPUtil.class);
-        registerFunctions(JsonUtil.class);
-        registerFunctions(Lang.class);
-        registerFunctions(StrUtil.class);
-        registerFunctions(PeerBanHelperServer.class);
-        registerFunctions(InfoHashUtil.class);
-        registerFunctions(Main.class);
-        try {
-            reloadConfig();
-        } catch (Exception e) {
-            log.error("Failed to load scripts", e);
-            System.exit(1);
-        }
-//        test code
-//        Torrent torrent = new TorrentImpl("1", "","",1,1.00d, 1,1);
-//        Peer peer = new PeerImpl(new PeerAddress("2408:8214:1551:bf20::1", 51413),
-//                "2408:8214:1551:bf20::1","-TR2940-", "Transmission 2.94",
-//                1,1,1,1,0.0d,null);
-//        System.out.println(shouldBanPeer(torrent,peer, Executors.newVirtualThreadPerTaskExecutor()));
-    }
-
-    @Override
     public void onDisable() {
         Main.getReloadManager().unregister(this);
     }
@@ -267,7 +276,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                         continue;
                     }
                     String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
-                    ExpressionMetadata expressionMetadata = parseScriptMetadata(script.getName(), scriptContent);
+                    ExpressionMetadata expressionMetadata = parseScriptMetadata(script, script.getName(), scriptContent);
                     executor.submit(() -> {
                         try {
                             AviatorEvaluator.getInstance().validate(expressionMetadata.script());
@@ -286,7 +295,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         log.info(tlUI(Lang.MODULE_EXPRESSION_RULE_COMPILED, expressions.size(), System.currentTimeMillis() - start));
     }
 
-    private ExpressionMetadata parseScriptMetadata(String fallbackName, String scriptContent) {
+    private ExpressionMetadata parseScriptMetadata(File file, String fallbackName, String scriptContent) {
         try (BufferedReader reader = new BufferedReader(new StringReader(scriptContent))) {
             String name = fallbackName;
             String author = "Unknown";
@@ -313,21 +322,21 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                     }
                 }
             }
-            return new ExpressionMetadata(name, author, cacheable, threadSafe, version, scriptContent);
+            return new ExpressionMetadata(file, name, author, cacheable, threadSafe, version, scriptContent);
         } catch (IOException e) {
-            return new ExpressionMetadata("Failed to parse name", "Unknown", true, true, "null", scriptContent);
+            return new ExpressionMetadata(file, "Failed to parse name", "Unknown", true, true, "null", scriptContent);
         }
     }
 
     private void initScripts() throws IOException {
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
         scriptDir.mkdirs();
-        File versionFile = new File(scriptDir,"version");
-        if(!versionFile.exists()){
+        File versionFile = new File(scriptDir, "version");
+        if (!versionFile.exists()) {
             versionFile.createNewFile();
         }
         var version = Files.readString(versionFile.toPath(), StandardCharsets.UTF_8);
-        if(VERSION.equals(version)){
+        if (VERSION.equals(version)) {
             return;
         }
         PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
@@ -335,14 +344,15 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         for (Resource re : res) {
             String content = new String(re.getContentAsByteArray(), StandardCharsets.UTF_8);
             File file = new File(scriptDir, re.getFilename());
-            if(file.exists()) continue;
+            if (file.exists()) continue;
             file.createNewFile();
             Files.writeString(file.toPath(), content);
         }
         Files.writeString(versionFile.toPath(), VERSION, StandardCharsets.UTF_8);
     }
 
-    record ExpressionMetadata(String name, String author, boolean cacheable, boolean threadSafe, String version,
+    record ExpressionMetadata(File file, String name, String author, boolean cacheable, boolean threadSafe,
+                              String version,
                               String script) {
     }
 }
