@@ -330,8 +330,9 @@ public class PeerBanHelperServer implements Reloadable {
             this.BAN_LIST.putAll(data);
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
             downloaders.forEach(downloader -> {
-                downloader.login();
-                downloader.setBanList(BAN_LIST.keySet(), null, null, true);
+                if (downloader.login().success()) {
+                    downloader.setBanList(BAN_LIST.keySet(), null, null, true);
+                }
             });
             Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
             downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
