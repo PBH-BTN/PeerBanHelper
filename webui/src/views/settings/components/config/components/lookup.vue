@@ -6,7 +6,7 @@
     <a-form-item
       :label="t('page.settings.tab.config.lookup.dnsReverseLookup')"
       field="server.dns_reverse_lookup"
-      :tooltip="t('page.settings.tab.config.lookup.dnsReverseLookup')"
+      :tooltip="t('page.settings.tab.config.lookup.dnsReverseLookup.tips')"
     >
       <a-switch v-model="model.dns_reverse_lookup" />
     </a-form-item>

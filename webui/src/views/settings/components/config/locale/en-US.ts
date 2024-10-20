@@ -32,6 +32,8 @@ export default {
 
   'page.settings.tab.config.lookup.title': 'Lookup',
   'page.settings.tab.config.lookup.dnsReverseLookup': 'Enable DNS reverse lookup',
+  'page.settings.tab.config.lookup.dnsReverseLookup.tips':
+    'Enable reverse DNS lookup for IPs, however it will increase your DNS server payload, and DNS server may block your access if too many quires sent to them server',
 
   'page.settings.tab.config.persist.title': 'Persistence',
   'page.settings.tab.config.persist.banlist': 'Persist banlist',
