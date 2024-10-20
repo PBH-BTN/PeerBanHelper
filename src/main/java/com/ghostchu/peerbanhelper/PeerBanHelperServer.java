@@ -381,10 +381,10 @@ public class PeerBanHelperServer implements Reloadable {
             webContainer.start(host, httpdPort, token);
         } catch (JavalinBindException e) {
             if (e.getMessage().contains("Port already in use")) {
-                log.error(tlUI(Lang.JAVALIN_PORT_IN_USE));
+                log.error(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort));
                 throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE), e);
             } else if (e.getMessage().contains("require elevated privileges")) {
-                log.error(tlUI(Lang.JAVALIN_PORT_IN_USE));
+                log.error(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES));
                 throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES), e);
             }
         }
