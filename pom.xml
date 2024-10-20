@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.0.0-24w43a</version>
+    <version>7.0.0-24w43b</version>
     <packaging>jar</packaging>43
 
     <name>PeerBanHelper</name>
