@@ -99,7 +99,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             reloadConfig();
         } catch (Exception e) {
             log.error("Failed to load scripts", e);
-            System.exit(1);
         }
 //        test code
 //        Torrent torrent = new TorrentImpl("1", "","",1,1.00d, 1,1);
