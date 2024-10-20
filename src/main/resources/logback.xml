@@ -1,4 +1,4 @@
-<configuration>
+<configuration debug="true">
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
@@ -7,9 +7,9 @@
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>data/logs/latest.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>data/logs/%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
-            <maxHistory>1000</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
         </rollingPolicy>
         <encoder>
             <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
@@ -19,29 +19,6 @@
     <appender name="DEQUE" class="com.ghostchu.peerbanhelper.util.logger.JListAppender">
         <!-- 无需其他配置项，DequeAppender 直接使用静态的 Deque 变量 -->
     </appender>
-
-    <!--    <appender name="SWING" class="com.ghostchu.peerbanhelper.util.logger.JListAppender"> &lt;!&ndash; Custom appender like SwingLoggerAppender needs custom implementation &ndash;&gt;-->
-    <!--        <encoder>-->
-    <!--            <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>-->
-    <!--        </encoder>-->
-    <!--    </appender>-->
-
-    <!--    <appender name="MEMORY" class="ch.qos.logback.core.ConsoleAppender"> &lt;!&ndash; Custom appender like MemoryLoggerAppender needs custom implementation &ndash;&gt;-->
-    <!--        <encoder>-->
-    <!--            <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>-->
-    <!--        </encoder>-->
-    <!--    </appender>-->
-
-
-    <logger name="NETWORK_PACKETS" level="INFO" additivity="false">
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator>
-                <expression>e.marker.contains("NETWORK_PACKETS")</expression>
-            </evaluator>
-            <OnMatch>DENY</OnMatch>
-            <OnMismatch>NEUTRAL</OnMismatch>
-        </filter>
-    </logger>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
