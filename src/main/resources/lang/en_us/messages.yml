@@ -1,6 +1,6 @@
 ERR_BUILD_NO_INFO_FILE: "Error: Build information file does not exist"
 ERR_CANNOT_LOAD_BUILD_INFO: "Error: Unable to load build information file"
-MOTD: "PeerBanHelper v{} - by PBH-BTN Community, Made with Sugar & Heart"
+MOTD: "PeerBanHelper v{} - by PBH-BTN Community, Made with Sugar & Love"
 LOADING_CONFIG: "Loading configuration file..."
 CONFIG_PEERBANHELPER: "Directory structure initialized, related files are placed in the data folder of the running directory. Please configure the related files and restart PeerBanHelper"
 ERR_SETUP_CONFIGURATION: "Error: Unable to initialize configuration file structure"
