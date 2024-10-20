@@ -60,8 +60,8 @@ public class HybirdDHTRecordStore implements RecordStore {
     @Override
     public void remove(Multihash multihash) {
         records.invalidate(multihash);
-        dhtRecordDao.remove(multihash);
-        //persistTasks.offer(new DHTRecordDao.PersistTask(true, multihash, null));
+        //dhtRecordDao.remove(multihash);
+        persistTasks.offer(new DHTRecordDao.PersistTask(true, multihash, null));
     }
 
     private void flush() {
