@@ -224,13 +224,16 @@ public class BiglyBT extends AbstractDownloader {
             if (peer.getIp() == null || peer.getIp().isBlank()) {
                 continue;
             }
-            var supportedMessages = peer.getPeerSupportedMessages().stream().map(str -> {
-                try {
-                    return PeerMessage.valueOf(str.toUpperCase(Locale.ROOT).replace("-", "_"));
-                } catch (IllegalArgumentException e) {
-                    return null;
-                }
-            }).filter(Objects::nonNull).toList();
+            var supportedMessages = new ArrayList<PeerMessage>();
+            if (peer.getPeerSupportedMessages() != null) {
+                supportedMessages.addAll(peer.getPeerSupportedMessages().stream().map(str -> {
+                    try {
+                        return PeerMessage.valueOf(str.toUpperCase(Locale.ROOT).replace("-", "_"));
+                    } catch (IllegalArgumentException e) {
+                        return null;
+                    }
+                }).filter(Objects::nonNull).toList());
+            }
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
                     peer.getIp(),
