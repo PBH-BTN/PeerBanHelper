@@ -52,13 +52,14 @@ public class BtnNetwork {
     private PeerRecordDao peerRecordDao;
     private ModuleMatchCache moduleMatchCache;
 
-    public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret) {
+    public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret, ModuleMatchCache moduleMatchCache) {
         this.server = server;
         this.userAgent = userAgent;
         this.configUrl = configUrl;
         this.submit = submit;
         this.appId = appId;
         this.appSecret = appSecret;
+        this.moduleMatchCache = moduleMatchCache;
         setupHttpClient();
         resetScheduler();
         checkIfNeedRetryConfig();
