@@ -22,7 +22,7 @@ public class HybirdDHTRecordStore implements RecordStore {
     private final Cache<Multihash, IpnsRecord> records = CacheBuilder
             .newBuilder()
             .expireAfterAccess(30, TimeUnit.MINUTES)
-            .maximumSize(2000)
+            .maximumSize(200)
             .removalListener(notification -> {
                 if (notification.getCause() != RemovalCause.EXPLICIT) {
                     Multihash key = (Multihash) notification.getKey();
