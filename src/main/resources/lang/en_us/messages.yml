@@ -391,3 +391,8 @@ JAVALIN_PORT_IN_USE: "Bind to port {} already in use. It could caused by: (1)Mor
 JAVALIN_PORT_REQUIRE_PRIVILEGES: "Bind to port {} failed (system require privileges on this port). Pick another WebUI port or run PeerBanHelper as Administrator/root."
 SPRING_CONTEXT_LOADING: "Spring Context initializing context to start PeerBanHelper up, it may take a while on low-end devices"
 PBH_STARTUP_FATAL_ERROR: "PeerBanHelper encountered fatal error during startup, unable to continue"
+
+IPFS_STARTING: "[IPFS] PeerBanHelper connecting to IPFS, please wait..."
+IPFS_STARTED: "[IPFS] IPFS connected, decentralized features now enabled"
+FRIEND_LOADED: "[Friend] Loaded {} friends"
+IPFS_ADVERTISE_RELAY: "[IPFS] PeerBanHelper announced this node as a Relay node, you will be help other users routing the traffic on this IPFS network"

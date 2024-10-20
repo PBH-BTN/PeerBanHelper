@@ -389,3 +389,8 @@ JAVALIN_PORT_IN_USE: "端口监听失败，端口 {} 已被其它进程占用。
 JAVALIN_PORT_REQUIRE_PRIVILEGES: "端口监听失败，监听 {} 端口需要权限提升。请更换一个 WebUI 端口或以管理员身份运行 PeerBanHelper"
 SPRING_CONTEXT_LOADING: "Spring Context 正在进行上下文装配以启动 PeerBanHelper，在低端设备上可能需要一段时间"
 PBH_STARTUP_FATAL_ERROR: "PeerBanHelper 启动过程中遇到致命错误，无法继续启动"
+
+IPFS_STARTING: "[IPFS] PeerBanHelper 正在连接到 IPFS 网络，请稍等"
+IPFS_STARTED: "[IPFS] PeerBanHelper 已连接到 IPFS 网络，去中心化网络功能已启用"
+FRIEND_LOADED: "[好友] 已加载 {} 个好友"
+IPFS_ADVERTISE_RELAY: "[IPFS] PeerBanHelper 已宣告此 IPFS 节点为网络中继节点 (Relay)，您将帮助 IPFS 网络上的其它用户中继流量"

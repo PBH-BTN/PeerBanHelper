@@ -400,12 +400,16 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
             <version>1.78.1</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
             <artifactId>semver4j</artifactId>
             <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.peergos</groupId>
+            <artifactId>nabu</artifactId>
+            <version>v0.8.0</version>
         </dependency>
     </dependencies>
 </project>

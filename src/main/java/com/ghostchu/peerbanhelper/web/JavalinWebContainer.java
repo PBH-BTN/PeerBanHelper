@@ -43,6 +43,8 @@ public class JavalinWebContainer {
     private Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
+    @Getter
+    private String host;
 
     public JavalinWebContainer(ActivationManager activationManager) {
         JsonMapper gsonMapper = new JsonMapper() {
@@ -161,6 +163,7 @@ public class JavalinWebContainer {
     }
 
     public void start(String host, int port, String token) {
+        this.host = host;
         this.token = token;
         javalin.start(host, port);
     }
