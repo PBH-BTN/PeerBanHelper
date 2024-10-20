@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -82,14 +81,6 @@ public class Main {
         startupArgs = args;
         setupConfDirectory(args);
         setupLogback();
-        Path librariesPath = dataDirectory.toPath().toAbsolutePath().resolve("libraries");
-//        libraryManager = new PBHLibraryManager(
-//                new Slf4jLogAppender(),
-//                Main.getDataDirectory().toPath(), "libraries"
-//        );
-//        boolean nogui = !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"));
-//        libraryManager.setLogLevel(LogLevel.ERROR);
-//        librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath, !nogui);
         meta = buildMeta();
         setupConfiguration();
         mainConfigFile = new File(configDirectory, "config.yml");
