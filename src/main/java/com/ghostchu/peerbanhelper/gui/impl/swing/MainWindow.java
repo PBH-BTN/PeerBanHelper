@@ -85,14 +85,7 @@ public class MainWindow extends JFrame {
             setVisible(false);
             if (!persistFlagTrayMessageSent) {
                 persistFlagTrayMessageSent = true;
-                try {
-                    trayIcon.displayMessage(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION), TrayIcon.MessageType.INFO);
-                    SystemTray tray = SystemTray.getSystemTray();
-                    tray.remove(trayIcon); // fix https://github.com/PBH-BTN/PeerBanHelper/issues/515
-                    tray.add(trayIcon);
-                } catch (AWTException e) {
-                    throw new RuntimeException(e);
-                }
+                swingGUI.createNotification(Level.INFO, tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
             }
         }
     }
