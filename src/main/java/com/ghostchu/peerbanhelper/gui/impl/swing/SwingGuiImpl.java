@@ -99,7 +99,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                         model.addElement(logEntry);
 
                         // 限制最大元素数量为 500
-                        while (model.size() > 500) {
+                        while (model.size() > 300) {
                             model.removeElementAt(0);
                         }
 
