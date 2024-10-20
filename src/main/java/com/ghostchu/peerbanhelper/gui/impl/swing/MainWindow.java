@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
+import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
@@ -40,6 +41,10 @@ public class MainWindow extends JFrame {
 
     public MainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("apple.awt.application.appearance", "system");
+        if (SystemInfo.isMacFullWindowContentSupported)
+            getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
         setJMenuBar(setupMenuBar());
         setTitle(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         setSize(1000, 600);
@@ -91,6 +96,8 @@ public class MainWindow extends JFrame {
         loggerTextList.setFont(new Font("微软雅黑", Font.PLAIN, 14));
         loggerTextList.setCellRenderer(new LogEntryRenderer());
         loggerTextList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        loggerTextList.setLayoutOrientation(JList.VERTICAL);
+        loggerTextList.setFixedCellHeight(-1);
     }
 
     public static void setTabTitle(JPanel tab, String title) {
@@ -162,6 +169,10 @@ public class MainWindow extends JFrame {
         JMenuItem viewOnGithub = new JMenuItem(tlUI(Lang.ABOUT_VIEW_GITHUB));
         viewOnGithub.addActionListener(e -> swingGUI.openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
         menu.add(viewOnGithub);
+        menu.addSeparator();
+        JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT));
+        quit.addActionListener(e -> System.exit(0));
+        menu.add(quit);
         return menu;
     }
 
@@ -297,10 +308,11 @@ public class MainWindow extends JFrame {
                 }
             }
             setFont(list.getFont());
-            setSize(list.getWidth(), Short.MAX_VALUE);  // 设置 JTextArea 宽度
-            int preferredHeight = getPreferredSize().height;  // 获取文本的理想高度
-            list.setFixedCellHeight(preferredHeight);  // 设置 JList 行的固定高度
+
+            // 动态计算行高，无需设置固定行高
+            setSize(list.getWidth(), Short.MAX_VALUE);  // 设置 JTextArea 的宽度来支持换行
             return this;
         }
     }
+
 }
