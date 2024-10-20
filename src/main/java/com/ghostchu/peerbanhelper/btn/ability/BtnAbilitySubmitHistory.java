@@ -40,7 +40,7 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
 
     @Override
     public void load() {
-        setLastStatus(true, "No content reported to remote yet");
+        setLastStatus(true, tlUI(Lang.BTN_NO_CONTENT_REPORTED_YET));
         btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
@@ -49,7 +49,7 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_PEERS));
             List<BtnPeerHistory> btnPeers = generatePing();
             if (btnPeers.isEmpty()) {
-                setLastStatus(true, "Last report is empty, skipped.");
+                setLastStatus(true, tlUI(Lang.BTN_LAST_REPORT_EMPTY));
                 return;
             }
             BtnPeerHistoryPing ping = new BtnPeerHistoryPing(
@@ -63,10 +63,10 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                     .thenAccept(r -> {
                         if (r.statusCode() != 200) {
                             log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                            setLastStatus(false, "HTTP Error: " + r.statusCode() + " - " + r.body());
+                            setLastStatus(false, tlUI(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_PEERS, btnPeers.size()));
-                            setLastStatus(true, "Reported " + btnPeers.size() + " entries.");
+                            setLastStatus(true, tlUI(Lang.BTN_REPORTED_DATA, btnPeers.size()));
                             lastSubmitAt = System.currentTimeMillis();
                         }
                     })

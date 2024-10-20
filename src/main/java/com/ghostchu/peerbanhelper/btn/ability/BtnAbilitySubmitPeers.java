@@ -36,7 +36,7 @@ public class BtnAbilitySubmitPeers extends AbstractBtnAbility {
 
     @Override
     public void load() {
-        setLastStatus(true, "No content reported to remote yet");
+        setLastStatus(true, tlUI(Lang.BTN_NO_CONTENT_REPORTED_YET));
         btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
@@ -45,7 +45,7 @@ public class BtnAbilitySubmitPeers extends AbstractBtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_PEERS));
             List<BtnPeer> btnPeers = generatePing();
             if (btnPeers.isEmpty()) {
-                setLastStatus(true, "Last report is empty, skipped.");
+                setLastStatus(true, tlUI(Lang.BTN_LAST_REPORT_EMPTY));
                 return;
             }
             BtnPeerPing ping = new BtnPeerPing(
@@ -59,10 +59,10 @@ public class BtnAbilitySubmitPeers extends AbstractBtnAbility {
                     .thenAccept(r -> {
                         if (r.statusCode() != 200) {
                             log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                            setLastStatus(false, "HTTP Error: " + r.statusCode() + " - " + r.body());
+                            setLastStatus(false, tlUI(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_PEERS, btnPeers.size()));
-                            setLastStatus(true, "Reported " + btnPeers.size() + " entries.");
+                            setLastStatus(true, tlUI(Lang.BTN_REPORTED_DATA, btnPeers.size()));
                         }
                     })
                     .exceptionally(e -> {
@@ -71,8 +71,8 @@ public class BtnAbilitySubmitPeers extends AbstractBtnAbility {
                         return null;
                     });
         } catch (Throwable e) {
-            log.error("Unable to submit peers", e);
-            setLastStatus(false, "Unknown Error: " + e.getClass().getName() + ": " + e.getMessage());
+            log.error(tlUI(Lang.BTN_SUBMIT_PEERS_FAILED), e);
+            setLastStatus(false, tlUI(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 

@@ -268,10 +268,6 @@ public class PeerBanHelperServer implements Reloadable {
             String databaseCity = mainConfig.getString("ip-database.database-city", "");
             String databaseASN = mainConfig.getString("ip-database.database-asn", "");
             boolean autoUpdate = mainConfig.getBoolean("ip-database.auto-update");
-//            if (accountId.isEmpty() || licenseKey.isEmpty() || databaseCity.isEmpty() || databaseASN.isEmpty()) {
-//                log.warn(tlUI(Lang.IPDB_NEED_CONFIG));
-//                return;
-//            }
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
                     databaseCity, databaseASN, autoUpdate, Main.getUserAgent());
         } catch (Exception e) {
@@ -311,13 +307,13 @@ public class PeerBanHelperServer implements Reloadable {
         if (this.ipdb != null) {
             this.ipdb.close();
         }
-        this.downloaders.forEach(d -> {
+        for (Downloader d : this.downloaders) {
             try {
                 d.close();
             } catch (Exception e) {
-                log.error("Failed to close download {}", d.getName(), e);
+                log.error(tlUI(Lang.UNABLE_CLOSE_DOWNLOADER, d.getName()), e);
             }
-        });
+        }
         log.info(tlUI(Lang.SHUTDOWN_DONE));
         Main.getReloadManager().unregister(this);
     }
@@ -391,7 +387,7 @@ public class PeerBanHelperServer implements Reloadable {
 
     private void registerBanWaveTimer() {
         if (BAN_WAVE_SERVICE != null && (!BAN_WAVE_SERVICE.isShutdown() || !BAN_WAVE_SERVICE.isTerminated())) {
-            BAN_WAVE_SERVICE.shutdownNow().forEach(r -> log.error("Unfinished runnable: {}", r));
+            BAN_WAVE_SERVICE.shutdownNow().forEach(r -> log.error(tlUI(Lang.UNFINISHED_RUNNABLE), r));
         }
         BAN_WAVE_SERVICE = Executors.newScheduledThreadPool(1, r -> {
             Thread thread = new Thread(r);
@@ -509,8 +505,7 @@ public class PeerBanHelperServer implements Reloadable {
 
                         needRelaunched.put(downloader, relaunch);
                     } catch (Exception e) {
-                        log.error("Unable to complete peer ban task, report to PBH developer!!!");
-                        rollbarErrorReporter.error(e);
+                        log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
                     }
                 });
             }
@@ -547,8 +542,7 @@ public class PeerBanHelperServer implements Reloadable {
             log.error("Thread interrupted");
             Thread.currentThread().interrupt();
         } catch (Throwable throwable) {
-            log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.error(throwable);
+            log.error(tlUI(Lang.UNABLE_COMPLETE_SCHEDULE_TASKS), throwable);
         } finally {
             banWaveWatchDog.feed();
             metrics.recordCheck();
@@ -711,7 +705,7 @@ public class PeerBanHelperServer implements Reloadable {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } catch (Exception e) {
-                    log.error("Unable to retrieve peers", e);
+                    log.error(tlUI(Lang.UNABLE_RETRIEVE_PEERS), e);
                 } finally {
                     parallelReqRestrict.release();
                 }
@@ -783,7 +777,7 @@ public class PeerBanHelperServer implements Reloadable {
                     }
                     results.add(checkResult);
                 } catch (Exception e) {
-                    log.error("Unable to execute module {}, report to PeerBanHelper developer!", module.getName(), e);
+                    log.error(tlUI(Lang.UNABLE_EXECUTE_MODULE, module.getName()), e);
                 }
             }
             CheckResult result = NO_MATCHES_CHECK_RESULT;

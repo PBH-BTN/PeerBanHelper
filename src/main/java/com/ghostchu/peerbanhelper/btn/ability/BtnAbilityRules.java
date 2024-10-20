@@ -42,7 +42,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
-        setLastStatus(true, "Stand by");
+        setLastStatus(true, tlUI(Lang.BTN_STAND_BY));
     }
 
     private void loadCacheFile() throws IOException {
@@ -64,9 +64,9 @@ public class BtnAbilityRules extends AbstractBtnAbility {
     public void load() {
         try {
             loadCacheFile();
-            setLastStatus(true, "Loaded from disk cache");
+            setLastStatus(true, tlUI(Lang.BTN_RULES_LOADED_FROM_CACHE));
         } catch (Exception e) {
-            log.error("Unable to load cached BTN rules into memory");
+            log.error(tlUI(Lang.BTN_RULES_LOAD_FROM_CACHE_FAILED));
             setLastStatus(false, e.getClass().getName() + ": " + e.getMessage());
         }
         btnNetwork.getExecuteService().scheduleWithFixedDelay(this::updateRule, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
@@ -85,12 +85,12 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                         HttpResponse.BodyHandlers.ofString())
                 .thenAccept(r -> {
                     if (r.statusCode() == 204) {
-                        setLastStatus(true, "Not modified");
+                        setLastStatus(true, tlUI(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
                         return;
                     }
                     if (r.statusCode() != 200) {
                         log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                        setLastStatus(false, "HTTP Error: " + r.statusCode() + " - " + r.body());
+                        setLastStatus(false, tlUI(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                     } else {
                         try {
                             BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
@@ -101,7 +101,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                             } catch (IOException ignored) {
                             }
                             log.info(tlUI(Lang.BTN_UPDATE_RULES_SUCCESSES, this.btnRule.getVersion()));
-                            setLastStatus(true, "Loaded from remote, version: " + this.btnRule.getVersion());
+                            setLastStatus(true, tlUI(Lang.BTN_RULES_LOADED_FROM_REMOTE, this.btnRule.getVersion()));
                             btnNetwork.getModuleMatchCache().invalidateAll();
                         } catch (JsonSyntaxException e) {
                             setLastStatus(false, "Unable parse remote JSON response: " + r.statusCode() + " - " + r.body());
@@ -111,7 +111,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                 })
                 .exceptionally((e) -> {
                     log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
-                    setLastStatus(false, "Unknown Error: " + e.getClass().getName() + ": " + e.getMessage());
+                    setLastStatus(false, tlUI(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
                     return null;
                 });
     }

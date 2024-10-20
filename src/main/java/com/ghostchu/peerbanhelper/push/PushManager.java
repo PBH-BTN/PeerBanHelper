@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.push.impl.PushPlusPushProvider;
 import com.ghostchu.peerbanhelper.push.impl.ServerChanPushProvider;
 import com.ghostchu.peerbanhelper.push.impl.SmtpPushProvider;
 import com.ghostchu.peerbanhelper.push.impl.TelegramPushProvider;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
@@ -34,7 +37,7 @@ public class PushManager implements Reloadable {
                     case "pushplus" -> registered.add(new PushPlusPushProvider(section));
                     case "serverchan" -> registered.add(new ServerChanPushProvider(section));
                     case "telegram" -> registered.add(new TelegramPushProvider(section));
-                    default -> log.warn("Unknown push-notification type {}:{}", provider, section.getString("type"));
+                    default -> log.warn(tlUI(Lang.UNKNOWN_PUSH_PROVIDER, provider, section.getString("type")));
                 }
             }
         });
@@ -50,7 +53,7 @@ public class PushManager implements Reloadable {
                     anySuccess.set(true);
                 }
             } catch (Exception e) {
-                log.error("Unable to push message via {}", pushProvider.getClass().getName(), e);
+                log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT_VIA, pushProvider.getClass().getName()), e);
             }
         });
         return anySuccess.get();
