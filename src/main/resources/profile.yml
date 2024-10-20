@@ -1,4 +1,4 @@
-config-version: 19
+config-version: 20
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -285,11 +285,16 @@ module:
     # IPv6 地址前缀长度
     # IPv6 prefix length
     subnet-mask-v6-length: 60
-    # 容许同一网段下载同一种子的IP数量，正整数
+    # 容许同一网段下载同一种子的IP数量，正整数 (IPV4)
     # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
     # The allowed maximum amount of ips in same subnet
     # To avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same city
-    tolerate-num: 5
+    tolerate-num-ipv4: 2
+    # 容许同一网段下载同一种子的IP数量，正整数 (IPV6)
+    # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
+    # The allowed maximum amount of ips in same subnet
+    # To avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same city
+    tolerate-num-ipv6: 5
     # 缓存持续时间（秒）
     # Cache life span
     # 所有连接过的peer会记入缓存，DHCP服务会定期重新分配IP，缓存时间过长会导致误杀
