@@ -161,7 +161,18 @@ public class PeerBanHelperServer implements Reloadable {
         resetKnownDownloaders();
         loadBanListToMemory();
         registerTimer();
+        unbanWhitelistedPeers();
         return Reloadable.super.reloadModule();
+    }
+
+    private void unbanWhitelistedPeers() {
+        for (PeerAddress peerAddress : BAN_LIST.keySet()) {
+            for (IPAddress ignoreAddress : ignoreAddresses) {
+                if (ignoreAddress.equals(peerAddress.getAddress()) || ignoreAddress.contains(peerAddress.getAddress())) {
+                    scheduleUnBanPeer(peerAddress);
+                }
+            }
+        }
     }
 
     public void start() throws SQLException {
