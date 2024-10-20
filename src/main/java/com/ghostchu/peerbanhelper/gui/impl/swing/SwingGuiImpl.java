@@ -182,18 +182,31 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createNotification(Level level, String title, String description) {
-        if (mainWindow.getTrayIcon() != null) {
-            if (level.equals(Level.INFO)) {
-                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.INFO);
-            }
+        TrayIcon icon = mainWindow.getTrayIcon();
+        if (icon != null) {
             if (level.equals(Level.WARNING)) {
-                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.WARNING);
+                icon.displayMessage(title, description, TrayIcon.MessageType.WARNING);
+            } else if (level.equals(Level.SEVERE)) {
+                icon.displayMessage(title, description, TrayIcon.MessageType.ERROR);
+            } else {
+                icon.displayMessage(title, description, TrayIcon.MessageType.INFO);
             }
-            if (level.equals(Level.SEVERE)) {
-                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.ERROR);
-            }
+            this.scheduled.schedule(this::refreshTrayIcon, 5, TimeUnit.SECONDS);
         } else {
             super.createNotification(level, title, description);
+        }
+    }
+
+    private void refreshTrayIcon() {
+        TrayIcon icon = mainWindow.getTrayIcon();
+        if (icon != null) {
+            try {
+                SystemTray tray = SystemTray.getSystemTray();
+                tray.remove(icon); // fix https://github.com/PBH-BTN/PeerBanHelper/issues/515
+                tray.add(icon);
+            } catch (AWTException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
