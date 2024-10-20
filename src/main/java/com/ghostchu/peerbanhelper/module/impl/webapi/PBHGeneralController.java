@@ -124,7 +124,6 @@ public class PBHGeneralController extends AbstractFeatureModule {
         threads.put("daemonCount", threadsMXBean.getDaemonThreadCount());
         threads.put("peakCount", threadsMXBean.getPeakThreadCount());
         threads.put("totalStartedThreadCount", threadsMXBean.getTotalStartedThreadCount());
-        threads.put("details", Arrays.stream(threadsMXBean.dumpAllThreads(true, true)).map(ThreadInfo::toString).collect(Collectors.joining("\n\n")));
         data.put("threads", threads);
         context.json(new StdResp(true, null, data));
     }
