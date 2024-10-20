@@ -197,7 +197,14 @@ public class BitComet extends AbstractDownloader {
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
         var resp = JsonUtil.standard().fromJson(query.body(), BCIpFilterResponse.class);
-        return !resp.getIpFilterConfig().getEnableIpFilter() || resp.getIpFilterConfig().getEnableWhitelistMode();
+        boolean isBlacklistMode = false;
+        if (resp.getIpFilterConfig().getEnableWhitelistMode() != null) {
+            isBlacklistMode = !resp.getIpFilterConfig().getEnableWhitelistMode();
+        }
+        if (resp.getIpFilterConfig().getFilterMode() != null) {
+            isBlacklistMode = "blacklist".equals(resp.getIpFilterConfig().getFilterMode());
+        }
+        return !resp.getIpFilterConfig().getEnableIpFilter() || !isBlacklistMode;
     }
 
     private void enableIpFilter() throws IOException, InterruptedException {
@@ -206,6 +213,7 @@ public class BitComet extends AbstractDownloader {
             put("ip_filter_config", new HashMap<>() {{
                 put("enable_ip_filter", true);
                 put("enable_whitelist_mode", false);
+                put("ipfilter_mode", "blacklist");
             }});
         }};
         HttpResponse<String> updatePreferencesToEnableIpFilter =
@@ -282,6 +290,7 @@ public class BitComet extends AbstractDownloader {
         try {
             Map<String, String> requirements = new HashMap<>();
             requirements.put("task_id", torrent.getId());
+            requirements.put("max_count", String.valueOf(Integer.MAX_VALUE));
             resp = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_PEERS.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
                             .header("Authorization", "Bearer " + this.deviceToken),
@@ -300,7 +309,7 @@ public class BitComet extends AbstractDownloader {
         var stream = peers.getPeers().stream();
 
         if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-            stream = stream.filter(dto -> dto.getGroup().equals("connected"));
+            stream = stream.filter(dto -> dto.getGroup().equals("connected") || dto.getGroup().equals("connected_peers"));
         }
 
         return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),

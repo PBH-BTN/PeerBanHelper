@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.j256.ormlite.field.DataPersisterManager;
 import com.j256.ormlite.jdbc.JdbcSingleConnectionSource;
 import com.j256.ormlite.jdbc.db.SqliteDatabaseType;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
@@ -50,7 +53,7 @@ public class Database {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
                 stmt.executeUpdate("PRAGMA journal_mode = WAL");
             } catch (Exception e) {
-                log.warn("Unable to set SQLite optimized PRAGMA arguments", e);
+                log.warn(tlUI(Lang.UNABLE_SET_SQLITE_OPTIMIZED_PRAGMA), e);
             }
         }
         this.dataSource = new JdbcSingleConnectionSource("jdbc:sqlite:" + file, new SqliteDatabaseType(), rawConnection);

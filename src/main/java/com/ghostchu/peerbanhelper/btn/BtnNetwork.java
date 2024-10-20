@@ -52,13 +52,14 @@ public class BtnNetwork {
     private PeerRecordDao peerRecordDao;
     private ModuleMatchCache moduleMatchCache;
 
-    public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret) {
+    public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret, ModuleMatchCache moduleMatchCache) {
         this.server = server;
         this.userAgent = userAgent;
         this.configUrl = configUrl;
         this.submit = submit;
         this.appId = appId;
         this.appSecret = appSecret;
+        this.moduleMatchCache = moduleMatchCache;
         setupHttpClient();
         resetScheduler();
         checkIfNeedRetryConfig();
@@ -81,7 +82,7 @@ public class BtnNetwork {
             }
             JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
             if (!json.has("min_protocol_version")) {
-                throw new IllegalStateException("Server config response missing min_protocol_version field");
+                throw new IllegalStateException(tlUI(Lang.MISSING_VERSION_PROTOCOL_FIELD));
             }
             int min_protocol_version = json.get("min_protocol_version").getAsInt();
             if (PBH_BTN_PROTOCOL_IMPL_VERSION < min_protocol_version) {
@@ -117,7 +118,7 @@ public class BtnNetwork {
                 try {
                     a.load();
                 } catch (Exception e) {
-                    log.error("Failed to load BTN ability", e);
+                    log.error(tlUI(Lang.UNABLE_LOAD_BTN_ABILITY, a.getClass().getSimpleName()), e);
                 }
             });
             configSuccess.set(true);
@@ -132,7 +133,7 @@ public class BtnNetwork {
                 configBtnNetwork();
             }
         } catch (Throwable throwable) {
-            log.error("Unable to complete scheduled tasks", throwable);
+            log.error(tlUI(Lang.UNABLE_COMPLETE_SCHEDULE_TASKS), throwable);
         }
 
     }

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.alert;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.push.PushManager;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -47,11 +48,11 @@ public class AlertManager {
             alertDao.create(alertEntity);
             if (push) {
                 if (!pushManager.pushMessage("[PeerBanHelper/" + level.name() + "] " + tlUI(title), tlUI(content))) {
-                    log.error("Unable to push alert via push providers");
+                    log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT_VIA_PROVIDERS));
                 }
             }
         } catch (Exception e) {
-            log.error("Unable to publish alert", e);
+            log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT), e);
         }
 
     }

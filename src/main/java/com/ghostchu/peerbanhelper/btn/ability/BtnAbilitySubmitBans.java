@@ -44,7 +44,7 @@ public class BtnAbilitySubmitBans extends AbstractBtnAbility {
     @Override
     public void load() {
         Main.getEventBus().register(this);
-        setLastStatus(true, "No content reported to remote yet");
+        setLastStatus(true, tlUI(Lang.BTN_NO_CONTENT_REPORTED_YET));
         btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
@@ -59,7 +59,7 @@ public class BtnAbilitySubmitBans extends AbstractBtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             List<BtnBan> btnPeers = generateBans();
             if (btnPeers.isEmpty()) {
-                setLastStatus(true, "Last report is empty, skipped.");
+                setLastStatus(true, tlUI(Lang.BTN_LAST_REPORT_EMPTY));
                 lastReport = System.currentTimeMillis();
                 return;
             }
@@ -74,10 +74,10 @@ public class BtnAbilitySubmitBans extends AbstractBtnAbility {
                     .thenAccept(r -> {
                         if (r.statusCode() != 200) {
                             log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                            setLastStatus(false, "HTTP Error: " + r.statusCode() + " - " + r.body());
+                            setLastStatus(false, tlUI(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
-                            setLastStatus(true, "Reported " + btnPeers.size() + " entries.");
+                            setLastStatus(true, tlUI(Lang.BTN_REPORTED_DATA, btnPeers.size()));
                             lastReport = System.currentTimeMillis();
                         }
                     })
@@ -87,8 +87,8 @@ public class BtnAbilitySubmitBans extends AbstractBtnAbility {
                         return null;
                     });
         } catch (Throwable e) {
-            log.error("Unable to submit bans", e);
-            setLastStatus(false, "Unknown Error: " + e.getClass().getName() + ": " + e.getMessage());
+            log.error(tlUI(Lang.BTN_SUBMITTED_BANS), e);
+            setLastStatus(false, tlUI(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 
