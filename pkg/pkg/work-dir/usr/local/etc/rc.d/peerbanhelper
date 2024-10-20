@@ -13,10 +13,9 @@ rcvar=peerbanhelper_enable
 : ${peerbanhelper_enable:=NO}
 : ${peerbanhelper_user:="root"}
 : ${peerbanhelper_dir:="/usr/local/var/db/peerbanhelper"}
-: ${peerbanhelper_classpath:="/usr/local/lib/peerbanhelper/libraries/*"}
-: ${peerbanhelper_mainclass:="com.ghostchu.peerbanhelper.MainJumpLoader"}
+: ${peerbanhelper_classpath:="/usr/local/lib/peerbanhelper/PeerBanHelper.jar"}
 : ${peerbanhelper_jvm_flags:="-Dpbh.datadir=${peerbanhelper_dir} -Xmx512M -Xss512K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"}
-: ${peerbanhelper_command:="/usr/local/bin/java ${peerbanhelper_jvm_flags} -cp ${peerbanhelper_classpath} ${peerbanhelper_mainclass}"}
+: ${peerbanhelper_command:="/usr/local/bin/java ${peerbanhelper_jvm_flags} -jar ${peerbanhelper_classpath}"}
 
 command="/usr/sbin/daemon"
 command_args="-f -p /var/run/${name}.pid -u ${peerbanhelper_user} ${peerbanhelper_command}"
