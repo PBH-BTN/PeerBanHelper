@@ -59,9 +59,9 @@ public class HybirdDHTRecordStore implements RecordStore {
 
     @Override
     public void remove(Multihash multihash) {
-        records.invalidate(multihash);
         //dhtRecordDao.remove(multihash);
         persistTasks.offer(new DHTRecordDao.PersistTask(true, multihash, null));
+        records.invalidate(multihash);
     }
 
     private void flush() {
@@ -71,6 +71,7 @@ public class HybirdDHTRecordStore implements RecordStore {
     @Override
     public void close() throws Exception {
         scheduled.shutdownNow();
+        records.asMap().forEach((hash, record) -> persistTasks.offer(new DHTRecordDao.PersistTask(false, hash, record)));
         records.invalidateAll();
         flush();
     }
