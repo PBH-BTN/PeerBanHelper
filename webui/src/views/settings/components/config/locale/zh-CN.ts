@@ -33,6 +33,8 @@ export default {
 
   'page.settings.tab.config.lookup.title': '查询',
   'page.settings.tab.config.lookup.dnsReverseLookup': '启用 DNS 反向查找',
+  'page.settings.tab.config.lookup.dnsReverseLookup.tips':
+    '启用 DNS 反查，能够通过 IP 反查域名，但可能增加你所使用 DNS 服务器的压力，并可能导致 DNS 服务器对你采取降低服务质量的措施',
 
   'page.settings.tab.config.persist.title': '持久化',
   'page.settings.tab.config.persist.banlist': '持久化封禁列表',

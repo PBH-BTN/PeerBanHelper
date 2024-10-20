@@ -369,6 +369,12 @@
             <groupId>com.github.Dansoftowner</groupId>
             <artifactId>jSystemThemeDetector</artifactId>
             <version>3.9.1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>oshi-core</artifactId>
+                    <groupId>com.github.oshi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -410,6 +416,12 @@
             <groupId>com.github.peergos</groupId>
             <artifactId>nabu</artifactId>
             <version>v0.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <!-- DO NOT UPDATE, Keep sync with jSystemThemeDetector -->
+            <version>5.8.6</version>
         </dependency>
     </dependencies>
 </project>
