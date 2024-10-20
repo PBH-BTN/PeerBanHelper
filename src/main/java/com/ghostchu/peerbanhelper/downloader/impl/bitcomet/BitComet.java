@@ -197,7 +197,14 @@ public class BitComet extends AbstractDownloader {
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
         var resp = JsonUtil.standard().fromJson(query.body(), BCIpFilterResponse.class);
-        return !resp.getIpFilterConfig().getEnableIpFilter() || resp.getIpFilterConfig().getEnableWhitelistMode();
+        boolean isBlacklistMode = false;
+        if (resp.getIpFilterConfig().getEnableWhitelistMode() != null) {
+            isBlacklistMode = !resp.getIpFilterConfig().getEnableWhitelistMode();
+        }
+        if (resp.getIpFilterConfig().getFilterMode() != null) {
+            isBlacklistMode = "blacklist".equals(resp.getIpFilterConfig().getFilterMode());
+        }
+        return !resp.getIpFilterConfig().getEnableIpFilter() || !isBlacklistMode;
     }
 
     private void enableIpFilter() throws IOException, InterruptedException {
@@ -206,6 +213,7 @@ public class BitComet extends AbstractDownloader {
             put("ip_filter_config", new HashMap<>() {{
                 put("enable_ip_filter", true);
                 put("enable_whitelist_mode", false);
+                put("ipfilter_mode", "blacklist");
             }});
         }};
         HttpResponse<String> updatePreferencesToEnableIpFilter =
