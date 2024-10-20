@@ -46,7 +46,6 @@ public class MainWindow extends JFrame {
         if (SystemInfo.isMacFullWindowContentSupported)
             getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
         setJMenuBar(setupMenuBar());
-        setTitle(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         setSize(1000, 600);
         setContentPane(mainPanel);
         setupTabbedPane();

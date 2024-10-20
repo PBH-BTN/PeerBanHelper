@@ -3,8 +3,10 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.jthemedetecor.OsThemeDetector;
@@ -15,20 +17,40 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.StringJoiner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
 public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
+    private final ScheduledExecutorService scheduled;
     private MainWindow mainWindow;
 
     public SwingGuiImpl(String[] args) {
         super(args);
         this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
+        this.scheduled = Executors.newScheduledThreadPool(1);
+        this.scheduled.scheduleWithFixedDelay(this::updateTitle, 0, 1, TimeUnit.SECONDS);
+    }
+
+    private void updateTitle() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+        StringJoiner joiner = new StringJoiner(" ", "[", "]");
+        ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
+        SwingUtilities.invokeLater(() -> {
+            if (mainWindow != null) {
+                mainWindow.setTitle(builder.append(" ").append(joiner).toString());
+            }
+        });
     }
 
 
