@@ -272,17 +272,21 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             File[] scripts = scriptDir.listFiles();
             if (scripts != null) {
                 for (File script : scripts) {
-                    if (!script.getName().endsWith(".av") || script.isHidden()) {
-                        continue;
-                    }
-                    String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
-                    ExpressionMetadata expressionMetadata = parseScriptMetadata(script, script.getName(), scriptContent);
                     executor.submit(() -> {
                         try {
-                            AviatorEvaluator.getInstance().validate(expressionMetadata.script());
-                            Expression expression = AviatorEvaluator.getInstance().compile(expressionMetadata.script(), false);
-                            expression.newEnv("peerbanhelper", getServer(), "moduleConfig", getConfig(), "ipdb", getServer().getIpdb());
-                            userRules.put(expression, expressionMetadata);
+                            if (!script.getName().endsWith(".av") || script.isHidden()) {
+                                return;
+                            }
+                            try {
+                                String scriptContent = java.nio.file.Files.readString(script.toPath(), StandardCharsets.UTF_8);
+                                ExpressionMetadata expressionMetadata = parseScriptMetadata(script, script.getName(), scriptContent);
+                                AviatorEvaluator.getInstance().validate(expressionMetadata.script());
+                                Expression expression = AviatorEvaluator.getInstance().compile(expressionMetadata.script(), false);
+                                expression.newEnv("peerbanhelper", getServer(), "moduleConfig", getConfig(), "ipdb", getServer().getIpdb());
+                                userRules.put(expression, expressionMetadata);
+                            } catch (IOException e) {
+                                log.error("Unable to load script file", e);
+                            }
                         } catch (ExpressionSyntaxErrorException err) {
                             log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_BAD_EXPRESSION), err);
                         }
