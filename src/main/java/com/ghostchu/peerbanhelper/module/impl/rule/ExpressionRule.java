@@ -47,7 +47,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -55,8 +54,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @IgnoreScan
 public class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
-    private final long maxScriptExecuteTime = 1500;
-    private final Map<ExpressionMetadata, ReentrantLock> threadLocks = new HashMap<>();
+    private final long maxScriptExecuteTime = 1500
     private Map<Expression, ExpressionMetadata> expressions = new HashMap<>();
     private long banDuration;
     private final static String VERSION = "2";
@@ -180,12 +178,8 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                 if (expressionMetadata.threadSafe()) {
                     returns = expression.execute(env);
                 } else {
-                    ReentrantLock lock = threadLocks.get(expressionMetadata);
-                    lock.lock();
-                    try {
+                    synchronized (expressionMetadata) {
                         returns = expression.execute(env);
-                    } finally {
-                        lock.unlock();
                     }
                 }
                 result = handleResult(expression, returns);
@@ -259,7 +253,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
 
     private void reloadConfig() throws IOException {
         expressions.clear();
-        threadLocks.clear();
         this.banDuration = getConfig().getLong("ban-duration", 0);
         initScripts();
         log.info(tlUI(Lang.MODULE_EXPRESSION_RULE_COMPILING));
@@ -281,9 +274,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                             Expression expression = AviatorEvaluator.getInstance().compile(expressionMetadata.script(), false);
                             expression.newEnv("peerbanhelper", getServer(), "moduleConfig", getConfig(), "ipdb", getServer().getIpdb());
                             userRules.put(expression, expressionMetadata);
-                            if (!expressionMetadata.threadSafe()) {
-                                threadLocks.put(expressionMetadata, new ReentrantLock());
-                            }
                         } catch (ExpressionSyntaxErrorException err) {
                             log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_BAD_EXPRESSION), err);
                         }
