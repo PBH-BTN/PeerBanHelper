@@ -278,8 +278,10 @@ public class PeerBanHelperServer implements Reloadable {
     private void resetKnownDownloaders() {
         try {
             for (Downloader downloader : downloaders) {
-                downloader.login();
-                downloader.setBanList(Collections.emptyList(), null, null, true);
+                var result = downloader.login();
+                if (result.success()) {
+                    downloader.setBanList(Collections.emptyList(), null, null, true);
+                }
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.RESET_DOWNLOADER_FAILED), e);
