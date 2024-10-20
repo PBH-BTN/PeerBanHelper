@@ -32,6 +32,7 @@ jobs:
             mkdir -p pkg/pkg/work-dir/usr/local/lib/peerbanhelper
             mkdir -p pkg/pkg/work-dir/usr/local/var/db/peerbanhelper/
             mv target/libraries pkg/pkg/work-dir/usr/local/lib/peerbanhelper/
+            (cd pkg/pkg/work-dir/ && find -d * \! -type d) | sort | sed -e "s/.*/\/&/" >> pkg/pkg/pkg-plist
             pkg create -m pkg/pkg/ -r pkg/pkg/work-dir -p pkg/pkg/pkg-plist -o pkg/ 
             pkg info -F pkg/peerbanhelper-v${{ env.PBH_VERSION }}.pkg
             mv pkg/peerbanhelper-v${{ env.PBH_VERSION }}.pkg pkg/peerbanhelper-v${{ env.PBH_VERSION }}-$(uname -o)-$(uname -r).pkg
