@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -119,10 +120,16 @@ public class Main {
         }
         guiManager.onPBHFullyStarted(server);
         setupShutdownHook();
+        setupReloading();
         guiManager.sync();
     }
 
-    private static void setupLogback() {
+    @SneakyThrows
+    private static void setupReloading() {
+        reloadManager.register(Main.class.getDeclaredMethod("setupProxySettings"));
+    }
+
+    public static void setupLogback() {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender<?> appender = (RollingFileAppender<?>) loggerContext.getLogger("ROOT").getAppender("FILE");
 
@@ -138,7 +145,7 @@ public class Main {
         }
     }
 
-    private static void setupProxySettings() {
+    public static void setupProxySettings() {
         var proxySection = mainConfig.getConfigurationSection("proxy");
         if (proxySection == null) return;
         String host = proxySection.getString("host");
