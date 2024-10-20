@@ -15,8 +15,8 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
@@ -53,40 +53,10 @@ public class MainWindow extends JFrame {
         setupSystemTray();
         setComponents();
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {
-
-            }
-
+        addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 minimizeToTray();
-            }
-
-            @Override
-            public void windowClosed(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowIconified(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowDeiconified(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowActivated(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowDeactivated(WindowEvent e) {
-
             }
         });
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("/assets/icon.png"));
@@ -115,7 +85,14 @@ public class MainWindow extends JFrame {
             setVisible(false);
             if (!persistFlagTrayMessageSent) {
                 persistFlagTrayMessageSent = true;
-                trayIcon.displayMessage(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION), TrayIcon.MessageType.INFO);
+                try {
+                    trayIcon.displayMessage(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION), TrayIcon.MessageType.INFO);
+                    SystemTray tray = SystemTray.getSystemTray();
+                    tray.remove(trayIcon); // fix https://github.com/PBH-BTN/PeerBanHelper/issues/515
+                    tray.add(trayIcon);
+                } catch (AWTException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
