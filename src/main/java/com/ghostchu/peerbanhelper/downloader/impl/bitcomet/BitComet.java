@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
@@ -31,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.http.HttpClient;
@@ -56,20 +54,10 @@ public class BitComet extends AbstractDownloader {
     private String serverId;
     private String serverVersion;
     private String serverName;
-    private boolean dependenciesLoaded = false;
 
     public BitComet(String name, Config config) {
         super(name);
-        try {
-            loadRequiredDependencies();
-            BCAESTool.init();
-            dependenciesLoaded = true;
-        } catch (IOException e) {
-            log.error(tlUI(Lang.DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED));
-        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
-            log.error("Unable to load BCAESTool");
-        }
+        BCAESTool.init();
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
@@ -107,9 +95,6 @@ public class BitComet extends AbstractDownloader {
         return new PeerAddress(host.getHost(), port);
     }
 
-    private void loadRequiredDependencies() throws IOException {
-        Main.loadDependencies("/libraries/bitcomet.maven");
-    }
 
     @Override
     public JsonObject saveDownloaderJson() {
@@ -122,8 +107,6 @@ public class BitComet extends AbstractDownloader {
     }
 
     public DownloaderLoginResult login0() throws Exception {
-        if (!dependenciesLoaded)
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED));
         if (isLoggedIn())
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK)); // 重用 Session 会话
         Map<String, String> loginAttemptCred = new HashMap<>();

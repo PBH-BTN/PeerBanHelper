@@ -3,8 +3,6 @@ package com.ghostchu.peerbanhelper;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
-import com.alessiodp.libby.LibraryManager;
-import com.alessiodp.libby.logging.LogLevel;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
@@ -12,11 +10,8 @@ import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
-import com.ghostchu.peerbanhelper.util.PBHLibrariesLoader;
-import com.ghostchu.peerbanhelper.util.Slf4jLogAppender;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import com.google.common.eventbus.EventBus;
-import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
@@ -39,7 +34,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Map;
 
 @Slf4j
 public class Main {
@@ -66,10 +60,10 @@ public class Main {
     private static File mainConfigFile;
     @Getter
     private static File profileConfigFile;
-    @Getter
-    private static LibraryManager libraryManager;
-    @Getter
-    private static PBHLibrariesLoader librariesLoader;
+    //    @Getter
+//    private static LibraryManager libraryManager;
+//    @Getter
+//    private static PBHLibrariesLoader librariesLoader;
     @Getter
     private static AnnotationConfigApplicationContext applicationContext;
     @Getter
@@ -88,13 +82,13 @@ public class Main {
         setupConfDirectory(args);
         //setupLogback();
         Path librariesPath = dataDirectory.toPath().toAbsolutePath().resolve("libraries");
-        libraryManager = new PBHLibraryManager(
-                new Slf4jLogAppender(),
-                Main.getDataDirectory().toPath(), "libraries"
-        );
-        boolean nogui = !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"));
-        libraryManager.setLogLevel(LogLevel.ERROR);
-        librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath, !nogui);
+//        libraryManager = new PBHLibraryManager(
+//                new Slf4jLogAppender(),
+//                Main.getDataDirectory().toPath(), "libraries"
+//        );
+//        boolean nogui = !Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"));
+//        libraryManager.setLogLevel(LogLevel.ERROR);
+//        librariesLoader = new PBHLibrariesLoader(libraryManager, librariesPath, !nogui);
         meta = buildMeta();
         setupConfiguration();
         mainConfigFile = new File(configDirectory, "config.yml");
@@ -297,28 +291,28 @@ public class Main {
         return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.2";
     }
 
-    public static boolean loadDependencies(String mavenManifestPath) throws IOException {
-        try (var is = Main.class.getResourceAsStream(mavenManifestPath)) {
-            String str = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
-            String[] libraries = str.split("\n");
-            String osName = System.getProperty("os.name").toLowerCase();
-            String sysArch = "win";
-            if (osName.contains("linux")) {
-                sysArch = "linux";
-            } else if (osName.contains("mac")) {
-                sysArch = "mac";
-            }
-            try {
-                librariesLoader.loadLibraries(Arrays.stream(libraries).toList(),
-                        Map.of("system.platform", sysArch, "javafx.version",
-                                Main.getMeta().getJavafx()));
-                return true;
-            } catch (Exception e) {
-                log.error("Unable to load JavaFx dependencies", e);
-                return false;
-            }
-        }
-    }
+//    public static boolean loadDependencies(String mavenManifestPath) throws IOException {
+//        try (var is = Main.class.getResourceAsStream(mavenManifestPath)) {
+//            String str = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
+//            String[] libraries = str.split("\n");
+//            String osName = System.getProperty("os.name").toLowerCase();
+//            String sysArch = "win";
+//            if (osName.contains("linux")) {
+//                sysArch = "linux";
+//            } else if (osName.contains("mac")) {
+//                sysArch = "mac";
+//            }
+//            try {
+//                librariesLoader.loadLibraries(Arrays.stream(libraries).toList(),
+//                        Map.of("system.platform", sysArch, "javafx.version",
+//                                Main.getMeta().getJavafx()));
+//                return true;
+//            } catch (Exception e) {
+//                log.error("Unable to load JavaFx dependencies", e);
+//                return false;
+//            }
+//        }
+//    }
 
 
     private static void handleCommand(String input) {
