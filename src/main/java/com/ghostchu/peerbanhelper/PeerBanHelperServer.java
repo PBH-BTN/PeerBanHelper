@@ -494,6 +494,7 @@ public class PeerBanHelperServer implements Reloadable {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_ADD_BANS));
             })) {
+                var banlistClone = List.copyOf(BAN_LIST.keySet());
                 downloaderBanDetailMap.forEach((downloader, details) -> {
                     try {
                         List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
@@ -509,7 +510,7 @@ public class PeerBanHelperServer implements Reloadable {
                                             detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                     bannedPeers.add(banMetadata);
                                     relaunch.add(detail.torrent());
-                                    banPeer(banMetadata, detail.torrent(), detail.peer());
+                                    banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
                                     if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
                                         log.warn(tlUI(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), tl(DEF_LOCALE, detail.result().reason())));
                                     }
@@ -834,11 +835,12 @@ public class PeerBanHelperServer implements Reloadable {
     /**
      * 以指定元数据封禁一个特定的对等体
      *
+     * @param compareWith 对比 BanList，默认 BAN_LIST 或者 BAN_LIST 的克隆
      * @param peer        对等体 IP 地址
      * @param banMetadata 封禁元数据
      */
-    private void banPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
-        if (BAN_LIST.containsKey(peer.getPeerAddress())) {
+    private void banPeer(@NotNull Collection<PeerAddress> compareWith, @NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
+        if (compareWith.contains(peer.getPeerAddress())) {
             log.error(tlUI(Lang.DUPLICATE_BAN, banMetadata));
             needReApplyBanList.set(true);
             log.warn(tlUI(Lang.SCHEDULED_FULL_BANLIST_APPLY));
@@ -861,7 +863,7 @@ public class PeerBanHelperServer implements Reloadable {
     public void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
         Downloader downloader = getDownloaders().stream().filter(d -> d.getName().equals(banMetadata.getDownloader()))
                 .findFirst().orElseThrow();
-        banPeer(banMetadata, torrent, peer);
+        banPeer(BAN_LIST.keySet(), banMetadata, torrent, peer);
         scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
                 downloader,
                 new BanDetail(torrent,
