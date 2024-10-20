@@ -184,8 +184,8 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     private boolean insideDirectory(File allowRange, File targetFile) {
-        Path path = allowRange.toPath().toAbsolutePath();
-        Path target = targetFile.toPath().toAbsolutePath();
+        Path path = allowRange.toPath().normalize().toAbsolutePath();
+        Path target = targetFile.toPath().normalize().toAbsolutePath();
         return target.startsWith(path);
     }
 
