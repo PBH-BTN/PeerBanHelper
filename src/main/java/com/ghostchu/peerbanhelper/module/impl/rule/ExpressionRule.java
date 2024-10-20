@@ -17,6 +17,8 @@ import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
+import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.googlecode.aviator.AviatorEvaluator;
@@ -26,6 +28,8 @@ import com.googlecode.aviator.Options;
 import com.googlecode.aviator.exception.ExpressionSyntaxErrorException;
 import com.googlecode.aviator.exception.TimeoutException;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +45,11 @@ import java.io.StringReader;
 import java.math.MathContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -100,12 +108,101 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         } catch (Exception e) {
             log.error("Failed to load scripts", e);
         }
+        javalinWebContainer.javalin()
+                .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
+                .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
+                .put("/api/" + getConfigName() + "/{scriptId}", this::writeScript, Role.USER_WRITE)
+                .delete("/api/" + getConfigName() + "/{scriptId}", this::deleteScript, Role.USER_WRITE);
 //        test code
 //        Torrent torrent = new TorrentImpl("1", "","",1,1.00d, 1,1);
 //        Peer peer = new PeerImpl(new PeerAddress("2408:8214:1551:bf20::1", 51413),
 //                "2408:8214:1551:bf20::1","-TR2940-", "Transmission 2.94",
 //                1,1,1,1,0.0d,null);
 //        System.out.println(shouldBanPeer(torrent,peer, Executors.newVirtualThreadPerTaskExecutor()));
+    }
+
+    private void deleteScript(Context context) throws IOException {
+        var scriptId = context.pathParam("scriptId");
+        File readFile = getIfAllowedScriptId(scriptId);
+        if (readFile == null) {
+            context.status(HttpStatus.BAD_REQUEST);
+            context.json(new StdResp(false, "Access to this resource is disallowed", null));
+            return;
+        }
+        if (!readFile.exists()) {
+            context.status(HttpStatus.NOT_FOUND);
+            context.json(new StdResp(false, "This script are not exists", null));
+            return;
+        }
+        readFile.delete();
+        context.json(new StdResp(true, "OK!", null));
+        reloadConfig();
+    }
+
+    private void writeScript(Context context) throws IOException {
+        var scriptId = context.pathParam("scriptId");
+        File readFile = getIfAllowedScriptId(scriptId);
+        if (readFile == null) {
+            context.status(HttpStatus.BAD_REQUEST);
+            context.json(new StdResp(false, "Access to this resource is disallowed", null));
+            return;
+        }
+        Files.write(readFile.toPath(), context.bodyAsBytes(), StandardOpenOption.CREATE);
+        context.json(new StdResp(true, "OK!", null));
+        reloadConfig();
+    }
+
+    private void readScript(Context context) throws IOException {
+        var scriptId = context.pathParam("scriptId");
+        File readFile = getIfAllowedScriptId(scriptId);
+        if (readFile == null) {
+            context.status(HttpStatus.BAD_REQUEST);
+            context.json(new StdResp(false, "Access to this resource is disallowed", null));
+            return;
+        }
+        if (!readFile.exists()) {
+            context.status(HttpStatus.NOT_FOUND);
+            context.json(new StdResp(false, "This script are not exists", null));
+            return;
+        }
+        context.json(new StdResp(true, null, Files.readString(readFile.toPath(), StandardCharsets.UTF_8)));
+    }
+
+    @Nullable
+    private File getIfAllowedScriptId(String scriptId) {
+        if (scriptId.isBlank())
+            throw new IllegalArgumentException("ScriptId cannot be null or blank");
+        if (!scriptId.endsWith(".av")) {
+            return null;
+        }
+        File scriptDir = new File(Main.getDataDirectory(), "scripts");
+        File readFile = new File(scriptDir, scriptId);
+        if (insideDirectory(scriptDir, readFile)) {
+            return readFile;
+        }
+        return null;
+    }
+
+    private boolean insideDirectory(File allowRange, File targetFile) {
+        Path path = allowRange.toPath().toAbsolutePath();
+        Path target = targetFile.toPath().toAbsolutePath();
+        return target.startsWith(path);
+    }
+
+    private void listScripts(Context context) {
+        List<ExpressionMetadataDto> list = new ArrayList<>();
+        for (Map.Entry<Expression, ExpressionMetadata> entry : expressions.entrySet()) {
+            var metadata = entry.getValue();
+            list.add(new ExpressionMetadataDto(
+                    metadata.file().getName(),
+                    metadata.name(),
+                    metadata.author(),
+                    metadata.cacheable(),
+                    metadata.threadSafe(),
+                    metadata.version()
+            ));
+        }
+        context.json(new StdResp(true, null, list));
     }
 
 
@@ -293,7 +390,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                 }
             }
         }
-        expressions = Map.copyOf(userRules);
+        expressions = new HashMap<>(userRules);
         getCache().invalidateAll();
         log.info(tlUI(Lang.MODULE_EXPRESSION_RULE_COMPILED, expressions.size(), System.currentTimeMillis() - start));
     }
@@ -357,5 +454,9 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     record ExpressionMetadata(File file, String name, String author, boolean cacheable, boolean threadSafe,
                               String version,
                               String script) {
+    }
+
+    record ExpressionMetadataDto(String id, String name, String author, boolean cacheable, boolean threadSafe,
+                                 String version) {
     }
 }
