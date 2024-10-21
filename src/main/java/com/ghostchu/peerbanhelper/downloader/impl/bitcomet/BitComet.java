@@ -99,7 +99,7 @@ public class BitComet extends AbstractDownloader {
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
-        if (serverVersion.getMajor() >= 2 && serverVersion.getMinor() != null && serverVersion.getMinor() >= 11) {
+        if (is211Newer()) {
             flags.add(DownloaderFeatureFlag.UNBAN_IP);
         }
         return flags;
@@ -335,7 +335,7 @@ public class BitComet extends AbstractDownloader {
 
     @Override
     public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
-        if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
+        if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList && !is211Newer()) {
             setBanListIncrement(added);
         } else {
             setBanListFull(fullList);
@@ -345,14 +345,27 @@ public class BitComet extends AbstractDownloader {
     private void setBanListIncrement(Collection<BanMetadata> added) {
         StringJoiner joiner = new StringJoiner("\n");
         added.forEach(p -> joiner.add(p.getPeer().getAddress().getIp()));
-        operateBanList("merge", joiner.toString());
+        if (is211Newer()) {
+            operateBanListNew("merge", joiner.toString());
+        } else {
+            operateBanListLegacy("merge", joiner.toString());
+        }
     }
 
     protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
-        operateBanList("replace", joiner.toString());
-        unbanAllPeers();
+        if (is211Newer()) {
+            operateBanListNew("replace", joiner.toString());
+            unbanAllPeers();
+        } else {
+            operateBanListLegacy("replace", joiner.toString());
+        }
+
+    }
+
+    private boolean is211Newer() {
+        return serverVersion.getMajor() >= 2 && serverVersion.getMinor() != null && serverVersion.getMinor() >= 11;
     }
 
     private void unbanAllPeers() {
@@ -374,9 +387,28 @@ public class BitComet extends AbstractDownloader {
         }
     }
 
-    private void operateBanList(String mode, String content) {
+    private void operateBanListLegacy(String mode, String content) {
         Map<String, String> banListSettings = new HashMap<>();
         banListSettings.put("import_type", mode);
+        banListSettings.put("content_base64", Base64.getEncoder().encodeToString(content.getBytes(StandardCharsets.UTF_8)));
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.IP_FILTER_UPLOAD.getEndpoint(),
+                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(banListSettings)))
+                            .header("Authorization", "Bearer " + this.deviceToken),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (request.statusCode() != 200) {
+                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                throw new IllegalStateException("Save BitComet banlist error: statusCode=" + request.statusCode());
+            }
+        } catch (Exception e) {
+            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private void operateBanListNew(String mode, String content) {
+        Map<String, String> banListSettings = new HashMap<>();
+        banListSettings.put("data_type", "manual_list");
         banListSettings.put("content_base64", Base64.getEncoder().encodeToString(content.getBytes(StandardCharsets.UTF_8)));
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.IP_FILTER_UPLOAD.getEndpoint(),
