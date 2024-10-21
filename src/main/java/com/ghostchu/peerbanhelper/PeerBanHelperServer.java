@@ -22,7 +22,6 @@ import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
-import com.ghostchu.peerbanhelper.metric.HitRateMetric;
 import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
@@ -128,8 +127,6 @@ public class PeerBanHelperServer implements Reloadable {
             .maximumSize(3000)
             .softValues()
             .build();
-    @Getter
-    private HitRateMetric hitRateMetric = new HitRateMetric();
     @Autowired
     private BanListDao banListDao;
     @Autowired

@@ -165,15 +165,6 @@ export const routerOptions: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: '/metricsRule',
-        name: 'rule_metrics',
-        meta: {
-          label: 'router.metrics.ruleMetrics',
-          needLogin: true
-        },
-        component: RuleMetric
-      },
-      {
         path: '/metricsCharts',
         name: 'charts',
         meta: {

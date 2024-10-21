@@ -13,15 +13,10 @@ public abstract class AbstractMatcher implements Rule {
 
     @Override
     public @NotNull MatchResult match(@Nullable String content) {
-        Main.getServer().getHitRateMetric().addQuery(this);
         if (content == null) {
             content = "";
         }
-        MatchResult r = match0(content);
-        if (r != MatchResult.DEFAULT) {
-            Main.getServer().getHitRateMetric().addHit(this);
-        }
-        return r;
+        return match0(content);
     }
 
     public abstract @NotNull MatchResult match0(@NotNull String content);
