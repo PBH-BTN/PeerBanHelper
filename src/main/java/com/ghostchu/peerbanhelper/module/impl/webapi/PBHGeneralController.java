@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
-import oshi.software.os.InternetProtocolStats;
 
 import javax.management.MBeanServer;
 import java.io.*;
@@ -94,199 +93,96 @@ public class PBHGeneralController extends AbstractFeatureModule {
     private void handleStatusGet(Context context) {
         // 有点大而全了，需要和前端看看哪些不需要可以删了
         SystemInfo systemInfo = new SystemInfo();
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("os", generateOsData(systemInfo));
-        data.put("network", generateNetworkStats(systemInfo));
-        //data.put("networkInterface", generateIf(systemInfo));
+        data.put("network", generateNetworkStats(context.ip(), userIp(context), systemInfo));
         data.put("jvm", generateJvmData());
-        data.put("heapMemory", generateMemoryData(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));
-        data.put("nonHeapMemory", generateMemoryData(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage()));
-        data.put("systemMemory", generateSystemMemoryData(systemInfo.getHardware()));
+        Map<String, Object> mem = new LinkedHashMap<>();
+        mem.put("heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));
+        mem.put("nonHeap", generateMemoryData(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage()));
+        mem.put("computer", generateSystemMemoryData(systemInfo.getHardware()));
+        data.put("memory", mem);
         data.put("peerbanhelper", generatePbhData());
-        data.put("threads", generateThreadsData());
-        data.put("cpu", generateProcessorData(systemInfo));
-        data.put("sensor", generateSensorData(systemInfo));
+        var cpu = systemInfo.getHardware().getProcessor();
+        data.put("load", String.join(", ", Arrays.stream(cpu.getProcessorCpuLoadTicks()[0]).mapToObj(String::valueOf).toList()));
         context.json(new StdResp(true, null, data));
     }
 
-    private Map<String, Object> generateSensorData(SystemInfo systemInfo) {
-        Map<String, Object> data = new HashMap<>();
-        var sensors = systemInfo.getHardware().getSensors();
-        data.put("cpuTemp", sensors.getCpuTemperature());
-        data.put("cpuVoltage", sensors.getCpuVoltage());
-        data.put("fanSpeed", String.join(", ", Arrays.stream(sensors.getFanSpeeds()).mapToObj(String::valueOf).toList()));
-        return data;
-    }
-
-    private Map<String, Object> generateProcessorData(SystemInfo systemInfo) {
-        Map<String, Object> data = new HashMap<>();
-        var cpu = systemInfo.getHardware().getProcessor();
-        //data.put("contextSwitches", cpu.getContextSwitches());
-        data.put("currentFreq", String.join(", ", Arrays.stream(cpu.getCurrentFreq()).mapToObj(String::valueOf).toList()));
-        //data.put("interrupts", cpu.getInterrupts());
-        data.put("logicalProcessorCount", cpu.getLogicalProcessorCount());
-        data.put("maxFreq", cpu.getMaxFreq());
-        data.put("physicalPackageCount", cpu.getPhysicalPackageCount());
-        data.put("physicalProcessorCount", cpu.getPhysicalProcessorCount());
-        data.put("cpuLoadTicks", String.join(", ", Arrays.stream(cpu.getProcessorCpuLoadTicks()[0]).mapToObj(String::valueOf).toList()));
-        var id = cpu.getProcessorIdentifier();
-        data.put("family", id.getFamily());
-        data.put("identifier", id.getIdentifier());
-        data.put("microArch", id.getMicroarchitecture());
-        data.put("model", id.getModel());
-        data.put("name", id.getName());
-        data.put("processorId", id.getProcessorID());
-        data.put("stepping", id.getStepping());
-        data.put("vendor", id.getVendor());
-        data.put("vendorFreq", id.getVendorFreq());
-        return data;
-    }
-//
-//    private List<Map<String, Object>> generateIf(SystemInfo systemInfo) {
-//        List<Map<String, Object>> nifs = new ArrayList<>();
-//        var ifs = systemInfo.getHardware().getNetworkIFs();
-//        ifs.forEach(nif -> {
-//            Map<String, Object> ifdat = new HashMap<>();
-//            ifdat.put("name", nif.getName());
-//            ifdat.put("displayName", nif.getDisplayName());
-//            ifdat.put("recvBytes", nif.getBytesRecv());
-//            ifdat.put("sentBytes", nif.getBytesSent());
-//            ifdat.put("collisions", nif.getCollisions());
-//            ifdat.put("alias", nif.getIfAlias());
-//            ifdat.put("operStatus", nif.getIfOperStatus().getValue());
-//            ifdat.put("index", nif.getIndex());
-//            ifdat.put("inDrops", nif.getInDrops());
-//            ifdat.put("inErrors", nif.getInErrors());
-//            ifdat.put("addrs4", String.join(", ", nif.getIPv4addr()));
-//            ifdat.put("addrs6", String.join(", ", nif.getIPv6addr()));
-//            ifdat.put("macaddr", nif.getMacaddr());
-//            ifdat.put("ifType", nif.getIfType());
-//            // ifdat.put("mtu", nif.getMTU());
-//            ifdat.put("nDisPhysicalMediumType", nif.getNdisPhysicalMediumType());
-//            ifdat.put("outErrors", nif.getOutErrors());
-//            ifdat.put("recvPackets", nif.getPacketsRecv());
-//            ifdat.put("sentPackets", nif.getPacketsSent());
-//            ifdat.put("prefixLengths", String.join(", ", Arrays.stream(nif.getPrefixLengths()).map(String::valueOf).toList()));
-//            ifdat.put("speed", nif.getSpeed());
-//            ifdat.put("subnetMasks", String.join(", ", Arrays.stream(nif.getSubnetMasks()).map(String::valueOf).toList()));
-//            ifdat.put("timestamp", nif.getTimeStamp());
-//            nifs.add(ifdat);
-//        });
-//        return nifs;
-//    }
-
-    private Map<String, Object> generateThreadsData() {
-        var threadsMXBean = ManagementFactory.getThreadMXBean();
-        Map<String, Object> threads = new HashMap<>();
-        threads.put("count", threadsMXBean.getThreadCount());
-        threads.put("daemonCount", threadsMXBean.getDaemonThreadCount());
-        threads.put("peakCount", threadsMXBean.getPeakThreadCount());
-        threads.put("totalStartedThreadCount", threadsMXBean.getTotalStartedThreadCount());
-        return threads;
-    }
-
     private Map<String, Object> generatePbhData() {
-        Map<String, Object> pbh = new HashMap<>();
+        Map<String, Object> pbh = new LinkedHashMap<>();
         pbh.put("dataDir", Main.getDataDirectory().getAbsolutePath());
-        pbh.put("userAgent", Main.getUserAgent());
-        pbh.put("startupArgs", String.join(" ", Main.getStartupArgs()));
         pbh.put("guiAvailable", Main.getGuiManager().isGuiAvailable());
         pbh.put("defaultLocale", Main.DEF_LOCALE);
+        pbh.put("uptime", System.currentTimeMillis() - Main.getStartupAt());
+        pbh.put("commitId", Main.getMeta().getCommit());
+        pbh.put("version", Main.getMeta().getVersion());
+        pbh.put("release", System.getProperty("pbh.release"));
+        pbh.put("compileTime", Main.getMeta().getCompileTime());
         return pbh;
     }
 
     private Map<String, Object> generateOsData(SystemInfo systemInfo) {
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
         var operatingSystem = systemInfo.getOperatingSystem();
-        Map<String, Object> os = new HashMap<>();
+        Map<String, Object> os = new LinkedHashMap<>();
         os.put("name", osMXBean.getName());
         os.put("version", osMXBean.getVersion());
         os.put("availableProcessors", osMXBean.getAvailableProcessors());
         os.put("arch", osMXBean.getArch());
-        os.put("systemLoadAverage", osMXBean.getSystemLoadAverage());
         os.put("family", operatingSystem.getFamily());
         os.put("bitness", operatingSystem.getBitness());
-        os.put("bootTime", operatingSystem.getSystemBootTime());
-        os.put("upTime", operatingSystem.getSystemUptime());
         os.put("manufacturer", operatingSystem.getManufacturer());
-        os.put("processCount", operatingSystem.getProcessCount());
         var versionInfo = operatingSystem.getVersionInfo();
         os.put("buildNumber", versionInfo.getBuildNumber());
         os.put("codeName", versionInfo.getCodeName());
         os.put("osVersion", versionInfo.getVersion());
+        os.put("bootTime", operatingSystem.getSystemBootTime());
+        os.put("upTime", operatingSystem.getSystemUptime());
+        os.put("systemLoadAverage", osMXBean.getSystemLoadAverage());
         return os;
     }
 
-    private Map<String, Object> generateNetworkStats(SystemInfo systemInfo) {
-        var operatingSystem = systemInfo.getOperatingSystem();
-        Map<String, Object> network = new HashMap<>();
-        var networkParams = operatingSystem.getNetworkParams();
-        var tcpipStats = operatingSystem.getInternetProtocolStats();
-        network.put("hostname", networkParams.getHostName());
-        network.put("dns", String.join(", ", networkParams.getDnsServers()));
-        network.put("domainName", networkParams.getDomainName());
-        network.put("ipv4DefaultGateway", networkParams.getIpv4DefaultGateway());
-        network.put("ipv6DefaultGateway", networkParams.getIpv6DefaultGateway());
-        network.put("tcp4Stats", generateTcpStats(tcpipStats.getTCPv4Stats()));
-        network.put("tcp6Stats", generateTcpStats(tcpipStats.getTCPv6Stats()));
-        network.put("udp4Stats", generateUdpStats(tcpipStats.getUDPv4Stats()));
-        network.put("udp6Stats", generateUdpStats(tcpipStats.getUDPv6Stats()));
+    private Map<String, Object> generateNetworkStats(String clientIp, String userIp, SystemInfo systemInfo) {
+        Map<String, Object> network = new LinkedHashMap<>();
+        network.put("clientIp", clientIp);
+        network.put("userIp", userIp);
+        network.put("reverseProxy", !Objects.equals(clientIp, userIp));
+        network.put("useProxy", Main.getMainConfig().getInt("proxy.setting"));
         return network;
     }
 
     private Map<String, Object> generateJvmData() {
         var runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-        Map<String, Object> jvm = new HashMap<>();
-        jvm.put("specification", runtimeMXBean.getSpecName());
+        Map<String, Object> jvm = new LinkedHashMap<>();
+        jvm.put("bitness", Short.parseShort(System.getProperty("sun.arch.data.model")));
+        jvm.put("vmName", runtimeMXBean.getVmName());
         jvm.put("version", runtimeMXBean.getVmVersion());
         jvm.put("vendor", runtimeMXBean.getVmVendor());
+        jvm.put("specification", runtimeMXBean.getSpecName());
         jvm.put("classVersion", System.getProperty("java.class.version"));
-        jvm.put("installDir", System.getProperty("java.home"));
-        jvm.put("tmpDir", System.getProperty("java.io.tmpdir"));
+        jvm.put("uptime", runtimeMXBean.getUptime());
+        jvm.put("startTime", runtimeMXBean.getStartTime());
+
         return jvm;
     }
 
     private Map<String, Object> generateSystemMemoryData(HardwareAbstractionLayer hardware) {
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new LinkedHashMap<>();
         var mem = hardware.getMemory();
+        data.put("total", mem.getTotal());
         data.put("available", mem.getAvailable());
         data.put("pageSize", mem.getPageSize());
-        data.put("total", mem.getTotal());
-        return data;
-    }
-
-
-    private Map<String, Object> generateUdpStats(InternetProtocolStats.UdpStats stats) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("datagramsNoPort", stats.getDatagramsNoPort());
-        data.put("datagramsReceived", stats.getDatagramsReceived());
-        data.put("datagramsReceivedErrors", stats.getDatagramsReceivedErrors());
-        data.put("datagramsSent", stats.getDatagramsSent());
-        return data;
-    }
-
-    private Map<String, Object> generateTcpStats(InternetProtocolStats.TcpStats stats) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("connectionFailures", stats.getConnectionFailures());
-        data.put("connectionActive", stats.getConnectionsActive());
-        data.put("connectionEstablished", stats.getConnectionsEstablished());
-        data.put("connectionPassive", stats.getConnectionsPassive());
-        data.put("connectionReset", stats.getConnectionsReset());
-        data.put("inErrors", stats.getInErrors());
-        data.put("outResets", stats.getOutResets());
-        data.put("segmentsReceived", stats.getSegmentsReceived());
-        data.put("segmentsRetransmitted", stats.getSegmentsRetransmitted());
-        data.put("segmentsSent", stats.getSegmentsSent());
         return data;
     }
 
     private Map<String, Object> generateMemoryData(MemoryUsage heapMemoryMXBean) {
-        Map<String, Object> nonHeapMem = new HashMap<>();
-        nonHeapMem.put("init", heapMemoryMXBean.getInit());
-        nonHeapMem.put("max", heapMemoryMXBean.getMax());
-        nonHeapMem.put("used", heapMemoryMXBean.getUsed());
-        nonHeapMem.put("committed", heapMemoryMXBean.getCommitted());
-        return nonHeapMem;
+        Map<String, Object> mem = new LinkedHashMap<>();
+        mem.put("init", heapMemoryMXBean.getInit());
+        mem.put("max", heapMemoryMXBean.getMax());
+        mem.put("used", heapMemoryMXBean.getUsed());
+        mem.put("free", heapMemoryMXBean.getMax() - heapMemoryMXBean.getUsed());
+        mem.put("committed", heapMemoryMXBean.getCommitted());
+        return mem;
     }
 
     private void handleReloading(Context context) {

@@ -79,6 +79,8 @@ public class Main {
     private static BuildMeta meta;
     @Getter
     private static String[] startupArgs;
+    @Getter
+    private static long startupAt = System.currentTimeMillis();
 
     public static void main(String[] args) {
         startupArgs = args;
