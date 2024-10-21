@@ -189,7 +189,9 @@ public class PBHMetricsController extends AbstractFeatureModule {
                 })
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
                 .toList();
-        ctx.json(new StdResp(true, null, dat));
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("data", dat);
+        ctx.json(new StdResp(true, null, resp));
     }
 
     private void handleBasicCounter(Context ctx) {
@@ -232,7 +234,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         private String type;
         private long hit;
         private long query;
-        private String metadata;
+        private Map<String, Object> metadata;
     }
 
 }

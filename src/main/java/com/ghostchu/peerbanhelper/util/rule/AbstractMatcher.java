@@ -37,5 +37,5 @@ public abstract class AbstractMatcher implements Rule {
 
     public abstract @NotNull MatchResult match0(@NotNull String content);
 
-    public record MatcherInfo(TranslationComponent ruleType, String metadata) {}
+    public record MatcherInfo(TranslationComponent ruleType, Map<String, Object> metadata) {}
 }

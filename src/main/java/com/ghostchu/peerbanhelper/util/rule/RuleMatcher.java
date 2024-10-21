@@ -30,8 +30,8 @@ public abstract class RuleMatcher<T> extends AbstractMatcher {
 
     public abstract void setData(String ruleName, List<T> ruleData);
 
-    public String metadata() {
-        return ruleName;
+    public Map<String, Object> metadata() {
+        return Map.of("id", ruleId, "rule", ruleName);
     }
 
 }

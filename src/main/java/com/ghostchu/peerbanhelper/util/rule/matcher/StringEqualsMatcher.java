@@ -50,7 +50,7 @@ public class StringEqualsMatcher extends AbstractJsonMatcher {
     }
 
     @Override
-    public String metadata() {
-        return rule;
+    public Map<String, Object> metadata() {
+        return Map.of("rule", rule);
     }
 }

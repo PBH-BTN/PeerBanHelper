@@ -51,7 +51,7 @@ public class StringRegexMatcher extends AbstractJsonMatcher {
     }
 
     @Override
-    public String metadata() {
-        return rule.pattern();
+    public Map<String, Object> metadata() {
+        return Map.of("rule", rule);
     }
 }
