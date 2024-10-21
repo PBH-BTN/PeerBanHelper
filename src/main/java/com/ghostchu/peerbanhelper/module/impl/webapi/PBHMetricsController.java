@@ -9,7 +9,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.rule.Rule;
+import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -181,22 +181,15 @@ public class PBHMetricsController extends AbstractFeatureModule {
     }
     private void handleRules(Context ctx) {
         String locale = locale(ctx);
-        Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(getServer().getHitRateMetric().getHitRateMetric().asMap());
-        Map<String, String> dict = new HashMap<>();
+        Map<AbstractMatcher.MatcherInfo, HitRateMetricRecorder> metric = new HashMap<>(getServer().getHitRateMetric().getHitRateMetric().asMap());
         List<RuleData> dat = metric.entrySet().stream()
                 .map(obj -> {
-                    TranslationComponent ruleType = new TranslationComponent(obj.getKey().getClass().getName());
-                    if (obj.getKey().matcherName() != null) {
-                        ruleType = obj.getKey().matcherName();
-                    }
-                    // 返回特定计算值作为字典键，这样不需要修改前端
-                    dict.put(tl(locale, ruleType), tl(locale, ruleType));
+                    TranslationComponent ruleType = obj.getKey().ruleType();
                     return new RuleData(tl(locale, ruleType), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata());
                 })
                 .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
                 .toList();
         Map<String, Object> resp = new HashMap<>();
-        resp.put("dict", dict);
         resp.put("data", dat);
         ctx.json(new StdResp(true, null, resp));
     }
