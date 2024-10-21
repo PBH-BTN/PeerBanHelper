@@ -3,7 +3,6 @@ import BanList from '@/views/banlist/index.vue'
 import Ranks from '@/views/ranks/index.vue'
 import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
 import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
-import RuleMetric from '@/views/rule-metrics/index.vue'
 import { IconCloud, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
 import { computed, h } from 'vue'
 import {
