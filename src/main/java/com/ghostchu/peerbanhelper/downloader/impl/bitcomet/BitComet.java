@@ -311,6 +311,8 @@ public class BitComet extends AbstractDownloader {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
         var peers = JsonUtil.standard().fromJson(resp.body(), BCTaskPeersResponse.class);
+        //noinspection UnusedAssignment
+        resp = null; // 立即手动释放 resp 的对象引用，你可能觉得这非常夸张，但 BitComet 一个响应能高达 12 MB，这值得。
         if (peers.getPeers() == null) {
             return Collections.emptyList();
         }
