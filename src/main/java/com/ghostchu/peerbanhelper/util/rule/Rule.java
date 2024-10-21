@@ -28,4 +28,14 @@ public interface Rule {
         info.put("metadata", metadata());
         return JsonUtil.standard().toJson(info);
     }
+
+    default RuleInfo toRuleInfo() {
+        if (matcherName() != null) {
+            return new RuleInfo(matcherName(), metadata());
+        } else {
+            return new RuleInfo(new TranslationComponent(getClass().getName()), metadata());
+        }
+    }
+
+    record RuleInfo(TranslationComponent ruleType, String metadata) {}
 }

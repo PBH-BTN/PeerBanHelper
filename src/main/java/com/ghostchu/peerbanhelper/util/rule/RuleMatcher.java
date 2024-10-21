@@ -30,6 +30,7 @@ public abstract class RuleMatcher<T> extends AbstractMatcher {
 
     public abstract void setData(String ruleName, List<T> ruleData);
 
+    @Override
     public String metadata() {
         return ruleName;
     }
