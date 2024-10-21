@@ -705,7 +705,7 @@ public class PeerBanHelperServer implements Reloadable {
             return Collections.emptyMap();
         }
         List<Torrent> torrents = downloader.getTorrents();
-        Semaphore parallelReqRestrict = new Semaphore(16);
+        Semaphore parallelReqRestrict = new Semaphore(downloader.getMaxConcurrentPeerRequestSlots());
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.COLLECT_PEERS.getTimeout(), (t) -> {
             log.error(tlUI(Lang.TIMING_COLLECT_PEERS));
         })) {

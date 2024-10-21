@@ -91,4 +91,9 @@ public abstract class AbstractDownloader implements Downloader {
     public List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.UNBAN_IP);
     }
+
+    @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        return 16;
+    }
 }

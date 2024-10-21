@@ -426,6 +426,11 @@ public class BitComet extends AbstractDownloader {
     }
 
     @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        return 2;
+    }
+
+    @Override
     public void close() throws Exception {
 
     }
