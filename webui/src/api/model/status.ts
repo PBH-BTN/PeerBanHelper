@@ -22,7 +22,7 @@ export type RunningInfo = {
       total: number
       free: number
     }
-    load: string
+    load: number
     network: {
       internet_access: boolean
       use_proxy: boolean

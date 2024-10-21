@@ -202,7 +202,7 @@
         </a-space>
       </a-descriptions-item>
       <a-descriptions-item
-        v-if="data?.data.system.load > 0"
+        v-if="(data?.data.system.load ?? 0) > 0"
         :label="t('page.settings.tab.info.system.load')"
       >
         {{ data?.data.system.load.toFixed(2) }}
