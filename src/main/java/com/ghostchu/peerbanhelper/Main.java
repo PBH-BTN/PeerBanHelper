@@ -13,6 +13,8 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.simplereloadlib.ReloadManager;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -126,7 +128,7 @@ public class Main {
 
     @SneakyThrows
     private static void setupReloading() {
-        reloadManager.register(Main.class.getDeclaredMethod("setupProxySettings"));
+        reloadManager.register(Main.class.getDeclaredMethod("reloadModule"));
     }
 
     public static void setupLogback() {
@@ -145,7 +147,13 @@ public class Main {
         }
     }
 
-    public static void setupProxySettings() {
+    public static ReloadResult reloadModule() {
+        setupProxySettings();
+        ;
+        return ReloadResult.builder().status(ReloadStatus.SUCCESS).reason("OK!").build();
+    }
+
+    private static void setupProxySettings() {
         var proxySection = mainConfig.getConfigurationSection("proxy");
         if (proxySection == null) return;
         String host = proxySection.getString("host");
