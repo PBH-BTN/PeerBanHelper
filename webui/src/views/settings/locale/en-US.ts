@@ -4,7 +4,7 @@ export default {
   'page.settings.tab.config': 'Settings',
   'page.settings.tab.profile': 'Profile',
   'page.settings.tab.script': 'Custom Script',
-  'page.settings.tab.script.disable': 'Disabled for security reasons temporarily',
+  'page.settings.tab.script.disable': 'Temporarily disabled for security reasons temporarily',
   ...ProfileLocale,
   ...ConfigLocale
 }
