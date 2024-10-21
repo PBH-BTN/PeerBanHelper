@@ -29,6 +29,11 @@ public class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 22)
+    public void addIPFS(YamlConfiguration bundle) {
+        conf.set("ipfs.port", 9899);
+    }
+
     @UpdateScript(version = 21)
     public void addPushProvider(YamlConfiguration bundle) {
         conf.set("push-notification", bundle.get("push-notification"));

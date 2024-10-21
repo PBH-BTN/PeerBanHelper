@@ -1,4 +1,4 @@
-config-version: 19
+config-version: 22
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -154,7 +154,8 @@ performance:
   # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
-
+ipfs:
+  port: 9899
 push-notification:
   # 邮件推送服务 - Email push notification
   email-example:
