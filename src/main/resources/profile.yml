@@ -304,7 +304,7 @@ module:
     # Keep hunting
     # 如果某IP已判定为多拨，无视缓存时间限制继续搜寻其同伙
     # If a specific IP flagged multi-dialing, should we ignore the caching span and keep searching other IPs in same subnet?
-    keep-hunting: true
+    keep-hunting: false
     # 追猎持续时间（秒）
     # Hunting time
     # keep-hunting为true时有效，和cache-lifespan相似，对被猎杀IP的缓存持续时间
