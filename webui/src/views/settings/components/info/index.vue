@@ -30,9 +30,6 @@
       <a-descriptions-item :label="t('page.settings.tab.info.version.uptime')">
         <a-skeleton-line :rows="1" :animation="true" />
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.version.uptime')">
-        <a-skeleton-line :rows="1" :animation="true" />
-      </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.version.plus')">
         <a-skeleton-line :rows="1" :animation="true" />
       </a-descriptions-item>
@@ -147,9 +144,6 @@
       <a-descriptions-item :label="t('page.settings.tab.info.version.uptime')">
         {{ dayjs.duration({ seconds: data?.data.peerbanhelper.uptime }).humanize() }}
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.version.uptime')">
-        {{ dayjs.duration({ seconds: data?.data.peerbanhelper.uptime }).humanize() }}
-      </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.version.plus')">
         <button @click="endpointStore.emitter.emit('open-plus-modal')">
           <a-tag :color="endpointStore.plusStatus?.activated ? 'green' : 'red'">
@@ -207,8 +201,11 @@
           {{ formatFileSize(data?.data.system.memory.free ?? 0) }}
         </a-space>
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.system.load')">
-        {{ data?.data.system.load }}
+      <a-descriptions-item
+        :label="t('page.settings.tab.info.system.load')"
+        v-if="data?.data.system.load > 0"
+      >
+        {{ data?.data.system.load.toFixed(2) }}
       </a-descriptions-item>
     </a-descriptions>
     <a-divider />
@@ -220,11 +217,12 @@
       :align="{ label: 'right' }"
     >
       <a-descriptions-item :label="t('page.settings.tab.info.network.internet')">
-        {{
+        Unknown
+        <!-- {{
           data?.data.system.network.internet_access
             ? t('page.settings.tab.info.network.yes')
             : t('page.settings.tab.info.network.no')
-        }}
+        }} -->
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.network.proxy')">
         {{
@@ -328,6 +326,7 @@ button {
   line-height: normal;
   cursor: pointer;
 }
+
 button::after {
   border: none;
 }
