@@ -94,7 +94,7 @@ export default {
 
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-length': '子网掩码长度',
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length': 'IPv6子网掩码长度',
-  'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': '封禁阈值',
+  'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': '封禁阈值（{version}）',
   'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num.tips':
     '容许同一网段下载同一种子的IP数量，防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判',
   'page.settings.tab.profile.module.multiDialingBlocker.timeWindow': '检测窗口',
