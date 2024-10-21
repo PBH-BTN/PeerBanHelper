@@ -47,8 +47,8 @@ public class BtnRuleParsed {
                     }
 
                     @Override
-                    public Map<String, Object> metadata() {
-                        return Map.of("port", s);
+                    public String metadata() {
+                        return String.valueOf(s);
                     }
 
                     @Override
