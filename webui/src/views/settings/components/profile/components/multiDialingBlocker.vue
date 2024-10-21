@@ -40,12 +40,28 @@
       ></a-input-number>
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.multiDialingBlocker.tolerate-num')"
+      :label="
+        t('page.settings.tab.profile.module.multiDialingBlocker.tolerate-num', { version: 'IPv4' })
+      "
       :tooltip="t('page.settings.tab.profile.module.multiDialingBlocker.tolerate-num.tips')"
       field="model.tolerate_num"
     >
       <a-input-number
-        v-model="model.tolerate_num"
+        v-model="model.tolerate_num_ipv4"
+        style="width: 100px"
+        :min="0"
+        :step="1"
+      ></a-input-number>
+    </a-form-item>
+    <a-form-item
+      :label="
+        t('page.settings.tab.profile.module.multiDialingBlocker.tolerate-num', { version: 'IPv6' })
+      "
+      :tooltip="t('page.settings.tab.profile.module.multiDialingBlocker.tolerate-num.tips')"
+      field="model.tolerate_num"
+    >
+      <a-input-number
+        v-model="model.tolerate_num_ipv6"
         style="width: 100px"
         :min="0"
         :step="1"

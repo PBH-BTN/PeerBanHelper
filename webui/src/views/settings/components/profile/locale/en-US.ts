@@ -103,7 +103,7 @@ export default {
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-length': 'Subnet mask length',
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length':
     'IPv6 subnet mask length',
-  'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': 'Tolerate number',
+  'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': 'Tolerate number({version})',
   'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num.tips':
     'The allowed maximum amount of ips in same subnet, to avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same ISP',
   'page.settings.tab.profile.module.multiDialingBlocker.timeWindow': 'Detection window',
