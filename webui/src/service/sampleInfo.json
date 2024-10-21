@@ -1,0 +1,32 @@
+{
+  "jvm": {
+    "version": "21.0.4+7-LTS",
+    "vendor": "Azul Systems, Inc.",
+    "runtime": "Hotspot",
+    "bitness": 64
+  },
+  "system": {
+    "os": "Linux",
+    "version": "5.4.0-80-generic",
+    "architecture": "amd64",
+    "cores": 4,
+    "memory": {
+      "total": 34204610560,
+      "free": 11366594560
+    },
+    "load": "4.22 6.18 7.04",
+    "network": {
+      "internet_access": true,
+      "use_proxy": false,
+      "reverse_proxy": true,
+      "client_ip": "127.0.0.1"
+    }
+  },
+  "peerbanhelper": {
+    "version": "7.0",
+    "commit_id": "38ff6a8c89fff1e23c99546ed441b8b52e7cf22f",
+    "compile_time": 1729492322,
+    "release": "deb",
+    "uptime": 36000
+  }
+}

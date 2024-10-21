@@ -1,5 +1,7 @@
 import { Message } from '@arco-design/web-vue'
 import { useStorage } from '@vueuse/core'
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
 import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
 
@@ -22,6 +24,7 @@ export default function useLocale() {
       return
     }
     i18.locale.value = value
+    dayjs.locale(value)
     store.setLocale(value)
     document.querySelector('html')?.setAttribute('lang', value)
     Message.success(i18.t('navbar.action.locale'))

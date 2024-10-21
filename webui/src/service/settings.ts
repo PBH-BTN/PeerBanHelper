@@ -1,8 +1,10 @@
 import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 import type { Config } from '@/api/model/config'
 import type { Profile } from '@/api/model/profile'
+import type { RunningInfo } from '@/api/model/status'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
+import sampleInfo from './sampleInfo.json'
 import { getCommonHeader } from './utils'
 
 export async function GetProfile(): Promise<CommonResponse<Profile>> {
@@ -55,4 +57,16 @@ export async function SaveConfig(config: Config): Promise<CommonResponseWithoutD
     endpointStore.assertResponseLogin(res)
     return res.json()
   })
+}
+
+export async function GetRunningInfo(): Promise<CommonResponse<RunningInfo>> {
+  return new Promise((res) =>
+    setTimeout(() => {
+      res({
+        data: sampleInfo as RunningInfo,
+        success: true,
+        message: 'ok'
+      })
+    }, 1000)
+  )
 }
