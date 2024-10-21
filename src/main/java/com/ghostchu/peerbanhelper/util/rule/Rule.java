@@ -13,7 +13,7 @@ public interface Rule {
     @NotNull
     MatchResult match(@NotNull String content);
 
-    Map<String, Object> metadata();
+    String metadata();
 
     default TranslationComponent matcherName() {
         return null;

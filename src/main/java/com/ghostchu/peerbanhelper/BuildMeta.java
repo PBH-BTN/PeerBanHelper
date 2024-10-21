@@ -15,6 +15,7 @@ public final class BuildMeta {
     private String commit;
     private String abbrev;
     private String javafx;
+    private String compileTime;
 
     public void loadBuildMeta(YamlConfiguration configuration) {
         this.version = configuration.getString("maven.version");
@@ -23,6 +24,7 @@ public final class BuildMeta {
         this.abbrev = configuration.getString("git.commit.id.abbrev");
         this.os = System.getProperty("os.name");
         this.javafx = configuration.getString("javafx.version");
+        this.compileTime = configuration.getString("git.build.time");
     }
 
     public String toString() {

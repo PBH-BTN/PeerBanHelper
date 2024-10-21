@@ -5,6 +5,9 @@ import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,10 +16,20 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.zip.GZIPOutputStream;
 
 public class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
 
+    public static void gzip(InputStream is, OutputStream os) throws IOException {
+        GZIPOutputStream gzipOs = new GZIPOutputStream(os);
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = is.read(buffer)) > -1) {
+            gzipOs.write(buffer, 0, bytesRead);
+        }
+        gzipOs.close();
+    }
     /**
      * Get this class available or not
      *

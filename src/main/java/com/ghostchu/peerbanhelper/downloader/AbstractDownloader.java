@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 public abstract class AbstractDownloader implements Downloader {
     protected String name;
@@ -84,5 +85,15 @@ public abstract class AbstractDownloader implements Downloader {
     @Override
     public DownloaderStatistics getStatistics() {
         return new DownloaderStatistics(0, 0);
+    }
+
+    @Override
+    public List<DownloaderFeatureFlag> getFeatureFlags() {
+        return List.of(DownloaderFeatureFlag.UNBAN_IP);
+    }
+
+    @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        return 16;
     }
 }
