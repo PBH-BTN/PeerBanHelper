@@ -6,13 +6,14 @@
     <a-tab-pane key="2" :title="t('page.settings.tab.profile')">
       <ProfileForm />
     </a-tab-pane>
-    <!-- This is unsafe, remove -->
-    <!-- <a-tab-pane key="3" disabled>
-      <template #title
-        ><icon-code-square />
-        {{ t('page.settings.tab.script') }}
+    <a-tab-pane key="3" disabled>
+      <template #title>
+        <a-popover :content="t('page.settings.tab.script.disable')">
+          <icon-code-square />
+          {{ t('page.settings.tab.script') }}
+        </a-popover>
       </template>
-    </a-tab-pane> -->
+    </a-tab-pane>
   </a-tabs>
 </template>
 <script setup lang="ts">
