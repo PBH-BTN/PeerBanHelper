@@ -99,9 +99,9 @@ public class BitComet extends AbstractDownloader {
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
-        if (is211Newer()) {
-            flags.add(DownloaderFeatureFlag.UNBAN_IP);
-        }
+//        if (is211Newer()) {
+//            flags.add(DownloaderFeatureFlag.UNBAN_IP);
+//        }
         return flags;
     }
 
@@ -359,7 +359,7 @@ public class BitComet extends AbstractDownloader {
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
         if (is211Newer()) {
             operateBanListNew("replace", joiner.toString());
-            unbanAllPeers();
+            //unbanAllPeers();
         } else {
             operateBanListLegacy("replace", joiner.toString());
         }
