@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -29,6 +30,25 @@ public class CommonUtil {
         return file;
     }
 
+    public static String userIp(Context context) {
+        String ip = context.header("CF-Connecting-IP");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.header("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.header("X-Forwarded-For");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.header("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.header("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.ip();
+        }
+        return ip;
+    }
 
     @NotNull
     public static String getClassJarPath(@NotNull Class<?> clazz) {
