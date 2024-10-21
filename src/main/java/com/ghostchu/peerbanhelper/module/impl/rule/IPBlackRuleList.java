@@ -23,6 +23,7 @@ import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.hash.HashCode;
@@ -108,8 +109,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        reloadConfig();
-        return Reloadable.super.reloadModule();
+        Thread.ofVirtual().start(this::reloadConfig);
+        return ReloadResult.builder().status(ReloadStatus.SCHEDULED).build();
     }
 
     @Override
