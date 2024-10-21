@@ -30,6 +30,9 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.nio.file.Files;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
@@ -94,75 +97,87 @@ public class PBHGeneralController extends AbstractFeatureModule {
         // 有点大而全了，需要和前端看看哪些不需要可以删了
         SystemInfo systemInfo = new SystemInfo();
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("os", generateOsData(systemInfo));
-        data.put("network", generateNetworkStats(context.ip(), userIp(context), systemInfo));
         data.put("jvm", generateJvmData());
-        Map<String, Object> mem = new LinkedHashMap<>();
-        mem.put("heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));
-        mem.put("nonHeap", generateMemoryData(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage()));
-        mem.put("computer", generateSystemMemoryData(systemInfo.getHardware()));
-        data.put("memory", mem);
+        data.put("system", generateSystemData(context, systemInfo));
         data.put("peerbanhelper", generatePbhData());
-        var cpu = systemInfo.getHardware().getProcessor();
-        data.put("load", String.join(", ", Arrays.stream(cpu.getProcessorCpuLoadTicks()[0]).mapToObj(String::valueOf).toList()));
         context.json(new StdResp(true, null, data));
     }
 
     private Map<String, Object> generatePbhData() {
+        long compile_time = 0;
+        String release = System.getProperty("pbh.release");
+        if (release == null) {
+            release = "unknown";
+        }
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+            compile_time = formatter.parse(Main.getMeta().getCompileTime()).getTime() / 1000;
+        } catch (Exception ignore) {
+        }
+
         Map<String, Object> pbh = new LinkedHashMap<>();
-        pbh.put("dataDir", Main.getDataDirectory().getAbsolutePath());
-        pbh.put("guiAvailable", Main.getGuiManager().isGuiAvailable());
-        pbh.put("defaultLocale", Main.DEF_LOCALE);
-        pbh.put("uptime", System.currentTimeMillis() - Main.getStartupAt());
-        pbh.put("commitId", Main.getMeta().getCommit());
         pbh.put("version", Main.getMeta().getVersion());
-        pbh.put("release", System.getProperty("pbh.release"));
-        pbh.put("compileTime", Main.getMeta().getCompileTime());
+        pbh.put("commit_id", Main.getMeta().getCommit());
+        pbh.put("compile_time", compile_time);
+        pbh.put("release", release);
+        pbh.put("uptime", System.currentTimeMillis() - Main.getStartupAt());
+        //pbh.put("data_dir", Main.getDataDirectory().getAbsolutePath());
+        //pbh.put("gui_available", Main.getGuiManager().isGuiAvailable());
+        //pbh.put("default_locale", Main.DEF_LOCALE);
         return pbh;
     }
 
-    private Map<String, Object> generateOsData(SystemInfo systemInfo) {
+    private Map<String, Object> generateSystemData(Context context, SystemInfo systemInfo) {
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
         var operatingSystem = systemInfo.getOperatingSystem();
         Map<String, Object> os = new LinkedHashMap<>();
-        os.put("name", osMXBean.getName());
+        os.put("os", osMXBean.getName());
         os.put("version", osMXBean.getVersion());
-        os.put("availableProcessors", osMXBean.getAvailableProcessors());
-        os.put("arch", osMXBean.getArch());
-        os.put("family", operatingSystem.getFamily());
-        os.put("bitness", operatingSystem.getBitness());
-        os.put("manufacturer", operatingSystem.getManufacturer());
-        var versionInfo = operatingSystem.getVersionInfo();
-        os.put("buildNumber", versionInfo.getBuildNumber());
-        os.put("codeName", versionInfo.getCodeName());
-        os.put("osVersion", versionInfo.getVersion());
-        os.put("bootTime", operatingSystem.getSystemBootTime());
-        os.put("upTime", operatingSystem.getSystemUptime());
-        os.put("systemLoadAverage", osMXBean.getSystemLoadAverage());
+        os.put("architecture", osMXBean.getArch());
+        os.put("cores", osMXBean.getAvailableProcessors());
+        //os.put("family", operatingSystem.getFamily());
+        //os.put("bitness", operatingSystem.getBitness());
+        //os.put("manufacturer", operatingSystem.getManufacturer());
+        //var versionInfo = operatingSystem.getVersionInfo();
+        //os.put("build_number", versionInfo.getBuildNumber());
+        //os.put("code_name", versionInfo.getCodeName());
+        //os.put("os_version", versionInfo.getVersion());
+        //os.put("boot_time", operatingSystem.getSystemBootTime());
+        //os.put("up_time", operatingSystem.getSystemUptime());
+        var mem = generateSystemMemoryData(systemInfo.getHardware());
+        os.put("memory", mem);
+        os.put("load", osMXBean.getSystemLoadAverage());
+        var network = generateNetworkStats(context.ip(), userIp(context), systemInfo);
+        os.put("network", network);
         return os;
     }
 
     private Map<String, Object> generateNetworkStats(String clientIp, String userIp, SystemInfo systemInfo) {
         Map<String, Object> network = new LinkedHashMap<>();
-        network.put("clientIp", clientIp);
-        network.put("userIp", userIp);
-        network.put("reverseProxy", !Objects.equals(clientIp, userIp));
-        network.put("useProxy", Main.getMainConfig().getInt("proxy.setting"));
+        var proxy = Main.getMainConfig().getInt("proxy.setting");
+        network.put("internet_access", true); // ?
+        network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
+        network.put("reverse_proxy", !Objects.equals(clientIp, userIp));
+        network.put("client_ip", userIp);
+        //network.put("user_ip", userIp);
         return network;
     }
 
     private Map<String, Object> generateJvmData() {
         var runtimeMXBean = ManagementFactory.getRuntimeMXBean();
         Map<String, Object> jvm = new LinkedHashMap<>();
-        jvm.put("bitness", Short.parseShort(System.getProperty("sun.arch.data.model")));
-        jvm.put("vmName", runtimeMXBean.getVmName());
         jvm.put("version", runtimeMXBean.getVmVersion());
         jvm.put("vendor", runtimeMXBean.getVmVendor());
-        jvm.put("specification", runtimeMXBean.getSpecName());
-        jvm.put("classVersion", System.getProperty("java.class.version"));
-        jvm.put("uptime", runtimeMXBean.getUptime());
-        jvm.put("startTime", runtimeMXBean.getStartTime());
-
+        jvm.put("runtime", runtimeMXBean.getVmName());
+        jvm.put("bitness", Short.parseShort(System.getProperty("sun.arch.data.model")));
+        //jvm.put("specification", runtimeMXBean.getSpecName());
+        //jvm.put("class_version", System.getProperty("java.class.version"));
+        //jvm.put("uptime", runtimeMXBean.getUptime());
+        //jvm.put("start_time", runtimeMXBean.getStartTime());
+        Map<String, Object> mem = new LinkedHashMap<>();
+        mem.put("heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));
+        mem.put("non_heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage()));
+        jvm.put("memory", mem);
         return jvm;
     }
 
@@ -170,8 +185,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
         Map<String, Object> data = new LinkedHashMap<>();
         var mem = hardware.getMemory();
         data.put("total", mem.getTotal());
-        data.put("available", mem.getAvailable());
-        data.put("pageSize", mem.getPageSize());
+        data.put("free", mem.getAvailable());
+        data.put("page_size", mem.getPageSize());
         return data;
     }
 

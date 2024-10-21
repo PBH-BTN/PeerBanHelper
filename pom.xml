@@ -71,7 +71,7 @@
                     <offline>true</offline>
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
                     <verbose>false</verbose>
-                    <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
+                    <dateFormat>yyyy-MM-dd HH:mm:ss Z</dateFormat>
                     <prefix>git</prefix>
                     <format>json</format>
                     <gitDescribe>
