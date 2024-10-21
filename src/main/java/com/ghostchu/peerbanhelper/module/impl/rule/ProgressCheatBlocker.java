@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -242,7 +243,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             }
 
             // 是否需要进行快速 PCB 测试
-            if (fastPcbTestPercentage > 0 && !fileTooSmall(torrentSize)  && downloader.getType().equalsIgnoreCase("BitComet")) {
+            if (fastPcbTestPercentage > 0 && !fileTooSmall(torrentSize) && downloader.getFeatureFlags().contains(DownloaderFeatureFlag.UNBAN_IP)) {
                 // 只在 <= 0（也就是从未测试过）的情况下对其进行测试
                 if (clientTask.getFastPcbTestExecuteAt() <= 0) {
                     // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁

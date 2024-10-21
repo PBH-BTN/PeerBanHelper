@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet;
 
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.crypto.BCAESTool;
@@ -52,7 +53,7 @@ public class BitComet extends AbstractDownloader {
     private final Config config;
     private String deviceToken;
     private String serverId;
-    private String serverVersion;
+    private Semver serverVersion;
     private String serverName;
 
     public BitComet(String name, Config config) {
@@ -95,6 +96,14 @@ public class BitComet extends AbstractDownloader {
         return new PeerAddress(host.getHost(), port);
     }
 
+    @Override
+    public List<DownloaderFeatureFlag> getFeatureFlags() {
+        List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
+        if (serverVersion.getMajor() >= 2 && serverVersion.getMinor() != null && serverVersion.getMinor() >= 11) {
+            flags.add(DownloaderFeatureFlag.UNBAN_IP);
+        }
+        return flags;
+    }
 
     @Override
     public JsonObject saveDownloaderJson() {
@@ -157,7 +166,7 @@ public class BitComet extends AbstractDownloader {
             var deviceTokenResponse = JsonUtil.standard().fromJson(retrieveDeviceToken.body(), BCDeviceTokenResult.class);
             this.deviceToken = deviceTokenResponse.getDeviceToken();
             this.serverId = deviceTokenResponse.getServerId();
-            this.serverVersion = deviceTokenResponse.getVersion();
+            this.serverVersion = new Semver(deviceTokenResponse.getVersion(), Semver.SemverType.LOOSE);
             this.serverName = deviceTokenResponse.getServerName();
             if (queryNeedReConfigureIpFilter()) {
                 enableIpFilter();
@@ -343,6 +352,26 @@ public class BitComet extends AbstractDownloader {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
         operateBanList("replace", joiner.toString());
+        unbanAllPeers();
+    }
+
+    private void unbanAllPeers() {
+        Map<String, Object> banListSettings = new HashMap<>();
+        banListSettings.put("ip_list", Collections.emptyList());
+        banListSettings.put("unban_range", "unban_all_task");
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.TASK_UNBAN_PEERS.getEndpoint(),
+                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(banListSettings)))
+                            .header("Authorization", "Bearer " + this.deviceToken),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (request.statusCode() != 200) {
+                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR (unban_peers)", request.body()));
+                throw new IllegalStateException("Save BitComet banlist error: statusCode=" + request.statusCode());
+            }
+        } catch (Exception e) {
+            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            throw new IllegalStateException(e);
+        }
     }
 
     private void operateBanList(String mode, String content) {

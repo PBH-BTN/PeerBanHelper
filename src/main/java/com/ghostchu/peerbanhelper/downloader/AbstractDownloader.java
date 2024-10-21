@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -90,6 +89,6 @@ public abstract class AbstractDownloader implements Downloader {
 
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
-        return Collections.emptyList();
+        return List.of(DownloaderFeatureFlag.UNBAN_IP);
     }
 }
