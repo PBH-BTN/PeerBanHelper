@@ -422,5 +422,11 @@
             <!-- DO NOT UPDATE, Keep sync with jSystemThemeDetector -->
             <version>5.8.6</version>
         </dependency>
+        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.github.jnr/jnr-posix &ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.jnr</groupId>-->
+        <!--            <artifactId>jnr-posix</artifactId>-->
+        <!--            <version>3.1.20</version>-->
+        <!--        </dependency>-->
     </dependencies>
 </project>
