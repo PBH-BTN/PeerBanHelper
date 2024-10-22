@@ -99,9 +99,9 @@ public class BitComet extends AbstractDownloader {
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
-//        if (is211Newer()) {
-//            flags.add(DownloaderFeatureFlag.UNBAN_IP);
-//        }
+        if (is211Newer()) {
+            flags.add(DownloaderFeatureFlag.UNBAN_IP);
+        }
         return flags;
     }
 
@@ -321,9 +321,9 @@ public class BitComet extends AbstractDownloader {
         var stream = peers.getPeers().stream();
 
         if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-            stream = stream.filter(dto -> dto.getGroup().equals("connected")
-                                          || dto.getGroup().equals("connected_peers")
-                                          || dto.getGroup().equals("peers_connected"));
+            stream = stream.filter(dto -> dto.getGroup().equals("connected") // 2.10 正式版
+                                          || dto.getGroup().equals("connected_peers") // 2.11 Beta 1-2
+                                          || dto.getGroup().equals("peers_connected")); // 2.11 Beta 3
         }
 
         return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
