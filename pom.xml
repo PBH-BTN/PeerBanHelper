@@ -417,6 +417,11 @@
             <version>3.1.0</version>
         </dependency>
         <dependency>
+            <groupId>com.github.peergos</groupId>
+            <artifactId>nabu</artifactId>
+            <version>v0.8.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <!-- DO NOT UPDATE, Keep sync with jSystemThemeDetector -->
