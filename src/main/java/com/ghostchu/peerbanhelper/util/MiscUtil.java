@@ -23,20 +23,12 @@ public class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
 
     public static boolean isUsingReserveProxy(Context context) {
-        String ip = context.header("CF-Connecting-IP");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.header("X-Real-IP");
+        var list = List.of("X-Real-IP", "X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP");
+        for (String s : list) {
+            if (context.header(s) != null)
+                return true;
         }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.header("X-Forwarded-For");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.header("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = context.header("WL-Proxy-Client-IP");
-        }
-        return ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip);
+        return false;
     }
 
     public static void gzip(InputStream is, OutputStream os) throws IOException {
