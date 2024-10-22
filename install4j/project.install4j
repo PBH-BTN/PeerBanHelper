@@ -25,7 +25,7 @@
     </entries>
   </files>
   <launchers>
-    <launcher name="PeerBanHelper" id="26" swtApp="true" checkUpdater="true">
+    <launcher name="PeerBanHelper" id="26" checkUpdater="true">
       <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
@@ -39,21 +39,7 @@
         <file path="./icon.png" />
       </iconImageFiles>
     </launcher>
-    <launcher name="PeerBanHelper (GUI, Safe mode)" id="60" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-Swing" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
-        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
-      </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" arguments="swing">
-        <classPath>
-          <scanDirectory location="libraries" failOnError="false" />
-          <archive location="PeerBanHelper.jar" failOnError="false" />
-        </classPath>
-      </java>
-      <iconImageFiles>
-        <file path="./icon.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="PeerBanHelper GUI Silent" id="66" swtApp="true" checkUpdater="true">
+    <launcher name="PeerBanHelper GUI Silent" id="66" checkUpdater="true">
       <executable name="PeerBanHelper-GUI-Silent" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
