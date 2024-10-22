@@ -40,6 +40,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.Lang.DOWNLOADER_BC_FAILED_SAVE_BANLIST;
@@ -246,7 +248,6 @@ public class BitComet extends AbstractDownloader {
         requirements.put("group_state", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
-
         HttpResponse<String> request;
         try {
             request = httpClient.send(
@@ -261,31 +262,39 @@ public class BitComet extends AbstractDownloader {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
         }
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
-        return response.getTasks().stream()
-                .filter(t -> t.getType().equals("BT"))
-                .map(torrent -> {
-                    try {
-                        Map<String, String> taskIds = new HashMap<>();
-                        taskIds.put("task_id", torrent.getTaskId().toString());
-                        HttpResponse<String> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
-                                                HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
-                                        .header("Authorization", "Bearer " + this.deviceToken),
-                                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                        return JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
-                    } catch (IOException | InterruptedException e) {
-                        log.warn("Unable to fetch task details", e);
-                        return null;
-                    }
-                }).filter(Objects::nonNull)
-                .map(torrent -> new TorrentImpl(torrent.getTask().getTaskId().toString(),
-                        torrent.getTask().getTaskName(),
-                        torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
-                        torrent.getTaskDetail().getTotalSize(),
-                        torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
-                        torrent.getTask().getUploadRate(),
-                        torrent.getTask().getDownloadRate(),
-                        torrent.getTaskDetail().getTorrentPrivate()
-                )).collect(Collectors.toList());
+
+        Semaphore semaphore = new Semaphore(16);
+        List<BCTaskTorrentResponse> torrentResponses = Collections.synchronizedList(new ArrayList<>(response.getTasks().size()));
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            response.getTasks().stream().filter(t -> t.getType().equals("BT"))
+                    .forEach(torrent -> executor.submit(() -> {
+                        try {
+                            semaphore.acquire();
+                            Map<String, String> taskIds = new HashMap<>();
+                            taskIds.put("task_id", torrent.getTaskId().toString());
+                            HttpResponse<String> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
+                                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
+                                            .header("Authorization", "Bearer " + this.deviceToken),
+                                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                            return JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
+                        } catch (IOException | InterruptedException e) {
+                            log.warn("Unable to fetch BitComet task details", e);
+                            return null;
+                        } finally {
+                            semaphore.release();
+                        }
+                    }));
+        }
+
+        return torrentResponses.stream().map(torrent -> new TorrentImpl(torrent.getTask().getTaskId().toString(),
+                torrent.getTask().getTaskName(),
+                torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
+                torrent.getTaskDetail().getTotalSize(),
+                torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
+                torrent.getTask().getUploadRate(),
+                torrent.getTask().getDownloadRate(),
+                torrent.getTaskDetail().getTorrentPrivate()
+        )).collect(Collectors.toList());
     }
 
     @Override
