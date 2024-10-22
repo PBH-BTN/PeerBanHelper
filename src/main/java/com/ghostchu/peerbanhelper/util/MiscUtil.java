@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util;
 
 import com.ghostchu.peerbanhelper.Main;
+import io.javalin.http.Context;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +21,23 @@ import java.util.zip.GZIPOutputStream;
 
 public class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
+
+    public static boolean isUsingReserveProxy(Context context) {
+        String ip = context.header("CF-Connecting-IP");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.header("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.header("X-Forwarded-For");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.header("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = context.header("WL-Proxy-Client-IP");
+        }
+        return ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip);
+    }
 
     public static void gzip(InputStream is, OutputStream os) throws IOException {
         GZIPOutputStream gzipOs = new GZIPOutputStream(os);

@@ -30,8 +30,6 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.nio.file.Files;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -147,17 +145,17 @@ public class PBHGeneralController extends AbstractFeatureModule {
         var mem = generateSystemMemoryData(systemInfo.getHardware());
         os.put("memory", mem);
         os.put("load", osMXBean.getSystemLoadAverage());
-        var network = generateNetworkStats(context.ip(), userIp(context), systemInfo);
+        var network = generateNetworkStats(context, context.ip(), userIp(context), systemInfo);
         os.put("network", network);
         return os;
     }
 
-    private Map<String, Object> generateNetworkStats(String clientIp, String userIp, SystemInfo systemInfo) {
+    private Map<String, Object> generateNetworkStats(Context context, String clientIp, String userIp, SystemInfo systemInfo) {
         Map<String, Object> network = new LinkedHashMap<>();
         var proxy = Main.getMainConfig().getInt("proxy.setting");
         network.put("internet_access", true); // ?
         network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
-        network.put("reverse_proxy", !Objects.equals(clientIp, userIp));
+        network.put("reverse_proxy", MiscUtil.isUsingReserveProxy(context));
         network.put("client_ip", userIp);
         //network.put("user_ip", userIp);
         return network;
