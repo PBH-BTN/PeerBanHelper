@@ -37,10 +37,7 @@ public final class PeerAddress implements Comparable<PeerAddress>, Serializable 
 
     @Override
     public String toString() {
-        return "PeerAddress{" +
-               "ip='" + ip + '\'' +
-               ", port=" + port +
-               '}';
+        return ip + ":" + port;
     }
 
     @Override

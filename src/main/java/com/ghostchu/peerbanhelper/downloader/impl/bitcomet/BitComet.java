@@ -297,7 +297,8 @@ public class BitComet extends AbstractDownloader {
     public List<Peer> getPeers(Torrent torrent) {
         HttpResponse<String> resp;
         try {
-            Map<String, String> requirements = new HashMap<>();
+            Map<String, Object> requirements = new HashMap<>();
+            requirements.put("groups", List.of("peers_connected"));
             requirements.put("task_id", torrent.getId());
             requirements.put("max_count", String.valueOf(Integer.MAX_VALUE));
             resp = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_PEERS.getEndpoint(),
@@ -320,7 +321,9 @@ public class BitComet extends AbstractDownloader {
         var stream = peers.getPeers().stream();
 
         if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-            stream = stream.filter(dto -> dto.getGroup().equals("connected") || dto.getGroup().equals("connected_peers"));
+            stream = stream.filter(dto -> dto.getGroup().equals("connected")
+                                          || dto.getGroup().equals("connected_peers")
+                                          || dto.getGroup().equals("peers_connected"));
         }
 
         return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
@@ -340,6 +343,9 @@ public class BitComet extends AbstractDownloader {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList && !is211Newer()) {
             setBanListIncrement(added);
         } else {
+            if (removed != null && !removed.isEmpty()) {
+                unbanPeers(removed.stream().map(meta -> meta.getPeer().getAddress().toString()).toList());
+            }
             setBanListFull(fullList);
         }
     }
@@ -348,7 +354,7 @@ public class BitComet extends AbstractDownloader {
         StringJoiner joiner = new StringJoiner("\n");
         added.forEach(p -> joiner.add(p.getPeer().getAddress().getIp()));
         if (is211Newer()) {
-            operateBanListNew("merge", joiner.toString());
+            operateBanListNew("data_file", joiner.toString());
         } else {
             operateBanListLegacy("merge", joiner.toString());
         }
@@ -358,7 +364,7 @@ public class BitComet extends AbstractDownloader {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
         if (is211Newer()) {
-            operateBanListNew("replace", joiner.toString());
+            operateBanListNew("data_file", joiner.toString());
             //unbanAllPeers();
         } else {
             operateBanListLegacy("replace", joiner.toString());
@@ -370,10 +376,10 @@ public class BitComet extends AbstractDownloader {
         return serverVersion.getMajor() >= 2 && serverVersion.getMinor() != null && serverVersion.getMinor() >= 11;
     }
 
-    private void unbanAllPeers() {
+    private void unbanPeers(List<String> peerAddresses) {
         Map<String, Object> banListSettings = new HashMap<>();
-        banListSettings.put("ip_list", Collections.emptyList());
-        banListSettings.put("unban_range", "unban_all_task");
+        banListSettings.put("ip_list", peerAddresses);
+        banListSettings.put("unban_range", "unban_peers_in_all_tasks");
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.TASK_UNBAN_PEERS.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(banListSettings)))
