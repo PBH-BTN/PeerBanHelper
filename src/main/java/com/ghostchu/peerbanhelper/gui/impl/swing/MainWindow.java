@@ -61,6 +61,7 @@ public class MainWindow extends JFrame {
         });
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("/assets/icon.png"));
         setIconImage(imageIcon.getImage());
+        pack();
         setVisible(!swingGUI.isSilentStart());
         loggerTextList.setModel(new DefaultListModel<>());
         loggerTextList.setFont(new Font("微软雅黑", Font.PLAIN, 14));
@@ -68,6 +69,7 @@ public class MainWindow extends JFrame {
         loggerTextList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         loggerTextList.setLayoutOrientation(JList.VERTICAL);
         loggerTextList.setFixedCellHeight(-1);
+
     }
 
     public static void setTabTitle(JPanel tab, String title) {
