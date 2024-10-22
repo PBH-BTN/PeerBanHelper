@@ -263,7 +263,7 @@ public class BitComet extends AbstractDownloader {
         }
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
 
-        Semaphore semaphore = new Semaphore(16);
+        Semaphore semaphore = new Semaphore(1);
         List<BCTaskTorrentResponse> torrentResponses = Collections.synchronizedList(new ArrayList<>(response.getTasks().size()));
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             response.getTasks().stream().filter(t -> t.getType().equals("BT"))
@@ -276,16 +276,16 @@ public class BitComet extends AbstractDownloader {
                                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
                                             .header("Authorization", "Bearer " + this.deviceToken),
                                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                            return JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
+                            System.out.println(System.currentTimeMillis() + " Received a RESP");
+                            var torrentResp = JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
+                            torrentResponses.add(torrentResp);
                         } catch (IOException | InterruptedException e) {
-                            log.warn("Unable to fetch BitComet task details", e);
-                            return null;
+                            log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY), e);
                         } finally {
                             semaphore.release();
                         }
                     }));
         }
-
         return torrentResponses.stream().map(torrent -> new TorrentImpl(torrent.getTask().getTaskId().toString(),
                 torrent.getTask().getTaskName(),
                 torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
