@@ -94,12 +94,13 @@ public class Main {
         profileConfigFile = new File(configDirectory, "profile.yml");
         profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
-        log.info("Current system language tag: {}", Locale.getDefault().toLanguageTag());
+        String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+        log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
             DEF_LOCALE = System.getenv("PBH_USER_LOCALE");
             if(DEF_LOCALE == null) {
-                DEF_LOCALE = Locale.getDefault().toLanguageTag();
+                DEF_LOCALE = defLocaleTag;
             }
         }
         DEF_LOCALE = DEF_LOCALE.toLowerCase(Locale.ROOT).replace("-", "_");
