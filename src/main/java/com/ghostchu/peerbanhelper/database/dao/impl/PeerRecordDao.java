@@ -42,9 +42,9 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
 
     public Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, Timestamp afterThan) throws SQLException {
         var queryBuilder = queryBuilder().where()
-                .gt("lastSubmitAt", afterThan)
+                .gt("lastTimeSeen", afterThan)
                 .or()
-                .isNull("lastSubmitAt")
+                .isNull("lastTimeSeen")
                 .queryBuilder()
                 .orderBy("lastTimeSeen", false);
         return queryByPaging(queryBuilder, pageable);

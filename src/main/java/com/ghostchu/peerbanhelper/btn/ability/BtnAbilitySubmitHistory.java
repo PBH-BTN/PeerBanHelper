@@ -76,7 +76,7 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                         return null;
                     });
         } catch (Throwable e) {
-            log.error("Unable to submit peers", e);
+            log.error("Unable to submit peer histories", e);
             setLastStatus(false, "Unknown Error: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
