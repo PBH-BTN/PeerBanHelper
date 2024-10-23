@@ -8,7 +8,7 @@
     <a-list
       :data="abilities"
       :pagination-props="{ defaultPageSize: 5, total: abilities.length }"
-      style="width: 35vw"
+      style="max-width: 60rem"
     >
       <template #item="{ item }">
         <a-list-item action-layout="vertical">

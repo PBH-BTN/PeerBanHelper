@@ -12,7 +12,7 @@
       :align="{ label: 'right' }"
     >
       <a-descriptions-item :label="t('page.settings.tab.info.version.current')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.version.webui')">
         {{ webuiVersion }} (<a-link
@@ -22,16 +22,16 @@
         >)
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.version.ReleaseType')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.version.compileTime')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.version.uptime')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.version.plus')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
     </a-descriptions>
     <a-divider />
@@ -43,25 +43,25 @@
       :align="{ label: 'right' }"
     >
       <a-descriptions-item :label="t('page.settings.tab.info.system.os')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.system.version')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.system.architecture')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.system.cores')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.system.memory.total')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.system.memory.free')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.system.load')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
     </a-descriptions>
     <a-divider />
@@ -73,16 +73,22 @@
       :align="{ label: 'right' }"
     >
       <a-descriptions-item :label="t('page.settings.tab.info.network.internet')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.network.proxy')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.network.reverseProxy')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item>
-        <a-skeleton-line :rows="1" :animation="true" />
+        <template #label>
+          {{ t('page.settings.tab.info.network.clientIP') }}
+          <a-popover :content="t('page.settings.tab.info.network.clientIP.warning')">
+            <icon-info-circle />
+          </a-popover>
+        </template>
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
     </a-descriptions>
     <a-divider />
@@ -94,16 +100,16 @@
       :align="{ label: 'right' }"
     >
       <a-descriptions-item :label="t('page.settings.tab.info.runtime.version')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.runtime.vendor')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.runtime.runtime')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
       <a-descriptions-item :label="t('page.settings.tab.info.runtime.bitness')">
-        <a-skeleton-line :rows="1" :animation="true" />
+        <a-skeleton-line :rows="1" />
       </a-descriptions-item>
     </a-descriptions>
   </a-space>
@@ -248,6 +254,14 @@
         <a-typography-text code copyable>
           {{ data?.data.system.network.client_ip }}
         </a-typography-text>
+        <a-popover
+          v-if="isClientIpLocal && data?.data.system.network.reverse_proxy"
+          :content="t('page.settings.tab.info.network.clientIP.warning')"
+        >
+          <a-typography-text type="warning">
+            <icon-exclamation-polygon-fill />
+          </a-typography-text>
+        </a-popover>
       </a-descriptions-item>
     </a-descriptions>
     <a-divider />
@@ -282,7 +296,7 @@
       :align="{ label: 'right' }"
     >
       <a-descriptions-item :label="t('page.settings.tab.info.btn.module')">
-        <a-skeleton-line v-if="btnLoading" :rows="1" :animation="true" />
+        <a-skeleton-line v-if="btnLoading" :rows="1" />
         <div v-else>
           <a-typography-text v-if="!btnEnable">{{
             t('page.settings.tab.info.btn.disable')
@@ -343,6 +357,8 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
+import { isInSubnet } from 'is-in-subnet'
+import { isIP } from 'is-ip'
 
 dayjs.extend(RelativeTime)
 dayjs.extend(Duration)
@@ -382,6 +398,20 @@ const { data: btnStatus } = useRequest(GetBtnStatus, {
 })
 
 const btnAbilityList = ref<InstanceType<typeof btnAbilitiesModal>>()
+
+const isClientIpLocal = computed(() => {
+  if (data.value?.data.system.network.client_ip && isIP(data.value.data.system.network.client_ip)) {
+    if (
+      data.value.data.system.network.client_ip === '[::1]' || // localhost v6
+      isInSubnet(data.value.data.system.network.client_ip, '127.0.0.1/8') || // localhost
+      isInSubnet(data.value.data.system.network.client_ip, '172.17.0.0/16') ||
+      isInSubnet(data.value.data.system.network.client_ip, '172.18.0.0/16') // docker0 ip
+    ) {
+      return true
+    }
+  }
+  return false
+})
 </script>
 
 <style scoped>

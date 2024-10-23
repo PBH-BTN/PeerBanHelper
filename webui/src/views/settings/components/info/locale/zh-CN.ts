@@ -27,6 +27,8 @@ export default {
   'page.settings.tab.info.network.clientIP': '浏览器 IP',
   'page.settings.tab.info.network.clientIP.tips':
     'PBH视角当前浏览器的 IP 地址，可用于排查反向代理的相关问题',
+  'page.settings.tab.info.network.clientIP.warning':
+    'PBH 获取到了一个本地的 IP 地址，这通常是非预期的并意味着您的反向代理配置有误，请检查您的反向代理配置',
   'page.settings.tab.info.network.yes': '是',
   'page.settings.tab.info.network.no': '否',
 
@@ -49,6 +51,6 @@ export default {
 
   'page.settings.tab.info.btn.abilities.list.lastSuccess': '最新状态',
   'page.settings.tab.info.btn.abilities.list.lastSuccess.success': '成功',
-  'page.settings.tab.info.btn.abilities.list.lastSuccess.fail': '失败',
+  'page.settings.tab.info.btn.abilities.list.lastSuccess.failed': '失败',
   'page.settings.tab.info.btn.abilities.list.lastSuccessTime': '上次更新时间'
 }

@@ -27,6 +27,8 @@ export default {
   'page.settings.tab.info.network.clientIP': 'Client IP',
   'page.settings.tab.info.network.clientIP.tips':
     'The IP address of the browser from the perspective of PBH, which can be used to troubleshoot issues related to reverse proxies',
+  'page.settings.tab.info.network.clientIP.warning':
+    'PBH has obtained a local IP address, which usually does not expected and indicates that your reverse proxy configuration is incorrect. Please check it.',
   'page.settings.tab.info.network.yes': 'Yes',
   'page.settings.tab.info.network.no': 'No',
 
@@ -49,6 +51,6 @@ export default {
 
   'page.settings.tab.info.btn.abilities.list.lastSuccess': 'Last Status',
   'page.settings.tab.info.btn.abilities.list.lastSuccess.success': 'Success',
-  'page.settings.tab.info.btn.abilities.list.lastSuccess.fail': 'Failed',
+  'page.settings.tab.info.btn.abilities.list.lastSuccess.failed': 'Failed',
   'page.settings.tab.info.btn.abilities.list.lastSuccessTime': 'Last Update Time'
 }
