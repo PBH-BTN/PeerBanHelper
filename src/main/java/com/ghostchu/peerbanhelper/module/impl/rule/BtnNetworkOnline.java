@@ -72,7 +72,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         reloadConfig();
         Main.getReloadManager().register(this);
         javalinWebContainer.javalin()
-                .get("/api/modules/btn/status", this::status, Role.USER_READ);
+                .get("/api/modules/btn", this::status, Role.USER_READ);
     }
 
     private void status(Context context) {
