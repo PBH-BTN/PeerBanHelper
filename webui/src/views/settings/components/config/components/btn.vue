@@ -23,19 +23,19 @@
         <a-input v-model="model.config_url" style="width: 400px" />
       </a-form-item>
       <a-form-item label="App ID" field="btn.app_id">
-        <a-input v-model="model.app_id" style="width: 200px" />
+        <a-input v-model="model.app_id" style="width: 400px" />
       </a-form-item>
       <a-form-item label="App Secret" field="btn.app_secret">
-        <a-input-password v-model="model.app_secret" style="width: 200px" />
+        <a-input-password v-model="model.app_secret" style="width: 400px" />
       </a-form-item>
     </div>
   </a-space>
 </template>
 <script setup lang="ts">
-import { type Btn } from '@/api/model/config'
-import { Modal, Typography, TypographyParagraph } from '@arco-design/web-vue'
-import { h } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { type Btn } from '@/api/model/config';
+import { Modal, Typography, TypographyParagraph } from '@arco-design/web-vue';
+import { h } from 'vue';
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n()
 const model = defineModel<Btn>({ required: true })
 
