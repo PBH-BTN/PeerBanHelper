@@ -192,7 +192,7 @@ public class BitComet extends AbstractDownloader {
 
     public boolean isLoggedIn() {
         try {
-            getTorrents();
+            queryNeedReConfigureIpFilter();
             return true;
         } catch (Exception e) {
             return false;
@@ -207,6 +207,9 @@ public class BitComet extends AbstractDownloader {
                                 .header("Authorization", "Bearer " + this.deviceToken),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
                 );
+        if (query.statusCode() != 200) {
+            throw new IllegalStateException("Not a excepted statusCode while query the IPFilter status");
+        }
         var resp = JsonUtil.standard().fromJson(query.body(), BCIpFilterResponse.class);
         boolean isBlacklistMode = false;
         if (resp.getIpFilterConfig().getEnableWhitelistMode() != null) { // 2.10
@@ -219,7 +222,6 @@ public class BitComet extends AbstractDownloader {
     }
 
     private void enableIpFilter() throws IOException, InterruptedException {
-        log.info(tlUI(Lang.DOWNLOADER_BC_CONFIG_IP_FILTER));
         Map<String, Object> settings = new HashMap<>() {{
             put("ip_filter_config", new HashMap<>() {{
                 put("enable_ip_filter", true);
@@ -263,7 +265,7 @@ public class BitComet extends AbstractDownloader {
         }
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
 
-        Semaphore semaphore = new Semaphore(1);
+        Semaphore semaphore = new Semaphore(4);
         List<BCTaskTorrentResponse> torrentResponses = Collections.synchronizedList(new ArrayList<>(response.getTasks().size()));
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             response.getTasks().stream().filter(t -> t.getType().equals("BT"))
@@ -276,7 +278,6 @@ public class BitComet extends AbstractDownloader {
                                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
                                             .header("Authorization", "Bearer " + this.deviceToken),
                                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                            System.out.println(System.currentTimeMillis() + " Received a RESP");
                             var torrentResp = JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
                             torrentResponses.add(torrentResp);
                         } catch (IOException | InterruptedException e) {
