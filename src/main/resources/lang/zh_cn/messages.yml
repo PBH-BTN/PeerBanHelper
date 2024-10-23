@@ -430,3 +430,4 @@ BTN_ABILITY_SUBMIT_HISTORY_DESCRIPTION: "“提交历史记录” 能力允许 B
 BTN_ABILITY_SUBMIT_SNAPSHOT: "BTN 能力 - 提交快照"
 BTN_ABILITY_SUBMIT_SNAPSHOT_DESCRIPTION: "“提交快照” 能力允许 BTN 服务器定期接收 PeerBanHelper 所跟踪的下载器上的瞬间状态快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，，并动态生成反吸血规则阻断这些恶意行为。同时，这些数据还有助于 BTN 分析当前网络上的活动，以了解不同时刻网络上的恶意活动的概况。"
 UNABLE_READ_ALERT: "无法更新警报的已读状态"
+BTN_NOT_ENABLE_AND_REQUIRE_RESTART: "当前 BTN 模块未被加载，请启用 BTN 模块并重新启动 PeerBanHelper"

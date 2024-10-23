@@ -22,6 +22,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
@@ -76,6 +77,10 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private void status(Context context) {
+        if (btnNetwork == null) {
+            context.json(new StdResp(false, tl(locale(context), Lang.BTN_NOT_ENABLE_AND_REQUIRE_RESTART), null));
+            return;
+        }
         Map<String, Object> info = new HashMap<>();
         info.put("configSuccess", btnNetwork.getConfigSuccess());
         var abilities = new ArrayList<>();
@@ -109,8 +114,15 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        reloadConfig();
-        return Reloadable.super.reloadModule();
+        boolean actualLoaded = btnNetwork != null;
+        boolean configLoaded = Main.getMainConfig().getBoolean("btn.enabled");
+        if (actualLoaded != configLoaded) {
+            return ReloadResult.builder().status(ReloadStatus.REQUIRE_RESTART).build();
+        } else {
+            reloadConfig();
+            return ReloadResult.builder().status(ReloadStatus.SUCCESS).build();
+        }
+
     }
 
     public void reloadConfig() {
