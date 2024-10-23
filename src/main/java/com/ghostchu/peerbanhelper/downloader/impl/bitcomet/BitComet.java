@@ -448,6 +448,10 @@ public class BitComet extends AbstractDownloader {
 
     }
 
+    @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        return 4;
+    }
 
     @NoArgsConstructor
     @Data
