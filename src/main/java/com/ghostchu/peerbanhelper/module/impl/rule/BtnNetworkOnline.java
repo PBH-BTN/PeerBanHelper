@@ -108,6 +108,14 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     @Override
+    public boolean isModuleEnabled() {
+        if (super.isModuleEnabled()) {
+            return btnNetwork != null;
+        }
+        return false;
+    }
+
+    @Override
     public void onDisable() {
         Main.getReloadManager().unregister(this);
     }

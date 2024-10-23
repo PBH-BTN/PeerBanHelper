@@ -89,8 +89,10 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 || module.getConfigName().equalsIgnoreCase(moduleName)
                 || module.getClass().getName().equalsIgnoreCase(moduleName)
                 || module.getClass().getSimpleName().equalsIgnoreCase(moduleName)) {
-                context.json(new StdResp(true, null, true));
-                return;
+                if (module.isModuleEnabled()) {
+                    context.json(new StdResp(true, null, true));
+                    return;
+                }
             }
         }
         context.json(new StdResp(true, null, false));
