@@ -443,7 +443,7 @@ const btnAbilityList = ref<InstanceType<typeof btnAbilitiesModal>>()
 const isClientIpLocal = computed(() => {
   if (data.value?.data.system.network.client_ip && isIP(data.value.data.system.network.client_ip)) {
     if (
-      data.value.data.system.network.client_ip === '[::1]' || // localhost v6
+      data.value.data.system.network.client_ip === '::1' || // localhost v6
       isInSubnet(data.value.data.system.network.client_ip, '127.0.0.1/8') || // localhost
       isInSubnet(data.value.data.system.network.client_ip, '172.17.0.0/16') ||
       isInSubnet(data.value.data.system.network.client_ip, '172.18.0.0/16') // docker0 ip
