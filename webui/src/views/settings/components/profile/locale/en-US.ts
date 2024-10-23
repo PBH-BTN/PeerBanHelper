@@ -123,7 +123,7 @@ export default {
     'For other configurations, please go to the {link} page',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': 'Rule Subscribe',
 
-  'page.settings.tab.profile.module.activeMonitoring.title': 'Active monitoring',
+  'page.settings.tab.profile.module.activeMonitor.title': 'Active monitoring',
   'page.settings.tab.profile.module.activeMonitor.disable.tips':
     'This function is required by some charts.',
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': 'Retention time',
