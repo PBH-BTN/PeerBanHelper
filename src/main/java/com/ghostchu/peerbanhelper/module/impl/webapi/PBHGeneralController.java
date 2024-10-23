@@ -118,7 +118,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
         pbh.put("commit_id", Main.getMeta().getCommit());
         pbh.put("compile_time", compile_time);
         pbh.put("release", release);
-        pbh.put("uptime", System.currentTimeMillis() - Main.getStartupAt());
+        pbh.put("uptime", (System.currentTimeMillis() - Main.getStartupAt()) / 1000);
         //pbh.put("data_dir", Main.getDataDirectory().getAbsolutePath());
         //pbh.put("gui_available", Main.getGuiManager().isGuiAvailable());
         //pbh.put("default_locale", Main.DEF_LOCALE);
