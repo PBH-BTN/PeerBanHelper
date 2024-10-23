@@ -2,6 +2,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -9,6 +11,7 @@ import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.Gson;
 import com.google.gson.ToNumberPolicy;
@@ -32,6 +35,8 @@ import java.lang.management.MemoryUsage;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @IgnoreScan
@@ -216,7 +221,21 @@ public class PBHGeneralController extends AbstractFeatureModule {
             entryList.add(new ReloadEntry(entryName, r.getStatus().name()));
         });
         moduleMatchCache.invalidateAll();
-        context.json(new StdResp(true, null, entryList));
+
+        boolean success = true;
+        TranslationComponent message = new TranslationComponent(Lang.RELOAD_RESULT_SUCCESS);
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.SCHEDULED)) {
+            message = new TranslationComponent(Lang.RELOAD_RESULT_SCHEDULED);
+        }
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.REQUIRE_RESTART)) {
+            message = new TranslationComponent(Lang.RELOAD_RESULT_REQUIRE_RESTART);
+        }
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.EXCEPTION)) {
+            success = false;
+            message = new TranslationComponent(Lang.RELOAD_RESULT_FAILED);
+        }
+
+        context.json(new StdResp(success, tl(locale(context), message), entryList));
     }
 
     private void handleConfigGet(Context context) throws FileNotFoundException {
