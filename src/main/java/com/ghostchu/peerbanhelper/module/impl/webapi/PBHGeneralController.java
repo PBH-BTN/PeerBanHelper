@@ -2,6 +2,10 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.FeatureModule;
+import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -9,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.Gson;
 import com.google.gson.ToNumberPolicy;
@@ -33,6 +38,8 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
 @Component
 @IgnoreScan
 public class PBHGeneralController extends AbstractFeatureModule {
@@ -43,6 +50,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
     private JavalinWebContainer webContainer;
     @Autowired
     private ModuleMatchCache moduleMatchCache;
+    @Autowired
+    private ModuleManager moduleManager;
 
     @Override
     public boolean isConfigurable() {
@@ -63,10 +72,30 @@ public class PBHGeneralController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
+                .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
                 .post("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
                 .post("/api/general/reload", this::handleReloading, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleModuleAvailable(Context context) {
+        var moduleName = context.queryParam("module");
+        if (moduleName == null) {
+            throw new IllegalArgumentException("module argument cannot be null");
+        }
+        for (FeatureModule module : moduleManager.getModules()) {
+            if (module.getName().equalsIgnoreCase(moduleName)
+                || module.getConfigName().equalsIgnoreCase(moduleName)
+                || module.getClass().getName().equalsIgnoreCase(moduleName)
+                || module.getClass().getSimpleName().equalsIgnoreCase(moduleName)) {
+                if (module.isModuleEnabled()) {
+                    context.json(new StdResp(true, null, true));
+                    return;
+                }
+            }
+        }
+        context.json(new StdResp(true, null, false));
     }
 
     private void handleHeapDump(Context context) throws IOException {
@@ -216,7 +245,21 @@ public class PBHGeneralController extends AbstractFeatureModule {
             entryList.add(new ReloadEntry(entryName, r.getStatus().name()));
         });
         moduleMatchCache.invalidateAll();
-        context.json(new StdResp(true, null, entryList));
+
+        boolean success = true;
+        TranslationComponent message = new TranslationComponent(Lang.RELOAD_RESULT_SUCCESS);
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.SCHEDULED)) {
+            message = new TranslationComponent(Lang.RELOAD_RESULT_SCHEDULED);
+        }
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.REQUIRE_RESTART)) {
+            message = new TranslationComponent(Lang.RELOAD_RESULT_REQUIRE_RESTART);
+        }
+        if (result.values().stream().anyMatch(r -> r.getStatus() == ReloadStatus.EXCEPTION)) {
+            success = false;
+            message = new TranslationComponent(Lang.RELOAD_RESULT_FAILED);
+        }
+
+        context.json(new StdResp(success, tl(locale(context), message), entryList));
     }
 
     private void handleConfigGet(Context context) throws FileNotFoundException {
