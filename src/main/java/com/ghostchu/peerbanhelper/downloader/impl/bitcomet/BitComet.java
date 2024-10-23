@@ -209,10 +209,10 @@ public class BitComet extends AbstractDownloader {
                 );
         var resp = JsonUtil.standard().fromJson(query.body(), BCIpFilterResponse.class);
         boolean isBlacklistMode = false;
-        if (resp.getIpFilterConfig().getEnableWhitelistMode() != null) {
+        if (resp.getIpFilterConfig().getEnableWhitelistMode() != null) { // 2.10
             isBlacklistMode = !resp.getIpFilterConfig().getEnableWhitelistMode();
         }
-        if (resp.getIpFilterConfig().getFilterMode() != null) {
+        if (resp.getIpFilterConfig().getFilterMode() != null) { // 2.11
             isBlacklistMode = "blacklist".equals(resp.getIpFilterConfig().getFilterMode());
         }
         return !resp.getIpFilterConfig().getEnableIpFilter() || !isBlacklistMode;
@@ -223,8 +223,8 @@ public class BitComet extends AbstractDownloader {
         Map<String, Object> settings = new HashMap<>() {{
             put("ip_filter_config", new HashMap<>() {{
                 put("enable_ip_filter", true);
-                put("enable_whitelist_mode", false);
-                put("ipfilter_mode", "blacklist");
+                put("enable_whitelist_mode", false); // 2.10
+                put("ipfilter_mode", "blacklist"); // 2.11
             }});
         }};
         HttpResponse<String> updatePreferencesToEnableIpFilter =
@@ -307,9 +307,9 @@ public class BitComet extends AbstractDownloader {
         HttpResponse<String> resp;
         try {
             Map<String, Object> requirements = new HashMap<>();
-            requirements.put("groups", List.of("peers_connected"));
+            requirements.put("groups", List.of("peers_connected")); // 2.11 Beta 3 可以限制获取哪一类 Peers，注意下面仍需要检查，因为旧版本不支持
             requirements.put("task_id", torrent.getId());
-            requirements.put("max_count", String.valueOf(Integer.MAX_VALUE));
+            requirements.put("max_count", String.valueOf(Integer.MAX_VALUE)); // 获取全量列表，因为我们需要检查所有 Peers
             resp = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_PEERS.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
                             .header("Authorization", "Bearer " + this.deviceToken),
@@ -322,11 +322,11 @@ public class BitComet extends AbstractDownloader {
         }
         var peers = JsonUtil.standard().fromJson(resp.body(), BCTaskPeersResponse.class);
         //noinspection UnusedAssignment
-        resp = null; // 立即手动释放 resp 的对象引用，你可能觉得这非常夸张，但 BitComet 一个响应能高达 12 MB，这值得。
+        resp = null; // 立即手动释放 resp 的对象引用，你可能觉得这非常夸张，但部分版本 BitComet 一个响应能高达 12 MB，考虑到 PBH 的设计运行内存上限仅 386MB ，所以辅助 GC 完成垃圾回收是值得的。
         if (peers.getPeers() == null) {
             return Collections.emptyList();
         }
-        var noGroupField = peers.getPeers().stream().noneMatch(dto -> dto.getGroup() != null);
+        var noGroupField = peers.getPeers().stream().noneMatch(dto -> dto.getGroup() != null); // 2.10 的一些版本没有 group 字段
         var stream = peers.getPeers().stream();
 
         if (!noGroupField) { // 对于新版本，添加一个 group 过滤
@@ -340,9 +340,9 @@ public class BitComet extends AbstractDownloader {
                 new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
                 peer.getClientType(),
                 peer.getDlRate(),
-                peer.getDlSize() != null ? peer.getDlSize() : -1,
+                peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10
                 peer.getUpRate(),
-                peer.getUpSize() != null ? peer.getUpSize() : -1,
+                peer.getUpSize() != null ? peer.getUpSize() : -1, // 兼容 2.10
                 peer.getPermillage() / 1000.0d, null, Collections.emptyList())
         ).collect(Collectors.toList());
     }
