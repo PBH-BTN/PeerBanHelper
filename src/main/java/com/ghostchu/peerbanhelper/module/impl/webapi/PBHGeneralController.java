@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -178,12 +179,14 @@ public class PBHGeneralController extends AbstractFeatureModule {
         var mem = generateSystemMemoryData(systemInfo.getHardware());
         os.put("memory", mem);
         os.put("load", osMXBean.getSystemLoadAverage());
-        var network = generateNetworkStats(context, context.ip(), userIp(context), systemInfo);
+        var network = generateNetworkStats(context);
         os.put("network", network);
         return os;
     }
 
-    private Map<String, Object> generateNetworkStats(Context context, String clientIp, String userIp, SystemInfo systemInfo) {
+    private Map<String, Object> generateNetworkStats(Context context) {
+        //var clientIp = IPAddressUtil.getIPAddress(context.ip()).toCompressedString();
+        var userIp = IPAddressUtil.getIPAddress(userIp(context)).toCompressedString();
         Map<String, Object> network = new LinkedHashMap<>();
         var proxy = Main.getMainConfig().getInt("proxy.setting");
         network.put("internet_access", true); // ?
