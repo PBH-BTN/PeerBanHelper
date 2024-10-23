@@ -48,6 +48,8 @@ export default {
   'page.settings.tab.info.btn.status.configUrl': 'Server Address',
   'page.settings.tab.info.btn.abilities': 'Ability List',
   'page.settings.tab.info.btn.abilities.enable': 'abilities enabled',
+  'page.settings.tab.info.btn.abilities.tips':
+    'BTN server provides a variety of abilities, here is the list of abilities currently provided by the server:',
 
   'page.settings.tab.info.btn.abilities.list.lastSuccess': 'Last Status',
   'page.settings.tab.info.btn.abilities.list.lastSuccess.success': 'Success',

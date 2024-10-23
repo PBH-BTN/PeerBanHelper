@@ -1,43 +1,50 @@
 <template>
   <a-modal
     v-model:visible="visiable"
-    :title="'BTN' + t('page.settings.tab.info.btn.abilities')"
+    :title="'BTN ' + t('page.settings.tab.info.btn.abilities')"
     unmount-on-close
+    hide-cancel
     width="auto"
   >
-    <a-list
-      :data="abilities"
-      :pagination-props="{ defaultPageSize: 5, total: abilities.length }"
-      style="max-width: 60rem"
-    >
-      <template #item="{ item }">
-        <a-list-item action-layout="vertical">
-          <a-list-item-meta :title="item.displayName" :description="item.description" />
-          <template #actions>
-            <a-space>
-              <a-typography-text>
-                {{ t('page.settings.tab.info.btn.abilities.list.lastSuccess') }}:&nbsp;
-                <a-popover :content="item.lastMessage">
-                  <a-tag :color="item.lastSuccess ? 'green' : 'red'">
-                    {{
-                      item.lastSuccess
-                        ? t('page.settings.tab.info.btn.abilities.list.lastSuccess.success')
-                        : t('page.settings.tab.info.btn.abilities.list.lastSuccess.failed')
-                    }}
-                  </a-tag>
-                </a-popover>
-              </a-typography-text>
-              <br />
-              <a-typography-text>
-                {{ t('page.settings.tab.info.btn.abilities.list.lastSuccessTime') }}:{{
-                  d(item.lastUpdateAt, 'long')
-                }}
-              </a-typography-text>
-            </a-space>
-          </template>
-        </a-list-item>
-      </template>
-    </a-list>
+    <a-space direction="vertical" fill>
+      <a-typography-text>
+        {{ t('page.settings.tab.info.btn.abilities.tips') }}
+      </a-typography-text>
+      <a-list
+        :data="abilities"
+        :pagination-props="{ defaultPageSize: 5, total: abilities.length }"
+        style="max-width: 60rem"
+      >
+        <template #item="{ item }">
+          <a-list-item action-layout="vertical">
+            <a-list-item-meta :title="item.displayName" :description="item.description" />
+            <template #actions>
+              <a-space style="cursor: default">
+                <a-typography-text>
+                  {{ t('page.settings.tab.info.btn.abilities.list.lastSuccess') }}:&nbsp;
+                  <a-popover :content="item.lastMessage">
+                    <a-tag :color="item.lastSuccess ? 'green' : 'red'">
+                      {{
+                        item.lastSuccess
+                          ? t('page.settings.tab.info.btn.abilities.list.lastSuccess.success')
+                          : t('page.settings.tab.info.btn.abilities.list.lastSuccess.failed')
+                      }}
+                    </a-tag>
+                  </a-popover>
+                </a-typography-text>
+                <br />
+                <a-typography-text>
+                  {{
+                    t('page.settings.tab.info.btn.abilities.list.lastSuccessTime')
+                  }}:&nbsp;<icon-clock-circle />
+                  {{ d(item.lastUpdateAt, 'long') }}
+                </a-typography-text>
+              </a-space>
+            </template>
+          </a-list-item>
+        </template>
+      </a-list>
+    </a-space>
   </a-modal>
 </template>
 <script setup lang="ts">
