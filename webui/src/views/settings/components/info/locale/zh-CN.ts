@@ -17,7 +17,9 @@ export default {
   'page.settings.tab.info.system.architecture': '架构',
   'page.settings.tab.info.system.cores': 'CPU 核心数',
   'page.settings.tab.info.system.memory.total': '内存总量',
-  'page.settings.tab.info.system.memory.free': '空闲内存',
+  'page.settings.tab.info.system.memory.free': '内存压力',
+  'page.settings.tab.info.system.memory.available': '可用',
+  'page.settings.tab.info.system.memory.used': '已用',
   'page.settings.tab.info.system.load': '负载',
 
   'page.settings.tab.info.network': '网络',

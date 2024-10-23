@@ -17,7 +17,9 @@ export default {
   'page.settings.tab.info.system.architecture': 'Architecture',
   'page.settings.tab.info.system.cores': 'CPU Cores',
   'page.settings.tab.info.system.memory.total': 'Memory Total',
-  'page.settings.tab.info.system.memory.free': 'Memory Free',
+  'page.settings.tab.info.system.memory.free': 'Memory pressure',
+  'page.settings.tab.info.system.memory.available': 'Available',
+  'page.settings.tab.info.system.memory.used': 'Used',
   'page.settings.tab.info.system.load': 'Load',
 
   'page.settings.tab.info.network': 'Network',

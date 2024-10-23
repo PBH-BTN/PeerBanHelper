@@ -222,9 +222,12 @@
             {{ formatFileSize(data?.data.system.memory.total ?? 0) }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.system.memory.free')">
-            <a-space>
+            <a-space style="display: flex; align-items: center">
               <a-popover
-                :content="`${Math.round(((data?.data.system.memory.free ?? 0) / (data?.data.system.memory.total ?? 1)) * 100)}%`"
+                :content="
+                  `${Math.round((1 - (data?.data.system.memory.free ?? 0) / (data?.data.system.memory.total ?? 1)) * 100)}% ` +
+                  t('page.settings.tab.info.system.memory.used')
+                "
               >
                 <a-progress
                   type="circle"
@@ -233,7 +236,8 @@
                   :percent="memoryStatus"
                 />
               </a-popover>
-              {{ formatFileSize(data?.data.system.memory.free ?? 0) }}
+              {{ formatFileSize(data?.data.system.memory.free ?? 0) }} &nbsp;
+              {{ t('page.settings.tab.info.system.memory.available') }}
             </a-space>
           </a-descriptions-item>
           <a-descriptions-item
@@ -409,6 +413,7 @@ const { data } = useRequest(GetRunningInfo, {
 const endpointStore = useEndpointStore()
 const memoryStatus = computed(
   () =>
+    1 -
     (data.value?.data.system.memory.free ?? 0) / ((data.value?.data.system.memory.total ?? 1) + 1)
 ) //+1保证永远不可能100%
 const memoryProgressBarColor = computed(() => {
