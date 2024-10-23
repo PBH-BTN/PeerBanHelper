@@ -34,5 +34,21 @@ export default {
   'page.settings.tab.info.runtime.version': 'JVM Version',
   'page.settings.tab.info.runtime.vendor': 'Vendor',
   'page.settings.tab.info.runtime.runtime': 'Runtime',
-  'page.settings.tab.info.runtime.bitness': 'Bitness'
+  'page.settings.tab.info.runtime.bitness': 'Bitness',
+
+  'page.settings.tab.info.btn': 'BTN Status',
+  'page.settings.tab.info.btn.module': 'Module',
+  'page.settings.tab.info.btn.enable': 'Enabled',
+  'page.settings.tab.info.btn.disable': 'BTN module is not enabled',
+  'page.settings.tab.info.btn.status': 'Status',
+  'page.settings.tab.info.btn.status.success': 'Configuration file obtained successfully',
+  'page.settings.tab.info.btn.status.fail': 'Failed to obtain configuration file',
+  'page.settings.tab.info.btn.status.configUrl': 'Server Address',
+  'page.settings.tab.info.btn.abilities': 'Ability List',
+  'page.settings.tab.info.btn.abilities.enable': 'abilities enabled',
+
+  'page.settings.tab.info.btn.abilities.list.lastSuccess': 'Last Status',
+  'page.settings.tab.info.btn.abilities.list.lastSuccess.success': 'Success',
+  'page.settings.tab.info.btn.abilities.list.lastSuccess.fail': 'Failed',
+  'page.settings.tab.info.btn.abilities.list.lastSuccessTime': 'Last Update Time'
 }

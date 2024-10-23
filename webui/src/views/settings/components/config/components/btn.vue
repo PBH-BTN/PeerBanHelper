@@ -32,10 +32,10 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { type Btn } from '@/api/model/config';
-import { Modal, Typography, TypographyParagraph } from '@arco-design/web-vue';
-import { h } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { type Btn } from '@/api/model/config'
+import { Modal, Typography, TypographyParagraph } from '@arco-design/web-vue'
+import { h } from 'vue'
+import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 const model = defineModel<Btn>({ required: true })
 

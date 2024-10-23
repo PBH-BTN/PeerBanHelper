@@ -34,5 +34,21 @@ export default {
   'page.settings.tab.info.runtime.version': 'JVM 版本',
   'page.settings.tab.info.runtime.vendor': '提供商',
   'page.settings.tab.info.runtime.runtime': '运行时',
-  'page.settings.tab.info.runtime.bitness': '指针长度'
+  'page.settings.tab.info.runtime.bitness': '指针长度',
+
+  'page.settings.tab.info.btn': 'BTN 状态',
+  'page.settings.tab.info.btn.module': '模块状态',
+  'page.settings.tab.info.btn.disable': 'BTN 模块未启用',
+  'page.settings.tab.info.btn.enable': '已启用',
+  'page.settings.tab.info.btn.status': '状态',
+  'page.settings.tab.info.btn.status.success': '配置文件获取成功',
+  'page.settings.tab.info.btn.status.fail': '配置文件获取失败',
+  'page.settings.tab.info.btn.status.configUrl': '服务器地址',
+  'page.settings.tab.info.btn.abilities': '能力列表',
+  'page.settings.tab.info.btn.abilities.enable': '个能力已启用',
+
+  'page.settings.tab.info.btn.abilities.list.lastSuccess': '最新状态',
+  'page.settings.tab.info.btn.abilities.list.lastSuccess.success': '成功',
+  'page.settings.tab.info.btn.abilities.list.lastSuccess.fail': '失败',
+  'page.settings.tab.info.btn.abilities.list.lastSuccessTime': '上次更新时间'
 }

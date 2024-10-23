@@ -273,10 +273,66 @@
         </a-tag>
       </a-descriptions-item>
     </a-descriptions>
+    <a-divider />
+    <!--BTN Info-->
+    <a-descriptions
+      :column="1"
+      size="large"
+      :title="t('page.settings.tab.info.btn')"
+      :align="{ label: 'right' }"
+    >
+      <a-descriptions-item :label="t('page.settings.tab.info.btn.module')">
+        <a-skeleton-line v-if="btnLoading" :rows="1" :animation="true" />
+        <div v-else>
+          <a-typography-text v-if="!btnEnable">{{
+            t('page.settings.tab.info.btn.disable')
+          }}</a-typography-text>
+          <a-typography-text v-else>{{ t('page.settings.tab.info.btn.enable') }}</a-typography-text>
+        </div>
+      </a-descriptions-item>
+      <a-descriptions-item :label="t('page.settings.tab.info.btn.status')">
+        <a-typography-text :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
+          {{
+            btnStatus?.data.configSuccess
+              ? t('page.settings.tab.info.btn.status.success')
+              : t('page.settings.tab.info.btn.status.fail')
+          }}
+        </a-typography-text>
+      </a-descriptions-item>
+      <a-descriptions-item :label="t('page.settings.tab.info.btn.status.configUrl')">
+        <a-typography-text code copyable>
+          {{ btnStatus?.data.configUrl }}
+        </a-typography-text>
+      </a-descriptions-item>
+      <a-descriptions-item label="App ID">
+        <a-typography-text code copyable>
+          {{ btnStatus?.data.appId }}
+        </a-typography-text>
+      </a-descriptions-item>
+      <a-descriptions-item label="App Secret">
+        {{ btnStatus?.data.appSecret }}
+      </a-descriptions-item>
+      <a-descriptions-item :label="t('page.settings.tab.info.btn.abilities')">
+        <a-space size="mini">
+          {{ btnStatus?.data.abilities.length ?? 0
+          }}{{ t('page.settings.tab.info.btn.abilities.enable') }}
+          <a-button
+            shape="circle"
+            type="text"
+            @click="btnAbilityList?.showModal(btnStatus?.data.abilities ?? [])"
+          >
+            <template #icon>
+              <icon-eye />
+            </template>
+          </a-button>
+        </a-space>
+      </a-descriptions-item>
+    </a-descriptions>
   </a-space>
+  <btnAbilitiesModal ref="btnAbilityList" />
 </template>
 <script setup lang="ts">
-import { GetRunningInfo } from '@/service/settings'
+import { CheckModuleEnable, GetBtnStatus, GetRunningInfo } from '@/service/settings'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
@@ -286,11 +342,13 @@ import RelativeTime from 'dayjs/plugin/relativeTime'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
 
 dayjs.extend(RelativeTime)
 dayjs.extend(Duration)
 const { t, d } = useI18n()
 const loading = ref(true)
+const btnLoading = ref(true)
 const { data } = useRequest(GetRunningInfo, {
   onSuccess: () => {
     loading.value = false
@@ -313,6 +371,17 @@ const webuiHash = computed(() => {
     return data.value?.data.peerbanhelper.commit_id ?? ''
   }
 })
+
+const { data: btnEnable } = useRequest(CheckModuleEnable, {
+  defaultParams: ['btn'],
+  onSuccess: () => (btnLoading.value = false)
+})
+
+const { data: btnStatus } = useRequest(GetBtnStatus, {
+  ready: computed(() => btnEnable.value?.data ?? false)
+})
+
+const btnAbilityList = ref<InstanceType<typeof btnAbilitiesModal>>()
 </script>
 
 <style scoped>
