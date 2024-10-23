@@ -2,6 +2,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.FeatureModule;
+import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
@@ -48,6 +50,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
     private JavalinWebContainer webContainer;
     @Autowired
     private ModuleMatchCache moduleMatchCache;
+    @Autowired
+    private ModuleManager moduleManager;
 
     @Override
     public boolean isConfigurable() {
@@ -68,10 +72,28 @@ public class PBHGeneralController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
+                .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
                 .post("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
                 .post("/api/general/reload", this::handleReloading, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleModuleAvailable(Context context) {
+        var moduleName = context.queryParam("module");
+        if (moduleName == null) {
+            throw new IllegalArgumentException("module argument cannot be null");
+        }
+        for (FeatureModule module : moduleManager.getModules()) {
+            if (module.getName().equalsIgnoreCase(moduleName)
+                || module.getConfigName().equalsIgnoreCase(moduleName)
+                || module.getClass().getName().equalsIgnoreCase(moduleName)
+                || module.getClass().getSimpleName().equalsIgnoreCase(moduleName)) {
+                context.json(new StdResp(true, null, true));
+                return;
+            }
+        }
+        context.json(new StdResp(true, null, false));
     }
 
     private void handleHeapDump(Context context) throws IOException {
