@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
 @Slf4j
 @Component
 @IgnoreScan
@@ -70,7 +72,6 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         reloadConfig();
         Main.getReloadManager().register(this);
         javalinWebContainer.javalin()
-                .get("/api/modules/btn", this::info, Role.USER_READ)
                 .get("/api/modules/btn/status", this::status, Role.USER_READ);
     }
 
@@ -80,20 +81,23 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         var abilities = new ArrayList<>();
         for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {
             Map<String, Object> abilityStatus = new HashMap<>();
-            abilityStatus.put("name", entry.getKey().getSimpleName());
+            abilityStatus.put("name", entry.getValue().getName());
+            abilityStatus.put("displayName", tl(locale(context), entry.getValue().getDisplayName()));
+            abilityStatus.put("description", tl(locale(context), entry.getValue().getDescription()));
             abilityStatus.put("lastSuccess", entry.getValue().lastStatus());
-            abilityStatus.put("lastMessage", entry.getValue().lastMessage());
+            abilityStatus.put("lastMessage", tl(locale(context), entry.getValue().lastMessage()));
             abilityStatus.put("lastUpdateAt", entry.getValue().lastStatusAt());
             abilities.add(abilityStatus);
         }
         info.put("abilities", abilities);
-        context.json(new StdResp(true, null, info));
-    }
-
-    private void info(Context context) {
-        Map<String, Object> info = new HashMap<>();
         info.put("appId", btnNetwork.getAppId());
-        info.put("appSecret", btnNetwork.getAppSecret());
+        String appSecret;
+        if (btnNetwork.getAppSecret().length() > 5) {
+            appSecret = btnNetwork.getAppSecret().substring(0, 5) + "*******";
+        } else {
+            appSecret = "******";
+        }
+        info.put("appSecret", appSecret);
         info.put("configUrl", btnNetwork.getConfigUrl());
         context.json(new StdResp(true, null, info));
     }

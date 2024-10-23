@@ -1,14 +1,16 @@
 package com.ghostchu.peerbanhelper.btn.ability;
 
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
+
 public abstract class AbstractBtnAbility implements BtnAbility {
     private boolean lastStatus;
     private long lastStatusAt;
-    private String lastMessage;
+    private TranslationComponent lastMessage;
 
 
-    public void setLastStatus(boolean success, String errorMsg) {
+    public void setLastStatus(boolean success, TranslationComponent lastMessage) {
         this.lastStatus = success;
-        this.lastMessage = errorMsg;
+        this.lastMessage = lastMessage;
         this.lastStatusAt = System.currentTimeMillis();
     }
 
@@ -18,7 +20,7 @@ public abstract class AbstractBtnAbility implements BtnAbility {
     }
 
     @Override
-    public String lastMessage() {
+    public TranslationComponent lastMessage() {
         return lastMessage;
     }
 
