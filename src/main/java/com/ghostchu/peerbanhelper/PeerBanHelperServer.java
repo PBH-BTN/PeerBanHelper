@@ -197,8 +197,10 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void sendSnapshotAlert() {
-        if (!Main.getMeta().isSnapshotOrBeta()) {
+        if (Main.getMeta().isSnapshotOrBeta()) {
             alertManager.publishAlert(false, AlertLevel.INFO, "unstable-alert", new TranslationComponent(Lang.ALERT_SNAPSHOT), new TranslationComponent(Lang.ALERT_SNAPSHOT_DESCRIPTION));
+        } else {
+            alertManager.markAlertAsRead("unstable-alert");
         }
     }
 

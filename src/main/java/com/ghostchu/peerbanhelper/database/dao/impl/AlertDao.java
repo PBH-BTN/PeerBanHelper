@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 @Component
 @Slf4j
@@ -27,5 +28,10 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
                 .eq("identifier", identifier).and()
                 .isNull("readAt")
                 .queryForFirst() != null;
+    }
+
+    public void markAsRead(String identifier) throws SQLException {
+        updateBuilder().updateColumnExpression("identifier", identifier)
+                .updateColumnValue("readAt", new Timestamp(System.currentTimeMillis()));
     }
 }

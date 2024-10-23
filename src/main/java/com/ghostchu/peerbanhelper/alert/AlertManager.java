@@ -26,6 +26,21 @@ public class AlertManager {
     }
 
     /**
+     * 移除已发布的警报
+     * @param identifier 标识符
+     */
+    public void markAlertAsRead(String identifier) {
+        try {
+            if (identifier == null || !alertDao.identifierAlertExists(identifier)) {
+                return;
+            }
+            alertDao.markAsRead(identifier);
+        } catch (Exception e) {
+            log.error(tlUI(Lang.UNABLE_READ_ALERT), e);
+        }
+    }
+
+    /**
      * 发布警报
      *
      * @param push       是否使用推送渠道进行推送？否则只有 WebUI 能看到
