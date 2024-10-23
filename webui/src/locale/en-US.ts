@@ -7,7 +7,6 @@ import loginLocale from '@/views/login/locale/en-US'
 import oobeLocale from '@/views/oobe/locale/en-US'
 import topBanPageLocale from '@/views/ranks/locale/en-US'
 import ruleManageMentLocale from '@/views/rule-management/locale/en-US'
-import ruleMetricsLocale from '@/views/rule-metrics/locale/en-US'
 import configLocale from '@/views/settings/locale/en-US'
 import plusLocale from './en-US/plus'
 import settingsLocale from './en-US/settings'
@@ -54,7 +53,6 @@ export default {
   ...banListPageLocale,
   ...dataLocale,
   ...topBanPageLocale,
-  ...ruleMetricsLocale,
   ...serviceLocale,
   ...loginLocale,
   ...oobeLocale,

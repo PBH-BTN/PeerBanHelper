@@ -1,6 +1,5 @@
 import { genIconComponent } from '@/components/iconFont'
 import BanList from '@/views/banlist/index.vue'
-import Ranks from '@/views/ranks/index.vue'
 import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
 import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
 import { IconCloud, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
@@ -179,7 +178,7 @@ export const routerOptions: RouteRecordRaw[] = [
           label: 'router.rank',
           needLogin: true
         },
-        component: Ranks
+        component: () => import('@/views/ranks/index.vue')
       }
     ]
   },
