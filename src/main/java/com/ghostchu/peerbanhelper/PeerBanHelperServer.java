@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
@@ -184,15 +185,21 @@ public class PeerBanHelperServer implements Reloadable {
         registerTimer();
         banListInvoker.forEach(BanListInvoker::reset);
         GENERAL_SCHEDULER.scheduleWithFixedDelay(this::saveBanList, 10 * 1000, BANLIST_SAVE_INTERVAL, TimeUnit.MILLISECONDS);
-        Main.getEventBus().post(new PBHServerStartedEvent(this));
-
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             for (int i = 0; i < 50; i++) {
                 log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://localhost:" + webContainer.javalin().port()));
             }
         }
-
         Main.getReloadManager().register(this);
+        Main.getEventBus().post(new PBHServerStartedEvent(this));
+        sendSnapshotAlert();
+
+    }
+
+    private void sendSnapshotAlert() {
+        if (!Main.getMeta().isSnapshotOrBeta()) {
+            alertManager.publishAlert(false, AlertLevel.INFO, "unstable-alert", new TranslationComponent(Lang.ALERT_SNAPSHOT), new TranslationComponent(Lang.ALERT_SNAPSHOT_DESCRIPTION));
+        }
     }
 
     public void loadDownloaders() {

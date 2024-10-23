@@ -27,6 +27,10 @@ public final class BuildMeta {
         this.compileTime = configuration.getString("git.build.time");
     }
 
+    public boolean isSnapshotOrBeta() {
+        return !"release".equals(branch);
+    }
+
     public String toString() {
         return "BuildMeta(version=" + this.getVersion() + ")";
     }
