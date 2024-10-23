@@ -229,6 +229,10 @@
     <repositories>
         <!--Transmission-->
         <repository>
+            <id>local-repo</id>
+            <url>file:///${project.basedir}/m2-local-repo</url>
+        </repository>
+        <repository>
             <id>reposilite-repository-releases</id>
             <name>Reposilite Repository</name>
             <url>https://maven.sergeybochkov.com/releases</url>
@@ -249,6 +253,7 @@
             <id>maven-snapshots</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
+
     </repositories>
 
     <dependencies>
@@ -292,10 +297,15 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.0.16</version>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.xerial</groupId>-->
+        <!--            <artifactId>sqlite-jdbc</artifactId>-->
+        <!--            <version>3.46.1.3</version>-->
+        <!--        </dependency>-->
         <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.46.1.3</version>
+            <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>
+            <artifactId>sqlite-jdbc-loongarch64</artifactId>
+            <version>3.47.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -429,4 +439,5 @@
         <!--            <version>3.1.20</version>-->
         <!--        </dependency>-->
     </dependencies>
+
 </project>
