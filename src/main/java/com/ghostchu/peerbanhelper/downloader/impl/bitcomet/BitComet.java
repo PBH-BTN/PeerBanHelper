@@ -19,9 +19,9 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
+import com.google.common.net.HostAndPort;
 import com.google.gson.JsonObject;
 import com.vdurmont.semver4j.Semver;
-import inet.ipaddr.HostName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -94,8 +94,8 @@ public class BitComet extends AbstractDownloader {
 
     private static PeerAddress parseAddress(String address, int port, int listenPort) {
         address = address.trim();
-        HostName host = new HostName(address);
-        return new PeerAddress(host.getHost(), port);
+        HostAndPort hostAndPort = HostAndPort.fromString(address);
+        return new PeerAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(port));
     }
 
     @Override
