@@ -113,7 +113,6 @@ useRequest(
               alert.readAt === null &&
               (alert.level == Level.Error ||
                 alert.level == Level.Warn ||
-                alert.level == Level.Info ||
                 alert.level == Level.Fatal)
           )
         ) {
