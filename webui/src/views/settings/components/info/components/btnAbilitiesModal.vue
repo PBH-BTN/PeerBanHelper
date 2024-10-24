@@ -12,7 +12,10 @@
       </a-typography-text>
       <a-list
         :data="abilities"
-        :pagination-props="{ defaultPageSize: 5, total: abilities.length }"
+        :virtual-list-props="{
+          height: 500,
+          threshold: 5
+        }"
         style="max-width: 60rem"
       >
         <template #item="{ item }">
