@@ -61,7 +61,19 @@ public class PBHAlertController extends AbstractFeatureModule {
     private void handleListing(Context ctx) throws SQLException {
         ctx.status(200);
         if (ctx.queryParam("unread") != null && Boolean.parseBoolean(ctx.queryParam("unread"))) {
-            ctx.json(new StdResp(true, null, alertDao.getUnreadAlertsUnPaged()));
+            ctx.json(new StdResp(true, null, alertDao.getUnreadAlertsUnPaged()
+                    .stream()
+                    .map(alert -> new AlertDTO(
+                            alert.getId(),
+                            alert.getCreateAt(),
+                            alert.getReadAt(),
+                            alert.getLevel(),
+                            alert.getIdentifier(),
+                            tl(locale(ctx), alert.getTitle()),
+                            tl(locale(ctx), alert.getContent())
+                    ))
+                    .toList()
+            ));
         } else {
             Page<AlertEntity> alerts = alertDao.queryByPaging(new Pageable(ctx));
             var newAlerts = new Page<>(alerts.getPage(), alerts.getSize(), alerts.getTotal(),
