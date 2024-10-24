@@ -94,7 +94,7 @@ public class PBHAlertController extends AbstractFeatureModule {
         var id = Long.parseLong(ctx.pathParam("id"));
         var entity = alertDao.queryForId(id);
         entity.setReadAt(new Timestamp(System.currentTimeMillis()));
-        alertDao.createOrUpdate(entity);
+        alertDao.update(entity);
         ctx.status(200);
         ctx.json(new StdResp(true, "OK", null));
     }

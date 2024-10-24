@@ -43,7 +43,7 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
         var ts = new Timestamp(System.currentTimeMillis());
         for (AlertEntity alert : alerts) {
             alert.setReadAt(ts);
-            createOrUpdate(alert);
+            update(alert);
         }
     }
 
