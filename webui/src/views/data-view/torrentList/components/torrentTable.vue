@@ -40,20 +40,20 @@
       </template>
       <template #count="{ record }">
         <a-space fill direction="vertical">
-          <a-popover :content="`${t('page.torrentList.column.count.ban')}: ${record.peerBanCount}`">
+          <a-tooltip :content="`${t('page.torrentList.column.count.ban')}: ${record.peerBanCount}`">
             <a-typography-text>
               <icon-stop />
               {{ record.peerBanCount }}
             </a-typography-text>
-          </a-popover>
-          <a-popover
+          </a-tooltip>
+          <a-tooltip
             :content="`${t('page.torrentList.column.count.access')}: ${record.peerAccessCount}`"
           >
             <a-typography-text>
               <icon-link />
               {{ record.peerAccessCount }}
             </a-typography-text>
-          </a-popover>
+          </a-tooltip>
         </a-space>
       </template>
       <template #action="{ record }">

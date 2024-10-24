@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,16 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
             }
             return null;
         });
+    }
+
+    public Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, Timestamp afterThan) throws SQLException {
+        var queryBuilder = queryBuilder().where()
+                .gt("lastTimeSeen", afterThan)
+                .or()
+                .isNull("lastTimeSeen")
+                .queryBuilder()
+                .orderBy("lastTimeSeen", false);
+        return queryByPaging(queryBuilder, pageable);
     }
 
     private int writeToDatabase(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {

@@ -1,0 +1,30 @@
+<configuration debug="true">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>data/logs/latest.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>data/logs/%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxFileSize>20MB</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="DEQUE" class="com.ghostchu.peerbanhelper.util.logger.JListAppender">
+        <!-- 无需其他配置项，DequeAppender 直接使用静态的 Deque 变量 -->
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="DEQUE"/>
+        <!--        <appender-ref ref="SWING"/>-->
+        <!--        <appender-ref ref="MEMORY"/>-->
+    </root>
+</configuration>

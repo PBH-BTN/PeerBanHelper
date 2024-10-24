@@ -3,9 +3,13 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
-import com.ghostchu.peerbanhelper.log4j2.SwingLoggerAppender;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.logger.JListAppender;
+import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,20 +18,40 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.StringJoiner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
-import static javax.swing.SwingUtilities.invokeLater;
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
 public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
+    private final ScheduledExecutorService scheduled;
     private MainWindow mainWindow;
 
     public SwingGuiImpl(String[] args) {
         super(args);
         this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
+        this.scheduled = Executors.newScheduledThreadPool(1);
+    }
+
+    private void updateTitle() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+        StringJoiner joiner = new StringJoiner("", " [", "]");
+        joiner.setEmptyValue("");
+        ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
+        SwingUtilities.invokeLater(() -> {
+            if (mainWindow != null) {
+                mainWindow.setTitle(builder.append(joiner).toString());
+            }
+        });
     }
 
 
@@ -39,6 +63,11 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         OsThemeDetector detector = OsThemeDetector.getDetector();
         detector.registerListener(this::updateTheme);
         updateTheme(detector.isDark());
+    }
+
+    @Override
+    public void onPBHFullyStarted(PeerBanHelperServer server) {
+        this.scheduled.scheduleWithFixedDelay(this::updateTitle, 0, 1, TimeUnit.SECONDS);
     }
 
     private void updateTheme(Boolean isDark) {
@@ -69,25 +98,47 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     private void initLoggerRedirection() {
-        SwingLoggerAppender.registerListener(event -> {
-            try {
-                invokeLater(() -> {
-                    JTextArea textArea = mainWindow.getLoggerTextArea();
-                    try {
-                        textArea.append(event.message() + "\n");
-                        int linesToCut = (textArea.getLineCount() - event.maxLines()) + (event.maxLines() / 5);
-                        linesToCut = Math.min(linesToCut, textArea.getLineCount());
-                        if (linesToCut > 0) {
-                            int posOfLastLineToTrunk = textArea.getLineEndOffset(linesToCut - 1);
-                            textArea.replaceRange("", 0, posOfLastLineToTrunk);
+        JScrollPane scrollPane = mainWindow.getLoggerScrollPane();  // 获取 JList 所在的 JScrollPane
+        JList<LogEntry> logList = mainWindow.getLoggerTextList();
+        BoundedRangeModel scrollModel = scrollPane.getVerticalScrollBar().getModel();
+
+        // 用于追踪用户是否在最底部
+        AtomicBoolean autoScroll = new AtomicBoolean(true);
+
+        // 监听滚动条的变化，判断用户是否在最底部
+        scrollModel.addChangeListener(e -> {
+            int max = scrollModel.getMaximum();
+            int extent = scrollModel.getExtent();
+            int current = scrollModel.getValue();
+
+            // 如果滚动条到达底部，启用自动滚动
+            // 如果用户滚动到了其他位置，禁用自动滚动
+            autoScroll.set(current + extent == max);
+        });
+
+        // 日志插入线程
+        Thread.ofVirtual().start(() -> {
+            while (true) {
+                try {
+                    var logEntry = JListAppender.logEntryDeque.poll(1, TimeUnit.HOURS);
+                    if (logEntry == null) continue;
+                    SwingUtilities.invokeLater(() -> {
+                        DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
+                        model.addElement(logEntry);
+
+                        // 限制最大元素数量为 500
+                        while (model.size() > 300) {
+                            model.removeElementAt(0);
                         }
-                        textArea.setCaretPosition(textArea.getDocument().getLength());
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                });
-            } catch (IllegalStateException exception) {
-                exception.printStackTrace();
+
+                        // 如果用户在底部，则自动滚动
+                        if (autoScroll.get()) {
+                            logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -131,18 +182,33 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createNotification(Level level, String title, String description) {
-        if (mainWindow.getTrayIcon() != null) {
-            if (level.equals(Level.INFO)) {
-                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.INFO);
-            }
+        TrayIcon icon = mainWindow.getTrayIcon();
+        if (icon != null) {
             if (level.equals(Level.WARNING)) {
-                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.WARNING);
+                icon.displayMessage(title, description, TrayIcon.MessageType.WARNING);
+            } else if (level.equals(Level.SEVERE)) {
+                icon.displayMessage(title, description, TrayIcon.MessageType.ERROR);
+            } else {
+                icon.displayMessage(title, description, TrayIcon.MessageType.INFO);
             }
-            if (level.equals(Level.SEVERE)) {
-                mainWindow.getTrayIcon().displayMessage(title, description, TrayIcon.MessageType.ERROR);
+            if (System.getProperty("os.name").contains("Windows")) {
+                this.scheduled.schedule(this::refreshTrayIcon, 5, TimeUnit.SECONDS);
             }
         } else {
             super.createNotification(level, title, description);
+        }
+    }
+
+    private void refreshTrayIcon() {
+        TrayIcon icon = mainWindow.getTrayIcon();
+        if (icon != null) {
+            try {
+                SystemTray tray = SystemTray.getSystemTray();
+                tray.remove(icon); // fix https://github.com/PBH-BTN/PeerBanHelper/issues/515
+                tray.add(icon);
+            } catch (AWTException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

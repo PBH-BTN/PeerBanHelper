@@ -45,8 +45,8 @@ public class RuleParser {
                 }
 
                 @Override
-                public Map<String, Object> metadata() {
-                    return Map.of();
+                public String metadata() {
+                    return "";
                 }
 
                 @Override
@@ -63,8 +63,8 @@ public class RuleParser {
                 }
 
                 @Override
-                public Map<String, Object> metadata() {
-                    return Map.of();
+                public String metadata() {
+                    return "";
                 }
 
                 @Override
@@ -83,8 +83,8 @@ public class RuleParser {
                     }
 
                     @Override
-                    public Map<String, Object> metadata() {
-                        return Map.of();
+                    public String metadata() {
+                        return "";
                     }
 
                     @Override
@@ -101,8 +101,8 @@ public class RuleParser {
                     }
 
                     @Override
-                    public Map<String, Object> metadata() {
-                        return Map.of();
+                    public String metadata() {
+                        return "";
                     }
 
                     @Override
@@ -120,8 +120,8 @@ public class RuleParser {
                     }
 
                     @Override
-                    public Map<String, Object> metadata() {
-                        return Map.of();
+                    public String metadata() {
+                        return "";
                     }
 
                     @Override

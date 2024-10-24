@@ -25,6 +25,13 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 20)
+    public void v4v6Tolerate() {
+        conf.set("module.multi-dialing-blocker.tolerate-num-ipv4", 2);
+        conf.set("module.multi-dialing-blocker.tolerate-num-ipv6", 5);
+        conf.set("module.multi-dialing-blocker.tolerate-num", null);
+    }
+
     @UpdateScript(version = 19)
     public void fastPcbTesting() {
         conf.set("module.progress-cheat-blocker.fast-pcb-test-percentage", 0.1d);

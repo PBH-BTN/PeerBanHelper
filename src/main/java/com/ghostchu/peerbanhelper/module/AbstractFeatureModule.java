@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import io.javalin.http.Context;
 import lombok.Getter;
@@ -24,12 +25,12 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public abstract class AbstractFeatureModule implements FeatureModule {
     @Getter
+    private final ReentrantLock lock = new ReentrantLock();
+    @Getter
     @Autowired
     private PeerBanHelperServer server;
     @Getter
     private boolean register;
-    @Getter
-    private final ReentrantLock lock = new ReentrantLock();
     @Autowired
     private JavalinWebContainer javalinWebContainer;
 
@@ -105,5 +106,9 @@ public abstract class AbstractFeatureModule implements FeatureModule {
             tz = TimeZone.getTimeZone(ctx.header("X-Timezone"));
         }
         return tz;
+    }
+
+    public String userIp(Context context) {
+        return CommonUtil.userIp(context);
     }
 }

@@ -22,7 +22,8 @@ public enum BCEndpoint {
     IP_FILTER_CLEAR("/api/config/ipfilter/clear"),
     IP_FILTER_QUERY_IMPORTING("/api/config/ipfilter/query"),
     GET_REMOTE_ACCESS_CONFIG("/api/config/remote_access/get"),
-    SET_REMOTE_ACCESS_CONFIG("/api/config/remote_access/set");
+    SET_REMOTE_ACCESS_CONFIG("/api/config/remote_access/set"),
+    TASK_UNBAN_PEERS("/api/task/peers/unban_peers");
     private final String endpoint;
 
     BCEndpoint(String endpoint) {

@@ -20,20 +20,14 @@ public abstract class AbstractJsonMatcher extends AbstractMatcher {
 
     @Override
     public @NotNull MatchResult match(@Nullable String content) {
-        Main.getServer().getHitRateMetric().addQuery(this);
         if (content == null) {
             content = "";
         }
         if (condition != null) {
             if (condition.match(content) == MatchResult.FALSE) {
-                Main.getServer().getHitRateMetric().addHit(this);
                 return MatchResult.FALSE;
             }
         }
-        MatchResult r = match0(content);
-        if (r != MatchResult.DEFAULT) {
-            Main.getServer().getHitRateMetric().addHit(this);
-        }
-        return r;
+        return match0(content);
     }
 }

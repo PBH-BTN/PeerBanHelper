@@ -53,7 +53,7 @@ public class StringStartsWithMatcher extends AbstractJsonMatcher {
     }
 
     @Override
-    public Map<String, Object> metadata() {
-        return Map.of("rule", rule);
+    public String metadata() {
+        return rule;
     }
 }

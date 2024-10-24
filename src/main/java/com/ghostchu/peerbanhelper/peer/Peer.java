@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public interface Peer extends Comparable<Peer> {
     /**
      * 获取此对等体的 IP:端口 组
@@ -70,6 +72,13 @@ public interface Peer extends Comparable<Peer> {
      */
     @Nullable
     PeerFlag getFlags();
+
+    /**
+     * 获取此 Peer 支持的消息集合，需要下载器支持
+     * 不支持的下载器此处将返回空集合
+     * @return 支持的消息集合
+     */
+    List<PeerMessage> getSupportedMessages();
 
     @Override
     default int compareTo(Peer o) {

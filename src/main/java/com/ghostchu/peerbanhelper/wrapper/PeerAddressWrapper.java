@@ -15,4 +15,9 @@ public final class PeerAddressWrapper {
         this.ip = address.getIp();
         this.port = address.getPort();
     }
+
+    @Override
+    public String toString() {
+        return ip + ":" + port;
+    }
 }

@@ -1,0 +1,4 @@
+安装 SQLite-JDBC 到本地仓库
+mvn install:install-file -DgroupId=com.ghostchu.peerbanhelper.external-libs -DartifactId=sqlite-jdbc-loongarch64 -Dversion=3.47.0.0 -Dpackaging=jar -Dfile=${project.basedir}/lib/sqlite-jdbc-loongarch64-3.47.0.0.jar -DlocalRepositoryPath=${project.basedir}/m2-local-repo -f pom.xml
+清洁打包
+mvn clean package -T 1C -f pom.xml

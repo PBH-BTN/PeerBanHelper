@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.btn;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
@@ -38,20 +38,16 @@ public class BtnRuleParsed {
         portRules.forEach((k, v) -> {
             List<Rule> addresses = new ArrayList<>();
             for (int s : v) {
-                addresses.add(new Rule() {
+                addresses.add(new AbstractMatcher() {
                     @Override
-                    public @NotNull MatchResult match(@NotNull String content) {
-                        Main.getServer().getHitRateMetric().addQuery(this);
+                    public @NotNull MatchResult match0(@NotNull String content) {
                         boolean hit = Integer.parseInt(content) == s;
-                        if (hit) {
-                            Main.getServer().getHitRateMetric().addHit(this);
-                        }
                         return hit ? MatchResult.TRUE : MatchResult.DEFAULT;
                     }
 
                     @Override
-                    public Map<String, Object> metadata() {
-                        return Map.of("port", s);
+                    public String metadata() {
+                        return String.valueOf(s);
                     }
 
                     @Override
@@ -61,7 +57,7 @@ public class BtnRuleParsed {
 
                     @Override
                     public String matcherIdentifier() {
-                        return "btn:port";
+                        return "btn-exception:port";
                     }
                 });
             }
@@ -98,7 +94,7 @@ public class BtnRuleParsed {
 
         @Override
         public String matcherIdentifier() {
-            return "btn:ip";
+            return "btn-exception:ip";
         }
     }
 }
