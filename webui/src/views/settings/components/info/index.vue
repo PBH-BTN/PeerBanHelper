@@ -91,9 +91,9 @@
           <a-descriptions-item>
             <template #label>
               {{ t('page.settings.tab.info.network.clientIP') }}
-              <a-popover :content="t('page.settings.tab.info.network.clientIP.warning')">
+              <a-tooltip :content="t('page.settings.tab.info.network.clientIP.warning')">
                 <icon-info-circle />
-              </a-popover>
+              </a-tooltip>
             </template>
             <a-skeleton-line :rows="1" />
           </a-descriptions-item>
@@ -223,7 +223,7 @@
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.system.memory.free')">
             <a-space style="display: flex; align-items: center">
-              <a-popover
+              <a-tooltip
                 :content="
                   `${Math.round((1 - (data?.data.system.memory.free ?? 0) / (data?.data.system.memory.total ?? 1)) * 100)}% ` +
                   t('page.settings.tab.info.system.memory.used')
@@ -235,7 +235,7 @@
                   :status="memoryProgressBarColor"
                   :percent="memoryStatus"
                 />
-              </a-popover>
+              </a-tooltip>
               {{ formatFileSize(data?.data.system.memory.free ?? 0) }} &nbsp;
               {{ t('page.settings.tab.info.system.memory.available') }}
             </a-space>
@@ -284,21 +284,21 @@
           <a-descriptions-item>
             <template #label>
               {{ t('page.settings.tab.info.network.clientIP') }}
-              <a-popover :content="t('page.settings.tab.info.network.clientIP.tips')">
+              <a-tooltip :content="t('page.settings.tab.info.network.clientIP.tips')">
                 <icon-info-circle />
-              </a-popover>
+              </a-tooltip>
             </template>
             <a-typography-text code copyable>
               {{ data?.data.system.network.client_ip }}
             </a-typography-text>
-            <a-popover
+            <a-tooltip
               v-if="isClientIpLocal && data?.data.system.network.reverse_proxy"
               :content="t('page.settings.tab.info.network.clientIP.warning')"
             >
               <a-typography-text type="warning">
                 <icon-exclamation-polygon-fill />
               </a-typography-text>
-            </a-popover>
+            </a-tooltip>
           </a-descriptions-item>
         </a-descriptions>
       </template>
@@ -393,12 +393,12 @@ import { formatFileSize } from '@/utils/file'
 import dayjs from 'dayjs'
 import Duration from 'dayjs/plugin/duration'
 import RelativeTime from 'dayjs/plugin/relativeTime'
+import { isInSubnet } from 'is-in-subnet'
+import { isIP } from 'is-ip'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
-import { isInSubnet } from 'is-in-subnet'
-import { isIP } from 'is-ip'
 
 dayjs.extend(RelativeTime)
 dayjs.extend(Duration)

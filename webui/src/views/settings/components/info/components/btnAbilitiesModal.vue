@@ -25,7 +25,7 @@
               <a-space style="cursor: default">
                 <a-typography-text>
                   {{ t('page.settings.tab.info.btn.abilities.list.lastSuccess') }}:&nbsp;
-                  <a-popover :content="item.lastMessage">
+                  <a-tooltip :content="item.lastMessage">
                     <a-tag :color="item.lastSuccess ? 'green' : 'red'">
                       {{
                         item.lastSuccess
@@ -33,7 +33,7 @@
                           : t('page.settings.tab.info.btn.abilities.list.lastSuccess.failed')
                       }}
                     </a-tag>
-                  </a-popover>
+                  </a-tooltip>
                 </a-typography-text>
                 <br />
                 <a-typography-text>

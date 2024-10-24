@@ -53,7 +53,7 @@
       </a-menu>
     </template>
     <template #extra>
-      <div v-if="!disableMenu" style="display: flex; gap: 12px">
+      <div v-if="!disableMenu" style="display: flex; gap: 12px; margin-top: 5px">
         <a-dropdown
           v-if="mobileLayout === 0"
           position="bl"
@@ -135,6 +135,7 @@
               </template>
             </a-button>
           </a-tooltip>
+          <alert />
           <a-button
             class="nav-btn"
             type="outline"
@@ -151,18 +152,19 @@
   <settings-modal ref="settingsModalRef" />
 </template>
 <script setup lang="ts">
-import settingsModal from './settingsModal.vue'
-import autoUpdateBtn from './autoUpdateBtn.vue'
-import { useDark, useToggle } from '@vueuse/core'
-import useLocale from '@/stores/locale'
-import { useDarkStore } from '@/stores/dark'
 import { LOCALE_OPTIONS } from '@/locale'
-import { useI18n } from 'vue-i18n'
-import { ref, computed } from 'vue'
 import { useViewRoute } from '@/router'
-import { useRoute } from 'vue-router'
-import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
+import { useDarkStore } from '@/stores/dark'
 import { useEndpointStore } from '@/stores/endpoint'
+import useLocale from '@/stores/locale'
+import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
+import { useDark, useToggle } from '@vueuse/core'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import alert from './alert.vue'
+import autoUpdateBtn from './autoUpdateBtn.vue'
+import settingsModal from './settingsModal.vue'
 const { t, locale } = useI18n()
 const { changeLocale } = useLocale()
 const locales = [...LOCALE_OPTIONS]
