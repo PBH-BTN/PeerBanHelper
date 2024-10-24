@@ -280,7 +280,7 @@ public class MainWindow extends JFrame {
             setFont(list.getFont());
 
             // 动态计算行高，无需设置固定行高
-            setSize(list.getWidth(), Short.MAX_VALUE);  // 设置 JTextArea 的宽度来支持换行
+            setSize(list.getWidth(), (int) getPreferredSize().getHeight());  // 设置 JTextArea 的宽度来支持换行
             return this;
         }
     }
