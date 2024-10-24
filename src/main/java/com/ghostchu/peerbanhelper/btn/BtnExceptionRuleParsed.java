@@ -18,14 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class BtnRuleParsed {
+public class BtnExceptionRuleParsed {
     private String version;
     private Map<String, List<Rule>> peerIdRules;
     private Map<String, List<Rule>> clientNameRules;
     private Map<String, List<Rule>> ipRules;
     private Map<String, List<Rule>> portRules;
 
-    public BtnRuleParsed(BtnRule btnRule) {
+    public BtnExceptionRuleParsed(BtnExceptionRule btnRule) {
         this.version = btnRule.getVersion();
         this.ipRules = parseIPRule(btnRule.getIpRules());
         this.portRules = parsePortRule(btnRule.getPortRules());

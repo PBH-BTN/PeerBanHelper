@@ -114,6 +114,9 @@ public class BtnNetwork {
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));
             }
+            if (ability.has("exception")) {
+                abilities.put(BtnAbilityException.class, new BtnAbilityReconfigure(this, ability.get("exception").getAsJsonObject()));
+            }
             abilities.values().forEach(a -> {
                 try {
                     a.load();
