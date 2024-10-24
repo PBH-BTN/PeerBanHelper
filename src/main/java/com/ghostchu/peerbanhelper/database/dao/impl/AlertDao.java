@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -23,11 +24,27 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
         return queryByPaging(queryBuilder().orderBy("createAt", false).where().isNull("readAt").queryBuilder(), pageable);
     }
 
+    public List<AlertEntity> getUnreadAlertsUnPaged() throws SQLException {
+        return queryBuilder().orderBy("createAt", false).where().isNull("readAt").queryBuilder().query();
+    }
+
+
     public boolean identifierAlertExists(String identifier) throws SQLException {
         return queryBuilder().where()
-                .eq("identifier", identifier).and()
-                .isNull("readAt")
-                .queryForFirst() != null;
+                       .eq("identifier", identifier).and()
+                       .isNull("readAt")
+                       .queryForFirst() != null;
+    }
+
+
+    public void markAllAsRead() throws SQLException {
+        var alerts = queryBuilder().where().isNull("readAt")
+                .query();
+        var ts = new Timestamp(System.currentTimeMillis());
+        for (AlertEntity alert : alerts) {
+            alert.setReadAt(ts);
+            createOrUpdate(alert);
+        }
     }
 
     public void markAsRead(String identifier) throws SQLException {

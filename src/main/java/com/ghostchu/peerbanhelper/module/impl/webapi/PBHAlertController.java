@@ -48,29 +48,34 @@ public class PBHAlertController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/api/alerts", this::handleListing, Role.USER_READ)
                 .post("/api/alert/{id}/markAsRead", this::handleRead, Role.USER_WRITE)
+                .post("/api/alert/markAllAsRead", this::handleAllRead, Role.USER_WRITE)
                 .delete("/api/alert/{id}", this::handleDelete, Role.USER_WRITE);
+    }
+
+    private void handleAllRead(Context context) throws SQLException {
+        alertDao.markAllAsRead();
+        context.json(new StdResp(true, "OK!", null));
     }
 
 
     private void handleListing(Context ctx) throws SQLException {
         ctx.status(200);
-        Page<AlertEntity> alerts;
         if (ctx.queryParam("unread") != null && Boolean.parseBoolean(ctx.queryParam("unread"))) {
-            alerts = alertDao.getUnreadAlerts(new Pageable(ctx));
+            ctx.json(new StdResp(true, null, alertDao.getUnreadAlertsUnPaged()));
         } else {
-            alerts = alertDao.queryByPaging(new Pageable(ctx));
+            Page<AlertEntity> alerts = alertDao.queryByPaging(new Pageable(ctx));
+            var newAlerts = new Page<>(alerts.getPage(), alerts.getSize(), alerts.getTotal(),
+                    alerts.getResults().stream().map(alert -> new AlertDTO(
+                            alert.getId(),
+                            alert.getCreateAt(),
+                            alert.getReadAt(),
+                            alert.getLevel(),
+                            alert.getIdentifier(),
+                            tl(locale(ctx), alert.getTitle()),
+                            tl(locale(ctx), alert.getContent())
+                    )).toList());
+            ctx.json(new StdResp(true, null, newAlerts));
         }
-        var newAlerts = new Page<>(alerts.getPage(), alerts.getSize(), alerts.getTotal(),
-                alerts.getResults().stream().map(alert -> new AlertDTO(
-                        alert.getId(),
-                        alert.getCreateAt(),
-                        alert.getReadAt(),
-                        alert.getLevel(),
-                        alert.getIdentifier(),
-                        tl(locale(ctx), alert.getTitle()),
-                        tl(locale(ctx), alert.getContent())
-                )).toList());
-        ctx.json(new StdResp(true, null, newAlerts));
     }
 
     private void handleRead(Context ctx) throws SQLException {
