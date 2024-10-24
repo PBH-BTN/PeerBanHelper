@@ -47,8 +47,8 @@ public class PBHAlertController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/alerts", this::handleListing, Role.USER_READ)
-                .post("/api/alert/{id}/markAsRead", this::handleRead, Role.USER_WRITE)
-                .post("/api/alert/markAllAsRead", this::handleAllRead, Role.USER_WRITE)
+                .patch("/api/alert/{id}/dismiss", this::handleRead, Role.USER_WRITE)
+                .post("/api/alert/dismissAll", this::handleAllRead, Role.USER_WRITE)
                 .delete("/api/alert/{id}", this::handleDelete, Role.USER_WRITE);
     }
 
