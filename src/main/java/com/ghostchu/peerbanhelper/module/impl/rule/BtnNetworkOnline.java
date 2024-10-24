@@ -159,7 +159,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private @NotNull CheckResult checkShouldSkip(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
-        var abilityObject = manager.getAbilities().get(BtnAbilityRules.class);
+        var abilityObject = manager.getAbilities().get(BtnAbilityException.class);
         if (abilityObject == null) {
             return pass();
         }
