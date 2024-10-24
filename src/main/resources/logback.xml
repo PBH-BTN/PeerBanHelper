@@ -9,7 +9,7 @@
         <file>data/logs/latest.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>data/logs/%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
-            <maxFileSize>10MB</maxFileSize>
+            <maxFileSize>20MB</maxFileSize>
         </rollingPolicy>
         <encoder>
             <pattern>[%d{HH:mm:ss}] [%t/%level]: %msg%n</pattern>
