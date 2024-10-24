@@ -13,7 +13,7 @@
       <variable name="jarPath" value="../target/PeerBanHelper.jar" />
       <variable name="librariesPath" value="../target/libraries" />
     </variables>
-    <jreBundles jdkProviderId="Zulu" release="23/23.0.1" />
+    <jreBundles jdkProviderId="Liberica" release="23/23.0.1+13" />
   </application>
   <files keepModificationTimes="true">
     <mountPoints>
@@ -663,19 +663,34 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows x64" id="38" architecture="64">
+    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="64">
       <jreBundle installOnlyIfNecessary="true" />
     </windows>
-    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}" architecture="universal" />
-    <unixInstaller name="Universal Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}" require64BitVm="true">
+    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="universal" />
+    <unixInstaller name="x64 Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
       <jreBundle installOnlyIfNecessary="true" />
     </unixInstaller>
-    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64" />
-    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
+    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64" />
+    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="64">
       <jreBundle jreBundleSource="none" />
     </windows>
-    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}_nojava" architecture="universal">
+    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="universal">
       <jreBundle jreBundleSource="none" />
     </macosFolder>
+    <unixInstaller name="aarch64 Linux Installer" id="127" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-aarch64" installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="ppc64le Linux Installer" id="130" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-ppc64le" installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="riscv64 Linux Installer" id="133" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-riscv64" installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="alpine x64 Linux Installer" id="136" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="alpine-linux-amd64" installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="alpine aarch64 Linux Installer" id="139" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="alpine-linux-aarch64" installOnlyIfNecessary="true" />
+    </unixInstaller>
   </mediaSets>
 </install4j>
