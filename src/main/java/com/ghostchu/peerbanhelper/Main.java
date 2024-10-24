@@ -99,7 +99,7 @@ public class Main {
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
             DEF_LOCALE = System.getenv("PBH_USER_LOCALE");
-            if(DEF_LOCALE == null) {
+            if (DEF_LOCALE == null) {
                 DEF_LOCALE = defLocaleTag;
             }
         }
@@ -162,6 +162,19 @@ public class Main {
         String host = proxySection.getString("host");
         String port = String.valueOf(proxySection.getInt("port"));
         String nonProxyHost = proxySection.getString("non-proxy-hosts", "");
+
+        // 在设置新的代理属性之前，移除所有现有的设定
+        System.clearProperty("http.proxyHost");
+        System.clearProperty("http.proxyPort");
+        System.clearProperty("https.proxyHost");
+        System.clearProperty("https.proxyPort");
+        System.clearProperty("http.nonProxyHosts");
+        System.clearProperty("https.nonProxyHosts");
+        System.clearProperty("socks.proxyHost");
+        System.clearProperty("socks.proxyPort");
+        System.clearProperty("socks.nonProxyHosts");
+        System.clearProperty("java.net.useSystemProxies");
+
         switch (proxySection.getInt("setting")) {
             case 1 -> System.setProperty("java.net.useSystemProxies", "true");
             case 2 -> {
@@ -173,9 +186,9 @@ public class Main {
                 System.setProperty("https.nonProxyHosts", nonProxyHost);
             }
             case 3 -> {
-                System.setProperty("socksProxyHost", host);
-                System.setProperty("socksProxyPort", port);
-                System.setProperty("socksNonProxyHosts", nonProxyHost);
+                System.setProperty("socks.proxyHost", host);
+                System.setProperty("socks.proxyPort", port);
+                System.setProperty("socks.nonProxyHosts", nonProxyHost);
             }
             default -> System.setProperty("java.net.useSystemProxies", "false");
         }
@@ -189,9 +202,9 @@ public class Main {
                 root = new File(System.getenv("LOCALAPPDATA"), "PeerBanHelper").getAbsolutePath();
             } else {
                 var dataDirectory = new File(System.getProperty("user.home")).toPath();
-                if(osName.contains("mac")){
+                if (osName.contains("mac")) {
                     dataDirectory = dataDirectory.resolve("/Library/Application Support");
-                }else{
+                } else {
                     dataDirectory = dataDirectory.resolve(".config");
                 }
                 root = dataDirectory.resolve("PeerBanHelper").toAbsolutePath().toString();
@@ -327,7 +340,7 @@ public class Main {
             return name;
         }
         if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
-                Character.isUpperCase(name.charAt(0))) {
+            Character.isUpperCase(name.charAt(0))) {
             return name;
         }
         char chars[] = name.toCharArray();
