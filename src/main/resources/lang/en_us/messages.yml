@@ -445,3 +445,4 @@ RELOAD_RESULT_SCHEDULED: "Configuration saved and reload successfully, but some 
 RELOAD_RESULT_REQUIRE_RESTART: "Configuration saved and reload successfully, but some changes need restart to take effect"
 RELOAD_RESULT_FAILED: "Configuration saved but failed to reload, please check the console logs"
 WS_LOGS_STREAM_ACCESS_DENIED: "Access denied, failed to authenticate"
+ALERT_MANAGER_CLEAN_UP: "Removed {} history alerts"

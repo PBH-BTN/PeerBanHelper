@@ -166,7 +166,6 @@ public class PersistMetrics implements BasicMetrics {
 
     @Override
     public void close() {
-        scheduler.close();
         inMemory.close();
         flush();
     }
