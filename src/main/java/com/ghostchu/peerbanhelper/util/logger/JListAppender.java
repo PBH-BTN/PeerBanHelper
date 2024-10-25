@@ -3,15 +3,21 @@ package com.ghostchu.peerbanhelper.util.logger;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
+import com.ghostchu.peerbanhelper.util.collection.CircularArrayList;
 import org.slf4j.event.Level;
 
 import javax.swing.*;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class JListAppender extends AppenderBase<ILoggingEvent> {
 
     public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>();
+    public static final CircularArrayList<LogEntry> ringDeque = new CircularArrayList<>(300);
     private PatternLayout layout;
+    private static final AtomicInteger seq = new AtomicInteger(0);
 
     public JListAppender() {
     }
@@ -40,9 +46,14 @@ public class JListAppender extends AppenderBase<ILoggingEvent> {
             } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.OFF) {
                 return;
             }
-            logEntryDeque.add(new LogEntry(slf4jLevel, formattedMessage));
+            var entry = new LogEntry(seq.incrementAndGet(), slf4jLevel, formattedMessage.trim());
+            logEntryDeque.add(entry);
+            ringDeque.add(entry);
+            Main.getEventBus().post(new NewLogEntryCreatedEvent(entry));
         });
     }
 
-
+    public static AtomicInteger getSeq() {
+        return seq;
+    }
 }
