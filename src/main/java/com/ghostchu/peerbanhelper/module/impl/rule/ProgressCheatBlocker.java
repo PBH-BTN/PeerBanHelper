@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -64,7 +65,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 pendingPersistQueue.offer(new ClientTaskRecord(key, tasks));
             })
             .build();
-    private ScheduledExecutorService scheduledTimer;
     private long torrentMinimumSize;
     private boolean blockExcessiveClients;
     private double excessiveThreshold;
@@ -101,9 +101,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
                 .get("/api/modules/" + getConfigName() + "/status", this::handleStatus, Role.USER_READ);
-        scheduledTimer = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        scheduledTimer.scheduleWithFixedDelay(this::flushDatabase, 30, 30, TimeUnit.SECONDS);
-        scheduledTimer.scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flushDatabase, 30, 30, TimeUnit.SECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);
     }
 
@@ -166,7 +165,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
 
     @Override
     public void onDisable() {
-        scheduledTimer.shutdown();
         progressRecorder.invalidateAll();
         if (enablePersist) {
             log.info(tlUI(Lang.PCB_SHUTTING_DOWN));

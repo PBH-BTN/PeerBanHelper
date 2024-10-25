@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -46,7 +47,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,7 +67,6 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     private final RollbarErrorReporter rollbarErrorReporter;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
-    private ScheduledExecutorService scheduledExecutorService;
     private long banDuration;
 
     public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao, RollbarErrorReporter rollbarErrorReporter) {
@@ -96,8 +95,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         ConfigurationSection config = getConfig();
         // 读取检查间隔
         checkInterval = config.getLong("check-interval", checkInterval);
-        scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        scheduledExecutorService.scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
         Main.getReloadManager().register(this);
     }
 
@@ -436,11 +434,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         this.checkInterval = checkInterval;
         getConfig().set("check-interval", checkInterval);
         saveConfig();
-        if (null != scheduledExecutorService) {
-            scheduledExecutorService.shutdown();
-        }
-        scheduledExecutorService = Executors.newScheduledThreadPool(1, r -> Thread.ofVirtual().name("IPBlackRuleList - Update Thread").unstarted(r));
-        scheduledExecutorService.scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
 
     record IPBanResult(String ruleName, MatchResult matchResult) {

@@ -90,7 +90,7 @@ public class PeerBanHelperServer implements Reloadable {
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     @Getter
     private final List<BanListInvoker> banListInvoker = new ArrayList<>();
-    private final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofVirtual().factory());
+
     private final Lock banWaveLock = new ReentrantLock();
     private String pbhServerAddress;
     @Getter
@@ -912,6 +912,10 @@ public class PeerBanHelperServer implements Reloadable {
 
     public Map<PeerAddress, List<PeerMetadata>> getLivePeersSnapshot() {
         return LIVE_PEERS;
+    }
+
+    public ScheduledExecutorService getScheduler() {
+        return GENERAL_SCHEDULER;
     }
 
     /**

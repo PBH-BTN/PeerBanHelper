@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import com.jthemedetecor.OsThemeDetector;
@@ -19,8 +20,6 @@ import java.awt.*;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.StringJoiner;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -32,13 +31,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
-    private final ScheduledExecutorService scheduled;
     private MainWindow mainWindow;
 
     public SwingGuiImpl(String[] args) {
         super(args);
         this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
-        this.scheduled = Executors.newScheduledThreadPool(1);
     }
 
     private void updateTitle() {
@@ -67,7 +64,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void onPBHFullyStarted(PeerBanHelperServer server) {
-        this.scheduled.scheduleWithFixedDelay(this::updateTitle, 0, 1, TimeUnit.SECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateTitle, 0, 1, TimeUnit.SECONDS);
     }
 
     private void updateTheme(Boolean isDark) {

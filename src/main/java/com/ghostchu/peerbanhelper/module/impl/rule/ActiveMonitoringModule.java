@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -43,7 +44,6 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
     private final RollbarErrorReporter rollbarErrorReporter;
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
-    private ScheduledExecutorService scheduleService;
 
     public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao, RollbarErrorReporter rollbarErrorReporter) {
         super();
@@ -111,13 +111,9 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
-        if (this.scheduleService != null) {
-            this.scheduleService.shutdown();
-        }
-        this.scheduleService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        this.scheduleService.scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
-        this.scheduleService.scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
-        this.scheduleService.scheduleAtFixedRate(this::writeJournal, 0, 1, TimeUnit.HOURS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
+        CommonUtil.getScheduler().scheduleAtFixedRate(this::writeJournal, 0, 1, TimeUnit.HOURS);
     }
 
     private void writeJournal() {
@@ -177,9 +173,6 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
     @Override
     public void onDisable() {
         Main.getEventBus().unregister(this);
-        if (!this.scheduleService.isShutdown()) {
-            this.scheduleService.shutdownNow();
-        }
         diskWriteCache.invalidateAll();
         writeJournal();
         flush();

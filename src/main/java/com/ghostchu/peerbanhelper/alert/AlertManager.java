@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.alert;
 
+import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.push.PushManager;
@@ -8,9 +9,11 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -20,9 +23,20 @@ public class AlertManager {
     private final AlertDao alertDao;
     private final PushManager pushManager;
 
-    public AlertManager(AlertDao alertDao, PushManager pushManager) {
+    public AlertManager(AlertDao alertDao, PushManager pushManager, PeerBanHelperServer peerBanHelperServer) {
         this.alertDao = alertDao;
         this.pushManager = pushManager;
+        peerBanHelperServer.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
+
+    }
+
+    private void cleanup() {
+        try {
+            int removed = this.alertDao.deleteOldAlerts(new Timestamp(System.currentTimeMillis() - 1209600000));
+            log.info(tlUI(Lang.ALERT_MANAGER_CLEAN_UP, removed));
+        } catch (SQLException e) {
+            log.warn("Unable to cleanup expired history alerts", e);
+        }
     }
 
     /**
