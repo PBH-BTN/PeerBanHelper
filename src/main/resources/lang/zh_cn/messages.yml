@@ -463,3 +463,11 @@ DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK: |
   在尝试连接到下载器 {} 时错误次数过多，请检查下载器状态，如用户名或密码等。  
   您可以点击出错的下载器的 *编辑* 按钮并修正错误后，点击 *保存* 来跳过冷却重新激活下载器。
+PROGRAM_OUT_OF_MEMORY_TITLE: "PeerBanHelper 可用内存严重不足"
+PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
+  PeerBanHelper 的可用运行内存严重不足，并可能随时停止运行。
+  
+  可用内存: {}MB  
+  最大内存: {}MB
+  
+  请立即增加 PeerBanHelper 的内存分配。

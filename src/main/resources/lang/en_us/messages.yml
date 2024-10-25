@@ -465,3 +465,11 @@ DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK: |
   Too many errors when trying to connect to the downloader {}, please check the downloader status, such as username or password.
   You can skip the cool down to reactivate the downloader by clicking the *Edit* button for the downloader in error and fixing the error, then clicking *Save*.
+PROGRAM_OUT_OF_MEMORY_TITLE: "PeerBanHelper is critically low on available memory."
+PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
+  PeerBanHelper is running out of free memory and may stop running at any time.
+
+  Available memory: {}MB
+  Maximum memory: {}MB
+  
+  Please increase PeerBanHelper's memory allocation immediately.
