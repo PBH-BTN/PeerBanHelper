@@ -218,7 +218,7 @@ return console.askOkCancel(message, true);
                   <property name="variableName" type="string">startupWhenLoggedIn</property>
                 </serializedBean>
               </formComponent>
-              <formComponent name="Register system service" id="79" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+              <formComponent name="Register system service" id="79" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent" enabled="false">
                 <serializedBean>
                   <property name="checkboxText" type="string">${i18n:checkbox.registersystemservice}</property>
                   <property name="variableName" type="string">registerSystemService</property>
