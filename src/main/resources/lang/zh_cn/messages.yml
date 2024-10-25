@@ -452,3 +452,14 @@ MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION: |
   
   请检查下载器当前运行状态。  
   若需要修改告警设置，请前往 Active Monitoring 页面修改。
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE: "下载器返回错误响应次数过多 ({})"
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
+  在尝试连接到下载器 {} 时错误次数过多，请检查下载器状态，如用户名或密码等。
+
+  **最后一次连接状态:** {}  
+  **最后一次连接信息:** {}  
+  
+  您可以点击出错的下载器的 *编辑* 按钮并修正错误后，点击 *保存* 来跳过冷却重新激活下载器。
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK: |
+  在尝试连接到下载器 {} 时错误次数过多，请检查下载器状态，如用户名或密码等。  
+  您可以点击出错的下载器的 *编辑* 按钮并修正错误后，点击 *保存* 来跳过冷却重新激活下载器。

@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -56,8 +57,8 @@ public class BiglyBT extends AbstractDownloader {
     private final Config config;
     private final String connectorPayload;
 
-    public BiglyBT(String name, Config config) {
-        super(name);
+    public BiglyBT(String name, Config config, AlertManager alertManager) {
+        super(name, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
@@ -81,14 +82,14 @@ public class BiglyBT extends AbstractDownloader {
         this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
     }
 
-    public static BiglyBT loadFromConfig(String name, JsonObject section) {
+    public static BiglyBT loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new BiglyBT(name, config);
+        return new BiglyBT(name, config, alertManager);
     }
 
-    public static BiglyBT loadFromConfig(String name, ConfigurationSection section) {
+    public static BiglyBT loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
         Config config = Config.readFromYaml(section);
-        return new BiglyBT(name, config);
+        return new BiglyBT(name, config, alertManager);
     }
 
     @Override

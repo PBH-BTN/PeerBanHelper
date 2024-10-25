@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet;
 
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -58,8 +59,8 @@ public class BitComet extends AbstractDownloader {
     private Semver serverVersion;
     private String serverName;
 
-    public BitComet(String name, Config config) {
-        super(name);
+    public BitComet(String name, Config config, AlertManager alertManager) {
+        super(name, alertManager);
         BCAESTool.init();
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
@@ -82,14 +83,14 @@ public class BitComet extends AbstractDownloader {
         this.httpClient = builder.build();
     }
 
-    public static BitComet loadFromConfig(String name, ConfigurationSection section) {
+    public static BitComet loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
         Config config = Config.readFromYaml(section);
-        return new BitComet(name, config);
+        return new BitComet(name, config, alertManager);
     }
 
-    public static BitComet loadFromConfig(String name, JsonObject section) {
+    public static BitComet loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
         Config config = JsonUtil.getGson().fromJson(section, Config.class);
-        return new BitComet(name, config);
+        return new BitComet(name, config, alertManager);
     }
 
     private static PeerAddress parseAddress(String address, int port, int listenPort) {

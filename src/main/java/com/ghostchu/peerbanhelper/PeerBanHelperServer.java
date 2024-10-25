@@ -225,13 +225,13 @@ public class PeerBanHelperServer implements Reloadable {
         }
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
-            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(client, downloaderSection);
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection, alertManager);
+            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(client, downloaderSection, alertManager);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
-            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, downloaderSection);
+                    downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection, alertManager);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection, alertManager);
+            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection, alertManager);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, downloaderSection, alertManager);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -244,13 +244,13 @@ public class PeerBanHelperServer implements Reloadable {
         }
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection);
-            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(client, downloaderSection);
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection, alertManager);
+            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(client, downloaderSection, alertManager);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection);
-            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, downloaderSection);
+                    downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection, alertManager);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection, alertManager);
+            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection, alertManager);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, downloaderSection, alertManager);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;

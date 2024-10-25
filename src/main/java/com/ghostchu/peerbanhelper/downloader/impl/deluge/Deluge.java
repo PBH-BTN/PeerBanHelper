@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
@@ -46,21 +47,21 @@ public class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String name, Config config) {
-        super(name);
+    public Deluge(String name, Config config, AlertManager alertManager) {
+        super(name, alertManager);
         this.name = name;
         this.config = config;
         this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
     }
 
-    public static Deluge loadFromConfig(String name, ConfigurationSection section) {
+    public static Deluge loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
         Config config = Config.readFromYaml(section);
-        return new Deluge(name, config);
+        return new Deluge(name, config, alertManager);
     }
 
-    public static Deluge loadFromConfig(String name, JsonObject section) {
+    public static Deluge loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(name, config);
+        return new Deluge(name, config, alertManager);
     }
 
     @Override

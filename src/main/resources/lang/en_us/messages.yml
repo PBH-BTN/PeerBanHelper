@@ -454,3 +454,14 @@ MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION: |
   
   Please check the current running status of the downloader.
   If you need to modify the alarm settings, please go to Active Monitoring page to modify them.
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE: "Too many failed tried for downloader ({})"
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
+  Too many errors when trying to connect to the downloader {}, please check the downloader status, such as username or password.
+  
+  **Last connect status:** {}
+  **Last connect information:** {}
+  
+  You can skip the cool down to reactivate the downloader by clicking the *Edit* button for the downloader in error and fixing the error, then clicking *Save*.
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK: |
+  Too many errors when trying to connect to the downloader {}, please check the downloader status, such as username or password.
+  You can skip the cool down to reactivate the downloader by clicking the *Edit* button for the downloader in error and fixing the error, then clicking *Save*.
