@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.alert;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.push.PushManager;
@@ -24,7 +23,7 @@ public class AlertManager {
     private final AlertDao alertDao;
     private final PushManager pushManager;
 
-    public AlertManager(AlertDao alertDao, PushManager pushManager, PeerBanHelperServer peerBanHelperServer) {
+    public AlertManager(AlertDao alertDao, PushManager pushManager) {
         this.alertDao = alertDao;
         this.pushManager = pushManager;
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
@@ -52,6 +51,32 @@ public class AlertManager {
             alertDao.markAsRead(identifier);
         } catch (Exception e) {
             log.error(tlUI(Lang.UNABLE_READ_ALERT), e);
+        }
+    }
+
+    /**
+     * 检查指定标识符的警报是否存在且处于未读状态
+     * @param identifier 标识符
+     */
+    public boolean identifierAlertExists(String identifier) {
+        try {
+            return alertDao.identifierAlertExists(identifier);
+        } catch (SQLException e) {
+            log.warn("Unable query alert for identifier {}", identifier, e);
+            return false;
+        }
+    }
+
+    /**
+     * 检查指定标识符的警报是否存在，无论是否已读
+     * @param identifier 标识符
+     */
+    public boolean identifierAlertExistsIncludeRead(String identifier) {
+        try {
+            return alertDao.identifierAlertExistsIncludeRead(identifier);
+        } catch (SQLException e) {
+            log.warn("Unable query alert for identifier {}", identifier, e);
+            return false;
         }
     }
 

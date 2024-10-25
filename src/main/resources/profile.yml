@@ -408,3 +408,10 @@ module:
     # Do not set it run too frequently
     # 时间单位：ms；默认值：604800000 (7 天); default: (7 days)
     data-cleanup-interval: 604800000
+    # 流量监控 - Traffic Monitoring
+    # 设置流量封顶阈值，当超出阈值后将发送告警信息提醒您检查下载器状态
+    # Set the traffic capping threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.
+    traffic-monitoring:
+      # 每日阈值 - 设置为 -1 以禁用，单位：bytes
+      # Daily threshold, set to -1 to disable, Unit: bytes
+      daily: -1

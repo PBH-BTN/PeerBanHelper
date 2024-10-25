@@ -432,6 +432,11 @@
             <!-- DO NOT UPDATE, Keep sync with jSystemThemeDetector -->
             <version>5.8.6</version>
         </dependency>
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
+            <version>0.24.0</version>
+        </dependency>
         <!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.github.jnr/jnr-posix &ndash;&gt;-->
         <!--        <dependency>-->
         <!--            <groupId>com.github.jnr</groupId>-->

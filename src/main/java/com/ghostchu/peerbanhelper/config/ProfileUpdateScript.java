@@ -25,6 +25,11 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 21)
+    public void dailyTrafficAlert() {
+        conf.set("module.active-monitoring.traffic-monitoring.daily", -1);
+    }
+
     @UpdateScript(version = 20)
     public void v4v6Tolerate() {
         conf.set("module.multi-dialing-blocker.tolerate-num-ipv4", 2);

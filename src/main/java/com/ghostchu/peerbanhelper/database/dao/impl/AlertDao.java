@@ -36,6 +36,12 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
                        .queryForFirst() != null;
     }
 
+    public boolean identifierAlertExistsIncludeRead(String identifier) throws SQLException {
+        return queryBuilder().where()
+                       .eq("identifier", identifier)
+                       .queryForFirst() != null;
+    }
+
 
     public int deleteOldAlerts(Timestamp before) throws SQLException {
         var builder = deleteBuilder();
