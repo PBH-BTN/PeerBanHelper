@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.postprocessor.PostProcessor;
 import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.peerbanhelper.util.URLUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.SneakyThrows;
@@ -106,6 +107,10 @@ public class TextManager implements Reloadable {
             try {
                 if (obj instanceof TranslationComponent translationComponent) {
                     components[i] = tl(locale, translationComponent);
+                    continue;
+                }
+                if (obj instanceof Map map) { // 简单修复 GSON 嵌套反序列化问题
+                    components[i] = tl(locale, JsonUtil.standard().fromJson(JsonUtil.standard().toJsonTree(map), TranslationComponent.class));
                     continue;
                 }
                 components[i] = obj.toString();

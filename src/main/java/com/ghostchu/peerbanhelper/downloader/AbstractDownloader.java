@@ -28,15 +28,13 @@ public abstract class AbstractDownloader implements Downloader {
     @Override
     public DownloaderLoginResult login() {
         if (nextLoginTry >= System.currentTimeMillis()) {
-
-            // new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION, getName(),
-            //                            getLastStatus(),
-            //                            getLastStatusMessage()));
             alertManager.publishAlert(true,
                     AlertLevel.WARN,
                     "downloader-too-many-failed-attempt-" + getName(),
                     new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE, getName()),
-                    new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK, getName()));
+                    new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION, getName(),
+                            getLastStatus(),
+                            getLastStatusMessage()));
             return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS
                     , new TranslationComponent(Lang.TOO_MANY_FAILED_ATTEMPT, MsgUtil.getDateFormatter().format(new Date(nextLoginTry)))
             );
