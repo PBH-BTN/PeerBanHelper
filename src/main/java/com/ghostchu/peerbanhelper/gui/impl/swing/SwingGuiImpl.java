@@ -189,7 +189,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 icon.displayMessage(title, description, TrayIcon.MessageType.INFO);
             }
             if (System.getProperty("os.name").contains("Windows")) {
-                this.scheduled.schedule(this::refreshTrayIcon, 5, TimeUnit.SECONDS);
+                CommonUtil.getScheduler().schedule(this::refreshTrayIcon, 5, TimeUnit.SECONDS);
             }
         } else {
             super.createNotification(level, title, description);

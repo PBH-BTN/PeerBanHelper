@@ -184,7 +184,7 @@ public class PeerBanHelperServer implements Reloadable {
         loadBanListToMemory();
         registerTimer();
         banListInvoker.forEach(BanListInvoker::reset);
-        GENERAL_SCHEDULER.scheduleWithFixedDelay(this::saveBanList, 10 * 1000, BANLIST_SAVE_INTERVAL, TimeUnit.MILLISECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::saveBanList, 10 * 1000, BANLIST_SAVE_INTERVAL, TimeUnit.MILLISECONDS);
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             for (int i = 0; i < 50; i++) {
                 log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://localhost:" + webContainer.javalin().port()));
@@ -914,9 +914,6 @@ public class PeerBanHelperServer implements Reloadable {
         return LIVE_PEERS;
     }
 
-    public ScheduledExecutorService getScheduler() {
-        return GENERAL_SCHEDULER;
-    }
 
     /**
      * Use @Autowired if available
