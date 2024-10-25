@@ -158,6 +158,9 @@ importers:
       vite-plugin-node-polyfills:
         specifier: ^0.22.0
         version: 0.22.0(rollup@4.24.0)(vite@5.4.10(@types/node@22.7.9)(less@4.2.0)(sass@1.77.8))
+      vite-plugin-remove-console:
+        specifier: ^2.2.0
+        version: 2.2.0
       vite-plugin-vue-devtools:
         specifier: ^7.5.3
         version: 7.5.3(rollup@4.24.0)(vite@5.4.10(@types/node@22.7.9)(less@4.2.0)(sass@1.77.8))(vue@3.5.12(typescript@5.6.3))
@@ -2346,6 +2349,9 @@ packages:
     resolution: {integrity: sha512-F+G3LjiGbG8QpbH9bZ//GSBr9i1InSTkaulfUHFa9jkLqVGORFBoqc2A/Yu5Mmh1kNAbiAeKeK+6aaQUf3x0JA==}
     peerDependencies:
       vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
+
+  vite-plugin-remove-console@2.2.0:
+    resolution: {integrity: sha512-qgjh5pz75MdE9Kzs8J0kBwaCfifHV0ezRbB9rpGsIOxam+ilcGV7WOk91vFJXquzRmiKrFh3Hxlh0JJWAmXTbQ==, tarball: https://registry.npmjs.org/vite-plugin-remove-console/-/vite-plugin-remove-console-2.2.0.tgz}
 
   vite-plugin-vue-devtools@7.5.3:
     resolution: {integrity: sha512-gpR4S1anwc3rEapcealw0EATfQHO7jLCPqqT2qZAYLyVXsRi+Ysk7Z+kr/iq0sROfcVfSNAqAMB7foZobj2m5Q==}
@@ -4859,6 +4865,8 @@ snapshots:
       vite: 5.4.10(@types/node@22.7.9)(less@4.2.0)(sass@1.77.8)
     transitivePeerDependencies:
       - rollup
+
+  vite-plugin-remove-console@2.2.0: {}
 
   vite-plugin-vue-devtools@7.5.3(rollup@4.24.0)(vite@5.4.10(@types/node@22.7.9)(less@4.2.0)(sass@1.77.8))(vue@3.5.12(typescript@5.6.3)):
     dependencies:
