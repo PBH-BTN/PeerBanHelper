@@ -128,7 +128,8 @@ public class PBHLogsController extends AbstractFeatureModule {
 
     private void handleLogs(Context ctx) {
         ctx.status(200);
-        //ctx.json(new StdResp(true, null, Map.of("logs", MemoryLoggerAppender.getLogs())));
+        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntry(e.content(), e.level().name(), e.seq())).toList();
+        ctx.json(new StdResp(true, null, list));
     }
 
 
