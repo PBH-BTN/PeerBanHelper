@@ -48,7 +48,7 @@ public class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "6"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "7"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -74,6 +74,11 @@ public class DatabaseHelper {
         if (v == 5) {
             TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
             TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            v = 6;
+        }
+        if (v == 6) {
+            TableUtils.dropTable(getDataSource(), AlertEntity.class, true);
+            TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
             v = 6;
         }
         version.setValue(String.valueOf(v));
