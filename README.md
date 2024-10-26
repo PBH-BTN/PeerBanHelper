@@ -67,6 +67,11 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 
 [![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
+## 法律文本
+
+违法网站和黑灰产请勿向我组织开发或支持人员发起任何形式的人工服务请求；严禁使用 PBH-BTN 团队的任何服务、产品从事任何违法违规、危害国家安全、实施或帮助他人实施电信犯罪等非法活动。  
+用户不得通过 PBH-BTN 团队的任何服务、产品进行任何损害其它个人或组织的利益的活动。在任何违反个人或组织权益的情况下使用 PBH-BTN 团队的任何服务、产品均不被允许。
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
@@ -95,3 +100,4 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 * [Vue](https://vuejs.org/)
 * [ArcoDesign](https://arco.design/)
 * [ECharts](https://echarts.apache.org/en/index.html)
+
