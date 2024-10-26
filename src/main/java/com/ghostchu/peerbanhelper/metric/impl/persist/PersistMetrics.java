@@ -11,7 +11,6 @@ import com.ghostchu.peerbanhelper.database.table.RuleEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
@@ -35,16 +34,14 @@ public class PersistMetrics implements BasicMetrics {
     private final ModuleDao moduleDao;
     private final RuleDao ruleDao;
     private final HistoryDao historyDao;
-    private final RollbarErrorReporter rollbarErrorReporter;
 
-    public PersistMetrics(HistoryDao historyDao, RuleDao ruleDao, ModuleDao moduleDao, TorrentDao torrentDao, InMemoryMetrics inMemory, RollbarErrorReporter rollbarErrorReporter) {
+    public PersistMetrics(HistoryDao historyDao, RuleDao ruleDao, ModuleDao moduleDao, TorrentDao torrentDao, InMemoryMetrics inMemory) {
         this.historyDao = historyDao;
         this.ruleDao = ruleDao;
         this.moduleDao = moduleDao;
         this.torrentDao = torrentDao;
         this.inMemory = inMemory;
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
-        this.rollbarErrorReporter = rollbarErrorReporter;
     }
 
     private void cleanup() {
@@ -62,12 +59,10 @@ public class PersistMetrics implements BasicMetrics {
                     log.info(tlUI(Lang.CLEANED_BANLOGS, builder.delete()));
                 } catch (Exception e) {
                     log.error("Unable to cleanup expired banlogs", e);
-                    rollbarErrorReporter.warning(e);
                 }
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.warning(throwable);
         }
     }
 
@@ -134,7 +129,6 @@ public class PersistMetrics implements BasicMetrics {
                 ));
             } catch (SQLException e) {
                 log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);
-                rollbarErrorReporter.error(e);
             }
         });
     }

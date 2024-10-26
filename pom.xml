@@ -410,11 +410,6 @@
             <artifactId>apache-mime4j-storage</artifactId>
             <version>0.8.9</version>
         </dependency>
-        <dependency>
-            <groupId>com.rollbar</groupId>
-            <artifactId>rollbar-java</artifactId>
-            <version>1.10.3</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>

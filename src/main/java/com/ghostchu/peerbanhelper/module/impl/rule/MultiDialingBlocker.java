@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -51,8 +50,6 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
-    @Autowired
-    private RollbarErrorReporter rollbarErrorReporter;
     private int tolerateNumV4;
     private int tolerateNumV6;
 
@@ -197,7 +194,6 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
             }
         } catch (Exception e) {
             log.error("shouldBanPeer exception", e);
-            rollbarErrorReporter.error(e);
         }
 
         return pass();

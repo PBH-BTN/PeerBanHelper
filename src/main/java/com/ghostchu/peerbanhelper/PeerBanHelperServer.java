@@ -27,8 +27,6 @@ import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.telemetry.ErrorReporter;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -130,10 +128,6 @@ public class PeerBanHelperServer implements Reloadable {
             .build();
     @Autowired
     private BanListDao banListDao;
-    @Autowired
-    private ErrorReporter errorReporter;
-    @Autowired
-    private RollbarErrorReporter rollbarErrorReporter;
 
     public PeerBanHelperServer() {
         reloadConfig();
@@ -367,7 +361,6 @@ public class PeerBanHelperServer implements Reloadable {
             log.info(tlUI(Lang.SAVED_BANLIST, count));
         } catch (Exception e) {
             log.error(tlUI(Lang.SAVE_BANLIST_FAILED), e);
-            rollbarErrorReporter.error(e);
         }
     }
 
@@ -427,7 +420,6 @@ public class PeerBanHelperServer implements Reloadable {
             threadDump.append(MsgUtil.threadInfoToString(threadInfo));
         }
         log.info(threadDump.toString());
-        errorReporter.error("Timed out when complete the banWave", Map.of("thread_dump", threadDump));
         registerBanWaveTimer();
         Main.getGuiManager().createNotification(Level.WARNING, tlUI(Lang.BAN_WAVE_WATCH_DOG_TITLE), tlUI(Lang.BAN_WAVE_WATCH_DOG_DESCRIPTION));
     }

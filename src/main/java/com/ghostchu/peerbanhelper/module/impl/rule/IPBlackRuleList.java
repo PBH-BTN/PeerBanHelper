@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -64,15 +63,13 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @IgnoreScan
 public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
     private final RuleSubLogsDao ruleSubLogsDao;
-    private final RollbarErrorReporter rollbarErrorReporter;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private long banDuration;
 
-    public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao, RollbarErrorReporter rollbarErrorReporter) {
+    public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao) {
         super();
         this.ruleSubLogsDao = ruleSubLogsDao;
-        this.rollbarErrorReporter = rollbarErrorReporter;
     }
 
     @Override
@@ -170,7 +167,6 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             getCache().invalidateAll();
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.error(throwable);
         }
     }
 
@@ -272,7 +268,6 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                         result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
                     }
                 } catch (IOException e) {
-                    rollbarErrorReporter.error(e);
                     throw new RuntimeException(e);
                 }
             }).join();

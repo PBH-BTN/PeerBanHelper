@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
@@ -47,17 +46,15 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             .maximumSize(3500)
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
-    private final RollbarErrorReporter rollbarErrorReporter;
     private long dailyTrafficCapping;
     private final AlertManager alertManager;
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
 
-    public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao, RollbarErrorReporter rollbarErrorReporter, AlertManager alertManager) {
+    public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao, AlertManager alertManager) {
         super();
         this.peerRecordDao = peerRecordDao;
         this.trafficJournalDao = trafficJournalDao;
-        this.rollbarErrorReporter = rollbarErrorReporter;
         this.alertManager = alertManager;
     }
 
@@ -138,7 +135,6 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
                 }
             } catch (Throwable e) {
                 log.error("Unable to write hourly traffic journal to database", e);
-                rollbarErrorReporter.warning(e);
             }
         }
         updateTrafficMonitoringService();
@@ -178,11 +174,9 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
                 peerRecordDao.syncPendingTasks(dataBuffer);
             } catch (SQLException e) {
                 log.warn("Unable sync peers data to database", e);
-                rollbarErrorReporter.warning(e);
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.warning(throwable);
         }
     }
 
@@ -201,11 +195,9 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
                 log.info(tlUI(Lang.AMM_CLEANED_UP, deleted));
             } catch (SQLException e) {
                 log.warn("Unable to clean up AMM tables", e);
-                rollbarErrorReporter.warning(e);
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.warning(throwable);
         }
     }
 
