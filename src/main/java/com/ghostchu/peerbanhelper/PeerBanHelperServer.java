@@ -90,6 +90,11 @@ public class PeerBanHelperServer implements Reloadable {
     private final List<BanListInvoker> banListInvoker = new ArrayList<>();
 
     private final Lock banWaveLock = new ReentrantLock();
+    private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .maximumSize(300)
+            .softValues()
+            .build();
     private String pbhServerAddress;
     @Getter
     private YamlConfiguration profileConfig;
@@ -121,11 +126,6 @@ public class PeerBanHelperServer implements Reloadable {
     private JavalinWebContainer webContainer;
     @Autowired
     private AlertManager alertManager;
-    private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(5, TimeUnit.MINUTES)
-            .maximumSize(300)
-            .softValues()
-            .build();
     @Autowired
     private BanListDao banListDao;
 
@@ -193,6 +193,11 @@ public class PeerBanHelperServer implements Reloadable {
     private void sendSnapshotAlert() {
         if (Main.getMeta().isSnapshotOrBeta()) {
             alertManager.publishAlert(false, AlertLevel.INFO, "unstable-alert", new TranslationComponent(Lang.ALERT_SNAPSHOT), new TranslationComponent(Lang.ALERT_SNAPSHOT_DESCRIPTION));
+            log.trace(tlUI(Lang.ALERT_SNAPSHOT));
+            log.debug(tlUI(Lang.ALERT_SNAPSHOT));
+            log.info(tlUI(Lang.ALERT_SNAPSHOT));
+            log.warn(tlUI(Lang.ALERT_SNAPSHOT));
+            log.error(tlUI(Lang.ALERT_SNAPSHOT));
         } else {
             alertManager.markAlertAsRead("unstable-alert");
         }
