@@ -54,6 +54,13 @@ const datetimeFormat = {
   'short-second': {
     minute: 'numeric',
     second: 'numeric'
+  },
+  log: {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
   }
 } as const
 

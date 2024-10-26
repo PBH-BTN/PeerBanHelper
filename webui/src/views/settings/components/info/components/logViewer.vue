@@ -12,27 +12,39 @@
       scrollbar
       :virtual-list-props="{
         height: 600,
-        buffer: 40
+        buffer: 20
       }"
       :data="logBuffer"
     >
       <template #item="{ item, index }">
         <a-list-item :key="index">
-          <a-typography-text>{{ item.content }}</a-typography-text>
+          <a-space class="log-line" fill>
+            <a-tag>{{ d(item.time, 'log') }}</a-tag>
+            <a-tag :color="getColor(item.thread)">{{ item.thread }}</a-tag>
+            <a-tag :color="getColorByLogLevel(item.level)">{{ item.level }}</a-tag>
+            <a-typography-text
+              :ellipsis="{
+                rows: 1,
+                showTooltip: true
+              }"
+              >{{ item.content }}</a-typography-text
+            >
+          </a-space>
         </a-list-item>
       </template>
     </a-list>
   </a-space>
 </template>
 <script setup lang="ts">
-import type { Log } from '@/api/model/log'
+import { LogLevel, type Log } from '@/api/model/log'
 import { GetHistoryLogs } from '@/service/logger'
 import { onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import { StreamLogger } from '@/service/logger'
 import { List, Message } from '@arco-design/web-vue'
-const { t } = useI18n()
+import { getColor } from '@/utils/color'
+const { t, d } = useI18n()
 const logBuffer = ref([] as Log[])
 const { loading } = useRequest(GetHistoryLogs, {
   onSuccess: (data) => {
@@ -70,6 +82,21 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
     return false
   }
 }
+
+const getColorByLogLevel = (level: LogLevel) => {
+  switch (level) {
+    case LogLevel.TRACE:
+      return 'blue'
+    case LogLevel.WARN:
+      return 'orange'
+    case LogLevel.ERROR:
+      return 'red'
+    case LogLevel.DEBUG:
+    case LogLevel.INFO:
+    default:
+      return 'gray'
+  }
+}
 onBeforeUnmount(() => {
   console.log('close ws')
   ws.close()
@@ -79,5 +106,18 @@ onBeforeUnmount(() => {
 <style scoped>
 .container {
   width: 70rem;
+}
+</style>
+
+<style lang="less">
+.log-line {
+  .arco-space-item {
+    display: flex;
+    align-items: center;
+    .arco-typography {
+      width: 50rem;
+      margin-bottom: 0;
+    }
+  }
 }
 </style>
