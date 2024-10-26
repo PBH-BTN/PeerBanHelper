@@ -28,9 +28,9 @@
             <template #title>
               <a-space>
                 {{ data?.data.address }}
-                <a-popover v-if="!data?.data.found" :content="t('page.ipList.notfound.tips')">
+                <a-tooltip v-if="!data?.data.found" :content="t('page.ipList.notfound.tips')">
                   <a-tag>Not found</a-tag>
-                </a-popover>
+                </a-tooltip>
               </a-space>
             </template>
             <a-descriptions-item
@@ -137,9 +137,9 @@
               <template #label>
                 <a-space>
                   {{ t('page.ipList.shortcut') }}
-                  <a-popover :content="t('page.ipList.shortcut.tips')">
+                  <a-tooltip :content="t('page.ipList.shortcut.tips')">
                     <icon-info-circle />
-                  </a-popover> </a-space
+                  </a-tooltip> </a-space
               ></template>
               <a-space>
                 <a-button :href="`https://ip.ping0.cc/ip/${searchInput}`" type="outline">
@@ -164,9 +164,9 @@
                 <icon-lock v-else />
               </template>
               <template v-if="!plusStatus?.activated" #extra>
-                <a-popover :content="t('page.ipList.plusLock')">
+                <a-tooltip :content="t('page.ipList.plusLock')">
                   <a-tag size="small">Plus</a-tag>
-                </a-popover>
+                </a-tooltip>
               </template>
               <accessHistoryTable :ip="searchInput" />
             </a-collapse-item>
@@ -181,9 +181,9 @@
                 <icon-lock v-else />
               </template>
               <template v-if="!plusStatus?.activated" #extra>
-                <a-popover :content="t('page.ipList.plusLock')">
+                <a-tooltip :content="t('page.ipList.plusLock')">
                   <a-tag size="small">Plus</a-tag>
-                </a-popover>
+                </a-tooltip>
               </template>
               <banHistoryTable :ip="searchInput" />
             </a-collapse-item>

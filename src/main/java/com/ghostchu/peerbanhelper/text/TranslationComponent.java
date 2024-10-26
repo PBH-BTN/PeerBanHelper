@@ -2,10 +2,15 @@ package com.ghostchu.peerbanhelper.text;
 
 import lombok.Getter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Arrays;
 
 @Getter
-public class TranslationComponent {
+public class TranslationComponent implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final String key;
     private final Object[] params;
 

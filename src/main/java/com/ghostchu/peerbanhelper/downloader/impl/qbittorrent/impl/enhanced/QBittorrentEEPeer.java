@@ -3,11 +3,15 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced;
 
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.peer.PeerFlag;
+import com.ghostchu.peerbanhelper.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 @Setter
 public final class QBittorrentEEPeer implements Peer {
@@ -100,6 +104,11 @@ public final class QBittorrentEEPeer implements Peer {
     @Override
     public PeerFlag getFlags() {
         return new PeerFlag(flags);
+    }
+
+    @Override
+    public List<PeerMessage> getSupportedMessages() {
+        return Collections.emptyList();
     }
 
     @Override

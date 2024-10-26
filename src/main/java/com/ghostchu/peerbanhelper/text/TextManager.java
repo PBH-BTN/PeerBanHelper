@@ -60,7 +60,7 @@ public class TextManager implements Reloadable {
 //    }
 
     public static String tl(String locale, Lang key, Object... params) {
-        return tl(locale, new TranslationComponent(key.getKey(), (Object[]) TextManager.convert(locale, params)));
+        return tl(locale, new TranslationComponent(key.getKey(), (Object[]) convert(locale, params)));
     }
 
     public static String tl(String locale, TranslationComponent translationComponent) {
@@ -75,7 +75,7 @@ public class TextManager implements Reloadable {
         }
         String str = yamlConfiguration.getString(translationComponent.getKey());
         if (str == null) {
-            return translationComponent.getKey();
+            str = translationComponent.getKey();
         }
         String[] params = convert(locale, translationComponent.getParams());
         for (PostProcessor postProcessor : INSTANCE_HOLDER.postProcessors) {
@@ -108,6 +108,10 @@ public class TextManager implements Reloadable {
                     components[i] = tl(locale, translationComponent);
                     continue;
                 }
+//                if (obj instanceof Map map) { // 简单修复 GSON 嵌套反序列化问题
+//                    components[i] = tl(locale, JsonUtil.standard().fromJson(JsonUtil.standard().toJsonTree(map), TranslationComponent.class));
+//                    continue;
+//                }
                 components[i] = obj.toString();
             } catch (Exception exception) {
                 log.debug("Failed to process the object: {}", obj);

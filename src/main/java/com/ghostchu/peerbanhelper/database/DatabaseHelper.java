@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.database.table.*;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.logger.Level;
@@ -20,11 +19,9 @@ import java.sql.SQLException;
 @Slf4j
 public class DatabaseHelper {
     private final Database database;
-    private final RollbarErrorReporter rollbarErrorReporter;
 
-    public DatabaseHelper(@Autowired Database database, RollbarErrorReporter rollbarErrorReporter) throws SQLException {
+    public DatabaseHelper(@Autowired Database database) throws SQLException {
         this.database = database;
-        this.rollbarErrorReporter = rollbarErrorReporter;
         Logger.setGlobalLogLevel(Level.WARNING);
         createTables();
         performUpgrade();
@@ -43,11 +40,12 @@ public class DatabaseHelper {
         TableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
         TableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class);
+        TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
     }
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "6"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "7"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -55,8 +53,7 @@ public class DatabaseHelper {
                 var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
                 historyDao.executeRaw("ALTER TABLE " + historyDao.getTableName() + " ADD COLUMN downloader VARCHAR DEFAULT ''");
             } catch (Exception err) {
-                rollbarErrorReporter.error(err);
-                //log.error("Unable to upgrade database schema", err);
+                log.error("Unable to upgrade database schema", err);
             }
             v = 3;
         }
@@ -73,6 +70,11 @@ public class DatabaseHelper {
         if (v == 5) {
             TableUtils.dropTable(getDataSource(), ProgressCheatBlockerPersistEntity.class, true);
             TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+            v = 6;
+        }
+        if (v == 6) {
+            TableUtils.dropTable(getDataSource(), AlertEntity.class, true);
+            TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
             v = 6;
         }
         version.setValue(String.valueOf(v));

@@ -1,6 +1,6 @@
 ERR_BUILD_NO_INFO_FILE: "Error: Build information file does not exist"
 ERR_CANNOT_LOAD_BUILD_INFO: "Error: Unable to load build information file"
-MOTD: "PeerBanHelper v{} - by PBH-BTN Community, Made with ❤"
+MOTD: "PeerBanHelper v{} - by PBH-BTN Community, Made with Sugar & Love"
 LOADING_CONFIG: "Loading configuration file..."
 CONFIG_PEERBANHELPER: "Directory structure initialized, related files are placed in the data folder of the running directory. Please configure the related files and restart PeerBanHelper"
 ERR_SETUP_CONFIGURATION: "Error: Unable to initialize configuration file structure"
@@ -81,6 +81,8 @@ BTN_SUBMITTING_BANS: "[BTN Network] Scheduled task submitting new ban entries si
 BTN_SUBMITTED_BANS: "[BTN Network] Submitted {} ban records to BTN network, thank you for supporting the BTN network!"
 BTN_SUBMITTING_HITRATE: "[BTN Network] Scheduled task reporting rule hit rate data to BTN network, please wait"
 BTN_SUBMITTED_HITRATE: "[BTN Network] Reported hit rate data of {} rules to BTN network, thank you for supporting the BTN network!"
+BTN_SUBMITTING_HISTORIES: "[BTN Network] Scheduled task submitting {} peers history activities to network, please wait..."
+BTN_SUBMITTED_HISTORIES: "[BTN Network] Submitted {} peers history activities, thank you for supporting the BTN network!"
 CONFIG_CHECKING: "[Configuration Upgrade Utility] Please wait while we check configuration file updates..."
 CONFIG_MIGRATING: "[Configuration Upgrade Utility] Migrating configuration file: from {} to {} ..."
 CONFIG_EXECUTE_MIGRATE: "[Configuration Upgrade Utility] Executing configuration file upgrade script: {}"
@@ -127,7 +129,7 @@ IPDB_NEED_CONFIG: "IPDB feature requires configuration, please fill in the relev
 DOWNLOAD_PROGRESS_DETERMINED: "Download progress: downloaded {}/{} bytes, progress: {}%"
 DOWNLOAD_PROGRESS: "Download progress: downloaded {} bytes"
 DOWNLOAD_COMPLETED: "Download progress: completed! Total transferred {} bytes of data"
-BAN_WAVE_CHECK_COMPLETED: "Checked {} active torrents and {} peers from {} downloaders. Banned {} peers and unbanned {} expired bans ({}ms)"
+BAN_WAVE_CHECK_COMPLETED: "Completed check from {} downloaders with {} active torrents and {} peers. Banned {} peers and unbanned {} expired bans ({}ms)"
 WATCH_DOG_HUNGRY: "[Warning] WatchDog Service {} not reset within the specified time {}. Last status {}. Dumping process thread information, please send to PeerBanHelper developers to assist in fixing this issue"
 WATCH_DOG_CALLBACK_BLOCKED: "[Error] WatchDog Service callback thread unresponsive, forced exit from callback"
 PBH_BAN_WAVE_STARTED: "PeerBanHelper BanWave Daemon started"
@@ -287,7 +289,7 @@ BTN_PORT_RULE: "BTN Port Rule ({})"
 BTN_IP_RULE: "BTN IP Rule ({})"
 GENERAL_NA: "N/A"
 
-DUPLICATE_BAN: "Warning: The Peer being blocked is in the block list! This may be due to a program error, or you have manually cleaned the downloader's block list. If this problem persists, try restarting PBH and contact the developers: {}"
+DUPLICATE_BAN: "The Peer being blocked is in the block list: {}"
 
 NET_TYPE_WIDEBAND: "Wide Band"
 NET_TYPE_BASE_STATION: "Mobile Base Station"
@@ -361,7 +363,7 @@ RELOADING_MODULE: "[Reload] {}: {}"
 TORRENT_NOT_FOUND: "No records found by given InfoHash"
 PEER_NOT_FOUND: "No records found by given Peer"
 
-IN_ECOMODE_SHORT: "🍃EcoQoS"
+IN_ECOMODE_SHORT: "🍃Efficiency mode"
 IN_ECOMODE_DESCRIPTION: "EcoQoS API load successfully，Windows Efficiency Mode now applied to PeerBanHelper for saving power usage."
 
 DOWNLOADER_TRANSMISSION_DISCOURAGE: "Warning: Use Transmission Adapter is discourage. Frequent starting and stopping of torrents on seeds that are often subject to bans can result in frequent updates to the tracker server, indirectly triggering DoS attacks. This increases the load on the tracker server and may lead to your IP address being banned by the tracker. We encourage you to migrate to other downloaders whenever possible. https://github.com/PBH-BTN/PeerBanHelper/issues/382"
@@ -387,3 +389,88 @@ DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED: "Failed to download necessary librar
 
 JAVALIN_PORT_IN_USE: "Bind to port {} already in use. It could caused by: (1)More than one PBH instance is running (for example: Install as System Service); (2)Other application using this port (e.g Uplay, Ubisoft connect)"
 JAVALIN_PORT_REQUIRE_PRIVILEGES: "Bind to port {} failed (system require privileges on this port). Pick another WebUI port or run PeerBanHelper as Administrator/root."
+SPRING_CONTEXT_LOADING: "Spring Context initializing context to start PeerBanHelper up, it may take a while on low-end devices"
+PBH_STARTUP_FATAL_ERROR: "PeerBanHelper encountered fatal error during startup, unable to continue"
+UNABLE_TO_PUSH_ALERT_VIA_PROVIDERS: "Push messages via push providers failed"
+UNABLE_TO_PUSH_ALERT_VIA: "Push messages via {} failed"
+UNABLE_TO_PUSH_ALERT: "Failed to push messages"
+UNKNOWN_PUSH_PROVIDER: "Unknown type push provider: {} - {}"
+UNABLE_EXECUTE_MODULE: "Failed to execute module {}, please report to PeerBanHelper developer"
+UNABLE_RETRIEVE_PEERS: "Unable to retrieve peers"
+UNABLE_COMPLETE_SCHEDULE_TASKS: "Failed to execute scheduled tasks"
+UNABLE_COMPLETE_PEER_BAN_TASK: "Failed to execute peers ban tasks, please report to PeerBanHelper developer"
+UNFINISHED_RUNNABLE: "Unfinished tasks: {}"
+UNABLE_CLOSE_DOWNLOADER: "Error while shutting down downloader {}"
+UNABLE_LOAD_BTN_ABILITY: "Error on loading BTN ability {}"
+MISSING_VERSION_PROTOCOL_FIELD: "Missing min_protocol_version field in BTN server response, please contact BTN server administrator"
+BTN_NO_CONTENT_REPORTED_YET: "No any data reported to remote"
+BTN_LAST_REPORT_EMPTY: "Last report to remote server is empty, skipped"
+BTN_HTTP_ERROR: "HTTP Error: {} - {}"
+BTN_UNKNOWN_ERROR: "Unknown Error: {}"
+BTN_REPORTED_DATA: "Reported {} records"
+BTN_SUBMIT_PEERS_FAILED: "Failed while report peers"
+BTN_SUBMIT_BANS_FAILED: "Failed while report bans"
+BTN_RULES_LOADED_FROM_CACHE: "Loaded from disk cache"
+BTN_RULES_LOADED_FROM_REMOTE: "Loaded from remote, version {}"
+BTN_RULES_LOAD_FROM_CACHE_FAILED: "Failed load the cache from disk"
+BTN_STAND_BY: "Ready"
+BTN_RECONFIGURE_DISABLED_BY_SERVER: "BTN server disabled reconfigure"
+BTN_RECONFIGURE_PREPARE_RECONFIGURE: "Detected new version of configuration, reconfiguring..."
+UNABLE_SET_SQLITE_OPTIMIZED_PRAGMA: "Failed to set optimized SQLite PRAGMA arguments"
+THREAD_INTERRUPTED: "Thread interrupted, operation cancelled"
+DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY: "Cannot retrieve BitComet task details"
+ALERT_SNAPSHOT: "You are currently using a non-stable version of PeerBanHelper"
+ALERT_SNAPSHOT_DESCRIPTION: "Non-stable builds are for testing purposes only and may contain serious defects. Please back up your data before continuing to use non-stable builds. If you encounter a bug, please go to the [Issue Tracker](https://github.com/PBH-BTN/PeerBanHelper/issues) for feedback."
+BTN_ABILITY_RECONFIGURE: "Reconfigure"
+BTN_ABILITY_RECONFIGURE_DESCRIPTION: "The “reconfigure” ability allows the BTN server to notify the PeerBanHelper to contact the BTN server after a certain period of time to refresh the configuration file in use in order to obtain configuration changes from the remote server."
+BTN_ABILITY_RULES: "Cloud Rules"
+BTN_ABILITY_RULES_DESCRIPTION: "The “Cloud Rules” ability allows BTN servers to periodically provide PeerBanHelper with anti-vamping rules generated by remote servers as a supplement to local anti-vamping rules."
+BTN_ABILITY_SUBMIT_BANS: "Submit Bans"
+BTN_ABILITY_SUBMIT_BANS_DESCRIPTION: "The “Submit Bans” ability allows the BTN server to periodically receive PeerBanHelper's block list and a snapshot of the data at the time of the block.This data helps the BTN server analyze malicious behavior on the network and dynamically generate anti-siphoning rules to block such malicious behavior."
+BTN_ABILITY_SUBMIT_HISTORY: "Submit Histories"
+BTN_ABILITY_SUBMIT_HISTORY_DESCRIPTION: "The “Submit Histories” ability allows the BTN server to periodically receive a snapshot of the Peers activity on the downloader tracked by PeerBanHelper and the last recorded activity data.This data helps the BTN server analyze malicious behavior on the network and dynamically generate anti-siphoning rules to block such malicious behavior. At the same time, this data also helps analyze whether there are in-the-wild exploits that take advantage of the PeerBanHelper's anti-siphoning feature to bypass the anti-siphoning mechanism."
+BTN_ABILITY_SUBMIT_SNAPSHOT: "Submit Snapshots"
+BTN_ABILITY_SUBMIT_SNAPSHOT_DESCRIPTION: "The “Submit Snapshot” ability allows the BTN server to periodically receive snapshots of the instantaneous state of the downloader tracked by PeerBanHelper. This data helps the BTN server analyze malicious behavior on the network and dynamically generate anti-siphoning rules to block such behavior.The data also helps the BTN analyze the current activity on the network to get an overview of the malicious activity on the network at different moments."
+UNABLE_READ_ALERT: "Unable update the alert read status"
+BTN_ABILITY_EXCEPTION: "Exception"
+BTN_ABILITY_EXCEPTION_DESCRIPTION: "The “Exception” ability allows the BTN server to notify PeerBanHelper to exclude certain addresses from the checklist. If the specified addresses are already blocked, they will be unblocked. We use this feature to deal with potential vandalism. If someone is maliciously exploiting the BTN network, we use this capability to remove the affected records from PeerBanHelper."
+BTN_ABILITY_EXCEPTION_LOADED_FROM_CACHE: "Loaded from local disk cache"
+BTN_ABILITY_EXCEPTION_LOADED_FROM_CACHE_FAILED: "Failed to load exception list from local disk cache"
+BTN_ABILITY_EXCEPTION_LOADED_FROM_REMOTE: "Loaded from remote server, version: {}"
+BTN_ABILITY_EXCEPTION_UPDATE_RULES_SUCCESSES: "[BTN Network] (Exception)Rules data update successfully, version：{}"
+BTN_ABILITY_EXCEPTION_UNBANNED_PEERS: "[BTN Network] Unbanned {} peers, because they're in the BTN exception list."
+BTN_NOT_ENABLE_AND_REQUIRE_RESTART: "Current BTN module not loaded, please enable BTN module and restart PeerBanHelper"
+RELOAD_RESULT_SUCCESS: "Configuration saved and reload successfully"
+RELOAD_RESULT_SCHEDULED: "Configuration saved and reload successfully, but some changes may need a while to take effect"
+RELOAD_RESULT_REQUIRE_RESTART: "Configuration saved and reload successfully, but some changes need restart to take effect"
+RELOAD_RESULT_FAILED: "Configuration saved but failed to reload, please check the console logs"
+WS_LOGS_STREAM_ACCESS_DENIED: "Access denied, failed to authenticate"
+ALERT_MANAGER_CLEAN_UP: "Removed {} history alerts"
+MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_TITLE: "Download upload traffic reached threshold ({})"
+MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION: |
+  PeerBanHelper monitored that the total uploaded traffic of the hosted downloader reached the alert threshold for the day on {}.
+  
+  **Total uploaded traffic: {} (alert threshold: {})**
+  
+  Please check the current running status of the downloader.
+  If you need to modify the alarm settings, please go to Active Monitoring page to modify them.
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE: "Too many failed tried for downloader ({})"
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
+  Too many errors when trying to connect to the downloader {}, please check the downloader status, such as username or password.
+  
+  **Last connect status:** {}  
+  **Last connect information:** {}
+  
+  You can skip the cool down to reactivate the downloader by clicking the *Edit* button for the downloader in error and fixing the error, then clicking *Save*.
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK: |
+  Too many errors when trying to connect to the downloader {}, please check the downloader status, such as username or password.
+  You can skip the cool down to reactivate the downloader by clicking the *Edit* button for the downloader in error and fixing the error, then clicking *Save*.
+PROGRAM_OUT_OF_MEMORY_TITLE: "PeerBanHelper is critically low on available memory."
+PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
+  PeerBanHelper is running out of free memory and may stop running at any time.
+
+  Available memory: {}MB
+  Maximum memory: {}MB
+  
+  Please increase PeerBanHelper's memory allocation immediately.
+BAN_PEER_EXCEPTION: "An exception occurred while ban Peer, specific Peer unable to ban, Please report these information to PeerBanHelper developer"

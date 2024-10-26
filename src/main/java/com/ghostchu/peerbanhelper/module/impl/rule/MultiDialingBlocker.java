@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -45,15 +44,14 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
 
     private int subnetMaskLength;
     private int subnetMaskV6Length;
-    private int tolerateNum;
     private long cacheLifespan;
     private boolean keepHunting;
     private long keepHuntingTime;
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
-    @Autowired
-    private RollbarErrorReporter rollbarErrorReporter;
+    private int tolerateNumV4;
+    private int tolerateNumV6;
 
     @Override
     public void onEnable() {
@@ -89,7 +87,8 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
         Map<String, Object> config = new HashMap<>();
         config.put("subnetMaskLength", subnetMaskLength);
         config.put("subnetMaskV6Length", subnetMaskV6Length);
-        config.put("tolerateNum", tolerateNum);
+        config.put("tolerateNumV4", tolerateNumV4);
+        config.put("tolerateNumV5", tolerateNumV6);
         config.put("cacheLifespan", cacheLifespan);
         config.put("keepHunting", keepHunting);
         config.put("keepHuntingTime", keepHuntingTime);
@@ -115,7 +114,8 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
         this.banDuration = getConfig().getLong("ban-duration", 0);
         subnetMaskLength = getConfig().getInt("subnet-mask-length");
         subnetMaskV6Length = getConfig().getInt("subnet-mask-v6-length");
-        tolerateNum = getConfig().getInt("tolerate-num");
+        tolerateNumV4 = getConfig().getInt("tolerate-num-ipv4");
+        tolerateNumV6 = getConfig().getInt("tolerate-num-ipv6");
         cacheLifespan = getConfig().getInt("cache-lifespan") * 1000L;
         keepHunting = getConfig().getBoolean("keep-hunting");
         keepHuntingTime = getConfig().getInt("keep-hunting-time") * 1000L;
@@ -160,7 +160,13 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
             String torrentSubnetStr = torrentId + '@' + peerSubnet;
             Cache<String, Long> subnetPeers = subnetCounter.get(torrentSubnetStr, this::genPeerGroup);
             subnetPeers.put(peerIpStr, currentTimestamp);
-
+            int tolerateNum = Integer.MAX_VALUE;
+            if (peerSubnet.isIPv4()) {
+                tolerateNum = tolerateNumV4;
+            }
+            if (peerSubnet.isIPv6()) {
+                tolerateNum = tolerateNumV6;
+            }
             if (subnetPeers.size() > tolerateNum) {
                 // 落库
                 huntingList.put(torrentSubnetStr, currentTimestamp);
@@ -188,7 +194,6 @@ public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Re
             }
         } catch (Exception e) {
             log.error("shouldBanPeer exception", e);
-            rollbarErrorReporter.error(e);
         }
 
         return pass();

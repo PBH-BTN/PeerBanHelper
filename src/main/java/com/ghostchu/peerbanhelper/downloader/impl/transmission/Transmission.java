@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
@@ -52,8 +53,8 @@ public class Transmission extends AbstractDownloader {
             API 受限，实际实现起来意义不大
 
             */
-    public Transmission(String name, String blocklistUrl, Config config) {
-        super(name);
+    public Transmission(String name, String blocklistUrl, Config config, AlertManager alertManager) {
+        super(name, alertManager);
         this.config = config;
         this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
@@ -65,14 +66,14 @@ public class Transmission extends AbstractDownloader {
         return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
-    public static Transmission loadFromConfig(String name, String pbhServerAddress, ConfigurationSection section) {
+    public static Transmission loadFromConfig(String name, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager) {
         Config config = Config.readFromYaml(section);
-        return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config);
+        return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config, alertManager);
     }
 
-    public static Transmission loadFromConfig(String name, String pbhServerAddress, JsonObject section) {
+    public static Transmission loadFromConfig(String name, String pbhServerAddress, JsonObject section, AlertManager alertManager) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
-        return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config);
+        return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config, alertManager);
     }
 
     @Override

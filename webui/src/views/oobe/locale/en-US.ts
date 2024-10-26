@@ -12,6 +12,10 @@ export default {
   'page.oobe.welcome.title': 'Welcome to PeerBanHelper!',
   'page.oobe.welcome.description':
     "PeerBanHelper is a tool for anti-leech. PBH will connect to your downloader and check if any bad peers connected to your downloader. Once any bad peer was found, PBH will ban it. Before we start, let's do some simple config first.",
+  'page.oobe.steps.welcome.docTips': 'Please read the {doc} and our {privacy}',
+  'page.oobe.steps.welcome.doc': 'Doc',
+  'page.oobe.steps.welcome.privacy': 'Privacy Policy',
+  'page.oobe.steps.welcome.privacy.accept': 'I have read and agree to the above {privacy}',
   'page.oobe.setToken.title': 'Set Token',
   'page.oobe.setToken.description':
     'First, you need to set a token, this token can prevent your WebUI from malicious access and protect your privacy. Once you login to your WebUI once, your browser will remember it and automaticlly login in future.',

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="10.0.8" transformSequenceNumber="10">
   <directoryPresets config="target/PeerBanHelper.jar" />
-  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="4.4.1" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="23">
+  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="7.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="23">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
@@ -10,24 +10,28 @@
     </languages>
     <variables>
       <variable name="registerSystemService" value="registerSystemService" />
+      <variable name="jarPath" value="../target/PeerBanHelper.jar" />
+      <variable name="librariesPath" value="../target/libraries" />
     </variables>
-    <jreBundles jdkProviderId="Zulu" release="23/23.0.0" />
+    <jreBundles jdkProviderId="Liberica" release="23/23.0.1+13" />
   </application>
   <files keepModificationTimes="true">
     <mountPoints>
       <mountPoint id="24" />
     </mountPoints>
     <entries>
+      <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
       <variableEntry mountPoint="24" name="jarPath" />
     </entries>
   </files>
   <launchers>
-    <launcher name="PeerBanHelper" id="26" swtApp="true" checkUpdater="true">
+    <launcher name="PeerBanHelper" id="26" checkUpdater="true">
       <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true">
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j">
         <classPath>
+          <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
@@ -35,25 +39,13 @@
         <file path="./icon.png" />
       </iconImageFiles>
     </launcher>
-    <launcher name="PeerBanHelper (GUI, Safe mode)" id="60" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-Swing" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
-        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
-      </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="swing">
-        <classPath>
-          <archive location="PeerBanHelper.jar" failOnError="false" />
-        </classPath>
-      </java>
-      <iconImageFiles>
-        <file path="./icon.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="PeerBanHelper GUI Silent" id="66" swtApp="true" checkUpdater="true">
+    <launcher name="PeerBanHelper GUI Silent" id="66" checkUpdater="true">
       <executable name="PeerBanHelper-GUI-Silent" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="silent">
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" arguments="silent">
         <classPath>
+          <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
@@ -65,8 +57,9 @@
       <executable name="PeerBanHelper-NoGUI" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="nogui">
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" arguments="nogui">
         <classPath>
+          <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
@@ -78,8 +71,9 @@
       <executable name="PeerBanHelper-Service" iconSet="true" executableDir="." redirectStderr="false" stderrFile="~/PeerBanHelper/error.log" stdoutFile="~/PeerBanHelper/output.log" executableMode="service" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true" arguments="nogui">
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" arguments="nogui">
         <classPath>
+          <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
@@ -224,7 +218,7 @@ return console.askOkCancel(message, true);
                   <property name="variableName" type="string">startupWhenLoggedIn</property>
                 </serializedBean>
               </formComponent>
-              <formComponent name="Register system service" id="79" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+              <formComponent name="Register system service" id="79" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent" enabled="false">
                 <serializedBean>
                   <property name="checkboxText" type="string">${i18n:checkbox.registersystemservice}</property>
                   <property name="variableName" type="string">registerSystemService</property>
@@ -269,6 +263,18 @@ return true;
           </screen>
           <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true" rollbackBarrierExitCode="0">
             <actions>
+              <action id="121" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="files" type="array" class="java.io.File" length="1">
+                    <element index="0">
+                      <object class="java.io.File">
+                        <string>libraries</string>
+                      </object>
+                    </element>
+                  </property>
+                  <property name="recursive" type="boolean" value="true" />
+                </serializedBean>
+              </action>
               <action id="17" beanClass="com.install4j.runtime.beans.actions.InstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="quit" errorMessage="${i18n:FileCorrupted}" />
               <action id="18" beanClass="com.install4j.runtime.beans.actions.desktop.CreateProgramGroupAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
@@ -657,19 +663,34 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows x64" id="38" architecture="64">
+    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="64">
       <jreBundle installOnlyIfNecessary="true" />
     </windows>
-    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}" architecture="universal" />
-    <unixInstaller name="Universal Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}" require64BitVm="true">
-      <jreBundle installOnlyIfNecessary="true" />
-    </unixInstaller>
-    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_glibc_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64" />
-    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
+    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_windows_nojava_${compiler:sys.version}" architecture="64">
       <jreBundle jreBundleSource="none" />
     </windows>
-    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_universal_${compiler:sys.version}_nojava" architecture="universal">
+    <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="universal" />
+    <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_macos_nojava_${compiler:sys.version}" architecture="universal">
       <jreBundle jreBundleSource="none" />
     </macosFolder>
+    <linuxRPM name="Linux RPM" id="106" mediaFileName="${compiler:sys.shortName}_rpm_${compiler:sys.jreBundleArch}_${compiler:sys.version}" installDir="/usr/local/${compiler:sys.shortName}" require64BitVm="true" arch="x86_64" />
+    <unixInstaller name="x64 Linux Installer" id="103" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="aarch64 Linux Installer" id="127" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-aarch64" installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="ppc64le Linux Installer" id="130" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-ppc64le" installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="riscv64 Linux Installer" id="133" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-riscv64" installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="alpine x64 Linux Installer" id="136" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="alpine-linux-amd64" installOnlyIfNecessary="true" />
+    </unixInstaller>
+    <unixInstaller name="alpine aarch64 Linux Installer" id="139" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="alpine-linux-aarch64" installOnlyIfNecessary="true" />
+    </unixInstaller>
   </mediaSets>
 </install4j>

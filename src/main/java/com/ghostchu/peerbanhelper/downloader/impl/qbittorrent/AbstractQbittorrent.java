@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
@@ -50,8 +51,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected final QBittorrentConfig config;
     protected final Cache<String, Boolean> isPrivateCache;
 
-    public AbstractQbittorrent(String name, QBittorrentConfig config) {
-        super(name);
+    public AbstractQbittorrent(String name, QBittorrentConfig config, AlertManager alertManager) {
+        super(name, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
         CookieManager cm = new CookieManager();

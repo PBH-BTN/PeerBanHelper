@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeer;
 import com.ghostchu.peerbanhelper.module.impl.rule.BtnNetworkOnline;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -16,7 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -38,10 +43,25 @@ public class BtnAbilitySubmitBans extends AbstractBtnAbility {
     }
 
     @Override
+    public String getName() {
+        return "BtnAbilitySubmitBans";
+    }
+
+    @Override
+    public TranslationComponent getDisplayName() {
+        return new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_BANS);
+    }
+
+    @Override
+    public TranslationComponent getDescription() {
+        return new TranslationComponent(Lang.BTN_ABILITY_SUBMIT_BANS_DESCRIPTION);
+    }
+
+    @Override
     public void load() {
         Main.getEventBus().register(this);
-        setLastStatus(true, "No content reported to remote yet");
-        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + new Random().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        setLastStatus(true, new TranslationComponent(Lang.BTN_NO_CONTENT_REPORTED_YET));
+        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -55,7 +75,7 @@ public class BtnAbilitySubmitBans extends AbstractBtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             List<BtnBan> btnPeers = generateBans();
             if (btnPeers.isEmpty()) {
-                setLastStatus(true, "Last report is empty, skipped.");
+                setLastStatus(true, new TranslationComponent(Lang.BTN_LAST_REPORT_EMPTY));
                 lastReport = System.currentTimeMillis();
                 return;
             }
@@ -70,21 +90,21 @@ public class BtnAbilitySubmitBans extends AbstractBtnAbility {
                     .thenAccept(r -> {
                         if (r.statusCode() != 200) {
                             log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                            setLastStatus(false, "HTTP Error: " + r.statusCode() + " - " + r.body());
+                            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                         } else {
                             log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
-                            setLastStatus(true, "Reported " + btnPeers.size() + " entries.");
+                            setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, btnPeers.size()));
                             lastReport = System.currentTimeMillis();
                         }
                     })
                     .exceptionally(e -> {
                         log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
-                        setLastStatus(false, e.getClass().getName() + ": " + e.getMessage());
+                        setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
                         return null;
                     });
         } catch (Throwable e) {
-            log.error("Unable to submit bans", e);
-            setLastStatus(false, "Unknown Error: " + e.getClass().getName() + ": " + e.getMessage());
+            log.error(tlUI(Lang.BTN_SUBMITTED_BANS), e);
+            setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 
