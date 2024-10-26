@@ -205,6 +205,7 @@
           :align="{ label: 'right' }"
         >
           <a-descriptions-item :label="t('page.settings.tab.info.system.os')">
+            <component :is="osLogo[data?.data.system.os ?? 'Other']"></component>
             {{ data?.data.system.os }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.system.version')">
@@ -399,6 +400,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
+import { genIconComponent } from '@/components/iconFont'
 
 dayjs.extend(RelativeTime)
 dayjs.extend(Duration)
@@ -453,6 +455,15 @@ const isClientIpLocal = computed(() => {
   }
   return false
 })
+
+const osLogo = {
+  Windows: genIconComponent('icon-Windows'),
+  Linux: genIconComponent('icon-linux'),
+  FreeBSD: genIconComponent('icon-freebsd'),
+  MacOS: genIconComponent('icon-macOS'),
+  Solaris: genIconComponent('icon-solaris'),
+  Other: genIconComponent('icon-other')
+}
 </script>
 
 <style scoped>
