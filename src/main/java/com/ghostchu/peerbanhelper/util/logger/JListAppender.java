@@ -16,10 +16,14 @@ public class JListAppender extends AppenderBase<ILoggingEvent> {
 
     public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>();
     public static final CircularArrayList<LogEntry> ringDeque = new CircularArrayList<>(300);
-    private PatternLayout layout;
     private static final AtomicInteger seq = new AtomicInteger(0);
+    private PatternLayout layout;
 
     public JListAppender() {
+    }
+
+    public static AtomicInteger getSeq() {
+        return seq;
     }
 
     @Override
@@ -46,14 +50,15 @@ public class JListAppender extends AppenderBase<ILoggingEvent> {
             } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.OFF) {
                 return;
             }
-            var entry = new LogEntry(seq.incrementAndGet(), slf4jLevel, formattedMessage.trim());
+            var entry = new LogEntry(
+                    eventObject.getTimeStamp(),
+                    eventObject.getThreadName(),
+                    slf4jLevel,
+                    eventObject.getMessage().trim(),
+                    seq.incrementAndGet());
             logEntryDeque.add(entry);
             ringDeque.add(entry);
             Main.getEventBus().post(new NewLogEntryCreatedEvent(entry));
         });
-    }
-
-    public static AtomicInteger getSeq() {
-        return seq;
     }
 }

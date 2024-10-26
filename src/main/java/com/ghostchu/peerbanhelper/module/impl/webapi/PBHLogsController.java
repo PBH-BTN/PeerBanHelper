@@ -67,7 +67,13 @@ public class PBHLogsController extends AbstractFeatureModule {
         synchronized (session) {
             for (WsContext wsContext : session) {
                 wsContext.send(new StdResp(true, null,
-                        new WebSocketLogEntry(event.getEntry().content(), event.getEntry().level().name(), event.getEntry().seq())));
+                        new WebSocketLogEntry(
+                                event.getEntry().time(),
+                                event.getEntry().thread(),
+                                event.getEntry().level().name(),
+                                event.getEntry().content(),
+                                event.getEntry().seq()
+                        )));
             }
         }
     }
@@ -108,7 +114,13 @@ public class PBHLogsController extends AbstractFeatureModule {
         for (LogEntry logEntry : JListAppender.ringDeque) {
             if (logEntry.seq() > offset) {
                 ctx.send(new StdResp(true, null,
-                        new WebSocketLogEntry(logEntry.content(), logEntry.level().name(), logEntry.seq())));
+                        new WebSocketLogEntry(
+                                logEntry.time(),
+                                logEntry.thread(),
+                                logEntry.level().name(),
+                                logEntry.content(),
+                                logEntry.seq()
+                        )));
             }
         }
     }
@@ -128,7 +140,13 @@ public class PBHLogsController extends AbstractFeatureModule {
 
     private void handleLogs(Context ctx) {
         ctx.status(200);
-        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntry(e.content(), e.level().name(), e.seq())).toList();
+        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntry(
+                e.time(),
+                e.thread(),
+                e.level().name(),
+                e.content(),
+                e.seq()
+        )).toList();
         ctx.json(new StdResp(true, null, list));
     }
 
@@ -141,8 +159,10 @@ public class PBHLogsController extends AbstractFeatureModule {
     @AllArgsConstructor
     @Data
     private static class WebSocketLogEntry {
-        private String content;
+        private long time;
+        private String thread;
         private String level;
+        private String content;
         private long offset;
     }
 }
