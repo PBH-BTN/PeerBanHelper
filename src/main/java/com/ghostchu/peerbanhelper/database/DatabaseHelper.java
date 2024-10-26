@@ -75,7 +75,7 @@ public class DatabaseHelper {
         if (v == 6) {
             TableUtils.dropTable(getDataSource(), AlertEntity.class, true);
             TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
-            v = 6;
+            v = 7;
         }
         version.setValue(String.valueOf(v));
         metadata.update(version);
