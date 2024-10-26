@@ -125,6 +125,9 @@ useRequest(
           })
         }
         list.value = data.data
+      } else {
+        const newAlerts = data.data.filter((i) => !list.value.some((j) => j.id === i.id))
+        list.value.push(...newAlerts)
       }
     }
   },
