@@ -1,7 +1,7 @@
 <template>
   <a-space direction="vertical" class="container" size="medium">
     <a-space v-if="!loading">
-      <a-switch :before-change="changeAutoRefresh" />{{
+      <a-switch v-model="enableAutoRefresh" :before-change="changeAutoRefresh" />{{
         t('page.settings.tab.info.log.enableAutoRefresh')
       }}
     </a-space>
@@ -41,6 +41,7 @@ const { loading } = useRequest(GetHistoryLogs, {
 })
 const logList = ref<typeof List>()
 const ws = new StreamLogger()
+const enableAutoRefresh = ref(false)
 const changeAutoRefresh = async (enable: boolean | string | number) => {
   try {
     if (enable) {
@@ -57,6 +58,7 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
         },
         (err) => {
           Message.error(err.message)
+          enableAutoRefresh.value = false
         }
       )
     } else {
