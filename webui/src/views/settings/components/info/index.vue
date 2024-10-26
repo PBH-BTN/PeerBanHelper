@@ -481,7 +481,7 @@ const osLogo = {
   Other: genIconComponent('icon-other')
 }
 
-const showLog = ref(true)
+const showLog = ref(false)
 </script>
 
 <style scoped>

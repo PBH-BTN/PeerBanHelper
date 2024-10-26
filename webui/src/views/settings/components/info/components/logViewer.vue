@@ -20,7 +20,9 @@
         <a-list-item :key="index">
           <a-space class="log-line" fill>
             <a-tag>{{ d(item.time, 'log') }}</a-tag>
-            <a-tag :color="getColor(item.thread)">{{ item.thread }}</a-tag>
+            <a-tag :color="getColor(item.thread, ['orange', 'orangered', 'red', 'blue'])">
+              {{ item.thread }}
+            </a-tag>
             <a-tag :color="getColorByLogLevel(item.level)">{{ item.level }}</a-tag>
             <a-typography-text
               :ellipsis="{
