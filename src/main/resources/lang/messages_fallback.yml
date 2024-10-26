@@ -472,3 +472,4 @@ PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
   最大内存: {}MB
   
   请立即增加 PeerBanHelper 的内存分配。
+BAN_PEER_EXCEPTION: "封禁 Peer 时出现意外错误，指定 Peer 可能封禁失败，请将下面的信息报告给 PeerBanHelper 开发者"

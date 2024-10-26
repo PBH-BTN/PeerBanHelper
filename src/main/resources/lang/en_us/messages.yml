@@ -473,3 +473,4 @@ PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
   Maximum memory: {}MB
   
   Please increase PeerBanHelper's memory allocation immediately.
+BAN_PEER_EXCEPTION: "An exception occurred while ban Peer, specific Peer unable to ban, Please report these information to PeerBanHelper developer"
