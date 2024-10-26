@@ -118,7 +118,7 @@ const getColorByLogLevel = (level: LogLevel) => {
 }
 
 const getThreadColor = (thread: string) => {
-  if (thread.startsWith('virtual-') || /Thread-[0-9]+/.test(thread)) {
+  if (thread.startsWith('virtual-') || thread.startsWith('pool') || /Thread-[0-9]+/.test(thread)) {
     return 'gray'
   } else {
     return getColor(thread, ['orange', 'orangered', 'red', 'blue'])
