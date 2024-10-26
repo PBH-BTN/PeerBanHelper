@@ -5,6 +5,7 @@ interface initDownloaderConfig {
   config: downloaderConfig
 }
 export interface InitConfig {
+  acceptPrivacy: boolean
   token: string
   downloaderConfig: initDownloaderConfig
   valid: boolean

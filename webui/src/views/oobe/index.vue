@@ -60,6 +60,7 @@ const steps = computed(() => [
 ])
 
 const initConfig = ref<InitConfig>({
+  acceptPrivacy: false,
   token: '',
   downloaderConfig: {
     name: '',
@@ -87,7 +88,7 @@ const onPrev = () => {
 const canNext = () => {
   switch (current.value) {
     case 1:
-      return true
+      return initConfig.value.acceptPrivacy
     case 2:
       return initConfig.value.token.length > 0
     case 3:
