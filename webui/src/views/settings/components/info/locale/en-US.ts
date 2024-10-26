@@ -14,7 +14,6 @@ export default {
   'page.settings.tab.info.system': 'System Info',
   'page.settings.tab.info.system.os': 'OS',
   'page.settings.tab.info.system.version': 'Version',
-  'page.settings.tab.info.system.architecture': 'Architecture',
   'page.settings.tab.info.system.cores': 'CPU Cores',
   'page.settings.tab.info.system.memory.total': 'Memory Total',
   'page.settings.tab.info.system.memory.free': 'Memory pressure',
@@ -38,7 +37,7 @@ export default {
   'page.settings.tab.info.runtime.version': 'JVM Version',
   'page.settings.tab.info.runtime.vendor': 'Vendor',
   'page.settings.tab.info.runtime.runtime': 'Runtime',
-  'page.settings.tab.info.runtime.bitness': 'Bitness',
+  'page.settings.tab.info.runtime.heapMemory': 'Heap Memory Info',
 
   'page.settings.tab.info.btn': 'BTN Status',
   'page.settings.tab.info.btn.module': 'Module',

@@ -6,12 +6,23 @@ enum OSType {
   Solaris = 'Solaris',
   Other = 'Other'
 }
+interface JVMMemoryInfo {
+  init: number
+  used: number
+  committed: number
+  max: number
+  free: number
+}
 export type RunningInfo = {
   jvm: {
     version: string
     vendor: string
     runtime: string
     bitness: 32 | 64
+    memory: {
+      heap: JVMMemoryInfo
+      non_heap: JVMMemoryInfo
+    }
   }
   system: {
     os: OSType

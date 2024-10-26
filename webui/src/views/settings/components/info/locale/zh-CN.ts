@@ -14,7 +14,6 @@ export default {
   'page.settings.tab.info.system': '系统信息',
   'page.settings.tab.info.system.os': '操作系统',
   'page.settings.tab.info.system.version': '版本',
-  'page.settings.tab.info.system.architecture': '架构',
   'page.settings.tab.info.system.cores': 'CPU 核心数',
   'page.settings.tab.info.system.memory.total': '内存总量',
   'page.settings.tab.info.system.memory.free': '内存压力',
@@ -38,7 +37,7 @@ export default {
   'page.settings.tab.info.runtime.version': 'JVM 版本',
   'page.settings.tab.info.runtime.vendor': '提供商',
   'page.settings.tab.info.runtime.runtime': '运行时',
-  'page.settings.tab.info.runtime.bitness': '指针长度',
+  'page.settings.tab.info.runtime.heapMemory': '堆内存信息',
 
   'page.settings.tab.info.btn': 'BTN 状态',
   'page.settings.tab.info.btn.module': '模块状态',

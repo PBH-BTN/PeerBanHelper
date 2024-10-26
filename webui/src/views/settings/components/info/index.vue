@@ -51,9 +51,6 @@
           <a-descriptions-item :label="t('page.settings.tab.info.system.version')">
             <a-skeleton-line :rows="1" />
           </a-descriptions-item>
-          <a-descriptions-item :label="t('page.settings.tab.info.system.architecture')">
-            <a-skeleton-line :rows="1" />
-          </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.system.cores')">
             <a-skeleton-line :rows="1" />
           </a-descriptions-item>
@@ -116,7 +113,7 @@
           <a-descriptions-item :label="t('page.settings.tab.info.runtime.runtime')">
             <a-skeleton-line :rows="1" />
           </a-descriptions-item>
-          <a-descriptions-item :label="t('page.settings.tab.info.runtime.bitness')">
+          <a-descriptions-item :label="t('page.settings.tab.info.runtime.heapMemory')">
             <a-skeleton-line :rows="1" />
           </a-descriptions-item>
         </a-descriptions>
@@ -215,12 +212,12 @@
             {{ data?.data.system.os }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.system.version')">
-            {{ data?.data.system.version }}
-          </a-descriptions-item>
-          <a-descriptions-item :label="t('page.settings.tab.info.system.architecture')">
-            <a-tag :color="getColor(data?.data.system.architecture ?? '')">
-              {{ data?.data.system.architecture }}
-            </a-tag>
+            <a-space>
+              {{ data?.data.system.version }}
+              <a-tag color="arcoblue">
+                {{ data?.data.system.architecture }}
+              </a-tag>
+            </a-space>
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.system.cores')">
             {{ data?.data.system.cores }}
@@ -318,7 +315,12 @@
           :align="{ label: 'right' }"
         >
           <a-descriptions-item :label="t('page.settings.tab.info.runtime.version')">
-            {{ data?.data.jvm.version }}
+            <a-space
+              >{{ data?.data.jvm.version
+              }}<a-tag :color="data?.data.jvm.bitness === 64 ? 'arcoblue' : 'orange'">
+                {{ data?.data.jvm.bitness }}-Bit
+              </a-tag></a-space
+            >
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.runtime.vendor')">
             {{ data?.data.jvm.vendor }}
@@ -326,10 +328,24 @@
           <a-descriptions-item :label="t('page.settings.tab.info.runtime.runtime')">
             {{ data?.data.jvm.runtime }}
           </a-descriptions-item>
-          <a-descriptions-item :label="t('page.settings.tab.info.runtime.bitness')">
-            <a-tag :color="data?.data.jvm.bitness === 64 ? 'arcoblue' : 'orange'">
-              {{ data?.data.jvm.bitness }}
-            </a-tag>
+          <a-descriptions-item :label="t('page.settings.tab.info.runtime.heapMemory')">
+            <a-space style="display: flex; align-items: center">
+              <a-tooltip
+                :content="
+                  `${Math.round((1 - (data?.data.jvm.memory.heap.free ?? 0) / (data?.data.jvm.memory.heap.max ?? 1)) * 100)}% ` +
+                  t('page.settings.tab.info.system.memory.used')
+                "
+              >
+                <a-progress
+                  type="circle"
+                  size="mini"
+                  :status="memoryProgressBarColor"
+                  :percent="memoryStatus"
+                />
+              </a-tooltip>
+              {{ formatFileSize(data?.data.jvm.memory.heap.free ?? 0) }} &nbsp;
+              {{ t('page.settings.tab.info.system.memory.available') }}
+            </a-space>
           </a-descriptions-item>
         </a-descriptions>
       </template>
