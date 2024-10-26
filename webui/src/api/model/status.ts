@@ -1,7 +1,7 @@
 enum OSType {
   Linux = 'Linux',
   Windows = 'Windows',
-  MacOS = 'MacOS',
+  MacOS = 'Mac OS X',
   FreeBSD = 'FreeBSD',
   Solaris = 'Solaris',
   Other = 'Other'

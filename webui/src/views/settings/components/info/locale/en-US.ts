@@ -56,5 +56,9 @@ export default {
   'page.settings.tab.info.btn.abilities.list.lastSuccess': 'Last Status',
   'page.settings.tab.info.btn.abilities.list.lastSuccess.success': 'Success',
   'page.settings.tab.info.btn.abilities.list.lastSuccess.failed': 'Failed',
-  'page.settings.tab.info.btn.abilities.list.lastSuccessTime': 'Last Update Time'
+  'page.settings.tab.info.btn.abilities.list.lastSuccessTime': 'Last Update Time',
+
+  'page.settings.tab.info.log.button': 'View Logs',
+  'page.settings.tab.info.log.title': 'Logs',
+  'page.settings.tab.info.log.enableAutoRefresh': 'Auto Refresh'
 }

@@ -56,5 +56,9 @@ export default {
   'page.settings.tab.info.btn.abilities.list.lastSuccess': '最新状态',
   'page.settings.tab.info.btn.abilities.list.lastSuccess.success': '成功',
   'page.settings.tab.info.btn.abilities.list.lastSuccess.failed': '失败',
-  'page.settings.tab.info.btn.abilities.list.lastSuccessTime': '上次更新时间'
+  'page.settings.tab.info.btn.abilities.list.lastSuccessTime': '上次更新时间',
+
+  'page.settings.tab.info.log.button': '查看日志',
+  'page.settings.tab.info.log.title': '日志',
+  'page.settings.tab.info.log.enableAutoRefresh': '自动刷新'
 }

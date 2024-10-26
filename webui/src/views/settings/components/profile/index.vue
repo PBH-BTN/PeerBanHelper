@@ -136,7 +136,21 @@ const form = reactive({
   config_version: 0,
   check_interval: 0,
   ban_duration: 0,
-  ignore_peers_from_addresses: [] as string[]
+  ignore_peers_from_addresses: [] as string[],
+  module: {
+    peer_id_blacklist: {},
+    client_name_blacklist: {},
+    progress_cheat_blocker: {},
+    ip_address_blocker: {},
+    auto_range_ban: {},
+    btn: {},
+    multi_dialing_blocker: {},
+    expression_engine: {},
+    ip_address_blocker_rules: {},
+    active_monitoring: {
+      traffic_monitoring: {}
+    }
+  }
 } as Profile)
 const { loading } = useRequest(GetProfile, {
   onSuccess: (data) => {

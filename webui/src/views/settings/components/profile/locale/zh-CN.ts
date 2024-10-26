@@ -4,6 +4,7 @@ export default {
   'page.settings.tab.profile.form.checkInterval': '检查频率',
   'page.settings.tab.profile.unit.ms': '毫秒',
   'page.settings.tab.profile.unit.s': '秒',
+  'page.settings.tab.profile.unit.bytes': '字节',
   'page.settings.tab.profile.form.banDuration': '封禁持续时间',
   'page.settings.tab.profile.form.ignoreAddress': '忽略地址',
   'page.settings.tab.profile.form.ignoreAddress.tooltip':
@@ -118,5 +119,9 @@ export default {
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': '数据记录周期',
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
     'SQLite 的特性，记录被删除后不会释放磁盘空间，但后续新数据记录会重新利用此部分空间',
-  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': '清理周期'
+  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': '清理周期',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable': '开启流量封顶',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
+    '设置流量封顶阈值，当超出阈值后将发送告警信息提醒您检查下载器状态',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value': '每日流量封顶阈值'
 }

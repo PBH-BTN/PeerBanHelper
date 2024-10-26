@@ -21,7 +21,7 @@
       </a-badge>
     </a-tooltip>
     <template #content>
-      <a-card :title="t('alert.title')" class="alert-card" hoverable>
+      <a-card :title="t('alert.title')" class="alert-card">
         <template #extra>
           <a-button type="text" @click="markAllAsRead()">{{
             t('alert.action.dismissAll')
@@ -193,5 +193,8 @@ const markAllAsRead = () => {
   .arco-card-body {
     padding: 0;
   }
+}
+body[arco-theme='dark'] .alert-card {
+  box-shadow: #555 0px 0px 3px;
 }
 </style>

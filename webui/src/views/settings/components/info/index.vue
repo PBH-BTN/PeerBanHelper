@@ -141,9 +141,15 @@
   </a-space>
   <!--End 骨架屏-->
   <a-space v-else direction="vertical" fill>
-    <a-typography-title :heading="3">
-      {{ t('page.settings.tab.info.title') }}
-    </a-typography-title>
+    <a-space style="display: flex; justify-content: space-between">
+      <a-typography-title :heading="3">
+        {{ t('page.settings.tab.info.title') }}
+      </a-typography-title>
+      <a-button type="primary" @click="showLog = true">
+        <template #icon> <icon-eye /> </template>
+        {{ t('page.settings.tab.info.log.button') }}
+      </a-button>
+    </a-space>
     <a-split :size="0.5" disabled>
       <template #first>
         <!--Peerbanhelper info-->
@@ -179,7 +185,7 @@
             {{ dayjs.duration({ seconds: data?.data.peerbanhelper.uptime }).humanize() }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.version.plus')">
-            <button @click="endpointStore.emitter.emit('open-plus-modal')">
+            <button class="tag-button" @click="endpointStore.emitter.emit('open-plus-modal')">
               <a-tag :color="endpointStore.plusStatus?.activated ? 'green' : 'red'">
                 <template v-if="endpointStore.plusStatus?.activated" #icon>
                   <icon-check-circle-fill />
@@ -385,6 +391,15 @@
     </a-descriptions>
   </a-space>
   <btnAbilitiesModal ref="btnAbilityList" />
+  <a-modal
+    v-model:visible="showLog"
+    :title="t('page.settings.tab.info.log.title')"
+    unmount-on-close
+    hide-cancel
+    width="auto"
+  >
+    <logViewer />
+  </a-modal>
 </template>
 <script setup lang="ts">
 import { CheckModuleEnable, GetBtnStatus, GetRunningInfo } from '@/service/settings'
@@ -396,7 +411,7 @@ import Duration from 'dayjs/plugin/duration'
 import RelativeTime from 'dayjs/plugin/relativeTime'
 import { isInSubnet } from 'is-in-subnet'
 import { isIP } from 'is-ip'
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
@@ -404,6 +419,7 @@ import { genIconComponent } from '@/components/iconFont'
 
 dayjs.extend(RelativeTime)
 dayjs.extend(Duration)
+const logViewer = defineAsyncComponent(() => import('./components/logViewer.vue'))
 const { t, d } = useI18n()
 const loading = ref(true)
 const btnLoading = ref(true)
@@ -460,14 +476,16 @@ const osLogo = {
   Windows: genIconComponent('icon-Windows'),
   Linux: genIconComponent('icon-linux'),
   FreeBSD: genIconComponent('icon-freebsd'),
-  MacOS: genIconComponent('icon-macOS'),
+  'Mac OS X': genIconComponent('icon-macOS'),
   Solaris: genIconComponent('icon-solaris'),
   Other: genIconComponent('icon-other')
 }
+
+const showLog = ref(true)
 </script>
 
 <style scoped>
-button {
+.tag-button {
   border: none;
   margin: 0;
   padding: 0;
@@ -478,7 +496,7 @@ button {
   cursor: pointer;
 }
 
-button::after {
+.tag-button::after {
   border: none;
 }
 </style>

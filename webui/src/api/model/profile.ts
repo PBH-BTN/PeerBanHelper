@@ -131,4 +131,7 @@ export interface ActiveMonitoring {
   enabled: boolean
   data_retention_time: number
   data_cleanup_interval: number
+  traffic_monitoring: {
+    daily: number
+  }
 }
