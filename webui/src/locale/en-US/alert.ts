@@ -5,5 +5,6 @@ export default {
   'alert.action.dismissAll': 'Dismiss all',
   'alert.action.markAsRead': 'Mark as read',
   'alert.newAlert': 'New Alert!',
-  'alert.newAlert.tips': 'Incoming alerts, please check'
+  'alert.newAlert.tips': 'Incoming alerts, please check!',
+  'alert.newAlert.action': 'Check now'
 }

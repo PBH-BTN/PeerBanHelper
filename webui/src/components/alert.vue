@@ -93,9 +93,9 @@
 import { Level, type Alert } from '@/api/model/alert'
 import { DismissAlert, DismissAll, GetUnreadAlerts } from '@/service/alert'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
-import { Message, Notification } from '@arco-design/web-vue'
+import { Button, Message, Notification } from '@arco-design/web-vue'
 import markdownit from 'markdown-it'
-import { computed, ref } from 'vue'
+import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 const { t } = useI18n()
@@ -119,9 +119,21 @@ useRequest(
                 alert.level == Level.Fatal)
           )
         ) {
-          Notification.warning({
+          const closeHandler = Notification.warning({
             title: t('alert.newAlert'),
-            content: t('alert.newAlert.tips')
+            content: t('alert.newAlert.tips'),
+            footer: () =>
+              h(
+                Button,
+                {
+                  onClick: () => {
+                    closeHandler.close()
+                    visable.value = true
+                  },
+                  type: 'primary'
+                },
+                () => t('alert.newAlert.action')
+              )
           })
         }
         list.value = data.data
