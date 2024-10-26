@@ -396,6 +396,7 @@
     :title="t('page.settings.tab.info.log.title')"
     unmount-on-close
     hide-cancel
+    :mask-closable="false"
     width="auto"
   >
     <logViewer />

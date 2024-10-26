@@ -1,9 +1,17 @@
 <template>
   <a-space direction="vertical" class="container" size="medium">
-    <a-space v-if="!loading">
-      <a-switch v-model="enableAutoRefresh" :before-change="changeAutoRefresh" />{{
-        t('page.settings.tab.info.log.enableAutoRefresh')
-      }}
+    <a-space v-if="!loading" size="large">
+      <a-space>
+        <a-switch v-model="enableAutoRefresh" :before-change="changeAutoRefresh" />{{
+          t('page.settings.tab.info.log.enableAutoRefresh')
+        }}
+      </a-space>
+      <a-space>
+        <a-switch v-model="hideBanWave" />{{ t('page.settings.tab.info.log.hideBanWave') }}
+      </a-space>
+      <a-space>
+        <a-switch v-model="showThreadName" />{{ t('page.settings.tab.info.log.showThread') }}
+      </a-space>
     </a-space>
     <a-list
       ref="logList"
@@ -11,19 +19,21 @@
       :loading="loading"
       scrollbar
       :virtual-list-props="{
-        height: 600,
+        height: 700,
         buffer: 20
       }"
-      :data="logBuffer"
+      :data="list"
     >
       <template #item="{ item, index }">
         <a-list-item :key="index">
           <a-space class="log-line" fill>
+            <a-tag class="level-tag" :color="getColorByLogLevel(item.level)">{{
+              item.level
+            }}</a-tag>
             <a-tag>{{ d(item.time, 'log') }}</a-tag>
-            <a-tag :color="getColor(item.thread, ['orange', 'orangered', 'red', 'blue'])">
+            <a-tag v-if="showThreadName" :color="getThreadColor(item.thread)">
               {{ item.thread }}
             </a-tag>
-            <a-tag :color="getColorByLogLevel(item.level)">{{ item.level }}</a-tag>
             <a-typography-text
               :ellipsis="{
                 rows: 1,
@@ -40,19 +50,26 @@
 <script setup lang="ts">
 import { LogLevel, type Log } from '@/api/model/log'
 import { GetHistoryLogs } from '@/service/logger'
-import { onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import { StreamLogger } from '@/service/logger'
 import { List, Message } from '@arco-design/web-vue'
 import { getColor } from '@/utils/color'
 const { t, d } = useI18n()
-const logBuffer = ref([] as Log[])
+const hideBanWave = ref(false)
+const logBuffer = reactive([] as Log[])
 const { loading } = useRequest(GetHistoryLogs, {
   onSuccess: (data) => {
-    logBuffer.value = data.data
+    logBuffer.splice(0, logBuffer.length)
+    logBuffer.push(...data.data)
   }
 })
+
+const list = computed(() =>
+  hideBanWave.value ? logBuffer.filter((log) => log.thread !== 'Ban Wave') : logBuffer
+)
+
 const logList = ref<typeof List>()
 const ws = new StreamLogger()
 const enableAutoRefresh = ref(false)
@@ -61,12 +78,12 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
     if (enable) {
       console.log('open auto refresh')
       return ws.open(
-        logBuffer.value.length > 0 ? logBuffer.value[logBuffer.value.length - 1].offset : 0,
+        logBuffer.length > 0 ? logBuffer[logBuffer.length - 1].offset : 0,
         (newLog) => {
-          logBuffer.value.push(newLog)
-          console.log('scroll to', logBuffer.value.length - 1)
+          logBuffer.push(newLog)
+          console.log('scroll to', logBuffer.length - 1)
           logList.value?.scrollIntoView({
-            index: logBuffer.value.length - 1,
+            index: logBuffer.length - 1,
             align: 'bottom'
           } as ScrollIntoViewOptions)
         },
@@ -99,15 +116,32 @@ const getColorByLogLevel = (level: LogLevel) => {
       return 'gray'
   }
 }
+
+const getThreadColor = (thread: string) => {
+  if (thread.startsWith('virtual-') || /Thread-[0-9]+/.test(thread)) {
+    return 'gray'
+  } else {
+    return getColor(thread, ['orange', 'orangered', 'red', 'blue'])
+  }
+}
+
 onBeforeUnmount(() => {
   console.log('close ws')
   ws.close()
 })
+
+const showThreadName = ref(true)
 </script>
 
 <style scoped>
 .container {
   width: 70rem;
+}
+.level-tag {
+  width: 4.5em;
+  text-align: center;
+  display: flex;
+  justify-content: center;
 }
 </style>
 

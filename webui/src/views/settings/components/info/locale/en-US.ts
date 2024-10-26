@@ -60,5 +60,7 @@ export default {
 
   'page.settings.tab.info.log.button': 'View Logs',
   'page.settings.tab.info.log.title': 'Logs',
-  'page.settings.tab.info.log.enableAutoRefresh': 'Auto Refresh'
+  'page.settings.tab.info.log.enableAutoRefresh': 'Auto Refresh',
+  'page.settings.tab.info.log.hideBanWave': 'Hide check logs from Ban Wave',
+  'page.settings.tab.info.log.showThread': 'Show Thread Name'
 }
