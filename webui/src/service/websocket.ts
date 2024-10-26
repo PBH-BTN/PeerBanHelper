@@ -18,8 +18,9 @@ export class WebSocketHandler<T> {
 
   constructor(endpoint: string, path: string, token: string) {
     const url = new URL(endpoint)
-    const protocal = url.protocol === 'https:' ? 'wss' : 'ws'
-    this.url = new URL(urlJoin(`${protocal}://${url.host}${url.pathname}`, path))
+    this.url = new URL(
+      urlJoin(`${url.protocol === 'https:' ? 'wss' : 'ws'}://${url.host}${url.pathname}`, path)
+    )
     this.url.searchParams.append('token', token)
   }
 
