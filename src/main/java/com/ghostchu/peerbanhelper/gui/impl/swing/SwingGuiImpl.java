@@ -56,10 +56,23 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     public void setup() {
         super.setup();
         //FlatIntelliJLaf.setup();
+        setupSwingDefaultFonts();
         Main.getEventBus().register(this);
         OsThemeDetector detector = OsThemeDetector.getDetector();
         detector.registerListener(this::updateTheme);
         updateTheme(detector.isDark());
+    }
+
+    private void setupSwingDefaultFonts() {
+//        FontUIResource fontRes = new FontUIResource(new Font("Microsoft YaHei UI" , Font.PLAIN, 16));
+//        for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements();) {
+//            Object key = keys.nextElement();
+//            Object value = UIManager.get(key);
+//            if (value instanceof FontUIResource) {
+//                UIManager.put(key, fontRes);
+//            }
+//        }
+
     }
 
     @Override

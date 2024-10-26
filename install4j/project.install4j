@@ -663,7 +663,7 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_windows_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="64">
+    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="64">
       <jreBundle installOnlyIfNecessary="true" />
     </windows>
     <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_windows_nojava_${compiler:sys.version}" architecture="64">
