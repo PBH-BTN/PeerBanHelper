@@ -121,9 +121,9 @@ public class PeerBanHelperServer implements Reloadable {
     private JavalinWebContainer webContainer;
     @Autowired
     private AlertManager alertManager;
-    private Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
+    private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)
-            .maximumSize(3000)
+            .maximumSize(300)
             .softValues()
             .build();
     @Autowired
