@@ -129,7 +129,7 @@ IPDB_NEED_CONFIG: "IPDB feature requires configuration, please fill in the relev
 DOWNLOAD_PROGRESS_DETERMINED: "Download progress: downloaded {}/{} bytes, progress: {}%"
 DOWNLOAD_PROGRESS: "Download progress: downloaded {} bytes"
 DOWNLOAD_COMPLETED: "Download progress: completed! Total transferred {} bytes of data"
-BAN_WAVE_CHECK_COMPLETED: "Checked {} active torrents and {} peers from {} downloaders. Banned {} peers and unbanned {} expired bans ({}ms)"
+BAN_WAVE_CHECK_COMPLETED: "Completed check from {} downloaders with {} active torrents and {} peers. Banned {} peers and unbanned {} expired bans ({}ms)"
 WATCH_DOG_HUNGRY: "[Warning] WatchDog Service {} not reset within the specified time {}. Last status {}. Dumping process thread information, please send to PeerBanHelper developers to assist in fixing this issue"
 WATCH_DOG_CALLBACK_BLOCKED: "[Error] WatchDog Service callback thread unresponsive, forced exit from callback"
 PBH_BAN_WAVE_STARTED: "PeerBanHelper BanWave Daemon started"
