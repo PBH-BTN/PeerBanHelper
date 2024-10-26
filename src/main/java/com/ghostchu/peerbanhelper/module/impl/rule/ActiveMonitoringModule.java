@@ -156,6 +156,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         var dateTimeString = MiscUtil.formatDateTime(now);
         var dateString = MiscUtil.formatDateOnly(now);
         var identifier = "dataTrafficCapping-" + startOfToday;
+        // 一天只发一次
         if (totalBytes >= dailyTrafficCapping && !alertManager.identifierAlertExistsIncludeRead(identifier)) {
             alertManager.publishAlert(true,
                     AlertLevel.WARN,

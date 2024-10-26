@@ -91,6 +91,7 @@ public class AlertManager {
      */
     public void publishAlert(boolean push, AlertLevel level, String identifier, TranslationComponent title, TranslationComponent content) {
         try {
+            // 当前如果已有相同的 identifier 的未读警报，则不重复发送
             if (identifier != null && alertDao.identifierAlertExists(identifier)) {
                 return;
             }
