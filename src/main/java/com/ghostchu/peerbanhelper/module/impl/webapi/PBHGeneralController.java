@@ -344,7 +344,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
 
     private void mergeYaml(ConfigurationSection originalConfig, Map<String, Object> newMap) {
         newMap.forEach((key, value) -> {
-            String originalKey = key.replace("_", "-");
+            final String originalKey = originalConfig.contains(key) ? key : key.replace("_", "-");
             // 对象列表转为字符串列表
             if (originalKey.equals("banned-peer-id") || originalKey.equals("banned-client-name")) {
                 if (value instanceof List<?> list) {
