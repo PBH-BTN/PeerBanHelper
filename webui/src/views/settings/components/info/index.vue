@@ -340,7 +340,7 @@
                   type="circle"
                   size="mini"
                   :status="memoryProgressBarColor"
-                  :percent="memoryStatus"
+                  :percent="heapMemoryStatus"
                 />
               </a-tooltip>
               {{ formatFileSize(data?.data.jvm.memory.heap.free ?? 0) }} &nbsp;
@@ -450,6 +450,11 @@ const memoryStatus = computed(
   () =>
     1 -
     (data.value?.data.system.memory.free ?? 0) / ((data.value?.data.system.memory.total ?? 1) + 1)
+) //+1保证永远不可能100%
+const heapMemoryStatus = computed(
+    () =>
+        1 -
+        (data.value?.data.jvm.memory.heap.free ?? 0) / ((data.value?.data.jvm.memory.heap.max ?? 1) + 1)
 ) //+1保证永远不可能100%
 const memoryProgressBarColor = computed(() => {
   if (memoryStatus.value > 0.8) return 'danger'
