@@ -62,7 +62,7 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
 
     private void submit() {
         try {
-            log.info(tlUI(Lang.BTN_SUBMITTING_PEERS));
+            log.info(tlUI(Lang.BTN_SUBMITTING_HISTORIES));
             List<BtnPeerHistory> btnPeers = generatePing();
             if (btnPeers.isEmpty()) {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_LAST_REPORT_EMPTY));
@@ -81,7 +81,7 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                             log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                             setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                         } else {
-                            log.info(tlUI(Lang.BTN_SUBMITTED_PEERS, btnPeers.size()));
+                            log.info(tlUI(Lang.BTN_SUBMITTED_HISTORIES, btnPeers.size()));
                             setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, btnPeers.size()));
                             lastSubmitAt = System.currentTimeMillis();
                         }
