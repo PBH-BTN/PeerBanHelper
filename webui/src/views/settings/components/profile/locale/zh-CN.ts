@@ -83,14 +83,14 @@ export default {
   'page.settings.tab.profile.module.ipAddressBlocker.rules': '配置规则请前往{link}页面',
   'page.settings.tab.profile.module.ipAddressBlocker.rules.link': '规则配置',
 
-  'page.settings.tab.profile.module.autoRangeBan.title': '范围 IP 段封禁',
+  'page.settings.tab.profile.module.autoRangeBan.title': '连锁封禁',
   'page.settings.tab.profile.module.autoRangeBan.tips':
-    '在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁',
+    '在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同连锁封禁',
   'page.settings.tab.profile.module.autoRangeBan.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 前缀长度',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 前缀长度',
 
-  'page.settings.tab.profile.module.multiDialingBlocker.title': '多播封禁',
+  'page.settings.tab.profile.module.multiDialingBlocker.title': '多拨封禁',
   'page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime': '使用全局封禁时间',
 
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-length': '子网掩码长度',
