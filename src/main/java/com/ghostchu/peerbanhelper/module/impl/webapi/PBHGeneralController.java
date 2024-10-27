@@ -314,21 +314,25 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 .collect(LinkedHashMap::new, (map, entry) -> {
                     String updatedKey = entry.getKey().replace("-", "_");
                     Object value = entry.getValue();
-                    // 字符串列表转为对象列表
-                    if (updatedKey.equals("banned_peer_id") || updatedKey.equals("banned_client_name")) {
-                        if (value instanceof List<?> list) {
-                            List<Map<String, String>> parsedBannedPeerIdList = list.stream()
-                                    .filter(String.class::isInstance)
-                                    .map(String.class::cast)
-                                    .map(item -> (Map<String, String>) GSON.fromJson(item, new TypeToken<Map<String, String>>() {
-                                    }.getType()))
-                                    .toList();
-                            map.put(updatedKey, parsedBannedPeerIdList); // 替换为对象列表
+                    switch (updatedKey) {
+                        // 字符串列表转为对象列表
+                        case "banned_peer_id":
+                        case "banned_client_name": {
+                            if (value instanceof List<?> list) {
+                                List<Map<String, String>> bannedList = list.stream()
+                                        .filter(String.class::isInstance)
+                                        .map(String.class::cast)
+                                        .map(item -> (Map<String, String>) GSON.fromJson(item, new TypeToken<Map<String, String>>() {
+                                        }.getType()))
+                                        .toList();
+                                value = bannedList;
+                            }
+                            break;
                         }
                     }
                     // 如果值是 Map，递归替换子 Map 中的键
-                    else if (value instanceof Map<?, ?>) {
-                        map.put(updatedKey, replaceKeys((Map<String, Object>) value));
+                    if (value instanceof Map<?, ?> m) {
+                        map.put(updatedKey, replaceKeys((Map<String, Object>) m));
                     }
                     // 如果值是 List，检查其中的元素是否是 Map，如果是也进行递归处理
                     else if (value instanceof List<?> list) {
@@ -345,21 +349,25 @@ public class PBHGeneralController extends AbstractFeatureModule {
     private void mergeYaml(ConfigurationSection originalConfig, Map<String, Object> newMap) {
         newMap.forEach((key, value) -> {
             final String originalKey = originalConfig.contains(key) ? key : key.replace("_", "-");
-            // 对象列表转为字符串列表
-            if (originalKey.equals("banned-peer-id") || originalKey.equals("banned-client-name")) {
-                if (value instanceof List<?> list) {
-                    List<String> parsedList = list.stream()
-                            .filter(item -> item instanceof Map)
-                            .map(GSON::toJson)
-                            .toList();
-                    originalConfig.set(originalKey, parsedList);
+            switch (originalKey) {
+                // 对象列表转为字符串列表
+                case "banned-peer-id":
+                case "banned-client-name": {
+                    if (value instanceof List<?> l) {
+                        List<String> bannedList = l.stream()
+                                .filter(item -> item instanceof Map)
+                                .map(GSON::toJson)
+                                .toList();
+                        value = bannedList;
+                    }
+                    break;
                 }
             }
             // 如果值是 Map，递归替换子 Map 中的键
-            else if (value instanceof Map<?, ?> map) {
+            if (value instanceof Map<?, ?> m) {
                 ConfigurationSection section = Optional.ofNullable(originalConfig.getConfigurationSection(originalKey))
                         .orElseGet(() -> originalConfig.createSection(originalKey));
-                mergeYaml(section, (Map<String, Object>) map);
+                mergeYaml(section, (Map<String, Object>) m);
                 originalConfig.set(originalKey, section);
             }
             // 如果值是 List 或者其他，直接替换
