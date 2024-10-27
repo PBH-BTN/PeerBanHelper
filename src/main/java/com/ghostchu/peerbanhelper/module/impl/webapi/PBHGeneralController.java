@@ -22,12 +22,13 @@ import com.google.gson.reflect.TypeToken;
 import com.sun.management.HotSpotDiagnosticMXBean;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.yaml.snakeyaml.Yaml;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 
@@ -41,6 +42,7 @@ import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
+@Slf4j
 @Component
 @IgnoreScan
 public class PBHGeneralController extends AbstractFeatureModule {
@@ -76,7 +78,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
                 .post("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
                 .post("/api/general/reload", this::handleReloading, Role.USER_WRITE)
-                .get("/api/general/{configName}", this::handleConfigGet, Role.USER_READ)
+                .get("/api/general/{configName}", this::handleConfigGet, Role.USER_WRITE)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
     }
 
@@ -269,8 +271,35 @@ public class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(success, tl(locale(context), message), entryList));
     }
 
-    private void handleConfigGet(Context context) throws FileNotFoundException {
+    private void handleConfigGet(Context context) throws IOException, InvalidConfigurationException {
+        YamlConfiguration yamlConfiguration = new YamlConfiguration();
+        yamlConfiguration.getOptions()
+                .setParseComments(true)
+                .setWidth(1000);
+        switch (context.pathParam("configName")) {
+            case "config" -> {
+                yamlConfiguration.load(Main.getMainConfigFile());
+                sectionToList(yamlConfiguration, "push-notification", "push-notification-name");
+            }
+            case "profile" -> {
+                yamlConfiguration.load(Main.getProfileConfigFile());
+                stringListToMapList(yamlConfiguration, "module.peer-id-blacklist", "banned-peer-id");
+                stringListToMapList(yamlConfiguration, "module.client-name-blacklist", "banned-client-name");
+            }
+            default -> {
+                context.status(HttpStatus.NOT_FOUND);
+                return;
+            }
+        }
+        context.json(new StdResp(true, null, replaceKeys(yamlConfiguration, "-", "_")));
+    }
+
+    private void handleConfigPut(Context context) throws IOException, InvalidConfigurationException {
         File configFile;
+        YamlConfiguration yamlConfiguration = new YamlConfiguration();
+        yamlConfiguration.getOptions()
+                .setParseComments(true)
+                .setWidth(1000);
         switch (context.pathParam("configName")) {
             case "config" -> configFile = Main.getMainConfigFile();
             case "profile" -> configFile = Main.getProfileConfigFile();
@@ -279,127 +308,139 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 return;
             }
         }
-        Map<String, Object> originalYaml = new Yaml().load(new FileReader(configFile));
-        context.json(new StdResp(true, null, replaceKeys(originalYaml)));
-    }
-
-    private void handleConfigPut(Context context) throws IOException {
-        File configFile;
-        YamlConfiguration config;
-        switch (context.pathParam("configName")) {
-            case "config" -> {
-                config = Main.getMainConfig();
-                configFile = Main.getMainConfigFile();
-            }
-            case "profile" -> {
-                config = Main.getProfileConfig();
-                configFile = Main.getProfileConfigFile();
-            }
-            default -> {
-                context.status(HttpStatus.NOT_FOUND);
-                return;
-            }
-        }
+        yamlConfiguration.load(configFile);
         Map<String, Object> newData = GSON.fromJson(context.body(), Map.class);
-        mergeYaml(config, newData);
-        config.save(configFile);
+        mergeYaml(yamlConfiguration, newData, "_", "-");
+        yamlConfiguration.save(configFile);
         //moduleMatchCache.invalidateAll();
         context.status(HttpStatus.CREATED);
         //context.json(new StdResp(true, tl(locale(context), Lang.OPERATION_EXECUTE_SUCCESSFULLY), null));
         handleReloading(context);
     }
 
-    private Map<String, Object> replaceKeys(Map<String, Object> originalMap) {
-        return originalMap.entrySet().stream()
+    private static void stringListToMapList(ConfigurationSection cfg, String path, String field) {
+        ConfigurationSection section = cfg.getConfigurationSection(path);
+        if (section != null) {
+            List<Map<String, String>> list = section.getStringList(field).stream()
+                    .map(item -> (Map<String, String>) GSON.fromJson(item, new TypeToken<Map<String, String>>() {
+                    }.getType()))
+                    .toList();
+            section.set(field, list);
+            cfg.set(path, section);
+        }
+    }
+
+    private static void sectionToList(ConfigurationSection cfg, String path, String key) {
+        ConfigurationSection section = cfg.getConfigurationSection(path);
+        if (section != null) {
+            List<Object> list = section.getKeys(false).stream().map(k -> {
+                ConfigurationSection s2 = section.getConfigurationSection(k);
+                if (s2 != null) {
+                    s2.set(key, k);
+                    return s2;
+                }
+                return section.get(k);
+            }).toList();
+            cfg.set(path, list);
+        }
+    }
+
+    private static Map<String, Object> replaceKeys(ConfigurationSection cfg, String target, String replacement) {
+        return cfg.getValues(false).entrySet().stream()
                 .collect(LinkedHashMap::new, (map, entry) -> {
-                    String updatedKey = entry.getKey().replace("-", "_");
+                    String updatedKey = entry.getKey().replace(target, replacement);
                     Object value = entry.getValue();
-                    switch (updatedKey) {
-                        // 推送服务转为列表
-                        case "push_notification": {
-                            if (value instanceof Map<?, ?> m) {
-                                List<Map<String, Object>> pushList = m.entrySet().stream()
-                                        .map(e -> {
-                                            Map<String, Object> innerMap = (Map<String, Object>) e.getValue();
-                                            innerMap.put("name", e.getKey());
-                                            return innerMap;
-                                        }).toList();
-                                value = pushList;
-                            }
-                            break;
-                        }
-                        // 字符串列表转为对象列表
-                        case "banned_peer_id":
-                        case "banned_client_name": {
-                            if (value instanceof List<?> list) {
-                                List<Map<String, String>> bannedList = list.stream()
-                                        .filter(String.class::isInstance)
-                                        .map(String.class::cast)
-                                        .map(item -> (Map<String, String>) GSON.fromJson(item, new TypeToken<Map<String, String>>() {
-                                        }.getType()))
-                                        .toList();
-                                value = bannedList;
-                            }
-                            break;
-                        }
-                    }
-                    // 如果值是 Map，递归替换子 Map 中的键
-                    if (value instanceof Map<?, ?> m) {
-                        map.put(updatedKey, replaceKeys((Map<String, Object>) m));
-                    }
-                    // 如果值是 List，检查其中的元素是否是 Map，如果是也进行递归处理
-                    else if (value instanceof List<?> list) {
+                    if (value instanceof ConfigurationSection c) {
+                        map.put(updatedKey, replaceKeys(c, target, replacement));
+                    } else if (value instanceof List<?> list) {
                         List<Object> updatedList = list.stream()
-                                .map(item -> item instanceof Map<?, ?> ? replaceKeys((Map<String, Object>) item) : item)
+                                .map(item -> item instanceof ConfigurationSection c ? replaceKeys(c, target, replacement) : item)
                                 .toList();
                         map.put(updatedKey, updatedList);
                     } else {
-                        map.put(updatedKey, value); // 直接添加非 Map 和非 List 的值
+                        map.put(updatedKey, value);
                     }
                 }, LinkedHashMap::putAll);
     }
 
-    private void mergeYaml(ConfigurationSection originalConfig, Map<String, Object> newMap) {
+    private static Map<String, Object> replaceKeys(Map<String, Object> originalMap, String target, String replacement) {
+        return originalMap.entrySet().stream()
+                .collect(LinkedHashMap::new, (map, entry) -> {
+                    String updatedKey = entry.getKey().replace(target, replacement);
+                    Object value = entry.getValue();
+                    // 如果值是 Map，递归替换子 Map 中的键
+                    if (value instanceof Map<?, ?> m) {
+                        map.put(updatedKey, replaceKeys((Map<String, Object>) m, target, replacement));
+                    }
+                    // 如果值是 List，检查其中的元素是否是 Map，如果是也进行递归处理
+                    else if (value instanceof List<?> list) {
+                        List<Object> updatedList = list.stream()
+                                .map(item -> item instanceof Map<?, ?> ? replaceKeys((Map<String, Object>) item, target, replacement) : item)
+                                .toList();
+                        map.put(updatedKey, updatedList);
+                    }
+                    // 直接添加非 Map 和非 List 的值
+                    else {
+                        map.put(updatedKey, value);
+                    }
+                }, LinkedHashMap::putAll);
+    }
+
+    private static void mergeYaml(ConfigurationSection cfg, Map<String, Object> newMap, String target, String replacement) {
+        String path = cfg.getCurrentPath();
         newMap.forEach((key, value) -> {
-            final String originalKey = originalConfig.contains(key) ? key : key.replace("_", "-");
+            final String originalKey = cfg.contains(key) ? key : key.replace(target, replacement);
             switch (originalKey) {
                 // 推送服务转回字典
-                case "push-notification": {
-                    if (value instanceof List<?> list) {
-                        Map<String, Object> pushMap = list.stream()
+                case "push-notification" -> {
+                    if ("".equals(path)) {
+                        Map<String, Object> pushMap = ((List<?>) value).stream()
                                 .filter(Map.class::isInstance)
                                 .map(Map.class::cast)
                                 .collect(LinkedHashMap::new, (map, entry) -> {
-                                    String name = (String) entry.remove("name");
+                                    String name = (String) entry.remove("push_notification_name");
                                     map.put(name, entry);
                                 }, LinkedHashMap::putAll);
                         value = pushMap;
                     }
-                    break;
                 }
                 // 对象列表转为字符串列表
-                case "banned-peer-id":
-                case "banned-client-name": {
-                    if (value instanceof List<?> list) {
-                        List<String> bannedList = list.stream()
+                case "banned-peer-id" -> {
+                    if ("module.peer-id-blacklist".equals(path)) {
+                        List<String> bannedList = ((List<?>) value).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
                         value = bannedList;
                     }
-                    break;
+                }
+                case "banned-client-name" -> {
+                    if ("module.client-name-blacklist".equals(path)) {
+                        List<String> bannedList = ((List<?>) value).stream()
+                                .filter(Map.class::isInstance)
+                                .map(GSON::toJson)
+                                .toList();
+                        value = bannedList;
+                    }
                 }
             }
-            // 如果值是 Map，递归替换子 Map 中的键
+            // 如果值是 Map，递归替换子 cfg 中的键
             if (value instanceof Map<?, ?> map) {
-                ConfigurationSection section = Optional.ofNullable(originalConfig.getConfigurationSection(originalKey))
-                        .orElseGet(() -> originalConfig.createSection(originalKey));
-                mergeYaml(section, (Map<String, Object>) map);
-                originalConfig.set(originalKey, section);
+                ConfigurationSection section = Optional.ofNullable(cfg.getConfigurationSection(originalKey))
+                        .orElseGet(() -> cfg.createSection(originalKey));
+                mergeYaml(section, (Map<String, Object>) map, target, replacement);
+                cfg.set(originalKey, section);
             }
-            // 如果值是 List 或者其他，直接替换
+            // 如果值是 List，检查其中的元素是否是 Map，如果是也进行递归处理
+            else if (value instanceof List<?> list) {
+                List<Object> updatedList = list.stream()
+                        .map(item -> item instanceof Map<?, ?> ? replaceKeys((Map<String, Object>) item, target, replacement) : item)
+                        .toList();
+                cfg.set(originalKey, updatedList);
+            }
+            // 直接添加非 Map 和非 List 的值
             else {
-                originalConfig.set(originalKey, value); // 直接添加
+                cfg.set(originalKey, value); // 直接添加
             }
         });
     }
