@@ -1,4 +1,4 @@
-config-version: 19
+config-version: 22
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -144,11 +144,7 @@ proxy:
   port: 7890
   # 代理例外地址，使用 | 分隔不同条目 - Exception list, spilt with | symbol
   non-proxy-hosts: "localhost|127.*|192.168.*|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|*.local|*.lan"
-privacy:
-  # 启用自动错误报告 - Enable automatic error reporting
-  # 错误报告信息不包含敏感信息或您的 IP 地址
-  # Error reports will not contain sensitive information or your IP address.
-  error-reporting: true
+
 performance:
   # 启用 Windows 平台上的 EcoQoS API以节约能源消耗，作为交换，程序运行速度将降低，定时任务可能推迟
   # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
