@@ -315,6 +315,19 @@ public class PBHGeneralController extends AbstractFeatureModule {
                     String updatedKey = entry.getKey().replace("-", "_");
                     Object value = entry.getValue();
                     switch (updatedKey) {
+                        // 推送服务转为列表
+                        case "push_notification": {
+                            if (value instanceof Map<?, ?> m) {
+                                List<Map<String, Object>> pushList = m.entrySet().stream()
+                                        .map(e -> {
+                                            Map<String, Object> innerMap = (Map<String, Object>) e.getValue();
+                                            innerMap.put("name", e.getKey());
+                                            return innerMap;
+                                        }).toList();
+                                value = pushList;
+                            }
+                            break;
+                        }
                         // 字符串列表转为对象列表
                         case "banned_peer_id":
                         case "banned_client_name": {
@@ -350,12 +363,26 @@ public class PBHGeneralController extends AbstractFeatureModule {
         newMap.forEach((key, value) -> {
             final String originalKey = originalConfig.contains(key) ? key : key.replace("_", "-");
             switch (originalKey) {
+                // 推送服务转回字典
+                case "push-notification": {
+                    if (value instanceof List<?> list) {
+                        Map<String, Object> pushMap = list.stream()
+                                .filter(Map.class::isInstance)
+                                .map(Map.class::cast)
+                                .collect(LinkedHashMap::new, (map, entry) -> {
+                                    String name = (String) entry.remove("name");
+                                    map.put(name, entry);
+                                }, LinkedHashMap::putAll);
+                        value = pushMap;
+                    }
+                    break;
+                }
                 // 对象列表转为字符串列表
                 case "banned-peer-id":
                 case "banned-client-name": {
-                    if (value instanceof List<?> l) {
-                        List<String> bannedList = l.stream()
-                                .filter(item -> item instanceof Map)
+                    if (value instanceof List<?> list) {
+                        List<String> bannedList = list.stream()
+                                .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
                                 .toList();
                         value = bannedList;
@@ -364,10 +391,10 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 }
             }
             // 如果值是 Map，递归替换子 Map 中的键
-            if (value instanceof Map<?, ?> m) {
+            if (value instanceof Map<?, ?> map) {
                 ConfigurationSection section = Optional.ofNullable(originalConfig.getConfigurationSection(originalKey))
                         .orElseGet(() -> originalConfig.createSection(originalKey));
-                mergeYaml(section, (Map<String, Object>) m);
+                mergeYaml(section, (Map<String, Object>) map);
                 originalConfig.set(originalKey, section);
             }
             // 如果值是 List 或者其他，直接替换
