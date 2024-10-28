@@ -10,7 +10,7 @@
       <a-typography-paragraph>
         <i18n-t keypath="page.oobe.steps.welcome.docTips">
           <template #doc>
-            <a-link href="https://doc.pbh-btn.com/" target="_blank">
+            <a-link href="https://docs.pbh-btn.com/" target="_blank">
               {{ t('page.oobe.steps.welcome.doc') }}
             </a-link>
           </template>

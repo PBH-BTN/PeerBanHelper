@@ -124,7 +124,7 @@ body:
           required: false
         - label: "所添加的下载器已满足 README 中的前置要求（如版本号和插件）(The downloaders that I've added already satisfied the requirements (E.g install plugins/adapters))"
           required: false
-        - label: "我已检查过 [PBH 文档](https://doc.pbh-btn.com/)（特别是常见问题），且即使使用了搜索也没有找到与此有关的内容 (This not a question/or the question that not listed in README's FAQ or [PBH WIKI](https://doc.pbh-btn.com/))"
+        - label: "我已检查过 [PBH 文档](https://docs.pbh-btn.com/)（特别是常见问题），且即使使用了搜索也没有找到与此有关的内容 (This not a question/or the question that not listed in README's FAQ or [PBH WIKI](https://docs.pbh-btn.com/))"
           required: false
         - label: "我没有检查这个检查清单，只是闭眼选中了所有的复选框，请关闭这个 Issue (I have not read these checkboxes and therefore I just ticked them all, Please close this issue)"
           required: false

@@ -7,13 +7,13 @@
 	{
 		"step_title": "查收 PeerBanHelper 用户文档",
 		"items": [{
-			"desc": "请花一点时间记下此地址：<a style='font-weight:bold' href='https://doc.pbh-btn.com/' target='_blank'>https://doc.pbh-btn.com/</a><br><br>此文档将帮助你完成后续的配置步骤。"
+			"desc": "请花一点时间记下此地址：<a style='font-weight:bold' href='https://docs.pbh-btn.com/' target='_blank'>https://docs.pbh-btn.com/</a><br><br>此文档将帮助你完成后续的配置步骤。"
 		}]
 	},
 	{
 		"step_title": "可选加入 BTN 威胁防护网络",
 		"items": [{
-			"desc": "在安装完成后，您可以加入 <a href='https://doc.pbh-btn.com/docs/btn/intro/' target='_blank'>BTN 威胁防护网络</a>，与 BTN 服务器交换数据，以提升您和其他人的恶意 Peer 封禁能力。<br><br>您可以在<a href='https://doc.pbh-btn.com/docs/btn/connect' target='_blank'>这里</a>查看如何加入。"
+			"desc": "在安装完成后，您可以加入 <a href='https://docs.pbh-btn.com/docs/btn/intro/' target='_blank'>BTN 威胁防护网络</a>，与 BTN 服务器交换数据，以提升您和其他人的恶意 Peer 封禁能力。<br><br>您可以在<a href='https://docs.pbh-btn.com/docs/btn/connect' target='_blank'>这里</a>查看如何加入。"
 		}]
 	},
 	{
