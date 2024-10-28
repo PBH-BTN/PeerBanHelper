@@ -52,8 +52,6 @@
           <a-divider />
           <ipDatabase v-model="form.ip_database" />
           <a-divider />
-          <proxy v-model="form.proxy" />
-          <a-divider />
           <performance v-model="form.performance" />
           <br />
           <a-form-item label-col-flex="0">
@@ -82,7 +80,6 @@ import logger from './components/logger.vue'
 import lookup from './components/lookup.vue'
 import performance from './components/performance.vue'
 import persist from './components/persist.vue'
-import proxy from './components/proxy.vue'
 import webui from './components/webui.vue'
 
 const endpointStore = useEndpointStore()
