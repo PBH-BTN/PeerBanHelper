@@ -37,11 +37,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -105,7 +107,7 @@ public class IPDB implements AutoCloseable {
                 if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
                     String iso = geoData.getCountry().getIso();
                     if (iso.equalsIgnoreCase("CN") || iso.equalsIgnoreCase("TW")
-                        || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
+                            || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
                         queryGeoCN(address, geoData);
                     }
                 }
@@ -246,7 +248,7 @@ public class IPDB implements AutoCloseable {
         IPDBDownloadSource main = new IPDBDownloadSource("https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
         IPDBDownloadSource backup = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", "GeoCN", true);
         Path tmp = Files.createTempFile("GeoCN", ".mmdb");
-        downloadFile(main, backup, tmp, "GeoCN").join();
+        downloadFile(tmp, "GeoCN", main, backup).join();
         if (!tmp.toFile().exists()) {
             throw new IllegalStateException("Download mmdb database failed!");
         }
@@ -268,7 +270,7 @@ public class IPDB implements AutoCloseable {
         IPDBDownloadSource main = new IPDBDownloadSource("https://github.com/P3TERX/GeoLite.mmdb/raw/download/", databaseName);
         IPDBDownloadSource backup = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", databaseName, true);
         Path tmp = Files.createTempFile(databaseName, ".mmdb");
-        downloadFile(main, backup, tmp, databaseName).join();
+        downloadFile(tmp, databaseName, main, backup).join();
         if (!tmp.toFile().exists()) {
             if (isMmdbNeverDownloaded(target)) {
                 throw new IllegalStateException("Download mmdb database failed!");
@@ -313,20 +315,25 @@ public class IPDB implements AutoCloseable {
         return System.currentTimeMillis() - target.lastModified() > updateInterval;
     }
 
-    private CompletableFuture<Void> downloadFile(IPDBDownloadSource req, IPDBDownloadSource backupReq, Path path, String databaseName) {
-        return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(req.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
+    private CompletableFuture<Void> downloadFile(Path path, String databaseName, IPDBDownloadSource... mirrorList) {
+        return downloadFile(Arrays.stream(mirrorList).collect(Collectors.toList()), path, databaseName);
+    }
+
+    private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName) {
+        IPDBDownloadSource mirror = mirrorList.removeFirst();
+        return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
                     if (r.statusCode() == 200) {
-                        if (req.supportGzip()) {
+                        if (mirror.supportGzip()) {
                             try {
                                 File tmp = File.createTempFile(databaseName, ".tmp");
                                 try (GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(r.body().toFile()));
                                      FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
-                                        byte[] buffer = new byte[1024];
-                                        int len;
-                                        while ((len = gzipInputStream.read(buffer)) > 0) {
-                                            fileOutputStream.write(buffer, 0, len);
-                                        }
+                                    byte[] buffer = new byte[1024];
+                                    int len;
+                                    while ((len = gzipInputStream.read(buffer)) > 0) {
+                                        fileOutputStream.write(buffer, 0, len);
+                                    }
                                 }
                                 Files.move(tmp.toPath(), r.body(), StandardCopyOption.REPLACE_EXISTING);
                                 log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
@@ -339,17 +346,17 @@ public class IPDB implements AutoCloseable {
                             return;
                         }
                     }
-                    if (backupReq != null) { // 非 200 状态码 或者 gzip 解压出错
+                    if (!mirrorList.isEmpty()) { // 非 200 状态码 或者 gzip 解压出错
                         log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                        downloadFile(backupReq, null, path, databaseName);
+                        downloadFile(mirrorList, path, databaseName);
                         return;
                     }
                     log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body()));
                 })
                 .exceptionally(e -> {
-                    if (backupReq != null) {
+                    if (!mirrorList.isEmpty()) {
                         log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                        return downloadFile(backupReq, null, path, databaseName).join();
+                        return downloadFile(mirrorList, path, databaseName).join();
                     }
                     log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, e.getMessage()), e);
                     File file = path.toFile();
