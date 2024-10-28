@@ -21,6 +21,7 @@ import com.maxmind.geoip2.record.Location;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,7 +45,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -328,10 +328,10 @@ public class IPDB implements AutoCloseable {
         return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
                     if (r.statusCode() == 200) {
-                        if (mirror.supportGzip()) {
+                        if (mirror.supportXzip()) {
                             try {
                                 File tmp = File.createTempFile(databaseName, ".tmp");
-                                try (GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(r.body().toFile()));
+                                try (XZCompressorInputStream gzipInputStream = new XZCompressorInputStream(new FileInputStream(r.body().toFile()));
                                      FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
                                     byte[] buffer = new byte[1024];
                                     int len;
@@ -349,6 +349,8 @@ public class IPDB implements AutoCloseable {
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         }
+                    } else {
+                        throw new IllegalStateException("Not a valid response");
                     }
                     if (!mirrorList.isEmpty()) { // 非 200 状态码 或者 gzip 解压出错
                         log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
