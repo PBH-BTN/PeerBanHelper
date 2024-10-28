@@ -1,27 +1,56 @@
+import { DurationFormat } from '@formatjs/intl-durationformat'
+
+function parseTimeDuration(ms: number) {
+  const nanoseconds = (ms * 1e6) % 1e3
+  const microseconds = Math.floor(ms * 1e3) % 1e3
+  const milliseconds = Math.floor(ms) % 1e3
+
+  const totalSeconds = Math.floor(ms / 1000)
+  const seconds = totalSeconds % 60
+
+  const totalMinutes = Math.floor(totalSeconds / 60)
+  const minutes = totalMinutes % 60
+
+  const totalHours = Math.floor(totalMinutes / 60)
+  const hours = totalHours % 24
+
+  const totalDays = Math.floor(totalHours / 24)
+  const days = totalDays % 7
+
+  const totalWeeks = Math.floor(totalDays / 7)
+  const weeks = totalWeeks % 4
+
+  const totalMonths = Math.floor(totalWeeks / 4)
+  const months = totalMonths % 12
+
+  const years = Math.floor(totalMonths / 12)
+
+  return {
+    years,
+    months,
+    weeks,
+    days,
+    hours,
+    minutes,
+    seconds,
+    milliseconds,
+    microseconds,
+    nanoseconds
+  }
+}
+function getFormatter(): DurationFormat {
+  // @ts-expect-error Supported on chrome 129
+  if (Intl.DurationFormat !== undefined) {
+    // @ts-expect-error Supported on chrome 129
+    return new Intl.DurationFormat()
+  } else {
+    return new DurationFormat()
+  }
+}
+
 export function formatMilliseconds(ms: number): string {
-  const days = Math.floor(ms / 86400000)
-  ms %= 86400000
-  const hours = Math.floor(ms / 3600000)
-  ms %= 3600000
-  const minutes = Math.floor(ms / 60000)
-  ms %= 60000
-  const seconds = Math.floor(ms / 1000)
-
-  let result = ''
-  if (days > 0) {
-    result += `${days} Day${days > 1 ? 's' : ''} `
-  }
-  if (hours > 0) {
-    result += `${hours} Hour${hours > 1 ? 's' : ''} `
-  }
-  if (minutes > 0) {
-    result += `${minutes} Minute${minutes > 1 ? 's' : ''} `
-  }
-  if (seconds > 0) {
-    result += `${seconds} Second${seconds > 1 ? 's' : ''} `
-  }
-
-  return result.trim()
+  const formatter = getFormatter()
+  return formatter.format(parseTimeDuration(ms))
 }
 
 export function formatSeconds(seconds: number): string {

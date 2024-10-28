@@ -1,5 +1,6 @@
 export default {
   'page.dashboard.description': '此页面展示 PeerBanHelper 自启动以来的基本数据。',
+  'page.dashboard.runningStatus': '运行状态',
   'page.dashboard.clientStatus.title': '已连接的下载器',
   'page.dashboard.clientStatus.card.title': '下载器状态',
   'page.dashboard.clientStatus.card.status': '状态',

@@ -29,12 +29,39 @@
       </a-input-number>
       <template #extra> ={{ formatMilliseconds(model.data_cleanup_interval) }} </template>
     </a-form-item>
+    <a-form-item
+      v-if="model.enabled"
+      :label="t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable')"
+      :tooltip="t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips')"
+      field="model.traffic_monitoring.daily"
+    >
+      <a-switch v-model="enableDailTrafficLimit" />
+    </a-form-item>
+    <a-form-item
+      v-if="model.enabled && enableDailTrafficLimit"
+      :label="t('page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value')"
+      field="model.traffic_monitoring.daily"
+    >
+      <a-input-number v-model="model.traffic_monitoring.daily" style="width: 200px">
+        <template #suffix> {{ t('page.settings.tab.profile.unit.bytes') }} </template>
+      </a-input-number>
+      <template #extra> ={{ formatFileSize(model.traffic_monitoring.daily) }} </template>
+    </a-form-item>
   </a-space>
 </template>
 <script setup lang="ts">
 import type { ActiveMonitoring } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
+import { formatFileSize } from '@/utils/file'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 const model = defineModel<ActiveMonitoring>({ required: true })
+
+const enableDailTrafficLimit = computed({
+  get: () => model.value.traffic_monitoring.daily !== -1,
+  set: (value) => {
+    model.value.traffic_monitoring.daily = value ? 1000 : -1
+  }
+})
 </script>

@@ -98,7 +98,8 @@ export interface MultiDialingBlocker {
   ban_duration: BanDuration
   subnet_mask_length: number
   subnet_mask_v6_length: number
-  tolerate_num: number
+  tolerate_num_ipv4: number
+  tolerate_num_ipv6: number
   cache_lifespan: number
   keep_hunting: boolean
   keep_hunting_time: number
@@ -130,4 +131,7 @@ export interface ActiveMonitoring {
   enabled: boolean
   data_retention_time: number
   data_cleanup_interval: number
+  traffic_monitoring: {
+    daily: number
+  }
 }

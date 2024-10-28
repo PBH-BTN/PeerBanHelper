@@ -289,7 +289,7 @@ BTN_PORT_RULE: "BTN 端口规则 ({})"
 BTN_IP_RULE: "BTN IP 规则 ({})"
 GENERAL_NA: "N/A"
 
-DUPLICATE_BAN: "警告：正在封禁的 Peer 已处于封禁列表中！这可能是由于程序错误，或者您手动清理了下载器的封禁列表。如果持续出现此问题，请尝试重新启动 PBH，并与开发者联系：{}"
+DUPLICATE_BAN: "正在封禁的 Peer 已处于封禁列表：{}"
 
 NET_TYPE_WIDEBAND: "宽带"
 NET_TYPE_BASE_STATION: "基站"
@@ -416,8 +416,64 @@ BTN_STAND_BY: "就绪"
 BTN_RECONFIGURE_DISABLED_BY_SERVER: "BTN 服务器已禁用重新配置"
 BTN_RECONFIGURE_PREPARE_RECONFIGURE: "检测到新的版本，正在重新配置"
 UNABLE_SET_SQLITE_OPTIMIZED_PRAGMA: "设置 SQLite 优化的 PRAGMA 参数时出现错误"
-
 IPFS_STARTING: "[IPFS] PeerBanHelper 正在连接到 IPFS 网络，请稍等"
 IPFS_STARTED: "[IPFS] PeerBanHelper 已连接到 IPFS 网络，去中心化网络功能已启用"
 FRIEND_LOADED: "[好友] 已加载 {} 个好友"
 IPFS_ADVERTISE_RELAY: "[IPFS] PeerBanHelper 已宣告此 IPFS 节点为网络中继节点 (Relay)，您将帮助 IPFS 网络上的其它用户中继流量"
+THREAD_INTERRUPTED: "线程强制终止，操作已被取消"
+DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY: "无法获取 BitComet 任务详情信息"
+ALERT_SNAPSHOT: "您当前正在使用的是 PeerBanHelper 的非稳定版本"
+ALERT_SNAPSHOT_DESCRIPTION: "非稳定版本的构建仅用于测试，且可能存在严重缺陷。在继续使用非稳定版本前，请做好数据备份。如遇到错误，请前往 [Issue Tracker](https://github.com/PBH-BTN/PeerBanHelper/issues) 反馈。"
+BTN_ABILITY_RECONFIGURE: "重新配置"
+BTN_ABILITY_RECONFIGURE_DESCRIPTION: "“重新配置” 能力允许 BTN 服务器通知 PeerBanHelper 在间隔一定时间后与 BTN 服务器联系，刷新使用的配置文件，以获取远程服务器的配置更改"
+BTN_ABILITY_RULES: "云端规则"
+BTN_ABILITY_RULES_DESCRIPTION: "“云端规则” 能力允许 BTN 服务器向 PeerBanHelper 定期提供由远程服务器生成的反吸血规则，作为本地反吸血规则的补充"
+BTN_ABILITY_SUBMIT_BANS: "提交封禁列表"
+BTN_ABILITY_SUBMIT_BANS_DESCRIPTION: "“提交封禁列表” 能力允许 BTN 服务器定期接收 PeerBanHelper 的封禁列表和封禁时的数据快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。"
+BTN_ABILITY_SUBMIT_HISTORY: "提交历史记录"
+BTN_ABILITY_SUBMIT_HISTORY_DESCRIPTION: "“提交历史记录” 能力允许 BTN 服务器定期接收 PeerBanHelper 所跟踪的下载器上的 Peers 活动和最后一次记录的活动数据快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。同时，这些数据还有助于分析是否存在利用 PeerBanHelper 反吸血功能的漏洞，绕过反吸血机制的在野利用。"
+BTN_ABILITY_SUBMIT_SNAPSHOT: "提交快照"
+BTN_ABILITY_SUBMIT_SNAPSHOT_DESCRIPTION: "“提交快照” 能力允许 BTN 服务器定期接收 PeerBanHelper 所跟踪的下载器上的瞬间状态快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。同时，这些数据还有助于 BTN 分析当前网络上的活动，以了解不同时刻网络上的恶意活动的概况。"
+BTN_ABILITY_EXCEPTION: "例外"
+BTN_ABILITY_EXCEPTION_DESCRIPTION: "“例外” 能力允许 BTN 服务器通知 PeerBanHelper 将某些地址排除在检查列表之外。如果指定的地址已被封禁，则将解除封禁。我们使用此功能来处理潜在的破坏行为。如果有人恶意利用 BTN 网络，我们将使用此能力将受到影响的记录从 PeerBanHelper 中删除。"
+BTN_ABILITY_EXCEPTION_LOADED_FROM_CACHE: "已从本地磁盘缓存加载"
+BTN_ABILITY_EXCEPTION_LOADED_FROM_CACHE_FAILED: "从本地磁盘缓存加载例外列表失败"
+BTN_ABILITY_EXCEPTION_LOADED_FROM_REMOTE: "已从远程服务器加载，版本: {}"
+BTN_ABILITY_EXCEPTION_UPDATE_RULES_SUCCESSES: "[BTN 网络] (例外)规则数据更新成功，当前数据版本：{}"
+BTN_ABILITY_EXCEPTION_UNBANNED_PEERS: "[BTN 网络] 已解除了 {} 个 Peer 的封禁，因为它们被 BTN 网络列入例外列表"
+UNABLE_READ_ALERT: "无法更新警报的已读状态"
+BTN_NOT_ENABLE_AND_REQUIRE_RESTART: "当前 BTN 模块未被加载，请启用 BTN 模块并重新启动 PeerBanHelper"
+RELOAD_RESULT_SUCCESS: "配置文件已保存并成功重载"
+RELOAD_RESULT_SCHEDULED: "配置文件已保存并成功重载，但部分修改可能需要一段时间生效"
+RELOAD_RESULT_REQUIRE_RESTART: "配置文件已保存并成功重载，但部分修改需要重启以生效"
+RELOAD_RESULT_FAILED: "配置文件已保存，但重载过程中出现了错误。请检查控制台日志"
+WS_LOGS_STREAM_ACCESS_DENIED: "操作被拒绝，鉴权失败"
+ALERT_MANAGER_CLEAN_UP: "已清理 {} 条历史警报记录"
+MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_TITLE: "下载器上行流量超限告警 ({})"
+MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION: |
+  PeerBanHelper 监测到托管的下载器的总上传流量于 {} 达到当日告警阈值。
+  
+  **已上传流量：{} (告警阈值: {})**
+  
+  请检查下载器当前运行状态。  
+  若需要修改告警设置，请前往 Active Monitoring 页面修改。
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE: "下载器返回错误响应次数过多 ({})"
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
+  在尝试连接到下载器 {} 时错误次数过多，请检查下载器状态，如用户名或密码等。
+
+  **最后一次连接状态:** {}  
+  **最后一次连接信息:** {}  
+  
+  您可以点击出错的下载器的 *编辑* 按钮并修正错误后，点击 *保存* 来跳过冷却重新激活下载器。
+DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK: |
+  在尝试连接到下载器 {} 时错误次数过多，请检查下载器状态，如用户名或密码等。  
+  您可以点击出错的下载器的 *编辑* 按钮并修正错误后，点击 *保存* 来跳过冷却重新激活下载器。
+PROGRAM_OUT_OF_MEMORY_TITLE: "PeerBanHelper 可用内存严重不足"
+PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
+  PeerBanHelper 的可用运行内存严重不足，并可能随时停止运行。
+  
+  可用内存: {}MB  
+  最大内存: {}MB
+  
+  请立即增加 PeerBanHelper 的内存分配。
+BAN_PEER_EXCEPTION: "封禁 Peer 时出现意外错误，指定 Peer 可能封禁失败，请将下面的信息报告给 PeerBanHelper 开发者"

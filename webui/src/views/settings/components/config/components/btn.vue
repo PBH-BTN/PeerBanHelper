@@ -23,10 +23,10 @@
         <a-input v-model="model.config_url" style="width: 400px" />
       </a-form-item>
       <a-form-item label="App ID" field="btn.app_id">
-        <a-input v-model="model.app_id" style="width: 200px" />
+        <a-input v-model="model.app_id" style="width: 400px" />
       </a-form-item>
       <a-form-item label="App Secret" field="btn.app_secret">
-        <a-input-password v-model="model.app_secret" style="width: 200px" />
+        <a-input-password v-model="model.app_secret" style="width: 400px" />
       </a-form-item>
     </div>
   </a-space>

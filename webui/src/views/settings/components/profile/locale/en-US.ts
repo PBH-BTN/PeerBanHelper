@@ -4,6 +4,7 @@ export default {
   'page.settings.tab.profile.form.checkInterval': 'Check Interval',
   'page.settings.tab.profile.unit.ms': 'ms',
   'page.settings.tab.profile.unit.s': 'seconds',
+  'page.settings.tab.profile.unit.bytes': 'bytes',
   'page.settings.tab.profile.form.banDuration': 'Ban Duration',
   'page.settings.tab.profile.form.ignoreAddress': 'Ignore Address',
   'page.settings.tab.profile.form.ignoreAddress.tooltip':
@@ -103,7 +104,7 @@ export default {
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-length': 'Subnet mask length',
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length':
     'IPv6 subnet mask length',
-  'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': 'Tolerate number',
+  'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': 'Tolerate number({version})',
   'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num.tips':
     'The allowed maximum amount of ips in same subnet, to avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same ISP',
   'page.settings.tab.profile.module.multiDialingBlocker.timeWindow': 'Detection window',
@@ -123,11 +124,17 @@ export default {
     'For other configurations, please go to the {link} page',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': 'Rule Subscribe',
 
-  'page.settings.tab.profile.module.activeMonitoring.title': 'Active monitoring',
+  'page.settings.tab.profile.module.activeMonitor.title': 'Active monitoring',
   'page.settings.tab.profile.module.activeMonitor.disable.tips':
     'This function is required by some charts.',
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': 'Retention time',
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
     "Deleted records won't free the disk space, but new data will reuse those parts of space due SQLite internal design",
-  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': 'Cleanup interval'
+  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': 'Cleanup interval',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable':
+    'Enable daily traffic limit',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
+    'Set the traffic capping threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
+    'Daily traffic limit'
 }

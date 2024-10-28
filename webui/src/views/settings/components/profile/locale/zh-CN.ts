@@ -4,6 +4,7 @@ export default {
   'page.settings.tab.profile.form.checkInterval': '检查频率',
   'page.settings.tab.profile.unit.ms': '毫秒',
   'page.settings.tab.profile.unit.s': '秒',
+  'page.settings.tab.profile.unit.bytes': '字节',
   'page.settings.tab.profile.form.banDuration': '封禁持续时间',
   'page.settings.tab.profile.form.ignoreAddress': '忽略地址',
   'page.settings.tab.profile.form.ignoreAddress.tooltip':
@@ -82,19 +83,19 @@ export default {
   'page.settings.tab.profile.module.ipAddressBlocker.rules': '配置规则请前往{link}页面',
   'page.settings.tab.profile.module.ipAddressBlocker.rules.link': '规则配置',
 
-  'page.settings.tab.profile.module.autoRangeBan.title': '范围 IP 段封禁',
+  'page.settings.tab.profile.module.autoRangeBan.title': '连锁封禁',
   'page.settings.tab.profile.module.autoRangeBan.tips':
-    '在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同封禁',
+    '在封禁 Peer 后，被封禁的 Peer 所在 IP 地址的指定前缀长度内的其它 IP 地址都将一同连锁封禁',
   'page.settings.tab.profile.module.autoRangeBan.useGlobalBanTime': '使用全局封禁时间',
   'page.settings.tab.profile.module.autoRangeBan.ipv4Prefix': 'IPv4 前缀长度',
   'page.settings.tab.profile.module.autoRangeBan.ipv6Prefix': 'IPv6 前缀长度',
 
-  'page.settings.tab.profile.module.multiDialingBlocker.title': '多播封禁',
+  'page.settings.tab.profile.module.multiDialingBlocker.title': '多拨封禁',
   'page.settings.tab.profile.module.multiDialingBlocker.useGlobalBanTime': '使用全局封禁时间',
 
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-length': '子网掩码长度',
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length': 'IPv6子网掩码长度',
-  'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': '封禁阈值',
+  'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': '封禁阈值（{version}）',
   'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num.tips':
     '容许同一网段下载同一种子的IP数量，防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判',
   'page.settings.tab.profile.module.multiDialingBlocker.timeWindow': '检测窗口',
@@ -118,5 +119,9 @@ export default {
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime': '数据记录周期',
   'page.settings.tab.profile.module.activeMonitor.dataRetentionTime.tips':
     'SQLite 的特性，记录被删除后不会释放磁盘空间，但后续新数据记录会重新利用此部分空间',
-  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': '清理周期'
+  'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': '清理周期',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable': '开启流量封顶',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
+    '设置流量封顶阈值，当超出阈值后将发送告警信息提醒您检查下载器状态',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value': '每日流量封顶阈值'
 }

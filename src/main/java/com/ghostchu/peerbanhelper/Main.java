@@ -13,8 +13,11 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.simplereloadlib.ReloadManager;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.google.common.eventbus.EventBus;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -76,6 +79,8 @@ public class Main {
     private static BuildMeta meta;
     @Getter
     private static String[] startupArgs;
+    @Getter
+    private static long startupAt = System.currentTimeMillis();
 
     public static void main(String[] args) {
         startupArgs = args;
@@ -89,12 +94,13 @@ public class Main {
         profileConfigFile = new File(configDirectory, "profile.yml");
         profileConfig = loadConfiguration(profileConfigFile);
         new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
-        log.info("Current system language tag: {}", Locale.getDefault().toLanguageTag());
+        String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+        log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
             DEF_LOCALE = System.getenv("PBH_USER_LOCALE");
-            if(DEF_LOCALE == null) {
-                DEF_LOCALE = Locale.getDefault().toLanguageTag();
+            if (DEF_LOCALE == null) {
+                DEF_LOCALE = defLocaleTag;
             }
         }
         DEF_LOCALE = DEF_LOCALE.toLowerCase(Locale.ROOT).replace("-", "_");
@@ -119,10 +125,16 @@ public class Main {
         }
         guiManager.onPBHFullyStarted(server);
         setupShutdownHook();
+        setupReloading();
         guiManager.sync();
     }
 
-    private static void setupLogback() {
+    @SneakyThrows
+    private static void setupReloading() {
+        reloadManager.register(Main.class.getDeclaredMethod("reloadModule"));
+    }
+
+    public static void setupLogback() {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender<?> appender = (RollingFileAppender<?>) loggerContext.getLogger("ROOT").getAppender("FILE");
 
@@ -138,12 +150,31 @@ public class Main {
         }
     }
 
+    public static ReloadResult reloadModule() {
+        setupProxySettings();
+        ;
+        return ReloadResult.builder().status(ReloadStatus.SUCCESS).reason("OK!").build();
+    }
+
     private static void setupProxySettings() {
         var proxySection = mainConfig.getConfigurationSection("proxy");
         if (proxySection == null) return;
         String host = proxySection.getString("host");
         String port = String.valueOf(proxySection.getInt("port"));
         String nonProxyHost = proxySection.getString("non-proxy-hosts", "");
+
+        // 在设置新的代理属性之前，移除所有现有的设定
+        System.clearProperty("http.proxyHost");
+        System.clearProperty("http.proxyPort");
+        System.clearProperty("https.proxyHost");
+        System.clearProperty("https.proxyPort");
+        System.clearProperty("http.nonProxyHosts");
+        System.clearProperty("https.nonProxyHosts");
+        System.clearProperty("socks.proxyHost");
+        System.clearProperty("socks.proxyPort");
+        System.clearProperty("socks.nonProxyHosts");
+        System.clearProperty("java.net.useSystemProxies");
+
         switch (proxySection.getInt("setting")) {
             case 1 -> System.setProperty("java.net.useSystemProxies", "true");
             case 2 -> {
@@ -155,9 +186,9 @@ public class Main {
                 System.setProperty("https.nonProxyHosts", nonProxyHost);
             }
             case 3 -> {
-                System.setProperty("socksProxyHost", host);
-                System.setProperty("socksProxyPort", port);
-                System.setProperty("socksNonProxyHosts", nonProxyHost);
+                System.setProperty("socks.proxyHost", host);
+                System.setProperty("socks.proxyPort", port);
+                System.setProperty("socks.nonProxyHosts", nonProxyHost);
             }
             default -> System.setProperty("java.net.useSystemProxies", "false");
         }
@@ -171,9 +202,9 @@ public class Main {
                 root = new File(System.getenv("LOCALAPPDATA"), "PeerBanHelper").getAbsolutePath();
             } else {
                 var dataDirectory = new File(System.getProperty("user.home")).toPath();
-                if(osName.contains("mac")){
+                if (osName.contains("mac")) {
                     dataDirectory = dataDirectory.resolve("/Library/Application Support");
-                }else{
+                } else {
                     dataDirectory = dataDirectory.resolve(".config");
                 }
                 root = dataDirectory.resolve("PeerBanHelper").toAbsolutePath().toString();
@@ -309,7 +340,7 @@ public class Main {
             return name;
         }
         if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
-                Character.isUpperCase(name.charAt(0))) {
+            Character.isUpperCase(name.charAt(0))) {
             return name;
         }
         char chars[] = name.toCharArray();

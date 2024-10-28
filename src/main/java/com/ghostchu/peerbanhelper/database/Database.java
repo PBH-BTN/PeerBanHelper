@@ -24,7 +24,7 @@ public class Database {
     private JdbcSingleConnectionSource dataSource;
     private HikariDataSource hikari;
 
-    public Database() throws SQLException {
+    public Database() throws SQLException, ClassNotFoundException {
         File databaseDirectory = new File(Main.getDataDirectory(), "persist");
         if (!databaseDirectory.exists()) {
             databaseDirectory.mkdirs();

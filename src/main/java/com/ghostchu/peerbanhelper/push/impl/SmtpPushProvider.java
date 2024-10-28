@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.push.impl;
 
-import com.ghostchu.peerbanhelper.push.PushProvider;
+import com.ghostchu.peerbanhelper.push.AbstractPushProvider;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Properties;
 
 @Slf4j
-public class SmtpPushProvider implements PushProvider {
+public class SmtpPushProvider extends AbstractPushProvider {
     private final Properties props;
     private final String username;
     private final String password;
@@ -45,8 +45,8 @@ public class SmtpPushProvider implements PushProvider {
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress(sender, senderName, "UTF-8"));
         msg.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(email));
-        msg.setSubject(subject);
-        msg.setContent(text, "text/plain;charset=utf-8");
+        msg.setSubject(stripMarkdown(subject));
+        msg.setContent(markdown2Html(text), "text/html;charset=utf-8");
         Transport.send(msg);
     }
 

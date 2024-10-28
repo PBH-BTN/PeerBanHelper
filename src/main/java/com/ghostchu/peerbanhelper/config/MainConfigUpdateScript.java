@@ -30,8 +30,9 @@ public class MainConfigUpdateScript {
     }
 
     @UpdateScript(version = 22)
-    public void addIPFS(YamlConfiguration bundle) {
+    public void miscChanges() {
         conf.set("ipfs.port", 9899);
+        conf.set("privacy", null);
     }
 
     @UpdateScript(version = 21)

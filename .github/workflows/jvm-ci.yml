@@ -71,6 +71,8 @@ jobs:
         platforms: |
           linux/amd64
           linux/arm64/v8
+          linux/riscv64
+          linux/ppc64le
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha

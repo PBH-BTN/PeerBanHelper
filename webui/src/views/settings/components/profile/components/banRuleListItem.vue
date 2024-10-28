@@ -9,8 +9,8 @@
       <a-option v-for="method in ruleMethod" :key="method" :value="method">
         <a-space
           >{{ method
-          }}<a-popover :content="t('page.settings.tab.profile.module.banRuleTips.' + method)"
-            ><icon-question-circle /></a-popover
+          }}<a-tooltip :content="t('page.settings.tab.profile.module.banRuleTips.' + method)"
+            ><icon-question-circle /></a-tooltip
         ></a-space>
       </a-option>
     </a-select>

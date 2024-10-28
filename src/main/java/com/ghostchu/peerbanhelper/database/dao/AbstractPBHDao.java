@@ -11,10 +11,19 @@ import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.concurrent.Callable;
 
 public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
+    private static final Object transactionLock = new Object();
     protected AbstractPBHDao(ConnectionSource connectionSource, Class<T> dataClass) throws SQLException {
         super(connectionSource, dataClass);
+    }
+
+    @Override
+    public <CT> CT callBatchTasks(Callable<CT> callable) throws SQLException {
+        synchronized (transactionLock) {
+            return super.callBatchTasks(callable);
+        }
     }
 
     public Page<T> queryByPaging(QueryBuilder<T, ID> qb, Pageable pageable) throws SQLException {

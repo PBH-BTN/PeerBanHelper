@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.push.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ghostchu.peerbanhelper.push.PushProvider;
+import com.ghostchu.peerbanhelper.push.AbstractPushProvider;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TelegramPushProvider implements PushProvider {
+public class TelegramPushProvider extends AbstractPushProvider {
 
     private final String token;
     private final String chatid;

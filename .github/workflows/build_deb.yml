@@ -12,7 +12,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
-          path: target/libraries/
+          path: target/
       - name: Build Deb package
         id: build-deb
         run: |
@@ -21,6 +21,7 @@ jobs:
           sed -i "s/<version>/${{ env.PBH_VERSION }}/g" pkg/deb/DEBIAN/control
           mkdir -p pkg/deb/usr/lib/peerbanhelper
           mv target/libraries pkg/deb/usr/lib/peerbanhelper/
+          cp target/PeerBanHelper.jar pkg/deb/usr/lib/peerbanhelper/
           cd pkg && dpkg -b deb peerbanhelper_${{ env.PBH_VERSION }}_all.deb
         # 上面那个文件名需要符合收集条件
         env:

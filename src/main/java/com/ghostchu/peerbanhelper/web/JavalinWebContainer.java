@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
@@ -143,23 +144,30 @@ public class JavalinWebContainer {
                         return;
                     }
                     // 开始登陆验证
-                    if (!allowAttemptLogin(ctx.ip())) {
+                    if (!allowAttemptLogin(CommonUtil.userIp(ctx))) {
                         throw new IPAddressBannedException();
                     }
-                    String authToken = ctx.header("Authorization");
-                    if (authToken != null) {
-                        if (authToken.startsWith("Bearer ")) {
-                            String tk = authToken.substring(7);
-                            if (tk.equals(token)) {
-                                markLoginSuccess(ctx.ip());
-                                return;
-                            }
-                        }
+                    if (isContextAuthorized(ctx)) {
+                        markLoginSuccess(CommonUtil.userIp(ctx));
+                        return;
                     }
-                    markLoginFailed(ctx.ip());
+                    markLoginFailed(CommonUtil.userIp(ctx));
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200));
+    }
+
+    public boolean isContextAuthorized(Context ctx) {
+        var tk = "";
+        String authToken = ctx.header("Authorization");
+        if (authToken != null) {
+            if (authToken.startsWith("Bearer ")) {
+                tk = authToken.substring(7);
+            }
+        } else {
+            tk = ctx.queryParam("token");
+        }
+        return token.equals(tk);
     }
 
     public void start(String host, int port, String token) {

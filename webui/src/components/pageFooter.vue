@@ -14,6 +14,7 @@
               </a-badge>
             </a>
             <div v-else>{{ serverVersion?.version }}</div>
+            <br />
             <a-button
               v-if="endpointStore.plusStatus?.activated"
               class="plus-button"

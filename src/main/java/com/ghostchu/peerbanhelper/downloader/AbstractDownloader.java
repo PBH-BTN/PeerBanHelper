@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader;
 
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -7,24 +9,32 @@ import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 public abstract class AbstractDownloader implements Downloader {
+    private final AlertManager alertManager;
     protected String name;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private TranslationComponent statusMessage;
     private int failedLoginAttempts = 0;
     private long nextLoginTry = 0L;
 
-    public AbstractDownloader(String name) {
+    public AbstractDownloader(String name, AlertManager alertManager) {
         this.name = name;
+        this.alertManager = alertManager;
     }
 
     @Override
     public DownloaderLoginResult login() {
         if (nextLoginTry >= System.currentTimeMillis()) {
+            alertManager.publishAlert(true,
+                    AlertLevel.WARN,
+                    "downloader-too-many-failed-attempt-" + getName(),
+                    new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE, getName()),
+                    new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION, getName(),
+                            getLastStatus(),
+                            getLastStatusMessage()));
             return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS
                     , new TranslationComponent(Lang.TOO_MANY_FAILED_ATTEMPT, MsgUtil.getDateFormatter().format(new Date(nextLoginTry)))
             );
@@ -90,6 +100,11 @@ public abstract class AbstractDownloader implements Downloader {
 
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
-        return Collections.emptyList();
+        return List.of(DownloaderFeatureFlag.UNBAN_IP);
+    }
+
+    @Override
+    public int getMaxConcurrentPeerRequestSlots() {
+        return 16;
     }
 }

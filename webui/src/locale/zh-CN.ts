@@ -7,8 +7,8 @@ import loginLocale from '@/views/login/locale/zh-CN'
 import oobeLocale from '@/views/oobe/locale/zh-CN'
 import topBanPageLocale from '@/views/ranks/locale/zh-CN'
 import ruleManageMentLocale from '@/views/rule-management/locale/zh-CN'
-import ruleMetricsLocale from '@/views/rule-metrics/locale/zh-CN'
 import configLocale from '@/views/settings/locale/zh-CN'
+import alertLocale from './zh-CN/alert'
 import plusLocale from './zh-CN/plus'
 import settingsLocale from './zh-CN/settings'
 
@@ -54,11 +54,11 @@ export default {
   ...banListPageLocale,
   ...dataLocale,
   ...topBanPageLocale,
-  ...ruleMetricsLocale,
   ...serviceLocale,
   ...loginLocale,
   ...oobeLocale,
   ...ruleManageMentLocale,
   ...chartsLocale,
-  ...configLocale
+  ...configLocale,
+  ...alertLocale
 }

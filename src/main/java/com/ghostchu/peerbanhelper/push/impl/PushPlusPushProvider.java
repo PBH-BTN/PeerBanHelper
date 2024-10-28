@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.push.impl;
 
-import com.ghostchu.peerbanhelper.push.PushProvider;
+import com.ghostchu.peerbanhelper.push.AbstractPushProvider;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class PushPlusPushProvider implements PushProvider {
+public class PushPlusPushProvider extends AbstractPushProvider {
     private final String token;
     private String topic;
     private String template;

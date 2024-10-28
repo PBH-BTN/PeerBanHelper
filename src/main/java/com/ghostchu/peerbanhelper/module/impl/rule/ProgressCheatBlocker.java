@@ -3,14 +3,15 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -63,7 +64,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 pendingPersistQueue.offer(new ClientTaskRecord(key, tasks));
             })
             .build();
-    private ScheduledExecutorService scheduledTimer;
     private long torrentMinimumSize;
     private boolean blockExcessiveClients;
     private double excessiveThreshold;
@@ -81,8 +81,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
     private long maxWaitDuration;
     private long fastPcbTestBlockingDuration;
     private double fastPcbTestPercentage;
-    @Autowired
-    private RollbarErrorReporter rollbarErrorReporter;
 
     @Override
     public @NotNull String getName() {
@@ -100,9 +98,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         webContainer.javalin()
                 .get("/api/modules/" + getConfigName(), this::handleConfig, Role.USER_READ)
                 .get("/api/modules/" + getConfigName() + "/status", this::handleStatus, Role.USER_READ);
-        scheduledTimer = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        scheduledTimer.scheduleWithFixedDelay(this::flushDatabase, 30, 30, TimeUnit.SECONDS);
-        scheduledTimer.scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flushDatabase, 30, 30, TimeUnit.SECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanDatabase, 0, 8, TimeUnit.HOURS);
         Main.getReloadManager().register(this);
     }
 
@@ -111,7 +108,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             progressCheatBlockerPersistDao.cleanupDatabase(new Timestamp(System.currentTimeMillis() - persistDuration));
         } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
-            rollbarErrorReporter.warning(e);
+            ;
         }
     }
 
@@ -121,11 +118,9 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 progressCheatBlockerPersistDao.flushDatabase(pendingPersistQueue);
             } catch (SQLException e) {
                 log.error("Unable flush records into database", e);
-                rollbarErrorReporter.error(e);
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.error(throwable);
         }
     }
 
@@ -165,7 +160,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
 
     @Override
     public void onDisable() {
-        scheduledTimer.shutdown();
         progressRecorder.invalidateAll();
         if (enablePersist) {
             log.info(tlUI(Lang.PCB_SHUTTING_DOWN));
@@ -214,7 +208,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             lastRecordedProgress = progressRecorder.get(client, () -> loadClientTasks(client));
         } catch (ExecutionException e) {
             log.error("Unhandled exception during load cached record data", e);
-            rollbarErrorReporter.error(e);
         }
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
@@ -242,7 +235,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             }
 
             // 是否需要进行快速 PCB 测试
-            if (fastPcbTestPercentage > 0 && !fileTooSmall(torrentSize)  && downloader.getType().equalsIgnoreCase("BitComet")) {
+            if (fastPcbTestPercentage > 0 && !fileTooSmall(torrentSize) && downloader.getFeatureFlags().contains(DownloaderFeatureFlag.UNBAN_IP)) {
                 // 只在 <= 0（也就是从未测试过）的情况下对其进行测试
                 if (clientTask.getFastPcbTestExecuteAt() <= 0) {
                     // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
@@ -338,7 +331,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             }
         } catch (SQLException e) {
             log.error("Unable to load cached client tasks from database", e);
-            rollbarErrorReporter.error(e);
         }
         return new CopyOnWriteArrayList<>();
     }
