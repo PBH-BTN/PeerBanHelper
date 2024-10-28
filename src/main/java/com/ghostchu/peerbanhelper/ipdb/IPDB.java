@@ -246,11 +246,11 @@ public class IPDB implements AutoCloseable {
     private void updateGeoCN(File mmdbGeoCNFile) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, "GeoCN (github.com/ljxi/GeoCN)"));
         IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
-        IPDBDownloadSource mirror2 = new IPDBDownloadSource("https://ghp.ci/https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
+        //IPDBDownloadSource mirror2 = new IPDBDownloadSource("https://ghp.ci/https://github.com/ljxi/GeoCN/releases/download/Latest/", "GeoCN");
         IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", "GeoCN", true);
         IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", "GeoCN", true);
         Path tmp = Files.createTempFile("GeoCN", ".mmdb");
-        downloadFile(tmp, "GeoCN", mirror1, mirror2, mirror3, mirror4).join();
+        downloadFile(tmp, "GeoCN", mirror1, mirror3, mirror4).join();
         if (!tmp.toFile().exists()) {
             throw new IllegalStateException("Download mmdb database failed!");
         }
@@ -270,11 +270,11 @@ public class IPDB implements AutoCloseable {
     private void updateMMDB(String databaseName, File target) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
         IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/", databaseName);
-        IPDBDownloadSource mirror2 = new IPDBDownloadSource("https://ghp.ci/https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/", databaseName);
+        //IPDBDownloadSource mirror2 = new IPDBDownloadSource("https://ghp.ci/https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/", databaseName);
         IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", databaseName, true);
         IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", databaseName, true);
         Path tmp = Files.createTempFile(databaseName, ".mmdb");
-        downloadFile(tmp, databaseName, mirror1, mirror2, mirror3, mirror4).join();
+        downloadFile(tmp, databaseName, mirror1, mirror3, mirror4).join();
         if (!tmp.toFile().exists()) {
             if (isMmdbNeverDownloaded(target)) {
                 throw new IllegalStateException("Download mmdb database failed!");
@@ -325,6 +325,7 @@ public class IPDB implements AutoCloseable {
 
     private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName) {
         IPDBDownloadSource mirror = mirrorList.removeFirst();
+        log.info(mirror.baseUrl());
         return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
                     if (r.statusCode() == 200) {
