@@ -170,9 +170,6 @@ public class Main {
         System.clearProperty("https.proxyPort");
         System.clearProperty("http.nonProxyHosts");
         System.clearProperty("https.nonProxyHosts");
-        System.clearProperty("socks.proxyHost");
-        System.clearProperty("socks.proxyPort");
-        System.clearProperty("socks.nonProxyHosts");
         System.clearProperty("java.net.useSystemProxies");
 
         switch (proxySection.getInt("setting")) {
@@ -184,11 +181,6 @@ public class Main {
                 System.setProperty("https.proxyPort", port);
                 System.setProperty("http.nonProxyHosts", nonProxyHost);
                 System.setProperty("https.nonProxyHosts", nonProxyHost);
-            }
-            case 3 -> {
-                System.setProperty("socks.proxyHost", host);
-                System.setProperty("socks.proxyPort", port);
-                System.setProperty("socks.nonProxyHosts", nonProxyHost);
             }
             default -> System.setProperty("java.net.useSystemProxies", "false");
         }
