@@ -19,6 +19,9 @@ importers:
       '@dzangolab/flag-icon-css':
         specifier: ^3.4.5
         version: 3.4.5
+      '@formatjs/intl-durationformat':
+        specifier: ^0.6.1
+        version: 0.6.1
       '@octokit/core':
         specifier: ^6.1.2
         version: 6.1.2
@@ -575,6 +578,18 @@ packages:
   '@eslint/plugin-kit@0.2.0':
     resolution: {integrity: sha512-vH9PiIMMwvhCx31Af3HiGzsVNULDbyVkHXwlemn/B0TFj/00ho3y55efXrUZTfQipxoHC5u4xq6zblww1zm1Ig==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@formatjs/ecma402-abstract@2.2.1':
+    resolution: {integrity: sha512-O4ywpkdJybrjFc9zyL8qK5aklleIAi5O4nYhBVJaOFtCkNrnU+lKFeJOFC48zpsZQmR8Aok2V79hGpHnzbmFpg==, tarball: https://registry.npmjs.org/@formatjs/ecma402-abstract/-/ecma402-abstract-2.2.1.tgz}
+
+  '@formatjs/fast-memoize@2.2.2':
+    resolution: {integrity: sha512-mzxZcS0g1pOzwZTslJOBTmLzDXseMLLvnh25ymRilCm8QLMObsQ7x/rj9GNrH0iUhZMlFisVOD6J1n6WQqpKPQ==, tarball: https://registry.npmjs.org/@formatjs/fast-memoize/-/fast-memoize-2.2.2.tgz}
+
+  '@formatjs/intl-durationformat@0.6.1':
+    resolution: {integrity: sha512-tPSX/D/wjO5ZKnRtwLlUYtjLUBILLX1w6+arU97NpPCpZ8SRWQePu+kDAxDwFKJ/w09idqvSFkJjYGTs6hMd1A==, tarball: https://registry.npmjs.org/@formatjs/intl-durationformat/-/intl-durationformat-0.6.1.tgz}
+
+  '@formatjs/intl-localematcher@0.5.6':
+    resolution: {integrity: sha512-roz1+Ba5e23AHX6KUAWmLEyTRZegM5YDuxuvkHCyK3RJddf/UXB2f+s7pOMm9ktfPGla0g+mQXOn5vsuYirnaA==, tarball: https://registry.npmjs.org/@formatjs/intl-localematcher/-/intl-localematcher-0.5.6.tgz}
 
   '@humanfs/core@0.19.0':
     resolution: {integrity: sha512-2cbWIHbZVEweE853g8jymffCA+NCMiuqeECeBBLm8dg2oFdjuGJhgN4UAbI+6v0CKbbhvtXA4qV8YR5Ji86nmw==}
@@ -2947,6 +2962,26 @@ snapshots:
   '@eslint/plugin-kit@0.2.0':
     dependencies:
       levn: 0.4.1
+
+  '@formatjs/ecma402-abstract@2.2.1':
+    dependencies:
+      '@formatjs/fast-memoize': 2.2.2
+      '@formatjs/intl-localematcher': 0.5.6
+      tslib: 2.6.2
+
+  '@formatjs/fast-memoize@2.2.2':
+    dependencies:
+      tslib: 2.6.2
+
+  '@formatjs/intl-durationformat@0.6.1':
+    dependencies:
+      '@formatjs/ecma402-abstract': 2.2.1
+      '@formatjs/intl-localematcher': 0.5.6
+      tslib: 2.6.2
+
+  '@formatjs/intl-localematcher@0.5.6':
+    dependencies:
+      tslib: 2.6.2
 
   '@humanfs/core@0.19.0': {}
 
