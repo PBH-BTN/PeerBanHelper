@@ -347,7 +347,6 @@ PBH_PLUS_LICENSE_UPDATED: "许可证信息已保存"
 PBH_PLUS_LICENSE_EXPIRED: "许可证已过期"
 PBH_PLUS_LICENSE_INVALID: "许可证无效"
 
-
 GUI_MENU_DEBUG: "调试"
 GUI_MENU_DEBUG_RELOAD_CONFIGURATION: "重载配置文件..."
 GUI_MENU_DEBUG_HEAP_DUMP: "执行堆转储..."
@@ -386,7 +385,7 @@ DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter 配置自动修正失�
 DOWNLOADER_BC_VERSION_UNACCEPTABLE: "当前使用的 BitComet 版本不受支持，请升级到 2.10 或者更高版本"
 DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED: "下载连接到 BitComet 所需的 BouncyCastle 加解密套件时出错，操作无法继续，请检查网络连接。有关更多信息，请检查控制台日志。"
 
-JAVALIN_PORT_IN_USE: "端口监听失败，端口 {} 已被其它进程占用。这可能是因为：(1)有两个 PeerBanHelper 正在运行（特别是您可能选择了安装为系统服务，这种情况下将会自动启动）(2)其它程序正在使用此端口（如 Uplay/Ubisoft Connect）；请跟随故障排除指南解决此问题。https://pbh-btn.github.io/pbh-docs/docs/faq"
+JAVALIN_PORT_IN_USE: "端口监听失败，端口 {} 已被其它进程占用。这可能是因为：(1)有两个 PeerBanHelper 正在运行（特别是您可能选择了安装为系统服务，这种情况下将会自动启动）(2)其它程序正在使用此端口（如 Uplay/Ubisoft Connect）；请跟随故障排除指南解决此问题。https://doc.pbh-btn.com//docs/faq"
 JAVALIN_PORT_REQUIRE_PRIVILEGES: "端口监听失败，监听 {} 端口需要权限提升。请更换一个 WebUI 端口或以管理员身份运行 PeerBanHelper"
 SPRING_CONTEXT_LOADING: "Spring Context 正在进行上下文装配以启动 PeerBanHelper，在低端设备上可能需要一段时间"
 PBH_STARTUP_FATAL_ERROR: "PeerBanHelper 启动过程中遇到致命错误，无法继续启动"
@@ -448,9 +447,9 @@ ALERT_MANAGER_CLEAN_UP: "已清理 {} 条历史警报记录"
 MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_TITLE: "下载器上行流量超限告警 ({})"
 MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION: |
   PeerBanHelper 监测到托管的下载器的总上传流量于 {} 达到当日告警阈值。
-  
+
   **已上传流量：{} (告警阈值: {})**
-  
+
   请检查下载器当前运行状态。  
   若需要修改告警设置，请前往 Active Monitoring 页面修改。
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE: "下载器返回错误响应次数过多 ({})"
@@ -459,7 +458,7 @@ DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
 
   **最后一次连接状态:** {}  
   **最后一次连接信息:** {}  
-  
+
   您可以点击出错的下载器的 *编辑* 按钮并修正错误后，点击 *保存* 来跳过冷却重新激活下载器。
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK: |
   在尝试连接到下载器 {} 时错误次数过多，请检查下载器状态，如用户名或密码等。  
@@ -467,9 +466,9 @@ DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION_FALLBACK: |
 PROGRAM_OUT_OF_MEMORY_TITLE: "PeerBanHelper 可用内存严重不足"
 PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
   PeerBanHelper 的可用运行内存严重不足，并可能随时停止运行。
-  
+
   可用内存: {}MB  
   最大内存: {}MB
-  
+
   请立即增加 PeerBanHelper 的内存分配。
 BAN_PEER_EXCEPTION: "封禁 Peer 时出现意外错误，指定 Peer 可能封禁失败，请将下面的信息报告给 PeerBanHelper 开发者"

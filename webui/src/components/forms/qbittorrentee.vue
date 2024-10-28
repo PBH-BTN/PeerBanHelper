@@ -51,7 +51,7 @@
     <template #extra>
       <i18n-t keypath="page.dashboard.editModal.label.shadowBan.description">
         <template #learnMore>
-          <a href="https://pbh-btn.github.io/pbh-docs/docs/downloader/qBittorrentEE">{{
+          <a href="https://doc.pbh-btn.com//docs/downloader/qBittorrentEE">{{
             t('page.dashboard.editModal.label.shadowBan.description.learnMore')
           }}</a>
         </template>
