@@ -21,6 +21,7 @@ jobs:
           wget -O GeoCN.mmdb https://github.com/ljxi/GeoCN/releases/download/Latest/GeoCN.mmdb
           wget -O GeoLite2-City.mmdb https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb
           wget -O GeoLite2-ASN.mmdb https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb
+          gzip --best -k *.mmdb
           xz -z -k -T $(nproc) *.mmdb
       - uses: shallwefootball/s3-upload-action@master
         with:
