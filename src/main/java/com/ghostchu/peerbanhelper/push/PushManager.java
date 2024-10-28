@@ -11,6 +11,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,6 +58,33 @@ public class PushManager implements Reloadable {
             }
         });
         return anySuccess.get();
+    }
+
+    @Nullable
+    public PushProvider getPushProvider(String name) {
+        if (name == null) {
+            return null;
+        }
+        var config = Main.getMainConfig().getConfigurationSection("push-notification");
+        var section = config.getConfigurationSection(name);
+        if (section == null) {
+            return null;
+        }
+        switch (section.getString("type")) {
+            case "smtp" -> {
+                return new SmtpPushProvider(section);
+            }
+            case "pushplus" -> {
+                return new PushPlusPushProvider(section);
+            }
+            case "serverchan" -> {
+                return new ServerChanPushProvider(section);
+            }
+            case "telegram" -> {
+                return new TelegramPushProvider(section);
+            }
+        }
+        return null;
     }
 
     @Override

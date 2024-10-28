@@ -473,4 +473,9 @@ PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
   Maximum memory: {}MB
   
   Please increase PeerBanHelper's memory allocation immediately.
+PUSH_PROVIDER_TEST_TITLE: "PeerBanHelper Push Notification Test Message"
+PUSH_PROVIDER_TEST_DESCRIPTION: "If you see this message, it means that the push service {} ({}) is configured correctly."
+PUSH_PROVIDER_TEST_SUCCESS: "{} ({}) Test message sent successfully, please check if you have received the message"
+PUSH_PROVIDER_TEST_FAILED: "Test push service {} ({}) failed"
+PUSH_PROVIDER_TEST_ERROR: "Test push service {} ({}) failed: {}"
 BAN_PEER_EXCEPTION: "An exception occurred while ban Peer, specific Peer unable to ban, Please report these information to PeerBanHelper developer"

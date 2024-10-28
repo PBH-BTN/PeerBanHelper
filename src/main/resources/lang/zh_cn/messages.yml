@@ -471,4 +471,9 @@ PROGRAM_OUT_OF_MEMORY_DESCRIPTION: |
   最大内存: {}MB
 
   请立即增加 PeerBanHelper 的内存分配。
+PUSH_PROVIDER_TEST_TITLE: "PeerBanHelper 推送服务测试消息"
+PUSH_PROVIDER_TEST_DESCRIPTION: "如果你看到了这条信息，代表推送服务 {} ({}) 配置正确。"
+PUSH_PROVIDER_TEST_SUCCESS: "{} ({}) 发送成功，请检查是否收到消息"
+PUSH_PROVIDER_TEST_FAILED: "测试推送服务 {} ({}) 失败"
+PUSH_PROVIDER_TEST_ERROR: "测试推送服务 {} ({}) 失败: {}"
 BAN_PEER_EXCEPTION: "封禁 Peer 时出现意外错误，指定 Peer 可能封禁失败，请将下面的信息报告给 PeerBanHelper 开发者"
