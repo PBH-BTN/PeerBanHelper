@@ -325,7 +325,6 @@ public class IPDB implements AutoCloseable {
 
     private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName) {
         IPDBDownloadSource mirror = mirrorList.removeFirst();
-        log.info(mirror.baseUrl());
         return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
                 .thenAccept(r -> {
                     if (r.statusCode() == 200) {
