@@ -385,7 +385,7 @@ DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED: "BitComet IpFilter 配置自动修正失�
 DOWNLOADER_BC_VERSION_UNACCEPTABLE: "当前使用的 BitComet 版本不受支持，请升级到 2.10 或者更高版本"
 DOWNLOADER_BC_DOWNLOAD_DEPENDENCIES_FAILED: "下载连接到 BitComet 所需的 BouncyCastle 加解密套件时出错，操作无法继续，请检查网络连接。有关更多信息，请检查控制台日志。"
 
-JAVALIN_PORT_IN_USE: "端口监听失败，端口 {} 已被其它进程占用。这可能是因为：(1)有两个 PeerBanHelper 正在运行（特别是您可能选择了安装为系统服务，这种情况下将会自动启动）(2)其它程序正在使用此端口（如 Uplay/Ubisoft Connect）；请跟随故障排除指南解决此问题。https://doc.pbh-btn.com//docs/faq"
+JAVALIN_PORT_IN_USE: "端口监听失败，端口 {} 已被其它进程占用。这可能是因为：(1)有两个 PeerBanHelper 正在运行（特别是您可能选择了安装为系统服务，这种情况下将会自动启动）(2)其它程序正在使用此端口（如 Uplay/Ubisoft Connect）；请跟随故障排除指南解决此问题。https://doc.pbh-btn.com/docs/faq"
 JAVALIN_PORT_REQUIRE_PRIVILEGES: "端口监听失败，监听 {} 端口需要权限提升。请更换一个 WebUI 端口或以管理员身份运行 PeerBanHelper"
 SPRING_CONTEXT_LOADING: "Spring Context 正在进行上下文装配以启动 PeerBanHelper，在低端设备上可能需要一段时间"
 PBH_STARTUP_FATAL_ERROR: "PeerBanHelper 启动过程中遇到致命错误，无法继续启动"

@@ -3,8 +3,8 @@
     <a-typography-title :heading="3"> BTN </a-typography-title>
     <a-alert>
       {{ t('page.settings.tab.config.btn.doc') }}
-      <a-link target="_blank" href="https://doc.pbh-btn.com//docs/btn/intro/">
-        https://doc.pbh-btn.com//docs/btn/intro/
+      <a-link target="_blank" href="https://doc.pbh-btn.com/docs/btn/intro/">
+        https://doc.pbh-btn.com/docs/btn/intro/
       </a-link>
     </a-alert>
     <a-form-item :label="t('page.settings.tab.config.btn.enable')" field="btn.enabled">

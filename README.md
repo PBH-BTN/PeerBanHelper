@@ -12,7 +12,7 @@
 > 您只需要正确连接 PBH 到下载器就可以正常工作，大多数情况下，并不需要额外配置
 
 > [!TIP]
-> 为获得最佳效果，建议配合我们维护的 IP 规则库 [PBH-BTN/BTN-Collected-Rules](https://github.com/PBH-BTN/BTN-Collected-Rules) 和 [BTN 网络](https://doc.pbh-btn.com//docs/btn/intro) 一起食用，不过这是完全可选的。
+> 为获得最佳效果，建议配合我们维护的 IP 规则库 [PBH-BTN/BTN-Collected-Rules](https://github.com/PBH-BTN/BTN-Collected-Rules) 和 [BTN 网络](https://doc.pbh-btn.com/docs/btn/intro) 一起食用，不过这是完全可选的。
 
 | 主界面                                                                                                                                | 封禁列表                                                                                                                             | 封禁日志                                                                                                                             | 封禁统计                                                                                                                            | 规则统计                                                                                                                                | 规则订阅                                                                                                                                |
 | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -20,7 +20,7 @@
 
 ## 安装 PeerBanHelper
 
-查看 [PeerBanHelper 文档](https://doc.pbh-btn.com//docs/category/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2)
+查看 [PeerBanHelper 文档](https://doc.pbh-btn.com/docs/category/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2)
 
 ## 支持的客户端
 
@@ -40,15 +40,15 @@
 
 PeerBanHelper 主要由以下几个功能模块组成：
 
-- [PeerID 黑名单](https://doc.pbh-btn.com//docs/module/peer-id)
-- [Client Name 黑名单](https://doc.pbh-btn.com//docs/module/client-name)
-- [IP/GeoIP/IP 类型 黑名单](https://doc.pbh-btn.com//docs/module/ip-address-blocker)
-- [虚假进度检查器（提供启发式客户端检测功能）](https://doc.pbh-btn.com//docs/module/progress-cheat-blocker)
-- [自动连锁封禁](https://doc.pbh-btn.com//docs/module/auto-range-ban)
-- [多拨追猎](https://doc.pbh-btn.com//docs/module/multi-dial)
-- Peer ID/Client Name 伪装检查；通过 [AviatorScript 引擎](https://doc.pbh-btn.com//docs/module/expression-engine) 实现
-- [主动监测（提供本地数据分析功能）](https://doc.pbh-btn.com//docs/module/active-monitoring)
-- [网络 IP 集规则订阅](https://doc.pbh-btn.com//docs/module/ip-address-blocker-rules)
+- [PeerID 黑名单](https://doc.pbh-btn.com/docs/module/peer-id)
+- [Client Name 黑名单](https://doc.pbh-btn.com/docs/module/client-name)
+- [IP/GeoIP/IP 类型 黑名单](https://doc.pbh-btn.com/docs/module/ip-address-blocker)
+- [虚假进度检查器（提供启发式客户端检测功能）](https://doc.pbh-btn.com/docs/module/progress-cheat-blocker)
+- [自动连锁封禁](https://doc.pbh-btn.com/docs/module/auto-range-ban)
+- [多拨追猎](https://doc.pbh-btn.com/docs/module/multi-dial)
+- Peer ID/Client Name 伪装检查；通过 [AviatorScript 引擎](https://doc.pbh-btn.com/docs/module/expression-engine) 实现
+- [主动监测（提供本地数据分析功能）](https://doc.pbh-btn.com/docs/module/active-monitoring)
+- [网络 IP 集规则订阅](https://doc.pbh-btn.com/docs/module/ip-address-blocker-rules)
 - WebUI （目前支持：活跃封禁名单查看，历史封禁查询，封禁最频繁的 Top 50 IP，规则订阅管理，图表查看，Peer 列表查看）
 
 此外，PeerBanHelper 会在启动时下载 GeoIP 库，成功加载后支持以下功能：
@@ -59,7 +59,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 ## 常见问题
 
-在报告问题前，请先检查 [常见问题列表](https://doc.pbh-btn.com//docs/faq)
+在报告问题前，请先检查 [常见问题列表](https://doc.pbh-btn.com/docs/faq)
 
 ## Install4j
 
