@@ -73,11 +73,18 @@ public class PBHPushController extends AbstractFeatureModule {
             return null;
         }
         var config = Main.getMainConfig().getConfigurationSection("push-notification");
+        if (config == null) {
+            return null;
+        }
         var section = config.getConfigurationSection(name);
         if (section == null) {
             return null;
         }
-        switch (section.getString("type")) {
+        String type = section.getString("type");
+        if (type == null) {
+            return null;
+        }
+        switch (type) {
             case "smtp" -> {
                 return new SmtpPushProvider(section);
             }
