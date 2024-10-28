@@ -149,7 +149,8 @@ performance:
   # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
-
+ipfs:
+  port: 9899
 push-notification:
   # 邮件推送服务 - Email push notification
   email-example:
