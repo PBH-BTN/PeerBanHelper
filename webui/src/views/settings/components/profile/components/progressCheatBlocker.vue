@@ -75,14 +75,14 @@
       field="model.ipv4_prefix_length"
       :tooltip="t('page.settings.tab.profile.module.progressCheatBlocker.ipprefixLength.tips')"
     >
-      <a-input-number v-model="model.ipv4_prefix_length" style="width: 100px"></a-input-number>
+      <a-input-number v-model="model.ipv4_prefix_length" style="width: 100px" :min="0" :max="32"></a-input-number>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.progressCheatBlocker.ipv6prefixlength')"
       field="model.ipv6_prefix_length"
       :tooltip="t('page.settings.tab.profile.module.progressCheatBlocker.ipprefixLength.tips')"
     >
-      <a-input-number v-model="model.ipv6_prefix_length" style="width: 100px"></a-input-number>
+      <a-input-number v-model="model.ipv6_prefix_length" style="width: 100px" :min="0" :max="128"></a-input-number>
     </a-form-item>
     <a-form-item
       :label="t('page.settings.tab.profile.module.progressCheatBlocker.banDuration')"
