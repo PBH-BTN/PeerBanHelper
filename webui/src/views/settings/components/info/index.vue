@@ -208,8 +208,10 @@
           :align="{ label: 'right' }"
         >
           <a-descriptions-item :label="t('page.settings.tab.info.system.os')">
-            <component :is="osLogo[data?.data.system.os ?? 'Other']"></component>
-            {{ data?.data.system.os }}
+            <a-space size="small">
+              <component :is="osLogo[data?.data.system.os ?? 'Other']"></component>
+              {{ data?.data.system.os }}
+            </a-space>
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.system.version')">
             <a-space>
@@ -419,6 +421,7 @@
   </a-modal>
 </template>
 <script setup lang="ts">
+import { genIconComponent } from '@/components/iconFont'
 import { CheckModuleEnable, GetBtnStatus, GetRunningInfo } from '@/service/settings'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
@@ -432,7 +435,6 @@ import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
-import { genIconComponent } from '@/components/iconFont'
 
 dayjs.extend(RelativeTime)
 dayjs.extend(Duration)
