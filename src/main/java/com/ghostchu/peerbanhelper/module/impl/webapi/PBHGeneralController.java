@@ -161,10 +161,11 @@ public class PBHGeneralController extends AbstractFeatureModule {
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
         var operatingSystem = systemInfo.getOperatingSystem();
         Map<String, Object> os = new LinkedHashMap<>();
-        os.put("os", osMXBean.getName());
         if (osMXBean.getName().contains("Windows")) {
+            os.put("os", "Windows");
             os.put("version", String.valueOf(operatingSystem));
         } else {
+            os.put("os", osMXBean.getName());
             os.put("version", osMXBean.getVersion());
         }
         os.put("architecture", osMXBean.getArch());
