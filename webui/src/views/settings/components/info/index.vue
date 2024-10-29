@@ -345,7 +345,7 @@
                 <a-progress
                   type="circle"
                   size="mini"
-                  :status="memoryProgressBarColor"
+                  :status="heapMemoryProgressBarColor"
                   :percent="heapMemoryStatus"
                 />
               </a-tooltip>
@@ -466,8 +466,13 @@ const heapMemoryStatus = computed(
     (data.value?.data.jvm.memory.heap.free ?? 0) / ((data.value?.data.jvm.memory.heap.max ?? 1) + 1)
 ) //+1保证永远不可能100%
 const memoryProgressBarColor = computed(() => {
-  if (memoryStatus.value > 0.8) return 'danger'
-  else if (memoryStatus.value > 0.6) return 'warning'
+  if (memoryStatus.value > 0.85) return 'danger'
+  else if (memoryStatus.value > 0.7) return 'warning'
+  else return 'normal'
+})
+const heapMemoryProgressBarColor = computed(() => {
+  if (heapMemoryStatus.value > 0.85) return 'danger'
+  else if (heapMemoryStatus.value > 0.7) return 'warning'
   else return 'normal'
 })
 const webuiVersion = __APP_VERSION__
