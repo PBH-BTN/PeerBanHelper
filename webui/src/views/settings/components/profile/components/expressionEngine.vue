@@ -13,7 +13,11 @@
     >
       <a-space>
         <a-switch v-model="useGlobalBanTime" />
-        <a-input-number v-if="!useGlobalBanTime" v-model.number="model.ban_duration as number">
+        <a-input-number
+          v-if="!useGlobalBanTime"
+          v-model.number="model.ban_duration as number"
+          :min="1"
+        >
           <template #suffix> {{ t('page.settings.tab.profile.unit.ms') }} </template>
         </a-input-number>
       </a-space>
