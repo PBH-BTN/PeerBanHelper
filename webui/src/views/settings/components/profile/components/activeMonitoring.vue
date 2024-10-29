@@ -45,7 +45,9 @@
       <a-input-number v-model="trafficMonitoringDaily" style="width: 200px" :precision="2">
         <template #suffix> MB </template>
       </a-input-number>
-      <template #extra> ={{ formatFileSize(model.traffic_monitoring.daily) }} </template>
+      <template v-if="model.traffic_monitoring.daily > 1024 ** 3" #extra>
+        ={{ formatFileSize(model.traffic_monitoring.daily) }}
+      </template>
     </a-form-item>
   </a-space>
 </template>
