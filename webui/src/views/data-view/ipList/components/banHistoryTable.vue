@@ -106,7 +106,7 @@ const columns = [
       '/' +
       t('page.banlog.banlogTable.column.unbanTime'),
     slotName: 'banAt',
-    width: 210
+    width: 220
   },
   {
     title: () => t('page.banlog.banlogTable.column.peerPort'),
