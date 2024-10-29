@@ -31,7 +31,12 @@
       :label="t('page.settings.tab.profile.module.autoRangeBan.ipv6Prefix')"
       field="model.ipv6"
     >
-      <a-input-number v-model="model.ipv6" style="width: 100px" :min="0" :max="128"></a-input-number>
+      <a-input-number
+        v-model="model.ipv6"
+        style="width: 100px"
+        :min="0"
+        :max="128"
+      ></a-input-number>
     </a-form-item>
   </a-space>
 </template>
