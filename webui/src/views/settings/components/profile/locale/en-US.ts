@@ -132,9 +132,9 @@ export default {
     "Deleted records won't free the disk space, but new data will reuse those parts of space due SQLite internal design",
   'page.settings.tab.profile.module.activeMonitor.dataCleanupInterval': 'Cleanup interval',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable':
-    'Enable daily traffic limit',
+    'Enable daily traffic alert',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
-    'Set the traffic capping threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.',
+    'Set the traffic alert threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
-    'Daily traffic limit'
+    'Daily traffic alert threshold'
 }
