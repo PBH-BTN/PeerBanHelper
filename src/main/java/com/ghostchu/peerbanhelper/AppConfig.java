@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.File;
 
@@ -13,6 +14,7 @@ import java.io.File;
 @ComponentScan(value = "com.ghostchu.peerbanhelper", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
 @ComponentScan(value = "com.ghostchu.lib.jni", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
 @Slf4j
+@EnableScheduling
 public class AppConfig {
     @Bean
     public BuildMeta buildMeta() {

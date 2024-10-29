@@ -3,6 +3,11 @@
   "extends": [
     "config:recommended"
   ],
+  "ignoreDeps": [
+    "com.github.oshi:oshi-core",
+    "org.xerial:sqlite-jdbc",
+    "com.ghostchu.peerbanhelper.external-libs:sqlite-jdbc-loongarch64"
+  ],
   "packageRules": [
     {
       "matchPackageNames": [

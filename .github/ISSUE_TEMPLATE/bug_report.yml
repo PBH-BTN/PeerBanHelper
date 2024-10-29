@@ -1,11 +1,11 @@
-name: '错误报告 - Bug Report'
-description: '报告与 PeerBanHelper 有关的程序错误 - Report the errors that related to PeerBanHelper'
+name: "错误报告 - Bug Report"
+description: "报告与 PeerBanHelper 有关的程序错误 - Report the errors that related to PeerBanHelper"
 
-title: '[BUG] '
+title: "[BUG] "
 labels:
-  - 'Bug'
+  - "Bug"
 body:
-  - type: 'markdown'
+  - type: "markdown"
     attributes:
       value: |-
         ## 请注意 - Caution
@@ -14,30 +14,30 @@ body:
         请尽可能完整且详细地填写所有表单项，以便我们以最高效率并准确的排查故障和诊断问题。
         **错误填写或者没有仔细检查末尾的检查清单，将导致此 Issue 被立刻关闭。**
         **只有最新版本的 PeerBanHelper 才会得到支持，任何非最新版本的 Issue 将被 立 刻 关 闭，不会有人给您提供任何支持** [在此查看最新版本的版本号](https://github.com/PBH-BTN/PeerBanHelper/releases/latest)
-  - type: 'input'
+  - type: "input"
     attributes:
-      label: '版本号 - Version'
+      label: "版本号 - Version"
       description: |-
         Enter the PBH version that display on WebUI footer or GUI window title.  
         输入您正在使用 PeerBanHelper 的版本号，通常可在窗口标题或者 WebUI 页面的底部找到
-      placeholder: 'vX.X.X'
+      placeholder: "vX.X.X"
     validations:
       required: true
-  - type: 'textarea'
+  - type: "textarea"
     attributes:
-      label: '操作系统平台和系统架构 - OS  and CPU Arch'
+      label: "操作系统平台和系统架构 - OS  and CPU Arch"
       description: |-
         Enter the OS version/arch that PBH running on (not downloader), E.g Windows, Debian, iStoreOS.
         输入 PBH 所在的操作系统平台（不是下载器），例如：Windows、Debian、iStoreOS 等  
         And please also enter the system arch if you know it, E.g x86, arm64
         此外，您还需要输入系统架构。如果是 x86 设备，则通常为 x64；如果是 arm 设备，则通常为 arm64。请根据实际情况填写。如果不知道，也可以不写系统架构类型。
-      placeholder: '操作系统平台名称……'
+      placeholder: "操作系统平台名称……"
     validations:
       required: true
   - type: checkboxes
     id: deploy-methods
     attributes:
-      label: '部署方式 - Deploy methods'
+      label: "部署方式 - Deploy methods"
       description: |-
         Check and tick checkboxes that deploy methods that you're using
         请检查并勾选你正在使用的 PeerBanHelper 部署方式
@@ -59,7 +59,7 @@ body:
   - type: checkboxes
     id: downloaders
     attributes:
-      label: '添加的下载器 - Added Downloaders'
+      label: "添加的下载器 - Added Downloaders"
       description: |-
         Check and tick checkboxes if you added those downloader(s) into your PeerBanHelper installation
         请勾选被你添加到 PeerBanHelper 中的下载器类型
@@ -76,17 +76,17 @@ body:
           required: false
     validations:
       required: true
-  - type: 'textarea'
+  - type: "textarea"
     attributes:
-      label: '问题描述 - Issue Description'
+      label: "问题描述 - Issue Description"
       description: |-
         Describe the problem you encounted.
         在此详细的描述你所遇到的问题
     validations:
       required: true
-  - type: 'textarea'
+  - type: "textarea"
     attributes:
-      label: '复现步骤 - Reproduce steps'
+      label: "复现步骤 - Reproduce steps"
       description: |-
         If you know how to reproduce the error, please type it in this text area.  
         如果你清楚如何复现此故障，也欢迎告诉我们，帮助我们更快的复现它。如果它是一个偶尔才会出现的错误，请告诉我们它通常可能会在什么情况下出现。
@@ -96,22 +96,22 @@ body:
         3. 出现 BUG!
     validations:
       required: true
-  - type: 'textarea'
+  - type: "textarea"
     attributes:
-      label: '截图/日志文件 - Screenshot / Logs '
+      label: "截图/日志文件 - Screenshot / Logs "
       description: |-
         If you have some screenshot or logs file can help us, please upload them here.  
         如果你有一些截图或者日志能够更好的解释你所提出的问题，你可以在这里上传。
-      placeholder: '<截图文件>'
+      placeholder: "<截图文件>"
     validations:
       required: false
-  - type: 'textarea'
+  - type: "textarea"
     attributes:
-      label: '额外信息 - Addition Information'
+      label: "额外信息 - Addition Information"
       description: |-
         If you have any related informations, please insert them into this text area.
         如果你还有其他觉得可能对排查和解决此问题有帮助的更多信息，可以在这里告诉我们
-      placeholder: '在此填写可能有用的额外信息...'
+      placeholder: "在此填写可能有用的额外信息..."
   - type: checkboxes
     id: check-list
     attributes:
@@ -124,7 +124,7 @@ body:
           required: false
         - label: "所添加的下载器已满足 README 中的前置要求（如版本号和插件）(The downloaders that I've added already satisfied the requirements (E.g install plugins/adapters))"
           required: false
-        - label: "我已检查过 [PBH 文档](https://pbh-btn.github.io/pbh-docs/)（特别是常见问题），且即使使用了搜索也没有找到与此有关的内容 (This not a question/or the question that not listed in README's FAQ or [PBH WIKI](https://pbh-btn.github.io/pbh-docs/))"
+        - label: "我已检查过 [PBH 文档](https://docs.pbh-btn.com/)（特别是常见问题），且即使使用了搜索也没有找到与此有关的内容 (This not a question/or the question that not listed in README's FAQ or [PBH WIKI](https://docs.pbh-btn.com/))"
           required: false
         - label: "我没有检查这个检查清单，只是闭眼选中了所有的复选框，请关闭这个 Issue (I have not read these checkboxes and therefore I just ticked them all, Please close this issue)"
           required: false

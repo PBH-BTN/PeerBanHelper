@@ -48,7 +48,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
   const status = ref<'checking' | 'needLogin' | 'pass' | 'fail' | 'needInit'>('checking')
   const error = ref<Error | null>(null)
   const checkUpgradeError = ref<Error | null>(null)
-  const emmitter = ref(mitt())
+  const emitter = ref(mitt())
 
   const setAuthToken = async (token: string | null, rememberPassword = false) => {
     if (serverManifest.value && compare(serverManifest.value.version.version, '4.0.0', '<')) {
@@ -185,7 +185,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
     setAuthToken,
     plusStatus,
     setPlusKey,
-    emmitter,
+    emitter: emitter,
     assertResponseLogin: (res: Response) => {
       if (res.status === 403) {
         setAuthToken(null)

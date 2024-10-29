@@ -29,6 +29,16 @@ public class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 22)
+    public void miscChanges() {
+        conf.set("privacy", null);
+    }
+
+
+    @UpdateScript(version = 21)
+    public void addPushProvider(YamlConfiguration bundle) {
+        conf.set("push-notification", bundle.get("push-notification"));
+    }
 
     @UpdateScript(version = 19)
     public void telemetryErrorReporting() {

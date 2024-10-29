@@ -4,6 +4,7 @@ import enUS from '@arco-design/web-vue/es/locale/lang/en-us'
 import en from './en-US'
 import cn from './zh-CN'
 import type { ArcoLang } from '@arco-design/web-vue/es/locale/interface'
+import dayjs from 'dayjs'
 
 export const LOCALE_OPTIONS = [
   { label: '中文', value: 'zh-CN' },
@@ -53,6 +54,13 @@ const datetimeFormat = {
   'short-second': {
     minute: 'numeric',
     second: 'numeric'
+  },
+  log: {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
   }
 } as const
 
@@ -69,6 +77,7 @@ const i18n = createI18n({
     'zh-CN': datetimeFormat
   }
 })
+dayjs.locale(getNavigatorLanguage())
 
 export const ArcoI18nMessages = {
   'en-US': enUS,

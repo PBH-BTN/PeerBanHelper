@@ -1,5 +1,6 @@
 export default {
   'page.dashboard.description': 'This page displays the basic data since PeerBanHelper started.',
+  'page.dashboard.runningStatus': 'Running Status',
   'page.dashboard.clientStatus.title': 'Connected Downloaders',
   'page.dashboard.clientStatus.card.title': 'Downloader Status',
   'page.dashboard.clientStatus.card.status': 'Status',

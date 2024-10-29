@@ -14,6 +14,7 @@
               </a-badge>
             </a>
             <div v-else>{{ serverVersion?.version }}</div>
+            <br />
             <a-button
               v-if="endpointStore.plusStatus?.activated"
               class="plus-button"
@@ -98,7 +99,7 @@ watch(
               Button,
               {
                 type: 'primary',
-                onClick: () => endpointStore.emmitter.emit('open-settings-modal')
+                onClick: () => endpointStore.emitter.emit('open-settings-modal')
               },
               () => t('settings.open')
             )
@@ -113,7 +114,7 @@ watch(
 )
 
 const plusInfo = ref<InstanceType<typeof plusModal>>()
-endpointStore.emmitter.on('open-plus-modal', () => {
+endpointStore.emitter.on('open-plus-modal', () => {
   plusInfo.value?.showModal()
 })
 </script>

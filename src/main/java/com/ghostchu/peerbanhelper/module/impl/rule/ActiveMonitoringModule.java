@@ -1,13 +1,16 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -15,11 +18,14 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.eventbus.Subscribe;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.concurrent.*;
@@ -40,16 +46,16 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             .maximumSize(3500)
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
-    private final RollbarErrorReporter rollbarErrorReporter;
+    private long dailyTrafficCapping;
+    private final AlertManager alertManager;
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
-    private ScheduledExecutorService scheduleService;
 
-    public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao, RollbarErrorReporter rollbarErrorReporter) {
+    public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao, AlertManager alertManager) {
         super();
         this.peerRecordDao = peerRecordDao;
         this.trafficJournalDao = trafficJournalDao;
-        this.rollbarErrorReporter = rollbarErrorReporter;
+        this.alertManager = alertManager;
     }
 
     @Override
@@ -111,13 +117,10 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
-        if (this.scheduleService != null) {
-            this.scheduleService.shutdown();
-        }
-        this.scheduleService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-        this.scheduleService.scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
-        this.scheduleService.scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
-        this.scheduleService.scheduleAtFixedRate(this::writeJournal, 0, 1, TimeUnit.HOURS);
+        this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily");
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::writeJournal, 0, 1, TimeUnit.HOURS);
     }
 
     private void writeJournal() {
@@ -132,8 +135,37 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
                 }
             } catch (Throwable e) {
                 log.error("Unable to write hourly traffic journal to database", e);
-                rollbarErrorReporter.warning(e);
             }
+        }
+        updateTrafficMonitoringService();
+    }
+
+    @SneakyThrows
+    private void updateTrafficMonitoringService() {
+        if (dailyTrafficCapping <= 0) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        // Calculating the today traffic
+        long startOfToday = MiscUtil.getStartOfToday(now);
+        var data = trafficJournalDao.getDayOffsetData(null, new Timestamp(startOfToday - 86400000), new Timestamp(now), trafficJournalDao::fixTimezone);
+        long totalBytes = 0;
+        for (TrafficJournalDao.TrafficData datum : data) {
+            totalBytes += datum.getDataOverallUploaded();
+        }
+        var dateTimeString = MiscUtil.formatDateTime(now);
+        var dateString = MiscUtil.formatDateOnly(now);
+        var identifier = "dataTrafficCapping-" + startOfToday;
+        // 一天只发一次
+        if (totalBytes >= dailyTrafficCapping && !alertManager.identifierAlertExistsIncludeRead(identifier)) {
+            alertManager.publishAlert(true,
+                    AlertLevel.WARN,
+                    identifier,
+                    new TranslationComponent(Lang.MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_TITLE, dateString),
+                    new TranslationComponent(Lang.MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION,
+                            dateTimeString,
+                            FileUtils.byteCountToDisplaySize(totalBytes),
+                            FileUtils.byteCountToDisplaySize(dailyTrafficCapping)));
         }
     }
 
@@ -143,11 +175,9 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
                 peerRecordDao.syncPendingTasks(dataBuffer);
             } catch (SQLException e) {
                 log.warn("Unable sync peers data to database", e);
-                rollbarErrorReporter.warning(e);
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.warning(throwable);
         }
     }
 
@@ -166,20 +196,15 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
                 log.info(tlUI(Lang.AMM_CLEANED_UP, deleted));
             } catch (SQLException e) {
                 log.warn("Unable to clean up AMM tables", e);
-                rollbarErrorReporter.warning(e);
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.warning(throwable);
         }
     }
 
     @Override
     public void onDisable() {
         Main.getEventBus().unregister(this);
-        if (!this.scheduleService.isShutdown()) {
-            this.scheduleService.shutdownNow();
-        }
         diskWriteCache.invalidateAll();
         writeJournal();
         flush();

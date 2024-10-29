@@ -127,4 +127,12 @@ public interface Downloader extends AutoCloseable {
      * @return 统计数据
      */
     DownloaderStatistics getStatistics();
+
+    /**
+     * 获取下载器扩展特性标记
+     * @return 扩展特性标记列表
+     */
+    List<DownloaderFeatureFlag> getFeatureFlags();
+
+    int getMaxConcurrentPeerRequestSlots();
 }

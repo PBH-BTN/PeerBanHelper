@@ -1,0 +1,4 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Tue Oct 29 01:52:37 CST 2024
+sqlite-jdbc-loongarch64-3.47.0.0.jar>=
+sqlite-jdbc-loongarch64-3.47.0.0.pom>=

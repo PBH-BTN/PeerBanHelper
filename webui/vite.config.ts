@@ -7,6 +7,7 @@ import { promisify } from 'node:util'
 import { defineConfig } from 'vite'
 import { analyzer } from 'vite-bundle-analyzer'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import removeConsole from 'vite-plugin-remove-console'
 import VueDevTools from 'vite-plugin-vue-devtools'
 
 const exec = promisify(execCallBack)
@@ -23,7 +24,8 @@ export default defineConfig({
       style: 'css'
     }),
     nodePolyfills({ include: ['path'] }),
-    ...(isAnalyze ? [analyzer()] : [])
+    ...(isAnalyze ? [analyzer()] : []),
+    removeConsole()
   ],
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),

@@ -11,8 +11,8 @@ import com.ghostchu.peerbanhelper.database.table.RuleEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
-import com.ghostchu.peerbanhelper.telemetry.rollbar.RollbarErrorReporter;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -36,17 +34,14 @@ public class PersistMetrics implements BasicMetrics {
     private final ModuleDao moduleDao;
     private final RuleDao ruleDao;
     private final HistoryDao historyDao;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-    private final RollbarErrorReporter rollbarErrorReporter;
 
-    public PersistMetrics(HistoryDao historyDao, RuleDao ruleDao, ModuleDao moduleDao, TorrentDao torrentDao, InMemoryMetrics inMemory, RollbarErrorReporter rollbarErrorReporter) {
+    public PersistMetrics(HistoryDao historyDao, RuleDao ruleDao, ModuleDao moduleDao, TorrentDao torrentDao, InMemoryMetrics inMemory) {
         this.historyDao = historyDao;
         this.ruleDao = ruleDao;
         this.moduleDao = moduleDao;
         this.torrentDao = torrentDao;
         this.inMemory = inMemory;
-        scheduler.scheduleAtFixedRate(this::cleanup, 1, 24, TimeUnit.HOURS);
-        this.rollbarErrorReporter = rollbarErrorReporter;
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
     }
 
     private void cleanup() {
@@ -64,12 +59,10 @@ public class PersistMetrics implements BasicMetrics {
                     log.info(tlUI(Lang.CLEANED_BANLOGS, builder.delete()));
                 } catch (Exception e) {
                     log.error("Unable to cleanup expired banlogs", e);
-                    rollbarErrorReporter.warning(e);
                 }
             }
         } catch (Throwable throwable) {
             log.error("Unable to complete scheduled tasks", throwable);
-            rollbarErrorReporter.warning(throwable);
         }
     }
 
@@ -136,7 +129,6 @@ public class PersistMetrics implements BasicMetrics {
                 ));
             } catch (SQLException e) {
                 log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);
-                rollbarErrorReporter.error(e);
             }
         });
     }
@@ -168,7 +160,6 @@ public class PersistMetrics implements BasicMetrics {
 
     @Override
     public void close() {
-        scheduler.close();
         inMemory.close();
         flush();
     }

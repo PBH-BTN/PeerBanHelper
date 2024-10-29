@@ -19,7 +19,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <scrollpane id="f08b9">
+              <scrollpane id="f08b9" binding="loggerScrollPane">
                 <constraints border-constraint="Center"/>
                 <properties>
                   <font name="Consolas"/>
@@ -29,13 +29,9 @@
                   <font/>
                 </border>
                 <children>
-                  <component id="80008" class="javax.swing.JTextArea" binding="loggerTextArea">
+                  <component id="954ba" class="javax.swing.JList" binding="loggerTextList">
                     <constraints/>
-                    <properties>
-                      <editable value="false"/>
-                      <lineWrap value="true"/>
-                      <wrapStyleWord value="true"/>
-                    </properties>
+                    <properties/>
                   </component>
                 </children>
               </scrollpane>

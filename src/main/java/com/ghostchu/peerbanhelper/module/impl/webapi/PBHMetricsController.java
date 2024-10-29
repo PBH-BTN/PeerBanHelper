@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
-import com.ghostchu.peerbanhelper.metric.HitRateMetricRecorder;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
@@ -52,7 +51,6 @@ public class PBHMetricsController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/statistic/counter", this::handleBasicCounter, Role.USER_READ)
-                .get("/api/statistic/rules", this::handleRules, Role.USER_READ)
                 .get("/api/statistic/analysis/field", this::handleHistoryNumberAccess, Role.USER_READ)
                 .get("/api/statistic/analysis/date", this::handleHistoryDateAccess, Role.USER_READ);
     }
@@ -179,27 +177,6 @@ public class PBHMetricsController extends AbstractFeatureModule {
         }
         ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e)-> new HistoryDao.UniversalFieldDateResult(e.getKey(), e.getValue().intValue() , 0)).toList()));
     }
-    private void handleRules(Context ctx) {
-        String locale = locale(ctx);
-        Map<Rule, HitRateMetricRecorder> metric = new HashMap<>(getServer().getHitRateMetric().getHitRateMetric().asMap());
-        Map<String, String> dict = new HashMap<>();
-        List<RuleData> dat = metric.entrySet().stream()
-                .map(obj -> {
-                    TranslationComponent ruleType = new TranslationComponent(obj.getKey().getClass().getName());
-                    if (obj.getKey().matcherName() != null) {
-                        ruleType = obj.getKey().matcherName();
-                    }
-                    // 返回特定计算值作为字典键，这样不需要修改前端
-                    dict.put(tl(locale, ruleType), tl(locale, ruleType));
-                    return new RuleData(tl(locale, ruleType), obj.getValue().getHitCounter(), obj.getValue().getQueryCounter(), obj.getKey().metadata());
-                })
-                .sorted((o1, o2) -> Long.compare(o2.getHit(), o1.getHit()))
-                .toList();
-        Map<String, Object> resp = new HashMap<>();
-        resp.put("dict", dict);
-        resp.put("data", dat);
-        ctx.json(new StdResp(true, null, resp));
-    }
 
     private void handleBasicCounter(Context ctx) {
         Map<String, Object> map = new HashMap<>();
@@ -241,7 +218,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         private String type;
         private long hit;
         private long query;
-        private Map<String, Object> metadata;
+        private String metadata;
     }
 
 }
