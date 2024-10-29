@@ -81,7 +81,7 @@ BTN_SUBMITTING_BANS: "[BTN 网络] 计划任务正在向 BTN 网络提交自上�
 BTN_SUBMITTED_BANS: "[BTN 网络] 已向 BTN 网络提交 {} 个封禁记录，感谢您对 BTN 网络的支持！"
 BTN_SUBMITTING_HITRATE: "[BTN 网络] 计划任务正在向 BTN 网络回报规则命中率数据，请稍等"
 BTN_SUBMITTED_HITRATE: "[BTN 网络] 已向 BTN 网络回报 {} 个规则的命中率数据，感谢您对 BTN 网络的支持！"
-BTN_SUBMITTING_HISTORIES: "[BTN 网络] 计划任务正在向 BTN 网络提交 {} 个 Peer 活动历史记录，请稍等……"
+BTN_SUBMITTING_HISTORIES: "[BTN 网络] 计划任务正在向 BTN 网络提交 Peer 活动历史记录，请稍等……"
 BTN_SUBMITTED_HISTORIES: "[BTN 网络] 已向 BTN 网络提交 {} 个 Peer 活动历史记录，感谢您对 BTN 网络的支持！"
 CONFIG_CHECKING: "[配置升级实用工具] 请等待检查配置文件更新……"
 CONFIG_MIGRATING: "[配置升级实用工具] 迁移配置文件：从 {} 至 {} ……"
