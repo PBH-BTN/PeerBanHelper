@@ -25,6 +25,13 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 22)
+    public void workaroundForBadWebUI() {
+        if(conf.getInt("module.auto-range-ban.ipv6") == 32) { // WebUI bug
+            conf.set("module.auto-range-ban.ipv6", 60); // Fix it
+        }
+    }
+
     @UpdateScript(version = 21)
     public void dailyTrafficAlert() {
         conf.set("module.active-monitoring.traffic-monitoring.daily", -1);
