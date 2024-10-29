@@ -25,7 +25,7 @@
         <template #extra>
           <a-button
             type="text"
-            :disabled="!list.some((alert) => alert.readAt !== null)"
+            :disabled="!list.some((alert) => alert.readAt === null)"
             @click="markAllAsRead()"
             >{{ t('alert.action.dismissAll') }}</a-button
           >
