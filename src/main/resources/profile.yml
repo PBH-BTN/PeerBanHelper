@@ -1,4 +1,4 @@
-config-version: 20
+config-version: 22
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
