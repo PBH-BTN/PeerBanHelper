@@ -48,9 +48,6 @@ public class MainWindow extends JFrame {
 
     public MainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
-        System.setProperty("apple.awt.application.name", "PeerBanHelper");
-        System.setProperty("apple.awt.application.appearance", "system");
         if (SystemInfo.isMacFullWindowContentSupported)
             getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
         setTitle(tlUI(Lang.GUI_TITLE_LOADING, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));

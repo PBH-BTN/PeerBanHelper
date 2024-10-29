@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
@@ -36,6 +37,9 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     public SwingGuiImpl(String[] args) {
         super(args);
         this.silentStart = Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("silent"));
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("apple.awt.application.name", "PeerBanHelper");
+        System.setProperty("apple.awt.application.appearance", "system");
     }
 
     private void updateTitle() {
