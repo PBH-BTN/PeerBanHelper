@@ -23,12 +23,9 @@
     <template #content>
       <a-card :title="t('alert.title')" class="alert-card">
         <template #extra>
-          <a-button
-            type="text"
-            :disabled="!list.some((alert) => alert.readAt !== null)"
-            @click="markAllAsRead()"
-            >{{ t('alert.action.dismissAll') }}</a-button
-          >
+          <a-button type="text" @click="markAllAsRead()">{{
+            t('alert.action.dismissAll')
+          }}</a-button>
         </template>
         <a-list
           :bordered="false"
