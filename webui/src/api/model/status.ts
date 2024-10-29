@@ -1,4 +1,4 @@
-enum OSType {
+export enum OSType {
   Linux = 'Linux',
   Windows = 'Windows',
   MacOS = 'Mac OS X',

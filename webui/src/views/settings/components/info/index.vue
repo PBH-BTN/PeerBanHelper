@@ -208,10 +208,14 @@
           :align="{ label: 'right' }"
         >
           <a-descriptions-item :label="t('page.settings.tab.info.system.os')">
-            <a-space size="small">
-              <component :is="osLogo[data?.data.system.os ?? 'Other']"></component>
-              {{ data?.data.system.os }}
-            </a-space>
+            <component :is="osLogo[data?.data.system.os ?? 'Other']"></component>
+            {{
+              data?.data.system.os === OSType.MacOS
+                ? compare(data?.data.system.version, '11.0.0', '>')
+                  ? 'macOS'
+                  : 'data?.data.system.os'
+                : data?.data.system.os
+            }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.system.version')">
             <a-space>
@@ -421,11 +425,13 @@
   </a-modal>
 </template>
 <script setup lang="ts">
+import { OSType } from '@/api/model/status'
 import { genIconComponent } from '@/components/iconFont'
 import { CheckModuleEnable, GetBtnStatus, GetRunningInfo } from '@/service/settings'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
+import { compare } from 'compare-versions'
 import dayjs from 'dayjs'
 import Duration from 'dayjs/plugin/duration'
 import RelativeTime from 'dayjs/plugin/relativeTime'
@@ -434,6 +440,7 @@ import { isIP } from 'is-ip'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
 
 dayjs.extend(RelativeTime)
@@ -500,7 +507,7 @@ const osLogo = {
   Windows: genIconComponent('icon-Windows'),
   Linux: genIconComponent('icon-linux'),
   FreeBSD: genIconComponent('icon-freebsd'),
-  'Mac OS X': genIconComponent('icon-macOS'),
+  'Mac OS X': genIconComponent('icon-mac-os'),
   Solaris: genIconComponent('icon-solaris'),
   Other: genIconComponent('icon-other')
 }
