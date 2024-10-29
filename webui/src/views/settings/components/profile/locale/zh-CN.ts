@@ -5,7 +5,7 @@ export default {
   'page.settings.tab.profile.unit.ms': '毫秒',
   'page.settings.tab.profile.unit.s': '秒',
   'page.settings.tab.profile.unit.bytes': '字节',
-  'page.settings.tab.profile.form.banDuration': '封禁持续时间',
+  'page.settings.tab.profile.form.banDuration': '使用全局封禁时间',
   'page.settings.tab.profile.form.ignoreAddress': '忽略地址',
   'page.settings.tab.profile.form.ignoreAddress.tooltip':
     '来自这些 IP 地址的 Peers 不会被 PBH 检查，绕过所有检查规则',
