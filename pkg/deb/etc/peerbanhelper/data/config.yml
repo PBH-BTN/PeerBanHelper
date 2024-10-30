@@ -1,4 +1,4 @@
-config-version: 19
+config-version: 22
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -120,17 +120,12 @@ banlist-invoker:
       - "/bin/sh -c 'ipset add peerbanhelper-blocklist ${peer.ip}'"
     unban:
       - "/bin/sh -c 'ipset remove peerbanhelper-blocklist ${peer.ip}'"
-# Maxmind GeoIP/ASN 数据库
-# Maxmind GeoIP/ASN database
-# https://www.maxmind.com/
-# 在您填写相关密钥信息后，PBH 将自动下载所需的数据库文件，这视为您同意 Maxmind 的最终用户许可协议：https://www.maxmind.com/en/end-user-license-agreement
-# After you filled them, PBH will automatically download GeoIP database. EULA: https://www.maxmind.com/en/end-user-license-agreement
+# GeoIP/ASN 数据库 (Powered by Maxmind & GeoCN)
+# GeoIP/ASN database
 ip-database:
-  # 允许自动更新 Maxmind GeoIP 数据库文件
-  # Allow PBH update Maxmind GeoIP database file while restarting if needed
+  # 允许自动更新 GeoIP 数据库文件
+  # Allow PBH update GeoIP database file while restarting if needed
   auto-update: true
-  # ==== 密钥信息结束 ====
-  # ==== End of license keys ====
   database-city: 'GeoLite2-City'
   database-asn: 'GeoLite2-ASN'
 # 代理服务器设定
@@ -141,7 +136,6 @@ proxy:
   # 0 = 不使用代理 - No proxy
   # 1 = 使用系统代理 - Use system proxy
   # 2 = 使用 HTTP(s) 代理 - Use HTTP(s) proxy
-  # 3 = 使用 socks5 代理(可能无法使用) - Use socks5 proxy (may not work well)
   setting: 1
   # 代理服务器地址 - Proxy server host
   host: "127.0.0.1"
@@ -149,13 +143,76 @@ proxy:
   port: 7890
   # 代理例外地址，使用 | 分隔不同条目 - Exception list, spilt with | symbol
   non-proxy-hosts: "localhost|127.*|192.168.*|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|*.local|*.lan"
-privacy:
-  # 启用自动错误报告 - Enable automatic error reporting
-  # 错误报告信息不包含敏感信息或您的 IP 地址
-  # Error reports will not contain sensitive information or your IP address.
-  error-reporting: true
+
 performance:
   # 启用 Windows 平台上的 EcoQoS API以节约能源消耗，作为交换，程序运行速度将降低，定时任务可能推迟
   # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
+
+push-notification:
+  # 邮件推送服务 - Email push notification
+  email-example:
+    type: smtp
+    # 启用 SMTP 邮件推送服务
+    # Enable SMTP push service
+    enabled: false
+    # SMTP 服务器主机名 - SMTP Server Hostname
+    host: "smtp.example.com"
+    # SMTP 端口号 - SMTP Port
+    port: "587"
+    # 使用 SSL - SSL
+    ssl: true
+    # SMTP 用户名 - SMTP Username
+    # 通常为邮箱地址 - Usually is email address
+    username: "example@example.com"
+    # 发送者名称 - Sender name
+    # 通常为邮箱地址 - Usually is email address
+    sender: "example@example.com"
+    # 发件者名称
+    # Sender name
+    name: "PeerBanHelper"
+    # SMTP 密码 - SMTP Password
+    # 通常为授权码（而非邮箱密码），请参阅您的邮件服务提供商的说明
+    # Usually is Access Token (not Email password), please refer to your email provider instruction
+    password: "password"
+    # 收件人列表 - Receiver list
+    # 推送的消息将发送到下面的所有邮件地址 - Messages will send to all address that listed below
+    receiver:
+      - "example@exmaple.com"
+
+  # PushPlus - 推送加（Chinese user only）
+  pushplus-example:
+    type: pushplus
+    # 启用 Push Plus 推送加服务
+    enabled: false
+    # PushPlus Token
+    token: ""
+    # 群组编码，不清楚这是什么请留空
+    topic: ""
+    # 发送模板，不清楚这是什么请留空
+    template: ""
+    # 发送渠道。不清楚这是什么请留空；https://www.pushplus.plus/doc/channel/#%E5%BC%95%E8%A8%80
+    channel: ""
+
+  # ServerChan - Server酱
+  serverchan-example:
+    type: serverchan
+    # 启用 ServerChan Server酱 推送加服务
+    enabled: false
+    # 发送密钥 (SendKey/AppKey)
+    send-key: ""
+    # 消息通道
+    channel: ""
+    # 消息抄送的 openid
+    openid: ""
+
+  # Telegram - Bot 推送
+  telegram-example:
+    type: telegram
+    # 启用 Telegram Bot 推送服务
+    enabled: false
+    # HTTP API Token 一般为 1234567890:XXXXXXXXXX 形式，不能有空格。联系 @BotFather 获取，参阅下方链接：
+    token: ""
+    # 聊天 Chat ID；https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a
+    chat-id: ""
