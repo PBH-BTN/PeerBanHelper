@@ -85,15 +85,11 @@ jobs:
         with:
           name: freebsd-pkg-14.1-dist
           path: target/media
-      - name: "Compress libraries archive"
-        run: |
-          cd target
-          tar zcvf libraries.tar.gz libraries
       - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/libraries.tar.gz", "target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*"]'
+          asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*"]'
   Build_Docker:
     permissions:
       contents: write
