@@ -41,8 +41,11 @@ jobs:
   Build_PKG:
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
+  Build_Portable:
+    needs: Build_Executable
+    uses: ./.github/workflows/build_portable.yml
   Upload_Artifacts:
-    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG]
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
     permissions:
       contents: write
       checks: write
@@ -69,6 +72,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: deb-dist
+          path: target/media
+      - uses: actions/download-artifact@v4
+        with:
+          name: portable-dist
           path: target/media
       - uses: actions/download-artifact@v4
         with:
