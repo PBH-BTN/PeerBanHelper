@@ -66,7 +66,7 @@ export default {
   'page.settings.tab.profile.module.progressCheatBlocker.excessive_threshold':
     'Excessive download threshold',
   'page.settings.tab.profile.module.progressCheatBlocker.excessive_threshold.tips':
-    'IsExcessive = uploaded > (torrent_size * excessive-threshold)',
+    'IsExcessive = uploaded > (torrent_size * excessive_threshold)',
   'page.settings.tab.profile.module.progressCheatBlocker.ipv4prefixlength': 'IPv4 prefix length',
   'page.settings.tab.profile.module.progressCheatBlocker.ipv6prefixlength': 'IPv6 prefix length',
   'page.settings.tab.profile.module.progressCheatBlocker.ipprefixLength.tips':

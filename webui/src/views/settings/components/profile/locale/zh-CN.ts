@@ -60,7 +60,7 @@ export default {
     '禁止那些在同一个种子的累计下载量超过种子本身大小的客户端',
   'page.settings.tab.profile.module.progressCheatBlocker.excessive_threshold': '过量下载阈值',
   'page.settings.tab.profile.module.progressCheatBlocker.excessive_threshold.tips':
-    '计算规则： 是否过量下载 = 上传总大小 > (种子总大小 * excessive-threshold)',
+    '计算规则： 是否过量下载 = 上传总大小 > (种子总大小 * excessive_threshold)',
   'page.settings.tab.profile.module.progressCheatBlocker.ipv4prefixlength': 'IPv4 前缀长度',
   'page.settings.tab.profile.module.progressCheatBlocker.ipv6prefixlength': 'IPv6 前缀长度',
   'page.settings.tab.profile.module.progressCheatBlocker.ipprefixLength.tips':
