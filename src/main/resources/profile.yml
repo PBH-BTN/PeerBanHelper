@@ -135,8 +135,8 @@ module:
     block-excessive-clients: true
     # 过量下载计算阈值
     # Calculation threshold
-    # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive-threshold)
-    # IsExcessive = uploaded > (torrent_size * excessive-threshold)
+    # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive_threshold)
+    # IsExcessive = uploaded > (torrent_size * excessive_threshold)
     excessive-threshold: 1.5
     # IPV4 前缀长度，前缀相同的 IP 都被视为同一个用户
     # IPV4 prefix length, same prefix will trick as a same user
