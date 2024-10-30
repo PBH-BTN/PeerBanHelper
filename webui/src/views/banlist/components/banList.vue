@@ -28,7 +28,7 @@
       </template>
       <template #scroll-loading>
         <a-spin
-          v-if="loading && !loadingMore"
+          v-if="loading && list.length === 0"
           :style="{ height: `${virtualListHeight}px`, display: 'flex', alignItems: 'center' }"
         />
         <a-empty v-else-if="list.length === 0" :style="{ height: `${virtualListHeight}px` }" />
