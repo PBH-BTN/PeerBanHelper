@@ -7,6 +7,7 @@ export default {
   'page.settings.tab.profile.unit.bytes': 'bytes',
   'page.settings.tab.profile.form.banDuration': 'Use Global Ban Duration',
   'page.settings.tab.profile.form.ignoreAddress': 'Ignore Address',
+  'page.settings.tab.profile.form.ignoreAddress.action': 'Click to view',
   'page.settings.tab.profile.form.ignoreAddress.tooltip':
     'Bypass list, all peers comes from those IPs will bypass all checks',
   'page.settings.tab.profile.module.title': 'Module Config',
