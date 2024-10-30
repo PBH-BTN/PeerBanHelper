@@ -4,6 +4,7 @@
     size="medium"
     class="banlist-item"
     :layout="(['inline-vertical', 'horizontal'] as const)[descriptionLayout]"
+    table-layout="fixed"
   >
     <template #title>
       <a-space fill style="display: flex; justify-content: space-between">
@@ -199,7 +200,7 @@ const handleUnban = async (address: string) => {
 }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .red {
   color: red;
 }
@@ -221,5 +222,20 @@ a {
 .banlist-item:hover .hover-display-btn {
   transition: opacity 0.15s ease-in-out;
   opacity: 1;
+}
+</style>
+<style lang="less">
+.banlist-item {
+  div {
+    table {
+      tbody {
+        tr {
+          td.arco-descriptions-item-label {
+            width: 100px;
+          }
+        }
+      }
+    }
+  }
 }
 </style>
