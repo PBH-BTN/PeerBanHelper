@@ -80,7 +80,8 @@ jobs:
           path: target/media
       - name: "Compress libraries archive"
         run: |
-          tar zcvf target/libraries.tar.gz target/libraries
+          cd target
+          tar zcvf libraries.tar.gz libraries
       - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
