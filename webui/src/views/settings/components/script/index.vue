@@ -11,19 +11,17 @@
   </div>
 </template>
 <script setup lang="ts">
-import { loader } from '@guolao/vue-monaco-editor';
+import { type MonacoEditor, VueMonacoEditor, loader } from '@guolao/vue-monaco-editor'
+import { MarkerSeverity, editor, type languages } from 'monaco-editor/esm/vs/editor/editor.api'
+import { shallowRef } from 'vue'
+import GrammarParser from './aviatorscript/grammar/GrammarParser'
+import monarch from './aviatorscript/monarch'
+import suggestions from './aviatorscript/suggestions'
 loader.config({
   paths: {
-    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs',
-  },
+    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs'
+  }
 })
-// editor.vue
-import { type MonacoEditor, VueMonacoEditor } from '@guolao/vue-monaco-editor';
-import { MarkerSeverity, editor, type languages, } from 'monaco-editor/esm/vs/editor/editor.api';
-import { shallowRef } from 'vue';
-import GrammarParser from './aviatorscript/grammar/GrammarParser';
-import monarch from './aviatorscript/monarch';
-import suggestions from './aviatorscript/suggestions';
 const AV = 'aviatorscript'
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,

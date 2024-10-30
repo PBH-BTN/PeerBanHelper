@@ -11,7 +11,9 @@
       }
     ]"
   >
-    <a-button type="primary" @click="visible = true">{{ t('page.settings.tab.profile.form.ignoreAddress.action') }}</a-button>
+    <a-button type="primary" @click="visible = true">{{
+      t('page.settings.tab.profile.form.ignoreAddress.action')
+    }}</a-button>
     <a-drawer
       :visible="visible"
       hide-cancel

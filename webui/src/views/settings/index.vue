@@ -14,17 +14,17 @@
         <icon-code-square />
         {{ t('page.settings.tab.script') }}
       </template>
-     <ScriptEditor/>
+      <ScriptEditor />
     </a-tab-pane>
   </a-tabs>
 </template>
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue';
-import { useI18n } from 'vue-i18n';
-import ConfigForm from './components/config/index.vue';
-import RunningStatus from './components/info/index.vue';
-import ProfileForm from './components/profile/index.vue';
-const ScriptEditor = defineAsyncComponent(()=>import('./components/script/index.vue'))
+import { defineAsyncComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
+import ConfigForm from './components/config/index.vue'
+import RunningStatus from './components/info/index.vue'
+import ProfileForm from './components/profile/index.vue'
+const ScriptEditor = defineAsyncComponent(() => import('./components/script/index.vue'))
 
 const { t } = useI18n()
 </script>
