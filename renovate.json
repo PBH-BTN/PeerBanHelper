@@ -27,7 +27,7 @@
       "groupName": "default"
     },
     {
-      "depTypeList": [
+      "matchDepTypes": [
         "devDependencies"
       ],
       "automerge": true,
