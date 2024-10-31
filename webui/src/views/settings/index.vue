@@ -14,7 +14,7 @@
         <icon-code-square />
         {{ t('page.settings.tab.script') }}
       </template>
-      <ScriptEditor />
+      <ScriptList />
     </a-tab-pane>
   </a-tabs>
 </template>
@@ -24,7 +24,7 @@ import { useI18n } from 'vue-i18n'
 import ConfigForm from './components/config/index.vue'
 import RunningStatus from './components/info/index.vue'
 import ProfileForm from './components/profile/index.vue'
-const ScriptEditor = defineAsyncComponent(() => import('./components/script/index.vue'))
+const ScriptList = defineAsyncComponent(() => import('./components/script/index.vue'))
 
 const { t } = useI18n()
 </script>
