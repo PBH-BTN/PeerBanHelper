@@ -1,5 +1,4 @@
 import type { languages } from 'monaco-editor'
-
 const monarch = {
   // Set defaultToken to invalid to see what you do not tokenize yet
   // defaultToken: 'invalid',

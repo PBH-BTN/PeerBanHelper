@@ -11,12 +11,16 @@
   </div>
 </template>
 <script setup lang="ts">
-import { type MonacoEditor, VueMonacoEditor, loader } from '@guolao/vue-monaco-editor'
-import { MarkerSeverity, editor, type languages } from 'monaco-editor/esm/vs/editor/editor.api'
+import {
+  type MonacoEditor,
+  VueMonacoEditor,
+  type VueMonacoEditorEmitsOptions,
+  loader
+} from '@guolao/vue-monaco-editor'
 import { shallowRef } from 'vue'
 import GrammarParser from './aviatorscript/grammar/GrammarParser'
 import monarch from './aviatorscript/monarch'
-import suggestions from './aviatorscript/suggestions'
+import getSuggestion from './aviatorscript/suggestions'
 loader.config({
   paths: {
     vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs'
@@ -28,15 +32,24 @@ const MONACO_EDITOR_OPTIONS = {
   formatOnType: true,
   formatOnPaste: true
 }
-const editorRef = shallowRef<editor.IStandaloneCodeEditor>()
-const handleMount = (editor: editor.IStandaloneCodeEditor, monaco: MonacoEditor) => {
+type onMountF = VueMonacoEditorEmitsOptions['mount']
+type editor = Parameters<onMountF>[0] // editor
+const editorRef = shallowRef<editor>()
+const monacoRef = shallowRef<MonacoEditor>()
+const handleMount: onMountF = (editor, monaco) => {
   editorRef.value = editor
+  monacoRef.value = monaco
   monaco.languages.register({ id: AV })
   monaco.languages.setMonarchTokensProvider(AV, monarch)
   monaco.languages.registerCompletionItemProvider(AV, {
-    provideCompletionItems: () => ({
-      suggestions: suggestions as languages.CompletionItem[]
-    })
+    provideCompletionItems: () =>
+      ({
+        suggestions: getSuggestion(monaco)
+      }) as ReturnType<
+        Parameters<
+          typeof monaco.languages.registerCompletionItemProvider
+        >[1]['provideCompletionItems']
+      >
   })
 }
 const grammarParser = new GrammarParser()
@@ -47,7 +60,7 @@ const handleChange = (value: string | undefined) => {
   for (let i = 0; i < ast.errors.length; i++) {
     const error = ast.errors[i]
     markers.push({
-      severity: MarkerSeverity.Error,
+      severity: monacoRef.value!.MarkerSeverity.Error,
       startLineNumber: error.line,
       startColumn: error.column,
       endLineNumber: error.line,
@@ -58,7 +71,7 @@ const handleChange = (value: string | undefined) => {
   for (let i = 1; i < ast.ast.children.length - 1; i++) {
     const child = ast.ast.children[i]
     markers.push({
-      severity: MarkerSeverity.Error,
+      severity: monacoRef.value!.MarkerSeverity.Error,
       startLineNumber: child.line,
       startColumn: child.column,
       endLineNumber: child.line,
@@ -67,6 +80,6 @@ const handleChange = (value: string | undefined) => {
     })
   }
   const model = editorRef.value?.getModel()
-  if (model) editor.setModelMarkers(model, AV, markers)
+  if (model) monacoRef.value?.editor.setModelMarkers(model, AV, markers)
 }
 </script>
