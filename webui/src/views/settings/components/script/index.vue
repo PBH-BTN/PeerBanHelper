@@ -33,7 +33,7 @@ const MONACO_EDITOR_OPTIONS = {
   formatOnPaste: true
 }
 type onMountF = VueMonacoEditorEmitsOptions['mount']
-type editor = Parameters<onMountF>[0] // editor
+type editor = Parameters<onMountF>[0] // monacoEditor.editor.IStandaloneCodeEditor
 const editorRef = shallowRef<editor>()
 const monacoRef = shallowRef<MonacoEditor>()
 const handleMount: onMountF = (editor, monaco) => {
