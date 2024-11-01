@@ -245,7 +245,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         }
         if (returns instanceof String string) {
             if (string.isBlank()) {
-                return pass();
+                return null;
             } else if (string.startsWith("@")) {
                 return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
