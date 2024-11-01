@@ -1,4 +1,4 @@
-config-version: 19
+config-version: 22
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -135,8 +135,8 @@ module:
     block-excessive-clients: true
     # 过量下载计算阈值
     # Calculation threshold
-    # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive-threshold)
-    # IsExcessive = uploaded > (torrent_size * excessive-threshold)
+    # 计算方式是： 是否过量下载 = 上传总大小 > (种子总大小 * excessive_threshold)
+    # IsExcessive = uploaded > (torrent_size * excessive_threshold)
     excessive-threshold: 1.5
     # IPV4 前缀长度，前缀相同的 IP 都被视为同一个用户
     # IPV4 prefix length, same prefix will trick as a same user
@@ -285,11 +285,16 @@ module:
     # IPv6 地址前缀长度
     # IPv6 prefix length
     subnet-mask-v6-length: 60
-    # 容许同一网段下载同一种子的IP数量，正整数
+    # 容许同一网段下载同一种子的IP数量，正整数 (IPV4)
     # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
     # The allowed maximum amount of ips in same subnet
     # To avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same city
-    tolerate-num: 5
+    tolerate-num-ipv4: 2
+    # 容许同一网段下载同一种子的IP数量，正整数 (IPV6)
+    # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
+    # The allowed maximum amount of ips in same subnet
+    # To avoid mistake bans that caused by DHCP re-allocated IPs, or multiple users in same city
+    tolerate-num-ipv6: 5
     # 缓存持续时间（秒）
     # Cache life span
     # 所有连接过的peer会记入缓存，DHCP服务会定期重新分配IP，缓存时间过长会导致误杀
@@ -299,7 +304,7 @@ module:
     # Keep hunting
     # 如果某IP已判定为多拨，无视缓存时间限制继续搜寻其同伙
     # If a specific IP flagged multi-dialing, should we ignore the caching span and keep searching other IPs in same subnet?
-    keep-hunting: true
+    keep-hunting: false
     # 追猎持续时间（秒）
     # Hunting time
     # keep-hunting为true时有效，和cache-lifespan相似，对被猎杀IP的缓存持续时间
@@ -403,3 +408,10 @@ module:
     # Do not set it run too frequently
     # 时间单位：ms；默认值：604800000 (7 天); default: (7 days)
     data-cleanup-interval: 604800000
+    # 流量监控 - Traffic Monitoring
+    # 设置流量封顶阈值，当超出阈值后将发送告警信息提醒您检查下载器状态
+    # Set the traffic capping threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.
+    traffic-monitoring:
+      # 每日阈值 - 设置为 -1 以禁用，单位：bytes
+      # Daily threshold, set to -1 to disable, Unit: bytes
+      daily: -1

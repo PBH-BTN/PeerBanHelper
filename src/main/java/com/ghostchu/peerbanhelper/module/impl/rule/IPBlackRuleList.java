@@ -20,6 +20,7 @@ import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
+import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -63,13 +64,15 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @IgnoreScan
 public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
     private final RuleSubLogsDao ruleSubLogsDao;
+    private final ModuleMatchCache moduleMatchCache;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private long banDuration;
 
-    public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao) {
+    public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao, ModuleMatchCache moduleMatchCache) {
         super();
         this.ruleSubLogsDao = ruleSubLogsDao;
+        this.moduleMatchCache = moduleMatchCache;
     }
 
     @Override
@@ -249,6 +252,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                         // 如果已经存在则更新，否则添加
                         ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
                             ele.setData(name, ipAddresses);
+                            moduleMatchCache.invalidateAll();
                             log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name));
                             result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATE_SUCCESS, name), null));
                         }, () -> {

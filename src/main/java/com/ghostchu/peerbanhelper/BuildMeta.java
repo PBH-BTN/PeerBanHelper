@@ -28,7 +28,7 @@ public final class BuildMeta {
     }
 
     public boolean isSnapshotOrBeta() {
-        return !"release".equals(branch);
+        return "master".equals(branch) || "dev".equals(branch);
     }
 
     public String toString() {

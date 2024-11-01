@@ -1,0 +1,37 @@
+name: Portable Package Build
+
+on:
+  workflow_call:
+jobs:
+  dpkg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-dist
+          path: target/
+      - name: Build Portable package
+        id: build-portable
+        run: |
+          mkdir -p pkg/portable/PeerBanHelper
+          mv target/libraries pkg/portable/PeerBanHelper/
+          cp target/PeerBanHelper.jar pkg/portable/PeerBanHelper/
+          (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
+          mkdir -p zulu
+          wget https://cdn.azul.com/zulu/bin/zulu23.30.13-ca-jre23.0.1-win_x64.zip -O zulu/zulu23.30.13-ca-jre23.0.1-win_x64.zip
+          (cd zulu && unzip zulu23.30.13-ca-jre23.0.1-win_x64.zip && mv zulu23.30.13-ca-jre23.0.1-win_x64 jre)
+          mv zulu/jre pkg/portable/PeerBanHelper/
+          mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
+          (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)
+        # 上面那个文件名需要符合收集条件
+        env:
+          PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-dist
+          path: |
+            pkg/portable/*.zip

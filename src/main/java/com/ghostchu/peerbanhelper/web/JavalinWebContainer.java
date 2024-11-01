@@ -62,6 +62,7 @@ public class JavalinWebContainer {
                     c.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
+                    c.bundledPlugins.enableRouteOverview("/route-overview");
                     if (Main.getMainConfig().getBoolean("server.allow-cors")
                         || System.getenv("PBH_ALLOW_CORS") != null
                         || System.getProperty("PBH_ALLOW_CORS") != null

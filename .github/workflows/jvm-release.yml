@@ -41,8 +41,11 @@ jobs:
   Build_PKG:
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
+  Build_Portable:
+    needs: Build_Executable
+    uses: ./.github/workflows/build_portable.yml
   Upload_Artifacts:
-    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG]
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
     permissions:
       contents: write
       checks: write
@@ -72,20 +75,21 @@ jobs:
           path: target/media
       - uses: actions/download-artifact@v4
         with:
+          name: portable-dist
+          path: target/media
+      - uses: actions/download-artifact@v4
+        with:
           name: freebsd-pkg-13.4-dist
           path: target/media
       - uses: actions/download-artifact@v4
         with:
           name: freebsd-pkg-14.1-dist
           path: target/media
-      - name: "Compress libraries archive"
-        run: |
-          tar zcvf target/libraries.tar.gz target/libraries
       - uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/libraries.tar.gz", "target/PeerBanHelper.jar", "target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*"]'
+          asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*"]'
   Build_Docker:
     permissions:
       contents: write

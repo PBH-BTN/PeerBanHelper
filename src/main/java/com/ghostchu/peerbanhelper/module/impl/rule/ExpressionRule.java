@@ -32,6 +32,7 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.Resource;
@@ -230,7 +231,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         ExpressionMetadata meta = expressions.get(expression);
         if (returns instanceof Boolean status) {
             if (status) {
-
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
                         new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, meta.name(), "true"));
@@ -296,7 +296,12 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
 
     private void registerFunctions(Class<?> clazz) {
         try {
-            AviatorEvaluator.addInstanceFunctions(clazz.getSimpleName(), clazz);
+            AviatorEvaluator.addInstanceFunctions(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
+        }
+        try {
+            AviatorEvaluator.addStaticFunctions(StringUtils.capitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
         }
@@ -335,6 +340,8 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                 env.put("peer", peer);
                 env.put("downloader", downloader);
                 env.put("cacheable", new AtomicBoolean(false));
+                env.put("server", getServer());
+                env.put("moduleInstance", this);
                 Object returns;
                 if (expressionMetadata.threadSafe()) {
                     returns = expression.execute(env);

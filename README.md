@@ -93,9 +93,6 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 - [GeoIP2](https://dev.maxmind.com/geoip)
 - [ormlite](https://ormlite.com/)
 - [SimpleReloadLib](https://github.com/Ghost-chu/SimpleReloadLib)
-- [AtlantaFx](https://github.com/mkpaz/atlantafx)
-- [FXThemes](https://github.com/dukke/FXThemes)
-- [PreferencesFX](https://github.com/dlsc-software-consulting-gmbh/PreferencesFX)
 
 ### WebUI
 
