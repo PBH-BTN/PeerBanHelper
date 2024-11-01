@@ -15,8 +15,11 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
+import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -107,17 +110,11 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         } catch (Exception e) {
             log.error("Failed to load scripts", e);
         }
-//        javalinWebContainer.javalin()
-//                .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
-//                .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
-//                .put("/api/" + getConfigName() + "/{scriptId}", this::writeScript, Role.USER_WRITE)
-//                .delete("/api/" + getConfigName() + "/{scriptId}", this::deleteScript, Role.USER_WRITE);
-//        test code
-//        Torrent torrent = new TorrentImpl("1", "","",1,1.00d, 1,1);
-//        Peer peer = new PeerImpl(new PeerAddress("2408:8214:1551:bf20::1", 51413),
-//                "2408:8214:1551:bf20::1","-TR2940-", "Transmission 2.94",
-//                1,1,1,1,0.0d,null);
-//        System.out.println(shouldBanPeer(torrent,peer, Executors.newVirtualThreadPerTaskExecutor()));
+        javalinWebContainer.javalin()
+                .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
+                .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
+                .put("/api/" + getConfigName() + "/{scriptId}", this::writeScript, Role.USER_WRITE)
+                .delete("/api/" + getConfigName() + "/{scriptId}", this::deleteScript, Role.USER_WRITE);
     }
 
     private void deleteScript(Context context) throws IOException {
@@ -189,6 +186,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     private void listScripts(Context context) {
+        Pageable pageable = new Pageable(context);
         List<ExpressionMetadataDto> list = new ArrayList<>();
         for (Map.Entry<Expression, ExpressionMetadata> entry : expressions.entrySet()) {
             var metadata = entry.getValue();
@@ -201,7 +199,8 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                     metadata.version()
             ));
         }
-        context.json(new StdResp(true, null, list));
+        var r = list.stream().skip(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).toList();
+        context.json(new StdResp(true, null, new Page<>(pageable, list.size(), r)));
     }
 
 

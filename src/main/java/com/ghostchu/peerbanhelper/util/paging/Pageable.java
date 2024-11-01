@@ -28,7 +28,7 @@ public class Pageable {
         }
     }
 
-    public long getQueryIndex() {
+    public long getZeroBasedPage() {
         return this.page - 1;
     }
 

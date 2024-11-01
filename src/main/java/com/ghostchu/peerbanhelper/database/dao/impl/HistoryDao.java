@@ -48,7 +48,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         List<PeerBanCount> mapped;
         try (GenericRawResults<String[]> banLogs = builder
                 .limit(pageable.getSize())
-                .offset(pageable.getQueryIndex() * pageable.getSize())
+                .offset(pageable.getZeroBasedPage() * pageable.getSize())
                 // .where().ge("banAt", twoWeeksAgo)
                 .queryRaw()) {
             var results = banLogs.getResults();
