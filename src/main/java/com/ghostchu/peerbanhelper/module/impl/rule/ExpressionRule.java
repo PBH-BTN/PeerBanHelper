@@ -184,6 +184,10 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     private boolean isSafeNetworkEnvironment(Context context){
+        var value = System.getProperty("pbh.please-disable-safe-network-environment-check-i-know-this-is-very-dangerous-and-i-may-lose-my-data-and-hacker-may-attack-me-via-this-endpoint-and-steal-my-data-or-destroy-my-computer-i-am-fully-responsible-for-this-action-and-i-will-not-blame-the-developer-for-any-loss");
+        if(value != null && value.equals("true")){
+            return true;
+        }
         var ip = IPAddressUtil.getIPAddress(context.ip());
         if(ip == null){
             throw new IllegalArgumentException("Safe check for IPAddress failed, the IP cannot be null");
