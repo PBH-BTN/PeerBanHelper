@@ -57,8 +57,8 @@ public class BtnNetwork {
         this.userAgent = userAgent;
         this.configUrl = configUrl;
         this.submit = submit;
-        this.appId = appId;
-        this.appSecret = appSecret;
+        this.appId = appId.trim();
+        this.appSecret = appSecret.trim();
         this.moduleMatchCache = moduleMatchCache;
         setupHttpClient();
         resetScheduler();
