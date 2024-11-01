@@ -479,3 +479,4 @@ PUSH_PROVIDER_TEST_SUCCESS: "{} ({}) Test message sent successfully, please chec
 PUSH_PROVIDER_TEST_FAILED: "Test push service {} ({}) failed"
 PUSH_PROVIDER_TEST_ERROR: "Test push service {} ({}) failed: {}"
 BAN_PEER_EXCEPTION: "An exception occurred while ban Peer, specific Peer unable to ban, Please report these information to PeerBanHelper developer"
+EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS: "For security reason, create AviatorScript via Internet or Reserve Proxy is disallowed."

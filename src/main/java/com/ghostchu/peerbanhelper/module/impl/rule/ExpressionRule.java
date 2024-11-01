@@ -10,9 +10,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.StrUtil;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.paging.Page;
@@ -59,6 +57,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
@@ -136,6 +135,11 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     private void writeScript(Context context) throws IOException {
+        if (!isSafeNetworkEnvironment(context)) {
+            context.status(HttpStatus.FORBIDDEN);
+            context.json(new StdResp(false, tl(locale(context), Lang.EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS, context.ip()), null));
+            return;
+        }
         var scriptId = context.pathParam("scriptId");
         File readFile = getIfAllowedScriptId(scriptId);
         if (readFile == null) {
@@ -177,6 +181,14 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             return readFile;
         }
         return null;
+    }
+
+    private boolean isSafeNetworkEnvironment(Context context){
+        var ip = IPAddressUtil.getIPAddress(context.ip());
+        if(ip == null){
+            throw new IllegalArgumentException("Safe check for IPAddress failed, the IP cannot be null");
+        }
+        return ip.isLocal() && !MiscUtil.isUsingReserveProxy(context);
     }
 
     private boolean insideDirectory(File allowRange, File targetFile) {
