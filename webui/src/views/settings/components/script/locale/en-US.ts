@@ -17,5 +17,9 @@ export default {
   'page.settings.tab.script.column.actions.delete': 'Are you sure you want to delete this script?',
   'page.settings.tab.script.detail.title.view': 'View script: ',
   'page.settings.tab.script.detail.title.edit': 'Edit script: ',
-  'page.settings.tab.script.detail.form.name': 'Script name'
+  'page.settings.tab.script.detail.form.name': 'Script name',
+  'page.settings.tab.script.detail.loading': 'Loading editor, this may take a while...',
+  'page.settings.tab.script.detail.failed': 'Unable to load editor',
+  'page.settings.tab.script.detail.failed.tips':
+    'Please check your network connection or refresh the page to try again'
 }

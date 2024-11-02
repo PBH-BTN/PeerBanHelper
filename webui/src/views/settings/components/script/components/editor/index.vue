@@ -8,7 +8,18 @@
       :default-language="AV"
       @mount="handleMount"
       @change="handleChange"
-    />
+    >
+      <template #default>
+        <a-spin :tip="t('page.settings.tab.script.detail.loading')" />
+      </template>
+      <template #failure>
+        <a-result status="error" :title="t('page.settings.tab.script.detail.failed')">
+          <template #subtitle>
+            {{ t('page.settings.tab.script.detail.failed.tips') }}
+          </template>
+        </a-result>
+      </template>
+    </VueMonacoEditor>
   </div>
 </template>
 <script setup lang="ts">
@@ -19,9 +30,13 @@ import {
   loader
 } from '@guolao/vue-monaco-editor'
 import { shallowRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 import GrammarParser from './aviatorscript/grammar/GrammarParser'
 import monarch from './aviatorscript/monarch'
 import getSuggestion from './aviatorscript/suggestions'
+
+const { t } = useI18n()
+
 const { viewOnly = false } = defineProps<{
   viewOnly: boolean
 }>()
