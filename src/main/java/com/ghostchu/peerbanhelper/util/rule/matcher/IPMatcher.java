@@ -15,7 +15,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -24,8 +26,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @ToString(callSuper = true)
 public class IPMatcher extends RuleMatcher<IPAddress> {
 
-    private List<IPAddress> subnets;
-    private List<IPAddress> ips;
+    private Set<IPAddress> subnets;
+    private Set<IPAddress> ips;
     private BloomFilter<String> bloomFilter;
 
     public IPMatcher(String ruleId, String ruleName, List<IPAddress> ruleData) {
@@ -42,8 +44,8 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
      */
     public void setData(String ruleName, List<IPAddress> ruleData) {
         setRuleName(ruleName);
-        this.ips = new ArrayList<>();
-        this.subnets = new ArrayList<>();
+        this.ips = new HashSet<>();
+        this.subnets = new HashSet<>();
         ruleData.forEach(ipAddress -> {
             // 判断是否是网段
             List<IPAddress> ipsList = new ArrayList<>();
@@ -66,11 +68,27 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
         });
         bloomFilter = BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8), this.ips.size(), 0.01);
         this.ips.forEach(ip -> bloomFilter.put(ip.toString()));
+        // subnets 合并与去重
+        Set<IPAddress> newSubnets = new HashSet<>();
+        for (IPAddress subnet : subnets) {
+            boolean merged = false;
+            for (IPAddress newSubnet : newSubnets) {
+                if (newSubnet.contains(subnet)) {
+                    merged = true;
+                    break;
+                }
+            }
+            if (!merged) {
+                newSubnets.add(subnet);
+            }
+        }
+        this.subnets = newSubnets;
     }
 
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         final IPAddress ip = IPAddressUtil.getIPAddress(content);
+        if(ip == null) return MatchResult.DEFAULT;
         // 先用bloom过滤器查一下
         if (bloomFilter.mightContain(content)) {
             // 如果查到了，那么进一步验证到底是不是在黑名单中(bloom filter存在误报的可能性)
