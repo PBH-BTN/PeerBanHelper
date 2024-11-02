@@ -335,23 +335,25 @@
             {{ data?.data.jvm.runtime }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.runtime.heapMemory')">
-            <a-space style="display: flex; align-items: center">
-              <a-tooltip
-                :content="
-                  `${Math.round((1 - (data?.data.jvm.memory.heap.free ?? 0) / (data?.data.jvm.memory.heap.max ?? 1)) * 100)}% ` +
-                  t('page.settings.tab.info.system.memory.used')
-                "
-              >
-                <a-progress
-                  type="circle"
-                  size="mini"
-                  :status="heapMemoryProgressBarColor"
-                  :percent="heapMemoryStatus"
-                />
-              </a-tooltip>
-              {{ formatFileSize(data?.data.jvm.memory.heap.free ?? 0) }} &nbsp;
-              {{ t('page.settings.tab.info.system.memory.available') }}
-            </a-space>
+            <multiClick :required="5" :time-limit="3000" @multi-click="downloadHeap">
+              <a-space style="display: flex; align-items: center">
+                <a-tooltip
+                  :content="
+                    `${Math.round((1 - (data?.data.jvm.memory.heap.free ?? 0) / (data?.data.jvm.memory.heap.max ?? 1)) * 100)}% ` +
+                    t('page.settings.tab.info.system.memory.used')
+                  "
+                >
+                  <a-progress
+                    type="circle"
+                    size="mini"
+                    :status="heapMemoryProgressBarColor"
+                    :percent="heapMemoryStatus"
+                  />
+                </a-tooltip>
+                {{ formatFileSize(data?.data.jvm.memory.heap.free ?? 0) }} &nbsp;
+                {{ t('page.settings.tab.info.system.memory.available') }}
+              </a-space>
+            </multiClick>
           </a-descriptions-item>
         </a-descriptions>
       </template>
@@ -427,7 +429,12 @@
 <script setup lang="ts">
 import { OSType } from '@/api/model/status'
 import { genIconComponent } from '@/components/iconFont'
-import { CheckModuleEnable, GetBtnStatus, GetRunningInfo } from '@/service/settings'
+import {
+  CheckModuleEnable,
+  GetBtnStatus,
+  GetHeapDumpFile,
+  GetRunningInfo
+} from '@/service/settings'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
@@ -440,8 +447,10 @@ import { isIP } from 'is-ip'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+import multiClick from '@/components/multiClick.vue'
 
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
+import { Message } from '@arco-design/web-vue'
 
 dayjs.extend(RelativeTime)
 dayjs.extend(Duration)
@@ -518,6 +527,15 @@ const osLogo = {
 }
 
 const showLog = ref(false)
+
+const downloadHeap = async () => {
+  Message.info(t('page.settings.tab.info.downloadHeap'))
+  const blob = await GetHeapDumpFile()
+  const a = document.createElement('a')
+  a.href = window.URL.createObjectURL(blob)
+  a.download = 'heapdump.hprof.gz'
+  a.click()
+}
 </script>
 
 <style scoped>

@@ -61,5 +61,7 @@ export default {
   'page.settings.tab.info.log.title': '日志',
   'page.settings.tab.info.log.enableAutoRefresh': '自动刷新',
   'page.settings.tab.info.log.hideBanWave': '隐藏来自 Ban Wave 的检查日志',
-  'page.settings.tab.info.log.showThread': '显示线程名'
+  'page.settings.tab.info.log.showThread': '显示线程名',
+
+  'page.settings.tab.info.downloadHeap': '开始下载堆转储文件，这需要一段时间'
 }

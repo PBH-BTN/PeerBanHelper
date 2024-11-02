@@ -94,3 +94,14 @@ export async function GetBtnStatus(): Promise<CommonResponse<BTNStatus>> {
     return res.json()
   })
 }
+
+export async function GetHeapDumpFile() {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/heapdump'), location.href)
+  return fetch(url, { headers: getCommonHeader(), method: 'POST' }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.blob()
+  })
+}
