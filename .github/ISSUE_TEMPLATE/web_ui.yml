@@ -1,5 +1,5 @@
 name: "WebUI"
-description: "报告与 WebUI 有关的程序错误 - Report the errors that related to WebUI"
+description: "报告与 WebUI 有关的错误，如页面错误、链接或按钮无效 - Report the errors that related to WebUI, E.g page error or buttom doesnt work"
 
 title: "[WebUI] "
 labels:
