@@ -14,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -48,7 +45,7 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
         this.subnets = new HashSet<>();
         ruleData.forEach(ipAddress -> {
             // 判断是否是网段
-            List<IPAddress> ipsList = new ArrayList<>();
+            List<IPAddress> ipsList = new LinkedList<>();
             if (null != ipAddress.getNetworkPrefixLength()) {
                 if (ipAddress.isIPv4() && ipAddress.getNetworkPrefixLength() >= 20) {
                     // 前缀长度 >= 20 的ipv4网段地址转为精确ip
