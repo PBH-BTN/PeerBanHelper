@@ -171,9 +171,9 @@ public class BitComet extends AbstractDownloader {
             this.serverId = deviceTokenResponse.getServerId();
             this.serverVersion = new Semver(deviceTokenResponse.getVersion(), Semver.SemverType.LOOSE);
             this.serverName = deviceTokenResponse.getServerName();
-            //if (queryNeedReConfigureIpFilter()) {
-            enableIpFilter();
-            //}
+            if (queryNeedReConfigureIpFilter()) {
+                enableIpFilter();
+            }
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             // return request.statusCode() == 200;
         } catch (Exception e) {
@@ -233,7 +233,7 @@ public class BitComet extends AbstractDownloader {
         }};
         HttpResponse<String> updatePreferencesToEnableIpFilter =
                 httpClient.send(
-                        MutableRequest.POST(apiEndpoint + BCEndpoint.GET_IP_FILTER_CONFIG.getEndpoint(),
+                        MutableRequest.POST(apiEndpoint + BCEndpoint.SET_IP_FILTER_CONFIG.getEndpoint(),
                                         HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(settings)))
                                 .header("Authorization", "Bearer " + this.deviceToken),
                         HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
