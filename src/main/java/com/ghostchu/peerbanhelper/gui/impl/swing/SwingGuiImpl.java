@@ -213,7 +213,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         }
     }
 
-    private void refreshTrayIcon() {
+    private synchronized void refreshTrayIcon() {
         TrayIcon icon = mainWindow.getTrayIcon();
         if (icon != null) {
             try {

@@ -273,6 +273,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
+                }finally {
+                    moduleMatchCache.invalidateAll();
                 }
             }).join();
         } else {
