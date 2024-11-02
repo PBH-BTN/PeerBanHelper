@@ -171,9 +171,9 @@ public class BitComet extends AbstractDownloader {
             this.serverId = deviceTokenResponse.getServerId();
             this.serverVersion = new Semver(deviceTokenResponse.getVersion(), Semver.SemverType.LOOSE);
             this.serverName = deviceTokenResponse.getServerName();
-            if (queryNeedReConfigureIpFilter()) {
-                enableIpFilter();
-            }
+            //if (queryNeedReConfigureIpFilter()) {
+            enableIpFilter();
+            //}
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             // return request.statusCode() == 200;
         } catch (Exception e) {
@@ -225,6 +225,7 @@ public class BitComet extends AbstractDownloader {
     private void enableIpFilter() throws IOException, InterruptedException {
         Map<String, Object> settings = new HashMap<>() {{
             put("ip_filter_config", new HashMap<>() {{
+                put("enable_ipfilter", true);
                 put("enable_ip_filter", true);
                 put("enable_whitelist_mode", false); // 2.10
                 put("ipfilter_mode", "blacklist"); // 2.11
