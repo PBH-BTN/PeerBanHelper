@@ -32,6 +32,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.http.HttpClient;
@@ -275,7 +277,7 @@ public class BitComet extends AbstractDownloader {
                         try {
                             semaphore.acquire();
                             Map<String, String> taskIds = new HashMap<>();
-                            taskIds.put("task_id", torrent.getTaskId().toString());
+                            taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
                             HttpResponse<String> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
                                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
                                             .header("Authorization", "Bearer " + this.deviceToken),
@@ -289,7 +291,7 @@ public class BitComet extends AbstractDownloader {
                         }
                     }));
         }
-        return torrentResponses.stream().map(torrent -> new TorrentImpl(torrent.getTask().getTaskId().toString(),
+        return torrentResponses.stream().map(torrent -> new TorrentImpl(Long.toString(torrent.getTask().getTaskId()),
                 torrent.getTask().getTaskName(),
                 torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
                 torrent.getTaskDetail().getTotalSize(),
@@ -307,7 +309,7 @@ public class BitComet extends AbstractDownloader {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<String> resp;
+        HttpResponse<InputStream> resp;
         try {
             Map<String, Object> requirements = new HashMap<>();
             requirements.put("groups", List.of("peers_connected")); // 2.11 Beta 3 可以限制获取哪一类 Peers，注意下面仍需要检查，因为旧版本不支持
@@ -316,38 +318,39 @@ public class BitComet extends AbstractDownloader {
             resp = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_PEERS.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
                             .header("Authorization", "Bearer " + this.deviceToken),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    HttpResponse.BodyHandlers.ofInputStream());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
         if (resp.statusCode() != 200) {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
-        var peers = JsonUtil.standard().fromJson(resp.body(), BCTaskPeersResponse.class);
-        //noinspection UnusedAssignment
-        resp = null; // 立即手动释放 resp 的对象引用，你可能觉得这非常夸张，但部分版本 BitComet 一个响应能高达 12 MB，考虑到 PBH 的设计运行内存上限仅 386MB ，所以辅助 GC 完成垃圾回收是值得的。
-        if (peers.getPeers() == null) {
-            return Collections.emptyList();
-        }
-        var noGroupField = peers.getPeers().stream().noneMatch(dto -> dto.getGroup() != null); // 2.10 的一些版本没有 group 字段
-        var stream = peers.getPeers().stream();
+        try (InputStreamReader reader = new InputStreamReader(resp.body())) {
+            var peers = JsonUtil.standard().fromJson(reader, BCTaskPeersResponse.class);
+            if (peers.getPeers() == null) {
+                return Collections.emptyList();
+            }
+            var noGroupField = peers.getPeers().stream().noneMatch(dto -> dto.getGroup() != null); // 2.10 的一些版本没有 group 字段
+            var stream = peers.getPeers().stream();
 
-        if (!noGroupField) { // 对于新版本，添加一个 group 过滤
-            stream = stream.filter(dto -> dto.getGroup().equals("connected") // 2.10 正式版
-                                          || dto.getGroup().equals("connected_peers") // 2.11 Beta 1-2
-                                          || dto.getGroup().equals("peers_connected")); // 2.11 Beta 3
+            if (!noGroupField) { // 对于新版本，添加一个 group 过滤
+                stream = stream.filter(dto -> dto.getGroup().equals("connected") // 2.10 正式版
+                                              || dto.getGroup().equals("connected_peers") // 2.11 Beta 1-2
+                                              || dto.getGroup().equals("peers_connected")); // 2.11 Beta 3
+            }
+            return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
+                    peer.getIp(),
+                    new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
+                    peer.getClientType(),
+                    peer.getDlRate(),
+                    peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10
+                    peer.getUpRate(),
+                    peer.getUpSize() != null ? peer.getUpSize() : -1, // 兼容 2.10
+                    peer.getPermillage() / 1000.0d, null, Collections.emptyList())
+            ).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
-
-        return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
-                peer.getIp(),
-                new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
-                peer.getClientType(),
-                peer.getDlRate(),
-                peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10
-                peer.getUpRate(),
-                peer.getUpSize() != null ? peer.getUpSize() : -1, // 兼容 2.10
-                peer.getPermillage() / 1000.0d, null, Collections.emptyList())
-        ).collect(Collectors.toList());
     }
 
     @Override
