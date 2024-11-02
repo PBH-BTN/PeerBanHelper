@@ -61,9 +61,14 @@ export async function UpsertScript(
   name: string,
   content: string
 ): Promise<CommonResponseWithoutData> {
-  console.log('name:', name)
-  console.log('content', content)
-  return new Promise((resolve) => {
-    resolve({ success: true, message: 'success' })
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `api/expression-engine/${name}`),
+    location.href
+  )
+  return fetch(url, { headers: getCommonHeader(), method: 'PUT', body: content }).then((res) => {
+    return res.json()
   })
 }
