@@ -20,8 +20,8 @@ public class BCTaskTorrentResponse {
     private TaskSummaryDTO taskSummary;
     @SerializedName("task")
     private TaskDTO task;
-    @SerializedName("version")
-    private String version;
+//    @SerializedName("version")
+//    private String version;
 
     @NoArgsConstructor
     @Data
@@ -91,22 +91,22 @@ public class BCTaskTorrentResponse {
 //        private String seedingTime;
 //        @SerializedName("availability")
 //        private String availability;
-        @SerializedName("piece_num")
-        private String pieceNum;
+//        @SerializedName("piece_num")
+//        private String pieceNum;
 //        @SerializedName("ltseed_upload_size")
 //        private Long ltseedUploadSize;
 //        @SerializedName("ltseed_upload_speed")
 //        private String ltseedUploadSpeed;
-        @SerializedName("size_left")
-        private Long sizeLeft;
+//        @SerializedName("size_left")
+//        private Long sizeLeft;
         @SerializedName("download_permillage")
         private Long downloadPermillage;
 //        @SerializedName("dl_time")
 //        private String dlTime;
 //        @SerializedName("dl_time_all")
 //        private String dlTimeAll;
-        @SerializedName("files_selected")
-        private Long filesSelected;
+//        @SerializedName("files_selected")
+//        private Long filesSelected;
 //        @SerializedName("piece_hashes")
 //        private String pieceHashes;
 //        @SerializedName("file_alignment")
@@ -143,21 +143,21 @@ public class BCTaskTorrentResponse {
         private String status;
         @SerializedName("total_size")
         private long totalSize;
-        @SerializedName("selected_size")
-        private long selectedSize;
-        @SerializedName("selected_downloaded_size")
-        private long selectedDownloadedSize;
+//        @SerializedName("selected_size")
+//        private long selectedSize;
+//        @SerializedName("selected_downloaded_size")
+//        private long selectedDownloadedSize;
         @SerializedName("download_rate")
         private long downloadRate;
         @SerializedName("upload_rate")
         private long uploadRate;
-        @SerializedName("error_code")
-        private String errorCode;
-        @SerializedName("error_message")
-        private String errorMessage;
+//        @SerializedName("error_code")
+//        private String errorCode;
+//        @SerializedName("error_message")
+//        private String errorMessage;
         @SerializedName("permillage")
         private long permillage;
-        @SerializedName("left_time")
-        private String leftTime;
+//        @SerializedName("left_time")
+//        private String leftTime;
     }
 }

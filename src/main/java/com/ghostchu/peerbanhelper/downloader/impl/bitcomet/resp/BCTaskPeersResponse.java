@@ -49,18 +49,18 @@ public class BCTaskPeersResponse {
         private String status;
         @SerializedName("total_size")
         private long totalSize;
-        @SerializedName("selected_size")
-        private long selectedSize;
-        @SerializedName("selected_downloaded_size")
-        private long selectedDownloadedSize;
+//        @SerializedName("selected_size")
+//        private long selectedSize;
+//        @SerializedName("selected_downloaded_size")
+//        private long selectedDownloadedSize;
         @SerializedName("download_rate")
         private long downloadRate;
         @SerializedName("upload_rate")
         private long uploadRate;
-        @SerializedName("error_code")
-        private String errorCode;
-        @SerializedName("error_message")
-        private String errorMessage;
+//        @SerializedName("error_code")
+//        private String errorCode;
+//        @SerializedName("error_message")
+//        private String errorMessage;
         @SerializedName("permillage")
         private Integer permillage;
 //        @SerializedName("left_time")
