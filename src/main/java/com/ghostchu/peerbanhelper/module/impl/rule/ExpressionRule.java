@@ -48,10 +48,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -420,7 +417,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         try (BufferedReader reader = new BufferedReader(new StringReader(scriptContent))) {
             String name = fallbackName;
             String author = "Unknown";
-            String version = "null";
+            String version = "0.0";
             boolean cacheable = true;
             boolean threadSafe = true;
             while (true) {
@@ -445,7 +442,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             }
             return new ExpressionMetadata(file, name, author, cacheable, threadSafe, version, scriptContent);
         } catch (IOException e) {
-            return new ExpressionMetadata(file, "Failed to parse name", "Unknown", true, true, "null", scriptContent);
+            return new ExpressionMetadata(file, "Failed to parse name", "Unknown", true, true, "0.0", scriptContent);
         }
     }
 
