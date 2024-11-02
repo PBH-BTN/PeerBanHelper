@@ -1,6 +1,7 @@
 <template>
   <div style="height: 80vh">
     <VueMonacoEditor
+      v-model:value="model"
       theme="vs-dark"
       class="editor"
       :options="MONACO_EDITOR_OPTIONS"
@@ -21,6 +22,11 @@ import { shallowRef } from 'vue'
 import GrammarParser from './aviatorscript/grammar/GrammarParser'
 import monarch from './aviatorscript/monarch'
 import getSuggestion from './aviatorscript/suggestions'
+const { viewOnly = false } = defineProps<{
+  viewOnly: boolean
+}>()
+const model = defineModel<string | undefined>({ required: true })
+
 loader.config({
   paths: {
     vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs'
@@ -36,6 +42,8 @@ type onMountF = VueMonacoEditorEmitsOptions['mount']
 type editor = Parameters<onMountF>[0] // monacoEditor.editor.IStandaloneCodeEditor
 const editorRef = shallowRef<editor>()
 const monacoRef = shallowRef<MonacoEditor>()
+const grammarParser = new GrammarParser()
+
 const handleMount: onMountF = (editor, monaco) => {
   editorRef.value = editor
   monacoRef.value = monaco
@@ -51,9 +59,8 @@ const handleMount: onMountF = (editor, monaco) => {
         >[1]['provideCompletionItems']
       >
   })
-  editor.updateOptions({ readOnly: true })
+  editor.updateOptions({ readOnly: viewOnly })
 }
-const grammarParser = new GrammarParser()
 const handleChange = (value: string | undefined) => {
   if (!value) return
   const ast = grammarParser.parse(value + '\n')

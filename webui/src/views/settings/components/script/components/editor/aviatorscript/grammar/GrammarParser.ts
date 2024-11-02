@@ -34,7 +34,6 @@ export default class GrammarParser {
 
     parser.buildParseTrees = true
     const tree = parser.root()
-    // console.info(tree);
 
     class Visitor {
       visitChildren(ctx: ParserRuleContext) {
