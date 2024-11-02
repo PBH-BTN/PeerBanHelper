@@ -364,23 +364,13 @@ public class BitComet extends AbstractDownloader {
     private void setBanListIncrement(Collection<BanMetadata> added) {
         StringJoiner joiner = new StringJoiner("\n");
         added.forEach(p -> joiner.add(p.getPeer().getAddress().getIp()));
-        if (is211Newer()) {
-            operateBanListNew("data_file", joiner.toString());
-        } else {
-            operateBanListLegacy("merge", joiner.toString());
-        }
+        operateBanListLegacy("merge", joiner.toString());
     }
 
     protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.forEach(p -> joiner.add(p.getIp()));
-        if (is211Newer()) {
-            operateBanListNew("data_file", joiner.toString());
-            //unbanAllPeers();
-        } else {
-            operateBanListLegacy("replace", joiner.toString());
-        }
-
+        operateBanListLegacy("replace", joiner.toString());
     }
 
     private boolean is211Newer() {
@@ -409,6 +399,7 @@ public class BitComet extends AbstractDownloader {
     private void operateBanListLegacy(String mode, String content) {
         Map<String, String> banListSettings = new HashMap<>();
         banListSettings.put("import_type", mode);
+        banListSettings.put("data_type", "data_file");
         banListSettings.put("content_base64", Base64.getEncoder().encodeToString(content.getBytes(StandardCharsets.UTF_8)));
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.IP_FILTER_UPLOAD.getEndpoint(),
@@ -425,24 +416,24 @@ public class BitComet extends AbstractDownloader {
         }
     }
 
-    private void operateBanListNew(String mode, String content) {
-        Map<String, String> banListSettings = new HashMap<>();
-        banListSettings.put("data_type", "manual_list");
-        banListSettings.put("content_base64", Base64.getEncoder().encodeToString(content.getBytes(StandardCharsets.UTF_8)));
-        try {
-            HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.IP_FILTER_UPLOAD.getEndpoint(),
-                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(banListSettings)))
-                            .header("Authorization", "Bearer " + this.deviceToken),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() != 200) {
-                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-                throw new IllegalStateException("Save BitComet banlist error: statusCode=" + request.statusCode());
-            }
-        } catch (Exception e) {
-            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
-            throw new IllegalStateException(e);
-        }
-    }
+//    private void operateBanListNew(String mode, String content) {
+//        Map<String, String> banListSettings = new HashMap<>();
+//        banListSettings.put("data_type", "manual_list");
+//        banListSettings.put("content_base64", Base64.getEncoder().encodeToString(content.getBytes(StandardCharsets.UTF_8)));
+//        try {
+//            HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.IP_FILTER_UPLOAD.getEndpoint(),
+//                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(banListSettings)))
+//                            .header("Authorization", "Bearer " + this.deviceToken),
+//                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+//            if (request.statusCode() != 200) {
+//                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+//                throw new IllegalStateException("Save BitComet banlist error: statusCode=" + request.statusCode());
+//            }
+//        } catch (Exception e) {
+//            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+//            throw new IllegalStateException(e);
+//        }
+//    }
 
     @Override
     public void close() throws Exception {
