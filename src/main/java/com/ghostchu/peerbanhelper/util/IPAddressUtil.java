@@ -18,12 +18,12 @@ import java.util.concurrent.TimeUnit;
 public class IPAddressUtil {
     private static final Cache<String, IPAddress> IP_ADDRESS_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(15, TimeUnit.MINUTES)
-            .maximumSize(2000)
+            .maximumSize(100)
             .softValues()
             .build();
     private static final Cache<IPAddress, IPAddress> IP_WITHOUT_PREFIX_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(15, TimeUnit.MINUTES)
-            .maximumSize(2000)
+            .maximumSize(100)
             .softValues()
             .build();
 
