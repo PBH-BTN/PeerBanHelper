@@ -123,7 +123,7 @@ public class ScriptEngine {
                     break;
                 }
                 if (line.startsWith("#")) {
-                    line = line.substring(2).trim();
+                    line = line.substring(1).trim();
                     if (line.startsWith("@NAME")) {
                         name = line.substring(5).trim();
                     } else if (line.startsWith("@AUTHOR")) {
