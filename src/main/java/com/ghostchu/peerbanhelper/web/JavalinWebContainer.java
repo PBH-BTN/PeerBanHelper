@@ -153,7 +153,8 @@ public class JavalinWebContainer {
                     markLoginFailed(CommonUtil.userIp(ctx));
                     throw new NotLoggedInException();
                 })
-                .options("/*", ctx -> ctx.status(200));
+                .options("/*", ctx -> ctx.status(200))
+                .get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
     }
 
     public boolean isContextAuthorized(Context ctx) {

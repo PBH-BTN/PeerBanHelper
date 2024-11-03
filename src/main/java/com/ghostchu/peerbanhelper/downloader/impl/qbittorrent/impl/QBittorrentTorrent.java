@@ -10,58 +10,58 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public final class QBittorrentTorrent implements Torrent {
-    @SerializedName("added_on")
-    private Long addedOn;
-
-    @SerializedName("amount_left")
-    private Long amountLeft;
-
-    @SerializedName("auto_tmm")
-    private Boolean autoTmm;
-
-    @SerializedName("availability")
-    private Double availability;
+//    @SerializedName("added_on")
+//    private Long addedOn;
+//
+//    @SerializedName("amount_left")
+//    private Long amountLeft;
+//
+//    @SerializedName("auto_tmm")
+//    private Boolean autoTmm;
+//
+//    @SerializedName("availability")
+//    private Double availability;
 
     @SerializedName("category")
     private String category;
 
-    @SerializedName("completed")
-    private Long completed;
-
-    @SerializedName("completion_on")
-    private Long completionOn;
-
-    @SerializedName("content_path")
-    private String contentPath;
+//    @SerializedName("completed")
+//    private Long completed;
+//
+//    @SerializedName("completion_on")
+//    private Long completionOn;
+//
+//    @SerializedName("content_path")
+//    private String contentPath;
 
     @SerializedName("dl_limit")
-    private Long dlLimit;
+    private long dlLimit;
 
     @SerializedName("dlspeed")
-    private Long dlspeed;
+    private long dlspeed;
 
-    @SerializedName("download_path")
-    private String downloadPath;
+//    @SerializedName("download_path")
+//    private String downloadPath;
 
     @SerializedName("downloaded")
-    private Long downloaded;
+    private long downloaded;
 
     @SerializedName("downloaded_session")
-    private Long downloadedSession;
+    private long downloadedSession;
 
-    @SerializedName("eta")
-    private Long eta;
-    @SerializedName("f_l_piece_prio")
-    private Boolean fLPiecePrio;
+//    @SerializedName("eta")
+//    private Long eta;
+//    @SerializedName("f_l_piece_prio")
+//    private Boolean fLPiecePrio;
 
     @SerializedName("force_start")
-    private Boolean forceStart;
+    private boolean forceStart;
 
     @SerializedName("hash")
     private String hash;
 
-    @SerializedName("inactive_seeding_time_limit")
-    private Long inactiveSeedingTimeLimit;
+//    @SerializedName("inactive_seeding_time_limit")
+//    private Long inactiveSeedingTimeLimit;
 
     @SerializedName("infohash_v1")
     private String infohashV1;
@@ -69,101 +69,101 @@ public final class QBittorrentTorrent implements Torrent {
     @SerializedName("infohash_v2")
     private String infohashV2;
 
-    @SerializedName("last_activity")
-    private Long lastActivity;
+//    @SerializedName("last_activity")
+//    private Long lastActivity;
 
-    @SerializedName("magnet_uri")
-    private String magnetUri;
+//    @SerializedName("magnet_uri")
+//    private String magnetUri;
 
-    @SerializedName("max_inactive_seeding_time")
-    private Long maxInactiveSeedingTime;
+//    @SerializedName("max_inactive_seeding_time")
+//    private Long maxInactiveSeedingTime;
 
-    @SerializedName("max_ratio")
-    private Double maxRatio;
-
-    @SerializedName("max_seeding_time")
-    private Long maxSeedingTime;
+//    @SerializedName("max_ratio")
+//    private Double maxRatio;
+//
+//    @SerializedName("max_seeding_time")
+//    private Long maxSeedingTime;
 
     @SerializedName("name")
     private String name;
-
-    @SerializedName("num_complete")
-    private Long numComplete;
-
-    @SerializedName("num_incomplete")
-    private Long numIncomplete;
-
-    @SerializedName("num_leechs")
-    private Long numLeechs;
-
-    @SerializedName("num_seeds")
-    private Long numSeeds;
-
-    @SerializedName("priority")
-    private Long priority;
+//
+//    @SerializedName("num_complete")
+//    private Long numComplete;
+//
+//    @SerializedName("num_incomplete")
+//    private Long numIncomplete;
+//
+//    @SerializedName("num_leechs")
+//    private Long numLeechs;
+//
+//    @SerializedName("num_seeds")
+//    private Long numSeeds;
+//
+//    @SerializedName("priority")
+//    private Long priority;
 
     @SerializedName("progress")
-    private Double progress;
+    private double progress;
 
     @SerializedName("ratio")
-    private Double ratio;
+    private double ratio;
 
-    @SerializedName("ratio_limit")
-    private Double ratioLimit;
+//    @SerializedName("ratio_limit")
+//    private Double ratioLimit;
 
-    @SerializedName("save_path")
-    private String savePath;
+//    @SerializedName("save_path")
+//    private String savePath;
 
-    @SerializedName("seeding_time")
-    private Long seedingTime;
+//    @SerializedName("seeding_time")
+//    private Long seedingTime;
+//
+//    @SerializedName("seeding_time_limit")
+//    private Long seedingTimeLimit;
+//
+//    @SerializedName("seen_complete")
+//    private Long seenComplete;
 
-    @SerializedName("seeding_time_limit")
-    private Long seedingTimeLimit;
-
-    @SerializedName("seen_complete")
-    private Long seenComplete;
-
-    @SerializedName("seq_dl")
-    private Boolean seqDl;
+//    @SerializedName("seq_dl")
+//    private Boolean seqDl;
 
     @SerializedName("size")
-    private Long size;
+    private long size;
 
     @SerializedName("state")
     private String state;
 
-    @SerializedName("super_seeding")
-    private Boolean superSeeding;
+//    @SerializedName("super_seeding")
+//    private Boolean superSeeding;
 
     @SerializedName("tags")
     private String tags;
 
-    @SerializedName("time_active")
-    private Long timeActive;
+//    @SerializedName("time_active")
+//    private Long timeActive;
 
     @SerializedName("total_size")
-    private Long totalSize;
+    private long totalSize;
 
-    @SerializedName("tracker")
-    private String tracker;
+//    @SerializedName("tracker")
+//    private String tracker;
 
-    @SerializedName("trackers_count")
-    private Long trackersCount;
+//    @SerializedName("trackers_count")
+//    private Long trackersCount;
 
     @SerializedName("up_limit")
-    private Long upLimit;
+    private long upLimit;
 
     @SerializedName("uploaded")
-    private Long uploaded;
+    private long uploaded;
 
     @SerializedName("uploaded_session")
-    private Long uploadedSession;
+    private long uploadedSession;
 
     @SerializedName("upspeed")
-    private Long upspeed;
+    private long upspeed;
 
     @SerializedName("is_private")
-    private Boolean privateTorrent;
+    private Boolean privateTorrent; // null in old versions
 
     @Override
     public String getId() {

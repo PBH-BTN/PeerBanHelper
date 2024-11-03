@@ -18,29 +18,29 @@ public class BCTaskPeersResponse {
     private List<PeersDTO> peers;
     @SerializedName("task")
     private TaskDTO task;
-    @SerializedName("version")
-    private String version;
+//    @SerializedName("version")
+//    private String version;
 
     @NoArgsConstructor
     @Data
     public static class PeerCountDTO {
         @SerializedName("peers_connected")
-        private Long peersConnected;
+        private long peersConnected;
         @SerializedName("peers_connecting")
-        private Long peersConnecting;
-        @SerializedName("ltseed_connected")
-        private Long ltseedConnected;
-        @SerializedName("ltseed_connecting")
-        private Long ltseedConnecting;
+        private long peersConnecting;
+//        @SerializedName("ltseed_connected")
+//        private Long ltseedConnected;
+//        @SerializedName("ltseed_connecting")
+//        private Long ltseedConnecting;
     }
 
     @NoArgsConstructor
     @Data
     public static class TaskDTO {
         @SerializedName("task_id")
-        private Long taskId;
-        @SerializedName("task_guid")
-        private String taskGuid;
+        private long taskId;
+//        @SerializedName("task_guid")
+//        private String taskGuid;
         @SerializedName("type")
         private String type;
         @SerializedName("task_name")
@@ -48,23 +48,23 @@ public class BCTaskPeersResponse {
         @SerializedName("status")
         private String status;
         @SerializedName("total_size")
-        private Long totalSize;
-        @SerializedName("selected_size")
-        private Long selectedSize;
-        @SerializedName("selected_downloaded_size")
-        private Long selectedDownloadedSize;
+        private long totalSize;
+//        @SerializedName("selected_size")
+//        private long selectedSize;
+//        @SerializedName("selected_downloaded_size")
+//        private long selectedDownloadedSize;
         @SerializedName("download_rate")
-        private Long downloadRate;
+        private long downloadRate;
         @SerializedName("upload_rate")
-        private Long uploadRate;
-        @SerializedName("error_code")
-        private String errorCode;
-        @SerializedName("error_message")
-        private String errorMessage;
+        private long uploadRate;
+//        @SerializedName("error_code")
+//        private String errorCode;
+//        @SerializedName("error_message")
+//        private String errorMessage;
         @SerializedName("permillage")
         private Integer permillage;
-        @SerializedName("left_time")
-        private String leftTime;
+//        @SerializedName("left_time")
+//        private String leftTime;
     }
 
     @NoArgsConstructor
@@ -72,32 +72,32 @@ public class BCTaskPeersResponse {
     public static class PeersDTO {
         @SerializedName("ip")
         private String ip;
-        @SerializedName("progress")
-        private String progress;
-        @SerializedName("dl_speed")
-        private String dlSpeed;
-        @SerializedName("up_speed")
-        private String upSpeed;
+//        @SerializedName("progress")
+//        private String progress;
+//        @SerializedName("dl_speed")
+//        private String dlSpeed;
+//        @SerializedName("up_speed")
+//        private String upSpeed;
         @SerializedName("client_type")
         private String clientType;
         @SerializedName("flag")
         private String flag;
-        @SerializedName("log_id")
-        private Long logId;
+//        @SerializedName("log_id")
+//        private Long logId;
         @SerializedName("remote_port")
-        private Integer remotePort;
+        private int remotePort;
         @SerializedName("listen_port")
-        private Integer listenPort;
+        private int listenPort;
         @SerializedName("permillage")
-        private Long permillage;
+        private long permillage;
         @SerializedName("dl_rate")
-        private Long dlRate;
+        private long dlRate;
         @SerializedName("up_rate")
-        private Long upRate;
+        private long upRate;
         @SerializedName("dl_size")
-        private Long dlSize;
+        private Long dlSize; // may null in some version, we need check it
         @SerializedName("up_size")
-        private Long upSize;
+        private Long upSize; // may null in some version, we need check it
         @SerializedName("peer_id")
         private String peerId;
         @SerializedName("group")
