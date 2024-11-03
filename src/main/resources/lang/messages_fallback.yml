@@ -201,12 +201,12 @@ STATUS_TEXT_NEED_PRIVILEGE: "权限不足，请求权限提升（以管理员/ro
 SUGGEST_FIREWALL_IPTABELS: "不推荐使用原生 iptables，可能引起网络性能下降。请考虑安装 ipset 代替使用 iptabels"
 SUGGEST_FIREWALL_FIREWALLD: "不推荐使用原生 firewalld，可能引起网络性能下降。请考虑安装 ipset 代替使用 firewalld"
 SUGGEST_FIREWALL_WINDOWS_FIREWALL_DISABLED: "Windows 防火墙目前处于禁用状态，请为 “公用网络” 和 “专用网络” 打开 Windows 防火墙，否则系统防火墙集成将不起作用"
-MODULE_EXPRESSION_RULE_BAD_EXPRESSION: "解析表达式时出错，请检查是否有语法错误"
-MODULE_EXPRESSION_RULE_COMPILING: "请稍等，规则引擎正在编译用户脚本以提高执行性能，这可能需要一点时间……"
-MODULE_EXPRESSION_RULE_COMPILED: "已成功编译 {} 条用户脚本，耗时 {}ms"
-MODULE_EXPRESSION_RULE_TIMEOUT: "用户脚本 {} 执行超时，最大允许时间是 {}ms"
-MODULE_EXPRESSION_RULE_ERROR: "执行用户脚本 {} 时出错"
-MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED: "[错误] 在释放预设脚本文件 {} 时遇到了系统错误"
+RULE_ENGINE_BAD_EXPRESSION: "解析表达式时出错，请检查是否有语法错误"
+RULE_ENGINE_COMPILING: "请稍等，规则引擎正在编译用户脚本以提高执行性能，这可能需要一点时间……"
+RULE_ENGINE_COMPILED: "已成功编译 {} 条用户脚本，耗时 {}ms"
+RULE_ENGINE_TIMEOUT: "用户脚本 {} 执行超时，最大允许时间是 {}ms"
+RULE_ENGINE_ERROR: "执行用户脚本 {} 时出错"
+RULE_ENGINE_RELEASE_FILE_FAILED: "[错误] 在释放预设脚本文件 {} 时遇到了系统错误"
 JFX_WEBVIEW_ALERT: "来自网页的消息"
 DATABASE_OUTDATED_LOGS_CLEANED_UP: "已清理数据库中 {} 条过期封禁日志数据"
 LIBRARIES_LOADER_DETERMINE_BEST_MIRROR: "请稍等，正在初始化并测试最佳下载源（最多 15 秒）……"
@@ -263,8 +263,8 @@ RULE_ENGINE_INVALID_RULE: "规则 {} 的参数 {} 无效，仅接受以下值：
 RULE_ENGINE_NOT_A_RULE: "[规则引擎] 表达式 {} 不是一个有效规则"
 RULE_MATCHER_STRING_EQUALS: "匹配相同"
 NEW_SETUP_NO_DOWNLOADERS: "PeerBanHelper 现在还未连接到任何下载器！请打开 WebUI 并添加下载器。如需登录 Token：{} （可随时从 GUI 菜单复制，或者从 config.yml 找到）"
-MODULE_EXPRESSION_RULE_INVALID_RETURNS: |
-  用户脚本 {} 返回了无效值，返回的值必须是以下类型中的其一：
+RULE_ENGINE_INVALID_RETURNS: |
+  脚本 {} 返回了无效值，返回的值必须是以下类型中的其一：
   Boolean: [false=不采取任何操作, true=封禁Peer]
   Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它规则]
   com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
@@ -308,8 +308,8 @@ DOWNLOADER_LOGIN_EXCEPTION: "无法连接到下载器，登录时出现错误：
 DOWNLOADER_LOGIN_IO_EXCEPTION: "无法连接到下载器，登录时出现网络错误：{}"
 DOWNLOADER_LOGIN_INCORRECT_CRED: "鉴权失败，错误的登录凭据。请检查用户名、密码或 Token 是否正确。"
 
-USER_SCRIPT_RULE: "用户 Aviator Script 自定脚本规则"
-USER_SCRIPT_RUN_RESULT: "用户脚本 {}: {}"
+USER_SCRIPT_RULE: "脚本引擎"
+USER_SCRIPT_RUN_RESULT: "脚本 {}: {}"
 SCHEDULED_OPERATIONS: "[计划任务] 已处理 {} 个封禁列表的外部计划更改"
 
 ARB_BANNED_REASON: "IP 地址 {} 与另一个已封禁的 IP 地址 {} 处于同一封禁区间内，执行连锁封禁操作：{}@{}"
@@ -477,3 +477,6 @@ PUSH_PROVIDER_TEST_SUCCESS: "{} ({}) 发送成功，请检查是否收到消息"
 PUSH_PROVIDER_TEST_FAILED: "测试推送服务 {} ({}) 失败"
 PUSH_PROVIDER_TEST_ERROR: "测试推送服务 {} ({}) 失败: {}"
 BAN_PEER_EXCEPTION: "封禁 Peer 时出现意外错误，指定 Peer 可能封禁失败，请将下面的信息报告给 PeerBanHelper 开发者"
+
+BTN_RULES_SCRIPT_COMPILING: "正在编译来自 BTN 服务器的可编程脚本，请稍等，这可能需要一点时间……"
+BTN_RULES_SCRIPT_COMPILED: "已成功编译 {} 个脚本，用时 {}ms"

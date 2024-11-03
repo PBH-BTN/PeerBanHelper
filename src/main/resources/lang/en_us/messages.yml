@@ -201,12 +201,12 @@ STATUS_TEXT_NEED_PRIVILEGE: "Insufficient privileges, request privilege escalati
 SUGGEST_FIREWALL_IPTABLES: "Native iptables are not recommended, may cause network performance degradation. Consider installing ipset instead of using iptables"
 SUGGEST_FIREWALL_FIREWALLD: "Native firewalld is not recommended, may cause network performance degradation. Consider installing ipset instead of using firewalld"
 SUGGEST_FIREWALL_WINDOWS_FIREWALL_DISABLED: "Windows Firewall is currently disabled, please enable Windows Firewall for 'Public Network' and 'Private Network' to ensure system firewall integration works"
-MODULE_EXPRESSION_RULE_BAD_EXPRESSION: "Error parsing expression, please check for syntax errors"
-MODULE_EXPRESSION_RULE_COMPILING: "Please wait, the rule engine is compiling user scripts to enhance execution performance, this may take some time..."
-MODULE_EXPRESSION_RULE_COMPILED: "Successfully compiled {} user scripts, took {}ms"
-MODULE_EXPRESSION_RULE_TIMEOUT: "User script {} execution timed out, maximum allowed time is {}ms"
-MODULE_EXPRESSION_RULE_ERROR: "Error executing user script {}"
-MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED: "[Error] Encountered system error while releasing preset script file {}"
+RULE_ENGINE_BAD_EXPRESSION: "Error parsing expression, please check for syntax errors"
+RULE_ENGINE_COMPILING: "Please wait, the rule engine is compiling scripts to enhance execution performance, this may take some time..."
+RULE_ENGINE_COMPILED: "Successfully compiled {} scripts, took {}ms"
+RULE_ENGINE_TIMEOUT: "Script {} execution timed out, maximum allowed time is {}ms"
+RULE_ENGINE_ERROR: "Error executing script {}"
+RULE_ENGINE_RELEASE_FILE_FAILED: "[Error] Encountered system error while releasing preset script file {}"
 JFX_WEBVIEW_ALERT: "Message from webpage"
 DATABASE_OUTDATED_LOGS_CLEANED_UP: "Cleaned up {} expired ban log entries from the database"
 LIBRARIES_LOADER_DETERMINE_BEST_MIRROR: "Please wait, initializing and testing the best download source (up to 15 seconds)..."
@@ -263,8 +263,8 @@ RULE_ENGINE_INVALID_RULE: "Invalid parameter {} for rule {}, only accepts the fo
 RULE_ENGINE_NOT_A_RULE: "[Rule Engine] Expression {} is not a valid rule"
 RULE_MATCHER_STRING_EQUALS: "Matches the same"
 NEW_SETUP_NO_DOWNLOADERS: "PeerBanHelper is currently not connected to any downloaders! Please open the WebUI and add downloaders. Token for login: {} (can be copied from the GUI menu at any time, or found in config.yml)"
-MODULE_EXPRESSION_RULE_INVALID_RETURNS: |
-  User script {} returned an invalid value. Valid return types are:
+RULE_ENGINE_INVALID_RETURNS: |
+  Script {} returned an invalid value. Valid return types are:
   Boolean: [false=do nothing, true=ban peer]
   Integer: [0=do nothing, 1=ban peer, 2=skip other rules]
   com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
@@ -308,8 +308,8 @@ DOWNLOADER_LOGIN_EXCEPTION: "Unable connect to downloader: {}"
 DOWNLOADER_LOGIN_IO_EXCEPTION: "Unable connect to downloader, network error: {}"
 DOWNLOADER_LOGIN_INCORRECT_CRED: "Unable to authenticate to downloader, check the username, password or token."
 
-USER_SCRIPT_RULE: "User Aviator Script Custom Rule"
-USER_SCRIPT_RUN_RESULT: "UserScript {}: {}"
+USER_SCRIPT_RULE: "Script Engine"
+USER_SCRIPT_RUN_RESULT: "Script {}: {}"
 SCHEDULED_OPERATIONS: "[Scheduled Tasks] Processed {} ban list external changes"
 
 ARB_BANNED_REASON: "IP address {} is in the same ban range as another banned IP address {}, performing chain ban operation: {}@{}"
