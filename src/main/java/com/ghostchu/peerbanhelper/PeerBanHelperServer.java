@@ -27,12 +27,15 @@ import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.time.ExceptedTime;
+import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.ghostchu.peerbanhelper.util.time.TimeoutProtect;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -44,10 +47,15 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
+import com.googlecode.aviator.AviatorEvaluator;
+import com.googlecode.aviator.EvalMode;
+import com.googlecode.aviator.Options;
+import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import inet.ipaddr.IPAddress;
 import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -62,6 +70,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.math.MathContext;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -128,6 +137,8 @@ public class PeerBanHelperServer implements Reloadable {
     private AlertManager alertManager;
     @Autowired
     private BanListDao banListDao;
+    @Getter
+    private ScriptEngine scriptEngine;
 
     public PeerBanHelperServer() {
         reloadConfig();
@@ -171,6 +182,7 @@ public class PeerBanHelperServer implements Reloadable {
         log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
         loadDownloaders();
         registerBanListInvokers();
+        setupScriptEngine();
         registerModules();
         registerHttpServer();
         setupIPDB();
@@ -188,6 +200,46 @@ public class PeerBanHelperServer implements Reloadable {
         Main.getEventBus().post(new PBHServerStartedEvent(this));
         sendSnapshotAlert();
 
+    }
+
+    private void setupScriptEngine() {
+        AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
+        // ASM 性能优先
+        AviatorEvaluator.getInstance().setOption(Options.EVAL_MODE, EvalMode.ASM);
+        // EVAL 性能优先
+        AviatorEvaluator.getInstance().setOption(Options.OPTIMIZE_LEVEL, AviatorEvaluator.EVAL);
+        // 降低浮点计算精度
+        AviatorEvaluator.getInstance().setOption(Options.MATH_CONTEXT, MathContext.DECIMAL32);
+        // 启用变量语法糖
+        AviatorEvaluator.getInstance().setOption(Options.ENABLE_PROPERTY_SYNTAX_SUGAR, true);
+//        // 表达式允许序列化和反序列化
+//        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
+        // 用户规则写糊保护
+        AviatorEvaluator.getInstance().setOption(Options.MAX_LOOP_COUNT, 5000);
+        // 启用反射方法查找
+        AviatorEvaluator.getInstance().setFunctionMissing(JavaMethodReflectionFunctionMissing.getInstance());
+        // 注册反射调用
+        registerFunctions(IPAddressUtil.class);
+        registerFunctions(HTTPUtil.class);
+        registerFunctions(JsonUtil.class);
+        registerFunctions(Lang.class);
+        registerFunctions(StrUtil.class);
+        registerFunctions(PeerBanHelperServer.class);
+        registerFunctions(InfoHashUtil.class);
+        registerFunctions(Main.class);
+    }
+
+    private void registerFunctions(Class<?> clazz) {
+        try {
+            AviatorEvaluator.addInstanceFunctions(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
+        }
+        try {
+            AviatorEvaluator.addStaticFunctions(StringUtils.capitalize(clazz.getSimpleName()), clazz);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
+        }
     }
 
     private void sendSnapshotAlert() {

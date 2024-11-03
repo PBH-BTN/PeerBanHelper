@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRule;
 import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
+import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -34,12 +35,14 @@ public class BtnAbilityRules extends AbstractBtnAbility {
     private final String endpoint;
     private final long randomInitialDelay;
     private final File btnCacheFile = new File(Main.getDataDirectory(), "btn.cache");
+    private final ScriptEngine scriptEngine;
     @Getter
     private BtnRuleParsed btnRule;
 
 
-    public BtnAbilityRules(BtnNetwork btnNetwork, JsonObject ability) {
+    public BtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability) {
         this.btnNetwork = btnNetwork;
+        this.scriptEngine = scriptEngine;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
@@ -55,7 +58,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
         } else {
             try {
                 BtnRule btnRule = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRule.class);
-                this.btnRule = new BtnRuleParsed(btnRule);
+                this.btnRule = new BtnRuleParsed(Main.getServer().getScriptEngine(), btnRule);
             } catch (Throwable ignored) {
             }
         }
@@ -110,7 +113,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                     } else {
                         try {
                             BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
-                            this.btnRule = new BtnRuleParsed(btr);
+                            this.btnRule = new BtnRuleParsed(scriptEngine, btr);
                             Main.getEventBus().post(new BtnRuleUpdateEvent());
                             try {
                                 Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
