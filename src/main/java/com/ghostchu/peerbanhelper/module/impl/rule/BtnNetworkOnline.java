@@ -201,7 +201,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
                 CheckResult result = future.get();
                 if (result.action() == PeerAction.SKIP) {
                     return result; // Early exit on SKIP action
-                } else if (result.action() == PeerAction.BAN && finalResult.action() != PeerAction.SKIP) {
+                } else if (result.action() == PeerAction.BAN) {
                     finalResult = result;
                 }
             } catch (InterruptedException | ExecutionException e) {
