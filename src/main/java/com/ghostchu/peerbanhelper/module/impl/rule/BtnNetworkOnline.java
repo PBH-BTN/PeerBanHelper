@@ -41,8 +41,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -185,25 +187,29 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         if (isHandShaking(peer)) {
             return handshaking();
         }
-        AtomicReference<CheckResult> checkResult = new AtomicReference<>(pass());
+
+        List<Future<CheckResult>> futures = new ArrayList<>();
         try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
             for (var kvPair : rule.getScriptRules().entrySet()) {
-                exec.submit(() -> {
-                    CheckResult expressionRun = runExpression(kvPair.getValue(), torrent, peer, downloader, ruleExecuteExecutor);
-                    if (expressionRun.action() == PeerAction.SKIP) {
-                        checkResult.set(expressionRun); // 提前退出
-                        return;
-                    }
-                    if (expressionRun.action() == PeerAction.BAN) {
-                        if (checkResult.get().action() != PeerAction.SKIP) {
-                            checkResult.set(expressionRun);
-                        }
-                    }
-                });
+                futures.add(exec.submit(() -> runExpression(kvPair.getValue(), torrent, peer, downloader, ruleExecuteExecutor)));
             }
         }
-        return checkResult.get();
 
+        CheckResult finalResult = pass();
+        for (Future<CheckResult> future : futures) {
+            try {
+                CheckResult result = future.get();
+                if (result.action() == PeerAction.SKIP) {
+                    return result; // Early exit on SKIP action
+                } else if (result.action() == PeerAction.BAN && finalResult.action() != PeerAction.SKIP) {
+                    finalResult = result;
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Error executing script, skipping", e);
+            }
+        }
+
+        return finalResult;
     }
 
     public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
