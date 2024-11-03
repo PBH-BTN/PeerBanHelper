@@ -100,8 +100,6 @@ export async function GetHeapDumpFile() {
   await endpointStore.serverAvailable
 
   const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/heapdump'), location.href)
-  return fetch(url, { headers: getCommonHeader(), method: 'POST' }).then((res) => {
-    endpointStore.assertResponseLogin(res)
-    return res.blob()
-  })
+  url.searchParams.set('token', endpointStore.authToken)
+  return url
 }

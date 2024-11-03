@@ -530,9 +530,10 @@ const showLog = ref(false)
 
 const downloadHeap = async () => {
   Message.info(t('page.settings.tab.info.downloadHeap'))
-  const blob = await GetHeapDumpFile()
+  const url = await GetHeapDumpFile()
   const a = document.createElement('a')
-  a.href = window.URL.createObjectURL(blob)
+  a.href = url.toString()
+  a.target = '_blank'
   a.download = 'heapdump.hprof.gz'
   a.click()
 }
