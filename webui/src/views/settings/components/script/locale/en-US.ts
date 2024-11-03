@@ -8,7 +8,7 @@ export default {
   'page.settings.tab.script.column.author': 'Author',
   'page.settings.tab.script.column.cacheable': 'Cacheable',
   'page.settings.tab.script.column.cacheable.tips':
-    'Whether to participate in caching, the same seed will only be executed once if the cache has not expired',
+    'Whether to participate in caching, one peer in one seed will only be executed once if the cache has not expired',
   'page.settings.tab.script.column.threadSafe': 'Thread Safe',
   'page.settings.tab.script.column.version': 'Version',
   'page.settings.tab.script.column.actions': 'Actions',

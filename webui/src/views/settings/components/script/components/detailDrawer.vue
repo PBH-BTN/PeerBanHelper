@@ -62,11 +62,12 @@ const { run, loading } = useRequest(GetScriptContent, {
   }
 })
 defineExpose({
-  viewDetail: (id: string | undefined, readonly: boolean) => {
+  viewDetail: (id: string | undefined, readonly: boolean = false) => {
     if (!id) {
       isNew.value = true
       form.name = ''
       content.value = ''
+      viewOnly.value = false
     } else {
       viewOnly.value = readonly
       isNew.value = false

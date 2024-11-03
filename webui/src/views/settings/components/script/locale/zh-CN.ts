@@ -8,7 +8,7 @@ export default {
   'page.settings.tab.script.column.author': '作者',
   'page.settings.tab.script.column.cacheable': '可缓存',
   'page.settings.tab.script.column.cacheable.tips':
-    '是否参与缓存，缓存未过期的情况下同一种子仅执行一次',
+    '是否参与缓存，缓存未过期的情况下同一种子下的同一 Peer 仅执行一次',
   'page.settings.tab.script.column.threadSafe': '线程安全',
   'page.settings.tab.script.column.version': '版本',
   'page.settings.tab.script.column.actions': '操作',
