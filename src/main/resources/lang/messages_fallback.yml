@@ -477,6 +477,7 @@ PUSH_PROVIDER_TEST_SUCCESS: "{} ({}) 发送成功，请检查是否收到消息"
 PUSH_PROVIDER_TEST_FAILED: "测试推送服务 {} ({}) 失败"
 PUSH_PROVIDER_TEST_ERROR: "测试推送服务 {} ({}) 失败: {}"
 BAN_PEER_EXCEPTION: "封禁 Peer 时出现意外错误，指定 Peer 可能封禁失败，请将下面的信息报告给 PeerBanHelper 开发者"
-
+EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS: "因安全原因，不允许通过互联网或者反向代理创建 AviatorScript 脚本"
+EXPRESS_RULE_ENGINE_SAVED: "脚本已保存"
 BTN_RULES_SCRIPT_COMPILING: "正在编译来自 BTN 服务器的可编程脚本，请稍等，这可能需要一点时间……"
 BTN_RULES_SCRIPT_COMPILED: "已成功编译 {} 个脚本，用时 {}ms"

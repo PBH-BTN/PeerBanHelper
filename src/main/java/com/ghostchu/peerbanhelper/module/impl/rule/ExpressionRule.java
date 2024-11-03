@@ -10,8 +10,15 @@ import com.ghostchu.peerbanhelper.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.paging.Page;
+import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
+import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -36,11 +43,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
@@ -69,17 +78,11 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         } catch (Exception e) {
             log.error("Failed to load scripts", e);
         }
-//        javalinWebContainer.javalin()
-//                .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
-//                .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
-//                .put("/api/" + getConfigName() + "/{scriptId}", this::writeScript, Role.USER_WRITE)
-//                .delete("/api/" + getConfigName() + "/{scriptId}", this::deleteScript, Role.USER_WRITE);
-//        test code
-//        Torrent torrent = new TorrentImpl("1", "","",1,1.00d, 1,1);
-//        Peer peer = new PeerImpl(new PeerAddress("2408:8214:1551:bf20::1", 51413),
-//                "2408:8214:1551:bf20::1","-TR2940-", "Transmission 2.94",
-//                1,1,1,1,0.0d,null);
-//        System.out.println(shouldBanPeer(torrent,peer, Executors.newVirtualThreadPerTaskExecutor()));
+        javalinWebContainer.javalin()
+                .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
+                .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
+                .put("/api/" + getConfigName() + "/{scriptId}", this::writeScript, Role.USER_WRITE)
+                .delete("/api/" + getConfigName() + "/{scriptId}", this::deleteScript, Role.USER_WRITE);
     }
 
     private void deleteScript(Context context) throws IOException {
@@ -101,6 +104,11 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     private void writeScript(Context context) throws IOException {
+        if (!isSafeNetworkEnvironment(context)) {
+            context.status(HttpStatus.FORBIDDEN);
+            context.json(new StdResp(false, tl(locale(context), Lang.EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS, context.ip()), null));
+            return;
+        }
         var scriptId = context.pathParam("scriptId");
         File readFile = getIfAllowedScriptId(scriptId);
         if (readFile == null) {
@@ -144,6 +152,18 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         return null;
     }
 
+    private boolean isSafeNetworkEnvironment(Context context){
+        var value = System.getProperty("pbh.please-disable-safe-network-environment-check-i-know-this-is-very-dangerous-and-i-may-lose-my-data-and-hacker-may-attack-me-via-this-endpoint-and-steal-my-data-or-destroy-my-computer-i-am-fully-responsible-for-this-action-and-i-will-not-blame-the-developer-for-any-loss");
+        if(value != null && value.equals("true")){
+            return true;
+        }
+        var ip = IPAddressUtil.getIPAddress(context.ip());
+        if(ip == null){
+            throw new IllegalArgumentException("Safe check for IPAddress failed, the IP cannot be null");
+        }
+        return (ip.isLocal() || ip.isLoopback()) && !MiscUtil.isUsingReserveProxy(context);
+    }
+
     private boolean insideDirectory(File allowRange, File targetFile) {
         Path path = allowRange.toPath().normalize().toAbsolutePath();
         Path target = targetFile.toPath().normalize().toAbsolutePath();
@@ -151,6 +171,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     private void listScripts(Context context) {
+        Pageable pageable = new Pageable(context);
         List<ExpressionMetadataDto> list = new ArrayList<>();
         for (var script : scripts) {
             list.add(new ExpressionMetadataDto(
@@ -162,7 +183,8 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                     script.version()
             ));
         }
-        context.json(new StdResp(true, null, list));
+        var r = list.stream().skip(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).toList();
+        context.json(new StdResp(true, null, new Page<>(pageable, list.size(), r)));
     }
 
 
@@ -289,39 +311,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
     }
 
-    private ExpressionMetadata parseScriptMetadata(File file, String fallbackName, String scriptContent) {
-        try (BufferedReader reader = new BufferedReader(new StringReader(scriptContent))) {
-            String name = fallbackName;
-            String author = "Unknown";
-            String version = "null";
-            boolean cacheable = true;
-            boolean threadSafe = true;
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                if (line.startsWith("#")) {
-                    line = line.substring(2).trim();
-                    if (line.startsWith("@NAME")) {
-                        name = line.substring(5).trim();
-                    } else if (line.startsWith("@AUTHOR")) {
-                        author = line.substring(7).trim();
-                    } else if (line.startsWith("@CACHEABLE")) {
-                        cacheable = Boolean.parseBoolean(line.substring(10).trim());
-                    } else if (line.startsWith("@VERSION")) {
-                        version = line.substring(8).trim();
-                    } else if (line.startsWith("@THREADSAFE")) {
-                        threadSafe = Boolean.parseBoolean(line.substring(11).trim());
-                    }
-                }
-            }
-            return new ExpressionMetadata(file, name, author, cacheable, threadSafe, version, scriptContent);
-        } catch (IOException e) {
-            return new ExpressionMetadata(file, "Failed to parse name", "Unknown", true, true, "null", scriptContent);
-        }
-    }
-
     private void initScripts() throws IOException {
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
         scriptDir.mkdirs();
@@ -343,11 +332,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             Files.writeString(file.toPath(), content);
         }
         Files.writeString(versionFile.toPath(), VERSION, StandardCharsets.UTF_8);
-    }
-
-    record ExpressionMetadata(File file, String name, String author, boolean cacheable, boolean threadSafe,
-                              String version,
-                              String script) {
     }
 
     record ExpressionMetadataDto(String id, String name, String author, boolean cacheable, boolean threadSafe,
