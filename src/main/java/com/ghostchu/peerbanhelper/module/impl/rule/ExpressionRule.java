@@ -311,39 +311,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         log.info(tlUI(Lang.RULE_ENGINE_COMPILED, scripts.size(), System.currentTimeMillis() - start));
     }
 
-    private ExpressionMetadata parseScriptMetadata(File file, String fallbackName, String scriptContent) {
-        try (BufferedReader reader = new BufferedReader(new StringReader(scriptContent))) {
-            String name = fallbackName;
-            String author = "Unknown";
-            String version = "0.0";
-            boolean cacheable = true;
-            boolean threadSafe = true;
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                if (line.startsWith("#")) {
-                    line = line.substring(2).trim();
-                    if (line.startsWith("@NAME")) {
-                        name = line.substring(5).trim();
-                    } else if (line.startsWith("@AUTHOR")) {
-                        author = line.substring(7).trim();
-                    } else if (line.startsWith("@CACHEABLE")) {
-                        cacheable = Boolean.parseBoolean(line.substring(10).trim());
-                    } else if (line.startsWith("@VERSION")) {
-                        version = line.substring(8).trim();
-                    } else if (line.startsWith("@THREADSAFE")) {
-                        threadSafe = Boolean.parseBoolean(line.substring(11).trim());
-                    }
-                }
-            }
-            return new ExpressionMetadata(file, name, author, cacheable, threadSafe, version, scriptContent);
-        } catch (IOException e) {
-            return new ExpressionMetadata(file, "Failed to parse name", "Unknown", true, true, "0.0", scriptContent);
-        }
-    }
-
     private void initScripts() throws IOException {
         File scriptDir = new File(Main.getDataDirectory(), "scripts");
         scriptDir.mkdirs();
