@@ -161,7 +161,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         if(ip == null){
             throw new IllegalArgumentException("Safe check for IPAddress failed, the IP cannot be null");
         }
-        return ip.isLocal() && !MiscUtil.isUsingReserveProxy(context);
+        return (ip.isLocal() || ip.isLoopback()) && !MiscUtil.isUsingReserveProxy(context);
     }
 
     private boolean insideDirectory(File allowRange, File targetFile) {
@@ -332,11 +332,6 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             Files.writeString(file.toPath(), content);
         }
         Files.writeString(versionFile.toPath(), VERSION, StandardCharsets.UTF_8);
-    }
-
-    record ExpressionMetadata(File file, String name, String author, boolean cacheable, boolean threadSafe,
-                              String version,
-                              String script) {
     }
 
     record ExpressionMetadataDto(String id, String name, String author, boolean cacheable, boolean threadSafe,
