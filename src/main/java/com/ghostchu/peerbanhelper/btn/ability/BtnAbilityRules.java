@@ -58,7 +58,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
         } else {
             try {
                 BtnRule btnRule = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRule.class);
-                this.btnRule = new BtnRuleParsed(Main.getServer().getScriptEngine(), btnRule);
+                this.btnRule = new BtnRuleParsed(scriptEngine, btnRule);
             } catch (Throwable ignored) {
             }
         }
