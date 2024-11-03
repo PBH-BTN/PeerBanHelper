@@ -149,7 +149,7 @@ public class ScriptEngine {
                     scriptContent,
                     expression
             );
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Script Engine unable to compile the script: {}", fallbackName);
             return null;
         }
