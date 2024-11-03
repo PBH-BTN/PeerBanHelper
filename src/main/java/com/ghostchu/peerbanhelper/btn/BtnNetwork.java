@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.btn;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -35,6 +36,7 @@ public class BtnNetwork {
     private static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 8;
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
+    private final ScriptEngine scriptEngine;
     @Getter
     private ScheduledExecutorService executeService = null;
     private String configUrl;
@@ -52,8 +54,9 @@ public class BtnNetwork {
     private PeerRecordDao peerRecordDao;
     private ModuleMatchCache moduleMatchCache;
 
-    public BtnNetwork(PeerBanHelperServer server, String userAgent, String configUrl, boolean submit, String appId, String appSecret, ModuleMatchCache moduleMatchCache) {
+    public BtnNetwork(PeerBanHelperServer server, ScriptEngine scriptEngine, String userAgent, String configUrl, boolean submit, String appId, String appSecret, ModuleMatchCache moduleMatchCache) {
         this.server = server;
+        this.scriptEngine = scriptEngine;
         this.userAgent = userAgent;
         this.configUrl = configUrl;
         this.submit = submit;
@@ -109,7 +112,7 @@ public class BtnNetwork {
 //                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));
 //            }
             if (ability.has("rules")) {
-                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, ability.get("rules").getAsJsonObject()));
+                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject()));
             }
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));
