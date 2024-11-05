@@ -86,7 +86,6 @@ public class PBHMetricsController extends AbstractFeatureModule {
         if (field == null) {
             throw new IllegalArgumentException("startAt cannot be null");
         }
-
         if(field.equalsIgnoreCase("banAt")){
             if("day".equals(type)){
                 // 劫持单独处理以加快首屏请求
@@ -175,9 +174,13 @@ public class PBHMetricsController extends AbstractFeatureModule {
         String field = ctx.queryParam("field");
         double filter = Double.parseDouble(Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0"));
         String downloader = ctx.queryParam("downloader");
+        Integer substringLength = null;
+        if("peerId".equalsIgnoreCase(field)){
+            substringLength = 8;
+        }
         List<HistoryDao.UniversalFieldNumResult> results = switch (type) {
-            case "count" -> historyDao.countField(field, filter);
-            case "sum" -> historyDao.sumField(field, filter);
+            case "count" -> historyDao.countField(field, filter, downloader, substringLength);
+            case "sum" -> historyDao.sumField(field, filter, downloader, substringLength);
             case null, default -> throw new IllegalArgumentException("type invalid");
         };
         ctx.json(new StdResp(true, null, results));

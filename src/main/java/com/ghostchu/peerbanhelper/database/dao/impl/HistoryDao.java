@@ -62,7 +62,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         return new Page<>(pageable, countBuilder.countOf("DISTINCT ip"), mapped);
     }
 
-    public List<UniversalFieldNumResult> sumField(String field, double percentFilter) throws Exception {
+    public List<UniversalFieldNumResult> sumField(String field, double percentFilter, String downloader, Integer substringLength) throws Exception {
         // SQL 无 PreparedStatement 防注入；这绝对不是最佳实践，但在这个场景下足够用了
         if (!sqlSafePattern.matcher(field).matches()) {
             throw new IllegalArgumentException("Invalid field: " + field + ", only A-Z a-z 0-9 is allowed.");
@@ -70,9 +70,9 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         List<UniversalFieldNumResult> results = new ArrayList<>();
         var sql = """
                 SELECT
-                                                 	%field%,
+                                                 	%field% AS %fieldraw%,
                                                  	SUM( %field% ) AS ct,
-                                                 	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history ) AS percent ,
+                                                 	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history WHERE downloader LIKE '%downloader%' ) AS percent ,
                                                  	torrentName,
                                                  	torrentInfoHash,
                                                  	module
@@ -88,6 +88,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
                                                  		)
                                                  		INNER JOIN modules ON modules.id = rules.module_id\s
+                                                 	WHERE downloader LIKE '%downloader%'\s
                                                  	)\s
                                                  GROUP BY
                                                  	%field%\s
@@ -96,8 +97,14 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  ORDER BY
                                                  	ct DESC;
                 """;
-        sql = sql.replace("%field%", field)
-                .replace("%percent%", String.valueOf(percentFilter));
+        sql =   sql.replace("%percent%", String.valueOf(percentFilter))
+                .replace("%downloader%", downloader == null ? "%" : downloader)
+                .replace("%fieldraw%", field);
+        if(substringLength != null){
+            sql = sql.replace("%field%", "SUBSTRING("+field+", 1, " + substringLength + ")");
+        }else{
+            sql = sql.replace("%field%", field);
+        }
         try (var resultSet = queryRaw(sql)) {
             for (String[] result : resultSet.getResults()) {
                 results.add(new UniversalFieldNumResult(result[0], Long.parseLong(result[1]), Double.parseDouble(result[2])));
@@ -106,7 +113,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         return results;
     }
 
-    public List<UniversalFieldNumResult> countField(String field, double percentFilter) throws Exception {
+    public List<UniversalFieldNumResult> countField(String field, double percentFilter, String downloader, Integer substringLength) throws Exception {
         // SQL 无 PreparedStatement 防注入；这绝对不是最佳实践，但在这个场景下足够用了
         if (!sqlSafePattern.matcher(field).matches()) {
             throw new IllegalArgumentException("Invalid field: " + field + ", only A-Z a-z 0-9 is allowed.");
@@ -114,9 +121,9 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         List<UniversalFieldNumResult> results = new ArrayList<>();
         var sql = """
                 SELECT
-                                                 	%field%,
+                                                 	%field% AS %fieldraw%,
                                                  	COUNT( %field% ) AS ct,
-                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( * ) FROM history ) AS percent ,
+                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( * ) FROM history WHERE downloader LIKE '%downloader%' ) AS percent ,
                                                  	torrentName,
                                                  	torrentInfoHash,
                                                  	module
@@ -132,6 +139,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
                                                  		)
                                                  		INNER JOIN modules ON modules.id = rules.module_id\s
+                                                 	WHERE downloader LIKE '%downloader%'\s
                                                  	)\s
                                                  GROUP BY
                                                  	%field%\s
@@ -141,8 +149,14 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	ct DESC;
                 """;
 
-        sql = sql.replace("%field%", field)
-                .replace("%percent%", String.valueOf(percentFilter));
+        sql =  sql.replace("%percent%", String.valueOf(percentFilter))
+                .replace("%downloader%", downloader == null ? "%" : downloader)
+                .replace("%fieldraw%", field);
+        if(substringLength != null){
+            sql = sql.replace("%field%", "SUBSTRING("+field+", 1, " + substringLength + ")");
+        }else{
+            sql = sql.replace("%field%", field);
+        }
         try (var resultSet = queryRaw(sql)) {
             for (String[] result : resultSet.getResults()) {
                 results.add(new UniversalFieldNumResult(result[0], Long.parseLong(result[1]), Double.parseDouble(result[2])));
