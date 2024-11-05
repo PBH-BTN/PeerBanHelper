@@ -1,5 +1,5 @@
 <template>
-  <a-tabs default-active-key="1" lazy-load animation>
+  <a-tabs default-active-key="1" lazy-load animation type="rounded">
     <a-tab-pane key="1" :title="t('page.settings.tab.info.title')">
       <RunningStatus />
     </a-tab-pane>

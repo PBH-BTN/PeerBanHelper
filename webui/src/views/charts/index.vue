@@ -1,5 +1,5 @@
 <template>
-  <a-tabs :default-active-key="0">
+  <a-tabs :default-active-key="0" lazy-load animation type="rounded">
     <a-tab-pane :key="0" :title="t('page.charts.all')">
       <a-row
         justify="center"
