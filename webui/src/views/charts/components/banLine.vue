@@ -107,17 +107,17 @@
 </template>
 
 <script lang="ts" setup>
-import { use } from 'echarts/core'
-import { LineChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent } from 'echarts/components'
-import VChart from 'vue-echarts'
-import { ref, reactive, watch, computed } from 'vue'
-import { useRequest } from 'vue-request'
-import { SVGRenderer } from 'echarts/renderers'
+import { getTimebasedStaticsData } from '@/service/charts'
 import { useDarkStore } from '@/stores/dark'
 import dayjs from 'dayjs'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+import { SVGRenderer } from 'echarts/renderers'
+import { computed, reactive, ref, watch } from 'vue'
+import VChart from 'vue-echarts'
 import { useI18n } from 'vue-i18n'
-import { getTimebasedStaticsData } from '@/service/charts'
+import { useRequest } from 'vue-request'
 const { t } = useI18n()
 const loadingOptions = computed(() => ({
   text: t('page.charts.loading'),
@@ -137,6 +137,9 @@ const changeStep = (v: string) => {
     option.range = [dayjs().startOf('hour').add(-6, 'hour').toDate(), new Date()]
   }
 }
+const props = defineProps<{
+  downloader?: string
+}>()
 
 const option = reactive({
   timeStep: 'day' as 'day' | 'hour',
@@ -164,11 +167,16 @@ const chartOptions = ref({
 })
 
 watch(option, (v) => {
-  run(v.range[0], v.range[1], v.timeStep)
+  run(v.range[0], v.range[1], v.timeStep, props.downloader)
 })
 
 const { loading, run, refresh } = useRequest(getTimebasedStaticsData, {
-  defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), 'day'],
+  defaultParams: [
+    dayjs().startOf('day').add(-7, 'day').toDate(),
+    new Date(),
+    'day',
+    props.downloader
+  ],
   onSuccess: (data) => {
     if (data.data) {
       const map = new Map<number, number>()

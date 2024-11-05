@@ -172,11 +172,19 @@ const chartOption = ref({
 })
 
 watch(option, (v) => {
-  run(v.range[0], v.range[1], option.bannedOnly)
+  run(v.range[0], v.range[1], option.bannedOnly, props.downloader)
 })
+const props = defineProps<{
+  downloader?: string
+}>()
 
 const { loading, run, refresh } = useRequest(getGeoIPData, {
-  defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), option.bannedOnly],
+  defaultParams: [
+    dayjs().startOf('day').add(-7, 'day').toDate(),
+    new Date(),
+    option.bannedOnly,
+    props.downloader
+  ],
   onSuccess: (data) => {
     if (data.data) {
       const fieldData = data.data[option.field]
