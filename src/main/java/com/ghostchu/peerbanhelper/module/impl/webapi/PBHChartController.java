@@ -24,6 +24,7 @@ import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -132,11 +133,11 @@ public class PBHChartController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, Map.of(
                 "connectedPeersTrend", connectedPeerTrends.entrySet().stream()
                         .map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                        .sorted((o1, o2) -> Long.compare(o1.key(), o2.key))
+                        .sorted(Comparator.comparingLong(SimpleLongIntKV::key))
                         .toList(),
                 "bannedPeersTrend", bannedPeerTrends.entrySet().stream()
                         .map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                        .sorted((o1, o2) -> Long.compare(o1.key(), o2.key))
+                        .sorted(Comparator.comparingLong(SimpleLongIntKV::key))
                         .toList()
         )));
     }

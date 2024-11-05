@@ -4,11 +4,9 @@ import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -28,8 +26,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @IgnoreScan
@@ -52,7 +48,34 @@ public class PBHMetricsController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/api/statistic/counter", this::handleBasicCounter, Role.USER_READ)
                 .get("/api/statistic/analysis/field", this::handleHistoryNumberAccess, Role.USER_READ)
+                .get("/api/statistic/analysis/banTrends", this::handleBanTrends, Role.USER_READ)
                 .get("/api/statistic/analysis/date", this::handleHistoryDateAccess, Role.USER_READ);
+    }
+
+    private void handleBanTrends(Context ctx) throws Exception {
+        var downloader = ctx.queryParam("downloader");
+        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+        Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
+        var queryBanned = historyDao.queryBuilder()
+                .selectColumns("id", "banAt")
+                .where()
+                .ge("banAt", timeQueryModel.startAt())
+                .and()
+                .le("banAt", timeQueryModel.endAt());
+        if (downloader != null && !downloader.isBlank()) {
+            queryBanned.and().eq("downloader", downloader);
+        }
+        try (var it = queryBanned.iterator()) {
+            while (it.hasNext()) {
+                var startOfDay = MiscUtil.getStartOfToday(it.next().getBanAt().getTime());
+                bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
+            }
+        }
+        ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream()
+                        .map((e) -> new PBHChartController.SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
+                        .sorted(Comparator.comparingLong(PBHChartController.SimpleLongIntKV::key))
+                        .toList()
+        ));
     }
 
     private void handleHistoryDateAccess(Context ctx) throws Exception {
@@ -151,6 +174,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         String type = ctx.queryParam("type");
         String field = ctx.queryParam("field");
         double filter = Double.parseDouble(Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0"));
+        String downloader = ctx.queryParam("downloader");
         List<HistoryDao.UniversalFieldNumResult> results = switch (type) {
             case "count" -> historyDao.countField(field, filter);
             case "sum" -> historyDao.sumField(field, filter);
