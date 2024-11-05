@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <a-card hoverable title="2048">
     <div class="chart">
       <vue2048 style="margin: 0 auto" />
@@ -9,11 +9,11 @@
       </a-tooltip>
     </template>
   </a-card>
-</template>
-<script lang="ts" setup>
+</template> -->
+<!-- <script lang="ts" setup>
 import { Vue2048 } from 'vue-2048'
 import 'vue-2048/dist/style.css'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-</script>
+</script> -->
