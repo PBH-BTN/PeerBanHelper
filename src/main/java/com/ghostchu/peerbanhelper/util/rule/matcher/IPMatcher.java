@@ -26,18 +26,15 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
 
     /**
      * 设置数据
-     * 其中ipv4网段地址转为精确ip
-     * 考虑到ipv6分配地址通常是/64，所以ipv6网段不转为精确ip
      *
      * @param ruleName 规则名
      * @param ruleData 规则数据
      */
     public void setData(String ruleName, List<IPAddress> ruleData) {
         setRuleName(ruleName);
-        this.ips = new DualIPv4v6Tries();
-        ruleData.forEach(ipAddress -> {
-            this.ips.add(ipAddress);
-        });
+        var tmp = new DualIPv4v6Tries();
+        ruleData.forEach(tmp::add);
+        this.ips = tmp;
     }
 
     @Override
