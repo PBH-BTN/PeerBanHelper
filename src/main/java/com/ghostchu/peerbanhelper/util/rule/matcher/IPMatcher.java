@@ -6,8 +6,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatcher;
 import inet.ipaddr.IPAddress;
-import inet.ipaddr.ipv4.IPv4AddressTrie;
-import inet.ipaddr.ipv6.IPv6AddressTrie;
+import inet.ipaddr.format.util.DualIPv4v6Tries;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +18,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class IPMatcher extends RuleMatcher<IPAddress> {
-    private IPv4AddressTrie ipv4;
-    private IPv6AddressTrie ipv6;
+    private DualIPv4v6Tries ips;
 
     public IPMatcher(String ruleId, String ruleName, List<IPAddress> ruleData) {
         super(ruleId, ruleName, ruleData);
@@ -36,16 +34,9 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
      */
     public void setData(String ruleName, List<IPAddress> ruleData) {
         setRuleName(ruleName);
-        this.ipv4 = new IPv4AddressTrie();
-        this.ipv6 = new IPv6AddressTrie();
+        this.ips = new DualIPv4v6Tries();
         ruleData.forEach(ipAddress -> {
-            if (ipAddress.isIPv4()) {
-                ipv4.add(ipAddress.toIPv4());
-            } else if (ipAddress.isIPv6()) {
-                ipv6.add(ipAddress.toIPv6());
-            } else {
-                log.debug("The address {} neither IPv4 or IPv6 addresses", ipAddress);
-            }
+            this.ips.add(ipAddress);
         });
     }
 
@@ -53,16 +44,8 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
     public @NotNull MatchResult match0(@NotNull String content) {
         final IPAddress ip = IPAddressUtil.getIPAddress(content);
         if (ip == null) return MatchResult.DEFAULT;
-        if (ip.isIPv4()) {
-            if (ipv4.contains(ip.toIPv4())) {
-                return MatchResult.TRUE;
-            }
-        } else if (ip.isIPv6()) {
-            if (ipv6.contains(ip.toIPv6())) {
-                return MatchResult.TRUE;
-            }
-        } else {
-            log.debug("The address {} neither IPv4 or IPv6 addresses", ip);
+        if (ips.contains(ip)) {
+            return MatchResult.TRUE;
         }
         return MatchResult.DEFAULT;
     }
