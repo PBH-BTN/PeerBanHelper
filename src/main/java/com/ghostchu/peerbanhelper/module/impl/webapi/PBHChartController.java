@@ -96,28 +96,33 @@ public class PBHChartController extends AbstractFeatureModule {
     }
 
     private void handlePeerTrends(Context ctx) throws Exception {
+        String downloader = ctx.queryParam("downloader");
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         Map<Long, AtomicInteger> connectedPeerTrends = new ConcurrentHashMap<>();
         Map<Long, AtomicInteger> bannedPeerTrends = new ConcurrentHashMap<>();
-        try (var it = peerRecordDao.queryBuilder()
+        var queryConnected = peerRecordDao.queryBuilder()
                 .selectColumns("id", "lastTimeSeen")
                 .where()
                 .ge("lastTimeSeen", timeQueryModel.startAt())
                 .and()
-                .le("lastTimeSeen", timeQueryModel.endAt())
-                .iterator()) {
+                .le("lastTimeSeen", timeQueryModel.endAt());
+        var queryBanned = historyDao.queryBuilder()
+                .selectColumns("id", "banAt")
+                .where()
+                .ge("banAt", timeQueryModel.startAt())
+                .and()
+                .le("banAt", timeQueryModel.endAt());
+        if (downloader != null && !downloader.isBlank()) {
+            queryConnected.and().eq("downloader", downloader);
+            queryBanned.and().eq("downloader", downloader);
+        }
+        try (var it = queryConnected.iterator()) {
             while (it.hasNext()) {
                 var startOfDay = MiscUtil.getStartOfToday(it.next().getLastTimeSeen().getTime());
                 connectedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
             }
         }
-        try (var it = historyDao.queryBuilder()
-                .selectColumns("id", "banAt")
-                .where()
-                .ge("banAt", timeQueryModel.startAt())
-                .and()
-                .le("banAt", timeQueryModel.endAt())
-                .iterator()) {
+        try (var it = queryBanned.iterator()) {
             while (it.hasNext()) {
                 var startOfDay = MiscUtil.getStartOfToday(it.next().getBanAt().getTime());
                 bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
