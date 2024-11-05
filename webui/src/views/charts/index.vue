@@ -16,22 +16,18 @@
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
           <fieldPie />
         </a-col>
-
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
           <plusWarpper :title="t('page.charts.title.geoip')">
             <ispPie />
           </plusWarpper>
         </a-col>
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <game2048 />
-        </a-col>
-        <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
-          <plusWarpper :title="t('page.charts.title.trends')"> <trends /></plusWarpper>
-        </a-col>
-        <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
           <plusWarpper :title="t('page.charts.title.traffic')">
             <traffic />
           </plusWarpper>
+        </a-col>
+        <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
+          <plusWarpper :title="t('page.charts.title.trends')"> <trends /></plusWarpper>
         </a-col>
       </a-row>
     </a-tab-pane>
@@ -61,17 +57,14 @@
           </plusWarpper>
         </a-col>
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <game2048 />
+          <plusWarpper :title="t('page.charts.title.traffic')">
+            <traffic :downloader="downloader.name" />
+          </plusWarpper>
         </a-col>
         <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
           <plusWarpper :title="t('page.charts.title.trends')">
             <trends :downloader="downloader.name"
           /></plusWarpper>
-        </a-col>
-        <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
-          <plusWarpper :title="t('page.charts.title.traffic')">
-            <traffic :downloader="downloader.name" />
-          </plusWarpper>
         </a-col>
       </a-row>
     </a-tab-pane>
@@ -83,7 +76,6 @@ import { getDownloaders } from '@/service/downloaders'
 import ispPie from '@/views/charts/components/ispPie.vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-import game2048 from './components/2048.vue'
 import banLine from './components/banLine.vue'
 import fieldPie from './components/fieldPie.vue'
 import plusWarpper from './components/plusWarpper.vue'
