@@ -672,6 +672,9 @@ return console.askYesNo(message, true);
     <windows name="Windows arm64" id="141" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="arm64">
       <jreBundle installOnlyIfNecessary="true" />
     </windows>
+    <windows name="Windows arm64" id="141" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_no_java_${compiler:sys.version}" architecture="arm64">
+      <jreBundle jreBundleSource="none" />
+    </windows>
     <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="universal" />
     <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_macos_nojava_${compiler:sys.version}" architecture="universal">
       <jreBundle jreBundleSource="none" />
