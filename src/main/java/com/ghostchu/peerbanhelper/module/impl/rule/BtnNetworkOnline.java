@@ -37,16 +37,12 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -91,11 +87,17 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private void status(Context context) {
+        Map<String, Object> info = new HashMap<>();
         if (btnNetwork == null) {
+            info.put("configSuccess", false);
+            info.put("appId", "N/A");
+            info.put("appSecret", "N/A");
+            info.put("abilities", Collections.emptyList());
+            info.put("configUrl", tl(locale(context), Lang.BTN_SERVICES_NEED_RESTART));
             context.json(new StdResp(false, tl(locale(context), Lang.BTN_NOT_ENABLE_AND_REQUIRE_RESTART), null));
             return;
         }
-        Map<String, Object> info = new HashMap<>();
+
         info.put("configSuccess", btnNetwork.getConfigSuccess());
         var abilities = new ArrayList<>();
         for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {

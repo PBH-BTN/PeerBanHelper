@@ -483,3 +483,4 @@ EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS: "For security reason, create 
 EXPRESS_RULE_ENGINE_SAVED: "Script saved"
 BTN_RULES_SCRIPT_COMPILING: "Compiling the scripts from BTN server, this may take a while..."
 BTN_RULES_SCRIPT_COMPILED: "Compiled {} scripts, took {}ms"
+BTN_SERVICES_NEED_RESTART: "BTN Service Unavailable: Restart PeerBanHelper is required for loading BTN module and apply changes."
