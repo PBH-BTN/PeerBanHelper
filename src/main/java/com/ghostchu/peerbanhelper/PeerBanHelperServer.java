@@ -616,6 +616,7 @@ public class PeerBanHelperServer implements Reloadable {
             banWaveWatchDog.feed();
             metrics.recordCheck();
             banWaveLock.unlock();
+            System.gc();
         }
     }
 
