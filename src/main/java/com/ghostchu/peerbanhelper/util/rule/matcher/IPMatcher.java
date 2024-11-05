@@ -41,7 +41,7 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
     public @NotNull MatchResult match0(@NotNull String content) {
         final IPAddress ip = IPAddressUtil.getIPAddress(content);
         if (ip == null) return MatchResult.DEFAULT;
-        if (ips.contains(ip)) {
+        if (ips.elementContains(ip)) {
             return MatchResult.TRUE;
         }
         return MatchResult.DEFAULT;
