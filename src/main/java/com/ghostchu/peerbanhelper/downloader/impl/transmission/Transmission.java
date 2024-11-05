@@ -196,6 +196,9 @@ public class Transmission extends AbstractDownloader {
 
     @Override
     public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
+        if(System.getProperty("pbh.transmission.disable-torrent-relaunch") != null) {
+            return;
+        }
         relaunchTorrents(torrents.stream().filter(t -> {
             try {
                 Long.parseLong(t.getId());
