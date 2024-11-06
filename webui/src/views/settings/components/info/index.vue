@@ -546,14 +546,16 @@ const osLogo = {
 
 const showLog = ref(false)
 
-const downloadHeap = async () => {
+const downloadHeap = () => {
   Message.info(t('page.settings.tab.info.downloadHeap'))
-  const url = await GetHeapDumpFile()
-  const a = document.createElement('a')
-  a.href = url.toString()
-  a.target = '_blank'
-  a.download = 'heapdump.hprof.gz'
-  a.click()
+  setTimeout(async () => {
+    const url = await GetHeapDumpFile()
+    const a = document.createElement('a')
+    a.href = url.toString()
+    a.target = '_blank'
+    a.download = 'heapdump.hprof.gz'
+    a.click()
+  }, 1000)
 }
 </script>
 
