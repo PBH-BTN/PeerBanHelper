@@ -462,7 +462,7 @@ MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION: |
   **Total uploaded traffic: {} (alert threshold: {})**
   
   Please check the current running status of the downloader.
-  If you need to modify the alarm settings, please go to Active Monitoring page to modify them.
+  If you need to modify the alarm settings, please go to [Active Monitoring](/config?tab=profile) page to modify them.
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE: "Too many failed tried for downloader ({})"
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
   Too many errors when trying to connect to the downloader {}, please check the downloader status, such as username or password.

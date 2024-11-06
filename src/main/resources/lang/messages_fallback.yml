@@ -460,7 +460,7 @@ MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION: |
   **已上传流量：{} (告警阈值: {})**
 
   请检查下载器当前运行状态。  
-  若需要修改告警设置，请前往 Active Monitoring 页面修改。
+  若需要修改告警设置，请前往 [主动监控](/config?tab=profile) 页面修改。
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE: "下载器返回错误响应次数过多 ({})"
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
   在尝试连接到下载器 {} 时错误次数过多，请检查下载器状态，如用户名或密码等。
