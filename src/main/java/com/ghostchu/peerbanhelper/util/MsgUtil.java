@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +15,11 @@ import java.text.StringCharacterIterator;
 public class MsgUtil {
     private static final DecimalFormat df = new DecimalFormat("0.00%");
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    public static String escapeSql(String sql){
+        if(sql == null) return null;
+        return StringUtils.replace(sql, "'", "''");
+    }
 
     public static String humanReadableByteCountBin(long bytes) {
         long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);

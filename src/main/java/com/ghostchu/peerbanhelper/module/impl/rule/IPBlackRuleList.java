@@ -29,6 +29,7 @@ import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
+import com.j256.ormlite.stmt.SelectArg;
 import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -116,11 +116,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             long t1 = System.currentTimeMillis();
             String ip = peer.getPeerAddress().getIp();
             List<IPBanResult> results = new ArrayList<>();
-            try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
-                ipBanMatchers.forEach(rule -> service.submit(() -> {
-                    results.add(new IPBanResult(rule.getRuleName(), rule.match(ip)));
-                }));
-            }
+            ipBanMatchers.forEach(rule-> results.add(new IPBanResult(rule.getRuleName(), rule.match(ip))));
             AtomicReference<IPBanResult> matchRule = new AtomicReference<>();
             boolean mr = results.stream().anyMatch(ipBanResult -> {
                 try {
@@ -181,15 +177,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     public StdResp updateRule(String locale, @NotNull ConfigurationSection rule, IPBanRuleUpdateType updateType) {
         AtomicReference<StdResp> result = new AtomicReference<>();
         String ruleId = rule.getName();
+        String name = rule.getString("name", ruleId);
+        if (name.contains(".")) {
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         if (!rule.getBoolean("enabled", false)) {
             // 检查ipBanMatchers是否有对应的规则，有则删除
             ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
             // 未启用跳过更新逻辑
             return new StdResp(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), null);
-        }
-        String name = rule.getString("name", ruleId);
-        if (name.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
         String url = rule.getString("url");
         if (null != url && url.startsWith("http")) {
@@ -355,7 +351,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             return null;
         }
 
-        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), new Pageable(1, 1)).getResults();
+        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", new SelectArg(ruleId)).queryBuilder(), new Pageable(1, 1)).getResults();
         Optional<RuleSubLogEntity> first = result.isEmpty() ? Optional.empty() : Optional.of(result.getFirst());
         long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
         int count = first.map(RuleSubLogEntity::getCount).orElse(0);
@@ -404,7 +400,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     public Page<RuleSubLogEntity> queryRuleSubLogs(String ruleId, Pageable pageable) throws SQLException {
         var builder = ruleSubLogsDao.queryBuilder().orderBy("updateTime", false);
         if (ruleId != null) {
-            builder = builder.where().eq("ruleId", ruleId).queryBuilder();
+            builder = builder.where().eq("ruleId", new SelectArg(ruleId)).queryBuilder();
         }
         return ruleSubLogsDao.queryByPaging(builder, pageable);
     }
@@ -419,7 +415,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     public long countRuleSubLogs(String ruleId) throws SQLException {
         var builder = ruleSubLogsDao.queryBuilder();
         if (ruleId != null) {
-            builder = builder.where().eq("ruleId", ruleId).queryBuilder();
+            builder = builder.where().eq("ruleId", new SelectArg(ruleId)).queryBuilder();
         }
         return ruleSubLogsDao.countOf(builder.setCountOf(true).prepare());
     }

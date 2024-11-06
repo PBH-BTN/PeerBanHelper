@@ -27,7 +27,7 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
     }
 
     public Page<T> queryByPaging(QueryBuilder<T, ID> qb, Pageable pageable) throws SQLException {
-        var r = query(qb.offset(pageable.getQueryIndex() * pageable.getSize()).limit(pageable.getSize()).prepare());
+        var r = query(qb.offset(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).prepare());
         var ct = qb.offset(null).limit(null).countOf();
         return new Page<>(
                 pageable,
@@ -40,7 +40,7 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
         return new Page<>(
                 pageable,
                 countOf(),
-                query(queryBuilder().offset(pageable.getQueryIndex() * pageable.getSize()).limit(pageable.getSize()).prepare())
+                query(queryBuilder().offset(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).prepare())
         );
     }
 
@@ -61,7 +61,7 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
             return new Page<>(pageable.getPage(), pageable.getSize(), 0, Collections.emptyList());
         } else {
             where.and(fieldC);
-            var results = qb.offset(pageable.getQueryIndex() * pageable.getSize()).limit(pageable.getSize()).query();
+            var results = query(qb.offset(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).prepare());
             var ct = qb.countOf();
             return new Page<>(pageable, ct, results);
         }

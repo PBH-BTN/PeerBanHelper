@@ -157,7 +157,7 @@ public class MainWindow extends JFrame {
         JMenuItem openWebUIMenuItem = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
         openWebUIMenuItem.addActionListener(e -> {
             if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
-                swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port()));
+                swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()));
             }
         });
         webUIMenu.add(openWebUIMenuItem);

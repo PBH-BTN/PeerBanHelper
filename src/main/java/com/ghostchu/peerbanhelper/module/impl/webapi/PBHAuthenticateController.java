@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
@@ -53,7 +54,7 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, "success", null));
     }
 
-    private void handleLogin(Context ctx) throws NeedInitException {
+    private void handleLogin(Context ctx) throws NeedInitException, IPAddressBannedException {
 //        if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
 //            ctx.status(HttpStatus.OK);
 //            ctx.json(Map.of("message", "Don't cry okay? Here is dummy success response, let's show OOBE page, it's fine?"));
@@ -62,12 +63,24 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             throw new NeedInitException();
         }
+
+        if(!webContainer.allowAttemptLogin(userIp(ctx))){
+            throw new IPAddressBannedException();
+        }
+
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
-        if (loginRequest == null || !webContainer.getToken().equals(loginRequest.getToken())) {
-            ctx.status(HttpStatus.UNAUTHORIZED);
+        if(loginRequest == null){
+            ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
             return;
         }
+        if ( !webContainer.getToken().equals(loginRequest.getToken())) {
+            ctx.status(HttpStatus.UNAUTHORIZED);
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
+            webContainer.markLoginFailed(userIp(ctx));
+            return;
+        }
+        webContainer.markLoginSuccess(userIp(ctx));
         ctx.sessionAttribute("authenticated", webContainer.getToken());
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }

@@ -42,5 +42,6 @@ export default {
   'page.charts.tooltip.2048':
     '由于图表对不齐很丑，所以听从Ghost_chu的建议，放一个2048在这，限时直到新的图表加入',
   'page.charts.error.title': '图表加载失败',
-  'page.charts.error.refresh': '重试'
+  'page.charts.error.refresh': '重试',
+  'page.charts.all': '全部下载器'
 }

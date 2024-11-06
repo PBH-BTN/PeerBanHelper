@@ -18,6 +18,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.eventbus.Subscribe;
+import com.j256.ormlite.stmt.SelectArg;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -46,8 +47,8 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             .maximumSize(3500)
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
-    private long dailyTrafficCapping;
     private final AlertManager alertManager;
+    private long dailyTrafficCapping;
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
 
@@ -117,7 +118,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
-        this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily");
+        this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily", -1);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::writeJournal, 0, 1, TimeUnit.HOURS);
@@ -190,7 +191,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             try {
                 var deleteBuilder = peerRecordDao.deleteBuilder();
                 var where = deleteBuilder.where()
-                        .lt("lastTimeSeen", dataRetentionTime);
+                        .lt("lastTimeSeen", new SelectArg(dataRetentionTime));
                 deleteBuilder.setWhere(where);
                 int deleted = deleteBuilder.delete();
                 log.info(tlUI(Lang.AMM_CLEANED_UP, deleted));

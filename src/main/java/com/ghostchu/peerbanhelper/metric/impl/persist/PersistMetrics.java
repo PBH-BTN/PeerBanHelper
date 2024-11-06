@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.j256.ormlite.stmt.SelectArg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -53,9 +54,9 @@ public class PersistMetrics implements BasicMetrics {
                     builder.setWhere(builder
                             .where()
                             .le("banAt",
-                                    new Timestamp(LocalDateTime.now().minusDays(keepDays)
+                                    new SelectArg(new Timestamp(LocalDateTime.now().minusDays(keepDays)
                                             .toInstant(MiscUtil.getSystemZoneOffset())
-                                            .toEpochMilli())));
+                                            .toEpochMilli()))));
                     log.info(tlUI(Lang.CLEANED_BANLOGS, builder.delete()));
                 } catch (Exception e) {
                     log.error("Unable to cleanup expired banlogs", e);

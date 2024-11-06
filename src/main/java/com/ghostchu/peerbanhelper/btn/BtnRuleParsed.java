@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.btn;
 
+import com.ghostchu.peerbanhelper.scriptengine.CompiledScript;
+import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
@@ -10,6 +12,7 @@ import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import inet.ipaddr.IPAddress;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,20 +20,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Data
+@Slf4j
 public class BtnRuleParsed {
+    private final ScriptEngine scriptEngine;
     private String version;
     private Map<String, List<Rule>> peerIdRules;
     private Map<String, List<Rule>> clientNameRules;
-    private Map<String, List<Rule>> ipRules;
+    private Map<String, IPMatcher> ipRules;
     private Map<String, List<Rule>> portRules;
+    private Map<String, CompiledScript> scriptRules;
 
-    public BtnRuleParsed(BtnRule btnRule) {
+    public BtnRuleParsed(ScriptEngine scriptEngine, BtnRule btnRule) {
+        this.scriptEngine = scriptEngine;
         this.version = btnRule.getVersion();
         this.ipRules = parseIPRule(btnRule.getIpRules());
         this.portRules = parsePortRule(btnRule.getPortRules());
         this.peerIdRules = parseRule(btnRule.getPeerIdRules());
         this.clientNameRules = parseRule(btnRule.getClientNameRules());
+        this.scriptRules = compileScripts(btnRule.getScriptRules());
+    }
+
+    private Map<String, CompiledScript> compileScripts(Map<String, String> scriptRules) {
+        Map<String, CompiledScript> scripts = new HashMap<>();
+        log.info(tlUI(Lang.BTN_RULES_SCRIPT_COMPILING, scriptRules.size()));
+        long startAt = System.currentTimeMillis();
+        scriptRules.forEach((name, content) -> {
+            try {
+                var script = scriptEngine.compileScript(null, name, content);
+                if (script != null) {
+                    scripts.put(name, script);
+                }
+            } catch (Exception e) {
+                log.error("Unable to load BTN script {}", name, e);
+            }
+        });
+        log.info(tlUI(Lang.BTN_RULES_SCRIPT_COMPILED, scripts.size(), System.currentTimeMillis() - startAt));
+        return scripts;
     }
 
     private Map<String, List<Rule>> parsePortRule(Map<String, List<Integer>> portRules) {
@@ -66,9 +94,10 @@ public class BtnRuleParsed {
         return rules;
     }
 
-    public Map<String, List<Rule>> parseIPRule(Map<String, List<String>> raw) {
-        Map<String, List<Rule>> rules = new HashMap<>();
-        raw.forEach((k, v) -> rules.put(k, List.of(new BtnRuleIpMatcher(version, k, k, v.stream().map(IPAddressUtil::getIPAddress).toList()))));
+
+    public Map<String, IPMatcher> parseIPRule(Map<String, List<String>> raw) {
+        Map<String, IPMatcher> rules = new HashMap<>();
+        raw.forEach((k, v) -> rules.put(k,new IPMatcher(version, k, v.stream().map(IPAddressUtil::getIPAddress).toList())));
         return rules;
     }
 
@@ -76,6 +105,15 @@ public class BtnRuleParsed {
         Map<String, List<Rule>> rules = new HashMap<>();
         raw.forEach((k, v) -> rules.put(k, RuleParser.parse(v)));
         return rules;
+    }
+
+    public long size(){
+        // check all categories and all value's collections's size
+        return peerIdRules.values().stream().mapToLong(List::size).sum() +
+                clientNameRules.values().stream().mapToLong(List::size).sum() +
+                ipRules.values().stream().mapToLong(IPMatcher::size).sum() +
+                portRules.values().stream().mapToLong(List::size).sum() +
+                scriptRules.size();
     }
 
     public static class BtnRuleIpMatcher extends IPMatcher {

@@ -20,7 +20,12 @@
       >
         <template #item="{ item }">
           <a-list-item action-layout="vertical">
-            <a-list-item-meta :title="item.displayName" :description="item.description" />
+            <a-list-item-meta :title="item.displayName">
+              <template #description>
+                <!-- eslint-disable-next-line vue/no-v-html-->
+                <div v-html="md.render(item.description)"></div>
+              </template>
+            </a-list-item-meta>
             <template #actions>
               <a-space style="cursor: default">
                 <a-typography-text>
@@ -52,8 +57,11 @@
 </template>
 <script setup lang="ts">
 import type { Ability } from '@/api/model/status'
+import markdownit from 'markdown-it'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+const md = new markdownit()
 
 const { t, d } = useI18n()
 const visiable = ref(false)

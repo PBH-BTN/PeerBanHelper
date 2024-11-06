@@ -112,7 +112,7 @@ LOAD_BANLIST_FROM_FILE: "[封禁] 已从保存的封禁列表缓存文件中恢�
 LOAD_BANLIST_FAIL: "[封禁] 加载封禁列表过程出现错误"
 GUI_MENU_PROGRAM: "程序"
 GUI_MENU_WEBUI: "WebUI"
-GUI_MENU_WEBUI_OPEN: "打开 WebUI..."
+GUI_MENU_WEBUI_OPEN: "打开并自动登录 WebUI..."
 GUI_MENU_ABOUT: "关于"
 GUI_MENU_QUIT: "退出"
 GUI_COPY_WEBUI_TOKEN: "复制 WebUI Token..."
@@ -201,12 +201,12 @@ STATUS_TEXT_NEED_PRIVILEGE: "权限不足，请求权限提升（以管理员/ro
 SUGGEST_FIREWALL_IPTABELS: "不推荐使用原生 iptables，可能引起网络性能下降。请考虑安装 ipset 代替使用 iptabels"
 SUGGEST_FIREWALL_FIREWALLD: "不推荐使用原生 firewalld，可能引起网络性能下降。请考虑安装 ipset 代替使用 firewalld"
 SUGGEST_FIREWALL_WINDOWS_FIREWALL_DISABLED: "Windows 防火墙目前处于禁用状态，请为 “公用网络” 和 “专用网络” 打开 Windows 防火墙，否则系统防火墙集成将不起作用"
-MODULE_EXPRESSION_RULE_BAD_EXPRESSION: "解析表达式时出错，请检查是否有语法错误"
-MODULE_EXPRESSION_RULE_COMPILING: "请稍等，规则引擎正在编译用户脚本以提高执行性能，这可能需要一点时间……"
-MODULE_EXPRESSION_RULE_COMPILED: "已成功编译 {} 条用户脚本，耗时 {}ms"
-MODULE_EXPRESSION_RULE_TIMEOUT: "用户脚本 {} 执行超时，最大允许时间是 {}ms"
-MODULE_EXPRESSION_RULE_ERROR: "执行用户脚本 {} 时出错"
-MODULE_EXPRESSION_RULE_RELEASE_FILE_FAILED: "[错误] 在释放预设脚本文件 {} 时遇到了系统错误"
+RULE_ENGINE_BAD_EXPRESSION: "解析表达式时出错，请检查是否有语法错误"
+RULE_ENGINE_COMPILING: "请稍等，规则引擎正在编译用户脚本以提高执行性能，这可能需要一点时间……"
+RULE_ENGINE_COMPILED: "已成功编译 {} 条用户脚本，耗时 {}ms"
+RULE_ENGINE_TIMEOUT: "用户脚本 {} 执行超时，最大允许时间是 {}ms"
+RULE_ENGINE_ERROR: "执行用户脚本 {} 时出错"
+RULE_ENGINE_RELEASE_FILE_FAILED: "[错误] 在释放预设脚本文件 {} 时遇到了系统错误"
 JFX_WEBVIEW_ALERT: "来自网页的消息"
 DATABASE_OUTDATED_LOGS_CLEANED_UP: "已清理数据库中 {} 条过期封禁日志数据"
 LIBRARIES_LOADER_DETERMINE_BEST_MIRROR: "请稍等，正在初始化并测试最佳下载源（最多 15 秒）……"
@@ -263,8 +263,8 @@ RULE_ENGINE_INVALID_RULE: "规则 {} 的参数 {} 无效，仅接受以下值：
 RULE_ENGINE_NOT_A_RULE: "[规则引擎] 表达式 {} 不是一个有效规则"
 RULE_MATCHER_STRING_EQUALS: "匹配相同"
 NEW_SETUP_NO_DOWNLOADERS: "PeerBanHelper 现在还未连接到任何下载器！请打开 WebUI 并添加下载器。如需登录 Token：{} （可随时从 GUI 菜单复制，或者从 config.yml 找到）"
-MODULE_EXPRESSION_RULE_INVALID_RETURNS: |
-  用户脚本 {} 返回了无效值，返回的值必须是以下类型中的其一：
+RULE_ENGINE_INVALID_RETURNS: |
+  脚本 {} 返回了无效值，返回的值必须是以下类型中的其一：
   Boolean: [false=不采取任何操作, true=封禁Peer]
   Integer: [0=不采取任何操作,1=封禁Peer,2=跳过其它规则]
   com.ghostchu.peerbanhelper.module.PeerAction: [NO_ACTION, BAN, SKIP]
@@ -308,8 +308,8 @@ DOWNLOADER_LOGIN_EXCEPTION: "无法连接到下载器，登录时出现错误：
 DOWNLOADER_LOGIN_IO_EXCEPTION: "无法连接到下载器，登录时出现网络错误：{}"
 DOWNLOADER_LOGIN_INCORRECT_CRED: "鉴权失败，错误的登录凭据。请检查用户名、密码或 Token 是否正确。"
 
-USER_SCRIPT_RULE: "用户 Aviator Script 自定脚本规则"
-USER_SCRIPT_RUN_RESULT: "用户脚本 {}: {}"
+USER_SCRIPT_RULE: "脚本引擎"
+USER_SCRIPT_RUN_RESULT: "脚本 {}: {}"
 SCHEDULED_OPERATIONS: "[计划任务] 已处理 {} 个封禁列表的外部计划更改"
 
 ARB_BANNED_REASON: "IP 地址 {} 与另一个已封禁的 IP 地址 {} 处于同一封禁区间内，执行连锁封禁操作：{}@{}"
@@ -422,7 +422,16 @@ ALERT_SNAPSHOT_DESCRIPTION: "非稳定版本的构建仅用于测试，且可能
 BTN_ABILITY_RECONFIGURE: "重新配置"
 BTN_ABILITY_RECONFIGURE_DESCRIPTION: "“重新配置” 能力允许 BTN 服务器通知 PeerBanHelper 在间隔一定时间后与 BTN 服务器联系，刷新使用的配置文件，以获取远程服务器的配置更改"
 BTN_ABILITY_RULES: "云端规则"
-BTN_ABILITY_RULES_DESCRIPTION: "“云端规则” 能力允许 BTN 服务器向 PeerBanHelper 定期提供由远程服务器生成的反吸血规则，作为本地反吸血规则的补充"
+BTN_ABILITY_RULES_DESCRIPTION: |
+  “云端规则” 能力允许 BTN 服务器向 PeerBanHelper 定期提供由远程服务器生成的反吸血规则，作为本地反吸血规则的补充。
+  
+  规则版本：**{}**, 当前已加载 **{}** 条规则：
+  
+  * IP 规则: {} 条
+  * PeerID 规则: {} 条
+  * ClientName 规则: {} 条
+  * 端口规则: {} 条
+  * 云定义脚本: {} 个
 BTN_ABILITY_SUBMIT_BANS: "提交封禁列表"
 BTN_ABILITY_SUBMIT_BANS_DESCRIPTION: "“提交封禁列表” 能力允许 BTN 服务器定期接收 PeerBanHelper 的封禁列表和封禁时的数据快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。"
 BTN_ABILITY_SUBMIT_HISTORY: "提交历史记录"
@@ -451,7 +460,7 @@ MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION: |
   **已上传流量：{} (告警阈值: {})**
 
   请检查下载器当前运行状态。  
-  若需要修改告警设置，请前往 Active Monitoring 页面修改。
+  若需要修改告警设置，请前往 [主动监控](/config?tab=profile) 页面修改。
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE: "下载器返回错误响应次数过多 ({})"
 DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION: |
   在尝试连接到下载器 {} 时错误次数过多，请检查下载器状态，如用户名或密码等。
@@ -477,3 +486,8 @@ PUSH_PROVIDER_TEST_SUCCESS: "{} ({}) 发送成功，请检查是否收到消息"
 PUSH_PROVIDER_TEST_FAILED: "测试推送服务 {} ({}) 失败"
 PUSH_PROVIDER_TEST_ERROR: "测试推送服务 {} ({}) 失败: {}"
 BAN_PEER_EXCEPTION: "封禁 Peer 时出现意外错误，指定 Peer 可能封禁失败，请将下面的信息报告给 PeerBanHelper 开发者"
+EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS: "因安全原因，不允许通过互联网或者反向代理创建 AviatorScript 脚本"
+EXPRESS_RULE_ENGINE_SAVED: "脚本已保存"
+BTN_RULES_SCRIPT_COMPILING: "正在编译来自 BTN 服务器的可编程脚本，请稍等，这可能需要一点时间……"
+BTN_RULES_SCRIPT_COMPILED: "已成功编译 {} 个脚本，用时 {}ms"
+BTN_SERVICES_NEED_RESTART: "BTN 服务不可用：需要重启 PeerBanHelper 以加载 BTN 模块并应用更改"

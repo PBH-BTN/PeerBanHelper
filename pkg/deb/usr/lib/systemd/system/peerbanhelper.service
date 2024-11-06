@@ -6,6 +6,6 @@ User=peerbanhelper
 WorkingDirectory=/etc/peerbanhelper
 ExecStart=/usr/bin/java -Dpbh.release=debian -Dpbh.datadir=/etc/peerbanhelper -Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -jar /usr/lib/peerbanhelper/PeerBanHelper.jar
 Restart=on-failure
+StandardOutput=null
 [Install]
 WantedBy=multi-user.target
-   

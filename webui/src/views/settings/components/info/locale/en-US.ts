@@ -48,7 +48,7 @@ export default {
   'page.settings.tab.info.btn.status.fail': 'Failed to obtain configuration file',
   'page.settings.tab.info.btn.status.configUrl': 'Server Address',
   'page.settings.tab.info.btn.abilities': 'Ability List',
-  'page.settings.tab.info.btn.abilities.enable': 'abilities enabled',
+  'page.settings.tab.info.btn.abilities.enable': '{number} abilities enabled',
   'page.settings.tab.info.btn.abilities.tips':
     'BTN server provides a variety of abilities, here is the list of abilities currently provided by the server:',
 
@@ -61,5 +61,8 @@ export default {
   'page.settings.tab.info.log.title': 'Logs',
   'page.settings.tab.info.log.enableAutoRefresh': 'Auto Refresh',
   'page.settings.tab.info.log.hideBanWave': 'Hide check logs from Ban Wave',
-  'page.settings.tab.info.log.showThread': 'Show Thread Name'
+  'page.settings.tab.info.log.showThread': 'Show Thread Name',
+
+  'page.settings.tab.info.downloadHeap':
+    'Start downloading heap dump file, this will take some time'
 }
