@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
@@ -10,13 +11,12 @@ import com.ghostchu.peerbanhelper.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
-import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -34,16 +34,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,12 +58,14 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     private final JavalinWebContainer javalinWebContainer;
     private final ScriptEngine scriptEngine;
     private final List<CompiledScript> scripts = Collections.synchronizedList(new LinkedList<>());
+    private final ScriptStorageDao scriptStorageDao;
     private long banDuration;
 
-    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngine scriptEngine) {
+    public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngine scriptEngine, ScriptStorageDao scriptStorageDao) {
         super();
         this.scriptEngine = scriptEngine;
         this.javalinWebContainer = javalinWebContainer;
+        this.scriptStorageDao = scriptStorageDao;
     }
 
 
@@ -242,6 +241,9 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
                 env.put("cacheable", new AtomicBoolean(false));
                 env.put("server", getServer());
                 env.put("moduleInstance", this);
+                env.put("banDuration", banDuration);
+                env.put("persistStorage", scriptStorageDao);
+                env.put("ramStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
                 Object returns;
                 if (script.threadSafe()) {
                     returns = script.expression().execute(env);

@@ -22,40 +22,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 public class ScriptEngine {
     public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"));
-//
-//    public CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
-//        CheckResult result;
-//        try {
-//            Map<String, Object> env = script.expression().newEnv();
-//            env.put("torrent", torrent);
-//            env.put("peer", peer);
-//            env.put("downloader", downloader);
-//            env.put("cacheable", new AtomicBoolean(false));
-//            env.put("server", peerBanHelperServer);
-//            env.put("moduleInstance", this);
-//            Object returns;
-//            if (script.threadSafe()) {
-//                returns = script.expression().execute(env);
-//            } else {
-//                synchronized (script.expression()) {
-//                    returns = script.expression().execute(env);
-//                }
-//            }
-//            result = handleResult(script.expression(), returns);
-//        } catch (TimeoutException timeoutException) {
-//            log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_TIMEOUT, maxScriptExecuteTime), timeoutException);
-//            return pass();
-//        } catch (Exception ex) {
-//            log.error(tlUI(Lang.MODULE_EXPRESSION_RULE_ERROR, expressionMetadata.name()), ex);
-//            return pass();
-//        }
-//        if (result != null && result.action() != PeerAction.NO_ACTION) {
-//            return result;
-//        } else {
-//            return pass();
-//        }
-//    }
-
 
     @Nullable
     public CheckResult handleResult(CompiledScript script, long banDuration, Object returns) {

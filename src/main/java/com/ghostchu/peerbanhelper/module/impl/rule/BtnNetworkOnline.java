@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityException;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityRules;
+import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
@@ -18,6 +19,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.NullUtil;
+import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
@@ -61,6 +63,8 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     private BtnNetwork btnNetwork;
     @Autowired
     private ScriptEngine scriptEngine;
+    @Autowired
+    private ScriptStorageDao scriptStorageDao;
 
 
     @Override
@@ -225,6 +229,10 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
                 env.put("cacheable", new AtomicBoolean(false));
                 env.put("server", getServer());
                 env.put("moduleInstance", this);
+                env.put("btnNetwork", btnNetwork);
+                env.put("banDuration", banDuration);
+                env.put("kvStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
+                env.put("persistStorage", scriptStorageDao);
                 Object returns;
                 synchronized (script.expression()) {
                     returns = script.expression().execute(env);
