@@ -272,7 +272,7 @@ module:
     # 封禁时间，单位：毫秒，使用 default 则跟随全局设置
     ban-duration: 259200000
     # 是否允许执行从 BTN 服务器下发的 Aviator Script
-    allow-script-execute: true
+    allow-script-execute: false
   # 多拨封禁
   # Multi-dialing blocker
   multi-dialing-blocker:
