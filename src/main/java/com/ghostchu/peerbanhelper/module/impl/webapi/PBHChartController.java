@@ -116,8 +116,8 @@ public class PBHChartController extends AbstractFeatureModule {
                 .and()
                 .le("banAt", new SelectArg(timeQueryModel.endAt()));
         if (downloader != null && !downloader.isBlank()) {
-            queryConnected.and().eq("downloader", downloader);
-            queryBanned.and().eq("downloader", downloader);
+            queryConnected.and().eq("downloader", new SelectArg(downloader));
+            queryBanned.and().eq("downloader", new SelectArg( downloader));
         }
         try (var it = queryConnected.iterator()) {
             while (it.hasNext()) {
