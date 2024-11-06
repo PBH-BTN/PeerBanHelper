@@ -102,6 +102,13 @@ public class PBHGeneralController extends AbstractFeatureModule {
     }
 
     private void handleHeapDump(Context context) throws IOException {
+        if(!webContainer.isContextAuthorized(context)){
+            webContainer.markLoginFailed(userIp(context));
+            context.status(HttpStatus.UNAUTHORIZED);
+            context.json(new StdResp(false, tl(locale(context), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
+            return;
+        }
+        webContainer.markLoginSuccess(userIp(context));
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
                 server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
