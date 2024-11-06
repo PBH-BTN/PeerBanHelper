@@ -375,8 +375,9 @@
           <a-typography-text v-else>{{ t('page.settings.tab.info.btn.enable') }}</a-typography-text>
         </div>
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.btn.status')">
-        <a-typography-text :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
+      <a-descriptions-item v-if="btnEnable?.data" :label="t('page.settings.tab.info.btn.status')">
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <a-typography-text v-else :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
           {{
             btnStatus?.data.configSuccess
               ? t('page.settings.tab.info.btn.status.success')
@@ -384,23 +385,38 @@
           }}
         </a-typography-text>
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.btn.status.configUrl')">
-        <a-typography-text code copyable>
+      <a-descriptions-item
+        v-if="btnEnable?.data"
+        :label="t('page.settings.tab.info.btn.status.configUrl')"
+      >
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <a-typography-text v-else code copyable>
           {{ btnStatus?.data.configUrl }}
         </a-typography-text>
       </a-descriptions-item>
-      <a-descriptions-item label="App ID">
-        <a-typography-text code copyable>
+      <a-descriptions-item v-if="btnEnable?.data" label="App ID">
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <a-typography-text v-else code copyable>
           {{ btnStatus?.data.appId }}
         </a-typography-text>
       </a-descriptions-item>
-      <a-descriptions-item label="App Secret">
-        {{ btnStatus?.data.appSecret }}
+      <a-descriptions-item v-if="btnEnable?.data" label="App Secret">
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <div v-else>
+          {{ btnStatus?.data.appSecret }}
+        </div>
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.btn.abilities')">
-        <a-space size="mini">
-          {{ btnStatus?.data.abilities.length ?? 0
-          }}{{ t('page.settings.tab.info.btn.abilities.enable') }}
+      <a-descriptions-item
+        v-if="btnEnable?.data"
+        :label="t('page.settings.tab.info.btn.abilities')"
+      >
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <a-space v-else size="mini">
+          {{
+            t('page.settings.tab.info.btn.abilities.enable', {
+              number: btnStatus?.data.abilities.length ?? 0
+            })
+          }}
           <a-button
             shape="circle"
             type="text"
@@ -497,9 +513,11 @@ const { data: btnEnable } = useRequest(CheckModuleEnable, {
   onSuccess: () => (btnLoading.value = false)
 })
 
-const { data: btnStatus } = useRequest(GetBtnStatus, {
+const { data: btnStatus, loading: statusLoading } = useRequest(GetBtnStatus, {
   ready: computed(() => btnEnable.value?.data ?? false)
 })
+
+const btnStatusLoading = computed(() => statusLoading || btnLoading.value)
 
 const btnAbilityList = ref<InstanceType<typeof btnAbilitiesModal>>()
 

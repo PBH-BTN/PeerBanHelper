@@ -56,10 +56,10 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import type { Ability } from '@/api/model/status';
-import markdownit from 'markdown-it';
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import type { Ability } from '@/api/model/status'
+import markdownit from 'markdown-it'
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const md = new markdownit()
 
