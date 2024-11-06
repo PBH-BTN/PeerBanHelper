@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -116,7 +115,7 @@ public class ScriptEngine {
                     expression
             );
         } catch (Exception e) {
-            log.warn("Script Engine unable to compile the script: {}", fallbackName);
+            log.warn("Script Engine unable to compile the script: {}", fallbackName, e);
             return null;
         }
     }
