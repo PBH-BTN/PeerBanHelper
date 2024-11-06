@@ -46,8 +46,8 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             .maximumSize(3500)
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
-    private long dailyTrafficCapping;
     private final AlertManager alertManager;
+    private long dailyTrafficCapping;
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
 
@@ -117,7 +117,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
-        this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily");
+        this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily", -1);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::writeJournal, 0, 1, TimeUnit.HOURS);
