@@ -116,7 +116,7 @@ const handleOk = async () => {
   }
   const result = await UpsertScript(form.name, content.value)
   if (result.success) {
-    Message.info(result.message)
+    Message.success(result.message)
     return true
   } else {
     Message.error(result.message)

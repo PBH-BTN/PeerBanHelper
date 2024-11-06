@@ -172,7 +172,7 @@ const detailDrawer = ref<InstanceType<typeof DetailDrawer>>()
 const handleDelete = async (id: string) => {
   const result = await DeleteScript(id)
   if (result.success) {
-    Message.info(result.message)
+    Message.success(result.message)
     refresh()
     return true
   } else {

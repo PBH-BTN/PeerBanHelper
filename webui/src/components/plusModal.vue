@@ -97,7 +97,7 @@ const submitKey = async (key: string) => {
   loading.value = true
   try {
     await endpointStore.setPlusKey(key)
-    Message.info({ content: t('plus.activeSuccess'), resetOnHover: true })
+    Message.success({ content: t('plus.activeSuccess'), resetOnHover: true })
   } catch (e: unknown) {
     if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
   } finally {
