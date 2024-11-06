@@ -121,7 +121,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
             return;
         }
         Files.write(readFile.toPath(), context.bodyAsBytes(), StandardOpenOption.CREATE);
-        context.json(new StdResp(true, "OK!", null));
+        context.json(new StdResp(true, tl(locale(context), Lang.EXPRESS_RULE_ENGINE_SAVED), null));
         reloadConfig();
     }
 
