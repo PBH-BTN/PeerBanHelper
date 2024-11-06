@@ -292,7 +292,6 @@ public class IPDB implements AutoCloseable {
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(userAgent)
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
