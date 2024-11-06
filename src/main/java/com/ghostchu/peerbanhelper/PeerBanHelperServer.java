@@ -27,7 +27,6 @@ import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -137,8 +136,6 @@ public class PeerBanHelperServer implements Reloadable {
     private AlertManager alertManager;
     @Autowired
     private BanListDao banListDao;
-    @Getter
-    private ScriptEngine scriptEngine;
 
     public PeerBanHelperServer() {
         reloadConfig();
