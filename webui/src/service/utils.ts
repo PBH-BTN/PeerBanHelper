@@ -17,6 +17,6 @@ export function getCommonHeader(withToken = true): Headers {
   headers.set('X-TimeZone', dayjs.tz.guess())
 
   // Token
-  if (withToken) headers.set('Authorization', `Bearer ${authToken}`)
+  if (import.meta.env.DEV && withToken) headers.set('Authorization', `Bearer ${authToken}`)
   return headers
 }
