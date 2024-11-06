@@ -369,7 +369,7 @@
       <a-descriptions-item :label="t('page.settings.tab.info.btn.module')">
         <a-skeleton-line v-if="btnLoading" :rows="1" />
         <div v-else>
-          <a-typography-text v-if="!btnEnable">{{
+          <a-typography-text v-if="!btnEnable?.data">{{
             t('page.settings.tab.info.btn.disable')
           }}</a-typography-text>
           <a-typography-text v-else>{{ t('page.settings.tab.info.btn.enable') }}</a-typography-text>
@@ -429,6 +429,7 @@
 <script setup lang="ts">
 import { OSType } from '@/api/model/status'
 import { genIconComponent } from '@/components/iconFont'
+import multiClick from '@/components/multiClick.vue'
 import {
   CheckModuleEnable,
   GetBtnStatus,
@@ -447,10 +448,9 @@ import { isIP } from 'is-ip'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-import multiClick from '@/components/multiClick.vue'
 
-import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
 import { Message } from '@arco-design/web-vue'
+import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
 
 dayjs.extend(RelativeTime)
 dayjs.extend(Duration)
