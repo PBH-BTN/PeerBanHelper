@@ -119,7 +119,7 @@ public class PBHChartController extends AbstractFeatureModule {
                 .le("banAt", timeQueryModel.endAt());
         if (downloader != null && !downloader.isBlank()) {
             queryConnected.and().eq("downloader", new SelectArg(downloader));
-            queryBanned.and().eq("downloader", new SelectArg( downloader));
+            queryBanned.and().eq("downloader", new SelectArg(downloader));
         }
         try (var it = queryConnected.iterator()) {
             while (it.hasNext()) {
@@ -185,6 +185,7 @@ public class PBHChartController extends AbstractFeatureModule {
                     public boolean hasNext() {
                         return bannedOnly ? itBanned.hasNext() : itConnected.hasNext();
                     }
+
                     @Override
                     public String next() {
                         return bannedOnly ? itBanned.next().getIp() : itConnected.next().getAddress();
