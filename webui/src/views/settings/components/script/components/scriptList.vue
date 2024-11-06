@@ -84,7 +84,7 @@
               class="edit-btn"
               shape="circle"
               type="text"
-              @click="() => detailDrawer?.viewDetail(record.id, false)"
+              @click="() => handleEdit(record.id)"
             >
               <template #icon>
                 <icon-edit />
@@ -197,6 +197,24 @@ const handleAddOne = () => {
   }
 
   detailDrawer.value?.viewDetail(undefined, true)
+}
+const handleEdit = (id: string) => {
+  if (!userStore.scriptWarningConfirm) {
+    Modal.warning({
+      title: t('page.settings.tab.script.warning'),
+      content: t('page.settings.tab.script.warning.description'),
+      hideCancel: false,
+      onOk: () => {
+        userStore.confirmScriptWarning()
+        detailDrawer.value?.viewDetail(id, false)
+      },
+      okText: t('page.settings.tab.script.warning.confirm'),
+      cancelText: t('page.settings.tab.script.warning.cancel')
+    })
+    return
+  }
+
+  detailDrawer.value?.viewDetail(id, false)
 }
 </script>
 <style scoped>
