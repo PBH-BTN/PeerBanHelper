@@ -18,7 +18,6 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.eventbus.Subscribe;
-import com.j256.ormlite.stmt.SelectArg;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -191,7 +190,7 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
             try {
                 var deleteBuilder = peerRecordDao.deleteBuilder();
                 var where = deleteBuilder.where()
-                        .lt("lastTimeSeen", new SelectArg(dataRetentionTime));
+                        .lt("lastTimeSeen", dataRetentionTime);
                 deleteBuilder.setWhere(where);
                 int deleted = deleteBuilder.delete();
                 log.info(tlUI(Lang.AMM_CLEANED_UP, deleted));

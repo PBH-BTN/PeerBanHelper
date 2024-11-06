@@ -47,7 +47,7 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
     public int deleteOldAlerts(Timestamp before) throws SQLException {
         var builder = deleteBuilder();
         builder.setWhere(
-                queryBuilder().where().lt("createAt", new SelectArg(before))
+                queryBuilder().where().lt("createAt",before)
                         .and()
                         .isNotNull("readAt")
         );
@@ -68,7 +68,7 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
     public void markAsRead(String identifier) throws SQLException {
         update(updateBuilder()
                 .updateColumnValue("identifier", new SelectArg(identifier))
-                .updateColumnValue("readAt",  new SelectArg(new Timestamp(System.currentTimeMillis())))
+                .updateColumnValue("readAt", new Timestamp(System.currentTimeMillis()))
                 .prepare());
     }
 }
