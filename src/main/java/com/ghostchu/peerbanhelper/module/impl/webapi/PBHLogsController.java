@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
@@ -88,9 +87,10 @@ public class PBHLogsController extends AbstractFeatureModule {
             }
             if (!webContainer.isContextAuthorized(ctx.getUpgradeCtx$javalin())) {
                 ctx.closeSession(WsCloseStatus.POLICY_VIOLATION, JsonUtil.standard().toJson(new StdResp(false, tlUI(Lang.WS_LOGS_STREAM_ACCESS_DENIED), null)));
-                webContainer.markLoginFailed(CommonUtil.userIp(ctx.getUpgradeCtx$javalin()));
+                webContainer.markLoginFailed(userIp(ctx.getUpgradeCtx$javalin()));
                 return;
             }
+            webContainer.markLoginSuccess(userIp(ctx.getUpgradeCtx$javalin()));
             ctx.enableAutomaticPings(15, TimeUnit.SECONDS);
             this.session.add(ctx);
             var offset = ctx.queryParam("offset");
