@@ -68,7 +68,7 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
     public void markAsRead(String identifier) throws SQLException {
         update(updateBuilder()
                 .updateColumnValue("identifier", new SelectArg(identifier))
-                .updateColumnValue("readAt", new Timestamp(System.currentTimeMillis()))
+                .updateColumnValue("readAt",  new SelectArg(new Timestamp(System.currentTimeMillis())))
                 .prepare());
     }
 }

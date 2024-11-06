@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.stmt.SelectArg;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,7 +45,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 .groupBy("ip")
                 .orderByRaw("count DESC");
         if (filter != null) {
-            builder.setWhere(builder.where().like("ip", filter + "%"));
+            builder.setWhere(builder.where().like("ip", new SelectArg(filter + "%")));
         }
         List<PeerBanCount> mapped;
         try (GenericRawResults<String[]> banLogs = builder
@@ -58,7 +59,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
         var countBuilder = queryBuilder()
                 .selectColumns("ip");
         if (filter != null) {
-            countBuilder.setWhere(countBuilder.where().like("ip", filter + "%"));
+            countBuilder.setWhere(countBuilder.where().like("ip", new SelectArg(filter + "%")));
         }
         return new Page<>(pageable, countBuilder.countOf("DISTINCT ip"), mapped);
     }
