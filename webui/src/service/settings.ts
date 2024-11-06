@@ -100,6 +100,6 @@ export async function GetHeapDumpFile() {
   await endpointStore.serverAvailable
 
   const url = new URL(urlJoin(endpointStore.endpoint, 'api/general/heapdump'), location.href)
-  url.searchParams.set('token', endpointStore.authToken)
+  if (import.meta.env.DEV) url.searchParams.set('token', endpointStore.authToken)
   return url
 }
