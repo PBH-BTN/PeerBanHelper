@@ -234,8 +234,12 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
                 env.put("kvStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
                 env.put("persistStorage", scriptStorageDao);
                 Object returns;
-                synchronized (script.expression()) {
+                if (script.threadSafe()) {
                     returns = script.expression().execute(env);
+                } else {
+                    synchronized (script.expression()) {
+                        returns = script.expression().execute(env);
+                    }
                 }
                 result = scriptEngine.handleResult(script, banDuration, returns);
             } catch (TimeoutException timeoutException) {
