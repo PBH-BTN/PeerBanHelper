@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ProgressCheatBlockerPersistEntity;
 import com.ghostchu.peerbanhelper.module.impl.rule.ProgressCheatBlocker;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.j256.ormlite.stmt.SelectArg;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,9 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
         if (address == null) return Collections.emptyList();
         List<ProgressCheatBlockerPersistEntity> entities = queryBuilder()
                 .where()
-                .eq("torrentId", client.getTorrentId())
+                .eq("torrentId", new SelectArg(client.getTorrentId()))
                 .and()
-                .ge("lastTimeSeen", after)
+                .ge("lastTimeSeen", new SelectArg(after))
                 .query();
         return entities.stream().filter(
                 entity -> address.contains(IPAddressUtil.getIPAddress(entity.getAddress()))
@@ -98,15 +99,15 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
     private ProgressCheatBlockerPersistEntity findExists(String ip, String torrentId) throws SQLException {
         return queryBuilder()
                 .where()
-                .eq("address", ip)
+                .eq("address", new SelectArg(ip))
                 .and()
-                .eq("torrentId", torrentId)
+                .eq("torrentId", new SelectArg(torrentId))
                 .queryForFirst();
     }
 
     public int cleanupDatabase(Timestamp timestamp) throws SQLException {
         var builder = deleteBuilder();
-        var where = builder.where().lt("lastTimeSeen", timestamp);
+        var where = builder.where().lt("lastTimeSeen", new SelectArg(timestamp));
         builder.setWhere(where);
         return builder.delete();
     }

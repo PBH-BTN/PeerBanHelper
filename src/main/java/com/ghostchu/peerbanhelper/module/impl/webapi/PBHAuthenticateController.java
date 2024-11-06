@@ -62,6 +62,7 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             throw new NeedInitException();
         }
+        // TODO 修复暴力破解防护
         LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
         if (loginRequest == null || !webContainer.getToken().equals(loginRequest.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);

@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -105,15 +106,15 @@ public class PBHChartController extends AbstractFeatureModule {
         var queryConnected = peerRecordDao.queryBuilder()
                 .selectColumns("id", "lastTimeSeen")
                 .where()
-                .ge("lastTimeSeen", timeQueryModel.startAt())
+                .ge("lastTimeSeen", new SelectArg(timeQueryModel.startAt()))
                 .and()
-                .le("lastTimeSeen", timeQueryModel.endAt());
+                .le("lastTimeSeen", new SelectArg(timeQueryModel.endAt()));
         var queryBanned = historyDao.queryBuilder()
                 .selectColumns("id", "banAt")
                 .where()
-                .ge("banAt", timeQueryModel.startAt())
+                .ge("banAt", new SelectArg(timeQueryModel.startAt()))
                 .and()
-                .le("banAt", timeQueryModel.endAt());
+                .le("banAt", new SelectArg(timeQueryModel.endAt()));
         if (downloader != null && !downloader.isBlank()) {
             queryConnected.and().eq("downloader", downloader);
             queryBanned.and().eq("downloader", downloader);
@@ -160,19 +161,19 @@ public class PBHChartController extends AbstractFeatureModule {
                 .distinct()
                 .selectColumns("id", "ip")
                 .where()
-                .ge("banAt", timeQueryModel.startAt())
+                .ge("banAt", new SelectArg(timeQueryModel.startAt()))
                 .and()
-                .le("banAt", timeQueryModel.endAt());
+                .le("banAt", new SelectArg(timeQueryModel.endAt()));
         var queryConnected = peerRecordDao.queryBuilder()
                 .distinct()
                 .selectColumns("id", "address")
                 .where()
-                .ge("lastTimeSeen", timeQueryModel.startAt())
+                .ge("lastTimeSeen", new SelectArg(timeQueryModel.startAt()))
                 .and()
-                .le("lastTimeSeen", timeQueryModel.endAt());
+                .le("lastTimeSeen", new SelectArg(timeQueryModel.endAt()));
         if (downloader != null && !downloader.isBlank()) {
-            queryBanned.and().eq("downloader", downloader);
-            queryConnected.and().eq("downloader", downloader);
+            queryBanned.and().eq("downloader", new SelectArg(downloader));
+            queryConnected.and().eq("downloader", new SelectArg(downloader));
         }
         try (var itBanned = queryBanned.iterator();
              var itConnected = queryConnected.iterator()) {

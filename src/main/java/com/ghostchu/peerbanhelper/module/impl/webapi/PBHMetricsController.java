@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -59,11 +60,11 @@ public class PBHMetricsController extends AbstractFeatureModule {
         var queryBanned = historyDao.queryBuilder()
                 .selectColumns("id", "banAt")
                 .where()
-                .ge("banAt", timeQueryModel.startAt())
+                .ge("banAt", new SelectArg(timeQueryModel.startAt()))
                 .and()
-                .le("banAt", timeQueryModel.endAt());
+                .le("banAt", new SelectArg(timeQueryModel.endAt()));
         if (downloader != null && !downloader.isBlank()) {
-            queryBanned.and().eq("downloader", downloader);
+            queryBanned.and().eq("downloader", new SelectArg(downloader));
         }
         try (var it = queryBanned.iterator()) {
             while (it.hasNext()) {
@@ -193,9 +194,9 @@ public class PBHMetricsController extends AbstractFeatureModule {
         try (var it = historyDao.queryBuilder()
                 .selectColumns("id", "banAt")
                 .where()
-                .ge("banAt", timeQueryModel.startAt())
+                .ge("banAt", new SelectArg(timeQueryModel.startAt()))
                 .and()
-                .le("banAt", timeQueryModel.endAt())
+                .le("banAt", new SelectArg(timeQueryModel.endAt()))
                 .iterator()) {
             while (it.hasNext()) {
                 var startOfDay = MiscUtil.getStartOfToday(it.next().getBanAt().getTime());
