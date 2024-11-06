@@ -172,6 +172,7 @@ public class TextManager implements Reloadable {
             pending.add("en_us");
             this.languageFilesManager.deploy("en_us", loadBuiltInFallback());
         }
+        this.languageFilesManager.fillMissing( loadBuiltInFallback());
         // Remember all available languages
         availableLanguages.addAll(pending);
 
