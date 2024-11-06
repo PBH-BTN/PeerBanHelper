@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -76,7 +78,12 @@ public class BtnAbilityRules extends AbstractBtnAbility {
 
     @Override
     public TranslationComponent getDescription() {
-        return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION);
+        return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION, btnRule.getVersion(), btnRule.size()
+                , btnRule.getIpRules().values().stream().mapToLong(IPMatcher::size).sum(),
+                btnRule.getPeerIdRules().values().stream().mapToLong(List::size).sum(),
+                btnRule.getClientNameRules().values().stream().mapToLong(List::size).sum(),
+                btnRule.getPortRules().values().stream().mapToLong(List::size).sum(),
+                btnRule.getScriptRules().size());
     }
 
     @Override

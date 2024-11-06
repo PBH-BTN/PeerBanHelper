@@ -29,7 +29,7 @@ public class BtnRuleParsed {
     private String version;
     private Map<String, List<Rule>> peerIdRules;
     private Map<String, List<Rule>> clientNameRules;
-    private Map<String, List<Rule>> ipRules;
+    private Map<String, IPMatcher> ipRules;
     private Map<String, List<Rule>> portRules;
     private Map<String, CompiledScript> scriptRules;
 
@@ -95,9 +95,9 @@ public class BtnRuleParsed {
     }
 
 
-    public Map<String, List<Rule>> parseIPRule(Map<String, List<String>> raw) {
-        Map<String, List<Rule>> rules = new HashMap<>();
-        raw.forEach((k, v) -> rules.put(k, List.of(new BtnRuleIpMatcher(version, k, k, v.stream().map(IPAddressUtil::getIPAddress).toList()))));
+    public Map<String, IPMatcher> parseIPRule(Map<String, List<String>> raw) {
+        Map<String, IPMatcher> rules = new HashMap<>();
+        raw.forEach((k, v) -> rules.put(k,new IPMatcher(version, k, v.stream().map(IPAddressUtil::getIPAddress).toList())));
         return rules;
     }
 
@@ -105,6 +105,15 @@ public class BtnRuleParsed {
         Map<String, List<Rule>> rules = new HashMap<>();
         raw.forEach((k, v) -> rules.put(k, RuleParser.parse(v)));
         return rules;
+    }
+
+    public long size(){
+        // check all categories and all value's collections's size
+        return peerIdRules.values().stream().mapToLong(List::size).sum() +
+                clientNameRules.values().stream().mapToLong(List::size).sum() +
+                ipRules.values().stream().mapToLong(IPMatcher::size).sum() +
+                portRules.values().stream().mapToLong(List::size).sum() +
+                scriptRules.size();
     }
 
     public static class BtnRuleIpMatcher extends IPMatcher {

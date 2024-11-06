@@ -422,7 +422,16 @@ ALERT_SNAPSHOT_DESCRIPTION: "非稳定版本的构建仅用于测试，且可能
 BTN_ABILITY_RECONFIGURE: "重新配置"
 BTN_ABILITY_RECONFIGURE_DESCRIPTION: "“重新配置” 能力允许 BTN 服务器通知 PeerBanHelper 在间隔一定时间后与 BTN 服务器联系，刷新使用的配置文件，以获取远程服务器的配置更改"
 BTN_ABILITY_RULES: "云端规则"
-BTN_ABILITY_RULES_DESCRIPTION: "“云端规则” 能力允许 BTN 服务器向 PeerBanHelper 定期提供由远程服务器生成的反吸血规则，作为本地反吸血规则的补充"
+BTN_ABILITY_RULES_DESCRIPTION: |
+  “云端规则” 能力允许 BTN 服务器向 PeerBanHelper 定期提供由远程服务器生成的反吸血规则，作为本地反吸血规则的补充。  
+  
+  规则版本：**{}**, 当前已加载 **{}** 条规则：
+  
+  * IP 规则: {} 条
+  * PeerID 规则: {} 条
+  * ClientName 规则: {} 条
+  * 端口规则: {} 条
+  * 云定义脚本: {} 个
 BTN_ABILITY_SUBMIT_BANS: "提交封禁列表"
 BTN_ABILITY_SUBMIT_BANS_DESCRIPTION: "“提交封禁列表” 能力允许 BTN 服务器定期接收 PeerBanHelper 的封禁列表和封禁时的数据快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。"
 BTN_ABILITY_SUBMIT_HISTORY: "提交历史记录"

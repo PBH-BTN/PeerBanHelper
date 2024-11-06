@@ -37,6 +37,10 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
         this.ips = tmp;
     }
 
+    public long size(){
+        return ips.size();
+    }
+
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         final IPAddress ip = IPAddressUtil.getIPAddress(content);
