@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.j256.ormlite.dao.GenericRawResults;
@@ -97,13 +98,13 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  ORDER BY
                                                  	ct DESC;
                 """;
-        sql =   sql.replace("%percent%", String.valueOf(percentFilter))
-                .replace("%downloader%", downloader == null ? "%" : downloader)
-                .replace("%fieldraw%", field);
-        if(substringLength != null){
-            sql = sql.replace("%field%", "SUBSTRING("+field+", 1, " + substringLength + ")");
-        }else{
-            sql = sql.replace("%field%", field);
+        sql = sql.replace("%percent%", String.valueOf(percentFilter))
+                .replace("%downloader%", downloader == null ? "%" : MsgUtil.escapeSql(downloader))
+                .replace("%fieldraw%", MsgUtil.escapeSql(field));
+        if (substringLength != null) {
+            sql = sql.replace("%field%", "SUBSTRING(" + MsgUtil.escapeSql(field) + ", 1, " + substringLength + ")");
+        } else {
+            sql = sql.replace("%field%", MsgUtil.escapeSql(field));
         }
         try (var resultSet = queryRaw(sql)) {
             for (String[] result : resultSet.getResults()) {
@@ -149,13 +150,13 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	ct DESC;
                 """;
 
-        sql =  sql.replace("%percent%", String.valueOf(percentFilter))
-                .replace("%downloader%", downloader == null ? "%" : downloader)
-                .replace("%fieldraw%", field);
-        if(substringLength != null){
-            sql = sql.replace("%field%", "SUBSTRING("+field+", 1, " + substringLength + ")");
-        }else{
-            sql = sql.replace("%field%", field);
+        sql = sql.replace("%percent%", String.valueOf(percentFilter))
+                .replace("%downloader%", downloader == null ? "%" : MsgUtil.escapeSql(downloader))
+                .replace("%fieldraw%", MsgUtil.escapeSql(field));
+        if (substringLength != null) {
+            sql = sql.replace("%field%", "SUBSTRING(" + MsgUtil.escapeSql(field) + ", 1, " + substringLength + ")");
+        } else {
+            sql = sql.replace("%field%", MsgUtil.escapeSql(field));
         }
         try (var resultSet = queryRaw(sql)) {
             for (String[] result : resultSet.getResults()) {
