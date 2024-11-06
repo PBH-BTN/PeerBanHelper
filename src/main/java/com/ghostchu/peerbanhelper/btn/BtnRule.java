@@ -22,4 +22,6 @@ public class BtnRule {
     private Map<String, List<String>> ipRules;
     @SerializedName("port")
     private Map<String, List<Integer>> portRules;
+    @SerializedName("script")
+    private Map<String, String> scriptRules;
 }

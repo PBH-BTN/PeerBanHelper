@@ -45,7 +45,7 @@
             </a-checkbox>
             <a-link
               :style="{ marginLeft: 'auto' }"
-              href="https://github.com/PBH-BTN/PeerBanHelper/wiki/%E5%A6%82%E4%BD%95%E9%87%8D%E7%BD%AEToken"
+              href="https://docs.pbh-btn.com/docs/network/http-server/#%E6%9B%B4%E6%94%B9-webui-token"
             >
               {{ t('login.form.forgetPassword') }}
             </a-link>

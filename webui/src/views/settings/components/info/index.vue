@@ -335,23 +335,25 @@
             {{ data?.data.jvm.runtime }}
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.runtime.heapMemory')">
-            <a-space style="display: flex; align-items: center">
-              <a-tooltip
-                :content="
-                  `${Math.round((1 - (data?.data.jvm.memory.heap.free ?? 0) / (data?.data.jvm.memory.heap.max ?? 1)) * 100)}% ` +
-                  t('page.settings.tab.info.system.memory.used')
-                "
-              >
-                <a-progress
-                  type="circle"
-                  size="mini"
-                  :status="heapMemoryProgressBarColor"
-                  :percent="heapMemoryStatus"
-                />
-              </a-tooltip>
-              {{ formatFileSize(data?.data.jvm.memory.heap.free ?? 0) }} &nbsp;
-              {{ t('page.settings.tab.info.system.memory.available') }}
-            </a-space>
+            <multiClick :required="5" :time-limit="3000" @multi-click="downloadHeap">
+              <a-space style="display: flex; align-items: center">
+                <a-tooltip
+                  :content="
+                    `${Math.round((1 - (data?.data.jvm.memory.heap.free ?? 0) / (data?.data.jvm.memory.heap.max ?? 1)) * 100)}% ` +
+                    t('page.settings.tab.info.system.memory.used')
+                  "
+                >
+                  <a-progress
+                    type="circle"
+                    size="mini"
+                    :status="heapMemoryProgressBarColor"
+                    :percent="heapMemoryStatus"
+                  />
+                </a-tooltip>
+                {{ formatFileSize(data?.data.jvm.memory.heap.free ?? 0) }} &nbsp;
+                {{ t('page.settings.tab.info.system.memory.available') }}
+              </a-space>
+            </multiClick>
           </a-descriptions-item>
         </a-descriptions>
       </template>
@@ -367,14 +369,15 @@
       <a-descriptions-item :label="t('page.settings.tab.info.btn.module')">
         <a-skeleton-line v-if="btnLoading" :rows="1" />
         <div v-else>
-          <a-typography-text v-if="!btnEnable">{{
+          <a-typography-text v-if="!btnEnable?.data">{{
             t('page.settings.tab.info.btn.disable')
           }}</a-typography-text>
           <a-typography-text v-else>{{ t('page.settings.tab.info.btn.enable') }}</a-typography-text>
         </div>
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.btn.status')">
-        <a-typography-text :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
+      <a-descriptions-item v-if="btnEnable?.data" :label="t('page.settings.tab.info.btn.status')">
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <a-typography-text v-else :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
           {{
             btnStatus?.data.configSuccess
               ? t('page.settings.tab.info.btn.status.success')
@@ -382,23 +385,38 @@
           }}
         </a-typography-text>
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.btn.status.configUrl')">
-        <a-typography-text code copyable>
+      <a-descriptions-item
+        v-if="btnEnable?.data"
+        :label="t('page.settings.tab.info.btn.status.configUrl')"
+      >
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <a-typography-text v-else code copyable>
           {{ btnStatus?.data.configUrl }}
         </a-typography-text>
       </a-descriptions-item>
-      <a-descriptions-item label="App ID">
-        <a-typography-text code copyable>
+      <a-descriptions-item v-if="btnEnable?.data" label="App ID">
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <a-typography-text v-else code copyable>
           {{ btnStatus?.data.appId }}
         </a-typography-text>
       </a-descriptions-item>
-      <a-descriptions-item label="App Secret">
-        {{ btnStatus?.data.appSecret }}
+      <a-descriptions-item v-if="btnEnable?.data" label="App Secret">
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <div v-else>
+          {{ btnStatus?.data.appSecret }}
+        </div>
       </a-descriptions-item>
-      <a-descriptions-item :label="t('page.settings.tab.info.btn.abilities')">
-        <a-space size="mini">
-          {{ btnStatus?.data.abilities.length ?? 0
-          }}{{ t('page.settings.tab.info.btn.abilities.enable') }}
+      <a-descriptions-item
+        v-if="btnEnable?.data"
+        :label="t('page.settings.tab.info.btn.abilities')"
+      >
+        <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
+        <a-space v-else size="mini">
+          {{
+            t('page.settings.tab.info.btn.abilities.enable', {
+              number: btnStatus?.data.abilities.length ?? 0
+            })
+          }}
           <a-button
             shape="circle"
             type="text"
@@ -427,7 +445,13 @@
 <script setup lang="ts">
 import { OSType } from '@/api/model/status'
 import { genIconComponent } from '@/components/iconFont'
-import { CheckModuleEnable, GetBtnStatus, GetRunningInfo } from '@/service/settings'
+import multiClick from '@/components/multiClick.vue'
+import {
+  CheckModuleEnable,
+  GetBtnStatus,
+  GetHeapDumpFile,
+  GetRunningInfo
+} from '@/service/settings'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
@@ -441,6 +465,7 @@ import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 
+import { Message } from '@arco-design/web-vue'
 import btnAbilitiesModal from './components/btnAbilitiesModal.vue'
 
 dayjs.extend(RelativeTime)
@@ -488,9 +513,11 @@ const { data: btnEnable } = useRequest(CheckModuleEnable, {
   onSuccess: () => (btnLoading.value = false)
 })
 
-const { data: btnStatus } = useRequest(GetBtnStatus, {
+const { data: btnStatus, loading: statusLoading } = useRequest(GetBtnStatus, {
   ready: computed(() => btnEnable.value?.data ?? false)
 })
+
+const btnStatusLoading = computed(() => statusLoading || btnLoading.value)
 
 const btnAbilityList = ref<InstanceType<typeof btnAbilitiesModal>>()
 
@@ -518,6 +545,16 @@ const osLogo = {
 }
 
 const showLog = ref(false)
+
+const downloadHeap = async () => {
+  Message.info(t('page.settings.tab.info.downloadHeap'))
+  const url = await GetHeapDumpFile()
+  const a = document.createElement('a')
+  a.href = url.toString()
+  a.target = '_blank'
+  a.download = 'heapdump.hprof.gz'
+  a.click()
+}
 </script>
 
 <style scoped>

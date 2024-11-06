@@ -7,16 +7,21 @@ import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityException;
 import com.ghostchu.peerbanhelper.btn.ability.BtnAbilityRules;
+import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.scriptengine.CompiledScript;
+import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.NullUtil;
+import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
@@ -26,6 +31,7 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.googlecode.aviator.exception.TimeoutException;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +40,15 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
@@ -54,6 +62,11 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     private JavalinWebContainer javalinWebContainer;
     @Autowired
     private BtnNetwork btnNetwork;
+    @Autowired
+    private ScriptEngine scriptEngine;
+    @Autowired
+    private ScriptStorageDao scriptStorageDao;
+
 
     @Override
     public @NotNull String getName() {
@@ -79,11 +92,17 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private void status(Context context) {
+        Map<String, Object> info = new HashMap<>();
         if (btnNetwork == null) {
+            info.put("configSuccess", false);
+            info.put("appId", "N/A");
+            info.put("appSecret", "N/A");
+            info.put("abilities", Collections.emptyList());
+            info.put("configUrl", tl(locale(context), Lang.BTN_SERVICES_NEED_RESTART));
             context.json(new StdResp(false, tl(locale(context), Lang.BTN_NOT_ENABLE_AND_REQUIRE_RESTART), null));
             return;
         }
-        Map<String, Object> info = new HashMap<>();
+
         info.put("configSuccess", btnNetwork.getConfigSuccess());
         var abilities = new ArrayList<>();
         for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {
@@ -155,7 +174,87 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         if (checkExceptionResult.action() == PeerAction.SKIP) {
             return checkExceptionResult;
         }
+        var scriptResult = checkScript(torrent, peer, downloader, ruleExecuteExecutor);
+        if (scriptResult.action() != PeerAction.NO_ACTION) {
+            return scriptResult;
+        }
         return checkShouldBan(torrent, peer, downloader, ruleExecuteExecutor);
+    }
+
+    private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
+        var abilityObject = manager.getAbilities().get(BtnAbilityRules.class);
+        if (abilityObject == null) {
+            return pass();
+        }
+        BtnAbilityRules exception = (BtnAbilityRules) abilityObject;
+        BtnRuleParsed rule = exception.getBtnRule();
+        if (rule == null) {
+            return pass();
+        }
+        if (isHandShaking(peer)) {
+            return handshaking();
+        }
+
+        List<Future<CheckResult>> futures = new ArrayList<>();
+        try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
+            for (var kvPair : rule.getScriptRules().entrySet()) {
+                futures.add(exec.submit(() -> runExpression(kvPair.getValue(), torrent, peer, downloader, ruleExecuteExecutor)));
+            }
+        }
+
+        CheckResult finalResult = pass();
+        for (Future<CheckResult> future : futures) {
+            try {
+                CheckResult result = future.get();
+                if (result.action() == PeerAction.SKIP) {
+                    return result; // Early exit on SKIP action
+                } else if (result.action() == PeerAction.BAN) {
+                    finalResult = result;
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Error executing script, skipping", e);
+            }
+        }
+
+        return finalResult;
+    }
+
+    public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+        return getCache().readCacheButWritePassOnly(this, script.hashCode() + peer.getCacheKey(), () -> {
+            CheckResult result;
+            try {
+                Map<String, Object> env = script.expression().newEnv();
+                env.put("torrent", torrent);
+                env.put("peer", peer);
+                env.put("downloader", downloader);
+                env.put("cacheable", new AtomicBoolean(false));
+                env.put("server", getServer());
+                env.put("moduleInstance", this);
+                env.put("btnNetwork", btnNetwork);
+                env.put("banDuration", banDuration);
+                env.put("kvStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
+                env.put("persistStorage", scriptStorageDao);
+                Object returns;
+                if (script.threadSafe()) {
+                    returns = script.expression().execute(env);
+                } else {
+                    synchronized (script.expression()) {
+                        returns = script.expression().execute(env);
+                    }
+                }
+                result = scriptEngine.handleResult(script, banDuration, returns);
+            } catch (TimeoutException timeoutException) {
+                return pass();
+            } catch (Exception ex) {
+                log.error(tlUI(Lang.RULE_ENGINE_ERROR, script.name()), ex);
+                return pass();
+            }
+            if (result != null && result.action() != PeerAction.NO_ACTION) {
+                return result;
+            } else {
+                return pass();
+            }
+        }, script.cacheable());
     }
 
     private @NotNull CheckResult checkShouldSkip(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
@@ -194,7 +293,6 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
 
     private @NotNull CheckResult checkShouldBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         var abilityObject = manager.getAbilities().get(BtnAbilityRules.class);
-        ;
         if (abilityObject == null) {
             return pass();
         }
@@ -303,9 +401,10 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
             pa = pa.toIPv4();
         }
         for (String category : rule.getIpRules().keySet()) {
-            RuleMatchResult matchResult = RuleParser.matchRule(rule.getIpRules().get(category), pa.toString());
-            if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()), new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
+            var ipMatcher = rule.getIpRules().get(category);
+            MatchResult matchResult = ipMatcher.match(pa.toString());
+            if (matchResult == MatchResult.TRUE) {
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, category), new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
             }
         }
         return null;

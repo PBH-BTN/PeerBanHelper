@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -116,11 +115,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             long t1 = System.currentTimeMillis();
             String ip = peer.getPeerAddress().getIp();
             List<IPBanResult> results = new ArrayList<>();
-            try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
-                ipBanMatchers.forEach(rule -> service.submit(() -> {
-                    results.add(new IPBanResult(rule.getRuleName(), rule.match(ip)));
-                }));
-            }
+            ipBanMatchers.forEach(rule-> results.add(new IPBanResult(rule.getRuleName(), rule.match(ip))));
             AtomicReference<IPBanResult> matchRule = new AtomicReference<>();
             boolean mr = results.stream().anyMatch(ipBanResult -> {
                 try {
@@ -181,15 +176,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     public StdResp updateRule(String locale, @NotNull ConfigurationSection rule, IPBanRuleUpdateType updateType) {
         AtomicReference<StdResp> result = new AtomicReference<>();
         String ruleId = rule.getName();
+        String name = rule.getString("name", ruleId);
+        if (name.contains(".")) {
+            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
+        }
         if (!rule.getBoolean("enabled", false)) {
             // 检查ipBanMatchers是否有对应的规则，有则删除
             ipBanMatchers.removeIf(ele -> ele.getRuleId().equals(ruleId));
             // 未启用跳过更新逻辑
             return new StdResp(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), null);
-        }
-        String name = rule.getString("name", ruleId);
-        if (name.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
         String url = rule.getString("url");
         if (null != url && url.startsWith("http")) {

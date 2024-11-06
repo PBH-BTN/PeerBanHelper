@@ -42,5 +42,6 @@ export default {
   'page.charts.tooltip.2048':
     "Because the chart is ugly when the icons are not aligned, I listened to Ghost_chu's suggestion and put a 2048 here",
   'page.charts.error.title': 'Failed to load chart',
-  'page.charts.error.refresh': 'Retry'
+  'page.charts.error.refresh': 'Retry',
+  'page.charts.all': 'All'
 }

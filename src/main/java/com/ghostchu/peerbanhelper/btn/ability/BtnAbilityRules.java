@@ -5,11 +5,13 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRule;
 import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
+import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -34,12 +37,14 @@ public class BtnAbilityRules extends AbstractBtnAbility {
     private final String endpoint;
     private final long randomInitialDelay;
     private final File btnCacheFile = new File(Main.getDataDirectory(), "btn.cache");
+    private final ScriptEngine scriptEngine;
     @Getter
     private BtnRuleParsed btnRule;
 
 
-    public BtnAbilityRules(BtnNetwork btnNetwork, JsonObject ability) {
+    public BtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability) {
         this.btnNetwork = btnNetwork;
+        this.scriptEngine = scriptEngine;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
@@ -55,7 +60,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
         } else {
             try {
                 BtnRule btnRule = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRule.class);
-                this.btnRule = new BtnRuleParsed(btnRule);
+                this.btnRule = new BtnRuleParsed(scriptEngine, btnRule);
             } catch (Throwable ignored) {
             }
         }
@@ -73,7 +78,12 @@ public class BtnAbilityRules extends AbstractBtnAbility {
 
     @Override
     public TranslationComponent getDescription() {
-        return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION);
+        return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION, btnRule.getVersion(), btnRule.size()
+                , btnRule.getIpRules().values().stream().mapToLong(IPMatcher::size).sum(),
+                btnRule.getPeerIdRules().values().stream().mapToLong(List::size).sum(),
+                btnRule.getClientNameRules().values().stream().mapToLong(List::size).sum(),
+                btnRule.getPortRules().values().stream().mapToLong(List::size).sum(),
+                btnRule.getScriptRules().size());
     }
 
     @Override
@@ -110,7 +120,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                     } else {
                         try {
                             BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
-                            this.btnRule = new BtnRuleParsed(btr);
+                            this.btnRule = new BtnRuleParsed(scriptEngine, btr);
                             Main.getEventBus().post(new BtnRuleUpdateEvent());
                             try {
                                 Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);

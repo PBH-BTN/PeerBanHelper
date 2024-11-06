@@ -68,16 +68,16 @@
   </a-card>
 </template>
 <script lang="ts" setup>
-import { use } from 'echarts/core'
-import { PieChart } from 'echarts/charts'
-import { TooltipComponent, LegendComponent } from 'echarts/components'
-import { SVGRenderer } from 'echarts/renderers'
-import { ref, reactive, watch, computed } from 'vue'
 import { getAnalysisDataByField } from '@/service/charts'
-import { useRequest } from 'vue-request'
-import VChart from 'vue-echarts'
 import { useDarkStore } from '@/stores/dark'
+import { PieChart } from 'echarts/charts'
+import { LegendComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+import { SVGRenderer } from 'echarts/renderers'
+import { computed, reactive, ref, watch } from 'vue'
+import VChart from 'vue-echarts'
 import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 
 const { t } = useI18n()
 
@@ -139,11 +139,15 @@ const chartOption = ref({
 })
 
 watch(option, (v) => {
-  run(v.field, v.enableThreshold)
+  run(v.field, v.enableThreshold, props.downloader)
 })
 
+const props = defineProps<{
+  downloader?: string
+}>()
+
 const { loading, run, refresh } = useRequest(getAnalysisDataByField, {
-  defaultParams: ['peerId', true],
+  defaultParams: ['peerId', true, props.downloader],
   onSuccess: (data) => {
     if (data.data) {
       const nonEmptyData = data.data.map((it) => {

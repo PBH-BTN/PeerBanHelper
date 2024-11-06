@@ -48,7 +48,7 @@ export default {
   'page.settings.tab.info.btn.status.fail': '配置文件获取失败',
   'page.settings.tab.info.btn.status.configUrl': '服务器地址',
   'page.settings.tab.info.btn.abilities': '能力列表',
-  'page.settings.tab.info.btn.abilities.enable': '个能力已启用',
+  'page.settings.tab.info.btn.abilities.enable': '{number}个能力已启用',
   'page.settings.tab.info.btn.abilities.tips':
     'BTN 服务端提供了多种能力，以下是当前服务器提供的能力列表：',
 
@@ -61,5 +61,7 @@ export default {
   'page.settings.tab.info.log.title': '日志',
   'page.settings.tab.info.log.enableAutoRefresh': '自动刷新',
   'page.settings.tab.info.log.hideBanWave': '隐藏来自 Ban Wave 的检查日志',
-  'page.settings.tab.info.log.showThread': '显示线程名'
+  'page.settings.tab.info.log.showThread': '显示线程名',
+
+  'page.settings.tab.info.downloadHeap': '开始下载堆转储文件，这需要一段时间'
 }

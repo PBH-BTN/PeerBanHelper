@@ -663,14 +663,17 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="64">
+    <windows name="Windows x64" id="38" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="64">
       <jreBundle installOnlyIfNecessary="true" />
     </windows>
-    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_windows_nojava_${compiler:sys.version}" architecture="64">
+    <windows name="Windows x64 NoJava" id="109" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="64">
       <jreBundle jreBundleSource="none" />
     </windows>
-    <windows name="Windows arm64" id="141" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="arm64">
+    <windows name="Windows arm64" id="141" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="arm64">
       <jreBundle installOnlyIfNecessary="true" />
+    </windows>
+    <windows name="Windows arm64 NoJava" id="112" mediaFileName="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}_nojava" architecture="arm64">
+      <jreBundle jreBundleSource="none" />
     </windows>
     <macosFolder name="macOS Folder" id="98" mediaFileName="${compiler:sys.shortName}_macos_${compiler:sys.jreBundleArch}_${compiler:sys.version}" architecture="universal" />
     <macosFolder name="macOS Folder NoJava" id="120" mediaFileName="${compiler:sys.shortName}_macos_nojava_${compiler:sys.version}" architecture="universal">

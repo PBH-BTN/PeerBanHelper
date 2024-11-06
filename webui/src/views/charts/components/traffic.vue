@@ -169,11 +169,14 @@ const chartOptions = ref({
 })
 
 watch(option, (v) => {
-  run(v.range[0], v.range[1])
+  run(v.range[0], v.range[1], props.downloader)
 })
+const props = defineProps<{
+  downloader?: string
+}>()
 
 const { loading, run, refresh, data } = useRequest(getTraffic, {
-  defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()],
+  defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), props.downloader],
   onSuccess: (data) => {
     if (data.data) {
       chartOptions.value.series[0].data = data.data.map((v) => [
