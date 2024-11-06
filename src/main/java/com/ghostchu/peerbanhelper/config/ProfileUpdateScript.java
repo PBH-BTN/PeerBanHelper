@@ -25,6 +25,12 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 23)
+    public void scriptExecuteSwitch() {
+        conf.set("module.btn.allow-script-execute", true);
+    }
+
+
     @UpdateScript(version = 22)
     public void workaroundForBadWebUI() {
         if(conf.getInt("module.auto-range-ban.ipv6") == 32) { // WebUI bug

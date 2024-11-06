@@ -66,6 +66,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     private ScriptEngine scriptEngine;
     @Autowired
     private ScriptStorageDao scriptStorageDao;
+    private boolean allowScript;
 
 
     @Override
@@ -156,6 +157,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
 
     public void reloadConfig() {
         this.banDuration = getConfig().getLong("ban-duration", 0);
+        this.allowScript = getConfig().getBoolean("allow-script-execute");
         getCache().invalidateAll();
     }
 
@@ -174,9 +176,11 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         if (checkExceptionResult.action() == PeerAction.SKIP) {
             return checkExceptionResult;
         }
-        var scriptResult = checkScript(torrent, peer, downloader, ruleExecuteExecutor);
-        if (scriptResult.action() != PeerAction.NO_ACTION) {
-            return scriptResult;
+        if(allowScript) {
+            var scriptResult = checkScript(torrent, peer, downloader, ruleExecuteExecutor);
+            if (scriptResult.action() != PeerAction.NO_ACTION) {
+                return scriptResult;
+            }
         }
         return checkShouldBan(torrent, peer, downloader, ruleExecuteExecutor);
     }
