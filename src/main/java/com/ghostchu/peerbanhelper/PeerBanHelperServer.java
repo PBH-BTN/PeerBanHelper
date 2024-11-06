@@ -238,7 +238,6 @@ public class PeerBanHelperServer implements Reloadable {
         registerFunctions(ActivationKeyUtil.class);
         registerFunctions(Pageable.class);
         registerFunctions(TextManager.class);
-        registerFunctions(Lang.class);
         registerFunctions(ExchangeMap.class);
         registerFunctions(Main.class);
     }
