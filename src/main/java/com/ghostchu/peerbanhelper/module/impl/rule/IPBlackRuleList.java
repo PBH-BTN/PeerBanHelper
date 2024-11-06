@@ -29,6 +29,7 @@ import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
+import com.j256.ormlite.stmt.SelectArg;
 import inet.ipaddr.IPAddress;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -350,7 +351,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             return null;
         }
 
-        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", ruleId).queryBuilder(), new Pageable(1, 1)).getResults();
+        var result = ruleSubLogsDao.queryByPaging(ruleSubLogsDao.queryBuilder().orderBy("id", false).where().eq("ruleId", new SelectArg(ruleId)).queryBuilder(), new Pageable(1, 1)).getResults();
         Optional<RuleSubLogEntity> first = result.isEmpty() ? Optional.empty() : Optional.of(result.getFirst());
         long lastUpdate = first.map(RuleSubLogEntity::getUpdateTime).orElse(0L);
         int count = first.map(RuleSubLogEntity::getCount).orElse(0);
@@ -399,7 +400,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     public Page<RuleSubLogEntity> queryRuleSubLogs(String ruleId, Pageable pageable) throws SQLException {
         var builder = ruleSubLogsDao.queryBuilder().orderBy("updateTime", false);
         if (ruleId != null) {
-            builder = builder.where().eq("ruleId", ruleId).queryBuilder();
+            builder = builder.where().eq("ruleId", new SelectArg(ruleId)).queryBuilder();
         }
         return ruleSubLogsDao.queryByPaging(builder, pageable);
     }
@@ -414,7 +415,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     public long countRuleSubLogs(String ruleId) throws SQLException {
         var builder = ruleSubLogsDao.queryBuilder();
         if (ruleId != null) {
-            builder = builder.where().eq("ruleId", ruleId).queryBuilder();
+            builder = builder.where().eq("ruleId", new SelectArg(ruleId)).queryBuilder();
         }
         return ruleSubLogsDao.countOf(builder.setCountOf(true).prepare());
     }

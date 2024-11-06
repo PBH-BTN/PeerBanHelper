@@ -61,7 +61,7 @@ public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
             return new Page<>(pageable.getPage(), pageable.getSize(), 0, Collections.emptyList());
         } else {
             where.and(fieldC);
-            var results = qb.offset(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).query();
+            var results = query(qb.offset(pageable.getZeroBasedPage() * pageable.getSize()).limit(pageable.getSize()).prepare());
             var ct = qb.countOf();
             return new Page<>(pageable, ct, results);
         }
