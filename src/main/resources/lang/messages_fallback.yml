@@ -112,7 +112,7 @@ LOAD_BANLIST_FROM_FILE: "[封禁] 已从保存的封禁列表缓存文件中恢�
 LOAD_BANLIST_FAIL: "[封禁] 加载封禁列表过程出现错误"
 GUI_MENU_PROGRAM: "程序"
 GUI_MENU_WEBUI: "WebUI"
-GUI_MENU_WEBUI_OPEN: "打开 WebUI..."
+GUI_MENU_WEBUI_OPEN: "打开并自动登录 WebUI..."
 GUI_MENU_ABOUT: "关于"
 GUI_MENU_QUIT: "退出"
 GUI_COPY_WEBUI_TOKEN: "复制 WebUI Token..."

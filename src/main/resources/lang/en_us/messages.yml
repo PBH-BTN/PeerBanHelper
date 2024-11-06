@@ -112,7 +112,7 @@ LOAD_BANLIST_FROM_FILE: "[Ban] Restored {} ban records from saved ban list cache
 LOAD_BANLIST_FAIL: "[Ban] Error loading ban list"
 GUI_MENU_PROGRAM: "Program"
 GUI_MENU_WEBUI: "WebUI"
-GUI_MENU_WEBUI_OPEN: "Open WebUI..."
+GUI_MENU_WEBUI_OPEN: "Open and automatic login WebUI..."
 GUI_MENU_ABOUT: "About"
 GUI_MENU_QUIT: "Quit"
 GUI_COPY_WEBUI_TOKEN: "Copy WebUI Token..."
