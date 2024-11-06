@@ -17,6 +17,7 @@ public class MsgUtil {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static String escapeSql(String sql){
+        if(sql == null) return null;
         return StringUtils.replace(sql, "'", "''");
     }
 
