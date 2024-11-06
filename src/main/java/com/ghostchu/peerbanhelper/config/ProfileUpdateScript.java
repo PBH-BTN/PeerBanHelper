@@ -27,7 +27,7 @@ public class ProfileUpdateScript {
 
     @UpdateScript(version = 23)
     public void scriptExecuteSwitch() {
-        conf.set("module.btn.allow-script-execute", true);
+        conf.set("module.btn.allow-script-execute", false);
     }
 
 
