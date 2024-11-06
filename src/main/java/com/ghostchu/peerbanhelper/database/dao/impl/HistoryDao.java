@@ -74,7 +74,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 SELECT
                                                  	%field% AS %fieldraw%,
                                                  	SUM( %field% ) AS ct,
-                                                 	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history WHERE downloader LIKE '%downloader%' ) AS percent ,
+                                                 	SUM( %field% ) * 1.0 / ( SELECT SUM( %field% ) FROM history WHERE downloader LIKE ? ) AS percent ,
                                                  	torrentName,
                                                  	torrentInfoHash,
                                                  	module
@@ -90,7 +90,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
                                                  		)
                                                  		INNER JOIN modules ON modules.id = rules.module_id\s
-                                                 	WHERE downloader LIKE '%downloader%'\s
+                                                 	WHERE downloader LIKE ?\s
                                                  	)\s
                                                  GROUP BY
                                                  	%field%\s
@@ -100,14 +100,15 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  	ct DESC;
                 """;
         sql = sql.replace("%percent%", String.valueOf(percentFilter))
-                .replace("%downloader%", downloader == null ? "%" : MsgUtil.escapeSql(downloader))
                 .replace("%fieldraw%", MsgUtil.escapeSql(field));
         if (substringLength != null) {
             sql = sql.replace("%field%", "SUBSTRING(" + MsgUtil.escapeSql(field) + ", 1, " + substringLength + ")");
         } else {
             sql = sql.replace("%field%", MsgUtil.escapeSql(field));
         }
-        try (var resultSet = queryRaw(sql)) {
+        try (var resultSet = queryRaw(sql,
+                downloader == null ? "%" : downloader,
+                downloader == null ? "%" : downloader)) {
             for (String[] result : resultSet.getResults()) {
                 results.add(new UniversalFieldNumResult(result[0], Long.parseLong(result[1]), Double.parseDouble(result[2])));
             }
@@ -125,7 +126,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 SELECT
                                                  	%field% AS %fieldraw%,
                                                  	COUNT( %field% ) AS ct,
-                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( * ) FROM history WHERE downloader LIKE '%downloader%' ) AS percent ,
+                                                 	COUNT( %field% ) * 1.0 / ( SELECT COUNT( * ) FROM history WHERE downloader LIKE ? ) AS percent ,
                                                  	torrentName,
                                                  	torrentInfoHash,
                                                  	module
@@ -141,7 +142,7 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                                                  			( ( history INNER JOIN torrents ON history.torrent_id = torrents.id ) INNER JOIN rules ON history.rule_id = rules.id )\s
                                                  		)
                                                  		INNER JOIN modules ON modules.id = rules.module_id\s
-                                                 	WHERE downloader LIKE '%downloader%'\s
+                                                 	WHERE downloader LIKE ?\s
                                                  	)\s
                                                  GROUP BY
                                                  	%field%\s
@@ -152,14 +153,15 @@ public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
                 """;
 
         sql = sql.replace("%percent%", String.valueOf(percentFilter))
-                .replace("%downloader%", downloader == null ? "%" : MsgUtil.escapeSql(downloader))
                 .replace("%fieldraw%", MsgUtil.escapeSql(field));
         if (substringLength != null) {
             sql = sql.replace("%field%", "SUBSTRING(" + MsgUtil.escapeSql(field) + ", 1, " + substringLength + ")");
         } else {
             sql = sql.replace("%field%", MsgUtil.escapeSql(field));
         }
-        try (var resultSet = queryRaw(sql)) {
+        try (var resultSet = queryRaw(sql,
+                downloader == null ? "%" : downloader,
+                downloader == null ? "%" : downloader)) {
             for (String[] result : resultSet.getResults()) {
                 results.add(new UniversalFieldNumResult(result[0], Long.parseLong(result[1]), Double.parseDouble(result[2])));
             }
