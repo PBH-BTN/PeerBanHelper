@@ -4,8 +4,6 @@
     :visible="visible"
     unmount-on-close
     :hide-cancel="!isNew"
-    @before-ok="handleOk"
-    @ok="visible = false"
     @cancel="handleCancel"
   >
     <template #title>
@@ -25,16 +23,37 @@
     >
       <a-spin />
     </div>
-    <a-space v-else direction="vertical" fill>
-      <editor v-model="content" :view-only="viewOnly" />
-      <a-form ref="formRef" :model="form" :disabled="!isNew">
-        <a-form-item field="name" :label="t('page.settings.tab.script.detail.form.name')" required>
-          <a-input v-model="form.name" style="width: 20rem">
-            <template #suffix> .av </template>
-          </a-input>
-        </a-form-item>
-      </a-form>
-    </a-space>
+    <editor v-else v-model="content" :view-only="viewOnly" />
+    <template #footer>
+      <a-space fill style="display: flex; justify-content: space-between">
+        <a-form ref="formRef" :model="form" :disabled="!isNew" auto-label-width>
+          <a-form-item
+            field="name"
+            :label="t('page.settings.tab.script.detail.form.name')"
+            required
+          >
+            <a-input v-model="form.name" style="width: 20rem">
+              <template #suffix> .av </template>
+            </a-input>
+          </a-form-item>
+        </a-form>
+        <a-space>
+          <a-button @click="handleCancel">
+            {{ t('page.settings.tab.script.detail.action.cancel') }}</a-button
+          >
+          <a-button
+            type="primary"
+            @click="
+              async () => {
+                if (await handleOk()) visible = false
+              }
+            "
+          >
+            {{ t('page.settings.tab.script.detail.action.ok') }}
+          </a-button>
+        </a-space>
+      </a-space>
+    </template>
   </a-drawer>
 </template>
 <script setup lang="ts">

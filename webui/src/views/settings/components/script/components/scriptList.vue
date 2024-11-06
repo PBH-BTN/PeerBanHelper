@@ -5,7 +5,7 @@
         {{ t('page.settings.tab.script.description') }}
       </a-typography-text>
       <a-space>
-        <a-button type="primary" @click="() => detailDrawer?.viewDetail(undefined, true)">
+        <a-button type="primary" @click="handleAddOne">
           <template #icon>
             <icon-plus-circle />
           </template>
@@ -84,7 +84,7 @@
               class="edit-btn"
               shape="circle"
               type="text"
-              @click="() => detailDrawer?.viewDetail(record.id, false)"
+              @click="() => handleEdit(record.id)"
             >
               <template #icon>
                 <icon-edit />
@@ -110,14 +110,16 @@
 </template>
 <script setup lang="ts">
 import { DeleteScript, GetScriptList } from '@/service/script'
+import { useUserStore } from '@/stores/userStore'
 import { getColor } from '@/utils/color'
-import { Message } from '@arco-design/web-vue'
+import { Message, Modal } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 import DetailDrawer from './detailDrawer.vue'
 const { t } = useI18n()
+const userStore = useUserStore()
 const columns = [
   {
     title: () => t('page.settings.tab.script.column.id'),
@@ -177,6 +179,42 @@ const handleDelete = async (id: string) => {
     Message.error(result.message)
     return false
   }
+}
+const handleAddOne = () => {
+  if (!userStore.scriptWarningConfirm) {
+    Modal.warning({
+      title: t('page.settings.tab.script.warning'),
+      content: t('page.settings.tab.script.warning.description'),
+      hideCancel: false,
+      onOk: () => {
+        userStore.confirmScriptWarning()
+        detailDrawer.value?.viewDetail(undefined, true)
+      },
+      okText: t('page.settings.tab.script.warning.confirm'),
+      cancelText: t('page.settings.tab.script.warning.cancel')
+    })
+    return
+  }
+
+  detailDrawer.value?.viewDetail(undefined, true)
+}
+const handleEdit = (id: string) => {
+  if (!userStore.scriptWarningConfirm) {
+    Modal.warning({
+      title: t('page.settings.tab.script.warning'),
+      content: t('page.settings.tab.script.warning.description'),
+      hideCancel: false,
+      onOk: () => {
+        userStore.confirmScriptWarning()
+        detailDrawer.value?.viewDetail(id, false)
+      },
+      okText: t('page.settings.tab.script.warning.confirm'),
+      cancelText: t('page.settings.tab.script.warning.cancel')
+    })
+    return
+  }
+
+  detailDrawer.value?.viewDetail(id, false)
 }
 </script>
 <style scoped>
