@@ -47,7 +47,7 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
     public int deleteOldAlerts(Timestamp before) throws SQLException {
         var builder = deleteBuilder();
         builder.setWhere(
-                queryBuilder().where().lt("createAt", before)
+                queryBuilder().where().lt("createAt", new SelectArg(before))
                         .and()
                         .isNotNull("readAt")
         );
