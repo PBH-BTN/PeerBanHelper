@@ -41,18 +41,18 @@ public class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String
         }
     }
 
-    public List<String> keys() {
+    public List<String> keys(long offset, long limit) {
         try {
-            return queryForAll().stream().map(ScriptStorageEntity::getKey).toList();
+            return queryBuilder().offset(offset).limit(limit).query().stream().map(ScriptStorageEntity::getKey).toList();
         } catch (SQLException e) {
             log.warn("Unable to get script storage keys", e);
             return List.of();
         }
     }
 
-    public List<String> values() {
+    public List<String> values(long offset, long limit) {
         try {
-            return queryForAll().stream().map(ScriptStorageEntity::getValue).toList();
+            return queryBuilder().offset(offset).limit(limit).query().stream().map(ScriptStorageEntity::getValue).toList();
         } catch (SQLException e) {
             log.warn("Unable to get script storage values", e);
             return List.of();
@@ -77,11 +77,11 @@ public class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String
         }
     }
 
-    public Map<String, String> entries(int offset, int limit) {
+    public Map<String, String> entries(long offset, long limit) {
         try {
             return queryBuilder()
-                    .offset(Long.valueOf(offset))
-                    .limit(Long.valueOf(limit))
+                    .offset(offset)
+                    .limit(limit)
                     .query()
                     .stream()
                     .collect(Collectors.toMap(
