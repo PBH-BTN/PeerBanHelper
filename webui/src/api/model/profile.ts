@@ -91,7 +91,6 @@ export interface AutoRangeBan {
 export interface Btn {
   enabled: boolean
   ban_duration: BanDuration
-  allow_script_execute: boolean
 }
 
 export interface MultiDialingBlocker {

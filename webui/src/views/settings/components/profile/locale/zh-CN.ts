@@ -124,12 +124,5 @@ export default {
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.enable': '开启流量告警',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
     '设置流量告警阈值，当超出阈值后将发送告警信息提醒您检查下载器状态',
-  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
-    '每日流量告警阈值',
-
-  'page.settings.tab.profile.module.btn.allowScript': '允许 BTN 服务器下发脚本',
-  'page.settings.tab.profile.module.btn.allowScript.warning':
-    '警告，这意味着远程服务器可以在你的设备上执行任意代码，请谨慎开启',
-  'page.settings.tab.profile.module.btn.allowScript.tips':
-    '打开此选项后将允许 PeerBanHelper 接收并执行来自 BTN 服务器的动态脚本，这有助于提高反吸血精确度和反吸血效果。'
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value': '每日流量告警阈值'
 }

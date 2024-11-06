@@ -48,6 +48,11 @@ export default {
   'page.settings.tab.config.btn.enableSubmit.modal.content2':
     '您的 Torrent 列表（包括：Torrent 种子摘要的二次不可逆哈希和 Torrent 大小），连接到您的 Torrent 的所有 Peers （包括：IP地址、端口号、PeerID、UserAgent（ClientName），Peer协议，Peer总下载量，Peer总上传量，Peer瞬时上传速度，Peer瞬时下载速度，Peer下载进度，以及您的下载器名称）',
   'page.settings.tab.config.btn.enableSubmit.modal.content3': '确定要开启提交吗？',
+  'page.settings.tab.config.btn.allowScript': '允许 BTN 服务器下发脚本',
+  'page.settings.tab.config.btn.allowScript.warning':
+    '警告，这意味着远程服务器可以在你的设备上执行任意代码，请谨慎开启',
+  'page.settings.tab.config.btn.allowScript.tips':
+    '打开此选项后将允许 PeerBanHelper 接收并执行来自 BTN 服务器的动态脚本，这有助于提高反吸血精确度和反吸血效果。',
 
   'page.settings.tab.config.ipDatabase.title': 'IP 数据库',
   'page.settings.tab.config.ipDatabase.autoUpdate': '启用自动更新',
