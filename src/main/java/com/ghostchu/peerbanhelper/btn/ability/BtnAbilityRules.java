@@ -78,12 +78,14 @@ public class BtnAbilityRules extends AbstractBtnAbility {
 
     @Override
     public TranslationComponent getDescription() {
-        return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION, btnRule.getVersion(), btnRule.size()
-                , btnRule.getIpRules().values().stream().mapToLong(IPMatcher::size).sum(),
+        return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION,
+                btnRule.getVersion(),
+                btnRule.size(),
+                btnRule.getIpRules().values().stream().mapToLong(IPMatcher::size).sum(),
                 btnRule.getPeerIdRules().values().stream().mapToLong(List::size).sum(),
                 btnRule.getClientNameRules().values().stream().mapToLong(List::size).sum(),
                 btnRule.getPortRules().values().stream().mapToLong(List::size).sum(),
-                btnRule.getScriptRules().size());
+                btnRule.getScriptRules().values().size());
     }
 
     @Override
