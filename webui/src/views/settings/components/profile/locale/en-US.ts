@@ -137,5 +137,9 @@ export default {
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
     'Set the traffic alert threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
-    'Daily traffic alert threshold'
+    'Daily traffic alert threshold',
+
+  'page.settings.tab.profile.module.btn.allowScript': 'Allow BTN server push scripts',
+  'page.settings.tab.profile.module.btn.allowScript.tips':
+    'Warning, this means that the remote server can execute any code on your computer, please enable with caution!'
 }

@@ -21,6 +21,17 @@
         ={{ formatMilliseconds(model.ban_duration) }}
       </template>
     </a-form-item>
+    <a-form-item
+      :label="t('page.settings.tab.profile.module.btn.allowScript')"
+      field="model.enabled"
+    >
+      <a-switch v-model="model.allow_script_execute" />
+      <template v-if="model.allow_script_execute" #extra>
+        <a-typography-text type="danger">
+          {{ t('page.settings.tab.profile.module.btn.allowScript.tips') }}
+        </a-typography-text></template
+      >
+    </a-form-item>
   </a-space>
 </template>
 <script setup lang="ts">
