@@ -25,10 +25,6 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
-    @UpdateScript(version = 23)
-    public void scriptExecuteSwitch() {
-        conf.set("module.btn.allow-script-execute", false);
-    }
 
 
     @UpdateScript(version = 22)

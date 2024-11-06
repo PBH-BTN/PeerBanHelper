@@ -37,6 +37,7 @@ public class BtnNetwork {
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     private final ScriptEngine scriptEngine;
+    private final boolean scriptExecute;
     @Getter
     private ScheduledExecutorService executeService = null;
     private String configUrl;
@@ -54,7 +55,7 @@ public class BtnNetwork {
     private PeerRecordDao peerRecordDao;
     private ModuleMatchCache moduleMatchCache;
 
-    public BtnNetwork(PeerBanHelperServer server, ScriptEngine scriptEngine, String userAgent, String configUrl, boolean submit, String appId, String appSecret, ModuleMatchCache moduleMatchCache) {
+    public BtnNetwork(PeerBanHelperServer server, ScriptEngine scriptEngine, String userAgent, String configUrl, boolean submit, String appId, String appSecret, ModuleMatchCache moduleMatchCache, boolean scriptExecute) {
         this.server = server;
         this.scriptEngine = scriptEngine;
         this.userAgent = userAgent;
@@ -63,6 +64,7 @@ public class BtnNetwork {
         this.appId = appId.trim();
         this.appSecret = appSecret.trim();
         this.moduleMatchCache = moduleMatchCache;
+        this.scriptExecute = scriptExecute;
         setupHttpClient();
         resetScheduler();
         checkIfNeedRetryConfig();
@@ -112,7 +114,7 @@ public class BtnNetwork {
 //                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));
 //            }
             if (ability.has("rules")) {
-                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject()));
+                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
             }
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));

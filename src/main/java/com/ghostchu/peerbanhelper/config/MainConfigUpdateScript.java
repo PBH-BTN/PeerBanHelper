@@ -29,6 +29,12 @@ public class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 23)
+    public void btnScriptExecuteSwitch() {
+        conf.set("btn.allow-script-execute", false);
+    }
+
+
     @UpdateScript(version = 22)
     public void miscChanges() {
         conf.set("privacy", null);

@@ -1,4 +1,4 @@
-config-version: 22
+config-version: 23
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -77,6 +77,11 @@ btn:
   # The BTN instance URL, you need find a BTN instance
   # By default, PBH-BTN official BTN instance will be used
   config-url: "https://sparkle.ghostchu.com/ping/config"
+  # 是否允许 PeerBanHelper 接收来自 BTN 服务器的 Aviator 脚本
+  # 请仅在受信任的 BTN 服务器上启用此功能，运行来自未知来源的脚本可能会导致设备遭到攻击
+  # Allow PeerBanHelper to receive Aviator script from BTN server
+  # Enable this option only on trusted BTN server, running script from unknown source may cause your device under attack
+  allow-script-execute: false
 # 封禁列表处理
 # PBH 能够除了调用 BT 客户端的封禁 API 外，还能够进行如下操作，以便适配更多其它客户端
 # Banlist invoker
