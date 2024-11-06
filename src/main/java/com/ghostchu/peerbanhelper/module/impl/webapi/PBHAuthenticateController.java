@@ -63,7 +63,6 @@ public class PBHAuthenticateController extends AbstractFeatureModule {
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             throw new NeedInitException();
         }
-        // TODO 修复暴力破解防护
 
         if(!webContainer.allowAttemptLogin(userIp(ctx))){
             throw new IPAddressBannedException();
