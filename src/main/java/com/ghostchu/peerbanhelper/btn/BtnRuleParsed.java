@@ -33,14 +33,14 @@ public class BtnRuleParsed {
     private Map<String, List<Rule>> portRules;
     private Map<String, CompiledScript> scriptRules;
 
-    public BtnRuleParsed(ScriptEngine scriptEngine, BtnRule btnRule) {
+    public BtnRuleParsed(ScriptEngine scriptEngine, BtnRule btnRule, boolean scriptExecute) {
         this.scriptEngine = scriptEngine;
         this.version = btnRule.getVersion();
         this.ipRules = parseIPRule(btnRule.getIpRules());
         this.portRules = parsePortRule(btnRule.getPortRules());
         this.peerIdRules = parseRule(btnRule.getPeerIdRules());
         this.clientNameRules = parseRule(btnRule.getClientNameRules());
-        this.scriptRules = compileScripts(btnRule.getScriptRules());
+        this.scriptRules = scriptExecute ? compileScripts(btnRule.getScriptRules()) : new HashMap<>();
     }
 
     private Map<String, CompiledScript> compileScripts(Map<String, String> scriptRules) {

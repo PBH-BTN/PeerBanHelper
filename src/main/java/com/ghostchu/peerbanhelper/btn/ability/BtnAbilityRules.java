@@ -38,16 +38,18 @@ public class BtnAbilityRules extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final File btnCacheFile = new File(Main.getDataDirectory(), "btn.cache");
     private final ScriptEngine scriptEngine;
+    private final boolean scriptExecute;
     @Getter
     private BtnRuleParsed btnRule;
 
 
-    public BtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability) {
+    public BtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
         this.btnNetwork = btnNetwork;
         this.scriptEngine = scriptEngine;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+        this.scriptExecute = scriptExecute;
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
     }
 
@@ -60,7 +62,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
         } else {
             try {
                 BtnRule btnRule = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRule.class);
-                this.btnRule = new BtnRuleParsed(scriptEngine, btnRule);
+                this.btnRule = new BtnRuleParsed(scriptEngine, btnRule, scriptExecute);
             } catch (Throwable ignored) {
             }
         }
@@ -122,7 +124,7 @@ public class BtnAbilityRules extends AbstractBtnAbility {
                     } else {
                         try {
                             BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
-                            this.btnRule = new BtnRuleParsed(scriptEngine, btr);
+                            this.btnRule = new BtnRuleParsed(scriptEngine, btr, scriptExecute);
                             Main.getEventBus().post(new BtnRuleUpdateEvent());
                             try {
                                 Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
