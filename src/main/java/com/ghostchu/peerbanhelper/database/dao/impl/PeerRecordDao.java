@@ -43,7 +43,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
 
     public Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, Timestamp afterThan) throws SQLException {
         var queryBuilder = queryBuilder().where()
-                .gt("lastTimeSeen", new SelectArg(afterThan))
+                .gt("lastTimeSeen", afterThan)
                 .or()
                 .isNull("lastTimeSeen")
                 .queryBuilder()
@@ -101,7 +101,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
         PeerRecordEntity existing = queryBuilder().where()
                 .eq("address", new SelectArg(data.getAddress()))
                 .and()
-                .eq("torrent_id", new SelectArg(data.getTorrent().getId()))
+                .eq("torrent_id", data.getTorrent().getId())
                 .and()
                 .eq("downloader", new SelectArg(data.getDownloader()))
                 .queryForFirst();

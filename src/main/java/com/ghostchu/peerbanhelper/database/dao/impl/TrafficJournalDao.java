@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.j256.ormlite.stmt.SelectArg;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -73,9 +74,9 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
     public List<TrafficData> getAllDownloadersOverallData(Timestamp start, Timestamp end) throws Exception {
         try (var results = queryBuilder().selectRaw("timestamp", "SUM(dataOverallUploaded) AS totalUploaded", "SUM(dataOverallDownloaded) AS totalDownloaded")
                 .where()
-                .ge("timestamp",new SelectArg( start.getTime()))
+                .ge("timestamp", start.getTime())
                 .and()
-                .le("timestamp",new SelectArg( end.getTime()))
+                .le("timestamp", end.getTime())
                 .queryBuilder()
                 .groupBy("timestamp")
                 .queryRaw()) {
@@ -86,11 +87,11 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
     public List<TrafficData> getSpecificDownloaderOverallData(String downloadName, Timestamp start, Timestamp end) throws Exception {
         try (var results = queryBuilder().selectRaw("timestamp", "SUM(dataOverallUploaded) AS totalUploaded", "SUM(dataOverallDownloaded) AS totalDownloaded")
                 .where()
-                .ge("timestamp", new SelectArg(start.getTime()))
+                .ge("timestamp", start.getTime())
                 .and()
-                .le("timestamp", new SelectArg(end.getTime()))
+                .le("timestamp", end.getTime())
                 .and()
-                .eq("downloader", new SelectArg(downloadName))
+                .eq("downloader", MsgUtil.escapeSql(downloadName))
                 .queryBuilder()
                 .groupBy("timestamp")
                 .queryRaw()) {
@@ -104,7 +105,7 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
             return null;
         }
         TrafficJournalEntity existing = queryBuilder().where()
-                .eq("timestamp", new SelectArg(data.getTimestamp()))
+                .eq("timestamp", data.getTimestamp())
                 .and()
                 .eq("downloader", new SelectArg(data.getDownloader())).queryBuilder().queryForFirst();
         if (existing == null) {

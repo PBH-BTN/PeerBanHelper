@@ -89,7 +89,6 @@ public class HTTPUtil {
         Methanol.Builder builder = Methanol
                 .newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))

@@ -60,7 +60,6 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         Methanol.Builder builder = Methanol
                 .newBuilder()
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))

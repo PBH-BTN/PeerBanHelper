@@ -112,12 +112,12 @@ public class PBHTorrentController extends AbstractFeatureModule {
         for (TorrentEntity result : torrentEntityPage.getResults()) {
             var peerBanCount = historyDao.queryBuilder()
                     .where()
-                    .eq("torrent_id", new SelectArg(result.getId()))
+                    .eq("torrent_id", result.getId())
                     .countOf();
             var peerAccessCount = peerRecordDao.queryBuilder()
                     .orderBy("lastTimeSeen", false)
                     .where()
-                    .eq("torrent_id", new SelectArg(result.getId()))
+                    .eq("torrent_id", result.getId())
                     .countOf();
             infoList.add(new TorrentInfo(result.getInfoHash(), result.getName(), result.getSize(), peerBanCount, peerAccessCount));
         }
@@ -135,12 +135,12 @@ public class PBHTorrentController extends AbstractFeatureModule {
         var t = torrent.get();
         var peerBanCount = historyDao.queryBuilder()
                 .where()
-                .eq("torrent_id", new SelectArg(t.getId()))
+                .eq("torrent_id",t.getId())
                 .countOf();
         var peerAccessCount = peerRecordDao.queryBuilder()
                 .orderBy("lastTimeSeen", false)
                 .where()
-                .eq("torrent_id", new SelectArg(t.getId()))
+                .eq("torrent_id", t.getId())
                 .countOf();
 
         ctx.json(new StdResp(true, null, new TorrentInfo(t.getInfoHash(),
@@ -158,7 +158,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
         Pageable pageable = new Pageable(ctx);
         var t = torrent.get();
         var queryBuilder = peerRecordDao.queryBuilder().orderBy("lastTimeSeen", false);
-        var queryWhere = queryBuilder.where().eq("torrent_id", new SelectArg(t));
+        var queryWhere = queryBuilder.where().eq("torrent_id", t);
         queryBuilder.setWhere(queryWhere);
         Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);
         ctx.json(new StdResp(true, null, page));

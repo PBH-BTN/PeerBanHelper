@@ -33,7 +33,7 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
                 .where()
                 .eq("torrentId", new SelectArg(client.getTorrentId()))
                 .and()
-                .ge("lastTimeSeen", new SelectArg(after))
+                .ge("lastTimeSeen", after)
                 .query();
         return entities.stream().filter(
                 entity -> address.contains(IPAddressUtil.getIPAddress(entity.getAddress()))
@@ -107,7 +107,7 @@ public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheat
 
     public int cleanupDatabase(Timestamp timestamp) throws SQLException {
         var builder = deleteBuilder();
-        var where = builder.where().lt("lastTimeSeen", new SelectArg(timestamp));
+        var where = builder.where().lt("lastTimeSeen", timestamp);
         builder.setWhere(where);
         return builder.delete();
     }

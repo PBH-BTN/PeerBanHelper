@@ -60,9 +60,9 @@ public class PBHMetricsController extends AbstractFeatureModule {
         var queryBanned = historyDao.queryBuilder()
                 .selectColumns("id", "banAt")
                 .where()
-                .ge("banAt", new SelectArg(timeQueryModel.startAt()))
+                .ge("banAt", timeQueryModel.startAt())
                 .and()
-                .le("banAt", new SelectArg(timeQueryModel.endAt()));
+                .le("banAt", timeQueryModel.endAt());
         if (downloader != null && !downloader.isBlank()) {
             queryBanned.and().eq("downloader", new SelectArg(downloader));
         }
@@ -73,9 +73,9 @@ public class PBHMetricsController extends AbstractFeatureModule {
             }
         }
         ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream()
-                        .map((e) -> new PBHChartController.SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparingLong(PBHChartController.SimpleLongIntKV::key))
-                        .toList()
+                .map((e) -> new PBHChartController.SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
+                .sorted(Comparator.comparingLong(PBHChartController.SimpleLongIntKV::key))
+                .toList()
         ));
     }
 
@@ -87,8 +87,8 @@ public class PBHMetricsController extends AbstractFeatureModule {
         if (field == null) {
             throw new IllegalArgumentException("startAt cannot be null");
         }
-        if(field.equalsIgnoreCase("banAt")){
-            if("day".equals(type)){
+        if (field.equalsIgnoreCase("banAt")) {
+            if ("day".equals(type)) {
                 // 劫持单独处理以加快首屏请求
                 handlePeerBans(ctx);
                 return;
@@ -176,7 +176,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         double filter = Double.parseDouble(Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0"));
         String downloader = ctx.queryParam("downloader");
         Integer substringLength = null;
-        if("peerId".equalsIgnoreCase(field)){
+        if ("peerId".equalsIgnoreCase(field)) {
             substringLength = 8;
         }
         List<HistoryDao.UniversalFieldNumResult> results = switch (type) {
@@ -194,16 +194,16 @@ public class PBHMetricsController extends AbstractFeatureModule {
         try (var it = historyDao.queryBuilder()
                 .selectColumns("id", "banAt")
                 .where()
-                .ge("banAt", new SelectArg(timeQueryModel.startAt()))
+                .ge("banAt", timeQueryModel.startAt())
                 .and()
-                .le("banAt", new SelectArg(timeQueryModel.endAt()))
+                .le("banAt", timeQueryModel.endAt())
                 .iterator()) {
             while (it.hasNext()) {
                 var startOfDay = MiscUtil.getStartOfToday(it.next().getBanAt().getTime());
                 bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
             }
         }
-        ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e)-> new HistoryDao.UniversalFieldDateResult(e.getKey(), e.getValue().intValue() , 0)).toList()));
+        ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e) -> new HistoryDao.UniversalFieldDateResult(e.getKey(), e.getValue().intValue(), 0)).toList()));
     }
 
     private void handleBasicCounter(Context ctx) {

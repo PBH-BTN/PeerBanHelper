@@ -86,7 +86,9 @@ public class PBHChartController extends AbstractFeatureModule {
     private void handleTrafficClassic(Context ctx) throws Exception {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
-        var records = trafficJournalDao.getDayOffsetData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt(), d -> fixTimezone(ctx, d));
+        var records = trafficJournalDao.getDayOffsetData(downloader,
+                timeQueryModel.startAt(),
+                timeQueryModel.endAt(), d -> fixTimezone(ctx, d));
         ctx.json(new StdResp(true, null, records));
     }
 
@@ -106,18 +108,18 @@ public class PBHChartController extends AbstractFeatureModule {
         var queryConnected = peerRecordDao.queryBuilder()
                 .selectColumns("id", "lastTimeSeen")
                 .where()
-                .ge("lastTimeSeen", new SelectArg(timeQueryModel.startAt()))
+                .ge("lastTimeSeen", timeQueryModel.startAt())
                 .and()
-                .le("lastTimeSeen", new SelectArg(timeQueryModel.endAt()));
+                .le("lastTimeSeen", timeQueryModel.endAt());
         var queryBanned = historyDao.queryBuilder()
                 .selectColumns("id", "banAt")
                 .where()
-                .ge("banAt", new SelectArg(timeQueryModel.startAt()))
+                .ge("banAt", timeQueryModel.startAt())
                 .and()
-                .le("banAt", new SelectArg(timeQueryModel.endAt()));
+                .le("banAt", timeQueryModel.endAt());
         if (downloader != null && !downloader.isBlank()) {
             queryConnected.and().eq("downloader", new SelectArg(downloader));
-            queryBanned.and().eq("downloader", new SelectArg( downloader));
+            queryBanned.and().eq("downloader", new SelectArg(downloader));
         }
         try (var it = queryConnected.iterator()) {
             while (it.hasNext()) {
@@ -161,16 +163,16 @@ public class PBHChartController extends AbstractFeatureModule {
                 .distinct()
                 .selectColumns("id", "ip")
                 .where()
-                .ge("banAt", new SelectArg(timeQueryModel.startAt()))
+                .ge("banAt", timeQueryModel.startAt())
                 .and()
-                .le("banAt", new SelectArg(timeQueryModel.endAt()));
+                .le("banAt", timeQueryModel.endAt());
         var queryConnected = peerRecordDao.queryBuilder()
                 .distinct()
                 .selectColumns("id", "address")
                 .where()
-                .ge("lastTimeSeen", new SelectArg(timeQueryModel.startAt()))
+                .ge("lastTimeSeen", timeQueryModel.startAt())
                 .and()
-                .le("lastTimeSeen", new SelectArg(timeQueryModel.endAt()));
+                .le("lastTimeSeen", timeQueryModel.endAt());
         if (downloader != null && !downloader.isBlank()) {
             queryBanned.and().eq("downloader", new SelectArg(downloader));
             queryConnected.and().eq("downloader", new SelectArg(downloader));
@@ -183,6 +185,7 @@ public class PBHChartController extends AbstractFeatureModule {
                     public boolean hasNext() {
                         return bannedOnly ? itBanned.hasNext() : itConnected.hasNext();
                     }
+
                     @Override
                     public String next() {
                         return bannedOnly ? itBanned.next().getIp() : itConnected.next().getAddress();
