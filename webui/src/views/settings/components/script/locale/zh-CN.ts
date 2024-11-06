@@ -1,7 +1,7 @@
 export default {
   'page.settings.tab.script.disable': '功能在设置中被禁用',
   'page.settings.tab.script.description':
-    '你可以在这里编辑自定义脚本，这些脚本将在封禁的过程中执行。',
+    '你可以在这里管理自定义脚本，这些脚本将在封禁的过程中执行。',
   'page.settings.tab.script.add': '新增脚本',
   'page.settings.tab.script.column.id': 'ID',
   'page.settings.tab.script.column.name': '名称',
@@ -20,5 +20,12 @@ export default {
   'page.settings.tab.script.detail.form.name': '脚本名称',
   'page.settings.tab.script.detail.loading': '正在加载编辑器，这可能需要一些时间...',
   'page.settings.tab.script.detail.failed': '无法加载编辑器',
-  'page.settings.tab.script.detail.failed.tips': '请检查网络连接或者刷新页面重试'
+  'page.settings.tab.script.detail.failed.tips': '请检查网络连接或者刷新页面重试',
+  'page.settings.tab.script.detail.action.ok': '确定',
+  'page.settings.tab.script.detail.action.cancel': '取消',
+  'page.settings.tab.script.warning': '安全警告',
+  'page.settings.tab.script.warning.description':
+    '请勿添加任何由陌生人发送给你的脚本！脚本拥有执行任意代码和程序的能力，这可能导致您的设备被黑客控制或攻击，添加任何脚本之前请三思而后行！',
+  'page.settings.tab.script.warning.confirm': '我已了解上述风险',
+  'page.settings.tab.script.warning.cancel': '不是现在'
 }
