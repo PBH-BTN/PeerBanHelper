@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -34,7 +33,10 @@ import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import javax.management.MBeanServer;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.nio.file.Files;
@@ -102,17 +104,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, false));
     }
 
-    private void handleHeapDump(Context context) throws IOException, IPAddressBannedException {
-        if(!webContainer.allowAttemptLogin(userIp(context))){
-            throw new IPAddressBannedException();
-        }
-        if(!webContainer.isContextAuthorized(context)){
-            webContainer.markLoginFailed(userIp(context));
-            context.status(HttpStatus.UNAUTHORIZED);
-            context.json(new StdResp(false, tl(locale(context), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
-            return;
-        }
-        webContainer.markLoginSuccess(userIp(context));
+    private void handleHeapDump(Context context) throws IOException {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
                 server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
