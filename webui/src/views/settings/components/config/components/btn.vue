@@ -28,6 +28,18 @@
       <a-form-item label="App Secret" field="btn.app_secret">
         <a-input-password v-model="model.app_secret" style="width: 400px" />
       </a-form-item>
+      <a-form-item
+        :label="t('page.settings.tab.config.btn.allowScript')"
+        :tooltip="t('page.settings.tab.config.btn.allowScript.tips')"
+        field="model.enabled"
+      >
+        <a-switch v-model="model.allow_script_execute" />
+        <template v-if="model.allow_script_execute" #extra>
+          <a-typography-text type="danger">
+            {{ t('page.settings.tab.config.btn.allowScript.warning') }}
+          </a-typography-text></template
+        >
+      </a-form-item>
     </div>
   </a-space>
 </template>

@@ -41,6 +41,7 @@ export interface Btn {
   app_id: string
   app_secret: string
   config_url: string
+  allow_script_execute: boolean
 }
 
 export interface BanlistInvoker {
