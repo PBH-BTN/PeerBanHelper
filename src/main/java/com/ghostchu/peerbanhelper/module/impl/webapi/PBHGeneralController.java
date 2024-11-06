@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -101,7 +102,10 @@ public class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(true, null, false));
     }
 
-    private void handleHeapDump(Context context) throws IOException {
+    private void handleHeapDump(Context context) throws IOException, IPAddressBannedException {
+        if(!webContainer.allowAttemptLogin(userIp(context))){
+            throw new IPAddressBannedException();
+        }
         if(!webContainer.isContextAuthorized(context)){
             webContainer.markLoginFailed(userIp(context));
             context.status(HttpStatus.UNAUTHORIZED);
