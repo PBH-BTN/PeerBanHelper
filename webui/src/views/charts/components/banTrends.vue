@@ -1,29 +1,38 @@
 <template>
-  <a-card hoverable :title="t('page.charts.title.trends')">
+  <a-card hoverable :title="t('page.charts.title.line')">
     <template #extra>
-      <a-form :model="option" auto-label-width>
-        <a-form-item field="range" :label="t('page.charts.options.days')" style="margin-bottom: 0">
-          <a-range-picker
-            v-model="option.range"
-            value-format="Date"
-            style="width: 275px"
-            :shortcuts="[
-              {
-                label: t('page.charts.options.shortcut.7days'),
-                value: () => [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
-              },
-              {
-                label: t('page.charts.options.shortcut.14days'),
-                value: () => [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
-              },
-              {
-                label: t('page.charts.options.shortcut.30days'),
-                value: () => [dayjs().startOf('day').add(-30, 'day').toDate(), new Date()]
-              }
-            ]"
-          />
-        </a-form-item>
-      </a-form>
+      <a-popover>
+        <a-link>{{ t('page.charts.options.more') }}</a-link>
+        <template #content>
+          <a-form :model="option">
+            <a-form-item
+              field="range"
+              :label="t('page.charts.options.days')"
+              label-col-flex="100px"
+            >
+              <a-range-picker
+                v-model="option.range"
+                show-time
+                value-format="Date"
+                :shortcuts="[
+                  {
+                    label: t('page.charts.options.shortcut.7days'),
+                    value: () => [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+                  },
+                  {
+                    label: t('page.charts.options.shortcut.14days'),
+                    value: () => [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
+                  },
+                  {
+                    label: t('page.charts.options.shortcut.30days'),
+                    value: () => [dayjs().startOf('day').add(-30, 'day').toDate(), new Date()]
+                  }
+                ]"
+              />
+            </a-form-item>
+          </a-form>
+        </template>
+      </a-popover>
     </template>
     <a-result
       v-if="err"
@@ -59,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getTrends } from '@/service/charts'
+import { getBanTrends } from '@/service/charts'
 import { useDarkStore } from '@/stores/dark'
 import dayjs from 'dayjs'
 import { LineChart } from 'echarts/charts'
@@ -70,24 +79,25 @@ import { computed, reactive, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-
-use([GridComponent, TooltipComponent, LineChart, SVGRenderer])
-
 const { t } = useI18n()
-
-const option = reactive({
-  range: [dayjs().startOf('day').add(-14, 'day').toDate(), new Date()]
-})
-
-const err = ref<Error>()
-
-const darkStore = useDarkStore()
 const loadingOptions = computed(() => ({
   text: t('page.charts.loading'),
   color: darkStore.isDark ? 'rgb(60, 126, 255)' : 'rgb(22, 93, 255)',
   textColor: darkStore.isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgb(29, 33, 41)',
   maskColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.4)'
 }))
+
+const darkStore = useDarkStore()
+const err = ref<Error>()
+
+use([TooltipComponent, LineChart, GridComponent, SVGRenderer])
+const props = defineProps<{
+  downloader?: string
+}>()
+
+const option = reactive({
+  range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
+})
 
 const chartOptions = ref({
   xAxis: {
@@ -104,20 +114,7 @@ const chartOptions = ref({
     {
       data: [] as [Date, number][],
       type: 'line',
-      color: '#A5A051',
-      areaStyle: {
-        color: '#A5A051'
-      },
-      name: t('page.charts.trends.options.peers')
-    },
-    {
-      data: [] as [Date, number][],
-      type: 'line',
-      color: '#DB4D6D',
-      areaStyle: {
-        color: '#DB4D6D'
-      },
-      name: t('page.charts.trends.options.bans')
+      name: t('page.charts.line.options.field')
     }
   ]
 })
@@ -125,23 +122,14 @@ const chartOptions = ref({
 watch(option, (v) => {
   run(v.range[0], v.range[1], props.downloader)
 })
-const props = defineProps<{
-  downloader?: string
-}>()
-const { loading, run, refresh } = useRequest(getTrends, {
+
+const { loading, run, refresh } = useRequest(getBanTrends, {
   defaultParams: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date(), props.downloader],
   onSuccess: (data) => {
     if (data.data) {
-      chartOptions.value.series[0].data = data.data.connectedPeersTrend
-        .sort((a, b) => a.key - b.key)
-        .map((it) => {
-          return [new Date(it.key), it.value]
-        })
-      chartOptions.value.series[1].data = data.data.bannedPeersTrend
-        .sort((a, b) => a.key - b.key)
-        .map((it) => {
-          return [new Date(it.key), it.value]
-        })
+      chartOptions.value.series[0].data = data.data
+        .sort((kv1, kv2) => kv1.key - kv2.key)
+        .map((kv) => [new Date(kv.key), kv.value])
     }
   },
   onError: (e) => {

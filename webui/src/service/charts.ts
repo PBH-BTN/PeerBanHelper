@@ -1,11 +1,5 @@
 import type { CommonResponse } from '@/api/model/common'
-import type {
-  AnalysisField,
-  GeoIP,
-  TimeStatisticItem,
-  Traffic,
-  Trends
-} from '@/api/model/statistic'
+import type { AnalysisField, BanTrends, GeoIP, Traffic, Trends } from '@/api/model/statistic'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -63,25 +57,22 @@ export async function getGeoIPData(
   })
 }
 
-export async function getTimebasedStaticsData(
+export async function getBanTrends(
   startAt: Date,
   endAt: Date,
-  type: 'day' | 'hour',
   downloader?: string
-): Promise<CommonResponse<TimeStatisticItem[]>> {
+): Promise<CommonResponse<BanTrends[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const query = new URLSearchParams({
     startAt: startAt.getTime().toString(),
-    endAt: endAt.getTime().toString(),
-    type,
-    field: 'banAt'
+    endAt: endAt.getTime().toString()
   })
   if (downloader) {
     query.append('downloader', downloader)
   }
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/statistic/analysis/date?` + query.toString()),
+    urlJoin(endpointStore.endpoint, `api/statistic/analysis/banTrends?` + query.toString()),
     location.href
   )
 

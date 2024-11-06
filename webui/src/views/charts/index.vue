@@ -11,7 +11,7 @@
         ]"
       >
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <banLine />
+          <banTrends />
         </a-col>
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
           <fieldPie />
@@ -46,7 +46,7 @@
         ]"
       >
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <banLine :downloader="downloader.name" />
+          <banTrends :downloader="downloader.name" />
         </a-col>
         <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
           <fieldPie :downloader="downloader.name" />
@@ -76,7 +76,7 @@ import { getDownloaders } from '@/service/downloaders'
 import ispPie from '@/views/charts/components/ispPie.vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-import banLine from './components/banLine.vue'
+import banTrends from './components/banTrends.vue'
 import fieldPie from './components/fieldPie.vue'
 import plusWarpper from './components/plusWarpper.vue'
 import traffic from './components/traffic.vue'

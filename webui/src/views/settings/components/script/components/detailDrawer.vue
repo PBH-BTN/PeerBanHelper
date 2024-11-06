@@ -31,6 +31,7 @@
             field="name"
             :label="t('page.settings.tab.script.detail.form.name')"
             required
+            style="margin-bottom: 0"
           >
             <a-input v-model="form.name" style="width: 20rem">
               <template #suffix> .av </template>

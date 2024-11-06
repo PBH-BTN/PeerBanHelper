@@ -20,6 +20,7 @@ export interface TimeStatisticItem {
   percent: number
 }
 
+export type BanTrends = KV<number, number>
 export interface Trends {
   connectedPeersTrend: KV<number, number>[]
   bannedPeersTrend: KV<number, number>[]
