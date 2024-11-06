@@ -18,10 +18,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class IPMatcher extends RuleMatcher<IPAddress> {
-    private DualIPv4v6Tries ips;
+    private DualIPv4v6Tries ips = new DualIPv4v6Tries();
 
     public IPMatcher(String ruleId, String ruleName, List<IPAddress> ruleData) {
         super(ruleId, ruleName, ruleData);
+        ruleData.forEach(ips::add);
     }
 
     /**
@@ -37,7 +38,7 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
         this.ips = tmp;
     }
 
-    public long size(){
+    public long size() {
         return ips.size();
     }
 
@@ -45,6 +46,9 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
     public @NotNull MatchResult match0(@NotNull String content) {
         final IPAddress ip = IPAddressUtil.getIPAddress(content);
         if (ip == null) return MatchResult.DEFAULT;
+        if (ips == null) {
+            return MatchResult.DEFAULT;
+        }
         if (ips.elementContains(ip)) {
             return MatchResult.TRUE;
         }
