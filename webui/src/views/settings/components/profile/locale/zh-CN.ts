@@ -128,6 +128,8 @@ export default {
     '每日流量告警阈值',
 
   'page.settings.tab.profile.module.btn.allowScript': '允许 BTN 服务器下发脚本',
+  'page.settings.tab.profile.module.btn.allowScript.warning':
+    '警告，这意味着远程服务器可以在你的设备上执行任意代码，请谨慎开启',
   'page.settings.tab.profile.module.btn.allowScript.tips':
-    '警告，这意味着远程服务器可以在你的计算机上执行任意代码，请谨慎开启'
+    '打开此选项后将允许 PeerBanHelper 接收并执行来自 BTN 服务器的动态脚本，这有助于提高反吸血精确度和反吸血效果。'
 }

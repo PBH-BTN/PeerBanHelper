@@ -140,6 +140,8 @@ export default {
     'Daily traffic alert threshold',
 
   'page.settings.tab.profile.module.btn.allowScript': 'Allow BTN server push scripts',
+  'page.settings.tab.profile.module.btn.allowScript.warning':
+    'Warning, this means that the remote server can execute any code on your device, please enable with caution!',
   'page.settings.tab.profile.module.btn.allowScript.tips':
-    'Warning, this means that the remote server can execute any code on your computer, please enable with caution!'
+    'This option will allow BTN server push scripts to your device, this may increase the accuracy of the ban'
 }
