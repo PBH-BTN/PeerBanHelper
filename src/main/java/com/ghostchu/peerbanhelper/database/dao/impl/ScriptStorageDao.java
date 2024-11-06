@@ -77,9 +77,21 @@ public class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String
         }
     }
 
-    public Map<String, String> entries() {
+    public Map<String, String> entries(int offset, int limit) {
         try {
-            return queryForAll().stream().collect(Collectors.toMap(ScriptStorageEntity::getKey, ScriptStorageEntity::getValue));
+            return queryBuilder()
+                    .offset(Long.valueOf(offset))
+                    .limit(Long.valueOf(limit))
+                    .query()
+                    .stream()
+                    .collect(Collectors.toMap(
+                        ScriptStorageEntity::getKey,
+                        ScriptStorageEntity::getValue,
+                        (existing, replacement) -> {
+                            log.warn("Duplicate key found: {}", existing);
+                            return replacement;
+                        }
+                    ));
         } catch (SQLException e) {
             log.warn("Unable to get script storage entries", e);
             return Map.of();
