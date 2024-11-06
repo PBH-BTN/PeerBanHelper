@@ -211,8 +211,6 @@ public class PeerBanHelperServer implements Reloadable {
         AviatorEvaluator.getInstance().setOption(Options.ENABLE_PROPERTY_SYNTAX_SUGAR, true);
 //        // 表达式允许序列化和反序列化
 //        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
-        // 用户规则写糊保护
-        AviatorEvaluator.getInstance().setOption(Options.MAX_LOOP_COUNT, 5000);
         // 启用反射方法查找
         AviatorEvaluator.getInstance().setFunctionMissing(JavaMethodReflectionFunctionMissing.getInstance());
         // 注册反射调用
