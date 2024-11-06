@@ -1,7 +1,7 @@
 <template>
-  <div @click="handleClick">
+  <button class="no-style-button" @click="handleClick">
     <slot />
-  </div>
+  </button>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
@@ -34,3 +34,19 @@ const handleClick = () => {
   }
 }
 </script>
+<style scoped>
+.no-style-button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border-radius: 0;
+  background-color: transparent;
+  line-height: normal;
+  cursor: default;
+}
+
+.no-style-button::after {
+  border: none;
+}
+</style>
