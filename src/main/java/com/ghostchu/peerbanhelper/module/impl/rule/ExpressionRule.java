@@ -85,6 +85,11 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     private void deleteScript(Context context) throws IOException {
+        if (!isSafeNetworkEnvironment(context)) {
+            context.status(HttpStatus.FORBIDDEN);
+            context.json(new StdResp(false, tl(locale(context), Lang.EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS, context.ip()), null));
+            return;
+        }
         var scriptId = context.pathParam("scriptId");
         File readFile = getIfAllowedScriptId(scriptId);
         if (readFile == null) {
