@@ -187,7 +187,7 @@ public final class QBittorrentTorrent implements Torrent {
 
     @Override
     public long getSize() {
-        return size;
+        return totalSize;
     }
 
     @Override
