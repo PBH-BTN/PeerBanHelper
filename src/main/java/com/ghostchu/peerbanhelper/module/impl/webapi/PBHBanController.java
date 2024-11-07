@@ -114,6 +114,7 @@ public class PBHBanController extends AbstractFeatureModule {
         var banResponseList = getServer().getBannedPeers()
                 .entrySet()
                 .stream()
+                .filter(b -> !b.getValue().isBanForDisconnect())
                 .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue())))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
