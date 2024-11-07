@@ -140,6 +140,9 @@ const chartOptions = ref({
     min: 'dataMin',
     minInterval: 3600 * 24 * 1000
   },
+  grid: {
+    left: '15%'
+  },
   yAxis: {
     type: 'value',
     axisLabel: {
