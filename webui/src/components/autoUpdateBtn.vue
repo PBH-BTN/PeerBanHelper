@@ -29,9 +29,9 @@
 </template>
 
 <script setup lang="ts">
-import { useAutoUpdate } from '@/stores/autoUpdate';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useAutoUpdate } from '@/stores/autoUpdate'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 const { t, d } = useI18n()
 const autoUpdate = useAutoUpdate()
 const autoUpdateBtn = ref()
