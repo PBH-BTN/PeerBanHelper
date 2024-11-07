@@ -110,6 +110,9 @@ const chartOptions = ref({
   tooltip: {
     trigger: 'axis'
   },
+  grid: {
+    left: '15%'
+  },
   series: [
     {
       data: [] as [Date, number][],

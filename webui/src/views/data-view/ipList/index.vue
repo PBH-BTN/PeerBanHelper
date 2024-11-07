@@ -13,7 +13,7 @@
         placeholder="192.168.1.1...."
         class="searchBox"
         :loading="loading"
-        @search="run"
+        @search="handleSearch"
       />
     </div>
     <div class="result-container center">
@@ -231,6 +231,11 @@ onMounted(() => {
     run(searchInput.value)
   }
 })
+const handleSearch = (value: string) => {
+  if (value) {
+    run(value)
+  }
+}
 </script>
 
 <style scoped>

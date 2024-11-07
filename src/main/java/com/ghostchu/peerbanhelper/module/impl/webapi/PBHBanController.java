@@ -100,7 +100,8 @@ public class PBHBanController extends AbstractFeatureModule {
     private void handleBans(Context ctx) {
         long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
         long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
-        var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit);
+        boolean ignoreBanForDisconnect = Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
+        var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit, ignoreBanForDisconnect);
         ctx.json(new StdResp(true, null, banResponseList.toList()));
     }
 
@@ -110,10 +111,14 @@ public class PBHBanController extends AbstractFeatureModule {
     }
 
 
-    private @NotNull Stream<BanResponse> getBanResponseStream(String locale, long lastBanTime, long limit) {
+    private @NotNull Stream<BanResponse> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect) {
         var banResponseList = getServer().getBannedPeers()
                 .entrySet()
                 .stream()
+                .filter(b -> {
+                    if(!ignoreBanForDisconnect) return true;
+                    return !b.getValue().isBanForDisconnect();
+                })
                 .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue())))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
