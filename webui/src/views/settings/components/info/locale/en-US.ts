@@ -62,6 +62,7 @@ export default {
   'page.settings.tab.info.log.enableAutoRefresh': 'Auto Refresh',
   'page.settings.tab.info.log.hideBanWave': 'Hide check logs from Ban Wave',
   'page.settings.tab.info.log.showThread': 'Show Thread Name',
+  'page.settings.tab.info.log.autoScorll': 'Auto Scroll to Latest',
 
   'page.settings.tab.info.downloadHeap':
     'Start downloading heap dump file, this will take some time'
