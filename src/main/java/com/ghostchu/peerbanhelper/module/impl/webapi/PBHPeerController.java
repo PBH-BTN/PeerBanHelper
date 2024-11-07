@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
@@ -85,7 +86,7 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .selectRaw("SUM(uploaded) as uploaded_total, SUM(downloaded) as downloaded_total")
                 .groupBy("address")
                 .where()
-                .eq("address", new SelectArg(ip))
+                .eq("address", MsgUtil.escapeSql(ip))
                 .queryRawFirst();
         if (upDownResult != null) {
             if (upDownResult.length == 2) {
