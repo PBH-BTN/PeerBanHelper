@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -63,7 +64,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
                 .and()
                 .le("banAt", timeQueryModel.endAt());
         if (downloader != null && !downloader.isBlank()) {
-            queryBanned.and().eq("downloader", downloader);
+            queryBanned.and().eq("downloader", new SelectArg(downloader));
         }
         try (var it = queryBanned.iterator()) {
             while (it.hasNext()) {
@@ -72,9 +73,9 @@ public class PBHMetricsController extends AbstractFeatureModule {
             }
         }
         ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream()
-                        .map((e) -> new PBHChartController.SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparingLong(PBHChartController.SimpleLongIntKV::key))
-                        .toList()
+                .map((e) -> new PBHChartController.SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
+                .sorted(Comparator.comparingLong(PBHChartController.SimpleLongIntKV::key))
+                .toList()
         ));
     }
 
@@ -86,8 +87,8 @@ public class PBHMetricsController extends AbstractFeatureModule {
         if (field == null) {
             throw new IllegalArgumentException("startAt cannot be null");
         }
-        if(field.equalsIgnoreCase("banAt")){
-            if("day".equals(type)){
+        if (field.equalsIgnoreCase("banAt")) {
+            if ("day".equals(type)) {
                 // 劫持单独处理以加快首屏请求
                 handlePeerBans(ctx);
                 return;
@@ -175,7 +176,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
         double filter = Double.parseDouble(Objects.requireNonNullElse(ctx.queryParam("filter"), "0.0"));
         String downloader = ctx.queryParam("downloader");
         Integer substringLength = null;
-        if("peerId".equalsIgnoreCase(field)){
+        if ("peerId".equalsIgnoreCase(field)) {
             substringLength = 8;
         }
         List<HistoryDao.UniversalFieldNumResult> results = switch (type) {
@@ -202,7 +203,7 @@ public class PBHMetricsController extends AbstractFeatureModule {
                 bannedPeerTrends.computeIfAbsent(startOfDay, k -> new AtomicInteger()).addAndGet(1);
             }
         }
-        ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e)-> new HistoryDao.UniversalFieldDateResult(e.getKey(), e.getValue().intValue() , 0)).toList()));
+        ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream().map((e) -> new HistoryDao.UniversalFieldDateResult(e.getKey(), e.getValue().intValue(), 0)).toList()));
     }
 
     private void handleBasicCounter(Context ctx) {

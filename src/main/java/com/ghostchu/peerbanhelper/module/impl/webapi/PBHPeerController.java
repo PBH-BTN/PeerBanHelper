@@ -7,12 +7,14 @@ import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -72,11 +74,11 @@ public class PBHPeerController extends AbstractFeatureModule {
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         long banCount = historyDao.queryBuilder()
                 .where()
-                .eq("ip", ip)
+                .eq("ip", new SelectArg(ip))
                 .countOf();
         long torrentAccessCount = peerRecordDao.queryBuilder()
                 .where()
-                .eq("address", ip)
+                .eq("address",new SelectArg( ip))
                 .countOf();
         long uploadedToPeer;
         long downloadedFromPeer;
@@ -84,7 +86,7 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .selectRaw("SUM(uploaded) as uploaded_total, SUM(downloaded) as downloaded_total")
                 .groupBy("address")
                 .where()
-                .eq("address", ip)
+                .eq("address", MsgUtil.escapeSql(ip))
                 .queryRawFirst();
         if (upDownResult != null) {
             if (upDownResult.length == 2) {
@@ -104,12 +106,12 @@ public class PBHPeerController extends AbstractFeatureModule {
         var firstTimeSeen = peerRecordDao.queryBuilder()
                 .orderBy("firstTimeSeen", true)
                 .where()
-                .eq("address", ip)
+                .eq("address", new SelectArg(ip))
                 .queryForFirst();
         var lastTimeSeen = peerRecordDao.queryBuilder()
                 .orderBy("lastTimeSeen", false)
                 .where()
-                .eq("address", ip)
+                .eq("address", new SelectArg(ip))
                 .queryForFirst();
         if (firstTimeSeen != null) {
             firstTimeSeenTS = new Timestamp(firstTimeSeen.getFirstTimeSeen().getTime()).getTime();
@@ -141,7 +143,7 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .orderBy("banAt", false);
         var where = builder
                 .where()
-                .eq("ip", ip);
+                .eq("ip", new SelectArg(ip));
         builder.setWhere(where);
         var queryResult = historyDao.queryByPaging(builder, pageable);
         var result = queryResult.getResults().stream().map(r -> new PBHBanController.BanLogResponse(locale(ctx), r)).toList();
@@ -157,7 +159,7 @@ public class PBHPeerController extends AbstractFeatureModule {
                 .orderBy("lastTimeSeen", false);
         var where = builder
                 .where()
-                .eq("address", ip);
+                .eq("address", new SelectArg(ip));
         builder.setWhere(where);
         ctx.json(new StdResp(true, null, peerRecordDao.queryByPaging(builder, pageable)));
     }

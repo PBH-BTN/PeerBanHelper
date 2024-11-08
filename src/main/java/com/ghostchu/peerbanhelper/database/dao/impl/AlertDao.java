@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.j256.ormlite.stmt.SelectArg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,23 +31,23 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
 
 
     public boolean identifierAlertExists(String identifier) throws SQLException {
-        return queryBuilder().where()
-                       .eq("identifier", identifier).and()
-                       .isNull("readAt")
-                       .queryForFirst() != null;
+        return queryForFirst(queryBuilder().where()
+                .eq("identifier", new SelectArg(identifier)).and()
+                .isNull("readAt")
+                .prepare()) != null;
     }
 
     public boolean identifierAlertExistsIncludeRead(String identifier) throws SQLException {
-        return queryBuilder().where()
-                       .eq("identifier", identifier)
-                       .queryForFirst() != null;
+        return queryForFirst(queryBuilder().where()
+                .eq("identifier", new SelectArg(identifier))
+                .prepare()) != null;
     }
 
 
     public int deleteOldAlerts(Timestamp before) throws SQLException {
         var builder = deleteBuilder();
         builder.setWhere(
-                queryBuilder().where().lt("createAt", before)
+                queryBuilder().where().lt("createAt",before)
                         .and()
                         .isNotNull("readAt")
         );
@@ -65,7 +66,9 @@ public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
     }
 
     public void markAsRead(String identifier) throws SQLException {
-        updateBuilder().updateColumnExpression("identifier", identifier)
-                .updateColumnValue("readAt", new Timestamp(System.currentTimeMillis()));
+        update(updateBuilder()
+                .updateColumnValue("identifier", new SelectArg(identifier))
+                .updateColumnValue("readAt", new Timestamp(System.currentTimeMillis()))
+                .prepare());
     }
 }

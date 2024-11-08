@@ -24,7 +24,7 @@
       ]"
     >
       <!-- 骨架屏 -->
-      <a-col v-if="!data || data?.length === 0 || loading" :xs="24" :sm="12" :md="8" :lg="6">
+      <a-col v-if="!data || data?.length === 0 || firstLoading" :xs="24" :sm="12" :md="8" :lg="6">
         <a-card hoverable :header-style="{ height: 'auto' }">
           <template #title>
             <a-skeleton :animation="true">
@@ -82,12 +82,14 @@ import torrentList from './torrentList.vue'
 const { t } = useI18n()
 const endpointState = useEndpointStore()
 const data = ref<Downloader[]>()
-const { refresh, loading } = useRequest(
+const firstLoading = ref(true)
+const { refresh } = useRequest(
   getDownloaders,
   {
     cacheKey: () => `${endpointState.endpoint}-downloader`,
     onSuccess: (res) => {
       data.value = res.data
+      firstLoading.value = false
     }
   },
   [useAutoUpdatePlugin]

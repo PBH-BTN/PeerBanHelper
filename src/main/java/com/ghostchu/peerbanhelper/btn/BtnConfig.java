@@ -34,7 +34,8 @@ public class BtnConfig {
             var submit = server.getMainConfig().getBoolean("btn.submit");
             var appId = server.getMainConfig().getString("btn.app-id");
             var appSecret = server.getMainConfig().getString("btn.app-secret");
-            BtnNetwork btnNetwork = new BtnNetwork(server, scriptEngine, userAgent, configUrl, submit, appId, appSecret, matchCache);
+            var scriptExecute = server.getMainConfig().getBoolean("btn.allow-script-execute");
+            BtnNetwork btnNetwork = new BtnNetwork(server, scriptEngine, userAgent, configUrl, submit, appId, appSecret, matchCache, scriptExecute);
             log.info(tlUI(Lang.BTN_NETWORK_ENABLED));
             return btnNetwork;
         } else {

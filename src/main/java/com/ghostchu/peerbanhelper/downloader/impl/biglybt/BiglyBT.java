@@ -69,7 +69,6 @@ public class BiglyBT extends AbstractDownloader {
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .defaultHeader("Authorization", "Bearer " + config.getToken())
                 .defaultHeader("Content-Type", "application/json")
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))

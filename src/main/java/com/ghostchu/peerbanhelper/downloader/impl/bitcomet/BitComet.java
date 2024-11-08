@@ -70,7 +70,6 @@ public class BitComet extends AbstractDownloader {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         Methanol.Builder builder = Methanol.newBuilder()
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("Client-Type", "BitComet WebUI")
                 .defaultHeader("User-Agent", "PeerBanHelper BitComet Adapter")

@@ -41,13 +41,12 @@ public class DelugeServer {
                 .newBuilder()
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
+                .defaultHeader("Accept", "application/json")
+                .defaultHeader("Content-Type", "application/json")
+                .requestTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .defaultHeader("Accept", "application/json")
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
-                .defaultHeader("Content-Type", "application/json")
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {

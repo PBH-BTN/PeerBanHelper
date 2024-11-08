@@ -1,17 +1,19 @@
 <template>
-  <a-popover>
+  <a-popover :popup-container="container">
     <a-button
       ref="autoUpdateBtn"
       class="auto-update-btn"
-      :class="{
-        loading: loadingStatus === 'loading' || loadingHolding,
-        'loading-holding': loadingStatus === 'idle' && loadingHolding
-      }"
       :type="autoUpdate.autoUpdate ? 'primary' : 'outline'"
       :shape="'circle'"
       @click="() => autoUpdate.refresh()"
     >
-      <icon-sync />
+      <icon-sync
+        id="spin"
+        :class="{
+          loading: loadingStatus === 'loading' || loadingHolding,
+          'loading-holding': loadingStatus === 'idle' && loadingHolding
+        }"
+      />
     </a-button>
     <template #title>
       <a-space>
@@ -27,17 +29,19 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
 import { useAutoUpdate } from '@/stores/autoUpdate'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 const { t, d } = useI18n()
 const autoUpdate = useAutoUpdate()
 const autoUpdateBtn = ref()
 const loadingHolding = ref(false)
 
 let eventAbortController: AbortController
+const container = ref<HTMLElement>()
 
 onMounted(() => {
+  container.value = window.document.querySelector('body') as HTMLElement
   eventAbortController = new AbortController()
   autoUpdateBtn.value.$el.addEventListener(
     'animationstart',
@@ -71,10 +75,12 @@ const loadingStatus = computed(() => autoUpdate.status)
 .auto-update-btn,
 .auto-update-btn:hover {
   font-size: 16px;
-  &.loading {
-    animation: whirl 0.25s linear infinite;
-    &.loading-holding {
-      animation-iteration-count: 1;
+  #spin {
+    &.loading {
+      animation: whirl 0.25s linear infinite;
+      &.loading-holding {
+        animation-iteration-count: 1;
+      }
     }
   }
 }

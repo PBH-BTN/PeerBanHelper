@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -85,7 +86,9 @@ public class PBHChartController extends AbstractFeatureModule {
     private void handleTrafficClassic(Context ctx) throws Exception {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
-        var records = trafficJournalDao.getDayOffsetData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt(), d -> fixTimezone(ctx, d));
+        var records = trafficJournalDao.getDayOffsetData(downloader,
+                timeQueryModel.startAt(),
+                timeQueryModel.endAt(), d -> fixTimezone(ctx, d));
         ctx.json(new StdResp(true, null, records));
     }
 
@@ -115,8 +118,8 @@ public class PBHChartController extends AbstractFeatureModule {
                 .and()
                 .le("banAt", timeQueryModel.endAt());
         if (downloader != null && !downloader.isBlank()) {
-            queryConnected.and().eq("downloader", downloader);
-            queryBanned.and().eq("downloader", downloader);
+            queryConnected.and().eq("downloader", new SelectArg(downloader));
+            queryBanned.and().eq("downloader", new SelectArg(downloader));
         }
         try (var it = queryConnected.iterator()) {
             while (it.hasNext()) {
@@ -171,8 +174,8 @@ public class PBHChartController extends AbstractFeatureModule {
                 .and()
                 .le("lastTimeSeen", timeQueryModel.endAt());
         if (downloader != null && !downloader.isBlank()) {
-            queryBanned.and().eq("downloader", downloader);
-            queryConnected.and().eq("downloader", downloader);
+            queryBanned.and().eq("downloader", new SelectArg(downloader));
+            queryConnected.and().eq("downloader", new SelectArg(downloader));
         }
         try (var itBanned = queryBanned.iterator();
              var itConnected = queryConnected.iterator()) {
@@ -182,6 +185,7 @@ public class PBHChartController extends AbstractFeatureModule {
                     public boolean hasNext() {
                         return bannedOnly ? itBanned.hasNext() : itConnected.hasNext();
                     }
+
                     @Override
                     public String next() {
                         return bannedOnly ? itBanned.next().getIp() : itConnected.next().getAddress();

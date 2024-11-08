@@ -135,8 +135,6 @@ public class TextManager implements Reloadable {
         // second, load the bundled language files
         loadBundled().forEach(languageFilesManager::deploy);
         // then, load the translations from Crowdin
-        // and don't forget fix missing
-        languageFilesManager.fillMissing(loadBuiltInFallback());
         // finally, load override translations
         Collection<String> pending = getOverrideLocales(languageFilesManager.getDistributions().keySet());
         log.debug("Pending: {}", Arrays.toString(pending.toArray()));
@@ -172,6 +170,7 @@ public class TextManager implements Reloadable {
             pending.add("en_us");
             this.languageFilesManager.deploy("en_us", loadBuiltInFallback());
         }
+        this.languageFilesManager.fillMissing( loadBuiltInFallback());
         // Remember all available languages
         availableLanguages.addAll(pending);
 

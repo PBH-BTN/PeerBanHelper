@@ -12,6 +12,9 @@
       <a-space>
         <a-switch v-model="showThreadName" />{{ t('page.settings.tab.info.log.showThread') }}
       </a-space>
+      <a-space v-if="enableAutoRefresh">
+        <a-switch v-model="autoScroll" />{{ t('page.settings.tab.info.log.autoScorll') }}
+      </a-space>
     </a-space>
     <a-list
       ref="logList"
@@ -49,15 +52,15 @@
 </template>
 <script setup lang="ts">
 import { LogLevel, type Log } from '@/api/model/log'
-import { GetHistoryLogs } from '@/service/logger'
+import { GetHistoryLogs, StreamLogger } from '@/service/logger'
+import { getColor } from '@/utils/color'
+import { List, Message } from '@arco-design/web-vue'
 import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-import { StreamLogger } from '@/service/logger'
-import { List, Message } from '@arco-design/web-vue'
-import { getColor } from '@/utils/color'
 const { t, d } = useI18n()
 const hideBanWave = ref(false)
+const autoScroll = ref(false)
 const logBuffer = reactive([] as Log[])
 const { loading } = useRequest(GetHistoryLogs, {
   onSuccess: (data) => {
@@ -82,10 +85,12 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
         (newLog) => {
           logBuffer.push(newLog)
           console.log('scroll to', logBuffer.length - 1)
-          logList.value?.scrollIntoView({
-            index: logBuffer.length - 1,
-            align: 'bottom'
-          } as ScrollIntoViewOptions)
+          if (autoScroll.value) {
+            logList.value?.scrollIntoView({
+              index: logBuffer.length - 1,
+              align: 'bottom'
+            } as ScrollIntoViewOptions)
+          }
         },
         (err) => {
           Message.error(err.message)

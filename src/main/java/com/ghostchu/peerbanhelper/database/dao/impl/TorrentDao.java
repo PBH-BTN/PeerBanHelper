@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
+import com.j256.ormlite.stmt.SelectArg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +22,14 @@ public class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
         var torrent = queryBuilder()
                 .limit(1L)
                 .where()
-                .eq("infoHash", infoHash)
+                .eq("infoHash", new SelectArg(infoHash))
                 .queryForFirst();
         return Optional.ofNullable(torrent);
     }
 
     @Override
     public synchronized TorrentEntity createIfNotExists(TorrentEntity data) throws SQLException {
-        var entity = queryBuilder().where().eq("infoHash", data.getInfoHash()).queryForFirst();
+        var entity = queryBuilder().where().eq("infoHash", new SelectArg(data.getInfoHash())).queryForFirst();
         if (entity == null) {
             create(data);
             return data;

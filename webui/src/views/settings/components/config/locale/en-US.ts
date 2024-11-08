@@ -49,6 +49,11 @@ export default {
     'All peers connected to torrents (Including: IP, Port, PeerID, UserAgent, Peer Protocol, Flags, Uploaded, Downloaded, UploadRate, DownloadRate, PeerProgress, YourProgress and Downloader Name)',
   'page.settings.tab.config.btn.enableSubmit.modal.content3':
     'Are you sure you want to enable submit?',
+  'page.settings.tab.config.btn.allowScript': 'Allow BTN server push scripts',
+  'page.settings.tab.config.btn.allowScript.warning':
+    'Warning, this means that the remote server can execute any code on your device, please enable with caution!',
+  'page.settings.tab.config.btn.allowScript.tips':
+    'This option will allow BTN server push scripts to your device, this may increase the accuracy of the ban',
 
   'page.settings.tab.config.ipDatabase.title': 'IP Database',
   'page.settings.tab.config.ipDatabase.autoUpdate': 'Enable auto update',

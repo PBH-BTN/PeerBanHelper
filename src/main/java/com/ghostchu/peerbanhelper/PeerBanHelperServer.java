@@ -186,8 +186,8 @@ public class PeerBanHelperServer implements Reloadable {
         registerBanListInvokers();
         setupScriptEngine();
         registerModules();
-        registerHttpServer();
         setupIPDB();
+        registerHttpServer();
         resetKnownDownloaders();
         loadBanListToMemory();
         registerTimer();

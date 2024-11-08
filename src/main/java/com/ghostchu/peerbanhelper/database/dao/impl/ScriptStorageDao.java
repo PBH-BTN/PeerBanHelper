@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ScriptStorageEntity;
+import com.j256.ormlite.stmt.SelectArg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,7 @@ public class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String
 
     public List<String> keysStartWith(String prefix) {
         try {
-            return queryBuilder().where().like("key", prefix + "%").query().stream().map(ScriptStorageEntity::getKey).toList();
+            return query(queryBuilder().where().like("key", new SelectArg(prefix + "%")).prepare()).stream().map(ScriptStorageEntity::getKey).toList();
         } catch (SQLException e) {
             log.warn("Unable to get script storage keys", e);
             return List.of();
@@ -70,7 +71,7 @@ public class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String
 
     public List<String> valuesStartWith(String prefix) {
         try {
-            return queryBuilder().where().like("value", prefix + "%").query().stream().map(ScriptStorageEntity::getValue).toList();
+            return queryBuilder().where().like("value", new SelectArg(prefix + "%")).query().stream().map(ScriptStorageEntity::getValue).toList();
         } catch (SQLException e) {
             log.warn("Unable to get script storage values", e);
             return List.of();
@@ -85,12 +86,12 @@ public class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String
                     .query()
                     .stream()
                     .collect(Collectors.toMap(
-                        ScriptStorageEntity::getKey,
-                        ScriptStorageEntity::getValue,
-                        (existing, replacement) -> {
-                            log.warn("Duplicate key found: {}", existing);
-                            return replacement;
-                        }
+                            ScriptStorageEntity::getKey,
+                            ScriptStorageEntity::getValue,
+                            (existing, replacement) -> {
+                                log.warn("Duplicate key found: {}", existing);
+                                return replacement;
+                            }
                     ));
         } catch (SQLException e) {
             log.warn("Unable to get script storage entries", e);

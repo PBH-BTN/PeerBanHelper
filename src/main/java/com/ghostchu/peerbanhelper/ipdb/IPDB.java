@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -291,11 +292,10 @@ public class IPDB implements AutoCloseable {
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(userAgent)
-                .defaultHeader("Accept-Encoding", "gzip,deflate")
+                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory()))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {

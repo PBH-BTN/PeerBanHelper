@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +81,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
                 historyDao.queryBuilder()
                         .orderBy("banAt", false)
                         .where()
-                        .eq("torrent_id", t)
+                        .eq("torrent_id", new SelectArg(t))
                         .queryBuilder()
                 , pageable);
         var result = page.getResults().stream().map(r -> new PBHBanController.BanLogResponse(locale(ctx), r)).toList();
@@ -101,9 +102,9 @@ public class PBHTorrentController extends AbstractFeatureModule {
                     torrentDao.queryBuilder()
                             .orderBy("id", false)
                             .where()
-                            .like("name", "%" + ctx.queryParam("keyword") + "%")
+                            .like("name", new SelectArg("%" + ctx.queryParam("keyword") + "%"))
                             .or()
-                            .like("infoHash", "%" + ctx.queryParam("keyword") + "%")
+                            .like("infoHash", new SelectArg("%" + ctx.queryParam("keyword") + "%"))
                             .queryBuilder()
                     , pageable);
         }
@@ -134,7 +135,7 @@ public class PBHTorrentController extends AbstractFeatureModule {
         var t = torrent.get();
         var peerBanCount = historyDao.queryBuilder()
                 .where()
-                .eq("torrent_id", t.getId())
+                .eq("torrent_id",t.getId())
                 .countOf();
         var peerAccessCount = peerRecordDao.queryBuilder()
                 .orderBy("lastTimeSeen", false)

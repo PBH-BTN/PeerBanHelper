@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.j256.ormlite.stmt.SelectArg;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -89,7 +91,7 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
                 .and()
                 .le("timestamp", end.getTime())
                 .and()
-                .eq("downloader", downloadName)
+                .eq("downloader", MsgUtil.escapeSql(downloadName))
                 .queryBuilder()
                 .groupBy("timestamp")
                 .queryRaw()) {
@@ -105,7 +107,7 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
         TrafficJournalEntity existing = queryBuilder().where()
                 .eq("timestamp", data.getTimestamp())
                 .and()
-                .eq("downloader", data.getDownloader()).queryBuilder().queryForFirst();
+                .eq("downloader", new SelectArg(data.getDownloader())).queryBuilder().queryForFirst();
         if (existing == null) {
             create(data);
             return data;
