@@ -23,7 +23,7 @@
     <v-chart
       v-else
       class="chart"
-      :option="chartOption"
+      :option="usedOption"
       :loading="loading"
       autoresize
       :loading-options="loadingOptions"
@@ -97,11 +97,18 @@ const loadingOptions = computed(() => ({
 }))
 const err = ref<Error>()
 
+const usedOption = computed(() => chartOption.value)
+
 const chartOption = ref({
   tooltip: {
     trigger: 'item',
     appendToBody: true,
-    formatter: '<p style="word-wrap:break-all"><b>{b}</b></p>  {c} ({d}%)'
+    formatter: '<p style="word-wrap:break-all"><b>{b}</b></p>  {c} ({d}%)',
+    backgroundColor: darkStore.isDark ? '#333335' : '',
+    borderColor: darkStore.isDark ? '#333335' : '',
+    textStyle: {
+      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : ''
+    }
   },
   legend: {
     orient: 'vertical',

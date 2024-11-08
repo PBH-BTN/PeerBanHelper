@@ -48,10 +48,10 @@
     <v-chart
       v-else
       class="chart"
-      :option="chartOptions"
+      :option="usedOption"
       :loading="loading"
       :loading-options="loadingOptions"
-      theme="ovilia-green"
+      :theme="darkStore.isDark ? 'dark' : 'ovilia-green'"
       autoresize
       :init-options="{ renderer: 'svg' }"
     />
@@ -88,6 +88,7 @@ const loadingOptions = computed(() => ({
   textColor: darkStore.isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgb(29, 33, 41)',
   maskColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.4)'
 }))
+const usedOption = computed(() => chartOptions.value)
 
 const chartOptions = ref({
   xAxis: {
@@ -98,8 +99,14 @@ const chartOptions = ref({
     type: 'value'
   },
   tooltip: {
-    trigger: 'axis'
+    trigger: 'axis',
+    backgroundColor: darkStore.isDark ? '#333335' : '',
+    borderColor: darkStore.isDark ? '#333335' : '',
+    textStyle: {
+      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : ''
+    }
   },
+  backgroundColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.0)' : undefined,
   series: [
     {
       data: [] as [Date, number][],
