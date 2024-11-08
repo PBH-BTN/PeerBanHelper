@@ -336,7 +336,7 @@
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.runtime.heapMemory')">
             <multiClick :required="5" :time-limit="3000" @multi-click="downloadHeap">
-              <a-space style="display: flex; align-items: center">
+              <a-space style="display: flex; align-items: center; color: var(--color-text-1)">
                 <a-tooltip
                   :content="
                     `${Math.round((1 - (data?.data.jvm.memory.heap.free ?? 0) / (data?.data.jvm.memory.heap.max ?? 1)) * 100)}% ` +
