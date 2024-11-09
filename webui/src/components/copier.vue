@@ -12,9 +12,9 @@
   </AsyncMethod>
 </template>
 <script setup lang="ts">
-import copy from 'copy-to-clipboard';
-import { useI18n } from 'vue-i18n';
-import AsyncMethod from './asyncMethod.vue';
+import copy from 'copy-to-clipboard'
+import { useI18n } from 'vue-i18n'
+import AsyncMethod from './asyncMethod.vue'
 const { t } = useI18n()
 const { text } = defineProps<{
   text: string
