@@ -55,21 +55,30 @@
     >
       <template #item="{ item, index }">
         <a-list-item :key="index">
-          <a-space class="log-line" fill>
-            <a-tag class="level-tag" :color="getColorByLogLevel(item.level)">{{
-              item.level
-            }}</a-tag>
-            <a-tag>{{ d(item.time, 'log') }}</a-tag>
-            <a-tag v-if="showThreadName" :color="getThreadColor(item.thread)">
-              {{ item.thread }}
-            </a-tag>
-            <a-typography-text
-              :ellipsis="{
-                rows: 1,
-                showTooltip: true
-              }"
-              >{{ item.content }}</a-typography-text
-            >
+          <a-space
+            style="display: flex; justify-content: space-between"
+            fill
+            class="log-line-container"
+          >
+            <a-space class="log-line">
+              <a-tag class="level-tag" :color="getColorByLogLevel(item.level)">{{
+                item.level
+              }}</a-tag>
+              <a-tag>{{ d(item.time, 'log') }}</a-tag>
+              <a-tag v-if="showThreadName" :color="getThreadColor(item.thread)">
+                {{ item.thread }}
+              </a-tag>
+              <a-typography-text
+                :ellipsis="{
+                  rows: 1,
+                  showTooltip: true
+                }"
+                >{{ item.content }}</a-typography-text
+              >
+            </a-space>
+            <div class="hover-display-btn">
+              <copier :text="item.content" />
+            </div>
           </a-space>
         </a-list-item>
       </template>
@@ -78,6 +87,7 @@
 </template>
 <script setup lang="ts">
 import { LogLevel, type Log } from '@/api/model/log'
+import copier from '@/components/copier.vue'
 import { GetHistoryLogs, StreamLogger } from '@/service/logger'
 import { getColor } from '@/utils/color'
 import { List, Message, type SelectOptionData } from '@arco-design/web-vue'
@@ -204,9 +214,18 @@ const showThreadName = ref(true)
     display: flex;
     align-items: center;
     .arco-typography {
-      width: 50rem;
+      max-width: 50rem;
       margin-bottom: 0;
     }
   }
+}
+.hover-display-btn {
+  transition: opacity 0.15s ease-in-out;
+  opacity: 0;
+}
+
+.log-line-container:hover .hover-display-btn {
+  transition: opacity 0.15s ease-in-out;
+  opacity: 1;
 }
 </style>
