@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -19,6 +20,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -36,7 +38,7 @@ public class MainWindow extends JFrame {
     private JScrollPane loggerScrollPane;
     @Nullable
     @Getter
-    private TrayIcon trayIcon;
+    private SwingTray swingTrayDialog;
     private boolean persistFlagTrayMessageSent;
 
     public MainWindow(SwingGuiImpl swingGUI) {
@@ -87,7 +89,7 @@ public class MainWindow extends JFrame {
     }
 
     private void minimizeToTray() {
-        if (trayIcon != null) {
+        if (swingTrayDialog != null) {
             setVisible(false);
             if (!persistFlagTrayMessageSent) {
                 persistFlagTrayMessageSent = true;
@@ -104,24 +106,24 @@ public class MainWindow extends JFrame {
         if (SystemTray.isSupported()) {
             TrayIcon icon = new TrayIcon(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/assets/icon.png")));
             icon.setImageAutoSize(true);
-            //创建弹出菜单
-            PopupMenu menu = new PopupMenu();
-            //添加一个用于退出的按钮
-            MenuItem item = new MenuItem("Exit");
-            item.addActionListener(e -> System.exit(0));
-            menu.add(item);
-            //添加弹出菜单到托盘图标
-            icon.setPopupMenu(menu);
-            SystemTray tray = SystemTray.getSystemTray();//获取系统托盘
-            icon.addActionListener(e -> setVisible(true));
+            SystemTray sysTray = SystemTray.getSystemTray();//获取系统托盘
             try {
-                tray.add(icon);//将托盘图表添加到系统托盘
-                this.trayIcon = icon;
+                sysTray.add(icon);//将托盘图表添加到系统托盘
+                var tray = new SwingTray(icon, mouseEvent -> setVisible(true));
+                JMenuItem openMainWindow = new JMenuItem(tlUI(Lang.GUI_MENU_SHOW_WINDOW), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/open.svg")));
+                JMenuItem openWebUI = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/browser.svg")));
+                JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/close.svg")));
+                openMainWindow.addActionListener(e -> setVisible(true));
+                openWebUI.addActionListener(e -> openWebUI());
+                quit.addActionListener(e -> System.exit(0));
+                tray.set(List.of(openMainWindow, openWebUI, quit));
+                this.swingTrayDialog = tray;
             } catch (AWTException e) {
                 throw new RuntimeException(e);
             }
         }
     }
+
 
     private JMenuBar setupMenuBar() {
         JMenuBar menuBar = new JMenuBar();
@@ -156,9 +158,7 @@ public class MainWindow extends JFrame {
         JMenu webUIMenu = new JMenu(tlUI(Lang.GUI_MENU_WEBUI));
         JMenuItem openWebUIMenuItem = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
         openWebUIMenuItem.addActionListener(e -> {
-            if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
-                swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()));
-            }
+            this.openWebUI();
         });
         webUIMenu.add(openWebUIMenuItem);
         JMenuItem copyWebUIToken = new JMenuItem(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
@@ -171,6 +171,12 @@ public class MainWindow extends JFrame {
         });
         webUIMenu.add(copyWebUIToken);
         return webUIMenu;
+    }
+
+    private void openWebUI() {
+        if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
+            swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()));
+        }
     }
 
     public void sync() {

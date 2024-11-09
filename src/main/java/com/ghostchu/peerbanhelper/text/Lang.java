@@ -433,7 +433,7 @@ public enum Lang {
     BTN_RULES_SCRIPT_COMPILING,
     BTN_RULES_SCRIPT_COMPILED,
     BTN_SERVICES_NEED_RESTART,
-    EXPRESS_RULE_ENGINE_SAVED;
+    EXPRESS_RULE_ENGINE_SAVED, GUI_MENU_SHOW_WINDOW;
 
     public String getKey() {
         return name();
