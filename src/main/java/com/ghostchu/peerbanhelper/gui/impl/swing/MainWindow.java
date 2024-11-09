@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 import lombok.Getter;
@@ -20,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -108,15 +110,9 @@ public class MainWindow extends JFrame {
             icon.setImageAutoSize(true);
             SystemTray sysTray = SystemTray.getSystemTray();//获取系统托盘
             try {
+                var tray = new SwingTray(icon, mouseEvent -> setVisible(true), mouseEvent -> updateTrayMenus());
                 sysTray.add(icon);//将托盘图表添加到系统托盘
-                var tray = new SwingTray(icon, mouseEvent -> setVisible(true));
-                JMenuItem openMainWindow = new JMenuItem(tlUI(Lang.GUI_MENU_SHOW_WINDOW), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/open.svg")));
-                JMenuItem openWebUI = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/browser.svg")));
-                JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/close.svg")));
-                openMainWindow.addActionListener(e -> setVisible(true));
-                openWebUI.addActionListener(e -> openWebUI());
-                quit.addActionListener(e -> System.exit(0));
-                tray.set(List.of(openMainWindow, openWebUI, quit));
+                updateTrayMenus();
                 this.swingTrayDialog = tray;
             } catch (AWTException e) {
                 throw new RuntimeException(e);
@@ -124,6 +120,51 @@ public class MainWindow extends JFrame {
         }
     }
 
+    private void updateTrayMenus() {
+        if (this.swingTrayDialog == null) return;
+        List<JMenuItem> items = new ArrayList<>();
+        JMenuItem openMainWindow = new JMenuItem(tlUI(Lang.GUI_MENU_SHOW_WINDOW), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/open.svg")));
+        JMenuItem openWebUI = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/browser.svg")));
+        JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/close.svg")));
+        openMainWindow.addActionListener(e -> setVisible(true));
+        openWebUI.addActionListener(e -> openWebUI());
+        quit.addActionListener(e -> System.exit(0));
+        items.add(menuDisplayItem(new JMenuItem(tlUI(Lang.GUI_MENU_STATS))));
+        items.add(menuBanStats());
+        items.add(menuDownloaderStats());
+        items.add(menuDisplayItem(new JMenuItem(tlUI(Lang.GUI_MENU_QUICK_OPERATIONS))));
+        items.add(openMainWindow);
+        items.add(openWebUI);
+        items.add(null);
+        items.add(quit);
+        this.swingTrayDialog.set(items);
+    }
+
+    private JMenuItem menuDownloaderStats() {
+        var totalDownloaders = 0L;
+        var healthDownloaders = 0L;
+        if (Main.getServer() != null) {
+            totalDownloaders = Main.getServer().getDownloaders().size();
+            healthDownloaders = Main.getServer().getDownloaders().stream().filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
+        }
+        return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_DOWNLOADER, healthDownloaders, totalDownloaders), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/connection.svg")));
+    }
+
+    private JMenuItem menuBanStats() {
+        var bannedPeers = 0L;
+        var bannedIps = 0L;
+        var server = Main.getServer();
+        if (server != null) {
+            bannedIps = Main.getServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
+            bannedPeers = Main.getServer().getBannedPeers().values().size();
+        }
+        return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/banned.svg")));
+    }
+
+    private JMenuItem menuDisplayItem(JMenuItem jMenuItem) {
+        jMenuItem.setEnabled(false);
+        return jMenuItem;
+    }
 
     private JMenuBar setupMenuBar() {
         JMenuBar menuBar = new JMenuBar();

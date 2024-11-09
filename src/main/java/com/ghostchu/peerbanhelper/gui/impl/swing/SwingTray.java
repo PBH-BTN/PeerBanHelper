@@ -13,7 +13,7 @@ public class SwingTray {
     private final JPopupMenu jPopupMenu;
     private final TrayIcon trayIcon;
 
-    public SwingTray(TrayIcon trayIcon, Consumer<MouseEvent> clickCallback) {
+    public SwingTray(TrayIcon trayIcon, Consumer<MouseEvent> clickCallback, Consumer<MouseEvent> rightClickCallback) {
         this.trayIcon = trayIcon;
         this.jDialog = new JDialog();
         jDialog.setUndecorated(true);
@@ -33,6 +33,7 @@ public class SwingTray {
                     return;
                 }
                 if (e.getButton() == 3 && e.isPopupTrigger()) {
+                    rightClickCallback.accept(e);
                     // 获取屏幕相对位置
                     Point point = MouseInfo.getPointerInfo().getLocation();
                     // 将jDialog设置为鼠标位置
@@ -50,7 +51,13 @@ public class SwingTray {
 
     public void set(List<JMenuItem> items) {
         jPopupMenu.removeAll();
-        items.forEach(jPopupMenu::add);
+        items.forEach(ele->{
+            if(ele == null) {
+                jPopupMenu.addSeparator();
+            }else{
+                jPopupMenu.add(ele);
+            }
+        });
     }
 
     public TrayIcon getTrayIcon() {
