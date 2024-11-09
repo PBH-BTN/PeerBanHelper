@@ -24,7 +24,7 @@
           allow-create
           scrollbar
           :options="threadList"
-          :virtual-list-props="{ height: 200 }"
+          :virtual-list-props="{ height: 200, fixedSize: true }"
         />
       </a-form-item>
       <a-form-item field="hideThreads" :label="t('page.settings.tab.info.log.showLevel')">
@@ -48,7 +48,8 @@
       scrollbar
       :virtual-list-props="{
         height: 700,
-        buffer: 20
+        buffer: 20,
+        fixedSize: true
       }"
       :data="list"
     >
@@ -87,7 +88,7 @@ const { t, d } = useI18n()
 const loading = ref(true)
 const options = reactive({
   hideThreads: [] as string[],
-  autoScroll: false,
+  autoScroll: true,
   autoRefresh: false,
   showLevel: {
     [LogLevel.TRACE]: false,
