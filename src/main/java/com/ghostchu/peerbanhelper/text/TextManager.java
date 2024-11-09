@@ -127,7 +127,7 @@ public class TextManager implements Reloadable {
      * Loading Crowdin OTA module and i18n system
      */
     public void load() {
-        log.info("Loading up translations, this may need a while...");
+        log.info("Loading up translations, this may take a while...");
         //TODO: This will break the message processing system in-game until loading finished, need to fix it.
         this.reset();
         // first, we need load built-in fallback translation.

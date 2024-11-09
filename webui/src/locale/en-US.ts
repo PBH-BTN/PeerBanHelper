@@ -9,6 +9,7 @@ import topBanPageLocale from '@/views/ranks/locale/en-US'
 import ruleManageMentLocale from '@/views/rule-management/locale/en-US'
 import configLocale from '@/views/settings/locale/en-US'
 import alertLocale from './en-US/alert'
+import copierLocale from './en-US/copier'
 import plusLocale from './en-US/plus'
 import settingsLocale from './en-US/settings'
 export default {
@@ -60,5 +61,6 @@ export default {
   ...ruleManageMentLocale,
   ...chartsLocale,
   ...configLocale,
-  ...alertLocale
+  ...alertLocale,
+  ...copierLocale
 }
