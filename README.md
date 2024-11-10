@@ -78,7 +78,7 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
 
-## Credit
+## Credits
 
 ### Backend
 
