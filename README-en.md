@@ -51,7 +51,7 @@ PeerBanHelper mainly consists of the following functional modules:
 - Peer ID/Client Name Spoofing Check; implemented through the [AviatorScript Engine](https://docs.pbh-btn.com/docs/module/expression-engine)
 - [Active Monitoring (provides local data analysis)](https://docs.pbh-btn.com/docs/module/active-monitoring)
 - [Network IP Set Rule Subscription](https://docs.pbh-btn.com/docs/module/ip-address-blocker-rules)
-- WebUI (currently supports: viewing active ban list, querying historical bans, top 50 most frequently banned IPs, rule subscription management, chart viewing, Peer list viewing)
+- WebUI
 
 Additionally, PeerBanHelper downloads the GeoIP library at startup. Once successfully loaded, it supports the following features:
 
