@@ -103,6 +103,9 @@ public class QBittorrentEE extends AbstractQbittorrent {
             if(qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()){
                 continue;
             }
+            if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
+                continue;
+            }
             if(qbPeer.getRawIp().contains(".onion") || qbPeer.getRawIp().contains(".i2p")){
                 continue;
             }
