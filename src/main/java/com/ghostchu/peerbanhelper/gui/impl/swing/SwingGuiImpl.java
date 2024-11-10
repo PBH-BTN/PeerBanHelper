@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
@@ -196,32 +195,39 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createNotification(Level level, String title, String description) {
-        TrayIcon icon = mainWindow.getTrayIcon();
-        if (icon != null) {
-            if (level.equals(Level.WARNING)) {
-                icon.displayMessage(title, description, TrayIcon.MessageType.WARNING);
-            } else if (level.equals(Level.SEVERE)) {
-                icon.displayMessage(title, description, TrayIcon.MessageType.ERROR);
-            } else {
-                icon.displayMessage(title, description, TrayIcon.MessageType.INFO);
+
+        var swingTray = mainWindow.getSwingTrayDialog();
+        if (swingTray != null) {
+            var icon = swingTray.getTrayIcon();
+            if (swingTray.getTrayIcon() != null) {
+                if (level.equals(Level.WARNING)) {
+                    icon.displayMessage(title, description, TrayIcon.MessageType.WARNING);
+                } else if (level.equals(Level.SEVERE)) {
+                    icon.displayMessage(title, description, TrayIcon.MessageType.ERROR);
+                } else {
+                    icon.displayMessage(title, description, TrayIcon.MessageType.INFO);
+                }
+                if (System.getProperty("os.name").contains("Windows")) {
+                    CommonUtil.getScheduler().schedule(this::refreshTrayIcon, 5, TimeUnit.SECONDS);
+                }
+                return;
             }
-            if (System.getProperty("os.name").contains("Windows")) {
-                CommonUtil.getScheduler().schedule(this::refreshTrayIcon, 5, TimeUnit.SECONDS);
-            }
-        } else {
-            super.createNotification(level, title, description);
         }
+        super.createNotification(level, title, description);
     }
 
     private synchronized void refreshTrayIcon() {
-        TrayIcon icon = mainWindow.getTrayIcon();
-        if (icon != null) {
-            try {
-                SystemTray tray = SystemTray.getSystemTray();
-                tray.remove(icon); // fix https://github.com/PBH-BTN/PeerBanHelper/issues/515
-                tray.add(icon);
-            } catch (AWTException e) {
-                throw new RuntimeException(e);
+        var swingTray = mainWindow.getSwingTrayDialog();
+        if (swingTray != null) {
+            var icon = swingTray.getTrayIcon();
+            if (icon != null) {
+                try {
+                    SystemTray tray = SystemTray.getSystemTray();
+                    tray.remove(icon); // fix https://github.com/PBH-BTN/PeerBanHelper/issues/515
+                    tray.add(icon);
+                } catch (AWTException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

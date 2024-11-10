@@ -57,10 +57,10 @@
     <v-chart
       v-else
       class="chart"
-      :option="chartOptions"
+      :option="usedOption"
       :loading="loading"
       :loading-options="loadingOptions"
-      theme="ovilia-green"
+      :theme="darkStore.isDark ? 'dark' : 'ovilia-green'"
       autoresize
       :init-options="{ renderer: 'svg' }"
     />
@@ -99,6 +99,8 @@ const option = reactive({
   range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
 })
 
+const usedOption = computed(() => chartOptions.value)
+
 const chartOptions = ref({
   xAxis: {
     type: 'time',
@@ -108,7 +110,12 @@ const chartOptions = ref({
     type: 'value'
   },
   tooltip: {
-    trigger: 'axis'
+    trigger: 'axis',
+    backgroundColor: darkStore.isDark ? '#333335' : '',
+    borderColor: darkStore.isDark ? '#333335' : '',
+    textStyle: {
+      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : ''
+    }
   },
   grid: {
     left: '15%'
@@ -119,7 +126,8 @@ const chartOptions = ref({
       type: 'line',
       name: t('page.charts.line.options.field')
     }
-  ]
+  ],
+  backgroundColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.0)' : undefined
 })
 
 watch(option, (v) => {

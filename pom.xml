@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.1.2</version>
+    <version>7.1.3</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -485,7 +485,11 @@
             <artifactId>xz</artifactId>
             <version>1.10</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-extras</artifactId>
+            <version>3.0</version>
+        </dependency>
     </dependencies>
 
 
