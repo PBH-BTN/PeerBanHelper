@@ -132,20 +132,26 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         // 日志插入线程
         Thread.ofVirtual().start(() -> {
             while (true) {
-                var logEntry = JListAppender.logEntryDeque.();
-                if (logEntry == null) continue;
-                SwingUtilities.invokeLater(() -> {
-                    DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
-                    model.addElement(logEntry);
-                    // 限制最大元素数量为 500
-                    while (model.size() > 300) {
-                        model.removeElementAt(0);
-                    }
-                    // 如果用户在底部，则自动滚动
-                    if (autoScroll.get()) {
-                        logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
-                    }
-                });
+                try {
+                    var logEntry = JListAppender.logEntryDeque.poll(1, TimeUnit.HOURS);
+                    if (logEntry == null) continue;
+                    SwingUtilities.invokeLater(() -> {
+                        DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
+                        model.addElement(logEntry);
+
+                        // 限制最大元素数量为 500
+                        while (model.size() > 300) {
+                            model.removeElementAt(0);
+                        }
+
+                        // 如果用户在底部，则自动滚动
+                        if (autoScroll.get()) {
+                            logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
