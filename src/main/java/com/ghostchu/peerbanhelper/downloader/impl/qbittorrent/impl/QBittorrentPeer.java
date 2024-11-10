@@ -18,8 +18,8 @@ import java.util.List;
 public final class QBittorrentPeer implements Peer {
     @SerializedName("client")
     private String client;
-//    @SerializedName("connection")
-//    private String connection;
+    @SerializedName("connection")
+    private String connection;
 //    @SerializedName("country")
 //    private String country;
 //    @SerializedName("country_code")
@@ -114,4 +114,7 @@ public final class QBittorrentPeer implements Peer {
         return rawIp == null ? ip : rawIp;
     }
 
+    public String getConnection() {
+        return connection;
+    }
 }

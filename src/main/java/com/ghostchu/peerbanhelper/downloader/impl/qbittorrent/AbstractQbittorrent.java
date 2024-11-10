@@ -161,7 +161,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
             fillTorrentPrivateField(qbTorrent);
         }
         return qbTorrent.stream().map(t -> (Torrent) t)
-                .filter(t-> !config.isIgnorePrivate() || !t.isPrivate())
+                .filter(t -> !config.isIgnorePrivate() || !t.isPrivate())
                 .collect(Collectors.toList());
     }
 
@@ -247,6 +247,9 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
             QBittorrentPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentPeer.class);
+            if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
+                continue;
+            }
             if (qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()) {
                 continue;
             }
