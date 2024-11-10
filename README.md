@@ -26,32 +26,11 @@
 
 ## 支持的客户端
 
-- qBittorrent **4.5.0 或更高版本**
-- BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
-- Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
-- Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
-- Transmission **(不建议使用；3.00-20 或更高版本)**
-- BitComet **v2.10 Beta6 [20240928] 或更高版本**
-
-## 注意事项
-
-请不要打开下载器中的 "允许来自同一 IP 地址的多个连接" 选项，这会干扰 PBH 计算数据，并导致错误封禁。  
-如果您的下载器存在 PT 站种子，在添加下载器时建议开启 “忽略私有种子”。
+查看 [PeerBanHelper 文档](https://docs.pbh-btn.com/docs/category/%E4%B8%8B%E8%BD%BD%E5%99%A8%E9%85%8D%E7%BD%AE)
 
 ## 功能介绍
 
-PeerBanHelper 主要由以下几个功能模块组成：
-
-- [PeerID 黑名单](https://docs.pbh-btn.com/docs/module/peer-id)
-- [Client Name 黑名单](https://docs.pbh-btn.com/docs/module/client-name)
-- [IP/GeoIP/IP 类型 黑名单](https://docs.pbh-btn.com/docs/module/ip-address-blocker)
-- [虚假进度检查器（提供启发式客户端检测功能）](https://docs.pbh-btn.com/docs/module/progress-cheat-blocker)
-- [自动连锁封禁](https://docs.pbh-btn.com/docs/module/auto-range-ban)
-- [多拨追猎](https://docs.pbh-btn.com/docs/module/multi-dial)
-- Peer ID/Client Name 伪装检查；通过 [AviatorScript 引擎](https://docs.pbh-btn.com/docs/module/expression-engine) 实现
-- [主动监测（提供本地数据分析功能）](https://docs.pbh-btn.com/docs/module/active-monitoring)
-- [网络 IP 集规则订阅](https://docs.pbh-btn.com/docs/module/ip-address-blocker-rules)
-- WebUI
+查看 [PeerBanHelper 文档](https://docs.pbh-btn.com/docs/category/%E5%8A%9F%E8%83%BD%E6%A8%A1%E5%9D%97)
 
 此外，PeerBanHelper 会在启动时下载 GeoIP 库，成功加载后支持以下功能：
 
@@ -61,7 +40,8 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 ## 常见问题
 
-在报告问题前，请先检查 [常见问题列表](https://docs.pbh-btn.com/docs/faq)
+[常见问题列表](https://docs.pbh-btn.com/docs/faq)
+在报告问题前，也请您先检查[常见问题列表](https://docs.pbh-btn.com/docs/faq)，看看您遇到的问题是否已经涵盖在了该列表中
 
 ## Install4j
 
