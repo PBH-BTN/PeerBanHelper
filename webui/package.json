@@ -54,7 +54,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/parser": "^8.13.0",
     "@vitejs/plugin-vue": "^5.1.4",
-    "@vue/tsconfig": "^0.5.1",
+    "@vue/tsconfig": "^0.6.0",
     "eslint": "^9.14.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-vue": "^9.30.0",
