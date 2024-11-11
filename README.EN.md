@@ -1,5 +1,5 @@
 # PeerBanHelper
-[English](./README.EN.md)
+[简体中文](./README.md)
 
 Automatically block unwanted, leeches and abnormal BT peers with support for customized and cloud rules.
 
