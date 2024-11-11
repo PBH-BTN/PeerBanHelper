@@ -272,7 +272,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             }
             // 计算进度差异
             double difference = Math.abs(actualProgress - clientProgress);
-            if (difference > maximumDifference && !fileTooSmall(torrentSize)) {
+            // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
+            if (difference > maximumDifference && !fileTooSmall(torrentSize) && isUploadingToPeer(peer)) {
                 if (banPeerIfConditionReached(clientTask)) {
                     clientTask.setProgressDifferenceCounter(clientTask.getProgressDifferenceCounter() + 1);
                     clientTask.setBanDelayWindowEndAt(0L);
@@ -288,7 +289,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             if (rewindMaximumDifference > 0 && !fileTooSmall(torrentSize)) {
                 double lastRecord = clientTask.getLastReportProgress();
                 double rewind = lastRecord - peer.getProgress();
-                boolean ban = rewind > rewindMaximumDifference;
+                // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
+                boolean ban = rewind > rewindMaximumDifference && isUploadingToPeer(peer);
                 if (ban) {
                     clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
                     clientTask.setBanDelayWindowEndAt(0L);
@@ -310,6 +312,10 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             clientTask.setLastReportProgress(peer.getProgress());
             progressRecorder.put(client, lastRecordedProgress);
         }
+    }
+
+    private boolean isUploadingToPeer(Peer peer){
+        return peer.getUploadSpeed() > 0 || peer.getUploaded() > 0;
     }
 
     private boolean fileTooSmall(long torrentSize) {

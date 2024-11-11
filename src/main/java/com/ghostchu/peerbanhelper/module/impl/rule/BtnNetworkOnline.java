@@ -309,23 +309,30 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
             return handshaking();
         }
         return getCache().readCacheButWritePassOnly(this, "btn-ban-peer-" + peer.getCacheKey(), () -> {
-            CheckResult r = null;
+            List<CheckResult> results = new ArrayList<>();
             if (rule.getPeerIdRules() != null) {
-                r = NullUtil.anyNotNull(r, checkPeerIdRule(rule, torrent, peer, ruleExecuteExecutor));
+                results.add(checkPeerIdRule(rule, torrent, peer, ruleExecuteExecutor));
             }
             if (rule.getClientNameRules() != null) {
-                r = NullUtil.anyNotNull(r, checkClientNameRule(rule, torrent, peer, ruleExecuteExecutor));
+                results.add(checkClientNameRule(rule, torrent, peer, ruleExecuteExecutor));
             }
             if (rule.getIpRules() != null) {
-                r = NullUtil.anyNotNull(r, checkIpRule(rule, torrent, peer, ruleExecuteExecutor));
+                results.add(checkIpRule(rule, torrent, peer, ruleExecuteExecutor));
             }
             if (rule.getPortRules() != null) {
-                r = NullUtil.anyNotNull(r, checkPortRule(rule, torrent, peer, ruleExecuteExecutor));
+                results.add(checkPortRule(rule, torrent, peer, ruleExecuteExecutor));
             }
-            if (r == null) {
-                return pass();
+
+            CheckResult finalResult = pass();
+            for (CheckResult result : results) {
+                if (result != null && result.action() == PeerAction.SKIP) {
+                    return result;
+                }
+                if (result != null && result.action() == PeerAction.BAN) {
+                    finalResult = result;
+                }
             }
-            return r;
+            return finalResult;
         }, true);
     }
 
