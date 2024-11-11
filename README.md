@@ -6,7 +6,7 @@ Automatically block unwanted, leeches and abnormal BT peers with support for cus
 ![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
 ## Introduction
 
-Following function are provided byPeerBanHelper:
+Following function are provided by PeerBanHelper:
 
 - [PeerID Blacklist](https://docs.pbh-btn.com/docs/module/peer-id)
 - [Client Name Blacklist](https://docs.pbh-btn.com/docs/module/client-name)
