@@ -34,7 +34,7 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 - BiglyBT([plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT) is required)
 - Deluge([plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge)is required)
 - Azureus(Vuze)([plugin](https://github.com/PBH-BTN/PBH-Adapter-Azureus)is required)
-- Transmission **(deprected；3.00-20 或higher)**
+- Transmission **(deprected；3.00-20 or higher)**
 - BitComet **v2.10 Beta6 [20240928] or higher**
 
   
