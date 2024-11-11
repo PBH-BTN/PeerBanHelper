@@ -54,6 +54,9 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 在报告问题前，请先检查 [常见问题列表](https://docs.pbh-btn.com/docs/faq)
 
+## 需要帮助？
+考虑加入我们的[Telegram](https://t.me/+_t3Nt5GZ6bJmYjBl)群或者[QQ群](https://qm.qq.com/cgi-bin/qm/qr?k=w5as_wH2G1ReUrClreCYhR69XiNCuP65&jump_from=webapi&authKey=EyjMX7Pwc77XLM51V6FEcR7oXnG8fsUbSFqYZ4PPiEpq32vBglJn/jFvpc3LFDhn)！
+
 ## 声明
 
 违法网站和黑灰产请勿向我组织开发或支持人员发起任何形式的人工服务请求；严禁使用 PBH-BTN 团队的任何服务、产品从事任何违法违规、危害国家安全、实施或帮助他人实施电信犯罪等非法活动。  

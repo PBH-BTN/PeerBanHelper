@@ -53,6 +53,9 @@ Please read the [docs](https://docs.pbh-btn.com/docs/category/%E5%AE%89%E8%A3%85
 
 Before submit issue, please read the [FAQ](https://docs.pbh-btn.com/docs/faq)
 
+## Support
+Consider join our [Telegram](https://t.me/+_t3Nt5GZ6bJmYjBl) group or [QQ Group](https://qm.qq.com/cgi-bin/qm/qr?k=w5as_wH2G1ReUrClreCYhR69XiNCuP65&jump_from=webapi&authKey=EyjMX7Pwc77XLM51V6FEcR7oXnG8fsUbSFqYZ4PPiEpq32vBglJn/jFvpc3LFDhn)!
+
 ## Declaration
 
 Illegal websites and black and grey industries should not initiate any kind of manual service request to our organization's development or support staff; it is strictly prohibited to use any services or products of PBH-BTN team to engage in any illegal activities such as violating the law, endangering national security, committing or helping others to commit telecommunication crimes, and other illegal activities.  
