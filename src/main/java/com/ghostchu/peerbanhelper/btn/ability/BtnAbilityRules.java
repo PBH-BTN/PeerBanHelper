@@ -80,6 +80,9 @@ public class BtnAbilityRules extends AbstractBtnAbility {
 
     @Override
     public TranslationComponent getDescription() {
+        if(btnRule == null){
+            return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION, "N/A", 0, 0, 0, 0, 0);
+        }
         return new TranslationComponent(Lang.BTN_ABILITY_RULES_DESCRIPTION,
                 btnRule.getVersion(),
                 btnRule.size(),
