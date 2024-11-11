@@ -28,12 +28,12 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 > For best results, it is recommended to work with the IP rule [PBH-BTN/BTN-Collected-Rules](https://github.com/PBH-BTN/BTN-Collected-Rules) and [BTN Network](https://docs.pbh-btn.com/docs/btn/intro) , but this is completely optional.
 
 
-## Supported client
+## Supported clients
 
 - qBittorrent **4.5.0 or higher**
 - BiglyBT([plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT) is required)
-- Deluge([plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge)is required)
-- Azureus(Vuze)([plugin](https://github.com/PBH-BTN/PBH-Adapter-Azureus)is required)
+- Deluge([plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge) is required)
+- Azureus(Vuze)([plugin](https://github.com/PBH-BTN/PBH-Adapter-Azureus) is required)
 - Transmission **(deprected；3.00-20 or higher)**
 - BitComet **v2.10 Beta6 [20240928] or higher**
 
