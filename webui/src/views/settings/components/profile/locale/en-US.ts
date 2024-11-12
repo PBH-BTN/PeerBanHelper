@@ -32,9 +32,9 @@ export default {
 
   'page.settings.tab.profile.module.banRuleTips.empty': 'Please fill the empty fields',
 
-  'page.settings.tab.profile.module.peerIdBlackList': 'PeerId blacklist',
+  'page.settings.tab.profile.module.peerIdBlackList': 'PeerID blacklist',
   'page.settings.tab.profile.module.peerIdBlackList.useGlobalBanTime': 'Use global ban duration',
-  'page.settings.tab.profile.module.peerIdBlackList.banPeerId': 'Banned PeerId',
+  'page.settings.tab.profile.module.peerIdBlackList.banPeerId': 'Banned PeerID',
   'page.settings.tab.profile.module.peerIdBlackList.rule': 'Rule',
 
   'page.settings.tab.profile.module.clientNameBlackList': 'ClientName blacklist',
