@@ -8,15 +8,15 @@ Automatically block unwanted, leeches and abnormal BT peers with support for cus
 
 Following function are provided by PeerBanHelper:
 
-- [PeerID Blacklist](https://docs.pbh-btn.com/docs/module/peer-id)
-- [Client Name Blacklist](https://docs.pbh-btn.com/docs/module/client-name)
-- [IP/GeoIP/IP type Blacklist](https://docs.pbh-btn.com/docs/module/ip-address-blocker)
-- [Fake progress checker (heuristic client detection)](https://docs.pbh-btn.com/docs/module/progress-cheat-blocker)
-- [Auto range ban](https://docs.pbh-btn.com/docs/module/auto-range-ban)
-- [Multi-dail ban](https://docs.pbh-btn.com/docs/module/multi-dial)
-- Peer ID/Client Name camouflage check, powered by [AviatorScript Engine](https://docs.pbh-btn.com/docs/module/expression-engine)
-- [Active monitoring(data analysis)](https://docs.pbh-btn.com/docs/module/active-monitoring)
-- [IP set subscribe](https://docs.pbh-btn.com/docs/module/ip-address-blocker-rules)
+- [PeerID Blacklist](https://docs.pbh-btn.com/en/docs/module/peer-id)
+- [Client Name Blacklist](https://docs.pbh-btn.com/en/docs/module/client-name)
+- [IP/GeoIP/IP type Blacklist](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker)
+- [Fake progress checker (heuristic client detection)](https://docs.pbh-btn.com/en/docs/module/progress-cheat-blocker)
+- [Auto range ban](https://docs.pbh-btn.com/en/docs/module/auto-range-ban)
+- [Multi-dail ban](https://docs.pbh-btn.com/en/docs/module/multi-dial)
+- Peer ID/Client Name camouflage check, powered by [AviatorScript Engine](https://docs.pbh-btn.com/en/docs/module/expression-engine)
+- [Active monitoring(data analysis)](https://docs.pbh-btn.com/en/docs/module/active-monitoring)
+- [IP set subscribe](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker-rules)
 - a mordern WebUI
 
 In addition, PeerBanHelper downloads the GeoIP library at startup, and supports the following functions once it successful loaded:
@@ -25,7 +25,7 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 - View GeoIP statistics
 
 > [!TIP]
-> For best results, it is recommended to work with the IP rule [PBH-BTN/BTN-Collected-Rules](https://github.com/PBH-BTN/BTN-Collected-Rules) and [BTN Network](https://docs.pbh-btn.com/docs/btn/intro) , but this is completely optional.
+> For best results, it is recommended to work with the IP rule [PBH-BTN/BTN-Collected-Rules](https://github.com/PBH-BTN/BTN-Collected-Rules) and [BTN Network](https://docs.pbh-btn.com/en/docs/btn/intro) , but this is completely optional.
 
 
 ## Supported clients
@@ -46,12 +46,12 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 
 ## Install
 
-Please read the [docs](https://docs.pbh-btn.com/docs/category/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2)
+Please read the [docs](https://docs.pbh-btn.com/en/docs/category/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2)
 
 
 ## FAQ
 
-Before submit issue, please read the [FAQ](https://docs.pbh-btn.com/docs/faq)
+Before submit issue, please read the [FAQ](https://docs.pbh-btn.com/en/docs/faq)
 
 ## Support
 Consider join our [Telegram](https://t.me/+_t3Nt5GZ6bJmYjBl) group.
