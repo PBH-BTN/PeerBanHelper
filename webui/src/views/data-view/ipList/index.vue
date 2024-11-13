@@ -153,10 +153,9 @@
           </a-descriptions>
           <a-collapse
             v-if="data?.data.found"
-            :active-key="activatedTab"
+            v-model:active-key="activatedTab"
             :bordered="false"
             destroy-on-hide
-            @change="(k) => activatedTab.push(...k)"
           >
             <a-collapse-item
               key="1"
@@ -180,6 +179,7 @@
               key="2"
               :header="t('page.ipList.label.banHistory')"
               :disabled="!plusStatus?.activated"
+              class="collapse-table"
             >
               <template #expand-icon="{ active }">
                 <icon-plus v-if="plusStatus?.activated && !active" />
@@ -257,6 +257,16 @@ onMounted(() => {
   }
 })
 </script>
+<style>
+.collapse-table {
+  .arco-collapse-item-content-expend {
+    padding: 0;
+    .arco-collapse-item-content-box {
+      padding-top: 0px;
+    }
+  }
+}
+</style>
 
 <style scoped>
 .searchContainer {
