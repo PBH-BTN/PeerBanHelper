@@ -163,7 +163,7 @@ importers:
         version: 5.4.11(@types/node@22.9.0)(less@4.2.0)(sass@1.77.8)
       vite-bundle-analyzer:
         specifier: ^0.13.0
-        version: 0.13.0
+        version: 0.13.1
       vite-plugin-node-polyfills:
         specifier: ^0.22.0
         version: 0.22.0(rollup@4.25.0)(vite@5.4.11(@types/node@22.9.0)(less@4.2.0)(sass@1.77.8))
@@ -2414,8 +2414,8 @@ packages:
     resolution: {integrity: sha512-d0z310fCWv5dJwnX1Y/MncBAqGMKEzlBb1AOf7z9K8ALnd0utBX/msg/fA0+sbyN1ihbMsLhrBlnl1ak7Wa0rg==}
     hasBin: true
 
-  vite-bundle-analyzer@0.13.0:
-    resolution: {integrity: sha512-59ScOf+dCf6EmPpBiQawHf2vGVm8+kaiEwDQkMoMWMNweD4VWtxpU+voPe78z74YrIuP19RCaNCAfjP+0NOJ+A==}
+  vite-bundle-analyzer@0.13.1:
+    resolution: {integrity: sha512-471KXy0cq8L9voQnkLwintkDewhUDxSOUfUq5qgCXalORVmMt4W5JbcLVR6ybEHG6K83afs9/pD7LAlnJYS4mQ==}
 
   vite-hot-client@0.2.3:
     resolution: {integrity: sha512-rOGAV7rUlUHX89fP2p2v0A2WWvV3QMX2UYq0fRqsWSvFvev4atHWqjwGoKaZT1VTKyLGk533ecu3eyd0o59CAg==}
@@ -4977,7 +4977,7 @@ snapshots:
 
   uuid@11.0.3: {}
 
-  vite-bundle-analyzer@0.13.0: {}
+  vite-bundle-analyzer@0.13.1: {}
 
   vite-hot-client@0.2.3(vite@5.4.11(@types/node@22.9.0)(less@4.2.0)(sass@1.77.8)):
     dependencies:
