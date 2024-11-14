@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+systemctl daemon-reload
+systemctl stop peerbanhelper.service
