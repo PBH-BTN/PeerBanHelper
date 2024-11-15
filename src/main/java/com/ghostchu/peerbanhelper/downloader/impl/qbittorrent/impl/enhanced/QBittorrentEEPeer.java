@@ -116,6 +116,9 @@ public final class QBittorrentEEPeer implements Peer {
         return rawIp == null ? ip : rawIp;
     }
 
+    public String getConnection() {
+        return connection;
+    }
 
     @Override
     public String toString() {

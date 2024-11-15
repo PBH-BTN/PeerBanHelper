@@ -59,10 +59,12 @@ export default {
 
   'page.settings.tab.info.log.button': '查看日志',
   'page.settings.tab.info.log.title': '日志',
-  'page.settings.tab.info.log.enableAutoRefresh': '自动刷新',
-  'page.settings.tab.info.log.hideBanWave': '隐藏来自 Ban Wave 的检查日志',
-  'page.settings.tab.info.log.showThread': '显示线程名',
-  'page.settings.tab.info.log.autoScorll': '自动滚动到最新',
+  'page.settings.tab.info.log.enableAutoRefresh': '自动刷新:',
+  'page.settings.tab.info.log.hideThreads': '隐藏线程:',
+  'page.settings.tab.info.log.hideThreads.placeholder': '选择一个线程...',
+  'page.settings.tab.info.log.showThread': '显示线程名:',
+  'page.settings.tab.info.log.autoScorll': '自动滚动到最新:',
+  'page.settings.tab.info.log.showLevel': '显示日志级别:',
 
   'page.settings.tab.info.downloadHeap': '开始下载堆转储文件，这需要一段时间'
 }

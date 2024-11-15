@@ -59,10 +59,12 @@ export default {
 
   'page.settings.tab.info.log.button': 'View Logs',
   'page.settings.tab.info.log.title': 'Logs',
-  'page.settings.tab.info.log.enableAutoRefresh': 'Auto Refresh',
-  'page.settings.tab.info.log.hideBanWave': 'Hide check logs from Ban Wave',
-  'page.settings.tab.info.log.showThread': 'Show Thread Name',
-  'page.settings.tab.info.log.autoScorll': 'Auto Scroll to Latest',
+  'page.settings.tab.info.log.enableAutoRefresh': 'Auto Refresh:',
+  'page.settings.tab.info.log.hideThreads': 'Hide from threads:',
+  'page.settings.tab.info.log.hideThreads.placeholder': 'Select a thread...',
+  'page.settings.tab.info.log.showThread': 'Show Thread Name:',
+  'page.settings.tab.info.log.autoScorll': 'Auto Scroll to Latest:',
+  'page.settings.tab.info.log.showLevel': 'Show log level:',
 
   'page.settings.tab.info.downloadHeap':
     'Start downloading heap dump file, this will take some time'

@@ -32,9 +32,9 @@ export default {
 
   'page.settings.tab.profile.module.banRuleTips.empty': '存在为空的条目',
 
-  'page.settings.tab.profile.module.peerIdBlackList': 'PeerId 封禁',
+  'page.settings.tab.profile.module.peerIdBlackList': 'PeerID 封禁',
   'page.settings.tab.profile.module.peerIdBlackList.useGlobalBanTime': '使用全局封禁时间',
-  'page.settings.tab.profile.module.peerIdBlackList.banPeerId': '封禁 PeerId',
+  'page.settings.tab.profile.module.peerIdBlackList.banPeerId': '封禁 PeerID',
   'page.settings.tab.profile.module.peerIdBlackList.rule': '规则',
 
   'page.settings.tab.profile.module.clientNameBlackList': '客户端名称封禁',

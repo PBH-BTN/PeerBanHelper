@@ -41,7 +41,7 @@ public class JavalinWebContainer {
     @Setter
     @Getter
     private String token;
-    private Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
+    private final Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
 
