@@ -294,6 +294,7 @@ public class BitComet extends AbstractDownloader {
                 torrent.getTask().getTaskName(),
                 torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
                 torrent.getTaskDetail().getTotalSize(),
+                torrent.getTask().getSelectedDownloadedSize(),
                 torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
                 torrent.getTask().getUploadRate(),
                 torrent.getTask().getDownloadRate(),

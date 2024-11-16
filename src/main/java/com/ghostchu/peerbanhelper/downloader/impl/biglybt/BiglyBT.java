@@ -174,6 +174,7 @@ public class BiglyBT extends AbstractDownloader {
                     detail.getName(),
                     detail.getTorrent().getInfoHash(),
                     detail.getTorrent().getSize(),
+                    -1, // TODO
                     detail.getStats().getCompletedInThousandNotation() / 1000d,
                     detail.getStats().getRtUploadSpeed(),
                     detail.getStats().getRtDownloadSpeed(),

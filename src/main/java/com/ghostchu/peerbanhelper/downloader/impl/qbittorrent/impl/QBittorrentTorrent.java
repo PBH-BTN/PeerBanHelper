@@ -25,8 +25,8 @@ public final class QBittorrentTorrent implements Torrent {
     @SerializedName("category")
     private String category;
 
-//    @SerializedName("completed")
-//    private Long completed;
+    @SerializedName("completed")
+    private Long completed;
 //
 //    @SerializedName("completion_on")
 //    private Long completionOn;
@@ -188,6 +188,11 @@ public final class QBittorrentTorrent implements Torrent {
     @Override
     public long getSize() {
         return totalSize;
+    }
+
+    @Override
+    public long getCompletedSize() {
+        return completed;
     }
 
     @Override

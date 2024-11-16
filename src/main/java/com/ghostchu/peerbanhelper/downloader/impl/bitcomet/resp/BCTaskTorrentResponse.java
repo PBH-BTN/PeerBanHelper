@@ -145,8 +145,8 @@ public class BCTaskTorrentResponse {
         private long totalSize;
 //        @SerializedName("selected_size")
 //        private long selectedSize;
-//        @SerializedName("selected_downloaded_size")
-//        private long selectedDownloadedSize;
+        @SerializedName("selected_downloaded_size")
+        private long selectedDownloadedSize;
         @SerializedName("download_rate")
         private long downloadRate;
         @SerializedName("upload_rate")
