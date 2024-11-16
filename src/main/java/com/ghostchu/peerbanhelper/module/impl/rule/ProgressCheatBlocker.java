@@ -256,6 +256,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             // actualUploaded = -1 代表客户端不支持统计此 Peer 总上传量
             if (actualUploaded != -1 && blockExcessiveClients) {
                 long referenceSize = (completedSize > 0 && actualUploaded > completedSize) ? completedSize : torrentSize;
+                // 下载量超过种子大小或者超过已下载大小，检查
                 if (actualUploaded > referenceSize) {
                     long maxAllowedExcessiveThreshold = (long) (referenceSize * excessiveThreshold);
                     if (actualUploaded > maxAllowedExcessiveThreshold) {
@@ -268,8 +269,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                                 actualUploaded,
                                 maxAllowedExcessiveThreshold));
                     }
-                }
-            }
                 }
             }
             // 如果客户端报告自己进度更多，则跳过检查
