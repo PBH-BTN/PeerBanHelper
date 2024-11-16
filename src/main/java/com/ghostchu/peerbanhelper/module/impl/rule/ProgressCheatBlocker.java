@@ -255,30 +255,21 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             final double clientProgress = peer.getProgress(); // 客户端汇报进度
             // actualUploaded = -1 代表客户端不支持统计此 Peer 总上传量
             if (actualUploaded != -1 && blockExcessiveClients) {
-                if (actualUploaded > torrentSize) {
-                    // 下载量超过种子大小，检查
-                    long maxAllowedExcessiveThreshold = (long) (torrentSize * excessiveThreshold);
+                long referenceSize = (completedSize > 0 && actualUploaded > completedSize) ? completedSize : torrentSize;
+                if (actualUploaded > referenceSize) {
+                    long maxAllowedExcessiveThreshold = (long) (referenceSize * excessiveThreshold);
                     if (actualUploaded > maxAllowedExcessiveThreshold) {
                         clientTask.setBanDelayWindowEndAt(0L);
-                        progressRecorder.invalidate(client); // 封禁时，移除缓存
-                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
-                                new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
-                                        torrentSize,
-                                        actualUploaded,
-                                        maxAllowedExcessiveThreshold));
+                        progressRecorder.invalidate(client); // Remove from cache upon banning
+                        return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                            new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
+                            new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
+                                referenceSize,
+                                actualUploaded,
+                                maxAllowedExcessiveThreshold));
                     }
-                } else if (completedSize > 0 && (actualUploaded > completedSize)) {
-                    // 下载量超过任务大小，检查
-                    long maxAllowedExcessiveThreshold = (long) (completedSize * excessiveThreshold);
-                    if (actualUploaded > maxAllowedExcessiveThreshold) {
-                        clientTask.setBanDelayWindowEndAt(0L);
-                        progressRecorder.invalidate(client); // 封禁时，移除缓存
-                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
-                                new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
-                                        completedSize,
-                                        actualUploaded,
-                                        maxAllowedExcessiveThreshold));
-                    }
+                }
+            }
                 }
             }
             // 如果客户端报告自己进度更多，则跳过检查
