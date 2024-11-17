@@ -42,7 +42,7 @@ public final class TRTorrent implements Torrent {
 
     @Override
     public long getCompletedSize() {
-        return -1; // TODO
+        return (long) (backend.getSizeWhenDone() * backend.getPercentDone());
     }
 
     @Override
