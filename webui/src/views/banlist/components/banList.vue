@@ -13,9 +13,11 @@
     <a-list
       ref="banlist"
       :virtual-list-props="{
-        height: virtualListHeight
+        height: virtualListHeight,
+        fixedSize: true,
+        buffer: 10
       }"
-      :scrollbar="false"
+      :scrollbar="true"
       :data="list"
       @reach-bottom="loadMore"
     >
@@ -44,15 +46,15 @@
 </template>
 
 <script setup lang="ts">
-import { useRequest } from 'vue-request'
-import { computed, onMounted, ref, watch } from 'vue'
+import type { BanList } from '@/api/model/banlist'
+import { getBanList } from '@/service/banList'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
-import { getBanList } from '@/service/banList'
-import type { BanList } from '@/api/model/banlist'
-import { useI18n } from 'vue-i18n'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { useWindowSize } from '@vueuse/core'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
 import banListItem from './banListItem.vue'
 
 const { height } = useWindowSize()
@@ -136,12 +138,7 @@ const loadMore = async () => {
     }
     data.value = data.value.concat(newData)
   }
-  setTimeout(
-    () => {
-      loadingMore.value = false
-    },
-    bottom.value ? 1000 : 0
-  )
+  loadingMore.value = false
 }
 
 watch(
