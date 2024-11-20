@@ -21,7 +21,7 @@ importers:
         version: 3.4.5
       '@formatjs/intl-durationformat':
         specifier: ^0.6.3
-        version: 0.6.3
+        version: 0.6.4
       '@guolao/vue-monaco-editor':
         specifier: ^1.5.4
         version: 1.5.4(monaco-editor@0.52.0)(vue@3.5.13(typescript@5.6.3))
@@ -585,17 +585,17 @@ packages:
     resolution: {integrity: sha512-2b/g5hRmpbb1o4GnTZax9N9m0FXzz9OV42ZzI4rDDMDuHUqigAiQCEWChBWCY4ztAGVRjoWT19v0yMmc5/L5kA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@formatjs/ecma402-abstract@2.2.3':
-    resolution: {integrity: sha512-aElGmleuReGnk2wtYOzYFmNWYoiWWmf1pPPCYg0oiIQSJj0mjc4eUfzUXaSOJ4S8WzI/cLqnCTWjqz904FT2OQ==}
+  '@formatjs/ecma402-abstract@2.2.4':
+    resolution: {integrity: sha512-lFyiQDVvSbQOpU+WFd//ILolGj4UgA/qXrKeZxdV14uKiAUiPAtX6XAn7WBCRi7Mx6I7EybM9E5yYn4BIpZWYg==}
 
   '@formatjs/fast-memoize@2.2.3':
     resolution: {integrity: sha512-3jeJ+HyOfu8osl3GNSL4vVHUuWFXR03Iz9jjgI7RwjG6ysu/Ymdr0JRCPHfF5yGbTE6JCrd63EpvX1/WybYRbA==}
 
-  '@formatjs/intl-durationformat@0.6.3':
-    resolution: {integrity: sha512-sI+ssVZpL9ymdF7j4/qzwSwPHdCYVb2jQqQV71tCVEjDRgTz5jj8JqZTymYcV563v1rHKI2nNwNlp2L8D+zJQw==}
+  '@formatjs/intl-durationformat@0.6.4':
+    resolution: {integrity: sha512-kpYLechF9ZvECzzMsvikBl48GkbCEAbZJN4kG/4x0FTVZkBuOWrBlj6DghCn7YsW3Bgsr0n9E0RYO373Kg3m+Q==}
 
-  '@formatjs/intl-localematcher@0.5.7':
-    resolution: {integrity: sha512-GGFtfHGQVFe/niOZp24Kal5b2i36eE2bNL0xi9Sg/yd0TR8aLjcteApZdHmismP5QQax1cMnZM9yWySUUjJteA==}
+  '@formatjs/intl-localematcher@0.5.8':
+    resolution: {integrity: sha512-I+WDNWWJFZie+jkfkiK5Mp4hEDyRSEvmyfYadflOno/mmKJKcB17fEpEH0oJu/OWhhCJ8kJBDz2YMd/6cDl7Mg==}
 
   '@guolao/vue-monaco-editor@1.5.4':
     resolution: {integrity: sha512-eyBAqxJeDpV4mZYZSpNvh3xUgKCld5eEe0dBtjJhsy2+L0MB6PYFZ/FbPHNwskgp2RoIpfn1DLrIhXXE3lVbwQ==}
@@ -2354,6 +2354,9 @@ packages:
   tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
+  tslib@2.8.1:
+    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
   tty-browserify@0.0.1:
     resolution: {integrity: sha512-C3TaO7K81YvjCgQH9Q1S3R3P3BtN3RIM8n+OvX4il1K1zgE8ZhI0op7kClgkxtutIE8hQrcrHBXvIheqKUUCxw==}
 
@@ -3024,25 +3027,25 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@formatjs/ecma402-abstract@2.2.3':
+  '@formatjs/ecma402-abstract@2.2.4':
     dependencies:
       '@formatjs/fast-memoize': 2.2.3
-      '@formatjs/intl-localematcher': 0.5.7
-      tslib: 2.6.2
+      '@formatjs/intl-localematcher': 0.5.8
+      tslib: 2.8.1
 
   '@formatjs/fast-memoize@2.2.3':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.8.1
 
-  '@formatjs/intl-durationformat@0.6.3':
+  '@formatjs/intl-durationformat@0.6.4':
     dependencies:
-      '@formatjs/ecma402-abstract': 2.2.3
-      '@formatjs/intl-localematcher': 0.5.7
-      tslib: 2.6.2
+      '@formatjs/ecma402-abstract': 2.2.4
+      '@formatjs/intl-localematcher': 0.5.8
+      tslib: 2.8.1
 
-  '@formatjs/intl-localematcher@0.5.7':
+  '@formatjs/intl-localematcher@0.5.8':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.8.1
 
   '@guolao/vue-monaco-editor@1.5.4(monaco-editor@0.52.0)(vue@3.5.13(typescript@5.6.3))':
     dependencies:
@@ -4941,6 +4944,8 @@ snapshots:
   tslib@2.3.0: {}
 
   tslib@2.6.2: {}
+
+  tslib@2.8.1: {}
 
   tty-browserify@0.0.1: {}
 
