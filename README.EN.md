@@ -58,8 +58,11 @@ Consider join our [Telegram](https://t.me/+_t3Nt5GZ6bJmYjBl) group.
 
 ## Declaration
 
-Illegal websites and black and grey industries should not initiate any kind of manual service request to our organization's development or support staff; it is strictly prohibited to use any services or products of PBH-BTN team to engage in any illegal activities such as violating the law, endangering national security, committing or helping others to commit telecommunication crimes, and other illegal activities.  
-Users are not allowed to carry out any activities that harm the interests of other individuals or organizations through any services or products of PBH-BTN Team. The use of any PBH-BTN Team services or products in violation of the rights and interests of any individual or organization is not permitted.
+**Using this software means you agree to the following statement:**
+
+Illegal websites and black-grey production, DO NOT initiate any form of manual service requests to our organization's development or support staff; it is strictly forbidden to use any results of the PBH-BTN team (including but not limited to code, images, programs, BTN rule sets, etc.) to engage in any illegal activities such as violating laws and regulations, endangering national security, implementing or assisting others in implementing telecommunications crimes. 
+Users may not use any results of the PBH-BTN team (including but not limited to code, images, programs, BTN rule sets, etc.) to carry out any activities that harm the interests of other individuals or organizations. The use of any services or products of the PBH-BTN team in any case that violates the rights of individuals or organizations is not allowed.
+Any consequences caused by the user's use of this software are borne by the user and have nothing to do with the software developer."
 
 ## Star History
 
