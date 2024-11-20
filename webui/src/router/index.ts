@@ -62,7 +62,8 @@ export const routerOptions: RouteRecordRaw[] = [
         name: 'ipHistory',
         meta: {
           label: 'router.data.ipHistory',
-          needLogin: true
+          needLogin: true,
+          disableAutoUpdate: true
         },
         component: () => import('@/views/data-view/ipList/index.vue')
       }
@@ -205,7 +206,8 @@ export const routerOptions: RouteRecordRaw[] = [
     name: 'config',
     meta: {
       label: 'router.config',
-      needLogin: true
+      needLogin: true,
+      disableAutoUpdate: true
     },
     component: () => import('@/views/settings/index.vue')
   }
