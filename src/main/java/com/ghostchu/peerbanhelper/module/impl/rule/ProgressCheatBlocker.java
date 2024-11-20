@@ -255,19 +255,29 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
             final double clientProgress = peer.getProgress(); // 客户端汇报进度
             // actualUploaded = -1 代表客户端不支持统计此 Peer 总上传量
             if (actualUploaded != -1 && blockExcessiveClients) {
-                long referenceSize = (System.getProperty("pbh.pcb.disable-completed-excessive") == null && completedSize > 0 && actualUploaded > completedSize) ? completedSize : torrentSize;
-                // 下载量超过种子大小或者超过已下载大小，检查
-                if (actualUploaded > referenceSize) {
-                    long maxAllowedExcessiveThreshold = (long) (referenceSize * excessiveThreshold);
+                if (actualUploaded > torrentSize) {
+                    // 下载量超过种子大小，检查
+                    long maxAllowedExcessiveThreshold = (long) (torrentSize * excessiveThreshold);
                     if (actualUploaded > maxAllowedExcessiveThreshold) {
                         clientTask.setBanDelayWindowEndAt(0L);
-                        progressRecorder.invalidate(client); // Remove from cache upon banning
-                        return new CheckResult(getClass(), PeerAction.BAN, banDuration,
-                            new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
-                            new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
-                                referenceSize,
-                                actualUploaded,
-                                maxAllowedExcessiveThreshold));
+                        progressRecorder.invalidate(client); // 封禁时，移除缓存
+                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
+                                new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
+                                        torrentSize,
+                                        actualUploaded,
+                                        maxAllowedExcessiveThreshold));
+                    }
+                } else if (System.getProperty("pbh.pcb.disable-completed-excessive") == null && completedSize > 0 && actualUploaded > completedSize) {
+                    // 下载量超过任务大小，检查
+                    long maxAllowedExcessiveThreshold = (long) (completedSize * excessiveThreshold);
+                    if (actualUploaded > maxAllowedExcessiveThreshold) {
+                        clientTask.setBanDelayWindowEndAt(0L);
+                        progressRecorder.invalidate(client); // 封禁时，移除缓存
+                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
+                                new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
+                                        completedSize,
+                                        actualUploaded,
+                                        maxAllowedExcessiveThreshold));
                     }
                 }
             }
