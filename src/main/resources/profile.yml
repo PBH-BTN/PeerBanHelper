@@ -376,6 +376,18 @@ module:
         name: all-in-one
         # 规则文件订阅地址 - Subscription Address
         url: https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt
+      tor-exit-nodes:
+        enabled: false
+        name: Tor Exit Nodes
+        url: https://cdn.jsdelivr.net/gh/platformcosmo/Tor-IP-Addresses/tor-exit-nodes.lst
+      cloudflare-ipv4:
+        enabled: false
+        name: Cloudflare IPV4
+        url: https://www.cloudflare.com/ips-v4
+      cloudflare-ipv6:
+        enabled: false
+        name: Cloudflare IPV6
+        url: https://www.cloudflare.com/ips-v6
   # 主动监测 - Active Monitoring
   # 此功能允许 PeerBanHelper 主动记录每次请求下载器时获取到的数据到本地 SQLite 数据库中
   # Allow PBH records all data that fetched from downloader and save them into SQLite database

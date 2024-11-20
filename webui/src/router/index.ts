@@ -2,7 +2,7 @@ import { genIconComponent } from '@/components/iconFont'
 import BanList from '@/views/banlist/index.vue'
 import GenericBlackList from '@/views/rule-management/components/generic/index.vue'
 import SubscribeManagement from '@/views/rule-management/components/subscribe/index.vue'
-import { IconCloud, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
+import { IconCloud, IconCodeSquare, IconLocation, IconStorage } from '@arco-design/web-vue/es/icon'
 import { computed, h } from 'vue'
 import {
   createRouter,
@@ -62,7 +62,8 @@ export const routerOptions: RouteRecordRaw[] = [
         name: 'ipHistory',
         meta: {
           label: 'router.data.ipHistory',
-          needLogin: true
+          needLogin: true,
+          disableAutoUpdate: true
         },
         component: () => import('@/views/data-view/ipList/index.vue')
       }
@@ -86,6 +87,16 @@ export const routerOptions: RouteRecordRaw[] = [
           needLogin: true
         },
         component: SubscribeManagement
+      },
+      {
+        path: '/script',
+        name: 'rule_management_script',
+        meta: {
+          label: 'router.script',
+          icon: () => h(IconCodeSquare),
+          needLogin: true
+        },
+        component: () => import('@/views/custom-script/index.vue')
       },
       {
         path: '/ruleIp',
@@ -205,7 +216,8 @@ export const routerOptions: RouteRecordRaw[] = [
     name: 'config',
     meta: {
       label: 'router.config',
-      needLogin: true
+      needLogin: true,
+      disableAutoUpdate: true
     },
     component: () => import('@/views/settings/index.vue')
   }

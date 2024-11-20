@@ -1,6 +1,7 @@
 Package: peerbanhelper
 Version: <version>
-Depends: java-runtime (>=21),libc6
+Pre-Depends: adduser
+Depends: java-runtime (>=21), libc6
 Section: universe/net
 Priority: optional
 Architecture: all
