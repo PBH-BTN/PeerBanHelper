@@ -173,17 +173,25 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                         try {
                             torrentPropertiesLimit.acquire();
                             TorrentProperties properties = getTorrentProperties(detail);
+                            if (properties == null) {
+                                log.warn("Failed to retrieve properties for torrent: {}", detail.getHash());
+                                return;
+                            }
                             if (detail.getCompleted() != properties.completed) {
                                 // completed value changed, invalidate cache and fetch again.
                                 torrentPropertiesCache.invalidate(detail.getHash());
                                 properties = getTorrentProperties(detail);
+                                if (properties == null) {
+                                    log.warn("Failed to retrieve properties after cache invalidation for torrent: {}", detail.getHash());
+                                    return;
+                                }
                             }
                             if (config.isIgnorePrivate() && detail.getPrivateTorrent() == null) {
-                                log.debug("Field is_private is not present, query from properties api, hash: {}", detail.getHash());
+                                log.debug("Field is_private is not present, querying from properties API, hash: {}", detail.getHash());
                                 detail.setPrivateTorrent(properties.isPrivate);
                             }
                             if (detail.getPieceSize() <= 0 || detail.getPiecesHave() <= 0) {
-                                log.debug("Field piece_size,pieces_have is not present, query from properties api, hash: {}", detail.getHash());
+                                log.debug("Field piece_size or pieces_have is not present, querying from properties API, hash: {}", detail.getHash());
                                 detail.setPieceSize(properties.pieceSize);
                                 detail.setPiecesHave(properties.piecesHave);
                             }
