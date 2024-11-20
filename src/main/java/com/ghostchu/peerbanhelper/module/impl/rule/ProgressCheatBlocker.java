@@ -274,7 +274,8 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                         clientTask.setBanDelayWindowEndAt(0L);
                         progressRecorder.invalidate(client); // 封禁时，移除缓存
                         return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
-                                new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
+                                new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD_INCOMPLETE,
+                                        torrentSize,
                                         completedSize,
                                         actualUploaded,
                                         maxAllowedExcessiveThreshold));
