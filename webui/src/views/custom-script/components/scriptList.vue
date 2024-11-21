@@ -143,12 +143,12 @@
   <DetailDrawer ref="detailDrawer" />
 </template>
 <script setup lang="ts">
-import { DeleteScript, GetScriptList, CheckScriptEditable } from '@/service/script'
+import { CheckScriptEditable, DeleteScript, GetScriptList } from '@/service/script'
 import { useUserStore } from '@/stores/userStore'
 import { getColor } from '@/utils/color'
 import { Message, Modal } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination, useRequest } from 'vue-request'
 import DetailDrawer from './detailDrawer.vue'
@@ -193,7 +193,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
     defaultParams: [
       {
         page: 1,
-        pageSize: 5
+        pageSize: 10
       }
     ],
     pagination: {
@@ -205,7 +205,7 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
 
 const { data: editable, loading: editableLoading } = useRequest(CheckScriptEditable)
 
-const readOnlyMode = computed(() => !data.value?.data.editable && !editableLoading)
+const readOnlyMode = computed(() => !editable.value?.data.editable && !editableLoading)
 
 const detailDrawer = ref<InstanceType<typeof DetailDrawer>>()
 const handleDelete = async (id: string) => {
