@@ -488,7 +488,7 @@ PUSH_PROVIDER_TEST_SUCCESS: "{} ({}) Test message sent successfully, please chec
 PUSH_PROVIDER_TEST_FAILED: "Test push service {} ({}) failed"
 PUSH_PROVIDER_TEST_ERROR: "Test push service {} ({}) failed: {}"
 BAN_PEER_EXCEPTION: "An exception occurred while ban Peer, specific Peer unable to ban, Please report these information to PeerBanHelper developer"
-EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS: "For security reason, create AviatorScript via Internet or Reserve Proxy is disallowed."
+EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS: "For security reason, create AviatorScript via Internet or Reserve Proxy is disallowed. Please read: https://docs.pbh-btn.com/en/docs/faq/#why-cant-i-edit-custom-scripts-what-is-read-only-mode"
 EXPRESS_RULE_ENGINE_SAVED: "Script saved"
 BTN_RULES_SCRIPT_COMPILING: "Compiling the scripts from BTN server, this may take a while..."
 BTN_RULES_SCRIPT_COMPILED: "Compiled {} scripts, took {}ms"
