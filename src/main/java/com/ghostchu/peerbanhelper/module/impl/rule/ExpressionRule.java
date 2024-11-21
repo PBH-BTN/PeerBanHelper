@@ -57,7 +57,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     private final long maxScriptExecuteTime = 1500;
     private final JavalinWebContainer javalinWebContainer;
     private final ScriptEngine scriptEngine;
-    private final List<CompiledScript> scripts = Collections.synchronizedList(new LinkedList<>());
+    private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
     private final ScriptStorageDao scriptStorageDao;
     private long banDuration;
 
