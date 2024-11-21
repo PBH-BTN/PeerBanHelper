@@ -242,7 +242,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
         JsonObject object = JsonParser.parseString(resp.body()).getAsJsonObject();
         JsonObject peers = object.getAsJsonObject("peers");
-        List<Peer> peersList = new LinkedList<>();
+        List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
             QBittorrentPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentPeer.class);
