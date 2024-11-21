@@ -1,32 +1,36 @@
 export default {
-  'page.settings.tab.script.disable': 'Disabled in settings',
-  'page.settings.tab.script.description':
+  'page.rule.custom-script.disable': 'Disabled in settings',
+  'page.rule.custom-script.description':
     'You can manage custom scripts here, which will be executed during the ban process. ',
-  'page.settings.tab.script.add': 'Add script',
-  'page.settings.tab.script.column.id': 'ID',
-  'page.settings.tab.script.column.name': 'Name',
-  'page.settings.tab.script.column.author': 'Author',
-  'page.settings.tab.script.column.cacheable': 'Cacheable',
-  'page.settings.tab.script.column.cacheable.tips':
+  'page.rule.custom-script.add': 'Add script',
+  'page.rule.custom-script.column.id': 'ID',
+  'page.rule.custom-script.column.name': 'Name',
+  'page.rule.custom-script.column.author': 'Author',
+  'page.rule.custom-script.column.cacheable': 'Cacheable',
+  'page.rule.custom-script.column.cacheable.tips':
     'Whether to participate in caching, one peer in one seed will only be executed once if the cache has not expired',
-  'page.settings.tab.script.column.threadSafe': 'Thread Safe',
-  'page.settings.tab.script.column.version': 'Version',
-  'page.settings.tab.script.column.actions': 'Actions',
-  'page.settings.tab.script.column.actions.edit': 'Edit',
-  'page.settings.tab.script.column.actions.view': 'View',
-  'page.settings.tab.script.column.actions.delete': 'Are you sure you want to delete this script?',
-  'page.settings.tab.script.detail.title.view': 'View script: ',
-  'page.settings.tab.script.detail.title.edit': 'Edit script: ',
-  'page.settings.tab.script.detail.form.name': 'Script name',
-  'page.settings.tab.script.detail.loading': 'Loading editor, this may take a while...',
-  'page.settings.tab.script.detail.failed': 'Unable to load editor',
-  'page.settings.tab.script.detail.failed.tips':
+  'page.rule.custom-script.column.threadSafe': 'Thread Safe',
+  'page.rule.custom-script.column.version': 'Version',
+  'page.rule.custom-script.column.actions': 'Actions',
+  'page.rule.custom-script.column.actions.edit': 'Edit',
+  'page.rule.custom-script.column.actions.view': 'View',
+  'page.rule.custom-script.column.actions.delete': 'Delete',
+  'page.rule.custom-script.column.actions.deleteConfirm':
+    'Are you sure you want to delete this script?',
+  'page.rule.custom-script.detail.title.view': 'View script: ',
+  'page.rule.custom-script.detail.title.edit': 'Edit script: ',
+  'page.rule.custom-script.detail.form.name': 'Script name',
+  'page.rule.custom-script.detail.loading': 'Loading editor, this may take a while...',
+  'page.rule.custom-script.detail.failed': 'Unable to load editor',
+  'page.rule.custom-script.detail.failed.tips':
     'Please check your network connection or refresh the page to try again',
-  'page.settings.tab.script.detail.action.ok': 'Ok',
-  'page.settings.tab.script.detail.action.cancel': 'Cancel',
-  'page.settings.tab.script.warning': 'Security Warning',
-  'page.settings.tab.script.warning.description':
+  'page.rule.custom-script.detail.action.ok': 'Ok',
+  'page.rule.custom-script.detail.action.cancel': 'Cancel',
+  'page.rule.custom-script.warning': 'Security Warning',
+  'page.rule.custom-script.warning.description':
     'Scripts are powerful and can access system resources. Only add scripts from trusted sources as they run with system privileges.',
-  'page.settings.tab.script.warning.confirm': 'I understand',
-  'page.settings.tab.script.warning.cancel': 'Not now'
+  'page.rule.custom-script.warning.confirm': 'I understand',
+  'page.rule.custom-script.warning.cancel': 'Not now',
+  'page.rule.custom-script.readonlyMode': 'Read-only Mode',
+  'page.rule.custom-script.readonlyMode.disable': 'disabled due to read-only mode'
 }

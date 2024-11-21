@@ -1,16 +1,31 @@
 <template>
   <a-space fill direction="vertical">
     <a-space style="display: flex; justify-content: space-between">
-      <a-typography-text>
-        {{ t('page.settings.tab.script.description') }}
-      </a-typography-text>
       <a-space>
-        <a-button type="primary" @click="handleAddOne">
+        <a-typography-text>
+          {{ t('page.rule.custom-script.description') }}
+        </a-typography-text>
+        <a-tooltip v-if="readOnlyMode" :content="editable?.data.reason">
+          <a-tag color="orange">
+            {{ t('page.rule.custom-script.readonlyMode') }}
+          </a-tag>
+        </a-tooltip>
+      </a-space>
+      <a-space>
+        <a-tooltip v-if="readOnlyMode" :content="t('page.rule.custom-script.readonlyMode.disable')">
+          <a-button type="primary" disabled @click="handleAddOne">
+            <template #icon>
+              <icon-plus-circle />
+            </template>
+            {{ t('page.rule.custom-script.add') }}
+          </a-button>
+        </a-tooltip>
+        <a-button v-else type="primary" @click="handleAddOne">
           <template #icon>
             <icon-plus-circle />
           </template>
-          {{ t('page.settings.tab.script.add') }}</a-button
-        >
+          {{ t('page.rule.custom-script.add') }}
+        </a-button>
       </a-space>
     </a-space>
     <a-table
@@ -32,8 +47,8 @@
     >
       <template #cacheableTitle>
         <a-space size="mini">
-          {{ t('page.settings.tab.script.column.cacheable') }}
-          <a-tooltip :content="t('page.settings.tab.script.column.cacheable.tips')">
+          {{ t('page.rule.custom-script.column.cacheable') }}
+          <a-tooltip :content="t('page.rule.custom-script.column.cacheable.tips')">
             <icon-info-circle />
           </a-tooltip>
         </a-space>
@@ -60,7 +75,7 @@
       <template #action="{ record }">
         <a-space warp size="mini">
           <a-tooltip
-            :content="t('page.settings.tab.script.column.actions.view')"
+            :content="t('page.rule.custom-script.column.actions.view')"
             position="top"
             mini
           >
@@ -76,13 +91,18 @@
             </a-button>
           </a-tooltip>
           <a-tooltip
-            :content="t('page.settings.tab.script.column.actions.edit')"
+            :content="
+              readOnlyMode
+                ? t('page.rule.custom-script.readonlyMode.disable')
+                : t('page.rule.custom-script.column.actions.edit')
+            "
             position="top"
             mini
           >
             <a-button
               class="edit-btn"
               shape="circle"
+              :disabled="readOnlyMode"
               type="text"
               @click="() => handleEdit(record.id)"
             >
@@ -91,17 +111,31 @@
               </template>
             </a-button>
           </a-tooltip>
-          <a-popconfirm
-            :content="t('page.settings.tab.script.column.actions.delete')"
-            type="warning"
-            @before-ok="() => handleDelete(record.id)"
+          <a-tooltip
+            :content="
+              readOnlyMode
+                ? t('page.rule.custom-script.readonlyMode.disable')
+                : t('page.rule.custom-script.column.actions.delete')
+            "
           >
-            <a-button class="edit-btn" status="danger" shape="circle" type="text">
-              <template #icon>
-                <icon-delete />
-              </template>
-            </a-button>
-          </a-popconfirm>
+            <a-popconfirm
+              :content="t('page.rule.custom-script.column.actions.deleteConfirm')"
+              type="warning"
+              @before-ok="() => handleDelete(record.id)"
+            >
+              <a-button
+                :disabled="readOnlyMode"
+                class="edit-btn"
+                status="danger"
+                shape="circle"
+                type="text"
+              >
+                <template #icon>
+                  <icon-delete />
+                </template>
+              </a-button>
+            </a-popconfirm>
+          </a-tooltip>
         </a-space>
       </template>
     </a-table>
@@ -109,32 +143,32 @@
   <DetailDrawer ref="detailDrawer" />
 </template>
 <script setup lang="ts">
-import { DeleteScript, GetScriptList } from '@/service/script'
+import { DeleteScript, GetScriptList, CheckScriptEditable } from '@/service/script'
 import { useUserStore } from '@/stores/userStore'
 import { getColor } from '@/utils/color'
 import { Message, Modal } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { usePagination } from 'vue-request'
+import { usePagination, useRequest } from 'vue-request'
 import DetailDrawer from './detailDrawer.vue'
 const { t } = useI18n()
 const userStore = useUserStore()
 const columns = [
   {
-    title: () => t('page.settings.tab.script.column.id'),
+    title: () => t('page.rule.custom-script.column.id'),
     dataIndex: 'id',
     ellipsis: true,
     tooltip: true
   },
   {
-    title: () => t('page.settings.tab.script.column.name'),
+    title: () => t('page.rule.custom-script.column.name'),
     dataIndex: 'name',
     ellipsis: true,
     tooltip: true
   },
   {
-    title: () => t('page.settings.tab.script.column.author'),
+    title: () => t('page.rule.custom-script.column.author'),
     slotName: 'author'
   },
   {
@@ -143,16 +177,16 @@ const columns = [
     width: 120
   },
   {
-    title: () => t('page.settings.tab.script.column.threadSafe'),
+    title: () => t('page.rule.custom-script.column.threadSafe'),
     slotName: 'threadSafe',
     width: 100
   },
   {
-    title: () => t('page.settings.tab.script.column.version'),
+    title: () => t('page.rule.custom-script.column.version'),
     dataIndex: 'version',
     width: 100
   },
-  { title: () => t('page.settings.tab.script.column.actions'), slotName: 'action' }
+  { title: () => t('page.rule.custom-script.column.actions'), slotName: 'action' }
 ]
 const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh } =
   usePagination(GetScriptList, {
@@ -168,6 +202,11 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
       totalKey: 'data.total'
     }
   })
+
+const { data: editable, loading: editableLoading } = useRequest(CheckScriptEditable)
+
+const readOnlyMode = computed(() => !data.value?.data.editable && !editableLoading)
+
 const detailDrawer = ref<InstanceType<typeof DetailDrawer>>()
 const handleDelete = async (id: string) => {
   const result = await DeleteScript(id)
@@ -183,15 +222,15 @@ const handleDelete = async (id: string) => {
 const handleAddOne = () => {
   if (!userStore.scriptWarningConfirm) {
     Modal.warning({
-      title: t('page.settings.tab.script.warning'),
-      content: t('page.settings.tab.script.warning.description'),
+      title: t('page.rule.custom-script.warning'),
+      content: t('page.rule.custom-script.warning.description'),
       hideCancel: false,
       onOk: () => {
         userStore.confirmScriptWarning()
         detailDrawer.value?.viewDetail(undefined, true)
       },
-      okText: t('page.settings.tab.script.warning.confirm'),
-      cancelText: t('page.settings.tab.script.warning.cancel')
+      okText: t('page.rule.custom-script.warning.confirm'),
+      cancelText: t('page.rule.custom-script.warning.cancel')
     })
     return
   }
@@ -201,15 +240,15 @@ const handleAddOne = () => {
 const handleEdit = (id: string) => {
   if (!userStore.scriptWarningConfirm) {
     Modal.warning({
-      title: t('page.settings.tab.script.warning'),
-      content: t('page.settings.tab.script.warning.description'),
+      title: t('page.rule.custom-script.warning'),
+      content: t('page.rule.custom-script.warning.description'),
       hideCancel: false,
       onOk: () => {
         userStore.confirmScriptWarning()
         detailDrawer.value?.viewDetail(id, false)
       },
-      okText: t('page.settings.tab.script.warning.confirm'),
-      cancelText: t('page.settings.tab.script.warning.cancel')
+      okText: t('page.rule.custom-script.warning.confirm'),
+      cancelText: t('page.rule.custom-script.warning.cancel')
     })
     return
   }

@@ -10,11 +10,11 @@
     <template #title>
       {{
         isNew
-          ? t('page.settings.tab.script.add')
+          ? t('page.rule.custom-script.add')
           : t(
               viewOnly
-                ? 'page.settings.tab.script.detail.title.view'
-                : 'page.settings.tab.script.detail.title.edit'
+                ? 'page.rule.custom-script.detail.title.view'
+                : 'page.rule.custom-script.detail.title.edit'
             ) + editId
       }}
     </template>
@@ -30,7 +30,7 @@
         <a-form ref="formRef" :model="form" :disabled="!isNew" auto-label-width>
           <a-form-item
             field="name"
-            :label="t('page.settings.tab.script.detail.form.name')"
+            :label="t('page.rule.custom-script.detail.form.name')"
             required
             style="margin-bottom: 0"
           >
@@ -41,7 +41,7 @@
         </a-form>
         <a-space>
           <a-button @click="handleCancel">
-            {{ t('page.settings.tab.script.detail.action.cancel') }}
+            {{ t('page.rule.custom-script.detail.action.cancel') }}
           </a-button>
           <a-button
             type="primary"
@@ -51,7 +51,7 @@
               }
             "
           >
-            {{ t('page.settings.tab.script.detail.action.ok') }}
+            {{ t('page.rule.custom-script.detail.action.ok') }}
           </a-button>
         </a-space>
       </a-space>

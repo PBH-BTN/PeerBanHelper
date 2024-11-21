@@ -1,14 +1,14 @@
 <template>
   <a-space v-if="loading" direction="vertical" fill>
     <a-typography-text>
-      {{ t('page.settings.tab.script.description') }}
+      {{ t('page.rule.custom-script.description') }}
     </a-typography-text>
     <div class="container">
       <a-spin :loading="loading"></a-spin>
     </div>
   </a-space>
   <div v-else>
-    <a-result v-if="!data?.data" status="404" :subtitle="t('page.settings.tab.script.disable')" />
+    <a-result v-if="!data?.data" status="404" :subtitle="t('page.rule.custom-script.disable')" />
     <scriptList v-else />
   </div>
 </template>

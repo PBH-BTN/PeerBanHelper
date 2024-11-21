@@ -10,12 +10,12 @@
       @change="handleChange"
     >
       <template #default>
-        <a-spin :tip="t('page.settings.tab.script.detail.loading')" />
+        <a-spin :tip="t('page.rule.custom-script.detail.loading')" />
       </template>
       <template #failure>
-        <a-result status="error" :title="t('page.settings.tab.script.detail.failed')">
+        <a-result status="error" :title="t('page.rule.custom-script.detail.failed')">
           <template #subtitle>
-            {{ t('page.settings.tab.script.detail.failed.tips') }}
+            {{ t('page.rule.custom-script.detail.failed.tips') }}
           </template>
         </a-result>
       </template>
