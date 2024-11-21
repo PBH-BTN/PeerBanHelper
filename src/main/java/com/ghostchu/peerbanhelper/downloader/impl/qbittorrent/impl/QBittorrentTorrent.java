@@ -26,7 +26,7 @@ public final class QBittorrentTorrent implements Torrent {
     private String category;
 
     @SerializedName("completed")
-    private Long completed;
+    private long completed;
 //
 //    @SerializedName("completion_on")
 //    private Long completionOn;
