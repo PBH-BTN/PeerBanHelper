@@ -32,11 +32,18 @@ public interface Torrent {
     double getProgress();
 
     /**
-     * 获取目前该 Torrent 的共计大小
+     * 获取该 Torrent 的总大小
      *
-     * @return 共计大小
+     * @return 总大小
      */
     long getSize();
+
+    /**
+     * 获取该 Torrent 已保存的数据量 (也就是最大可以提供的上传量)
+     *
+     * @return 已保存的数据量
+     */
+    long getCompletedSize();
 
     /**
      * 实时下载速度

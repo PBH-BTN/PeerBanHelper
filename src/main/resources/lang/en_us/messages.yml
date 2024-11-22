@@ -26,6 +26,7 @@ MODULE_IBL_EXCEPTION_GEOIP: "An exception occurred while matching GeoIP informat
 MODULE_IBL_MATCH_PORT: "Match Port rule: {}"
 MODULE_PID_MATCH_PEER_ID: "Match PeerId rule: {}"
 MODULE_PCB_EXCESSIVE_DOWNLOAD: "Client excessive download: Torrent size: {}, total uploaded to this peer: {}, maximum allowed excessive download total: {}"
+MODULE_PCB_EXCESSIVE_DOWNLOAD_INCOMPLETE: "Client excessive download: Torrent size: {} ({} downloaded), total uploaded to this peer: {}, maximum allowed excessive download total: {}"
 MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP: "Client progress: {}, calculated minimal progress: {}, client progress more than local progress, skipping detection"
 MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS: "Client progress: {}, calculated minimal: {}, difference: {}"
 MODULE_PCB_PEER_BAN_REWIND: "Client progress: {}, calculated minimal progress: {}; last time recorded progress: {}, rewind progress: {}, max allowed rewind threshold: {}"
