@@ -17,7 +17,7 @@ Following function are provided by PeerBanHelper:
 - Peer ID/Client Name camouflage check, powered by [AviatorScript Engine](https://docs.pbh-btn.com/en/docs/module/expression-engine)
 - [Active monitoring(data analysis)](https://docs.pbh-btn.com/en/docs/module/active-monitoring)
 - [IP set subscribe](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker-rules)
-- A mordern WebUI
+- A modern WebUI
 
 In addition, PeerBanHelper downloads the GeoIP library at startup, and supports the following functions once it successful loaded:
 - View IP address attribution, AS information (ASN, ISP, AS name, etc.), network type information (broadband, base station, IoT, data center, etc.) in the blocking list.
