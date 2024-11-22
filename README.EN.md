@@ -13,11 +13,11 @@ Following function are provided by PeerBanHelper:
 - [IP/GeoIP/IP type Blacklist](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker)
 - [Fake progress checker (heuristic client detection)](https://docs.pbh-btn.com/en/docs/module/progress-cheat-blocker)
 - [Auto range ban](https://docs.pbh-btn.com/en/docs/module/auto-range-ban)
-- [Multi-dail ban](https://docs.pbh-btn.com/en/docs/module/multi-dial)
+- [Multi-dial ban](https://docs.pbh-btn.com/en/docs/module/multi-dial)
 - Peer ID/Client Name camouflage check, powered by [AviatorScript Engine](https://docs.pbh-btn.com/en/docs/module/expression-engine)
 - [Active monitoring(data analysis)](https://docs.pbh-btn.com/en/docs/module/active-monitoring)
 - [IP set subscribe](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker-rules)
-- a mordern WebUI
+- A mordern WebUI
 
 In addition, PeerBanHelper downloads the GeoIP library at startup, and supports the following functions once it successful loaded:
 - View IP address attribution, AS information (ASN, ISP, AS name, etc.), network type information (broadband, base station, IoT, data center, etc.) in the blocking list.
@@ -34,7 +34,7 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 - BiglyBT([plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT) is required)
 - Deluge([plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge) is required)
 - Azureus(Vuze)([plugin](https://github.com/PBH-BTN/PBH-Adapter-Azureus) is required)
-- Transmission **(deprected；3.00-20 or higher)**
+- Transmission **(deprecated；3.00-20 or higher)**
 - BitComet **v2.10 Beta6 [20240928] or higher**
 
 
@@ -51,7 +51,7 @@ Please read the [docs](https://docs.pbh-btn.com/en/docs/category/%E5%AE%89%E8%A3
 
 ## FAQ
 
-Before submit issue, please read the [FAQ](https://docs.pbh-btn.com/en/docs/faq)
+Before submitting an issue, please read the [FAQ](https://docs.pbh-btn.com/en/docs/faq)
 
 ## Support
 Consider join our [Telegram](https://t.me/+_t3Nt5GZ6bJmYjBl) group.
