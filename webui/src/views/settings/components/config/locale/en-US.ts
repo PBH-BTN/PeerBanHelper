@@ -51,7 +51,7 @@ export default {
     'Are you sure you want to enable submit?',
   'page.settings.tab.config.btn.allowScript': 'Allow BTN server push scripts',
   'page.settings.tab.config.btn.allowScript.warning':
-    'Warning, this means that the remote server can execute any code on your device, please enable with caution!',
+    'Warning: this means that the remote server can execute any code on your device, please enable with caution!',
   'page.settings.tab.config.btn.allowScript.tips':
     'This option will allow BTN server push scripts to your device, this may increase the accuracy of the ban',
 
