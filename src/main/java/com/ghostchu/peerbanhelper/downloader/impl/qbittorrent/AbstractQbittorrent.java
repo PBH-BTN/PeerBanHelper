@@ -62,9 +62,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
@@ -243,7 +242,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
         JsonObject object = JsonParser.parseString(resp.body()).getAsJsonObject();
         JsonObject peers = object.getAsJsonObject("peers");
-        List<Peer> peersList = new LinkedList<>();
+        List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
             JsonObject singlePeerObject = peers.getAsJsonObject(s);
             QBittorrentPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentPeer.class);

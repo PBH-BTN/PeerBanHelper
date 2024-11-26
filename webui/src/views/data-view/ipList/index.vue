@@ -151,7 +151,12 @@
               </a-space>
             </a-descriptions-item>
           </a-descriptions>
-          <a-collapse v-if="data?.data.found" :bordered="false" destroy-on-hide>
+          <a-collapse
+            v-if="data?.data.found"
+            v-model:active-key="activatedTab"
+            :bordered="false"
+            destroy-on-hide
+          >
             <a-collapse-item
               key="1"
               :header="t('page.ipList.label.accessHistory')"
@@ -168,12 +173,13 @@
                   <a-tag size="small">Plus</a-tag>
                 </a-tooltip>
               </template>
-              <accessHistoryTable :ip="searchInput" />
+              <accessHistoryTable :ip="data.data.address" />
             </a-collapse-item>
             <a-collapse-item
               key="2"
               :header="t('page.ipList.label.banHistory')"
               :disabled="!plusStatus?.activated"
+              class="collapse-table"
             >
               <template #expand-icon="{ active }">
                 <icon-plus v-if="plusStatus?.activated && !active" />
@@ -185,7 +191,7 @@
                   <a-tag size="small">Plus</a-tag>
                 </a-tooltip>
               </template>
-              <banHistoryTable :ip="searchInput" />
+              <banHistoryTable :ip="data.data.address" />
             </a-collapse-item>
           </a-collapse>
         </a-space>
@@ -224,19 +230,43 @@ const { data, loading, run, error } = useRequest(GetIPBasicData, {
 const endpointStore = useEndpointStore()
 const plusStatus = computed(() => endpointStore.plusStatus)
 
+const activatedTab = ref<(string | number)[]>([])
+
 const { query } = useRoute()
-onMounted(() => {
-  if (query.ip) {
-    searchInput.value = query.ip as string
-    run(searchInput.value)
-  }
-})
+
 const handleSearch = (value: string) => {
   if (value) {
+    data.value = undefined
+    activatedTab.value = []
+    if (value !== query.ip) {
+      const search = new URLSearchParams(window.location.search)
+      search.set('ip', value)
+      window.history.pushState(
+        {},
+        '',
+        new URL(`${window.location.origin}${window.location.pathname}?${search.toString()}`)
+      )
+    }
     run(value)
   }
 }
+onMounted(() => {
+  if (query.ip) {
+    searchInput.value = query.ip as string
+    handleSearch(searchInput.value)
+  }
+})
 </script>
+<style>
+.collapse-table {
+  .arco-collapse-item-content-expend {
+    padding: 0;
+    .arco-collapse-item-content-box {
+      padding-top: 0px;
+    }
+  }
+}
+</style>
 
 <style scoped>
 .searchContainer {

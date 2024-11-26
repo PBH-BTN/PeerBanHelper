@@ -12,6 +12,7 @@
       baseSize: 4,
       bufferSize: 1
     }"
+    :bordered="false"
     column-resizable
     size="medium"
     class="banlog-table"

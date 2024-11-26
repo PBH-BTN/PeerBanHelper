@@ -145,6 +145,11 @@ const handleSubmit = async (index: number) => {
       }
       Message.success({ content: resp.message, resetOnHover: true })
     } else {
+      if (dataSource[index].data === dataSource[index].oldData) {
+        //没有变化直接返回
+        dataSource[index].editing = false
+        return
+      }
       // update item 先添加，再删除，避免添加失败
       let resp = await addBlackList(dataSource[index].data, type.value)
       if (!resp.success) {

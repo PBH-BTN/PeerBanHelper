@@ -53,8 +53,6 @@ module:
       - '{"method":"STARTS_WITH","content":"-hp"}'
       - '{"method":"STARTS_WITH","content":"-xm"}'
       - '{"method":"STARTS_WITH","content":"-dt"}'
-      - '{"method":"STARTS_WITH","content":"-gt0002"}'
-      - '{"method":"STARTS_WITH","content":"-gt0003"}'
       - '{"method":"CONTAINS","content":"-rn0.0.0"}'
       - '{"method":"STARTS_WITH","content":"-sd"}'
       - '{"method":"STARTS_WITH","content":"-xf"}'
@@ -81,7 +79,6 @@ module:
       - '{"method":"STARTS_WITH","content":"dt "}'
       - '{"method":"STARTS_WITH","content":"xm/torrent"}'
       - '{"method":"STARTS_WITH","content":"xm "}'
-      - '{"method":"STARTS_WITH","content":"go.torrent"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"CONTAINS","content":"rain 0.0.0"}'
       - '{"method":"CONTAINS","content":"gopeed dev"}'
@@ -92,11 +89,9 @@ module:
       - '{"method":"CONTAINS","content":"tudou"}'
       - '{"method":"CONTAINS","content":"torrentstorm"}'
       - '{"method":"CONTAINS","content":"qqdownload"}'
-      - '{"method":"CONTAINS","content":"anacrolix/torrent"}'
       - '{"method":"STARTS_WITH","content":"qbittorrent/3.3.15"}'
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ޭ__"}' # 0xde-0xad-0xbe-0xef
-      - '{"method":"STARTS_WITH","content":"ljyun.cn/hangzhou/monitoring"}'
       - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"STARTS_WITH","content":"-XL"}'
   # 进度作弊检查器：Progress Cheat Blocker
@@ -381,6 +376,10 @@ module:
         name: all-in-one
         # 规则文件订阅地址 - Subscription Address
         url: https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt
+      tor-exit-nodes:
+        enabled: false
+        name: Tor Exit Nodes
+        url: https://cdn.jsdelivr.net/gh/platformcosmo/Tor-IP-Addresses/tor-exit-nodes.lst
   # 主动监测 - Active Monitoring
   # 此功能允许 PeerBanHelper 主动记录每次请求下载器时获取到的数据到本地 SQLite 数据库中
   # Allow PBH records all data that fetched from downloader and save them into SQLite database

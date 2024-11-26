@@ -43,7 +43,6 @@ public class DelugeServer {
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .defaultHeader("Accept", "application/json")
                 .defaultHeader("Content-Type", "application/json")
-                .requestTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS))

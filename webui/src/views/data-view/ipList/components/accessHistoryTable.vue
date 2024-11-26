@@ -15,6 +15,7 @@
     }"
     column-resizable
     size="medium"
+    :bordered="false"
     class="banlog-table"
     @page-change="changeCurrent"
     @page-size-change="changePageSize"
@@ -55,6 +56,14 @@
           ><icon-arrow-down class="red" />
           {{ formatFileSize(record.downloadedOffset) }}</a-typography-text
         >
+      </a-space>
+    </template>
+    <template #offsetTitle>
+      <a-space size="mini">
+        {{ t('page.torrentList.accessHistory.column.offset') }}
+        <a-popover :content="t('page.torrentList.accessHistory.column.offsetDescription')">
+          <icon-info-circle />
+        </a-popover>
       </a-space>
     </template>
     <template #flags="{ record }">
@@ -101,9 +110,7 @@ import { GetIPAccessHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
-import { Popover, Space } from '@arco-design/web-vue'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
-import { h } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 const { t, d } = useI18n()
@@ -152,17 +159,7 @@ const columns = [
     width: 120
   },
   {
-    title: () =>
-      h(Space, [
-        t('page.torrentList.accessHistory.column.offset'),
-        h(
-          Popover,
-          {
-            content: t('page.torrentList.accessHistory.column.offsetDescription')
-          },
-          () => h(IconInfoCircle)
-        )
-      ]),
+    titleSlotName: 'offsetTitle',
     slotName: 'offset',
     width: 120
   },

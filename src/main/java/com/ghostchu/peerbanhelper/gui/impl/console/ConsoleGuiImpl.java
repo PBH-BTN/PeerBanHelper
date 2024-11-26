@@ -16,7 +16,7 @@ public class ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void setup() {
-        // do nothing
+        System.setProperty("java.awt.headless", "true");
     }
 
     @Override

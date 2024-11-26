@@ -3,8 +3,9 @@
     :width="800"
     :visible="visible"
     unmount-on-close
-    :hide-cancel="!isNew"
+    :hide-cancel="viewOnly"
     @cancel="handleCancel"
+    @before-ok="handleOk"
   >
     <template #title>
       {{
@@ -24,7 +25,7 @@
       <a-spin />
     </div>
     <editor v-else v-model="content" :view-only="viewOnly" />
-    <template #footer>
+    <template v-if="!viewOnly" #footer>
       <a-space fill style="display: flex; justify-content: space-between">
         <a-form ref="formRef" :model="form" :disabled="!isNew" auto-label-width>
           <a-form-item
@@ -40,8 +41,8 @@
         </a-form>
         <a-space>
           <a-button @click="handleCancel">
-            {{ t('page.settings.tab.script.detail.action.cancel') }}</a-button
-          >
+            {{ t('page.settings.tab.script.detail.action.cancel') }}
+          </a-button>
           <a-button
             type="primary"
             @click="

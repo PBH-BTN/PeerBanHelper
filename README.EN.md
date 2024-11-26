@@ -8,15 +8,15 @@ Automatically block unwanted, leeches and abnormal BT peers with support for cus
 
 Following function are provided by PeerBanHelper:
 
-- [PeerID Blacklist](https://docs.pbh-btn.com/docs/module/peer-id)
-- [Client Name Blacklist](https://docs.pbh-btn.com/docs/module/client-name)
-- [IP/GeoIP/IP type Blacklist](https://docs.pbh-btn.com/docs/module/ip-address-blocker)
-- [Fake progress checker (heuristic client detection)](https://docs.pbh-btn.com/docs/module/progress-cheat-blocker)
-- [Auto range ban](https://docs.pbh-btn.com/docs/module/auto-range-ban)
-- [Multi-dail ban](https://docs.pbh-btn.com/docs/module/multi-dial)
-- Peer ID/Client Name camouflage check, powered by [AviatorScript Engine](https://docs.pbh-btn.com/docs/module/expression-engine)
-- [Active monitoring(data analysis)](https://docs.pbh-btn.com/docs/module/active-monitoring)
-- [IP set subscribe](https://docs.pbh-btn.com/docs/module/ip-address-blocker-rules)
+- [PeerID Blacklist](https://docs.pbh-btn.com/en/docs/module/peer-id)
+- [Client Name Blacklist](https://docs.pbh-btn.com/en/docs/module/client-name)
+- [IP/GeoIP/IP type Blacklist](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker)
+- [Fake progress checker (heuristic client detection)](https://docs.pbh-btn.com/en/docs/module/progress-cheat-blocker)
+- [Auto range ban](https://docs.pbh-btn.com/en/docs/module/auto-range-ban)
+- [Multi-dail ban](https://docs.pbh-btn.com/en/docs/module/multi-dial)
+- Peer ID/Client Name camouflage check, powered by [AviatorScript Engine](https://docs.pbh-btn.com/en/docs/module/expression-engine)
+- [Active monitoring(data analysis)](https://docs.pbh-btn.com/en/docs/module/active-monitoring)
+- [IP set subscribe](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker-rules)
 - a mordern WebUI
 
 In addition, PeerBanHelper downloads the GeoIP library at startup, and supports the following functions once it successful loaded:
@@ -25,7 +25,7 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 - View GeoIP statistics
 
 > [!TIP]
-> For best results, it is recommended to work with the IP rule [PBH-BTN/BTN-Collected-Rules](https://github.com/PBH-BTN/BTN-Collected-Rules) and [BTN Network](https://docs.pbh-btn.com/docs/btn/intro) , but this is completely optional.
+> For best results, it is recommended to work with the IP rule [PBH-BTN/BTN-Collected-Rules](https://github.com/PBH-BTN/BTN-Collected-Rules) and [BTN Network](https://docs.pbh-btn.com/en/docs/btn/intro) , but this is completely optional.
 
 
 ## Supported clients
@@ -46,20 +46,23 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 
 ## Install
 
-Please read the [docs](https://docs.pbh-btn.com/docs/category/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2)
+Please read the [docs](https://docs.pbh-btn.com/en/docs/category/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2)
 
 
 ## FAQ
 
-Before submit issue, please read the [FAQ](https://docs.pbh-btn.com/docs/faq)
+Before submit issue, please read the [FAQ](https://docs.pbh-btn.com/en/docs/faq)
 
 ## Support
 Consider join our [Telegram](https://t.me/+_t3Nt5GZ6bJmYjBl) group.
 
 ## Declaration
 
-Illegal websites and black and grey industries should not initiate any kind of manual service request to our organization's development or support staff; it is strictly prohibited to use any services or products of PBH-BTN team to engage in any illegal activities such as violating the law, endangering national security, committing or helping others to commit telecommunication crimes, and other illegal activities.  
-Users are not allowed to carry out any activities that harm the interests of other individuals or organizations through any services or products of PBH-BTN Team. The use of any PBH-BTN Team services or products in violation of the rights and interests of any individual or organization is not permitted.
+**Using this software means you agree to the following statement:**
+
+Illegal websites and black-grey production, DO NOT initiate any form of manual service requests to our organization's development or support staff; it is strictly forbidden to use any results of the PBH-BTN team (including but not limited to code, images, programs, BTN rule sets, etc.) to engage in any illegal activities such as violating laws and regulations, endangering national security, implementing or assisting others in implementing telecommunications crimes. 
+Users may not use any results of the PBH-BTN team (including but not limited to code, images, programs, BTN rule sets, etc.) to carry out any activities that harm the interests of other individuals or organizations. The use of any services or products of the PBH-BTN team in any case that violates the rights of individuals or organizations is not allowed.
+Any consequences caused by the user's use of this software are borne by the user and have nothing to do with the software developer."
 
 ## Star History
 
