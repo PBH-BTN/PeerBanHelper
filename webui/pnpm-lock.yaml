@@ -124,7 +124,7 @@ importers:
         version: 8.16.0(eslint@9.15.0)(typescript@5.6.3)
       '@vitejs/plugin-vue':
         specifier: ^5.2.0
-        version: 5.2.0(vite@6.0.0(@types/node@22.10.0)(less@4.2.1)(sass@1.77.8))(vue@3.5.13(typescript@5.6.3))
+        version: 5.2.1(vite@6.0.0(@types/node@22.10.0)(less@4.2.1)(sass@1.77.8))(vue@3.5.13(typescript@5.6.3))
       '@vue/tsconfig':
         specifier: ^0.6.0
         version: 0.6.0(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3))
@@ -151,7 +151,7 @@ importers:
         version: 7.0.1
       prettier:
         specifier: ^3.3.3
-        version: 3.4.0
+        version: 3.4.1
       typescript:
         specifier: ~5.6.3
         version: 5.6.3
@@ -927,11 +927,11 @@ packages:
     resolution: {integrity: sha512-pq19gbaMOmFE3CbL0ZB8J8BFCo2ckfHBfaIsaOZgBIF4EoISJIdLX5xRhd0FGB0LlHReNRuzoJoMGpTjq8F2CQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@vitejs/plugin-vue@5.2.0':
-    resolution: {integrity: sha512-7n7KdUEtx/7Yl7I/WVAMZ1bEb0eVvXF3ummWTeLcs/9gvo9pJhuLdouSXGjdZ/MKD1acf1I272+X0RMua4/R3g==}
+  '@vitejs/plugin-vue@5.2.1':
+    resolution: {integrity: sha512-cxh314tzaWwOLqVes2gnnCtvBDcM1UMdn+iFR+UjAn411dPT3tOmqrJjbMd7koZpMAmBM/GqeV4n9ge7JSiJJQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
-      vite: ^5.0.0
+      vite: ^5.0.0 || ^6.0.0
       vue: ^3.2.25
 
   '@volar/language-core@2.4.8':
@@ -2090,8 +2090,8 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier@3.4.0:
-    resolution: {integrity: sha512-/OXNZcLyWkfo13ofOW5M7SLh+k5pnIs07owXK2teFpnfaOEcycnSy7HQxldaVX1ZP/7Q8oO1eDuQJNwbomQq5Q==}
+  prettier@3.4.1:
+    resolution: {integrity: sha512-G+YdqtITVZmOJje6QkXQWzl3fSfMxFwm1tjTyo9exhkmWSqC4Yhd1+lug++IlR2mvRVAxEDDWYkQdeSztajqgg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -3360,7 +3360,7 @@ snapshots:
       '@typescript-eslint/types': 8.16.0
       eslint-visitor-keys: 4.2.0
 
-  '@vitejs/plugin-vue@5.2.0(vite@6.0.0(@types/node@22.10.0)(less@4.2.1)(sass@1.77.8))(vue@3.5.13(typescript@5.6.3))':
+  '@vitejs/plugin-vue@5.2.1(vite@6.0.0(@types/node@22.10.0)(less@4.2.1)(sass@1.77.8))(vue@3.5.13(typescript@5.6.3))':
     dependencies:
       vite: 6.0.0(@types/node@22.10.0)(less@4.2.1)(sass@1.77.8)
       vue: 3.5.13(typescript@5.6.3)
@@ -4677,7 +4677,7 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier@3.4.0: {}
+  prettier@3.4.1: {}
 
   process-nextick-args@2.0.1: {}
 
