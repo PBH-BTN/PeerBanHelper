@@ -7,11 +7,15 @@ import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.offbynull.portmapper.mapper.PortType;
 import io.ipfs.cid.Cid;
 import io.ipfs.multiaddr.MultiAddress;
+import io.ipfs.multihash.Multihash;
 import io.libp2p.core.PeerId;
 import io.libp2p.core.crypto.PrivKey;
+import io.libp2p.crypto.keys.Ed25519Kt;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.peergos.*;
+import org.peergos.BlockRequestAuthoriser;
+import org.peergos.EmbeddedIpfs;
+import org.peergos.HostBuilder;
+import org.peergos.Want;
 import org.peergos.blockstore.FileBlockstore;
 import org.peergos.config.IdentitySection;
 import org.peergos.protocol.http.HttpProtocol;
@@ -21,11 +25,12 @@ import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -35,14 +40,15 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class DecentralizedManager {
     private final File directory;
     private final int listeningPort;
-    private final boolean runNoBootstrap;
-    private final @NotNull List<String> bootstrapNodes;
     private final File ipfsDirectory;
     private final PBHPortMapper pbhPortMapper;
     private final DHTRecordDao dhtRecordDao;
     private EmbeddedIpfs ipfs;
+    private PrivKey privKey;
+    private PeerId peerId;
+    private IdentitySection identity;
 
-    public DecentralizedManager(PBHPortMapper pbhPortMapper, DHTRecordDao dhtRecordDao) {
+    public DecentralizedManager(PBHPortMapper pbhPortMapper, DHTRecordDao dhtRecordDao) throws IOException {
         this.pbhPortMapper = pbhPortMapper;
         this.dhtRecordDao = dhtRecordDao;
         this.directory = new File(Main.getDataDirectory(), "decentralized");
@@ -54,21 +60,17 @@ public class DecentralizedManager {
             this.ipfsDirectory.mkdirs();
         }
         this.listeningPort = Main.getMainConfig().getInt("decentralized.port", 9897);
-        this.runNoBootstrap = Main.getMainConfig().getBoolean("decentralized.no-bootstrap", false);
-        this.bootstrapNodes = Main.getMainConfig().getStringList("decentralized.bootstrap-nodes");
-        Thread.startVirtualThread(this::startupNabu);
+        this.privKey = getPrivKey();
+        this.peerId = PeerId.fromPubKey(privKey.publicKey());
+        this.identity = new IdentitySection(privKey.bytes(), peerId);
+        this.startupNabu();
     }
 
     private void startupNabu() {
         List<MultiAddress> swarmAddresses = List.of(new MultiAddress("/ip6/::/tcp/" + listeningPort));
         List<MultiAddress> bootstrapAddresses = List.of(new MultiAddress("/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa"));
         BlockRequestAuthoriser authoriser = (cid, peerid, auth) -> CompletableFuture.completedFuture(true);
-        HostBuilder builder = new HostBuilder().generateIdentity();
-        PrivKey privKey = builder.getPrivateKey();
-        PeerId peerId = builder.getPeerId();
-        IdentitySection identity = new IdentitySection(privKey.bytes(), peerId);
         boolean provideBlocks = true;
-
         SocketAddress httpTarget = new InetSocketAddress("localhost", 10000);
         Optional<HttpProtocol.HttpRequestProcessor> httpProxyTarget =
                 Optional.of((s, req, h) -> HttpProtocol.proxyRequest(req, httpTarget, h));
@@ -106,11 +108,38 @@ public class DecentralizedManager {
                 }
             });
         }
+    }
 
-        List<Want> wants = List.of(new Want(Cid.decode("zdpuAwfJrGYtiGFDcSV3rDpaUrqCtQZRxMjdC6Eq9PNqLqTGg")));
-        Set<PeerId> retrieveFrom = Set.of(PeerId.fromBase58("QmVdFZgHnEgcedCS2G2ZNiEN59LuVrnRm7z3yXtEBv2XiF"));
-        boolean addToLocal = true;
-        List<HashedBlock> blocks = ipfs.getBlocks(wants, retrieveFrom, addToLocal);
-        byte[] data = blocks.get(0).block;
+    public void publishValue(byte[] data, long seq, int hoursTTL){;
+        ipfs.publishValue(privKey,data,seq,hoursTTL);
+    }
+
+    public void publishValueToIpns(Multihash ipns, byte[] data, long seq, int hoursTTL){
+        // WTF?
+    }
+
+    public PrivKey getPrivKey() throws IOException {
+        File privKey = new File(directory, "ipfs.key");
+        if (!privKey.exists()) {
+            HostBuilder builder = new HostBuilder().generateIdentity();
+            Files.write(privKey.toPath(), builder.getPrivateKey().bytes());
+        }
+        return Ed25519Kt.unmarshalEd25519PrivateKey(Files.readAllBytes(privKey.toPath()));
+    }
+
+    public CompletableFuture<byte[]> getBlockFromIPNS(Cid ipnsPointerCid) {
+        return CompletableFuture.supplyAsync(() -> {
+            var future = ipfs.dht.resolveIpnsValue(ipnsPointerCid, ipfs.node, 1);
+            String contentCid = future.join();
+            return getBlockFromCid(Cid.decode(contentCid)).join();
+        });
+    }
+
+    public CompletableFuture<byte[]> getBlockFromCid(Cid cid) {
+        return CompletableFuture.supplyAsync(() -> {
+            var blocks = ipfs.getBlocks(List.of(new Want(cid)), null, true);
+            // there have multiple blocks, we need connect all byte[]
+            return blocks.getFirst().block;
+        });
     }
 }
