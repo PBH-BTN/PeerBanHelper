@@ -30,6 +30,8 @@ public class PBHPortMapper {
     private final Bus networkBus;
     private final Bus processBus;
     private final Map<MappedPort, MappedPort> originalToRefreshedPortMap = Collections.synchronizedMap(new HashMap<>());
+    private List<PortMapper> mappers = null;
+    private final Object scanMappersLock = new Object();
     private ScheduledExecutorService sched = Executors.newScheduledThreadPool(16, Thread.ofVirtual().factory());
 
     public PBHPortMapper() {
@@ -37,10 +39,15 @@ public class PBHPortMapper {
         this.process = ProcessGateway.create();
         this.networkBus = network.getBus();
         this.processBus = process.getBus();
+        Thread.startVirtualThread(()->{
+            scanMappers();
+        });
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                List<PortMapper> mappers = PortMapperFactory.discover(networkBus, processBus);
-                if (mappers.isEmpty()) {
+                if(originalToRefreshedPortMap.isEmpty()){
+                    return;
+                }
+                if(mappers == null || mappers.isEmpty()){
                     return;
                 }
                 var it = originalToRefreshedPortMap.entrySet().iterator();
@@ -51,13 +58,29 @@ public class PBHPortMapper {
                     it.remove();
                 }
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } finally {
+                networkBus.send(new KillNetworkRequest());
+                processBus.send(new KillProcessRequest());
+                sched.shutdown();
             }
-            networkBus.send(new KillNetworkRequest());
-            processBus.send(new KillProcessRequest());
-            sched.shutdown();
         }));
+    }
+
+    private void scanMappers() {
+        synchronized (scanMappersLock) {
+            try {
+                this.mappers = PortMapperFactory.discover(networkBus, processBus);
+            } catch (InterruptedException exception) {
+                log.warn("Unable to lookup port mappers", exception);
+            }
+        }
+    }
+
+    public List<PortMapper> getMappers(){
+        if(mappers == null){
+            scanMappers();
+        }
+        return mappers;
     }
 
     public CompletableFuture<Void> unmapPort(List<PortMapper> mappers, MappedPort mappedPort) {

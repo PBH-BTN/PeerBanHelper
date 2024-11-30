@@ -194,7 +194,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             return new StdResp(false, tl(locale, Lang.IP_BAN_RULE_DISABLED, ruleId), null);
         }
         String url = rule.getString("url");
-        if (null != url && url.startsWith("http")) {
+        if (null != url) {
             // 解析远程订阅
             String ruleFileName = ruleId + ".txt";
             File dir = new File(Main.getDataDirectory(), "/sub");
@@ -290,18 +290,33 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                 return new DataUpdateResult(response.statusCode(), null, response.body().getBytes());
             }
             // IPNS
-            if (url.startsWith("/ipfs/")) {
-                var ipnsCid = StringUtils.substringAfter(url, "/ipfs/");
-                Cid cid = Cid.decode(ipnsCid);
-                var bytes = decentralizedManager.getBlockFromIPNS(cid).join();
-                return new DataUpdateResult(200, "Data get from IPFS via IPNS", bytes);
+            if (url.startsWith("/ipns/")) {
+               var ipnsCid = StringUtils.substringAfter(url, "/ipns/");
+                var ipfs = decentralizedManager.getIpfs();
+                if (ipfs == null) {
+                    throw new IllegalStateException("IPFS not available");
+                }
+                try {
+                   var cid = ipfs.name.resolve(Cid.decode(ipnsCid), true);
+                   var data = ipfs.cat(Cid.decode(StringUtils.substringAfter(cid,"/ipfs/")));
+                   return new DataUpdateResult(200, "Data get from IPFS via IPNS", data);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
-            // 用户直接塞了个 CID
-            try {
-                Cid cid = Cid.decode(url);
-                var bytes = decentralizedManager.getBlockFromCid(cid).join();
-                return new DataUpdateResult(200, "Data get from IPFS", bytes);
-            } catch (Exception ignored) {
+            // IPNS
+            if (url.startsWith("/ipfs/")) {
+                var cid = StringUtils.substringAfter(url, "/ipfs/");
+                var ipfs = decentralizedManager.getIpfs();
+                if (ipfs == null) {
+                    throw new IllegalStateException("IPFS not available");
+                }
+                try {
+                    var data = ipfs.cat(Cid.decode(StringUtils.substringAfter(cid,"/ipfs/")));
+                    return new DataUpdateResult(200, "Data get from IPFS via IPNS", data);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
             throw new IllegalArgumentException("Invalid URL");
         });
