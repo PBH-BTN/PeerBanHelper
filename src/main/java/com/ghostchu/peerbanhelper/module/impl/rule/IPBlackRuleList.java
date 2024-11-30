@@ -42,6 +42,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -284,14 +286,20 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
 
     private CompletableFuture<DataUpdateResult> getResource(String url) {
         return CompletableFuture.supplyAsync(() -> {
-            if (url.startsWith("http")) {
+            URI uri;
+            try {
+                uri = new URI(url);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+            if (uri.getScheme().startsWith("http")) {
                 var response = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                         MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString()).join();
                 return new DataUpdateResult(response.statusCode(), null, response.body().getBytes());
             }
             // IPNS
-            if (url.startsWith("ipns://")) {
-               var ipnsCid = StringUtils.substringAfter(url, "ipns://");
+            if (uri.getScheme().equalsIgnoreCase("ipns")) {
+               var ipnsCid = uri.getHost();
                 var ipfs = decentralizedManager.getIpfs();
                 if (ipfs == null) {
                     throw new IllegalStateException("IPFS not available");
@@ -305,14 +313,14 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                 }
             }
             // IPFS
-            if (url.startsWith("ipfs://")) {
-                var cid = StringUtils.substringAfter(url, "ipfs://");
+            if (uri.getScheme().equalsIgnoreCase("ipfs")) {
+                var cid = uri.getHost();
                 var ipfs = decentralizedManager.getIpfs();
                 if (ipfs == null) {
                     throw new IllegalStateException("IPFS not available");
                 }
                 try {
-                    var data = ipfs.cat(Cid.decode(StringUtils.substringAfter(cid,"ipfs://")));
+                    var data = ipfs.cat(Cid.decode(cid));
                     return new DataUpdateResult(200, "Data get from IPFS", data);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
