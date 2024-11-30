@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.decentralized;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.DHTRecordDao;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.offbynull.portmapper.mapper.PortType;
 import io.ipfs.cid.Cid;
@@ -19,6 +20,7 @@ import org.peergos.Want;
 import org.peergos.blockstore.FileBlockstore;
 import org.peergos.config.IdentitySection;
 import org.peergos.protocol.http.HttpProtocol;
+import org.peergos.protocol.ipns.IPNS;
 import org.peergos.util.Logging;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -29,6 +31,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -68,7 +72,15 @@ public class DecentralizedManager {
 
     private void startupNabu() {
         List<MultiAddress> swarmAddresses = List.of(new MultiAddress("/ip6/::/tcp/" + listeningPort));
-        List<MultiAddress> bootstrapAddresses = List.of(new MultiAddress("/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa"));
+        List<MultiAddress> bootstrapAddresses = List.of(
+                new MultiAddress("/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa"),
+                new MultiAddress("/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN"),
+                new MultiAddress("/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa"),
+                new MultiAddress("/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb"),
+                new MultiAddress("/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt"),
+                new MultiAddress("/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ")
+
+        );
         BlockRequestAuthoriser authoriser = (cid, peerid, auth) -> CompletableFuture.completedFuture(true);
         boolean provideBlocks = true;
         SocketAddress httpTarget = new InetSocketAddress("localhost", 10000);
@@ -99,7 +111,6 @@ public class DecentralizedManager {
                 httpProxyTarget
         );
         ipfs.start();
-
         var mapper = pbhPortMapper.getPortMapper();
         if (mapper != null) {
             pbhPortMapper.mapPort(mapper, PortType.TCP, listeningPort).thenAccept(mappedPort -> {
@@ -108,14 +119,16 @@ public class DecentralizedManager {
                 }
             });
         }
+        Thread.startVirtualThread(()->{
+
+        });
     }
 
-    public void publishValue(byte[] data, long seq, int hoursTTL){;
-        ipfs.publishValue(privKey,data,seq,hoursTTL);
-    }
-
-    public void publishValueToIpns(Multihash ipns, byte[] data, long seq, int hoursTTL){
+    public void publishValueToIpns(Multihash ipns, byte[] data, long seq, long ttlMilis){
         // WTF?
+        long ttlNanos = ttlMilis * 1000000;
+        ipfs.publishPresignedRecord(ipns, IPNS.createSignedRecord(data, LocalDateTime.now().plus(1, ChronoUnit.HOURS),seq, ttlNanos,privKey));
+        log.info("[IPFS] Publishing IPNS {} ({})", ipns.toBase58(), ByteUtil.bytesToHex(IPNS.getKey(ipns)));
     }
 
     public PrivKey getPrivKey() throws IOException {
@@ -127,7 +140,7 @@ public class DecentralizedManager {
         return Ed25519Kt.unmarshalEd25519PrivateKey(Files.readAllBytes(privKey.toPath()));
     }
 
-    public CompletableFuture<byte[]> getBlockFromIPNS(Cid ipnsPointerCid) {
+    public CompletableFuture<byte[]> getBlockFromIPNS(Multihash ipnsPointerCid) {
         return CompletableFuture.supplyAsync(() -> {
             var future = ipfs.dht.resolveIpnsValue(ipnsPointerCid, ipfs.node, 1);
             String contentCid = future.join();
@@ -141,5 +154,9 @@ public class DecentralizedManager {
             // there have multiple blocks, we need connect all byte[]
             return blocks.getFirst().block;
         });
+    }
+
+    public PeerId getPeerId() {
+        return peerId;
     }
 }
