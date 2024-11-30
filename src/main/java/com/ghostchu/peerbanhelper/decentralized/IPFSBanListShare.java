@@ -90,10 +90,10 @@ public class IPFSBanListShare implements Reloadable {
                 try {
                     var map = ipfs.name.publish(node.hash, Optional.of(finalPublishKey.name));
                     log.info(tlUI(Lang.IPFS_BANLIST_PUBLISHED));
-                } catch (IOException ignored) {
+                } catch (Throwable ignored) {
                 }
             });
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Unable to publish/republish the banlist to IPFS", e);
         }
     }
