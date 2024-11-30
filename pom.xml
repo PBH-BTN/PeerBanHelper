@@ -440,6 +440,17 @@
             <artifactId>bcprov-jdk18on</artifactId>
             <version>1.79</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpg-jdk18on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpg-jdk18on</artifactId>
+            <version>1.79</version>
+        </dependency>
+        <dependency>
+            <groupId>name.neuhalfen.projects.crypto.bouncycastle.openpgp</groupId>
+            <artifactId>bouncy-gpg</artifactId>
+            <version>2.3.0</version>
+        </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
             <artifactId>semver4j</artifactId>
@@ -489,6 +500,16 @@
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
             <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Peergos</groupId>
+            <artifactId>nabu</artifactId>
+            <version>v0.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.offbynull.portmapper</groupId>
+            <artifactId>portmapper</artifactId>
+            <version>2.0.6</version>
         </dependency>
     </dependencies>
 
