@@ -290,8 +290,8 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                 return new DataUpdateResult(response.statusCode(), null, response.body().getBytes());
             }
             // IPNS
-            if (url.startsWith("/ipns/")) {
-               var ipnsCid = StringUtils.substringAfter(url, "/ipns/");
+            if (url.startsWith("ipns://")) {
+               var ipnsCid = StringUtils.substringAfter(url, "ipns://");
                 var ipfs = decentralizedManager.getIpfs();
                 if (ipfs == null) {
                     throw new IllegalStateException("IPFS not available");
@@ -304,16 +304,16 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                     throw new RuntimeException(e);
                 }
             }
-            // IPNS
-            if (url.startsWith("/ipfs/")) {
-                var cid = StringUtils.substringAfter(url, "/ipfs/");
+            // IPFS
+            if (url.startsWith("ipfs://")) {
+                var cid = StringUtils.substringAfter(url, "ipfs://");
                 var ipfs = decentralizedManager.getIpfs();
                 if (ipfs == null) {
                     throw new IllegalStateException("IPFS not available");
                 }
                 try {
-                    var data = ipfs.cat(Cid.decode(StringUtils.substringAfter(cid,"/ipfs/")));
-                    return new DataUpdateResult(200, "Data get from IPFS via IPNS", data);
+                    var data = ipfs.cat(Cid.decode(StringUtils.substringAfter(cid,"ipfs://")));
+                    return new DataUpdateResult(200, "Data get from IPFS", data);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
