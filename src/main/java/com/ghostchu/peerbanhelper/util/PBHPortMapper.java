@@ -43,12 +43,11 @@ public class PBHPortMapper {
                 if (mappers.isEmpty()) {
                     return;
                 }
-                var mapper = mappers.getFirst();
                 var it = originalToRefreshedPortMap.entrySet().iterator();
                 List<CompletableFuture<Void>> futures = new ArrayList<>();
                 while (it.hasNext()) {
                     var set = it.next();
-                    futures.add(unmapPort(mapper, set.getKey()));
+                    futures.add(unmapPort(mappers, set.getKey()));
                     it.remove();
                 }
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
@@ -57,57 +56,74 @@ public class PBHPortMapper {
             }
             networkBus.send(new KillNetworkRequest());
             processBus.send(new KillProcessRequest());
+            sched.shutdown();
         }));
     }
 
-    public CompletableFuture<Void> unmapPort(PortMapper mapper, MappedPort mappedPort) {
+    public CompletableFuture<Void> unmapPort(List<PortMapper> mappers, MappedPort mappedPort) {
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                mapper.unmapPort(originalToRefreshedPortMap.get(mappedPort));
-                mapper.unmapPort(mappedPort);
-                originalToRefreshedPortMap.remove(mappedPort);
-            } catch (InterruptedException ignored) {
+            for (PortMapper mapper : mappers) {
+                try {
+                    mapper.unmapPort(originalToRefreshedPortMap.get(mappedPort));
+                    mapper.unmapPort(mappedPort);
+                    originalToRefreshedPortMap.remove(mappedPort);
+                } catch (InterruptedException ignored) {
+                }
             }
             return null;
         });
     }
 
-    @Nullable
-    public CompletableFuture<MappedPort> mapPort(PortMapper mapper, PortType portType, int localPort) {
+    public CompletableFuture<@Nullable MappedPort> mapPort(List<PortMapper> mappers, PortType portType, int localPort) {
         try {
             return CompletableFuture.supplyAsync(() -> {
-                try {
-                    MappedPort mappedPort = mapper.mapPort(portType, localPort, localPort, Integer.MAX_VALUE);
-                    originalToRefreshedPortMap.put(mappedPort, mappedPort);
-                    sched.scheduleWithFixedDelay(() -> {
-                        try {
-                            var newMapperPort = mapper.refreshPort(mappedPort, Integer.MAX_VALUE);
-                            originalToRefreshedPortMap.put(mappedPort, newMapperPort);
-                        } catch (Exception e) {
-                            log.error(tlUI(Lang.PORT_MAPPER_PORT_MAPPING_FAILED, mappedPort.getInternalPort(), mappedPort.getPortType().name()), e);
-                        }
-                    }, mappedPort.getLifetime() / 2, mappedPort.getLifetime() / 2, TimeUnit.SECONDS);
-                    log.info(tlUI(Lang.PORT_MAPPER_PORT_MAPPED, mapper.getSourceAddress().getHostAddress(), mappedPort.getInternalPort(), mappedPort.getPortType().name(), mappedPort.getExternalPort(), mappedPort.getExternalAddress().getHostAddress(), mappedPort.getLifetime()));
-                    return mappedPort;
-                } catch (InterruptedException e) {
-                    log.error("Unable to mapPort", e);
-                    return null;
+                log.info(tlUI(Lang.PORT_MAPPER_PORT_MAPPING, localPort, portType.name()));
+                Map<PortMapper, MappedPort> mappedPorts = new LinkedHashMap<>();
+                for (PortMapper mapper : mappers) {
+                    try {
+                        MappedPort mappedPort = mapper.mapPort(portType, localPort, localPort, 600);
+                        originalToRefreshedPortMap.put(mappedPort, mappedPort);
+                        sched.scheduleWithFixedDelay(() -> {
+                            try {
+                                var newMapperPort = mapper.refreshPort(mappedPort, 600);
+                                originalToRefreshedPortMap.put(mappedPort, newMapperPort);
+                            } catch (Exception e) {
+                                if(System.getProperty("pbh.portMapper.disableRefreshFailRetry", "false").equals("true")) {
+                                    return;
+                                }
+                                log.error(tlUI(Lang.PORT_MAPPER_PORT_MAPPING_FAILED, mapper.getSourceAddress().getHostAddress(), mappedPort.getPortType().name(), mappedPort.getInternalPort()), e);
+                                mapPort(mappers, portType, localPort);
+                            }
+                        }, mappedPort.getLifetime() / 2, mappedPort.getLifetime() / 2, TimeUnit.SECONDS);
+                        mappedPorts.put(mapper, mappedPort);
+                    } catch (Exception ignored) {
+
+                    }
                 }
+                boolean anyExternal = false;
+                for (var entry : mappedPorts.entrySet()) {
+                    var inetAddress = entry.getValue().getExternalAddress();
+                    if (!(inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress() || inetAddress.isSiteLocalAddress())) {
+                        anyExternal = true;
+                    }
+                    var mappedPort = entry.getValue();
+                    log.info(tlUI(Lang.PORT_MAPPER_PORT_MAPPED, entry.getKey().getSourceAddress().getHostAddress(), mappedPort.getInternalPort(), mappedPort.getPortType().name(), mappedPort.getExternalPort(), mappedPort.getExternalAddress().getHostAddress(), mappedPort.getLifetime()));
+                }
+                if (!anyExternal) {
+                    log.warn(tlUI(Lang.PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS));
+                }
+                return mappedPorts.values().stream().findFirst().orElse(null);
             });
         } catch (Exception e) {
-            log.error(tlUI(Lang.PORT_MAPPER_PORT_MAPPING_FAILED, mapper.getSourceAddress().getHostAddress(), localPort, portType.name()), e);
+            log.error(tlUI(Lang.PORT_MAPPER_PORT_MAPPING_FAILED, "N/A", localPort, portType.name()), e);
             return CompletableFuture.completedFuture(null);
         }
     }
 
     @Nullable
-    public PortMapper getPortMapper() {
+    public List<PortMapper> getPortMapper() {
         try {
-            List<PortMapper> mappers = PortMapperFactory.discover(networkBus, processBus);
-            if (mappers.isEmpty()) {
-                return null;
-            }
-            return mappers.getFirst();
+            return PortMapperFactory.discover(networkBus, processBus);
         } catch (InterruptedException e) {
             return null;
         }

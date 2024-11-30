@@ -23,6 +23,7 @@ import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
@@ -141,6 +142,8 @@ public class PeerBanHelperServer implements Reloadable {
     private AlertManager alertManager;
     @Autowired
     private BanListDao banListDao;
+    @Autowired
+    private Laboratory laboratory;
 
     public PeerBanHelperServer() {
         reloadConfig();
