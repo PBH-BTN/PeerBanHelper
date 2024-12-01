@@ -46,7 +46,7 @@ jobs:
     uses: ./.github/workflows/build_portable.yml
   Empty_Old_S3_Files:
     needs: Build_Executable
-    uses: ./.github/workflows/delet_old_s3_objects.yml
+    uses: ./.github/workflows/delete_old_s3_objects.yml
   Upload_Updates_To_S3:
      needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
      runs-on: ubuntu-latest
