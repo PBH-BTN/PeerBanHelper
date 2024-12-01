@@ -34,7 +34,7 @@ public class DecentralizedManager implements AutoCloseable, Reloadable {
     }
 
     private void startupIPFS() {
-        if (Main.getMainConfig().getBoolean("decentralized.enabled", false)
+        if (!Main.getMainConfig().getBoolean("decentralized.enabled", false)
             || !laboratory.isExperimentActivated(Experiments.IPFS.getExperiment())) {
             this.ipfs = null;
             return;
