@@ -17,7 +17,6 @@ import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.net.CookieManager;
@@ -43,9 +42,6 @@ public class BtnNetwork implements Reloadable {
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     private final ScriptEngine scriptEngine;
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
-    @Autowired
-    @Qualifier("userAgent")
-    private String userAgent;
     private boolean scriptExecute;
     @Getter
     private ScheduledExecutorService executeService = null;
@@ -183,7 +179,7 @@ public class BtnNetwork implements Reloadable {
         this.httpClient = Methanol
                 .newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(userAgent)
+                .userAgent(Main.getUserAgent())
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("BTN-AppID", appId)
                 .defaultHeader("BTN-AppSecret", appSecret)
