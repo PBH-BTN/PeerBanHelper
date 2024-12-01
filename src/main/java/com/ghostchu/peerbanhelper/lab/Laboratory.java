@@ -30,7 +30,7 @@ public class Laboratory {
         if (!labConfigFile.exists()) {
             labConfigFile.createNewFile();
         }
-        this.labConfig = new YamlConfiguration();
+        this.labConfig = YamlConfiguration.loadConfiguration(labConfigFile);
         for (Experiments value : Experiments.values()) {
             isExperimentActivated(value.getExperiment()); // 生成配置文件
         }
