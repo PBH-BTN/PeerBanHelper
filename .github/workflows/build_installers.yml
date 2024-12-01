@@ -24,6 +24,9 @@ jobs:
       - name: Make installers
         run: |
           /opt/install4j/bin/install4jc -L ${{ secrets.INSTALL4J_LICENSE }} -r ${{ steps.java_info.outputs.project_version }} -g -d target/media -D librariesPath=$(pwd)/target/libraries install4j/project.install4j
+      - name: Delete garbages
+        run: |
+          rm -rf target/media/debug*
       # jarPath=$(pwd) 是必须的，install4jc 不知道什么毛病，不支持相对路径，这太诡异了
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
