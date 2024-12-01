@@ -45,11 +45,11 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_portable.yml
   Empty_Old_S3_Files:
-    needs: Build_Executable
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
     uses: ./.github/workflows/delete_old_s3_objects.yml
     secrets: inherit
   Upload_Updates_To_S3:
-     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
+     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files]
      runs-on: ubuntu-latest
      steps:
       - uses: actions/download-artifact@v4
