@@ -28,6 +28,12 @@ public class MainConfigUpdateScript {
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
     }
+    @UpdateScript(version = 24)
+    public void decentralizedConfiguration() {
+        conf.set("decentralized.enabled", true);
+        conf.set("decentralized.kubo-rpc", "/ip4/127.0.0.1/tcp/5001");
+        conf.set("decentralized.features.publish-banlist", 3600000);
+    }
 
     @UpdateScript(version = 23)
     public void btnScriptExecuteSwitch() {

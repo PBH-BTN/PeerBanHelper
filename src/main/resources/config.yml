@@ -1,4 +1,4 @@
-config-version: 23
+config-version: 24
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -160,7 +160,7 @@ performance:
 decentralized:
   enabled: true
   # Kubo RPC MultiAddr
-  rpc-url: "/ip4/127.0.0.1/tcp/5001"
+  kubo-rpc: "/ip4/127.0.0.1/tcp/5001"
   features:
     # 发布当前封禁列表到 IPFS 以允许它人订阅您的封禁列表内容，时间单位：毫秒，设置为 -1 以禁用
     # Publish current banlist to IPFS to allow others subscribe your banlist, time unit: milliseconds, set to -1 to disable
