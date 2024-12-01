@@ -54,7 +54,6 @@ public class Main {
     @Getter
     private static File configDirectory;
     private static File pluginDirectory;
-    private static File libraryDirectory;
     @Getter
     private static File debugDirectory;
     @Getter

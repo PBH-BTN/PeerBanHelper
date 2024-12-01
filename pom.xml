@@ -502,16 +502,18 @@
             <version>3.5.2</version>
         </dependency>
         <dependency>
-            <groupId>com.github.Peergos</groupId>
-            <artifactId>nabu</artifactId>
-            <version>v0.8.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.offbynull.portmapper</groupId>
             <artifactId>portmapper</artifactId>
             <version>2.0.6</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.ipfs</groupId>
+            <artifactId>java-ipfs-http-client</artifactId>
+            <version>1.4.4</version>
+        </dependency>
+<!--        </dependency>-->
+            <groupId>com.github.multiformats</groupId>
+            <artifactId>java-multiaddr</artifactId>
+            <version>v1.4.12</version>
     </dependencies>
-
-
 </project>
