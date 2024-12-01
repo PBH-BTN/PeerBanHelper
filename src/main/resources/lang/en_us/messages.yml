@@ -523,3 +523,4 @@ LAB_EXPERIMENT_IPFS_DESCRIPTION: "After participating in this experiment, the be
 IPFS_INIT_FAILED: "[IPFS] Initializing Kubo IPFS RPC fails, IPFS functionality will not be available, make sure Kubo IPFS is running!"
 IPFS_INIT_WELCOME: "[IPFS] Successfully connected to Kubo IPFS RPC, version {}. PeerBanHelper has successfully connected to the IPFS network via Kubo and provides extended functionality"
 IPFS_BANLIST_PUBLISHED: "[IPFS] The block list has been updated to IPFS, along with the IPNS record."
+MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE: "Couldn't update Rule Subscription from IPFS/IPNS because IPFS feature not available."

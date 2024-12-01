@@ -302,7 +302,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                var ipnsCid = uri.getHost();
                 var ipfs = decentralizedManager.getIpfs();
                 if (ipfs == null) {
-                    throw new IllegalStateException("IPFS not available");
+                    throw new IllegalStateException(tlUI(Lang.MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE));
                 }
                 try {
                    var cid = ipfs.name.resolve(Cid.decode(ipnsCid), true);
@@ -317,7 +317,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                 var cid = uri.getHost();
                 var ipfs = decentralizedManager.getIpfs();
                 if (ipfs == null) {
-                    throw new IllegalStateException("IPFS not available");
+                    throw new IllegalStateException(tlUI(Lang.MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE));
                 }
                 try {
                     var data = ipfs.cat(Cid.decode(cid));

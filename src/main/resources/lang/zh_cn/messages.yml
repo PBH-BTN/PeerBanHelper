@@ -519,3 +519,4 @@ LAB_EXPERIMENT_IPFS_DESCRIPTION: "参与此实验后，测试版 [IPFS (星际�
 IPFS_INIT_FAILED: "[IPFS] 初始化 Kubo IPFS RPC 失败，IPFS 功能将不可用，请确保 Kubo IPFS 正在运行"
 IPFS_INIT_WELCOME: "[IPFS] 已成功连接到 Kubo IPFS RPC，版本 {}。PeerBanHelper 已成功通过 Kubo 连接 IPFS 网络，并提供扩展功能"
 IPFS_BANLIST_PUBLISHED: "[IPFS] 已更新封禁列表到 IPFS，并一同更新了 IPNS 记录"
+MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE: "无法从 IPFS/IPNS 更新规则订阅，因为 IPFS 功能未启用"
