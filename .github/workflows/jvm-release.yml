@@ -65,6 +65,7 @@ jobs:
           destination_dir: 'updates/latest'
   Upload_Artifacts:
     continue-on-error: true
+    if: github.event_name != 'workflow_dispatch'
     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
     permissions:
       contents: write
@@ -111,6 +112,7 @@ jobs:
         with:
           asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*"]'
   Build_Docker:
+    if: github.event_name != 'workflow_dispatch'
     permissions:
       contents: write
       checks: write
