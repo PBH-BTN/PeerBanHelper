@@ -511,9 +511,10 @@
             <artifactId>java-ipfs-http-client</artifactId>
             <version>1.4.4</version>
         </dependency>
-<!--        </dependency>-->
+        <dependency>
             <groupId>com.github.multiformats</groupId>
             <artifactId>java-multiaddr</artifactId>
             <version>v1.4.12</version>
+        </dependency>
     </dependencies>
 </project>
