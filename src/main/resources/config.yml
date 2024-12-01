@@ -159,9 +159,6 @@ push-notification:
   # 邮件推送服务 - Email push notification
   email-example:
     type: smtp
-    # 启用 SMTP 邮件推送服务
-    # Enable SMTP push service
-    enabled: false
     # SMTP 服务器主机名 - SMTP Server Hostname
     host: "smtp.example.com"
     # SMTP 端口号 - SMTP Port
@@ -189,8 +186,6 @@ push-notification:
   # PushPlus - 推送加（Chinese user only）
   pushplus-example:
     type: pushplus
-    # 启用 Push Plus 推送加服务
-    enabled: false
     # PushPlus Token
     token: ""
     # 群组编码，不清楚这是什么请留空
@@ -203,8 +198,6 @@ push-notification:
   # ServerChan - Server酱
   serverchan-example:
     type: serverchan
-    # 启用 ServerChan Server酱 推送加服务
-    enabled: false
     # 发送密钥 (SendKey/AppKey)
     send-key: ""
     # 消息通道
@@ -215,8 +208,6 @@ push-notification:
   # Telegram - Bot 推送
   telegram-example:
     type: telegram
-    # 启用 Telegram Bot 推送服务
-    enabled: false
     # HTTP API Token 一般为 1234567890:XXXXXXXXXX 形式，不能有空格。联系 @BotFather 获取，参阅下方链接：
     token: ""
     # 聊天 Chat ID；https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a
