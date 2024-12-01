@@ -54,12 +54,12 @@ public class Laboratory {
         }
     }
 
-    public void setExperimentActivated(String id, boolean activated) throws IllegalArgumentException{
+    public void setExperimentActivated(String id, Boolean activated) throws IllegalArgumentException{
         for (Experiments value : Experiments.values()) {
             if(!value.getExperiment().getId().equals(id)){
                 continue;
             }
-            labConfig.set(value.getExperiment().getId(), activated);
+            labConfig.set(value.getExperiment().getId(), activated == null ? "default" : activated);
             saveLabConfig();
             return;
         }
@@ -78,7 +78,7 @@ public class Laboratory {
         return experimentalGroup;
     }
 
-    public boolean isExperimentalGroup(int group) {
-        return experimentalGroup == group;
+    public boolean isExperimentalGroup(List<Integer> group) {
+        return group.contains(experimentalGroup);
     }
 }

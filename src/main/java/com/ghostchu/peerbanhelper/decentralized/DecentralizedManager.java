@@ -40,7 +40,11 @@ public class DecentralizedManager implements AutoCloseable, Reloadable {
             return;
         }
         try {
-            this.ipfs = new IPFS(Main.getMainConfig().getString("decentralized.kubo-rpc", "/ip4/127.0.0.1/tcp/5001"));
+            var ipfsRpc = Main.getMainConfig().getString("decentralized.kubo-rpc", "/ip4/127.0.0.1/tcp/5001");
+            if (System.getProperty("pbh.kuboRPC") != null) {
+                ipfsRpc = System.getProperty("pbh.kuboRPC");
+            }
+            this.ipfs = new IPFS(ipfsRpc);
             log.info(tlUI(Lang.IPFS_INIT_WELCOME, ipfs.version()));
         } catch (Exception e) {
             log.error(tlUI(Lang.IPFS_INIT_FAILED), e);
