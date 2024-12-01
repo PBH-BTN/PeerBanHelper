@@ -82,7 +82,7 @@
       </iconImageFiles>
     </launcher>
   </launchers>
-  <installerGui>
+  <installerGui autoUpdateDescriptorUrl="https://pbh-files.pbh-btn.com/updates/latest/updates.xml">
     <applications>
       <application id="installer" beanClass="com.install4j.runtime.beans.applications.InstallerApplication">
         <startup>
