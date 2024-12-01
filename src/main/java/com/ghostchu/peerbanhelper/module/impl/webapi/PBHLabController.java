@@ -15,7 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -92,7 +94,10 @@ public class PBHLabController extends AbstractFeatureModule {
             );
             availableExperiments.add(record);
         }
-        context.json(new StdResp(true, null, availableExperiments));
+        Map<String, Object> map = new HashMap<>();
+        map.put("experiments", availableExperiments);
+        map.put("mygroup", laboratory.getExperimentalGroup());
+        context.json(new StdResp(true, null, map));
     }
 
     @Override
