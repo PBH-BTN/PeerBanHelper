@@ -44,7 +44,27 @@ jobs:
   Build_Portable:
     needs: Build_Executable
     uses: ./.github/workflows/build_portable.yml
+  Empty_Old_S3_Files:
+    needs: Build_Executable
+    uses: ./.github/workflows/delet_old_s3_objects.yml
+  Upload_Updates_To_S3:
+     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
+     runs-on: ubuntu-latest
+     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: installer-dist
+          path: target/media
+      - uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.S3_SECRET_KEY }}
+          aws_bucket: ${{ secrets.S3_BUCKET }}
+          endpoint: ${{ secrets.S3_ENDPOINT }}
+          source_dir: 'target/media'
+          destination_dir: 'updates/latest'
   Upload_Artifacts:
+    continue-on-error: true
     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
     permissions:
       contents: write
