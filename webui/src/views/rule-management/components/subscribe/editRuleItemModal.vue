@@ -38,11 +38,11 @@
 </template>
 <script setup lang="ts">
 import type { ruleBrief } from '@/api/model/ruleSubscribe'
-import { useI18n } from 'vue-i18n'
-import { reactive, ref } from 'vue'
-import { Message, type FieldRule, type Form } from '@arco-design/web-vue'
 import { AddRuleItem, UpdateRuleItem } from '@/service/ruleSubscribe'
+import { Message, type FieldRule, type Form } from '@arco-design/web-vue'
 import path from 'path'
+import { reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 const showModal = ref(false)
 const newItem = ref(false)
@@ -65,8 +65,17 @@ const rules: Record<string, FieldRule[]> = {
   ],
   subUrl: [
     {
-      type: 'url',
       required: true
+    },
+    {
+      validator(value, callback) {
+        try {
+          new URL(value)
+          callback()
+        } catch (_) {
+          callback(t('page.rule_management.ruleSubscribe.editModal.form.url.invalid'))
+        }
+      }
     }
   ]
 }

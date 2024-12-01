@@ -19,6 +19,7 @@ export default {
   'page.rule_management.ruleSubscribe.editModal.form.name': 'Rule Name',
   'page.rule_management.ruleSubscribe.editModal.form.id.extra': 'Rule ID, should be unique',
   'page.rule_management.ruleSubscribe.editModal.form.name.required': 'Please input rule name',
+  'page.rule_management.ruleSubscribe.editModal.form.url.invalid': 'Please input correct URL',
   'page.rule_management.ruleSubscribe.column.rulesCount': 'Rules',
   'page.rule_management.ruleSubscribe.column.deleteConfirm': 'Are you sure you want to delete?',
   'page.rule_management.ruleSubscribe.settingsModal.title': 'Subscribe Settings',
