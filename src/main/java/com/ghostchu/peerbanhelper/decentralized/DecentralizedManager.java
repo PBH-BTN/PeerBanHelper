@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.decentralized;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.lab.Experiments;
+import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -15,11 +17,13 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 public class DecentralizedManager implements AutoCloseable, Reloadable {
+    private final Laboratory laboratory;
     @Getter
     @Nullable
     private IPFS ipfs;
 
-    public DecentralizedManager() {
+    public DecentralizedManager(Laboratory laboratory) {
+        this.laboratory = laboratory;
         startupIPFS();
     }
 
@@ -30,7 +34,8 @@ public class DecentralizedManager implements AutoCloseable, Reloadable {
     }
 
     private void startupIPFS() {
-        if (Main.getMainConfig().getBoolean("decentralized.enabled", false)) {
+        if (Main.getMainConfig().getBoolean("decentralized.enabled", false)
+            || !laboratory.isExperimentActivated(Experiments.IPFS.getExperiment())) {
             this.ipfs = null;
             return;
         }
