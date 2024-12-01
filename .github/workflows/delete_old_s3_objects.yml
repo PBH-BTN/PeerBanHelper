@@ -1,4 +1,4 @@
-name: Installer Build
+name: Empty S3 directory
 
 on:
   workflow_call:
