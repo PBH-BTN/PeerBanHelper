@@ -1,7 +1,6 @@
-version: "3.9"
 services:
   peerbanhelper:
-    image: "ghostchu/peerbanhelper:<最新版本号>"
+    image: "ghostchu/peerbanhelper:<填写版本号>"
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
@@ -10,25 +9,17 @@ services:
       - "9898:9898"
     stop_grace_period: 30s
     environment:
-      - PBH_KUBO_RPC=/ip4/kubo/tcp/5001
+      - PBH_KUBO_RPC=/dnsaddr/kubo/tcp/5001
     depends_on:
-      - ipfs
+      - kubo
     links:
-      - ipfs
+      - kubo
   kubo:
-    image: "ipfs/go-ipfs:v0.32.1"
+    image: "ipfs/kubo:release"
     restart: unless-stopped
     container_name: "kubo"
-    volumes:
-      - ./ipfs/export:/export
-      - ./ipfs/data:/data/ipfs
     ports:
-      - "4001:9897"
-    environment:
-      - IPFS_PATH=/data/ipfs
+      - "4001:4001"
     stop_grace_period: 30s
-    healthcheck:
-      test: "/bin/netstat -anpt|grep 5001"
-      interval: 30s
-      timeout: 3s
-      retries: 1
+    volumes:
+      - ./ipfs:/data/ipfs
