@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.push.PushManager;
 import com.ghostchu.peerbanhelper.push.PushProvider;
 import com.ghostchu.peerbanhelper.push.impl.PushPlusPushProvider;
 import com.ghostchu.peerbanhelper.push.impl.ServerChanPushProvider;
@@ -26,6 +27,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 public class PBHPushController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private PushManager pushManager;
 
     @Override
     public boolean isConfigurable() {
@@ -45,7 +48,14 @@ public class PBHPushController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         webContainer.javalin()
+                .get("/api/push/list", this::handlePushList, Role.USER_READ)
                 .post("/api/push/{name}/test", this::handlePushTest, Role.USER_WRITE);
+    }
+
+    private void handlePushList(@NotNull Context context) {
+        for (PushProvider pushProvider : pushManager.getProviderList()) {
+
+        }
     }
 
     private void handlePushTest(Context ctx) {
@@ -86,16 +96,16 @@ public class PBHPushController extends AbstractFeatureModule {
         }
         switch (type) {
             case "smtp" -> {
-                return new SmtpPushProvider(section);
+                return SmtpPushProvider.loadFromYaml(section);
             }
             case "pushplus" -> {
-                return new PushPlusPushProvider(section);
+                return PushPlusPushProvider.loadFromYaml(section);
             }
             case "serverchan" -> {
-                return new ServerChanPushProvider(section);
+                return ServerChanPushProvider.loadFromYaml(section);
             }
             case "telegram" -> {
-                return new TelegramPushProvider(section);
+                return TelegramPushProvider.loadFromYaml(section);
             }
         }
         return null;

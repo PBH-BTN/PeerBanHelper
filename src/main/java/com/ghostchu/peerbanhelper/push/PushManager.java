@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.push.impl.TelegramPushProvider;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 public class PushManager implements Reloadable {
+    @Getter
     private final List<PushProvider> providerList = new ArrayList<>();
 
     public PushManager() {
@@ -33,10 +35,10 @@ public class PushManager implements Reloadable {
             var section = config.getConfigurationSection(provider);
             if (section.getBoolean("enabled")) {
                 switch (section.getString("type")) {
-                    case "smtp" -> registered.add(new SmtpPushProvider(section));
-                    case "pushplus" -> registered.add(new PushPlusPushProvider(section));
-                    case "serverchan" -> registered.add(new ServerChanPushProvider(section));
-                    case "telegram" -> registered.add(new TelegramPushProvider(section));
+                    case "smtp" -> registered.add(SmtpPushProvider.loadFromYaml(section));
+                    case "pushplus" -> registered.add(PushPlusPushProvider.loadFromYaml(section));
+                    case "serverchan" -> registered.add(ServerChanPushProvider.loadFromYaml(section));
+                    case "telegram" -> registered.add(TelegramPushProvider.loadFromYaml(section));
                     default -> log.warn(tlUI(Lang.UNKNOWN_PUSH_PROVIDER, provider, section.getString("type")));
                 }
             }

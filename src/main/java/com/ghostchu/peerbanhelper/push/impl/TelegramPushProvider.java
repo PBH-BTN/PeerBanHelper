@@ -5,6 +5,8 @@ import com.ghostchu.peerbanhelper.push.AbstractPushProvider;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.MutableRequest;
+import com.google.gson.JsonObject;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -17,25 +19,44 @@ import java.util.Map;
 
 public class TelegramPushProvider extends AbstractPushProvider {
 
-    private final String token;
-    private final String chatid;
+    private final Config config;
 
-    public TelegramPushProvider(ConfigurationSection section) {
-        this.token = section.getString("token", "");
-        this.chatid = section.getString("chat-id", "");
+    public TelegramPushProvider(Config config) {
+        this.config = config;
+    }
+
+    @Override
+    public String getConfigType() {
+        return "telegram";
+    }
+
+    public static TelegramPushProvider loadFromJson(JsonObject json) {
+        return new TelegramPushProvider(JsonUtil.getGson().fromJson(json, Config.class));
+    }
+
+    public static TelegramPushProvider loadFromYaml(ConfigurationSection section) {
+        var token = section.getString("token", "");
+        var chatid = section.getString("chatid", "");
+        Config config = new Config(token, chatid);
+        return new TelegramPushProvider(config);
+    }
+
+    @Override
+    public JsonObject saveJson() {
+        return JsonUtil.readObject(JsonUtil.standard().toJson(config));
     }
 
     @Override
     public boolean push(String title, String content) throws Exception {
         String markdown = "*" + title + "*\n" + content;
         Map<String, Object> map = new HashMap<>();
-        map.put("chat_id", chatid);
+        map.put("chat_id", config.getChatid());
         map.put("caption", markdown);
         map.put("text", markdown);
         map.put("photo", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
         map.put("parse_mode", "Markdown");
         HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
-                MutableRequest.POST("https://api.telegram.org/bot" + token + "/sendPhoto"
+                MutableRequest.POST("https://api.telegram.org/bot" + config.getToken() + "/sendPhoto"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
                         .header("Content-Type", "application/json")
                 , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
@@ -45,6 +66,12 @@ public class TelegramPushProvider extends AbstractPushProvider {
             throw new IllegalStateException("HTTP Failed while sending push messages to Telegram: " + tgr.getDescription());
         }
         return true;
+    }
+    @AllArgsConstructor
+    @Data
+    public static class Config{
+        private String token;
+        private String chatid;
     }
 
     @NoArgsConstructor
