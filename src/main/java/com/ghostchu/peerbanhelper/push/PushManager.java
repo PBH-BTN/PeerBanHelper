@@ -59,6 +59,7 @@ public class PushManager implements Reloadable {
     private void reloadConfig() {
         List<com.ghostchu.peerbanhelper.push.PushProvider> registered = new ArrayList<>();
         var config = Main.getMainConfig().getConfigurationSection("push-notification");
+        if(config == null) return;
         config.getKeys(false).forEach(provider -> {
             var section = config.getConfigurationSection(provider);
             registered.add(createPushProvider(provider, section.getString("type"), section));

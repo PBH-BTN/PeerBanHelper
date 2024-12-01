@@ -1,4 +1,4 @@
-config-version: 24
+config-version: 25
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -165,60 +165,3 @@ decentralized:
     # 发布当前封禁列表到 IPFS 以允许它人订阅您的封禁列表内容，时间单位：毫秒，设置为 -1 以禁用
     # Publish current banlist to IPFS to allow others subscribe your banlist, time unit: milliseconds, set to -1 to disable
     publish-banlist: 3600000
-push-notification:
-  # 邮件推送服务 - Email push notification
-  email-example:
-    type: smtp
-    # SMTP 服务器主机名 - SMTP Server Hostname
-    host: "smtp.example.com"
-    # SMTP 端口号 - SMTP Port
-    port: "587"
-    # 使用 SSL - SSL
-    ssl: true
-    # SMTP 用户名 - SMTP Username
-    # 通常为邮箱地址 - Usually is email address
-    username: "example@example.com"
-    # 发送者名称 - Sender name
-    # 通常为邮箱地址 - Usually is email address
-    sender: "example@example.com"
-    # 发件者名称
-    # Sender name
-    name: "PeerBanHelper"
-    # SMTP 密码 - SMTP Password
-    # 通常为授权码（而非邮箱密码），请参阅您的邮件服务提供商的说明
-    # Usually is Access Token (not Email password), please refer to your email provider instruction
-    password: "password"
-    # 收件人列表 - Receiver list
-    # 推送的消息将发送到下面的所有邮件地址 - Messages will send to all address that listed below
-    receiver:
-      - "example@exmaple.com"
-
-  # PushPlus - 推送加（Chinese user only）
-  pushplus-example:
-    type: pushplus
-    # PushPlus Token
-    token: ""
-    # 群组编码，不清楚这是什么请留空
-    topic: ""
-    # 发送模板，不清楚这是什么请留空
-    template: ""
-    # 发送渠道。不清楚这是什么请留空；https://www.pushplus.plus/doc/channel/#%E5%BC%95%E8%A8%80
-    channel: ""
-
-  # ServerChan - Server酱
-  serverchan-example:
-    type: serverchan
-    # 发送密钥 (SendKey/AppKey)
-    send-key: ""
-    # 消息通道
-    channel: ""
-    # 消息抄送的 openid
-    openid: ""
-
-  # Telegram - Bot 推送
-  telegram-example:
-    type: telegram
-    # HTTP API Token 一般为 1234567890:XXXXXXXXXX 形式，不能有空格。联系 @BotFather 获取，参阅下方链接：
-    token: ""
-    # 聊天 Chat ID；https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a
-    chat-id: ""

@@ -19,7 +19,7 @@ public class MainConfigUpdateScript {
 
     private void validate() {
         String installationId = conf.getString("installation-id");
-        if(installationId == null || installationId.isBlank()){
+        if (installationId == null || installationId.isBlank()) {
             conf.set("installation-id", UUID.randomUUID().toString());
         }
 //        String token = conf.getString("server.token");
@@ -28,6 +28,23 @@ public class MainConfigUpdateScript {
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
     }
+
+    @UpdateScript(version = 25)
+    public void pushProvidersCleanup() {
+        var pushNotification = conf.getConfigurationSection("push-notification");
+        if (pushNotification == null) return;
+        for (String key : pushNotification.getKeys(false)) {
+            var single = conf.getConfigurationSection(key);
+            single.set("enabled", null);
+            var sendKey = single.get("send-key");
+            if (sendKey != null) {
+                single.set("sendkey", sendKey);
+                single.set("send-key", null);
+            }
+            conf.set(key, single);
+        }
+    }
+
     @UpdateScript(version = 24)
     public void decentralizedConfiguration() {
         conf.set("decentralized.enabled", true);
