@@ -34,7 +34,8 @@ public class MainConfigUpdateScript {
         var pushNotification = conf.getConfigurationSection("push-notification");
         if (pushNotification == null) return;
         for (String key : pushNotification.getKeys(false)) {
-            var single = conf.getConfigurationSection(key);
+            var single = pushNotification.getConfigurationSection(key);
+            if (single == null) continue;
             single.set("enabled", null);
             var sendKey = single.get("send-key");
             if (sendKey != null) {
