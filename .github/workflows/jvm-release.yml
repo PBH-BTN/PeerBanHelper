@@ -64,6 +64,10 @@ jobs:
           endpoint: ${{ secrets.S3_ENDPOINT }}
           source_dir: 'target/media'
           destination_dir: 'updates/latest'
+  Clear_CloudFlare_Updates:
+    needs: [Upload_Updates_To_S3]
+    uses: ./.github/workflows/flush_cloudflare_cache.yml
+    secrets: inherit
   Upload_Artifacts:
     continue-on-error: true
     if: github.event_name != 'workflow_dispatch'
