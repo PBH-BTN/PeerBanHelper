@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.invoker.impl;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -26,13 +27,13 @@ public class CommandExec implements BanListInvoker {
     private boolean enabled = true;
 
     public CommandExec(PeerBanHelperServer server) {
-        if (!server.getMainConfig().getBoolean("banlist-invoker.command-exec.enabled", false)) {
+        if (!Main.getMainConfig().getBoolean("banlist-invoker.command-exec.enabled", false)) {
             this.enabled = false;
             return;
         }
-        this.resetCommands = server.getMainConfig().getStringList("banlist-invoker.command-exec.reset");
-        this.banCommands = server.getMainConfig().getStringList("banlist-invoker.command-exec.ban");
-        this.unbanCommands = server.getMainConfig().getStringList("banlist-invoker.command-exec.unban");
+        this.resetCommands = Main.getMainConfig().getStringList("banlist-invoker.command-exec.reset");
+        this.banCommands = Main.getMainConfig().getStringList("banlist-invoker.command-exec.ban");
+        this.unbanCommands = Main.getMainConfig().getStringList("banlist-invoker.command-exec.unban");
         log.info(tlUI(Lang.BANLIST_INVOKER_REGISTERED, getClass().getName()));
     }
 

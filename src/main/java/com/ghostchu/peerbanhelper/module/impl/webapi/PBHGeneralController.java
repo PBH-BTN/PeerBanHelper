@@ -241,6 +241,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
     }
 
     private void handleReloading(Context context) {
+        Main.setupConfiguration();
         var result = Main.getReloadManager().reload();
         List<ReloadEntry> entryList = new ArrayList<>();
         result.forEach((container, r) -> {

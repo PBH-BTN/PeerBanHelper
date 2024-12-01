@@ -64,7 +64,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,15 +111,11 @@ public class PeerBanHelperServer implements Reloadable {
             .build();
     private String pbhServerAddress;
     @Getter
-    private YamlConfiguration profileConfig;
-    @Getter
     private long banDuration;
     @Getter
     private int httpdPort;
     @Getter
     private boolean hideFinishLogs;
-    @Getter
-    private YamlConfiguration mainConfig;
     @Autowired
     private ModuleMatchCache moduleMatchCache;
     private ScheduledExecutorService BAN_WAVE_SERVICE;
@@ -154,12 +149,10 @@ public class PeerBanHelperServer implements Reloadable {
 
     private void reloadConfig() {
         this.pbhServerAddress = Main.getPbhServerAddress();
-        this.profileConfig = Main.getProfileConfig();
-        this.banDuration = profileConfig.getLong("ban-duration");
-        this.mainConfig = Main.getMainConfig();
-        this.httpdPort = mainConfig.getInt("server.http");
-        this.hideFinishLogs = mainConfig.getBoolean("logger.hide-finish-log");
-        profileConfig.getStringList("ignore-peers-from-addresses").forEach(ip -> {
+        this.banDuration = Main.getProfileConfig().getLong("ban-duration");
+        this.httpdPort = Main.getMainConfig().getInt("server.http");
+        this.hideFinishLogs = Main.getMainConfig().getBoolean("logger.hide-finish-log");
+        Main.getProfileConfig().getStringList("ignore-peers-from-addresses").forEach(ip -> {
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
             ignoreAddresses.add(ignored);
         });
@@ -271,7 +264,7 @@ public class PeerBanHelperServer implements Reloadable {
 
     public void loadDownloaders() {
         this.downloaders.clear();
-        ConfigurationSection clientSection = mainConfig.getConfigurationSection("client");
+        ConfigurationSection clientSection = Main.getMainConfig().getConfigurationSection("client");
         if (clientSection == null) {
             return;
         }
@@ -327,8 +320,8 @@ public class PeerBanHelperServer implements Reloadable {
         for (Downloader downloader : this.downloaders) {
             clientSection.set(downloader.getName(), downloader.saveDownloader());
         }
-        mainConfig.set("client", clientSection);
-        mainConfig.save(Main.getMainConfigFile());
+        Main.getMainConfig().set("client", clientSection);
+        Main.getMainConfig().save(Main.getMainConfigFile());
     }
 
     public boolean registerDownloader(Downloader downloader) {
@@ -345,11 +338,11 @@ public class PeerBanHelperServer implements Reloadable {
 
     private void setupIPDB() {
         try {
-            String accountId = mainConfig.getString("ip-database.account-id", "");
-            String licenseKey = mainConfig.getString("ip-database.license-key", "");
-            String databaseCity = mainConfig.getString("ip-database.database-city", "");
-            String databaseASN = mainConfig.getString("ip-database.database-asn", "");
-            boolean autoUpdate = mainConfig.getBoolean("ip-database.auto-update");
+            String accountId = Main.getMainConfig().getString("ip-database.account-id", "");
+            String licenseKey = Main.getMainConfig().getString("ip-database.license-key", "");
+            String databaseCity = Main.getMainConfig().getString("ip-database.database-city", "");
+            String databaseASN = Main.getMainConfig().getString("ip-database.database-asn", "");
+            boolean autoUpdate = Main.getMainConfig().getBoolean("ip-database.auto-update");
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
                     databaseCity, databaseASN, autoUpdate, Main.getUserAgent());
         } catch (Exception e) {
@@ -403,7 +396,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void loadBanListToMemory() {
-        if (!mainConfig.getBoolean("persist.banlist")) {
+        if (!Main.getMainConfig().getBoolean("persist.banlist")) {
             return;
         }
         this.BAN_LIST.clear();
@@ -424,7 +417,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void saveBanList() {
-        if (!mainConfig.getBoolean("persist.banlist")) {
+        if (!Main.getMainConfig().getBoolean("persist.banlist")) {
             return;
         }
         try {
@@ -442,9 +435,9 @@ public class PeerBanHelperServer implements Reloadable {
             token = System.getProperty("pbh.api_token");
         }
         if (token == null) {
-            token = getMainConfig().getString("server.token");
+            token = Main.getMainConfig().getString("server.token");
         }
-        String host = getMainConfig().getString("server.address");
+        String host = Main.getMainConfig().getString("server.address");
         if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
             host = null;
         }
@@ -465,14 +458,14 @@ public class PeerBanHelperServer implements Reloadable {
         if (this.banWaveWatchDog != null) {
             this.banWaveWatchDog.close();
         }
-        this.banWaveWatchDog = new WatchDog("BanWave Thread", profileConfig.getLong("check-interval", 5000) + (1000 * 60), this::watchDogHungry, null);
+        this.banWaveWatchDog = new WatchDog("BanWave Thread", Main.getProfileConfig().getLong("check-interval", 5000) + (1000 * 60), this::watchDogHungry, null);
         registerBanWaveTimer();
         this.banWaveWatchDog.start();
     }
 
     private void registerBanWaveTimer() {
         if (BAN_WAVE_SERVICE != null && (!BAN_WAVE_SERVICE.isShutdown() || !BAN_WAVE_SERVICE.isTerminated())) {
-            BAN_WAVE_SERVICE.shutdownNow().forEach(r -> log.error(tlUI(Lang.UNFINISHED_RUNNABLE), r));
+            BAN_WAVE_SERVICE.shutdownNow();
         }
         BAN_WAVE_SERVICE = Executors.newScheduledThreadPool(1, r -> {
             Thread thread = new Thread(r);
@@ -480,8 +473,7 @@ public class PeerBanHelperServer implements Reloadable {
             thread.setDaemon(true);
             return thread;
         });
-        log.info(tlUI(Lang.PBH_BAN_WAVE_STARTED));
-        BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::banWave, 1, profileConfig.getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
+        BAN_WAVE_SERVICE.scheduleWithFixedDelay(this::banWave, 1, Main.getProfileConfig().getLong("check-interval", 5000), TimeUnit.MILLISECONDS);
     }
 
 
@@ -927,7 +919,7 @@ public class PeerBanHelperServer implements Reloadable {
         metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
         banListInvoker.forEach(i -> i.add(peer.getPeerAddress(), banMetadata));
         banMetadata.setReverseLookup("N/A");
-        if (mainConfig.getBoolean("lookup.dns-reverse-lookup")) {
+        if (Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
             executor.submit(() -> {
                 String hostName = peer.getPeerAddress().getAddress().toInetAddress().getHostName();
                 if (!peer.getPeerAddress().getIp().equals(hostName)) {

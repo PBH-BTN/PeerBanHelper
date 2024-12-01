@@ -72,12 +72,12 @@ public class BtnNetwork implements Reloadable {
     }
 
     public void reloadConfig() {
-        this.enabled = server.getMainConfig().getBoolean("btn.enabled");
-        this.configUrl = server.getMainConfig().getString("btn.config-url");
-        this.submit = server.getMainConfig().getBoolean("btn.submit");
-        this.appId = server.getMainConfig().getString("btn.app-id");
-        this.appSecret = server.getMainConfig().getString("btn.app-secret");
-        this.scriptExecute = server.getMainConfig().getBoolean("btn.allow-script-execute");
+        this.enabled = Main.getMainConfig().getBoolean("btn.enabled");
+        this.configUrl = Main.getMainConfig().getString("btn.config-url");
+        this.submit = Main.getMainConfig().getBoolean("btn.submit");
+        this.appId = Main.getMainConfig().getString("btn.app-id");
+        this.appSecret = Main.getMainConfig().getString("btn.app-secret");
+        this.scriptExecute = Main.getMainConfig().getBoolean("btn.allow-script-execute");
         resetAbilities();
         setupHttpClient();
         resetScheduler();
