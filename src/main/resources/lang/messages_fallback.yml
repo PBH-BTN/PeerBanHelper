@@ -503,8 +503,6 @@ PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS: "[PortMapper] 需要注意！尽�
 PORT_MAPPER_PORT_MAPPING_FAILED: "[PortMapper] 在网卡 {} 上创建/更新端口映射 {}/{} 失败，正在重试；如果频繁出现此提示，请检查是否设备接入了多个网络（如：Tailscale）"
 DECENTRALIZED_PORT_FORWARDED: "[Decentralized] 自动端口映射成功：{} -> {} (外部 IP: {})"
 
-LAB_EXPERIMENT_IPFS_TITLE: "IPFS (*星际文件系统*) 去中心化网络"
-LAB_EXPERIMENT_IPFS_DESCRIPTION: "参与此实验后，测试版 IPFS (星际文件系统)去中心化网络将在 PeerBanHelper 上启用。\nIPFS (星际文件系统) 是一个无中心服务器的分布式网络，每一台计算机都是 IPFS 网络中的一个节点。IPFS 灵活且富有弹性，您可以通过 IPFS 存储和查找文件和传递数据或资源，并且随着资源变得逐渐热门，速度和可访问性都会自动改善。当一个数据不再被任何节点需要（且无人刻意保留它）时，它也会随着时间推移而从网络中自动淘汰移除。"
 PUSH_PROVIDER_API_ADD_FAILURE: "推送渠道创建失败，是否传递的是一个不受支持的推送类型？"
 PUSH_PROVIDER_API_CREATED: "推送渠道创建成功"
 PUSH_PROVIDER_API_UPDATED: "推送渠道更新成功"

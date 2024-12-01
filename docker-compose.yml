@@ -8,8 +8,27 @@ services:
       - ./:/app/data
     ports:
       - "9898:9898"
-    environment:
-      - PUID=0
-      - PGID=0
-      - TZ=UTC
     stop_grace_period: 30s
+    environment:
+      - PBH_KUBO_RPC=/ip4/kubo/tcp/5001
+    depends_on:
+      - ipfs
+    links:
+      - ipfs
+  kubo:
+    image: "ipfs/go-ipfs:v0.32.1"
+    restart: unless-stopped
+    container_name: "kubo"
+    volumes:
+      - ./ipfs/export:/export
+      - ./ipfs/data:/data/ipfs
+    ports:
+      - "4001:9897"
+    environment:
+      - IPFS_PATH=/data/ipfs
+    stop_grace_period: 30s
+    healthcheck:
+      test: "/bin/netstat -anpt|grep 5001"
+      interval: 30s
+      timeout: 3s
+      retries: 1
