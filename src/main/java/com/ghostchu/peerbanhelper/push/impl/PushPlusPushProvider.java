@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.IOException;
 import java.net.http.HttpRequest;
@@ -20,8 +21,10 @@ import java.util.Map;
 @Slf4j
 public class PushPlusPushProvider extends AbstractPushProvider {
     private final Config config;
+    private final String name;
 
-    public PushPlusPushProvider(Config config) {
+    public PushPlusPushProvider(String name, Config config) {
+        this.name = name;
         this.config = config;
     }
 
@@ -30,11 +33,22 @@ public class PushPlusPushProvider extends AbstractPushProvider {
         return JsonUtil.readObject(JsonUtil.standard().toJson(config));
     }
 
-    public static PushPlusPushProvider loadFromJson(JsonObject json) {
-        return new PushPlusPushProvider(JsonUtil.getGson().fromJson(json, Config.class));
+    @Override
+    public ConfigurationSection saveYaml() {
+        YamlConfiguration section = new YamlConfiguration();
+        section.set("type", "pushplus");
+        section.set("token", config.getToken());
+        section.set("topic", config.getTopic());
+        section.set("template", config.getTemplate());
+        section.set("channel", config.getChannel());
+        return section;
     }
 
-    public static PushPlusPushProvider loadFromYaml(ConfigurationSection section) {
+    public static PushPlusPushProvider loadFromJson(String name, JsonObject json) {
+        return new PushPlusPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class));
+    }
+
+    public static PushPlusPushProvider loadFromYaml(String name, ConfigurationSection section) {
         var token = section.getString("token", "");
         var topic = section.getString("topic", "");
         var template = section.getString("template", "");
@@ -49,8 +63,13 @@ public class PushPlusPushProvider extends AbstractPushProvider {
             channel = null;
         }
         Config config = new Config(token, topic, template, channel);
-        return new PushPlusPushProvider(config);
+        return new PushPlusPushProvider(name, config);
 
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override

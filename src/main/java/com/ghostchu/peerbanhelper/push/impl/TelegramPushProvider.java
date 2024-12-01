@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -20,9 +21,16 @@ import java.util.Map;
 public class TelegramPushProvider extends AbstractPushProvider {
 
     private final Config config;
+    private final String name;
 
-    public TelegramPushProvider(Config config) {
+    public TelegramPushProvider(String name, Config config) {
+        this.name = name;
         this.config = config;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -30,20 +38,29 @@ public class TelegramPushProvider extends AbstractPushProvider {
         return "telegram";
     }
 
-    public static TelegramPushProvider loadFromJson(JsonObject json) {
-        return new TelegramPushProvider(JsonUtil.getGson().fromJson(json, Config.class));
+    public static TelegramPushProvider loadFromJson(String name, JsonObject json) {
+        return new TelegramPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class));
     }
 
-    public static TelegramPushProvider loadFromYaml(ConfigurationSection section) {
+    public static TelegramPushProvider loadFromYaml(String name, ConfigurationSection section) {
         var token = section.getString("token", "");
         var chatid = section.getString("chatid", "");
         Config config = new Config(token, chatid);
-        return new TelegramPushProvider(config);
+        return new TelegramPushProvider(name, config);
     }
 
     @Override
     public JsonObject saveJson() {
         return JsonUtil.readObject(JsonUtil.standard().toJson(config));
+    }
+
+    @Override
+    public ConfigurationSection saveYaml() {
+        YamlConfiguration section = new YamlConfiguration();
+        section.set("type", "telegram");
+        section.set("token", config.getToken());
+        section.set("chatid", config.getChatid());
+        return section;
     }
 
     @Override

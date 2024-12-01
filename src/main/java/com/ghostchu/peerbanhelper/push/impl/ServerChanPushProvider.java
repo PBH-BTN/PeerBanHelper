@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -19,10 +20,17 @@ import java.util.Map;
 
 public class ServerChanPushProvider extends AbstractPushProvider {
 
-    private Config config;
+    private final Config config;
+    private final String name;
 
-    public ServerChanPushProvider(Config config) {
+    public ServerChanPushProvider(String name, Config config) {
+        this.name = name;
         this.config = config;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -35,12 +43,22 @@ public class ServerChanPushProvider extends AbstractPushProvider {
         return JsonUtil.readObject(JsonUtil.standard().toJson(config));
     }
 
-    public static ServerChanPushProvider loadFromJson(JsonObject json) {
-        return new ServerChanPushProvider(JsonUtil.getGson().fromJson(json, Config.class));
+    @Override
+    public ConfigurationSection saveYaml() {
+        YamlConfiguration section = new YamlConfiguration();
+        section.set("type", "serverchan");
+        section.set("sendkey", config.getSendKey());
+        section.set("channel", config.getChannel());
+        section.set("openid", config.getOpenid());
+        return section;
     }
 
-    public static ServerChanPushProvider loadFromYaml(ConfigurationSection section) {
-        var sendKey = section.getString("send-key", "");
+    public static ServerChanPushProvider loadFromJson(String name, JsonObject json) {
+        return new ServerChanPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class));
+    }
+
+    public static ServerChanPushProvider loadFromYaml(String name, ConfigurationSection section) {
+        var sendKey = section.getString("sendkey", "");
         var channel = section.getString("channel", "");
         var openid = section.getString("openid", "");
         if (channel.isBlank()) {
@@ -50,7 +68,7 @@ public class ServerChanPushProvider extends AbstractPushProvider {
             openid = null;
         }
         Config config = new Config(sendKey, channel, openid);
-        return new ServerChanPushProvider(config);
+        return new ServerChanPushProvider(name, config);
     }
 
     @Override

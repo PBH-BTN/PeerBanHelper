@@ -8,12 +8,17 @@ import com.ghostchu.peerbanhelper.push.impl.TelegramPushProvider;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -28,23 +33,54 @@ public class PushManager implements Reloadable {
         reloadConfig();
     }
 
+    public PushProvider createPushProvider(String name, String type, ConfigurationSection section) {
+        name = name.replace(".", "-");
+        AbstractPushProvider provider = null;
+        switch (type.toLowerCase(Locale.ROOT)) {
+            case "pushplus" -> provider = PushPlusPushProvider.loadFromYaml(name, section);
+            case "serverchan" -> provider = ServerChanPushProvider.loadFromYaml(name, section);
+            case "smtp" -> provider = SmtpPushProvider.loadFromYaml(name, section);
+            case "telegram" -> provider = TelegramPushProvider.loadFromYaml(name, section);
+        }
+        return provider;
+    }
+
+    public PushProvider createPushProvider(String name, String type, JsonObject jsonObject) {
+        AbstractPushProvider provider = null;
+        switch (type.toLowerCase(Locale.ROOT)) {
+            case "pushplus" -> provider = PushPlusPushProvider.loadFromJson(name, jsonObject);
+            case "serverchan" -> provider = ServerChanPushProvider.loadFromJson(name, jsonObject);
+            case "smtp" -> provider = SmtpPushProvider.loadFromJson(name, jsonObject);
+            case "telegram" -> provider = TelegramPushProvider.loadFromJson(name, jsonObject);
+        }
+        return provider;
+    }
+
     private void reloadConfig() {
-        List<PushProvider> registered = new ArrayList<>();
+        List<com.ghostchu.peerbanhelper.push.PushProvider> registered = new ArrayList<>();
         var config = Main.getMainConfig().getConfigurationSection("push-notification");
         config.getKeys(false).forEach(provider -> {
             var section = config.getConfigurationSection(provider);
-            if (section.getBoolean("enabled")) {
-                switch (section.getString("type")) {
-                    case "smtp" -> registered.add(SmtpPushProvider.loadFromYaml(section));
-                    case "pushplus" -> registered.add(PushPlusPushProvider.loadFromYaml(section));
-                    case "serverchan" -> registered.add(ServerChanPushProvider.loadFromYaml(section));
-                    case "telegram" -> registered.add(TelegramPushProvider.loadFromYaml(section));
-                    default -> log.warn(tlUI(Lang.UNKNOWN_PUSH_PROVIDER, provider, section.getString("type")));
-                }
-            }
+            registered.add(createPushProvider(provider, section.getString("type"), section));
         });
         providerList.clear();
         providerList.addAll(registered);
+    }
+
+    public boolean addPushProvider(PushProvider provider) {
+       return providerList.add(provider);
+    }
+    public boolean removePushProvider(PushProvider provider) {
+        return providerList.remove(provider);
+    }
+
+    public void savePushProviders() throws IOException {
+        ConfigurationSection clientSection = new MemoryConfiguration();
+        for (var pushProvider : this.providerList) {
+            clientSection.set(pushProvider.getName(), pushProvider.saveYaml());
+        }
+        Main.getMainConfig().set("push-notification", clientSection);
+        Main.getMainConfig().save(Main.getMainConfigFile());
     }
 
     public boolean pushMessage(String title, String description) {

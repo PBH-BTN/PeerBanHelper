@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.UnsupportedEncodingException;
@@ -19,16 +20,18 @@ import java.util.Properties;
 @Slf4j
 public class SmtpPushProvider extends AbstractPushProvider {
     private final Config config;
+    private final String name;
 
-    public SmtpPushProvider(Config config) {
+    public SmtpPushProvider(String name, Config config) {
+        this.name = name;
        this.config = config;
     }
 
-    public static SmtpPushProvider loadFromJson(JsonObject json) {
-        return new SmtpPushProvider(JsonUtil.getGson().fromJson(json, Config.class));
+    public static SmtpPushProvider loadFromJson(String name, JsonObject json) {
+        return new SmtpPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class));
     }
 
-    public static SmtpPushProvider loadFromYaml(ConfigurationSection section){
+    public static SmtpPushProvider loadFromYaml(String name, ConfigurationSection section){
         Properties props = new Properties();
         props.put("mail.smtp.auth", true);
         props.put("mail.smtp.starttls.enable", section.getBoolean("ssl"));
@@ -40,12 +43,27 @@ public class SmtpPushProvider extends AbstractPushProvider {
         var senderName = section.getString("name");
         var receivers = section.getStringList("receiver");
         Config config = new Config(props, username, password, sender, senderName, receivers);
-        return new SmtpPushProvider(config);
+        return new SmtpPushProvider(name, config);
     }
 
     @Override
     public JsonObject saveJson() {
         return JsonUtil.readObject(JsonUtil.standard().toJson(config));
+    }
+
+    @Override
+    public ConfigurationSection saveYaml() {
+        YamlConfiguration section = new YamlConfiguration();
+        section.set("type", "smtp");
+        section.set("ssl", config.getProps().get("mail.smtp.starttls.enable"));
+        section.set("host", config.getProps().get("mail.smtp.host"));
+        section.set("port", config.getProps().get("mail.smtp.port"));
+        section.set("username", config.getUsername());
+        section.set("password", config.getPassword());
+        section.set("sender", config.getSender());
+        section.set("name", config.getSenderName());
+        section.set("receiver", config.getReceivers());
+        return section;
     }
 
     public void sendMail(String email, String subject, String text) throws MessagingException, UnsupportedEncodingException {
@@ -61,6 +79,11 @@ public class SmtpPushProvider extends AbstractPushProvider {
         msg.setSubject(stripMarkdown(subject));
         msg.setContent(markdown2Html(text), "text/html;charset=utf-8");
         Transport.send(msg);
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
