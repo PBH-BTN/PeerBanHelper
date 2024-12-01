@@ -54,8 +54,7 @@ public class PBHPushController extends AbstractFeatureModule {
                 .put("/api/push", this::handlePushProviderPut, Role.USER_WRITE)
                 .patch("/api/push/{pushName}", ctx -> handlePushProviderPatch(ctx, ctx.pathParam("pushName")), Role.USER_WRITE)
                 .post("/api/push/test", this::handlePushProviderTest, Role.USER_WRITE)
-                .delete("/api/push/{pushName}", ctx -> handlePushProviderDelete(ctx, ctx.pathParam("pushName")), Role.USER_WRITE)
-                .get("/api/push/{pushName}/status", ctx -> handlePushProviderStatus(ctx, ctx.pathParam("pushName")), Role.USER_READ);
+                .delete("/api/push/{pushName}", ctx -> handlePushProviderDelete(ctx, ctx.pathParam("pushName")), Role.USER_WRITE);
     }
 
 
@@ -164,23 +163,9 @@ public class PBHPushController extends AbstractFeatureModule {
         }
     }
 
-    private void handlePushProviderStatus(@NotNull Context ctx, String pushProviderName) {
-        Optional<PushProvider> selected = pushManager.getProviderList().stream()
-                .filter(d -> d.getName().equals(pushProviderName))
-                .findFirst();
-        if (selected.isEmpty()) {
-            ctx.status(HttpStatus.NOT_FOUND);
-            ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_API_PROVIDER_NOT_EXISTS), null));
-            return;
-        }
-        PushProvider pushProvider = selected.get();
-        JsonObject config = pushProvider.saveJson();
-        ctx.json(new StdResp(true, null, new PushStatusWrapper(config)));
-    }
-
     private void handlePushProviderList(@NotNull Context ctx) {
         List<PushWrapper> pushProviders = pushManager.getProviderList()
-                .stream().map(d -> new PushWrapper(d.getName(), d.getConfigType()))
+                .stream().map(d -> new PushWrapper(d.getName(), d.getConfigType(), d.saveJson()))
                 .toList();
         ctx.json(new StdResp(true, null, pushProviders));
     }
@@ -191,8 +176,6 @@ public class PBHPushController extends AbstractFeatureModule {
 
     }
 
-    record PushWrapper(String name, String type) {
-    }
-    record PushStatusWrapper(JsonObject config) {
+    record PushWrapper(String name, String type, JsonObject config) {
     }
 }
