@@ -48,7 +48,7 @@ public class MainConfigUpdateScript {
                 single.set("config", config);
             }
             pushNotification.set(key, single);
-            conf.set(key, single);
+            conf.set("push-notification", pushNotification);
         }
     }
 
