@@ -137,11 +137,11 @@ public class PBHPushController extends AbstractFeatureModule {
             if (testResult) {
                 ctx.json(new StdResp(true, tl(locale(ctx), Lang.PUSH_PROVIDER_API_TEST_OK), null));
             } else {
-                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_TEST_FAILED), null));
+                ctx.json(new StdResp(false, tl(locale(ctx), Lang.PUSH_PROVIDER_TEST_FAILED, name, pushProvider.getConfigType()), null));
             }
         } catch (Exception e) {
             log.error("Validate PushProvider failed", e);
-            ctx.json(new StdResp(false,e.getMessage(), null));
+            ctx.json(new StdResp(false, e.getMessage(), null));
         }
     }
 
