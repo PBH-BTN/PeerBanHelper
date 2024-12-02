@@ -37,18 +37,23 @@ public class MainConfigUpdateScript {
         for (String key : pushNotification.getKeys(false)) {
             var single = pushNotification.getConfigurationSection(key);
             if (single == null) continue;
-            var type = single.getString("type");
-            if ("smtp".equals(type)) {
-                single.set("auth", true);
-                if(single.getBoolean("ssl")) {
-                    single.set("encryption", "STARTTLS");
-                }else{
-                    single.set("encryption", "NONE");
+            if(single.getBoolean("enabled", false)){
+                pushNotification.set(key, null); // 删除未启用的推送渠道
+            }else {
+                var type = single.getString("type");
+                if ("smtp".equals(type)) {
+                    single.set("auth", true);
+                    if (single.getBoolean("ssl")) {
+                        single.set("encryption", "STARTTLS");
+                    } else {
+                        single.set("encryption", "NONE");
+                    }
+                    single.set("ssl", null);
+                    single.set("sendPartial", true);
                 }
-                single.set("ssl", null);
-                single.set("sendPartial", true);
+                pushNotification.set(key, single);
             }
-            pushNotification.set(key, single);
+
             conf.set("push-notification", pushNotification);
         }
     }
