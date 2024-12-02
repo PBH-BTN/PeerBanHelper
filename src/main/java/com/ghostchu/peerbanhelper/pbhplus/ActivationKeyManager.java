@@ -83,7 +83,7 @@ public class ActivationKeyManager {
                 System.currentTimeMillis(),
                 LocalDateTime.now().plusDays(15).atOffset(ZoneOffset.UTC).toInstant().toEpochMilli(),
                 tlUI(Lang.FREE_LICENSE_DESCRIPTION),
-                "Local License", true);
+                "Local License", "local");
         var encrypted = (RSAUtils.encryptByPrivateKey(new Gson().toJson(key).getBytes(StandardCharsets.UTF_8),
                 Base64.getEncoder().encodeToString(getLocalKeyPair().getKey().getEncoded())));
         return Base64.getEncoder().encodeToString(encrypted);
@@ -134,7 +134,8 @@ public class ActivationKeyManager {
         // 隐藏字段，主要是为了改变 KEY，PBH 并不关心这个字段
         @Nullable
         private String hidden;
-        private boolean localLicense;
+        @Nullable
+        private String type = "afdian"; // 默认字段
     }
 
 }

@@ -5,8 +5,16 @@ config-version: 26
 # en_us English (US)
 # zh_cn Chinese Simplified (简体中文)
 language: default
-# PBH Plus 捐赠密钥 (https://afdian.com/a/Ghost_chu)，如果你有的话，就填在这里吧
-# PBH Plus donation key, if you have one, please fill to there
+# PBH Plus 的捐赠密钥，填写后将激活捐赠功能。
+# PeerBanHelper 是一个非营利、开放源代码的免费软件。维护 PeerBanHelper 是一项持续的任务，
+# 我们的团队成员每个月在上面花费大量的时间与恶意Peer进行技术对抗，因此你的支持对我们来说至关重要。
+# 如果您不想捐赠 PeerBanHelper，请通过 WebUI 创建本地免费许可证，它与通过捐赠获取的捐赠密钥在功能上相同。
+# A donation key for PBH Plus, which when filled out will activate the donation feature.
+# PeerBanHelper is a non-profit, open source, freeware program. Maintaining PeerBanHelper is an ongoing task,
+# and our team members spend a lot of time on it each month in technical confrontations with malicious Peers,
+# so your support is vital to us.
+# If you don't want to donate PeerBanHelper, please create a local free license via WebUI,
+# which is functionally identical to the donation key obtained via donation.
 pbh-plus-key: ''
 # Http 服务器设置
 # Http Server Settings

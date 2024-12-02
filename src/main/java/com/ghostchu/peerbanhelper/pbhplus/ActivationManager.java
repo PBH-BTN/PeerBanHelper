@@ -75,6 +75,6 @@ public class ActivationManager implements Reloadable {
     }
 
     public boolean isLocalLicense() {
-        return this.keyData != null && this.keyData.isLocalLicense();
+        return this.keyData != null && "local".equals(this.keyData.getType());
     }
 }
