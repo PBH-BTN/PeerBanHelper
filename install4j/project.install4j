@@ -23,12 +23,9 @@
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
       <variableEntry mountPoint="24" name="jarPath" />
     </entries>
-    <components>
-      <component name="IPFS Kubo Client" id="229" downloadable="true" />
-    </components>
   </files>
   <launchers>
-    <launcher name="PeerBanHelper" id="26" checkUpdater="true">
+    <launcher name="PeerBanHelper" id="26" menuName="${i18n:launcher.peerbanhelper.gui}" checkUpdater="true">
       <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
@@ -42,7 +39,7 @@
         <file path="./icon.png" />
       </iconImageFiles>
     </launcher>
-    <launcher name="PeerBanHelper GUI Silent" id="66" checkUpdater="true">
+    <launcher name="PeerBanHelper GUI Silent" id="66" menuName="${i18n:launcher.peerbanhelper.silent}" checkUpdater="true">
       <executable name="PeerBanHelper-GUI-Silent" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
@@ -56,7 +53,7 @@
         <file path="./icon.png" />
       </iconImageFiles>
     </launcher>
-    <launcher name="PeerBanHelper NoGUI" id="28" swtApp="true" checkUpdater="true">
+    <launcher name="PeerBanHelper NoGUI" id="28" menuName="${i18n:launcher.peerbanhelper.nogui}" swtApp="true" checkUpdater="true">
       <executable name="PeerBanHelper-NoGUI" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
@@ -82,6 +79,21 @@
       </java>
       <iconImageFiles>
         <file path="./icon.png" />
+      </iconImageFiles>
+    </launcher>
+    <launcher name="PeerBanHelper-Updater" id="235" menuName="${i18n:launcher.peerbanhelper.updater}">
+      <executable name="PeerBanHelper-Updater" iconSet="true" executableDir="." failOnStderrOutput="false" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
+        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
+      </executable>
+      <java mainClass="com.ghostchu.peerbanhelper.MainEmpty" vmParameters="-Xmx512M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Dlauncher.directory=${launcher:sys.launcherDirectory}">
+        <classPath>
+          <scanDirectory location="libraries" failOnError="false" />
+          <archive location="PeerBanHelper.jar" failOnError="false" />
+        </classPath>
+      </java>
+      <iconImageFiles>
+        <file path="" />
+        <file path="./updater.png" />
       </iconImageFiles>
     </launcher>
   </launchers>
@@ -721,7 +733,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
           </screen>
         </startup>
       </application>
-      <application name="Standalone update downloader" id="167" beanClass="com.install4j.runtime.beans.applications.CustomApplication" launchInNewProcess="false">
+      <application name="Standalone update downloader" id="167" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupSync" launchInNewProcess="false" launchSchedule="always" allLaunchers="false">
         <serializedBean>
           <property name="customIconImageFiles">
             <add>
@@ -754,6 +766,9 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
           <property name="useCustomIcon" type="boolean" value="true" />
           <property name="windowTitle" type="string">${i18n:updater.WindowTitle("${compiler:sys.fullName}")}</property>
         </serializedBean>
+        <launcherIds>
+          <launcher id="235" />
+        </launcherIds>
         <startup>
           <screen id="168" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0" />
         </startup>
@@ -1589,4 +1604,7 @@ return true;</property>
       <jreBundle platform="alpine-linux-aarch64" installOnlyIfNecessary="true" />
     </unixInstaller>
   </mediaSets>
+  <buildIds>
+    <mediaSet refId="38" />
+  </buildIds>
 </install4j>

@@ -1,7 +1,8 @@
 launcher.peerbanhelper.gui=PeerBanHelper
-launcher.peerbanhelper.gui.swing=PeerBanHelper(兼容模式)
-launcher.peerbanhelper.nogui=PeerBanHelper(无GUI, 控制台)
-launcher.peerbanhelper.service=PeerBanHelper(服务)
+launcher.peerbanhelper.silent=PeerBanHelper (静默启动)
+launcher.peerbanhelper.nogui=PeerBanHelper (无GUI, 控制台)
+launcher.peerbanhelper.service=PeerBanHelper (服务)
+launcher.peerbanhelper.updater=PeerBanHelper 检查更新
 checkbox.followsystemstartup=登录时自动启动到系统托盘
 peerbanhelper.description=PeerBanHelper
 checkbox.registersystemservice=注册为系统服务(除非你知道这是做什么的，否则不要选中)
