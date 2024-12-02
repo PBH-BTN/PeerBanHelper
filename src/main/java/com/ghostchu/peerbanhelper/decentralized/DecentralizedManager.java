@@ -50,7 +50,7 @@ public class DecentralizedManager implements AutoCloseable, Reloadable {
             this.ipfs = new IPFS(ipfsRpc);
             log.info(tlUI(Lang.IPFS_INIT_WELCOME, ipfs.version()));
         } catch (Exception e) {
-            log.error(tlUI(Lang.IPFS_INIT_FAILED, e.getMessage()));
+            log.warn(tlUI(Lang.IPFS_INIT_FAILED, e.getMessage()));
         }
     }
 
