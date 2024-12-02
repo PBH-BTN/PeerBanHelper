@@ -29,6 +29,27 @@ public class MainConfigUpdateScript {
 //        }
     }
 
+
+    @UpdateScript(version = 25)
+    public void pushProvidersSMTPStructUpgrade() {
+        var pushNotification = conf.getConfigurationSection("push-notification");
+        if (pushNotification == null) return;
+        for (String key : pushNotification.getKeys(false)) {
+            var single = pushNotification.getConfigurationSection(key);
+            if (single == null) continue;
+            var type = single.getString("type");
+            if("smtp".equals(type)) {
+                var config = single.getConfigurationSection("config");
+                if(config != null){
+                    config.set("auth", true);
+                    config.set("encryption", "STARTTLS");
+                    config.set("sendPartial", true);
+                }
+            }
+            conf.set(key, single);
+        }
+    }
+
     @UpdateScript(version = 25)
     public void pushProvidersCleanup() {
         var pushNotification = conf.getConfigurationSection("push-notification");
