@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,7 +54,8 @@ public class PBHPlusController extends AbstractFeatureModule {
 
     private void handleLicenseRenew(@NotNull Context ctx) throws Exception {
         if (activationManager.isActivated()) {
-            ctx.json(new StdResp(true, tl(locale(ctx), Lang.FREE_LICENSE_RENEW_STILL_ACTIVE), null));
+            ctx.status(HttpStatus.CONFLICT);
+            ctx.json(new StdResp(false, tl(locale(ctx), Lang.FREE_LICENSE_RENEW_STILL_ACTIVE), null));
             return;
         }
         var newLocalLicense = activationKeyManager.generateLocalLicense();
