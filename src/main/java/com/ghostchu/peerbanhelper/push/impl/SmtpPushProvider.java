@@ -40,7 +40,7 @@ public class SmtpPushProvider extends AbstractPushProvider {
         var sender = section.getString("sender");
         var senderName = section.getString("name");
         var receivers = section.getStringList("receiver");
-        var encryption = Encryption.valueOf(section.getString("encryption").toUpperCase(Locale.ROOT));
+        var encryption = Encryption.valueOf(section.getString("encryption", "STARTTLS").toUpperCase(Locale.ROOT));
         var sendPartial = section.getBoolean("sendPartial");
         Config config = new Config(section.getString("host"),
                 section.getInt("port"), auth, username, password,
