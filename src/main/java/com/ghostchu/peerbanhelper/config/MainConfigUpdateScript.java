@@ -38,14 +38,15 @@ public class MainConfigUpdateScript {
             var single = pushNotification.getConfigurationSection(key);
             if (single == null) continue;
             var type = single.getString("type");
-            if("smtp".equals(type)) {
-                var config = single.getConfigurationSection("config");
-                if(config != null){
-                    config.set("auth", true);
-                    config.set("encryption", "STARTTLS");
-                    config.set("sendPartial", true);
+            if ("smtp".equals(type)) {
+                single.set("auth", true);
+                if(single.getBoolean("ssl")) {
+                    single.set("encryption", "STARTTLS");
+                }else{
+                    single.set("encryption", "NONE");
                 }
-                single.set("config", config);
+                single.set("ssl", null);
+                single.set("sendPartial", true);
             }
             pushNotification.set(key, single);
             conf.set("push-notification", pushNotification);
