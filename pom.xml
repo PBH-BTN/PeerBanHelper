@@ -461,7 +461,7 @@
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <!-- DO NOT UPDATE, Keep sync with jSystemThemeDetector -->
-            <version>5.8.6</version>
+            <version>6.6.5</version>
         </dependency>
         <dependency>
             <groupId>org.commonmark</groupId>
