@@ -166,7 +166,7 @@ performance:
 # PeerBanHelper 去中心化网络服务 - Decentralized network service
 # 请配置一个可用的 Kubo IPFS 节点 - Please configure an available Kubo IPFS node
 decentralized:
-  enabled: true
+  enabled: false
   # Kubo RPC MultiAddr
   kubo-rpc: "/ip4/127.0.0.1/tcp/5001"
   features:
