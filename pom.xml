@@ -168,7 +168,7 @@
                     <plugin>
                         <groupId>com.install4j</groupId>
                         <artifactId>install4j-maven</artifactId>
-                        <version>10.0.8</version>
+                        <version>11.0.1</version>
                         <executions>
                             <execution>
                                 <id>compile-installers</id>
@@ -197,7 +197,7 @@
                     <plugin>
                         <groupId>com.install4j</groupId>
                         <artifactId>install4j-maven</artifactId>
-                        <version>10.0.8</version>
+                        <version>11.0.1</version>
                         <executions>
                             <execution>
                                 <id>compile-installers</id>
