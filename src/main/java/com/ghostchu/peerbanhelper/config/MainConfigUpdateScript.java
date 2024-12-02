@@ -45,7 +45,9 @@ public class MainConfigUpdateScript {
                     config.set("encryption", "STARTTLS");
                     config.set("sendPartial", true);
                 }
+                single.set("config", config);
             }
+            pushNotification.set(key, single);
             conf.set(key, single);
         }
     }
@@ -63,8 +65,9 @@ public class MainConfigUpdateScript {
                 single.set("sendkey", sendKey);
                 single.set("send-key", null);
             }
-            conf.set(key, single);
+            pushNotification.set(key, single);
         }
+        conf.set("push-notification", pushNotification);
     }
 
     @UpdateScript(version = 24)
