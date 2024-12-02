@@ -30,7 +30,7 @@ public class MainConfigUpdateScript {
     }
 
 
-    @UpdateScript(version = 25)
+    @UpdateScript(version = 26)
     public void pushProvidersSMTPStructUpgrade() {
         var pushNotification = conf.getConfigurationSection("push-notification");
         if (pushNotification == null) return;
