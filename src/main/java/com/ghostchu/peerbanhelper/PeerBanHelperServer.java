@@ -35,7 +35,6 @@ import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.*;
-import com.ghostchu.peerbanhelper.util.encrypt.ActivationKeyUtil;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
@@ -234,7 +233,6 @@ public class PeerBanHelperServer implements Reloadable {
         registerFunctions(URLUtil.class);
         registerFunctions(WebUtil.class);
         registerFunctions(RSAUtils.class);
-        registerFunctions(ActivationKeyUtil.class);
         registerFunctions(Pageable.class);
         registerFunctions(TextManager.class);
         registerFunctions(ExchangeMap.class);

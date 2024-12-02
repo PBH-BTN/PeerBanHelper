@@ -522,3 +522,9 @@ IPFS_INIT_FAILED: "[IPFS] 初始化 Kubo IPFS RPC 失败，IPFS 功能将不可�
 IPFS_INIT_WELCOME: "[IPFS] 已成功连接到 Kubo IPFS RPC，版本 {}。PeerBanHelper 已成功通过 Kubo 连接 IPFS 网络，并提供扩展功能"
 IPFS_BANLIST_PUBLISHED: "[IPFS] 已更新封禁列表到 IPFS，并一同更新了 IPNS 记录"
 MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE: "无法从 IPFS/IPNS 更新规则订阅，因为 IPFS 功能未启用"
+
+FREE_LICENSE_RENEW_SUCCESS: "新的许可证已生成并激活"
+FREE_LICENSE_RENEW_STILL_ACTIVE: "当前许可证仍在有效期内，无需重新生成"
+FREE_LICENSE_SOURCE: "本地生成的免费许可证"
+FREE_LICENSE_LICENSE_TO: "{} 用于个人用途"
+FREE_LICENSE_DESCRIPTION: "PeerBanHelper 是一个非营利，开放源代码的免费软件。免费许可证授权这台计算机的个人用途，您不得重新出售或者用于违反服务条款的用途。如果 PeerBanHelper 帮助到了你，请考虑[在爱发电上捐赠支持我们](https://afdian.com/a/Ghost_chu)。"
