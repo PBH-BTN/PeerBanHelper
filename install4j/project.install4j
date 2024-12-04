@@ -23,6 +23,14 @@
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
       <variableEntry mountPoint="24" name="jarPath" />
     </entries>
+    <components>
+      <component name="${i18n:components.peerbanhelper}" id="245" customizedId="peerbanhelper" changeable="false">
+        <description>${i18n:components.peerbanhelper.description}</description>
+        <include>
+          <entry defaultFileset="true" />
+        </include>
+      </component>
+    </components>
   </files>
   <launchers>
     <launcher name="PeerBanHelper" id="26" menuName="${i18n:launcher.peerbanhelper.gui}" checkUpdater="true">
@@ -92,7 +100,6 @@
         </classPath>
       </java>
       <iconImageFiles>
-        <file path="" />
         <file path="./updater.png" />
       </iconImageFiles>
     </launcher>

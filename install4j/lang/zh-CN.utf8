@@ -5,3 +5,5 @@ launcher.peerbanhelper.service=PeerBanHelper (服务)
 launcher.peerbanhelper.updater=PeerBanHelper 检查更新
 checkbox.followsystemstartup=登录到桌面时自动启动
 peerbanhelper.description=一个能够自动封禁不受欢迎、吸血和异常的 Peers，并支持自定义规则的 BT 客户端辅助工具
+components.peerbanhelper=PeerBanHelper
+components.peerbanhelper.description=PeerBanHelper 的核心主程序，包含了主程序代码和必要的运行文件
