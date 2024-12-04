@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Properties;
 
 @Slf4j
 public class Main {
@@ -87,6 +88,7 @@ public class Main {
         startupArgs = args;
         setupReloading();
         setupConfDirectory(args);
+        loadFlagsProperties();
         setupLogback();
         meta = buildMeta();
         setupConfiguration();
@@ -124,6 +126,22 @@ public class Main {
         guiManager.sync();
     }
 
+    private static void loadFlagsProperties() {
+        try {
+            var flags = new File(dataDirectory, "flags.properties");
+            if (flags.exists()) {
+                try (var is = Files.newInputStream(flags.toPath())) {
+                    Properties properties = new Properties();
+                    properties.load(is);
+                    System.getProperties().putAll(properties);
+                    log.info("Loaded {} property from data/flags.properties.", properties.size());
+                }
+            }
+        } catch (IOException e) {
+            log.error("Unable to load flags.properties", e);
+        }
+    }
+
     @SneakyThrows
     private static void setupReloading() {
         reloadManager.register(Main.class.getDeclaredMethod("reloadModule"));
@@ -157,6 +175,7 @@ public class Main {
 
     public static ReloadResult reloadModule() {
         setupConfiguration();
+        loadFlagsProperties();
         setupProxySettings();
         return ReloadResult.builder().status(ReloadStatus.SUCCESS).reason("OK!").build();
     }
