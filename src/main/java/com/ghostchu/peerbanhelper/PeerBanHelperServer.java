@@ -57,6 +57,7 @@ import com.googlecode.aviator.EvalMode;
 import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import inet.ipaddr.IPAddress;
+import inet.ipaddr.format.util.DualIPv4v6Tries;
 import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -97,7 +98,7 @@ public class PeerBanHelperServer implements Reloadable {
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
     private final List<Downloader> downloaders = new CopyOnWriteArrayList<>();
     @Getter
-    private final List<IPAddress> ignoreAddresses = new ArrayList<>();
+    private final DualIPv4v6Tries ignoreAddresses = new DualIPv4v6Tries();
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     @Getter
     private final List<BanListInvoker> banListInvoker = new ArrayList<>();
@@ -170,10 +171,8 @@ public class PeerBanHelperServer implements Reloadable {
 
     private void unbanWhitelistedPeers() {
         for (PeerAddress peerAddress : BAN_LIST.keySet()) {
-            for (IPAddress ignoreAddress : ignoreAddresses) {
-                if (ignoreAddress.equals(peerAddress.getAddress()) || ignoreAddress.contains(peerAddress.getAddress())) {
-                    scheduleUnBanPeer(peerAddress);
-                }
+            if (ignoreAddresses.elementContains(peerAddress.getAddress())) {
+                scheduleUnBanPeer(peerAddress);
             }
         }
     }
@@ -833,10 +832,8 @@ public class PeerBanHelperServer implements Reloadable {
         if (peer.getPeerAddress().getAddress().isAnyLocal()) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-local-address"), new TranslationComponent("general-reason-skip-local-peers"));
         }
-        for (IPAddress ignoreAddress : ignoreAddresses) {
-            if (ignoreAddress.contains(peer.getPeerAddress().getAddress())) {
-                return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
-            }
+        if (ignoreAddresses.elementContains(peer.getPeerAddress().getAddress())) {
+            return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
         }
         try {
             for (FeatureModule registeredModule : moduleManager.getModules()) {
