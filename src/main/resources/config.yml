@@ -15,7 +15,7 @@ language: default
 # so your support is vital to us.
 # If you don't want to donate PeerBanHelper, please create a local free license via WebUI,
 # which is functionally identical to the donation key obtained via donation.
-pbh-plus-key: ""
+pbh-plus-key: ''
 # Http 服务器设置
 # Http Server Settings
 server:
@@ -139,8 +139,8 @@ ip-database:
   # 允许自动更新 GeoIP 数据库文件
   # Allow PBH update GeoIP database file while restarting if needed
   auto-update: true
-  database-city: "GeoLite2-City"
-  database-asn: "GeoLite2-ASN"
+  database-city: 'GeoLite2-City'
+  database-asn: 'GeoLite2-ASN'
 # 代理服务器设定
 # Proxy server settings
 proxy:
@@ -166,7 +166,7 @@ performance:
 # PeerBanHelper 去中心化网络服务 - Decentralized network service
 # 请配置一个可用的 Kubo IPFS 节点 - Please configure an available Kubo IPFS node
 decentralized:
-  enabled: false
+  enabled: true
   # Kubo RPC MultiAddr
   kubo-rpc: "/ip4/127.0.0.1/tcp/5001"
   features:
