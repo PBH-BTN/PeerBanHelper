@@ -12,6 +12,8 @@
       <variable name="registerSystemService" value="registerSystemService" />
       <variable name="jarPath" value="../target/PeerBanHelper.jar" />
       <variable name="librariesPath" value="../target/libraries" />
+      <variable name="updatesXmlUrl" value="https://pbh-files.pbh-btn.com/updates/snapshot/updates.xml" />
+      <variable name="updatesInstallerBaseUrl" value="https://pbh-files.pbh-btn.com/snapshot/latest" />
     </variables>
     <jreBundles jdkProviderId="Liberica" release="23/23.0.1+13" />
   </application>
@@ -104,7 +106,7 @@
       </iconImageFiles>
     </launcher>
   </launchers>
-  <installerGui autoUpdateDescriptorUrl="https://pbh-files.pbh-btn.com/updates/latest/updates.xml">
+  <installerGui autoUpdateDescriptorUrl="${compiler:updatesXmlUrl}" autoUpdateBaseUrl="${compiler:updatesInstallerBaseUrl}">
     <applications>
       <application id="installer" beanClass="com.install4j.runtime.beans.applications.InstallerApplication">
         <startup>

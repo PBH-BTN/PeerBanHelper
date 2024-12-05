@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.2.0-Alpha1</version>
+    <version>7.2.0-SNAPSHOT-24w49a</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -180,6 +180,39 @@
                                     <variables>
                                         <librariesPath>${project.basedir}/target/libraries</librariesPath>
                                         <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
+                                        <updatesXmlUrl>https://pbh-files.pbh-btn.com/updates/snapshot/updates.xml</updatesXmlUrl>
+<!--                                        <updatesInstallerBaseUrl>https://pbh-files.pbh-btn.com/snapshot/latest</updatesInstallerBaseUrl>-->
+                                    </variables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>install4j-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                        <version>11.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <librariesPath>${project.basedir}/target/libraries</librariesPath>
+                                        <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
+                                        <updatesXmlUrl>https://pbh-files.pbh-btn.com/updates/latest/updates.xml</updatesXmlUrl>
+<!--                                        <updatesInstallerBaseUrl>https://pbh-files.pbh-btn.com/updates/latest/updates.xml</updatesInstallerBaseUrl>-->
                                     </variables>
                                 </configuration>
                             </execution>

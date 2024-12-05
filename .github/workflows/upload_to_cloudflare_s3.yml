@@ -1,0 +1,32 @@
+name: Upload to CloudFlare S3
+
+on:
+  workflow_call:
+    inputs:
+      destination_dir:
+        description: 'The destination directory'
+        required: true
+        type: string
+    secrets:
+      S3_ACCESS_KEY:
+        required: true
+      S3_SECRET_KEY:
+        required: true
+      S3_ENDPOINT:
+        required: true
+      S3_BUCKET:
+        required: true
+jobs:
+  Upload_To_CloudFlare_S3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove from S3
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.S3_SECRET_KEY }}
+          aws_bucket: ${{ secrets.S3_BUCKET }}
+          endpoint: ${{ secrets.S3_ENDPOINT }}
+          source_dir: 'target/media'
+          destination_dir: ${{ inputs.destination_dir }}
