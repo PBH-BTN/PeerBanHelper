@@ -87,7 +87,7 @@
             <a-space style="display: flex; justify-content: center; align-items: center">
               <a-typography-text type="secondary">{{ t('plus.or') }}</a-typography-text>
               &nbsp;
-              <a-button @click="handleTry" :loading="loading">{{ t('plus.try') }}</a-button>
+              <a-button :loading="loading" @click="handleTry">{{ t('plus.try') }}</a-button>
             </a-space>
           </template>
         </a-split>
