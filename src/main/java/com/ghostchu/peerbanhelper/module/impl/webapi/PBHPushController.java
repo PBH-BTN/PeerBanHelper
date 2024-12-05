@@ -153,7 +153,7 @@ public class PBHPushController extends AbstractFeatureModule {
             return;
         }
         PushProvider pushProvider = selected.get();
-        pushManager.addPushProvider(pushProvider);
+        pushManager.removePushProvider(pushProvider);
         try {
             pushManager.savePushProviders();
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.PUSH_PROVIDER_API_REMOVE_SAVED), null));
