@@ -24,7 +24,24 @@
         { xs: 8, sm: 8, md: 8, lg: 24, xl: 32 }
       ]"
     >
-      <a-col v-for="push in data?.data" :key="push.name" :xs="24" :sm="12" :md="8" :lg="6">
+      <!--骨架屏-->
+      <a-col v-if="loading" :xs="24" :sm="12" :md="8" :lg="6">
+        <a-card hoverable :style="{ width: '15rem', marginBottom: '20px' }">
+          <div
+            :style="{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }"
+          >
+            <a-space>
+              <a-skeleton-shape shape="circle" animation /><a-skeleton-line animation />
+            </a-space>
+          </div>
+        </a-card>
+      </a-col>
+      <!--骨架屏-->
+      <a-col v-for="push in data?.data" v-else :key="push.name" :xs="24" :sm="12" :md="8" :lg="6">
         <pushCard :channel="push" @deleted="refresh" @edit="handleEdit(push)" />
       </a-col>
     </a-row>
@@ -39,9 +56,8 @@ import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 import editPushModal from './push/editPush.vue'
 import pushCard from './push/pushCard.vue'
-
 const { t } = useI18n()
-const { data, refresh } = useRequest(GetPushChannelList)
+const { data, refresh, loading } = useRequest(GetPushChannelList)
 const editModal = ref<InstanceType<typeof editPushModal>>()
 const handleAdd = () => {
   editModal.value?.showModal(true)
