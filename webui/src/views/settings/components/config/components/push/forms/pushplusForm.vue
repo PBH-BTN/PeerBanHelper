@@ -9,21 +9,15 @@
   <a-form-item
     field="config.template"
     :label="t('page.settings.tab.config.push.form.pushplus.template')"
-    required
   >
     <a-input v-model="model.template" />
   </a-form-item>
-  <a-form-item
-    field="config.topic"
-    :label="t('page.settings.tab.config.push.form.pushplus.topic')"
-    required
-  >
+  <a-form-item field="config.topic" :label="t('page.settings.tab.config.push.form.pushplus.topic')">
     <a-input v-model="model.topic" />
   </a-form-item>
   <a-form-item
     field="config.channel"
     :label="t('page.settings.tab.config.push.form.pushplus.channel')"
-    required
   >
     <a-input v-model="model.channel" />
   </a-form-item>
