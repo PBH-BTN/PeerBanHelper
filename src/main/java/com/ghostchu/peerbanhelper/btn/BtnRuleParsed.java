@@ -10,7 +10,7 @@ import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
-import inet.ipaddr.IPAddress;
+import inet.ipaddr.format.util.DualIPv4v6Tries;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -94,10 +94,13 @@ public class BtnRuleParsed {
         return rules;
     }
 
-
     public Map<String, IPMatcher> parseIPRule(Map<String, List<String>> raw) {
         Map<String, IPMatcher> rules = new HashMap<>();
-        raw.forEach((k, v) -> rules.put(k,new IPMatcher(version, k, v.stream().map(IPAddressUtil::getIPAddress).toList())));
+        raw.forEach((k, v) -> {
+            DualIPv4v6Tries tries = new DualIPv4v6Tries();
+            v.stream().map(IPAddressUtil::getIPAddress).forEach(tries::add);
+            rules.put(k,new IPMatcher(version, k, List.of(tries)));
+        });
         return rules;
     }
 
@@ -120,7 +123,7 @@ public class BtnRuleParsed {
 
         private final String version;
 
-        public BtnRuleIpMatcher(String version, String ruleId, String ruleName, List<IPAddress> ruleData) {
+        public BtnRuleIpMatcher(String version, String ruleId, String ruleName, List<DualIPv4v6Tries> ruleData) {
             super(ruleId, ruleName, ruleData);
             this.version = version;
         }

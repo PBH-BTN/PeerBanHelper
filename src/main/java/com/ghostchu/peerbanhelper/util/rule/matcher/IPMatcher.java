@@ -17,12 +17,12 @@ import java.util.List;
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class IPMatcher extends RuleMatcher<IPAddress> {
-    private DualIPv4v6Tries ips = new DualIPv4v6Tries();
+public class IPMatcher extends RuleMatcher<DualIPv4v6Tries> {
+    private DualIPv4v6Tries ips;
 
-    public IPMatcher(String ruleId, String ruleName, List<IPAddress> ruleData) {
+    public IPMatcher(String ruleId, String ruleName, List<DualIPv4v6Tries> ruleData) {
         super(ruleId, ruleName, ruleData);
-        ruleData.forEach(ips::add);
+        this.ips = ruleData.getFirst();;
     }
 
     /**
@@ -31,11 +31,9 @@ public class IPMatcher extends RuleMatcher<IPAddress> {
      * @param ruleName 规则名
      * @param ruleData 规则数据
      */
-    public void setData(String ruleName, List<IPAddress> ruleData) {
+    public void setData(String ruleName, List<DualIPv4v6Tries> ruleData) {
         setRuleName(ruleName);
-        var tmp = new DualIPv4v6Tries();
-        ruleData.forEach(tmp::add);
-        this.ips = tmp;
+        this.ips = ruleData.getFirst();
     }
 
     public long size() {

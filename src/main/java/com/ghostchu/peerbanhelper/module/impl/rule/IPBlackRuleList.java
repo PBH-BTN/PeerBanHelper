@@ -32,6 +32,7 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.j256.ormlite.stmt.SelectArg;
 import inet.ipaddr.IPAddress;
+import inet.ipaddr.format.util.DualIPv4v6Tries;
 import io.ipfs.cid.Cid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -202,7 +203,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             File dir = new File(Main.getDataDirectory(), "/sub");
             dir.mkdirs();
             File ruleFile = new File(dir, ruleFileName);
-            List<IPAddress> ipAddresses = new ArrayList<>();
+            DualIPv4v6Tries ipAddresses = new DualIPv4v6Tries();
             getResource(url)
                     .whenComplete((dataUpdateResult, throwable) -> {
                         if (throwable != null) {
@@ -212,7 +213,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                                 if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
                                     try {
                                         fileToIPList(ruleFile, ipAddresses);
-                                        ipBanMatchers.add(new IPMatcher(ruleId, name, ipAddresses));
+                                        ipBanMatchers.add(new IPMatcher(ruleId, name, List.of(ipAddresses)));
                                         log.warn(tlUI(Lang.IP_BAN_RULE_USE_CACHE, name));
                                         result.set(new StdResp(false, tl(locale, Lang.IP_BAN_RULE_USE_CACHE, name), null));
                                     } catch (IOException ex) {
@@ -252,12 +253,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                             if (ent_count > 0) {
                                 // 如果已经存在则更新，否则添加
                                 ipBanMatchers.stream().filter(ele -> ele.getRuleId().equals(ruleId)).findFirst().ifPresentOrElse(ele -> {
-                                    ele.setData(name, ipAddresses);
+                                    ele.setData(name, List.of(ipAddresses));
                                     moduleMatchCache.invalidateAll();
                                     log.info(tlUI(Lang.IP_BAN_RULE_UPDATE_SUCCESS, name));
                                     result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATE_SUCCESS, name), null));
                                 }, () -> {
-                                    ipBanMatchers.add(new IPMatcher(ruleId, name, ipAddresses));
+                                    ipBanMatchers.add(new IPMatcher(ruleId, name, List.of(ipAddresses)));
                                     log.info(tlUI(Lang.IP_BAN_RULE_LOAD_SUCCESS, name));
                                     result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_LOAD_SUCCESS, name), null));
                                 });
@@ -338,7 +339,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      * @param ips      ip列表
      * @return 加载的行数
      */
-    private int fileToIPList(File ruleFile, List<IPAddress> ips) throws IOException {
+    private int fileToIPList(File ruleFile, DualIPv4v6Tries ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
         Files.readLines(ruleFile, StandardCharsets.UTF_8).stream().filter(s -> !s.isBlank()).forEach(ele -> {
             if (ele.startsWith("#")) {
@@ -364,7 +365,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      * @param ips      ip列表
      * @return 加载的行数
      */
-    private int stringToIPList(String data, List<IPAddress> ips) throws IOException {
+    private int stringToIPList(String data, DualIPv4v6Tries ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
         Arrays.stream(data.split("\n")).filter(s -> !s.isBlank()).forEach(ele -> {
             if (ele.startsWith("#")) {
