@@ -35,8 +35,13 @@
           allow-clear
         />
       </a-form-item>
-      <a-form-item field="type" :label="t('page.settings.tab.config.push.form.type')" required>
-        <a-radio-group v-model="form.type">
+      <a-form-item
+        field="type"
+        :label="t('page.settings.tab.config.push.form.type')"
+        required
+        :disabled="!newItem"
+      >
+        <a-radio-group v-model="form.type" style="width: 30rem">
           <a-grid :cols="4" :row-gap="16">
             <a-radio :value="PushType.Email">{{
               t('page.settings.tab.config.push.form.type.' + PushType.Email)
@@ -59,7 +64,7 @@
 </template>
 <script setup lang="ts">
 import { PushType, type PushConfig } from '@/api/model/push'
-import { CreatePushChannel, TestPushChannel } from '@/service/push'
+import { CreatePushChannel, TestPushChannel, UpdatePushChannel } from '@/service/push'
 import { Message, type Form } from '@arco-design/web-vue'
 import { defineAsyncComponent, ref, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -123,6 +128,17 @@ const handleBeforeOk = async () => {
       } else {
         throw new Error(res.message)
       }
+    } else {
+      const res = await UpdatePushChannel(oldName.value, form.value)
+      if (res.success) {
+        emits('changed')
+        resetFields()
+        showModal.value = false
+        Message.success(res.message)
+        return true
+      } else {
+        throw new Error(res.message)
+      }
     }
   } catch (e: unknown) {
     if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
@@ -152,13 +168,11 @@ const handleTest = async () => {
   }
   testLoading.value = true
   try {
-    if (newItem.value) {
-      const res = await TestPushChannel(form.value)
-      if (res.success) {
-        Message.success(res.message)
-      } else {
-        throw new Error(res.message)
-      }
+    const res = await TestPushChannel(form.value)
+    if (res.success) {
+      Message.success(res.message)
+    } else {
+      throw new Error(res.message)
     }
   } catch (e: unknown) {
     if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
