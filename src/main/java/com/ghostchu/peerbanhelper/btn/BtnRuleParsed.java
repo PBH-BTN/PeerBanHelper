@@ -119,23 +119,23 @@ public class BtnRuleParsed {
                 scriptRules.size();
     }
 
-    public static class BtnRuleIpMatcher extends IPMatcher {
-
-        private final String version;
-
-        public BtnRuleIpMatcher(String version, String ruleId, String ruleName, List<DualIPv4v6Tries> ruleData) {
-            super(ruleId, ruleName, ruleData);
-            this.version = version;
-        }
-
-        @Override
-        public @NotNull TranslationComponent matcherName() {
-            return new TranslationComponent(Lang.BTN_IP_RULE, version);
-        }
-
-        @Override
-        public String matcherIdentifier() {
-            return "btn-exception:ip";
-        }
-    }
+//    public static class BtnRuleIpMatcher extends IPMatcher {
+//
+//        private final String version;
+//
+//        public BtnRuleIpMatcher(String version, String ruleId, String ruleName, List<DualIPv4v6Tries> ruleData) {
+//            super(ruleId, ruleName, ruleData);
+//            this.version = version;
+//        }
+//
+//        @Override
+//        public @NotNull TranslationComponent matcherName() {
+//            return new TranslationComponent(Lang.BTN_IP_RULE, version);
+//        }
+//
+//        @Override
+//        public String matcherIdentifier() {
+//            return "btn-exception:ip";
+//        }
+//    }
 }

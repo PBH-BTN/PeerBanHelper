@@ -22,7 +22,7 @@ public class IPMatcher extends RuleMatcher<DualIPv4v6Tries> {
 
     public IPMatcher(String ruleId, String ruleName, List<DualIPv4v6Tries> ruleData) {
         super(ruleId, ruleName, ruleData);
-        this.ips = ruleData.getFirst();;
+        this.ips = ruleData.getFirst();
     }
 
     /**
