@@ -13,6 +13,12 @@
   ],
   "packageRules": [
     {
+      "matchFileNames": [
+        "webui/package.json"
+      ],
+      "dependencyDashboardApproval": true
+    },
+    {
       "matchPackageNames": [
         "*"
       ],
@@ -36,12 +42,6 @@
       "automerge": true,
       "automergeType": "pr",
       "groupName": "all devDependencies"
-    },
-    {
-      "matchFileNames": [
-        "webui/package.json"
-      ],
-      "dependencyDashboardApproval": true
     }
   ]
 }
