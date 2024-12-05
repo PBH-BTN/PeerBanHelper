@@ -38,7 +38,7 @@ jobs:
     with:
         path_to_delete: 'updates/snapshot'
   Upload_Updates_To_S3:
-    needs: [ Build_Executable, Build_Installers, Empty_Old_S3_Files ]
+    needs: [ CI, Build_Installers, Empty_Old_S3_Files ]
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     steps:
