@@ -74,5 +74,43 @@ export default {
   'page.settings.tab.config.performance.title': '性能',
   'page.settings.tab.config.performance.useEcoQOS': '使用 Windows EcoQos API',
   'page.settings.tab.config.performance.useEcoQOS.tips':
-    '启用 Windows 平台上的 {link}以节约能源消耗，程序运行速度将降低，定时任务可能推迟'
+    '启用 Windows 平台上的 {link}以节约能源消耗，程序运行速度将降低，定时任务可能推迟',
+
+  'page.settings.tab.config.push.title': '消息通知',
+  'page.settings.tab.config.push.description':
+    '配置消息通知，当有新的事件发生时，将会通过消息通知的方式通知您',
+  'page.settings.tab.config.push.add': '新增',
+  'page.settings.tab.config.push.edit': '编辑',
+  'page.settings.tab.config.push.deleteConfirm': '确定删除？',
+  'page.settings.tab.config.push.form.title.new': '新增推送渠道',
+  'page.settings.tab.config.push.form.title.edit': '编辑推送渠道',
+  'page.settings.tab.config.push.form.name': '名称',
+  'page.settings.tab.config.push.form.name.placeholder': '请输入唯一名称',
+  'page.settings.tab.config.push.form.type': '类型',
+  'page.settings.tab.config.push.form.type.smtp': '邮件',
+  'page.settings.tab.config.push.form.type.pushplus': 'Push+',
+  'page.settings.tab.config.push.form.type.serverchan': 'Server酱',
+  'page.settings.tab.config.push.form.type.telegram': 'Telegram',
+
+  'page.settings.tab.config.push.form.stmp.host': '主机',
+  'page.settings.tab.config.push.form.stmp.port': '端口号',
+  'page.settings.tab.config.push.form.stmp.sender': '发件人',
+  'page.settings.tab.config.push.form.stmp.senderName': '发件人名称',
+  'page.settings.tab.config.push.form.stmp.auth': '启用认证',
+  'page.settings.tab.config.push.form.stmp.authInfo': '认证信息',
+  'page.settings.tab.config.push.form.stmp.username': '用户名',
+  'page.settings.tab.config.push.form.stmp.password': '密码',
+  'page.settings.tab.config.push.form.stmp.encryption': '加密方式',
+  'page.settings.tab.config.push.form.stmp.receivers': '收件人',
+  'page.settings.tab.config.push.form.stmp.receivers.placeholder': '输入一个按回车输入下一个',
+  'page.settings.tab.config.push.form.stmp.sendPartial': '分片发送',
+
+  'page.settings.tab.config.push.form.pushplus.token': 'Token',
+  'page.settings.tab.config.push.form.pushplus.topic': 'Topic',
+  'page.settings.tab.config.push.form.pushplus.template': '模版',
+  'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
+
+  'page.settings.tab.config.push.form.action.ok': '确定',
+  'page.settings.tab.config.push.form.action.cancel': '取消',
+  'page.settings.tab.config.push.form.action.test': '测试'
 }

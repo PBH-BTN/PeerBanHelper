@@ -75,5 +75,44 @@ export default {
   'page.settings.tab.config.performance.title': 'Performance',
   'page.settings.tab.config.performance.useEcoQOS': 'Use Windows EcoQos API',
   'page.settings.tab.config.performance.useEcoQOS.tips':
-    'Enable {link} on Windows Platform for power saving, the program performance will reduce and cronjobs may delay'
+    'Enable {link} on Windows Platform for power saving, the program performance will reduce and cronjobs may delay',
+
+  'page.settings.tab.config.push.title': 'Message Push',
+  'page.settings.tab.config.push.description':
+    'By configuring message push, you can receive message push from PBH',
+  'page.settings.tab.config.push.add': 'New',
+  'page.settings.tab.config.push.edit': 'Edit',
+  'page.settings.tab.config.push.deleteConfirm': 'Are you sure to delete?',
+  'page.settings.tab.config.push.form.title.new': 'New push channel',
+  'page.settings.tab.config.push.form.title.edit': 'Edit push channel',
+  'page.settings.tab.config.push.form.name': 'Name',
+  'page.settings.tab.config.push.form.name.placeholder': 'Enter a unique name',
+  'page.settings.tab.config.push.form.type': 'Type',
+  'page.settings.tab.config.push.form.type.smtp': 'E-Mail',
+  'page.settings.tab.config.push.form.type.pushplus': 'Push+',
+  'page.settings.tab.config.push.form.type.serverchan': 'ServerChan',
+  'page.settings.tab.config.push.form.type.telegram': 'Telegram',
+
+  'page.settings.tab.config.push.form.stmp.host': 'Host',
+  'page.settings.tab.config.push.form.stmp.port': 'Port',
+  'page.settings.tab.config.push.form.stmp.sender': 'Sender',
+  'page.settings.tab.config.push.form.stmp.senderName': 'Sender Name',
+  'page.settings.tab.config.push.form.stmp.auth': 'Enable Auth',
+  'page.settings.tab.config.push.form.stmp.authInfo': 'Auth Info',
+  'page.settings.tab.config.push.form.stmp.username': 'Username',
+  'page.settings.tab.config.push.form.stmp.password': 'Password',
+  'page.settings.tab.config.push.form.stmp.encryption': 'Encryption',
+  'page.settings.tab.config.push.form.stmp.receivers': 'Receivers',
+  'page.settings.tab.config.push.form.stmp.receivers.placeholder':
+    "Enter one receivers, then press 'Enter'",
+  'page.settings.tab.config.push.form.stmp.sendPartial': 'Send Partial',
+
+  'page.settings.tab.config.push.form.pushplus.token': 'Token',
+  'page.settings.tab.config.push.form.pushplus.topic': 'Topic',
+  'page.settings.tab.config.push.form.pushplus.template': 'Template',
+  'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
+
+  'page.settings.tab.config.push.form.action.ok': 'Ok',
+  'page.settings.tab.config.push.form.action.cancel': 'Cancel',
+  'page.settings.tab.config.push.form.action.test': 'Test'
 }

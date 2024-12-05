@@ -1,3 +1,4 @@
+import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 import type {
   ClientStatus,
   CreateDownloadRequest,
@@ -9,13 +10,12 @@ import type { Statistic } from '@/api/model/statistic'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
-import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 
 export async function getClientStatus(name: string): Promise<CommonResponse<ClientStatus>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/downloaders/${name}/status`),
+    urlJoin(endpointStore.endpoint, `api/downloaders/${encodeURIComponent(name)}/status`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
@@ -50,7 +50,7 @@ export async function getTorrents(downloader: string): Promise<CommonResponse<To
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/downloaders/${downloader}/torrents`),
+    urlJoin(endpointStore.endpoint, `/api/downloaders/${encodeURIComponent(downloader)}/torrents`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
@@ -79,7 +79,10 @@ export async function UpdateDownloader(
 ): Promise<CommonResponseWithoutData> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, `/api/downloaders/${target}`), location.href)
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `/api/downloaders/${encodeURIComponent(target)}`),
+    location.href
+  )
   return fetch(url, {
     method: 'PATCH',
     headers: getCommonHeader(),
@@ -107,7 +110,10 @@ export async function TestDownloaderConfig(
 export async function DeleteDownloader(name: string): Promise<CommonResponseWithoutData> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
-  const url = new URL(urlJoin(endpointStore.endpoint, `/api/downloaders/${name}`), location.href)
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `/api/downloaders/${encodeURIComponent(name)}`),
+    location.href
+  )
   return fetch(url, { method: 'DELETE', headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
@@ -121,7 +127,10 @@ export async function getPeer(
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `/api/downloaders/${downloader}/torrent/${torrentId}/peers`),
+    urlJoin(
+      endpointStore.endpoint,
+      `/api/downloaders/${encodeURIComponent(downloader)}/torrent/${torrentId}/peers`
+    ),
     location.href
   )
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
