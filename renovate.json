@@ -1,6 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabled": false,
   "extends": [
     "config:recommended"
   ],
@@ -9,7 +8,9 @@
     "org.xerial:sqlite-jdbc",
     "com.ghostchu.peerbanhelper.external-libs:sqlite-jdbc-loongarch64"
   ],
-  "baseBranches":["dev"],
+  "baseBranches": [
+    "dev"
+  ],
   "packageRules": [
     {
       "matchPackageNames": [
@@ -35,6 +36,12 @@
       "automerge": true,
       "automergeType": "pr",
       "groupName": "all devDependencies"
+    },
+    {
+      "matchFileNames": [
+        "webui/package.json"
+      ],
+      "dependencyDashboardApproval": true
     }
   ]
 }
