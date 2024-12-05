@@ -54,12 +54,18 @@
           </a-descriptions-item>
         </a-descriptions>
         <a-space
-          v-if="!status?.activated"
+          v-if="!status?.activated || status?.keyData?.type === LicenseType.LicenseLocal"
           direction="vertical"
           style="display: flex; flex-direction: column; text-align: center"
         >
           <a-typography-paragraph style="max-width: 50em; text-align: left">
-            {{ t('plus.begging') }}
+            {{
+              t(
+                status?.keyData?.type === LicenseType.LicenseLocal
+                  ? 'plug.begging.local'
+                  : 'plus.begging'
+              )
+            }}
           </a-typography-paragraph>
           <a href="https://afdian.com/a/Ghost_chu?tab=shop" target="_blank">
             <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" />
