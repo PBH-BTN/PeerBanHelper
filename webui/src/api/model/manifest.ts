@@ -27,7 +27,7 @@ export interface donateStatus {
   keyData?: KeyData
 }
 
-enum LicenseType {
+export enum LicenseType {
   LicenseLocal = 'local',
   LicenseAifadian = 'afdian'
 }
