@@ -7,7 +7,7 @@
   </a-form-item>
 </template>
 <script setup lang="ts">
-import { type TelegramConfig } from '@/api/model/push';
+import { type TelegramConfig } from '@/api/model/push'
 
 const model = defineModel<TelegramConfig>({ required: true })
 </script>

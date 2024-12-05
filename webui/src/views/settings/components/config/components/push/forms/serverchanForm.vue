@@ -10,7 +10,7 @@
   </a-form-item>
 </template>
 <script setup lang="ts">
-import { type ServerChanConfig } from '@/api/model/push';
+import { type ServerChanConfig } from '@/api/model/push'
 
 const model = defineModel<ServerChanConfig>({ required: true })
 </script>

@@ -31,21 +31,27 @@
     :label="t('page.settings.tab.config.push.form.stmp.receivers')"
     required
   >
-    <a-input-tag v-model="model.receivers" :placeholder="t('page.settings.tab.config.push.form.stmp.receivers.placeholder')" />
+    <a-input-tag
+      v-model="model.receivers"
+      :placeholder="t('page.settings.tab.config.push.form.stmp.receivers.placeholder')"
+    />
   </a-form-item>
   <a-form-item
     field="config.encryption"
     :label="t('page.settings.tab.config.push.form.stmp.encryption')"
     required
   >
-    <a-select v-model="model.encryption" style="width: 12em;">
+    <a-select v-model="model.encryption" style="width: 12em">
       <a-option :value="SMTPEncryption.None">None</a-option>
       <a-option :value="SMTPEncryption.EnforceStartTLS">Force STARTTLS</a-option>
       <a-option :value="SMTPEncryption.StartTLS">{{ SMTPEncryption.StartTLS }}</a-option>
       <a-option :value="SMTPEncryption.SSLTLS">SSL/TLS</a-option>
     </a-select>
   </a-form-item>
-  <a-form-item field="config.sendPartial" :label="t('page.settings.tab.config.push.form.stmp.sendPartial')">
+  <a-form-item
+    field="config.sendPartial"
+    :label="t('page.settings.tab.config.push.form.stmp.sendPartial')"
+  >
     <a-switch v-model="model.sendPartial" />
   </a-form-item>
   <a-form-item field="config.auth" :label="t('page.settings.tab.config.push.form.stmp.auth')">
@@ -76,8 +82,8 @@
   </a-form-item>
 </template>
 <script setup lang="ts">
-import { type SMTPConfig, SMTPEncryption } from '@/api/model/push';
-import { useI18n } from 'vue-i18n';
+import { type SMTPConfig, SMTPEncryption } from '@/api/model/push'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const model = defineModel<SMTPConfig>({ required: true })

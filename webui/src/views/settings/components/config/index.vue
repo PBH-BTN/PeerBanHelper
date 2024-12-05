@@ -56,7 +56,7 @@
           <a-divider />
           <performance v-model="form.performance" />
           <a-divider />
-          <push/>
+          <push />
           <br />
           <a-form-item label-col-flex="0">
             <a-button html-type="submit" type="primary" :loading="saving" @click="submitConfig()">

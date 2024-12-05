@@ -14,7 +14,7 @@
   >
     <template #footer>
       <a-space style="display: flex; justify-content: space-between">
-        <a-button @click="handleTest">{{
+        <a-button :loading="testLoading" @click="handleTest">{{
           t('page.settings.tab.config.push.form.action.test')
         }}</a-button>
         <a-space>
@@ -68,6 +68,7 @@ const { t } = useI18n()
 const showModal = ref(false)
 const newItem = ref(false)
 const okLoading = ref(false)
+const testLoading = ref(false)
 
 const form = ref({ config: {} } as PushConfig)
 const oldName = ref('')
@@ -149,19 +150,20 @@ const handleTest = async () => {
   if (validateError) {
     return
   }
+  testLoading.value = true
   try {
     if (newItem.value) {
       const res = await TestPushChannel(form.value)
       if (res.success) {
         Message.success(res.message)
-        return
       } else {
         throw new Error(res.message)
       }
     }
   } catch (e: unknown) {
     if (e instanceof Error) Message.error({ content: e.message, resetOnHover: true })
-    return
+  } finally {
+    testLoading.value = false
   }
 }
 </script>
