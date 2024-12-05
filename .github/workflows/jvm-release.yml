@@ -45,21 +45,24 @@ jobs:
     needs: Build_Executable
     uses: ./.github/workflows/build_portable.yml
   Empty_Old_S3_Files:
-    needs: [ Build_Executable, Build_Installers ]
+    needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
     uses: ./.github/workflows/delete_old_s3_objects.yml
     secrets: inherit
-    with:
-      path_to_delete: 'updates/latest'
   Upload_Updates_To_S3:
-     needs: [ Build_Executable, Build_Installers, Empty_Old_S3_Files ]
+     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files]
      runs-on: ubuntu-latest
      steps:
       - uses: actions/download-artifact@v4
         with:
           name: installer-dist
           path: target/media
-      - uses: ./.github/workflows/upload_to_cloudflare_s3.yml
+      - uses: shallwefootball/s3-upload-action@master
         with:
+          aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.S3_SECRET_KEY }}
+          aws_bucket: ${{ secrets.S3_BUCKET }}
+          endpoint: ${{ secrets.S3_ENDPOINT }}
+          source_dir: 'target/media'
           destination_dir: 'updates/latest'
   Clear_CloudFlare_Updates:
     needs: [Upload_Updates_To_S3]
