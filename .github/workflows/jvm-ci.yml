@@ -31,15 +31,15 @@ jobs:
     needs: CI
     uses: ./.github/workflows/build_pkg.yml
   Empty_Old_S3_Files:
-    needs: [ CI, Build_Installers ]
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
+    needs: [ Build_Executable, Build_Installers ]
+    if: github.ref == 'refs/heads/master'
     uses: ./.github/workflows/delete_old_s3_objects.yml
     secrets: inherit
     with:
         path_to_delete: 'updates/snapshot'
   Upload_Updates_To_S3:
     needs: [ Build_Executable, Build_Installers, Empty_Old_S3_Files ]
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
