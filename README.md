@@ -93,6 +93,13 @@ PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej
 - [GeoIP2](https://dev.maxmind.com/geoip)
 - [ormlite](https://ormlite.com/)
 - [SimpleReloadLib](https://github.com/Ghost-chu/SimpleReloadLib)
+- [java-ipfs-http-client](https://github.com/ipfs-shipyard/java-ipfs-http-client)
+- [java-multiaddr](https://github.com/multiformats/java-multiaddr)
+- [portmapper](https://github.com/offbynull/portmapper)
+- [xz](https://github.com/tukaani-project/xz-java)
+- [commonmark](https://github.com/commonmark/commonmark-java)
+- [oshi](https://github.com/oshi/oshi)
+- [semver4j](https://github.com/vdurmont/semver4j)
 
 ### WebUI
 
