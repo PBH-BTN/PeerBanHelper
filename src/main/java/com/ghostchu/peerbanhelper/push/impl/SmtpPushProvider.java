@@ -87,7 +87,7 @@ public class SmtpPushProvider extends AbstractPushProvider {
         }
         mail.setSendPartial(config.isSendPartial());
         mail.setSubject(subject);
-        mail.setContent(text, "text/html");
+        mail.setContent(markdown2Html(text), "text/html");
         mail.setFrom(config.getSender(), config.getSenderName(), "UTF-8");
         mail.setTo(email.stream().map(str -> {
             try {

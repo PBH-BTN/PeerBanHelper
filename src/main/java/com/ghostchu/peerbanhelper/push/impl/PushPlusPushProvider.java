@@ -51,18 +51,14 @@ public class PushPlusPushProvider extends AbstractPushProvider {
     public static PushPlusPushProvider loadFromYaml(String name, ConfigurationSection section) {
         var token = section.getString("token", "");
         var topic = section.getString("topic", "");
-        var template = section.getString("template", "");
         var channel = section.getString("channel", "");
         if (topic.isBlank()) {
             topic = null;
         }
-        if (template.isBlank()) {
-            template = null;
-        }
         if (channel.isBlank()) {
             channel = null;
         }
-        Config config = new Config(token, topic, template, channel);
+        Config config = new Config(token, topic, channel);
         return new PushPlusPushProvider(name, config);
 
     }
@@ -84,14 +80,12 @@ public class PushPlusPushProvider extends AbstractPushProvider {
             if (config.getTopic() != null) {
                 put("topic", config.getTopic());
             }
-            if (config.getTemplate() != null) {
-                put("template", config.getTemplate());
-            }
             if (config.getChannel() != null) {
                 put("channel", config.getChannel());
             }
             put("title", title);
             put("content", content);
+            put("template", "markdown");
         }};
         HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                 MutableRequest.POST("https://www.pushplus.plus/send"
@@ -110,7 +104,6 @@ public class PushPlusPushProvider extends AbstractPushProvider {
     public static class Config {
         private String token;
         private String topic;
-        private String template;
         private String channel;
     }
 }
