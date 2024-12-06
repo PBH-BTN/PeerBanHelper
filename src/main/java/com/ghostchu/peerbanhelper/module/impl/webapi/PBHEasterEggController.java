@@ -54,7 +54,7 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
                 context.redirect("https://www.bilibili.com/video/BV1by4y1F7nS");
                 break;
             case 5:
-                context.redirect("https://www.bilibili.com/video/BV1ztzBY1EP");
+                context.redirect("https://www.bilibili.com/video/BV1ztzBY1EPy");
                 break;
             case 7:
                 context.redirect("https://www.bilibili.com/video/BV15Z4y1Q7mz");
