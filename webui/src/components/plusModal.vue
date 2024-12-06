@@ -14,7 +14,7 @@
         style="padding-left: 30px; padding-right: 30px"
         size="large"
       >
-        <a-descriptions :title="t('plus.subscription')" :column="1" style="max-width: 30rem">
+        <a-descriptions :title="t('plus.subscription')" :column="1">
           <a-descriptions-item :label="t('plus.status')">
             <a-typography-text :type="status?.activated ? 'success' : ''">
               {{
@@ -71,7 +71,12 @@
             <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" />
           </a>
         </a-space>
-        <a-split v-if="!status?.activated" :size="0.5" disabled style="width: 100%">
+        <a-split
+          v-if="status?.keyData?.type !== LicenseType.LicenseAifadian"
+          :size="0.5"
+          disabled
+          style="width: 100%"
+        >
           <template #first>
             <a-space direction="vertical" size="small">
               <a-typography-text type="secondary">{{ t('plus.activeTips') }}</a-typography-text>
@@ -83,7 +88,7 @@
               ></a-input-search>
             </a-space>
           </template>
-          <template #second>
+          <template v-if="status?.keyData?.type !== LicenseType.LicenseLocal" #second>
             <a-space style="display: flex; justify-content: center; align-items: center">
               <a-typography-text type="secondary">{{ t('plus.or') }}</a-typography-text>
               &nbsp;
@@ -108,10 +113,10 @@
 </template>
 <script lang="ts" setup>
 import medal from '@/components/plusMedal.vue'
+import { obtainFreeTrial } from '@/service/version'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { computed, ref } from 'vue'
-import { obtainFreeTrial } from '@/service/version'
 import { useI18n } from 'vue-i18n'
 
 import { LicenseType } from '@/api/model/manifest'

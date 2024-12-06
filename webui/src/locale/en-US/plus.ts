@@ -7,7 +7,7 @@ export default {
   'plus.key': 'License',
   'plus.type': 'Type',
   'plus.type.local': 'Local',
-  'plus.type.aifadian': 'Aifadian',
+  'plus.type.afdian': 'Aifadian',
   'plus.licenseTo': 'License to',
   'plus.startAt': 'Issued on',
   'plus.expireAt': 'Expire on',
