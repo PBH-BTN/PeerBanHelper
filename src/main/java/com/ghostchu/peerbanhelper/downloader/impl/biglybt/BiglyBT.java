@@ -173,6 +173,7 @@ public class BiglyBT extends AbstractDownloader {
                     detail.getName(),
                     detail.getTorrent().getInfoHash(),
                     detail.getTorrent().getSize(),
+                    detail.getTorrent().getSize() - detail.getStats().getRemainingBytes(), // 种子总大小 减去 (包含未选择文件的)尚未下载大小 等于 已下载内容大小
                     detail.getStats().getCompletedInThousandNotation() / 1000d,
                     detail.getStats().getRtUploadSpeed(),
                     detail.getStats().getRtDownloadSpeed(),

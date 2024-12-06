@@ -36,8 +36,9 @@ PeerBanHelper 主要由以下几个功能模块组成：
 - Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
 - Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
 - Transmission **(不建议使用；3.00-20 或更高版本)**
-- BitComet **v2.10 Beta6 [20240928] 或更高版本**
+- BitComet **v2.10 Beta6 [20240928] 或更高版本** (不支持 P2SP LTSeed 长效种子反吸血，因为 BitComet 暂时无法封禁长效连接)
 
+PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P 或者 Tor 连接将主动忽略。
 
 # 截图
 
@@ -48,7 +49,6 @@ PeerBanHelper 主要由以下几个功能模块组成：
 ## 安装 PeerBanHelper
 
 查看 [PeerBanHelper 文档](https://docs.pbh-btn.com/docs/category/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2)
-
 
 ## 常见问题
 
@@ -68,6 +68,13 @@ PeerBanHelper 主要由以下几个功能模块组成：
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
+
+
+### Install4j
+
+PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) 打包多平台安装程序。感谢 ej-technolgies 的开放源代码许可证。点击链接或者下面的图片下载 install4j。
+
+[![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
 ## Credit
 
@@ -93,8 +100,3 @@ PeerBanHelper 主要由以下几个功能模块组成：
 - [ArcoDesign](https://arco.design/)
 - [ECharts](https://echarts.apache.org/en/index.html)
 
-### Install4j
-
-PeerBanHelper 使用 [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) 打包多平台安装程序。感谢 ej-technolgies 的开放源代码许可证。点击链接或者下面的图片下载 install4j。
-
-[![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)

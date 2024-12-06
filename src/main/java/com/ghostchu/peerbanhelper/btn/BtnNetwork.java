@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.btn;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
@@ -7,6 +8,8 @@ import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.Reloadable;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
@@ -14,7 +17,7 @@ import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -32,12 +35,14 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Getter
-public class BtnNetwork {
+@Component
+public class BtnNetwork implements Reloadable {
     private static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 8;
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     private final ScriptEngine scriptEngine;
-    private final boolean scriptExecute;
+    private final AtomicBoolean configSuccess = new AtomicBoolean(false);
+    private boolean scriptExecute;
     @Getter
     private ScheduledExecutorService executeService = null;
     private String configUrl;
@@ -46,36 +51,54 @@ public class BtnNetwork {
     private String appSecret;
     @Getter
     private HttpClient httpClient;
-    @Autowired
-    @Qualifier("userAgent")
-    private String userAgent;
     private PeerBanHelperServer server;
-    private final AtomicBoolean configSuccess = new AtomicBoolean(false);
     @Autowired
     private PeerRecordDao peerRecordDao;
     private ModuleMatchCache moduleMatchCache;
+    private boolean enabled;
 
-    public BtnNetwork(PeerBanHelperServer server, ScriptEngine scriptEngine, String userAgent, String configUrl, boolean submit, String appId, String appSecret, ModuleMatchCache moduleMatchCache, boolean scriptExecute) {
+    public BtnNetwork(PeerBanHelperServer server, ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache) {
         this.server = server;
         this.scriptEngine = scriptEngine;
-        this.userAgent = userAgent;
-        this.configUrl = configUrl;
-        this.submit = submit;
-        this.appId = appId.trim();
-        this.appSecret = appSecret.trim();
         this.moduleMatchCache = moduleMatchCache;
-        this.scriptExecute = scriptExecute;
+        Main.getReloadManager().register(this);
+        reloadConfig();
+    }
+
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return Reloadable.super.reloadModule();
+    }
+
+    public void reloadConfig() {
+        this.enabled = Main.getMainConfig().getBoolean("btn.enabled");
+        this.configUrl = Main.getMainConfig().getString("btn.config-url");
+        this.submit = Main.getMainConfig().getBoolean("btn.submit");
+        this.appId = Main.getMainConfig().getString("btn.app-id");
+        this.appSecret = Main.getMainConfig().getString("btn.app-secret");
+        this.scriptExecute = Main.getMainConfig().getBoolean("btn.allow-script-execute");
+        resetAbilities();
         setupHttpClient();
         resetScheduler();
         checkIfNeedRetryConfig();
+    }
+
+    private void resetAbilities() {
+        abilities.values().forEach(BtnAbility::unload);
+        abilities.clear();
     }
 
     private void resetScheduler() {
         if (executeService != null) {
             executeService.shutdownNow();
         }
-        executeService = Executors.newScheduledThreadPool(2);
-        executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 600, 600, TimeUnit.SECONDS);
+        if (enabled) {
+            executeService = Executors.newScheduledThreadPool(2);
+            executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 600, 600, TimeUnit.SECONDS);
+        } else {
+            executeService = null;
+        }
     }
 
     public void configBtnNetwork() {
@@ -137,8 +160,12 @@ public class BtnNetwork {
 
     private void checkIfNeedRetryConfig() {
         try {
-            if (!configSuccess.get()) {
-                configBtnNetwork();
+            if (enabled) {
+                if (!configSuccess.get()) {
+                    configBtnNetwork();
+                }
+            } else {
+                configSuccess.set(false);
             }
         } catch (Throwable throwable) {
             log.error(tlUI(Lang.UNABLE_COMPLETE_SCHEDULE_TASKS), throwable);
@@ -152,7 +179,7 @@ public class BtnNetwork {
         this.httpClient = Methanol
                 .newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(userAgent)
+                .userAgent(Main.getUserAgent())
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("BTN-AppID", appId)
                 .defaultHeader("BTN-AppSecret", appSecret)

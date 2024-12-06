@@ -26,7 +26,7 @@ public class IPFilterInvoker implements BanListInvoker {
     @SneakyThrows
     public IPFilterInvoker(PeerBanHelperServer server) {
         this.server = server;
-        if (!server.getMainConfig().getBoolean("banlist-invoker.ipfilter-dat.enabled", false)) {
+        if (!Main.getMainConfig().getBoolean("banlist-invoker.ipfilter-dat.enabled", false)) {
             this.enabled = false;
             return;
         }

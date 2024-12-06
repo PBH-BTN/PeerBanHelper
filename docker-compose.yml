@@ -1,15 +1,26 @@
-version: "3.9"
 services:
   peerbanhelper:
-    image: "ghostchu/peerbanhelper:<最新版本号>"
+    image: "ghostchu/peerbanhelper:<填写版本号>"
     restart: unless-stopped
     container_name: "peerbanhelper"
     volumes:
       - ./:/app/data
     ports:
       - "9898:9898"
-    environment:
-      - PUID=0
-      - PGID=0
-      - TZ=UTC
     stop_grace_period: 30s
+# 如果不需要 IPFS 功能，请连带这段注释包括下面的所有内容删除
+    environment:
+      - PBH_KUBO_RPC=/dnsaddr/kubo/tcp/5001
+    depends_on:
+      - kubo
+    links:
+      - kubo
+  kubo:
+    image: "ipfs/kubo:release"
+    restart: unless-stopped
+    container_name: "kubo"
+    ports:
+      - "4001:4001"
+    stop_grace_period: 30s
+    volumes:
+      - ./ipfs:/data/ipfs

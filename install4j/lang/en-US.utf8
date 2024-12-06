@@ -1,8 +1,11 @@
 launcher.peerbanhelper.gui=PeerBanHelper
-launcher.peerbanhelper.gui.swing=PeerBanHelper(Compatibility Mode)
-launcher.peerbanhelper.nogui=PeerBanHelper(NoGUI, Console)
-launcher.peerbanhelper.service=PeerBanHelper(Service)
+launcher.peerbanhelper.gui.swing=PeerBanHelper (Compatibility Mode)
+launcher.peerbanhelper.nogui=PeerBanHelper (NoGUI, Console)
+launcher.peerbanhelper.service=PeerBanHelper (Service)
+launcher.peerbanhelper.updater=PeerBanHelper Updater
 checkbox.followsystemstartup=Boot automatically to the system tray when logged in
 peerbanhelper.description=PeerBanHelper
 checkbox.registersystemservice=Register as system service (DO NOT CHECK UNLESS YOU KNOW WHAT YOU'RE DOING)
 systemservice.note=When you install PeerBanHelper as system service，under Windows operation system, the configuration and files will store at C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper. Access this location will require Administrator privileges.
+components.peerbanhelper=PeerBanHelper
+components.peerbanhelper.description=PeerBanHelper core program, including main program code and necessary runtime files

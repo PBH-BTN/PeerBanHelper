@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -16,9 +17,9 @@ public class RSAUtils {
 
     public static final String SIGNATURE_ALGORITHM = "MD5withRSA";
 
-    private static final String PUBLIC_KEY = "RSAPublicKey";
+    public static final String PUBLIC_KEY = "RSAPublicKey";
 
-    private static final String PRIVATE_KEY = "RSAPrivateKey";
+    public static final String PRIVATE_KEY = "RSAPrivateKey";
 
     private static final int MAX_ENCRYPT_BLOCK = 117;
 
@@ -104,6 +105,18 @@ public class RSAUtils {
         byte[] decryptedData = out.toByteArray();
         out.close();
         return decryptedData;
+    }
+
+    public static PrivateKey getRSAPrivateKeyFromRawEncoded(byte[] encoded) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(encoded);
+        KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+        return keyFactory.generatePrivate(pkcs8KeySpec);
+    }
+
+    public static PublicKey getRSAPublicKeyFromRawEncoded(byte[] encoded) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(encoded);
+        KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+        return keyFactory.generatePublic(x509KeySpec);
     }
 
     public static byte[] decryptByPublicKey(byte[] encryptedData, String publicKey)

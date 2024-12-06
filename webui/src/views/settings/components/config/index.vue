@@ -55,6 +55,8 @@
           <ipDatabase v-model="form.ip_database" />
           <a-divider />
           <performance v-model="form.performance" />
+          <a-divider />
+          <push />
           <br />
           <a-form-item label-col-flex="0">
             <a-button html-type="submit" type="primary" :loading="saving" @click="submitConfig()">
@@ -83,6 +85,7 @@ import lookup from './components/lookup.vue'
 import performance from './components/performance.vue'
 import persist from './components/persist.vue'
 import proxy from './components/proxy.vue'
+import push from './components/push.vue'
 import webui from './components/webui.vue'
 
 const endpointStore = useEndpointStore()

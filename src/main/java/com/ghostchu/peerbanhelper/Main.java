@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Properties;
 
 @Slf4j
 public class Main {
@@ -54,7 +55,6 @@ public class Main {
     @Getter
     private static File configDirectory;
     private static File pluginDirectory;
-    private static File libraryDirectory;
     @Getter
     private static File debugDirectory;
     @Getter
@@ -86,16 +86,12 @@ public class Main {
 
     public static void main(String[] args) {
         startupArgs = args;
+        setupReloading();
         setupConfDirectory(args);
+        loadFlagsProperties();
         setupLogback();
         meta = buildMeta();
         setupConfiguration();
-        mainConfigFile = new File(configDirectory, "config.yml");
-        mainConfig = loadConfiguration(mainConfigFile);
-        new PBHConfigUpdater(mainConfigFile, mainConfig, Main.class.getResourceAsStream("/config.yml")).update(new MainConfigUpdateScript(mainConfig));
-        profileConfigFile = new File(configDirectory, "profile.yml");
-        profileConfig = loadConfiguration(profileConfigFile);
-        new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
         String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
         log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
@@ -115,10 +111,10 @@ public class Main {
             applicationContext = new AnnotationConfigApplicationContext();
             applicationContext.register(AppConfig.class);
             applicationContext.refresh();
-            registerBean(File.class, mainConfigFile, "mainConfigFile");
-            registerBean(File.class, profileConfigFile, "profileConfigFile");
-            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
-            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
+//            registerBean(File.class, mainConfigFile, "mainConfigFile");
+//            registerBean(File.class, profileConfigFile, "profileConfigFile");
+//            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
+//            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
             server = applicationContext.getBean(PeerBanHelperServer.class);
             server.start();
         } catch (Exception e) {
@@ -127,8 +123,23 @@ public class Main {
         }
         guiManager.onPBHFullyStarted(server);
         setupShutdownHook();
-        setupReloading();
         guiManager.sync();
+    }
+
+    private static void loadFlagsProperties() {
+        try {
+            var flags = new File(dataDirectory, "flags.properties");
+            if (flags.exists()) {
+                try (var is = Files.newInputStream(flags.toPath())) {
+                    Properties properties = new Properties();
+                    properties.load(is);
+                    System.getProperties().putAll(properties);
+                    log.info("Loaded {} property from data/flags.properties.", properties.size());
+                }
+            }
+        } catch (IOException e) {
+            log.error("Unable to load flags.properties", e);
+        }
     }
 
     @SneakyThrows
@@ -163,8 +174,9 @@ public class Main {
     }
 
     public static ReloadResult reloadModule() {
+        setupConfiguration();
+        loadFlagsProperties();
         setupProxySettings();
-        ;
         return ReloadResult.builder().status(ReloadStatus.SUCCESS).reason("OK!").build();
     }
 
@@ -247,10 +259,16 @@ public class Main {
         return configuration;
     }
 
-    private static void setupConfiguration() {
+    public static void setupConfiguration() {
         log.info("Loading configuration...");
         try {
             initConfiguration();
+            mainConfigFile = new File(configDirectory, "config.yml");
+            mainConfig = loadConfiguration(mainConfigFile);
+            new PBHConfigUpdater(mainConfigFile, mainConfig, Main.class.getResourceAsStream("/config.yml")).update(new MainConfigUpdateScript(mainConfig));
+            profileConfigFile = new File(configDirectory, "profile.yml");
+            profileConfig = loadConfiguration(profileConfigFile);
+            new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
             //guiManager.showConfigurationSetupDialog();
             //System.exit(0);
         } catch (IOException e) {
