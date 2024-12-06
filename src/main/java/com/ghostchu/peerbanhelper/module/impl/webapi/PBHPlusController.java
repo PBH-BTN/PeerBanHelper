@@ -102,10 +102,19 @@ public class PBHPlusController extends AbstractFeatureModule {
         } else {
             key = "**********";
         }
+        ActivationKeyManager.KeyData keyData = null;
+        ActivationKeyManager.KeyData expiredKeyData = null;
+        if(activationManager.getKeyData() != null) {
+            if(activationManager.isActivated()){
+                keyData = activationManager.getKeyData();
+            } else {
+                expiredKeyData = activationManager.getKeyData();
+            }
+        }
         context.json(new StdResp(true, null,
                 new ActiveInfo(activationManager.isActivated(),
-                        key,
-                        activationManager.getKeyData())));
+                        key,keyData, expiredKeyData
+                       )));
     }
 
     @Override
@@ -116,7 +125,8 @@ public class PBHPlusController extends AbstractFeatureModule {
     public record ActiveInfo(
             boolean activated,
             String key,
-            ActivationKeyManager.KeyData keyData
+            ActivationKeyManager.KeyData keyData,
+            ActivationKeyManager.KeyData inactiveKeyData
     ) {
 
     }
