@@ -517,7 +517,7 @@ PUSH_PROVIDER_API_REMOVE_SAVED: "移除成功，配置已保存"
 PUSH_PROVIDER_API_PROVIDER_NOT_EXISTS: "请求的推送渠道未在 PeerBanHelper 中注册"
 
 LAB_EXPERIMENT_IPFS_TITLE: "IPFS 去中心化网络"
-LAB_EXPERIMENT_IPFS_DESCRIPTION: "参与此实验后，测试版 [IPFS (星际文件系统)](https://ipfs.tech/) 去中心化网络将在 PeerBanHelper 上启用。\nIPFS (星际文件系统) 是一个无中心服务器的分布式网络，每一台计算机都是 IPFS 网络中的一个节点。IPFS 灵活且富有弹性，您可以通过 IPFS 存储和查找文件和传递数据或资源，并且随着资源变得逐渐热门，速度和可访问性都会自动改善。当一个数据不再被任何节点需要（且无人刻意保留它）时，它也会随着时间推移而从网络中自动淘汰移除。"
+LAB_EXPERIMENT_IPFS_DESCRIPTION: "[IPFS (星际文件系统)](https://ipfs.tech/) 是一个无中心服务器的分布式网络，每一台计算机都是 IPFS 网络中的一个节点。IPFS 灵活且富有弹性，您可以通过 IPFS 存储和查找文件和传递数据或资源，并且随着资源变得逐渐热门，速度和可访问性都会自动改善。当一个数据不再被任何节点需要（且无人刻意保留它）时，它也会随着时间推移而从网络中自动淘汰移除。\n要使用 IPFS 功能，请启用此实验，并在首选项中配置 Kube IPFS 客户端的 RPC 地址。启用后您将能够订阅其它人分享给您的位于 IPFS/IPNS 之上的 IP 规则。同时无需服务器，您也可以分享自己的封禁列表或者 IP 规则给其它人。"
 IPFS_INIT_FAILED: "[IPFS] 初始化 Kubo IPFS RPC 失败，IPFS 功能将不可用，请确认 Kubo IPFS 是否正在运行，若您不使用 IPFS 相关功能，可忽略此警告信息: {}"
 IPFS_INIT_WELCOME: "[IPFS] 已成功连接到 Kubo IPFS RPC，版本 {}。PeerBanHelper 已成功通过 Kubo 连接 IPFS 网络，并提供扩展功能"
 IPFS_BANLIST_PUBLISHED: "[IPFS] 已更新封禁列表到 IPFS，并一同更新了 IPNS 记录"
