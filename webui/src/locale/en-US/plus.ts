@@ -20,5 +20,5 @@ export default {
   'plus.activeSuccess': 'Activation successful',
 
   'plus.or': 'Or',
-  'plus.try': 'Try it now for 15 days!'
+  'plus.try': "I don't want to donate"
 }

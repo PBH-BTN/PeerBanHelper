@@ -20,5 +20,5 @@ export default {
   'plus.activeSuccess': '激活成功',
 
   'plus.or': '或者',
-  'plus.try': '立即体验15天！'
+  'plus.try': '我不想捐赠'
 }
