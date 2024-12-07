@@ -102,13 +102,15 @@ public class BtnNetwork implements Reloadable {
     }
 
     public void configBtnNetwork() {
+        String response = "<Not Provided>";
         try {
             HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body(), 600));
                 return;
             }
-            JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
+            response = resp.body();
+            JsonObject json = JsonParser.parseString(response).getAsJsonObject();
             if (!json.has("min_protocol_version")) {
                 throw new IllegalStateException(tlUI(Lang.MISSING_VERSION_PROTOCOL_FIELD));
             }
@@ -154,7 +156,7 @@ public class BtnNetwork implements Reloadable {
             });
             configSuccess.set(true);
         } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_CONFIG_FAILS, 600), e);
+            log.error(tlUI(Lang.BTN_CONFIG_FAILS, response, 600), e);
         }
     }
 
