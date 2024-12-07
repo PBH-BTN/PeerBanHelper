@@ -78,7 +78,7 @@
           style="width: 100%"
         >
           <template #first>
-            <a-space direction="vertical" size="small">
+            <a-space direction="vertical" size="small" style="max-width: 20rem; height: 6rem">
               <a-typography-text type="secondary">{{ t('plus.activeTips') }}</a-typography-text>
               <a-input-search
                 button-text="Go!"
@@ -92,7 +92,9 @@
             <a-space style="display: flex; justify-content: center; align-items: center">
               <a-typography-text type="secondary">{{ t('plus.or') }}</a-typography-text>
               &nbsp;
-              <a-button :loading="loading" @click="handleTry">{{ t('plus.try') }}</a-button>
+              <a-button :loading="loading" @click="handleTry">
+                <template #icon><icon-thumb-down /></template>{{ t('plus.try') }}
+              </a-button>
             </a-space>
           </template>
         </a-split>
