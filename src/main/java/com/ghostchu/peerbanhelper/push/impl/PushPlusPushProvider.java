@@ -39,7 +39,6 @@ public class PushPlusPushProvider extends AbstractPushProvider {
         section.set("type", "pushplus");
         section.set("token", config.getToken());
         section.set("topic", config.getTopic());
-        section.set("template", config.getTemplate());
         section.set("channel", config.getChannel());
         return section;
     }
