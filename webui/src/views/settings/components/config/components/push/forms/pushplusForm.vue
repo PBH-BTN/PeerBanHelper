@@ -17,8 +17,8 @@
   </a-form-item>
 </template>
 <script setup lang="ts">
-import { type PushPlusConfig } from '@/api/model/push';
-import { useI18n } from 'vue-i18n';
+import { type PushPlusConfig } from '@/api/model/push'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const model = defineModel<PushPlusConfig>({ required: true })
