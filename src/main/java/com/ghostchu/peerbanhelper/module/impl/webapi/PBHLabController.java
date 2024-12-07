@@ -109,6 +109,7 @@ public class PBHLabController extends AbstractFeatureModule {
         Map<String, Object> map = new HashMap<>();
         map.put("experiments", availableExperiments);
         map.put("mygroup", laboratory.getExperimentalGroup());
+        map.put("labEnabled", laboratory.isEnabled());
         context.json(new StdResp(true, null, map));
     }
 
