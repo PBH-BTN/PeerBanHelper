@@ -169,6 +169,17 @@
             >
               {{ webuiHash.substring(0, 8) }} </a-link
             >)
+            <a-tooltip
+              v-if="
+                data?.data.peerbanhelper.commit_id.substring(0, 8) !== webuiHash.substring(0, 8) &&
+                data?.data.peerbanhelper.commit_id
+              "
+              :content="t('page.settings.tab.info.version.webui.versionNotMatch')"
+            >
+              <a-typography-text type="warning">
+                <IconFont type="icon-zu" />
+              </a-typography-text>
+            </a-tooltip>
           </a-descriptions-item>
           <a-descriptions-item :label="t('page.settings.tab.info.version.ReleaseType')">
             <a-tag :color="getColor(data?.data.peerbanhelper.release ?? 'unknown')">
@@ -444,7 +455,7 @@
 </template>
 <script setup lang="ts">
 import { OSType } from '@/api/model/status'
-import { genIconComponent } from '@/components/iconFont'
+import IconFont, { genIconComponent } from '@/components/iconFont'
 import multiClick from '@/components/multiClick.vue'
 import {
   CheckModuleEnable,

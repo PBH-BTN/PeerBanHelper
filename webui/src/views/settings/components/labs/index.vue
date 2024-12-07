@@ -13,7 +13,18 @@
     <a-typography-title :heading="5">
       {{ t('page.settings.tab.labs.list') }}
     </a-typography-title>
-    <div style="width: 100%; display: flex; justify-content: center">
+    <a-spin
+      v-if="firstLoading"
+      style="
+        width: 100%;
+        height: 30rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      "
+      dot
+    />
+    <div v-else style="width: 100%; display: flex; justify-content: center">
       <a-list :data="data?.data.experiments" style="max-width: 60rem" :loading="loading">
         <template #item="{ item }">
           <a-list-item action-layout="vertical">
@@ -49,10 +60,14 @@
 import { GetExperimentList, SetExperimentStatus } from '@/service/labs'
 import { Message } from '@arco-design/web-vue'
 import markdownit from 'markdown-it'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 const { t } = useI18n()
-const { data, loading, refresh } = useRequest(GetExperimentList)
+const firstLoading = ref(true)
+const { data, loading, refresh } = useRequest(GetExperimentList, {
+  onSuccess: () => (firstLoading.value = false)
+})
 const md = new markdownit()
 const switchExperimentStatus = async (id: string, activated: boolean) => {
   try {

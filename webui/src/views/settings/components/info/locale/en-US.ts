@@ -10,6 +10,8 @@ export default {
   'page.settings.tab.info.version.plus': 'Plus Subscription',
   'page.settings.tab.info.version.plus.active': 'Active',
   'page.settings.tab.info.version.plus.inactive': 'Inactive',
+  'page.settings.tab.info.version.webui.versionNotMatch':
+    'WebUI Commit is different from the backend, this may be due to you using an external WebUI or browser cache, please hard refresh and try again.',
 
   'page.settings.tab.info.system': 'System Info',
   'page.settings.tab.info.system.os': 'OS',
