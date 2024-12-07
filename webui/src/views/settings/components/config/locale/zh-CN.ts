@@ -104,6 +104,7 @@ export default {
   'page.settings.tab.config.push.form.stmp.receivers': '收件人',
   'page.settings.tab.config.push.form.stmp.receivers.placeholder': '输入一个按回车输入下一个',
   'page.settings.tab.config.push.form.stmp.sendPartial': '分片发送',
+  'page.settings.tab.config.push.form.stmp.advance': '高级设置',
 
   'page.settings.tab.config.push.form.pushplus.token': 'Token',
   'page.settings.tab.config.push.form.pushplus.topic': 'Topic',
