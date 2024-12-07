@@ -176,8 +176,33 @@
               "
               :content="t('page.settings.tab.info.version.webui.versionNotMatch')"
             >
-              <a-typography-text type="warning">
-                <IconFont type="icon-zu" />
+              <a-typography-text type="warning" style="font-size: 1">
+                <svg
+                  class="arco-icon"
+                  t="1733594203567"
+                  viewBox="0 0 1024 1024"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  p-id="2704"
+                  width="200"
+                  height="200"
+                >
+                  <path
+                    d="M951 799.49l-383.89-651a64 64 0 0 0-110.26 0L73 799.49C47.83 842.16 78.59 896 128.12 896h767.77c49.52 0 80.28-53.84 55.11-96.51zM128.12 832l383.62-651a1 1 0 0 1 0.26 0l383.89 651z"
+                    fill="currentColor"
+                    p-id="2705"
+                  ></path>
+                  <path
+                    d="M470 393.88l8.59 244.51a33.18 33.18 0 0 0 66.31 0.06L554 394a42 42 0 1 0-84-0.08z"
+                    fill="currentColor"
+                    p-id="2706"
+                  ></path>
+                  <path
+                    d="M512 758.4m-40 0a40 40 0 1 0 80 0 40 40 0 1 0-80 0Z"
+                    fill="currentColor"
+                    p-id="2707"
+                  ></path>
+                </svg>
               </a-typography-text>
             </a-tooltip>
           </a-descriptions-item>
@@ -455,7 +480,7 @@
 </template>
 <script setup lang="ts">
 import { OSType } from '@/api/model/status'
-import IconFont, { genIconComponent } from '@/components/iconFont'
+import { genIconComponent } from '@/components/iconFont'
 import multiClick from '@/components/multiClick.vue'
 import {
   CheckModuleEnable,

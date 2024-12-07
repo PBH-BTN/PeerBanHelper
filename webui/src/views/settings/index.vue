@@ -12,7 +12,7 @@
     </a-tab-pane>
     <a-tab-pane :key="2">
       <template #title>
-        <IconFont type="icon-un-config-o" /> &nbsp;{{ t('page.settings.tab.profile') }}
+        <IconFont type="icon-config" /> &nbsp;{{ t('page.settings.tab.profile') }}
       </template>
       <ProfileForm />
     </a-tab-pane>
