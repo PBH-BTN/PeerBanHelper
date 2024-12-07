@@ -4,7 +4,9 @@ import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
 
-export async function GetExperimentList(): Promise<CommonResponse<{ experiments: Experiment[] }>> {
+export async function GetExperimentList(): Promise<
+  CommonResponse<{ labEnabled: boolean; experiments: Experiment[] }>
+> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
 
@@ -30,6 +32,23 @@ export async function SetExperimentStatus(
     method: 'PUT',
     headers: getCommonHeader(),
     body: JSON.stringify({ status })
+  }).then((res) => {
+    endpointStore.assertResponseLogin(res)
+    return res.json()
+  })
+}
+
+export async function SetLabConfig(config: {
+  enabled: boolean
+}): Promise<CommonResponseWithoutData> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(urlJoin(endpointStore.endpoint, `api/laboratory/config`), location.href)
+  return fetch(url, {
+    method: 'POST',
+    headers: getCommonHeader(),
+    body: JSON.stringify(config)
   }).then((res) => {
     endpointStore.assertResponseLogin(res)
     return res.json()
