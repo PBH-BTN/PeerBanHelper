@@ -37,6 +37,9 @@ public class Laboratory {
     }
 
     public boolean isExperimentActivated(Experiment experiment) {
+        if(!isEnabled()){
+            return false;
+        }
         var value = labConfig.getString(experiment.getId());
         if (value == null) {
             labConfig.set(experiment.getId(), "default");
@@ -80,5 +83,14 @@ public class Laboratory {
 
     public boolean isExperimentalGroup(List<Integer> group) {
         return group.contains(experimentalGroup);
+    }
+
+    public void setEnabled(boolean enabled) {
+        labConfig.set("enabled", enabled);
+        saveLabConfig();
+    }
+
+    public boolean isEnabled() {
+        return labConfig.getBoolean("enabled");
     }
 }
