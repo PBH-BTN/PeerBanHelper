@@ -1,6 +1,6 @@
 export default {
   'page.charts.loading': '加载中...',
-  'page.charts.options': '选项',
+  'page.charts.options': '视图选项',
   'page.charts.options.more': '更多选项',
   'page.charts.options.thresold': '只显示1%以上的数据',
   'page.charts.options.field': '维度',

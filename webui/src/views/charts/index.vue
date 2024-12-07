@@ -2,7 +2,9 @@
   <a-tabs :default-active-key="0" lazy-load animation type="rounded">
     <template #extra>
       <a-popover position="bottom">
-        <a-button>{{ t('page.charts.options') }}</a-button>
+        <a-button>
+          <template #icon><icon-eye /></template>{{ t('page.charts.options') }}
+        </a-button>
         <template #content>
           <a-space direction="vertical">
             <a-checkbox v-model="showCharts.banTrends">{{

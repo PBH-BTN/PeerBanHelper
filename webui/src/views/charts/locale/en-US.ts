@@ -1,6 +1,6 @@
 export default {
   'page.charts.loading': 'Loading...',
-  'page.charts.options': 'Options',
+  'page.charts.options': 'View Options',
   'page.charts.options.more': 'More Options',
   'page.charts.options.thresold': 'Only show data above 1%',
   'page.charts.options.field': 'Field',
