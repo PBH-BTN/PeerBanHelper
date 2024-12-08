@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.push.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.push.AbstractPushProvider;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -7,6 +8,7 @@ import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -94,6 +96,11 @@ public class PushPlusPushProvider extends AbstractPushProvider {
         ).join();
         if (resp.statusCode() != 200) {
             throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + resp.body());
+        } else {
+            PushPlusResponse ppr = JsonUtil.getGson().fromJson(resp.body(), PushPlusResponse.class);
+            if (ppr.getCode() != 200) {
+                throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + ppr.getMsg());
+            }
         }
         return true;
     }
@@ -104,5 +111,15 @@ public class PushPlusPushProvider extends AbstractPushProvider {
         private String token;
         private String topic;
         private String channel;
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class PushPlusResponse {
+
+        @JsonProperty("code")
+        private Integer code;
+        @JsonProperty("msg")
+        private String msg;
     }
 }
