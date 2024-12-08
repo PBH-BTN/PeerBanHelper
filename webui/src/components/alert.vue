@@ -59,28 +59,42 @@
                   </a-space>
                 </template>
                 <template #description>
-                  <div
-                    v-if="item.readAt === null"
-                    style="max-width: 25rem"
-                    v-html="md.render(item.content)"
-                  ></div>
-                  <del v-else style="max-width: 25rem" v-html="md.render(item.content)"> </del>
+                  <a-space direction="vertical" size="mini">
+                    <a-typography-text type="secondary"
+                      ><icon-clock-circle /> {{ d(item.createAt, 'long') }}</a-typography-text
+                    >
+                    <div
+                      v-if="item.readAt === null"
+                      class="md-container"
+                      style="max-width: 25rem"
+                      v-html="md.render(item.content)"
+                    ></div>
+                    <del
+                      v-else
+                      class="md-container"
+                      style="max-width: 25rem"
+                      v-html="md.render(item.content)"
+                    >
+                    </del>
+                  </a-space>
                 </template>
               </a-list-item-meta>
               <template #actions>
-                <a-tooltip v-if="item.readAt === null" :content="t('alert.action.markAsRead')">
-                  <a-button
-                    class="edit-btn"
-                    status="danger"
-                    shape="circle"
-                    type="text"
-                    @click="markAsRead(index)"
-                  >
-                    <template #icon>
-                      <icon-close />
-                    </template>
-                  </a-button>
-                </a-tooltip>
+                <a-space>
+                  <a-tooltip v-if="item.readAt === null" :content="t('alert.action.markAsRead')">
+                    <a-button
+                      class="edit-btn"
+                      status="danger"
+                      shape="circle"
+                      type="text"
+                      @click="markAsRead(index)"
+                    >
+                      <template #icon>
+                        <icon-notification-close />
+                      </template>
+                    </a-button>
+                  </a-tooltip>
+                </a-space>
               </template>
             </a-list-item>
           </template>
@@ -98,7 +112,7 @@ import markdownit from 'markdown-it'
 import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-const { t } = useI18n()
+const { t, d } = useI18n()
 const visable = ref(false)
 const md = new markdownit()
 useRequest(
@@ -214,5 +228,10 @@ const markAllAsRead = () => {
 }
 body[arco-theme='dark'] .alert-card {
   box-shadow: #555 0px 0px 3px;
+}
+.md-container {
+  p {
+    margin-top: 0;
+  }
 }
 </style>

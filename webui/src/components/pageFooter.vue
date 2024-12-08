@@ -16,7 +16,10 @@
             <div v-else>{{ serverVersion?.version }}</div>
             <br />
             <a-button
-              v-if="endpointStore.plusStatus?.activated"
+              v-if="
+                endpointStore.plusStatus?.activated &&
+                endpointStore.plusStatus.keyData?.type !== LicenseType.LicenseLocal
+              "
               class="plus-button"
               type="outline"
               size="mini"
@@ -57,6 +60,7 @@ import { compare } from 'compare-versions'
 import { computed, h, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import plusModal from './plusModal.vue'
+import { LicenseType } from '@/api/model/manifest'
 
 const { t } = useI18n()
 const version = __APP_VERSION__

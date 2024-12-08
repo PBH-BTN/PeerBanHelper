@@ -1,0 +1,20 @@
+name: Flush CloudFlare Update Cache
+
+on:
+  workflow_call:
+    secrets:
+      FILES_CLOUDFLARE_ZONE:
+        required: true
+      FILES_CLOUDFLARE_TOKEN:
+        required: true
+jobs:
+  purge-cloudflare-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Purge cache
+        uses: jakejarvis/cloudflare-purge-action@master
+        env:
+        # Zone is required by both authentication methods
+          CLOUDFLARE_ZONE: ${{ secrets.FILES_CLOUDFLARE_ZONE }}
+          CLOUDFLARE_TOKEN: ${{ secrets.FILES_CLOUDFLARE_TOKEN }}

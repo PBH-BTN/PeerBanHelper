@@ -28,11 +28,6 @@
               </i18n-t>
             </template>
           </a-form-item>
-          <a-form-item label="PBH Plus key">
-            <a-button type="primary" @click="endpointStore.emitter.emit('open-plus-modal')">
-              {{ t('page.settings.tab.config.plus.button') }}
-            </a-button>
-          </a-form-item>
           <a-form-item
             :label="t('page.settings.tab.config.privacy.errorReport')"
             field="privacy.error_reporting"
@@ -55,6 +50,8 @@
           <ipDatabase v-model="form.ip_database" />
           <a-divider />
           <performance v-model="form.performance" />
+          <a-divider />
+          <push />
           <br />
           <a-form-item label-col-flex="0">
             <a-button html-type="submit" type="primary" :loading="saving" @click="submitConfig()">
@@ -70,7 +67,6 @@
 <script setup lang="ts">
 import type { Config } from '@/api/model/config'
 import { GetConfig, SaveConfig } from '@/service/settings'
-import { useEndpointStore } from '@/stores/endpoint'
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
@@ -83,9 +79,9 @@ import lookup from './components/lookup.vue'
 import performance from './components/performance.vue'
 import persist from './components/persist.vue'
 import proxy from './components/proxy.vue'
+import push from './components/push.vue'
 import webui from './components/webui.vue'
 
-const endpointStore = useEndpointStore()
 const { t } = useI18n()
 const form = reactive({
   server: {},

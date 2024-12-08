@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 public final class TorrentWrapper {
     private String id;
     private long size;
+    private long completedSize;
     private String name;
     private String hash;
     private double progress;
@@ -20,6 +21,7 @@ public final class TorrentWrapper {
     public TorrentWrapper(Torrent torrent) {
         this.id = torrent.getId();
         this.size = torrent.getSize();
+        this.completedSize = torrent.getCompletedSize();
         this.name = torrent.getName();
         this.hash = torrent.getHash();
         this.progress = torrent.getProgress();

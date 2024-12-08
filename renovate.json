@@ -8,8 +8,16 @@
     "org.xerial:sqlite-jdbc",
     "com.ghostchu.peerbanhelper.external-libs:sqlite-jdbc-loongarch64"
   ],
-  "baseBranches":["dev"],
+  "baseBranches": [
+    "dev"
+  ],
   "packageRules": [
+    {
+      "matchFileNames": [
+        "webui/package.json"
+      ],
+      "dependencyDashboardApproval": true
+    },
     {
       "matchPackageNames": [
         "*"

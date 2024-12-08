@@ -43,15 +43,15 @@
       >
         <a-input v-model="form.name" allow-clear />
       </a-form-item>
-      <component :is="formMap[form.config.type] as any" v-model="form.config" />
+      <component :is="formMap[form.config.type]" v-model="form.config" />
     </a-form>
   </a-modal>
 </template>
 <script setup lang="ts">
 import { ClientTypeEnum, type downloaderConfig } from '@/api/model/downloader'
 import { CreateDownloader, TestDownloaderConfig, UpdateDownloader } from '@/service/downloaders'
-import { type Form, Message } from '@arco-design/web-vue'
-import { defineAsyncComponent, reactive, ref } from 'vue'
+import { Message, type Form } from '@arco-design/web-vue'
+import { defineAsyncComponent, reactive, ref, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
@@ -65,7 +65,7 @@ const { t } = useI18n()
 const showModal = ref(false)
 const newItem = ref(false)
 
-const formMap = {
+const formMap: Record<ClientTypeEnum, Component> = {
   [ClientTypeEnum.qBittorrent]: qbittorrentForm,
   [ClientTypeEnum.qBittorrentEE]: qbittorrentEEForm,
   [ClientTypeEnum.Transmission]: transmissionForm,

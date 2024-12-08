@@ -1,0 +1,3 @@
+#!/bin/sh -e
+
+[ $1 = purge ] && deluser --quiet peerbanhelper && rm -rf /var/lib/peerbanhelper || true

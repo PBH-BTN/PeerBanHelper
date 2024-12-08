@@ -59,7 +59,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Override
     public ConfigurationSection getConfig() {
         if (!isConfigurable()) return null;
-        ConfigurationSection section = Objects.requireNonNull(server.getProfileConfig().getConfigurationSection("module")).getConfigurationSection(getConfigName());
+        ConfigurationSection section = Objects.requireNonNull(Main.getProfileConfig().getConfigurationSection("module")).getConfigurationSection(getConfigName());
         if (section == null) {
             log.warn(tlUI(Lang.CONFIGURATION_OUTDATED_MODULE_DISABLED, getName()));
             YamlConfiguration configuration = new YamlConfiguration();
@@ -92,8 +92,8 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     @Override
     public void saveConfig() throws IOException {
         if (!isConfigurable()) return;
-        server.getProfileConfig().set("module." + getConfigName(), getConfig());
-        server.getProfileConfig().save(new File(Main.getConfigDirectory(), "profile.yml"));
+        Main.getProfileConfig().set("module." + getConfigName(), getConfig());
+        Main.getProfileConfig().save(new File(Main.getConfigDirectory(), "profile.yml"));
     }
 
     public String locale(Context ctx) {

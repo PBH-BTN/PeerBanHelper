@@ -41,6 +41,8 @@ public class PBHActiveTorrentsResponse extends DelugeResponse {
         private Double progress;
         @SerializedName("size")
         private Long size;
+        @SerializedName("completed_size")
+        private Long completedSize;
         @SerializedName("upload_payload_rate")
         private Long uploadPayloadRate;
         @SerializedName("download_payload_rate")

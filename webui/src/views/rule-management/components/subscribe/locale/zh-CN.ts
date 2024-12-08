@@ -17,6 +17,7 @@ export default {
   'page.rule_management.ruleSubscribe.editModal.form.name': '规则名称',
   'page.rule_management.ruleSubscribe.editModal.form.id.extra': '规则ID，不允许重复',
   'page.rule_management.ruleSubscribe.editModal.form.name.required': '请输入规则名称',
+  'page.rule_management.ruleSubscribe.editModal.form.url.invalid': '请输入正确的URL',
   'page.rule_management.ruleSubscribe.addRule': '新增订阅',
   'page.rule_management.ruleSubscribe.column.rulesCount': '规则数量',
   'page.rule_management.ruleSubscribe.column.deleteConfirm': '确定删除这条规则吗？',

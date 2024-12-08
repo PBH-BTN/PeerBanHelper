@@ -1,13 +1,21 @@
-config-version: 23
+config-version: 26
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
 # en_us English (US)
 # zh_cn Chinese Simplified (简体中文)
 language: default
-# PBH Plus 捐赠密钥 (https://afdian.com/a/Ghost_chu)，如果你有的话，就填在这里吧
-# PBH Plus donation key, if you have one, please fill to there
-pbh-plus-key: ''
+# PBH Plus 的捐赠密钥，填写后将激活捐赠功能。
+# PeerBanHelper 是一个非营利、开放源代码的免费软件。维护 PeerBanHelper 是一项持续的任务，
+# 我们的团队成员每个月在上面花费大量的时间与恶意Peer进行技术对抗，因此你的支持对我们来说至关重要。
+# 如果您不想捐赠 PeerBanHelper，请通过 WebUI 创建本地免费许可证，它与通过捐赠获取的捐赠密钥在功能上相同。
+# A donation key for PBH Plus, which when filled out will activate the donation feature.
+# PeerBanHelper is a non-profit, open source, freeware program. Maintaining PeerBanHelper is an ongoing task,
+# and our team members spend a lot of time on it each month in technical confrontations with malicious Peers,
+# so your support is vital to us.
+# If you don't want to donate PeerBanHelper, please create a local free license via WebUI,
+# which is functionally identical to the donation key obtained via donation.
+pbh-plus-key: ""
 # Http 服务器设置
 # Http Server Settings
 server:
@@ -131,8 +139,8 @@ ip-database:
   # 允许自动更新 GeoIP 数据库文件
   # Allow PBH update GeoIP database file while restarting if needed
   auto-update: true
-  database-city: 'GeoLite2-City'
-  database-asn: 'GeoLite2-ASN'
+  database-city: "GeoLite2-City"
+  database-asn: "GeoLite2-ASN"
 # 代理服务器设定
 # Proxy server settings
 proxy:
@@ -155,69 +163,13 @@ performance:
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
 
-push-notification:
-  # 邮件推送服务 - Email push notification
-  email-example:
-    type: smtp
-    # 启用 SMTP 邮件推送服务
-    # Enable SMTP push service
-    enabled: false
-    # SMTP 服务器主机名 - SMTP Server Hostname
-    host: "smtp.example.com"
-    # SMTP 端口号 - SMTP Port
-    port: "587"
-    # 使用 SSL - SSL
-    ssl: true
-    # SMTP 用户名 - SMTP Username
-    # 通常为邮箱地址 - Usually is email address
-    username: "example@example.com"
-    # 发送者名称 - Sender name
-    # 通常为邮箱地址 - Usually is email address
-    sender: "example@example.com"
-    # 发件者名称
-    # Sender name
-    name: "PeerBanHelper"
-    # SMTP 密码 - SMTP Password
-    # 通常为授权码（而非邮箱密码），请参阅您的邮件服务提供商的说明
-    # Usually is Access Token (not Email password), please refer to your email provider instruction
-    password: "password"
-    # 收件人列表 - Receiver list
-    # 推送的消息将发送到下面的所有邮件地址 - Messages will send to all address that listed below
-    receiver:
-      - "example@exmaple.com"
-
-  # PushPlus - 推送加（Chinese user only）
-  pushplus-example:
-    type: pushplus
-    # 启用 Push Plus 推送加服务
-    enabled: false
-    # PushPlus Token
-    token: ""
-    # 群组编码，不清楚这是什么请留空
-    topic: ""
-    # 发送模板，不清楚这是什么请留空
-    template: ""
-    # 发送渠道。不清楚这是什么请留空；https://www.pushplus.plus/doc/channel/#%E5%BC%95%E8%A8%80
-    channel: ""
-
-  # ServerChan - Server酱
-  serverchan-example:
-    type: serverchan
-    # 启用 ServerChan Server酱 推送加服务
-    enabled: false
-    # 发送密钥 (SendKey/AppKey)
-    send-key: ""
-    # 消息通道
-    channel: ""
-    # 消息抄送的 openid
-    openid: ""
-
-  # Telegram - Bot 推送
-  telegram-example:
-    type: telegram
-    # 启用 Telegram Bot 推送服务
-    enabled: false
-    # HTTP API Token 一般为 1234567890:XXXXXXXXXX 形式，不能有空格。联系 @BotFather 获取，参阅下方链接：
-    token: ""
-    # 聊天 Chat ID；https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a
-    chat-id: ""
+# PeerBanHelper 去中心化网络服务 - Decentralized network service
+# 请配置一个可用的 Kubo IPFS 节点 - Please configure an available Kubo IPFS node
+decentralized:
+  enabled: false
+  # Kubo RPC MultiAddr
+  kubo-rpc: "/ip4/127.0.0.1/tcp/5001"
+  features:
+    # 发布当前封禁列表到 IPFS 以允许它人订阅您的封禁列表内容，时间单位：毫秒，设置为 -1 以禁用
+    # Publish current banlist to IPFS to allow others subscribe your banlist, time unit: milliseconds, set to -1 to disable
+    publish-banlist: 3600000

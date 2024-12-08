@@ -10,6 +10,8 @@ export default {
   'page.settings.tab.info.version.plus': 'Plus 订阅',
   'page.settings.tab.info.version.plus.active': '已激活',
   'page.settings.tab.info.version.plus.inactive': '未激活',
+  'page.settings.tab.info.version.webui.versionNotMatch':
+    'WebUI Commit 与后端不同，这可能是由于你在使用外部 WebUI 或者浏览器缓存，请硬刷新后再试试。',
 
   'page.settings.tab.info.system': '系统信息',
   'page.settings.tab.info.system.os': '操作系统',

@@ -26,6 +26,7 @@ MODULE_IBL_EXCEPTION_GEOIP: "An exception occurred while matching GeoIP informat
 MODULE_IBL_MATCH_PORT: "Match Port rule: {}"
 MODULE_PID_MATCH_PEER_ID: "Match PeerId rule: {}"
 MODULE_PCB_EXCESSIVE_DOWNLOAD: "Client excessive download: Torrent size: {}, total uploaded to this peer: {}, maximum allowed excessive download total: {}"
+MODULE_PCB_EXCESSIVE_DOWNLOAD_INCOMPLETE: "Client excessive download: Torrent size: {} ({} downloaded), total uploaded to this peer: {}, maximum allowed excessive download total: {}"
 MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP: "Client progress: {}, calculated minimal progress: {}, client progress more than local progress, skipping detection"
 MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS: "Client progress: {}, calculated minimal: {}, difference: {}"
 MODULE_PCB_PEER_BAN_REWIND: "Client progress: {}, calculated minimal progress: {}; last time recorded progress: {}, rewind progress: {}, max allowed rewind threshold: {}"
@@ -488,7 +489,7 @@ PUSH_PROVIDER_TEST_SUCCESS: "{} ({}) Test message sent successfully, please chec
 PUSH_PROVIDER_TEST_FAILED: "Test push service {} ({}) failed"
 PUSH_PROVIDER_TEST_ERROR: "Test push service {} ({}) failed: {}"
 BAN_PEER_EXCEPTION: "An exception occurred while ban Peer, specific Peer unable to ban, Please report these information to PeerBanHelper developer"
-EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS: "For security reason, create AviatorScript via Internet or Reserve Proxy is disallowed."
+EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS: "For security reason, create AviatorScript via Internet or Reserve Proxy is disallowed. Please read: https://docs.pbh-btn.com/en/docs/faq/#why-cant-i-edit-custom-scripts-what-is-read-only-mode"
 EXPRESS_RULE_ENGINE_SAVED: "Script saved"
 BTN_RULES_SCRIPT_COMPILING: "Compiling the scripts from BTN server, this may take a while..."
 BTN_RULES_SCRIPT_COMPILED: "Compiled {} scripts, took {}ms"
@@ -498,3 +499,39 @@ GUI_MENU_SHOW_WINDOW: "Open Window"
 GUI_MENU_STATS: "Statistics"
 GUI_MENU_STATS_BANNED: "Banned {} peers ({} IP addresses)"
 GUI_MENU_STATS_DOWNLOADER: "Connected {}/{} downloader"
+
+PUSH_PROVIDER_API_ADD_FAILURE: "Failed to create push provider. Is the provided push type unsupported?"
+PUSH_PROVIDER_API_CREATED: "Push provider created successfully"
+PUSH_PROVIDER_API_UPDATED: "Push provider updated successfully"
+PUSH_PROVIDER_API_CREATION_FAILED_ALREADY_EXISTS: "Failed to create push provider. A push provider with the same configuration already exists"
+PUSH_PROVIDER_API_CREATION_FAILED_IO_EXCEPTION: "Failed to create push provider due to an I/O error. Please check the console logs"
+PUSH_PROVIDER_API_UPDATE_FAILURE: "Failed to update push provider. Is the provided push type unsupported?"
+PUSH_PROVIDER_API_UPDATE_FAILURE_ALREADY_EXISTS: "Failed to update push provider. A push provider with the same configuration already exists and removal failed"
+PUSH_PROVIDER_API_TEST_NAME_EXISTS: "The name used by the push provider conflicts with an existing push provider"
+PUSH_PROVIDER_API_TEST_OK: "Verification successful, configuration is valid"
+PUSH_PROVIDER_API_REMOVE_NOT_EXISTS: "Cannot remove the specified push provider. The push provider is not registered in PeerBanHelper"
+PUSH_PROVIDER_API_REMOVE_SAVED: "Removed successfully, configuration has been saved"
+PUSH_PROVIDER_API_PROVIDER_NOT_EXISTS: "The requested push provider is not registered in PeerBanHelper"
+
+
+PORT_MAPPER_PORT_MAPPING: "[PortMapper] Try to create port forwarding for port {}/{} ..."
+PORT_MAPPER_PORT_MAPPED: "[PortMapper] Successfully create a port forwarding on interface {} 's gateway for {}/{}, External Port: {} (External IP: {})；TTL：{} seconds."
+PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS: "[PortMapper] Need Attention! Although PortMapper successfully created one or more port forwarding, However, their external addresses appear to be dedicated IP addresses, which usually means that you are behind a two-tier NAT (e.g., your device is connected to a router that is under an optical cat that is also in routing mode), and port mapping may not work."
+PORT_MAPPER_PORT_MAPPING_FAILED: "[PortMapper] Failed to create/update port forwarding on interface {} for port {}/{}, re-trying; If this prompt appears frequently, check if the device is connected to multiple networks (e.g. Tailscale)"
+LAB_EXPERIMENT_IPFS_TITLE: "IPFS Decentralized Network"
+LAB_EXPERIMENT_IPFS_DESCRIPTION: |
+  [IPFS (InterPlanetary File System)](https://ipfs.tech/) is a decentralized, distributed network without central servers, where every computer acts as a node in the IPFS network.  
+  IPFS is flexible and resilient, allowing you to store and retrieve files, as well as transfer data or resources. As resources become increasingly popular, their speed and accessibility automatically improve. Conversely, when data is no longer needed by any node (and is not intentionally retained), it will gradually be removed from the network over time.  
+  Without requiring a server, you can also share your own ban lists or IP rules with others.  
+  
+  To use IPFS features, enable this experiment and configure the RPC address for the Kubo IPFS client in the configuration. Once enabled, you will be able to subscribe to IP-based rules shared with you via IPFS/IPNS.
+IPFS_INIT_FAILED: "[IPFS] Initializing Kubo IPFS RPC fails, IPFS functionality will not be available, make sure Kubo IPFS is running, you can ignore this warning if you don't use IPFS related functions: {}"
+IPFS_INIT_WELCOME: "[IPFS] Successfully connected to Kubo IPFS RPC, version {}. PeerBanHelper has successfully connected to the IPFS network via Kubo and provides extended functionality"
+IPFS_BANLIST_PUBLISHED: "[IPFS] The block list has been updated to IPFS, along with the IPNS record."
+MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE: "Couldn't update Rule Subscription from IPFS/IPNS because IPFS feature not available."
+
+FREE_LICENSE_RENEW_SUCCESS: "A new license has been generated and activated."
+FREE_LICENSE_RENEW_STILL_ACTIVE: "The current license is still active and does not need to be regenerated."
+FREE_LICENSE_SOURCE: "Locally generated free license."
+FREE_LICENSE_LICENSE_TO: "{} for personal use."
+FREE_LICENSE_DESCRIPTION: "Local generated renewable free license, for personal use only."

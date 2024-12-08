@@ -1,11 +1,14 @@
 [Unit]
 Description=PeerBanHelper Service
 After=network.target
+
 [Service]
 User=peerbanhelper
-WorkingDirectory=/etc/peerbanhelper
-ExecStart=/usr/bin/java -Dpbh.release=debian -Dpbh.datadir=/etc/peerbanhelper -Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -jar /usr/lib/peerbanhelper/PeerBanHelper.jar
+WorkingDirectory=/usr/lib/peerbanhelper
+ExecStart=/usr/bin/java -Dpbh.release=debian -Dpbh.datadir=/var/lib/peerbanhelper -Dpbh.configdir=/etc/peerbanhelper -Dpbh.logsdir=/var/log/peerbanhelper -Dpbh.log.level=WARN -Xmx512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -jar PeerBanHelper.jar
+SuccessExitStatus=143
+AmbientCapabilities=CAP_NET_ADMIN
 Restart=on-failure
-StandardOutput=null
+
 [Install]
 WantedBy=multi-user.target

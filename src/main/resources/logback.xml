@@ -20,6 +20,8 @@
         <!-- 无需其他配置项，DequeAppender 直接使用静态的 Deque 变量 -->
     </appender>
 
+    <logger name="com.offbynull.portmapper" level="OFF"/>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>

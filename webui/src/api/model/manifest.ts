@@ -27,6 +27,10 @@ export interface donateStatus {
   keyData?: KeyData
 }
 
+export enum LicenseType {
+  LicenseLocal = 'local',
+  LicenseAifadian = 'afdian'
+}
 export interface KeyData {
   createAt: number
   description: string
@@ -35,4 +39,5 @@ export interface KeyData {
   licenseTo: string
   source: string
   verifyMagic: string
+  type: LicenseType
 }

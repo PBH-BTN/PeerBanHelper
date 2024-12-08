@@ -8,6 +8,7 @@ import oobeLocale from '@/views/oobe/locale/zh-CN'
 import topBanPageLocale from '@/views/ranks/locale/zh-CN'
 import ruleManageMentLocale from '@/views/rule-management/locale/zh-CN'
 import configLocale from '@/views/settings/locale/zh-CN'
+import scriptLocale from '@/views/custom-script/locale/zh-CN'
 import alertLocale from './zh-CN/alert'
 import copierLocale from './zh-CN/copier'
 import plusLocale from './zh-CN/plus'
@@ -36,6 +37,7 @@ export default {
   'router.metrics.charts': '图表',
   'router.rule_management': '规则管理',
   'router.config': '设置',
+  'router.script': '自定义脚本',
 
   'router.moduleNotEnable': '{moduleName}功能未启用',
   'router.moduleNotEnable.tips': '请在配置文件中开启相关功能',
@@ -62,5 +64,6 @@ export default {
   ...chartsLocale,
   ...configLocale,
   ...alertLocale,
-  ...copierLocale
+  ...copierLocale,
+  ...scriptLocale
 }
