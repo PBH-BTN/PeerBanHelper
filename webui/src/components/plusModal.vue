@@ -93,7 +93,7 @@
               <a-typography-text type="secondary">{{ t('plus.or') }}</a-typography-text>
               &nbsp;
               <a-button :loading="loading" @click="handleTry">
-                <template #icon><icon-thumb-down /></template>{{ t('plus.try') }}
+                <template #icon><icon-face-frown-fill /></template>{{ t('plus.try') }}
               </a-button>
             </a-space>
           </template>
