@@ -534,3 +534,4 @@ FREE_LICENSE_RENEW_STILL_ACTIVE: "当前许可证仍在有效期内，无需重�
 FREE_LICENSE_SOURCE: "本地生成的免费许可证"
 FREE_LICENSE_LICENSE_TO: "{} 用于个人用途"
 FREE_LICENSE_DESCRIPTION: "本地生成的循环免费许可证，仅用于个人用途"
+DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED: "禁用 {} ({}) 的高级设置 “允许来自不同 IP 地址的多重连接” 失败：{} - {}！此功能必须关闭，否则将导致 PCB 封禁误判。"
