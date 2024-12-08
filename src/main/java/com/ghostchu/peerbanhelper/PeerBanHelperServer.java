@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
-import com.ghostchu.peerbanhelper.database.DatabaseHelper;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
 import com.ghostchu.peerbanhelper.decentralized.IPFSBanListShare;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -444,10 +443,10 @@ public class PeerBanHelperServer implements Reloadable {
         } catch (JavalinBindException e) {
             if (e.getMessage().contains("Port already in use")) {
                 log.error(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort));
-                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE), e);
+                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_IN_USE, httpdPort), e);
             } else if (e.getMessage().contains("require elevated privileges")) {
                 log.error(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES));
-                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES), e);
+                throw new JavalinBindException(tlUI(Lang.JAVALIN_PORT_REQUIRE_PRIVILEGES, httpdPort), e);
             }
         }
     }
