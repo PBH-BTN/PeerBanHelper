@@ -25,8 +25,8 @@ public final class QBittorrentTorrent implements Torrent {
     @SerializedName("category")
     private String category;
 
-//    @SerializedName("completed")
-//    private Long completed;
+    @SerializedName("completed")
+    private long completed;
 //
 //    @SerializedName("completion_on")
 //    private Long completionOn;
@@ -53,6 +53,12 @@ public final class QBittorrentTorrent implements Torrent {
 //    private Long eta;
 //    @SerializedName("f_l_piece_prio")
 //    private Boolean fLPiecePrio;
+
+    @SerializedName("piece_size")
+    private long pieceSize;
+
+    @SerializedName("pieces_have")
+    private long piecesHave;
 
     @SerializedName("force_start")
     private boolean forceStart;
@@ -188,6 +194,11 @@ public final class QBittorrentTorrent implements Torrent {
     @Override
     public long getSize() {
         return totalSize;
+    }
+
+    @Override
+    public long getCompletedSize() {
+        return (pieceSize > 0 && piecesHave > 0) ? pieceSize * piecesHave : -1;
     }
 
     @Override

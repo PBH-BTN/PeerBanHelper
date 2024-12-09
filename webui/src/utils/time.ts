@@ -18,17 +18,9 @@ function parseTimeDuration(ms: number) {
   const days = totalDays % 7
 
   const totalWeeks = Math.floor(totalDays / 7)
-  const weeks = totalWeeks % 4
-
-  const totalMonths = Math.floor(totalWeeks / 4)
-  const months = totalMonths % 12
-
-  const years = Math.floor(totalMonths / 12)
 
   return {
-    years,
-    months,
-    weeks,
+    weeks: totalWeeks,
     days,
     hours,
     minutes,

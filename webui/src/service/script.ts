@@ -3,7 +3,7 @@ import type {
   CommonResponseWithoutData,
   CommonResponseWithPage
 } from '@/api/model/common'
-import type { Script } from '@/api/model/script'
+import type { EditableResult, Script } from '@/api/model/script'
 import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
@@ -42,6 +42,19 @@ export async function GetScriptContent(id: string): Promise<CommonResponse<strin
   await endpointStore.serverAvailable
 
   const url = new URL(urlJoin(endpointStore.endpoint, `api/expression-engine/${id}`), location.href)
+  return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    return res.json()
+  })
+}
+
+export async function CheckScriptEditable(): Promise<CommonResponse<EditableResult>> {
+  const endpointStore = useEndpointStore()
+  await endpointStore.serverAvailable
+
+  const url = new URL(
+    urlJoin(endpointStore.endpoint, `api/expression-engine/editable`),
+    location.href
+  )
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     return res.json()
   })

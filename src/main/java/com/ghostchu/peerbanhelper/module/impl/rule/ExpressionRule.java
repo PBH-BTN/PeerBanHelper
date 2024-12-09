@@ -79,9 +79,18 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
         }
         javalinWebContainer.javalin()
                 .get("/api/" + getConfigName() + "/scripts", this::listScripts, Role.USER_READ)
+                .get("/api/"+getConfigName()+"/editable", this::editable, Role.USER_READ)
                 .get("/api/" + getConfigName() + "/{scriptId}", this::readScript, Role.USER_READ)
                 .put("/api/" + getConfigName() + "/{scriptId}", this::writeScript, Role.USER_WRITE)
                 .delete("/api/" + getConfigName() + "/{scriptId}", this::deleteScript, Role.USER_WRITE);
+    }
+
+    private void editable(Context context) {
+        Map<String, Object> map = new HashMap<>();
+        var editable = isSafeNetworkEnvironment(context);
+        map.put("editable", editable);
+        map.put("reason", editable ? null : tl(locale(context), Lang.EXPRESS_RULE_ENGINE_DISALLOW_UNSAFE_SOURCE_ACCESS, context.ip()));
+        context.json(new StdResp(true, null, map));
     }
 
     private void deleteScript(Context context) throws IOException {

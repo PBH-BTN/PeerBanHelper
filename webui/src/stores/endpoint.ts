@@ -185,6 +185,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
     setAuthToken,
     plusStatus,
     setPlusKey,
+    getPlusStatus,
     emitter: emitter,
     assertResponseLogin: (res: Response) => {
       if (res.status === 403) {

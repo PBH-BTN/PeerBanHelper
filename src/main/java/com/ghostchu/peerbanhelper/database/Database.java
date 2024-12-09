@@ -23,6 +23,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class Database {
     private JdbcSingleConnectionSource dataSource;
     private HikariDataSource hikari;
+    private DatabaseHelper helper;
 
     public Database() throws SQLException, ClassNotFoundException {
         File databaseDirectory = new File(Main.getDataDirectory(), "persist");
@@ -57,6 +58,7 @@ public class Database {
             }
         }
         this.dataSource = new JdbcSingleConnectionSource("jdbc:sqlite:" + file, new SqliteDatabaseType(), rawConnection);
+        this.helper = new DatabaseHelper(this);
         //  this.dataSource = new DataSourceConnectionSource( new HikariDataSource(config), new SqliteDatabaseType());
     }
 

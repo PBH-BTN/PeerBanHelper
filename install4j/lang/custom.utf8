@@ -1,8 +1,11 @@
 launcher.peerbanhelper.gui=PeerBanHelper
-launcher.peerbanhelper.gui.swing=PeerBanHelper(兼容模式)
-launcher.peerbanhelper.nogui=PeerBanHelper(无GUI, 控制台)
-launcher.peerbanhelper.service=PeerBanHelper(服务)
+launcher.peerbanhelper.silent=PeerBanHelper (静默启动)
+launcher.peerbanhelper.nogui=PeerBanHelper (无GUI, 控制台)
+launcher.peerbanhelper.service=PeerBanHelper (服务)
+launcher.peerbanhelper.updater=PeerBanHelper 检查更新
 checkbox.followsystemstartup=登录时自动启动到系统托盘
 peerbanhelper.description=PeerBanHelper
 checkbox.registersystemservice=注册为系统服务(除非你知道这是做什么的，否则不要选中)
 systemservice.note=将 PeerBanHelper 安装为系统服务时，Windows 系统下配置文件将被存储在 C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper 位置，访问此位置需要您拥有管理员权限。\nPeerBanHelper 将在系统启动时自动启动。
+components.peerbanhelper=PeerBanHelper
+components.peerbanhelper.description=PeerBanHelper 的核心主程序，包含了主程序代码和必要的运行文件

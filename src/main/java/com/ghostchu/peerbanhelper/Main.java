@@ -29,16 +29,19 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import oshi.SystemInfo;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Properties;
 
 @Slf4j
 public class Main {
@@ -54,7 +57,6 @@ public class Main {
     @Getter
     private static File configDirectory;
     private static File pluginDirectory;
-    private static File libraryDirectory;
     @Getter
     private static File debugDirectory;
     @Getter
@@ -83,19 +85,18 @@ public class Main {
     private static String[] startupArgs;
     @Getter
     private static long startupAt = System.currentTimeMillis();
+    private static String userAgent;
+    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 8;
+    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.0.3";
 
     public static void main(String[] args) {
         startupArgs = args;
+        setupReloading();
         setupConfDirectory(args);
+        loadFlagsProperties();
         setupLogback();
         meta = buildMeta();
         setupConfiguration();
-        mainConfigFile = new File(configDirectory, "config.yml");
-        mainConfig = loadConfiguration(mainConfigFile);
-        new PBHConfigUpdater(mainConfigFile, mainConfig, Main.class.getResourceAsStream("/config.yml")).update(new MainConfigUpdateScript(mainConfig));
-        profileConfigFile = new File(configDirectory, "profile.yml");
-        profileConfig = loadConfiguration(profileConfigFile);
-        new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
         String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
         log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
@@ -115,10 +116,10 @@ public class Main {
             applicationContext = new AnnotationConfigApplicationContext();
             applicationContext.register(AppConfig.class);
             applicationContext.refresh();
-            registerBean(File.class, mainConfigFile, "mainConfigFile");
-            registerBean(File.class, profileConfigFile, "profileConfigFile");
-            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
-            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
+//            registerBean(File.class, mainConfigFile, "mainConfigFile");
+//            registerBean(File.class, profileConfigFile, "profileConfigFile");
+//            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
+//            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
             server = applicationContext.getBean(PeerBanHelperServer.class);
             server.start();
         } catch (Exception e) {
@@ -127,8 +128,23 @@ public class Main {
         }
         guiManager.onPBHFullyStarted(server);
         setupShutdownHook();
-        setupReloading();
         guiManager.sync();
+    }
+
+    private static void loadFlagsProperties() {
+        try {
+            var flags = new File(dataDirectory, "flags.properties");
+            if (flags.exists()) {
+                try (var is = Files.newInputStream(flags.toPath())) {
+                    Properties properties = new Properties();
+                    properties.load(is);
+                    System.getProperties().putAll(properties);
+                    log.info("Loaded {} property from data/flags.properties.", properties.size());
+                }
+            }
+        } catch (IOException e) {
+            log.error("Unable to load flags.properties", e);
+        }
     }
 
     @SneakyThrows
@@ -163,8 +179,9 @@ public class Main {
     }
 
     public static ReloadResult reloadModule() {
+        setupConfiguration();
+        loadFlagsProperties();
         setupProxySettings();
-        ;
         return ReloadResult.builder().status(ReloadStatus.SUCCESS).reason("OK!").build();
     }
 
@@ -241,16 +258,31 @@ public class Main {
             configuration.load(file);
         } catch (IOException | InvalidConfigurationException e) {
             log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
-            JOptionPane.showMessageDialog(null, "Invalid/Corrupted YAML configuration | 无效或损坏的 YAML 配置文件", String.format("Failed to read configuration: %s", file), JOptionPane.ERROR_MESSAGE);
+            if (!Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+                try {
+                    log.error("Bad configuration:  {}", Files.readString(file.toPath()));
+                } catch (IOException ex) {
+                    log.error("Unable to output the bad configuration content", ex);
+                }
+                log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid/Corrupted YAML configuration | 无效或损坏的 YAML 配置文件", String.format("Failed to read configuration: %s", file), JOptionPane.ERROR_MESSAGE);
+            }
             System.exit(1);
         }
         return configuration;
     }
 
-    private static void setupConfiguration() {
+    public static void setupConfiguration() {
         log.info("Loading configuration...");
         try {
             initConfiguration();
+            mainConfigFile = new File(configDirectory, "config.yml");
+            mainConfig = loadConfiguration(mainConfigFile);
+            new PBHConfigUpdater(mainConfigFile, mainConfig, Main.class.getResourceAsStream("/config.yml")).update(new MainConfigUpdateScript(mainConfig));
+            profileConfigFile = new File(configDirectory, "profile.yml");
+            profileConfig = loadConfiguration(profileConfigFile);
+            new PBHConfigUpdater(profileConfigFile, profileConfig, Main.class.getResourceAsStream("/profile.yml")).update(new ProfileUpdateScript(profileConfig));
             //guiManager.showConfigurationSetupDialog();
             //System.exit(0);
         } catch (IOException e) {
@@ -307,7 +339,26 @@ public class Main {
     }
 
     public static String getUserAgent() {
-        return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.2";
+        if (userAgent != null) return userAgent;
+        String userAgentTemplate = "PeerBanHelper/%s (%s; %s,%s,%s) BTN-Protocol/%s BTN-Protocol-Version/%s";
+        var osMXBean = ManagementFactory.getOperatingSystemMXBean();
+        String release = System.getProperty("pbh.release");
+        if (release == null) {
+            release = "unknown";
+        }
+        String os = osMXBean.getName();
+        String osVersion = osMXBean.getVersion();
+        String buildNumber = "unknown";
+        String codeName = "";
+        try {
+            SystemInfo info = new SystemInfo();
+            var verInfo = info.getOperatingSystem().getVersionInfo();
+            buildNumber = verInfo.getBuildNumber();
+            codeName = verInfo.getCodeName();
+        } catch (Throwable ignored) {
+        }
+        userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
+        return userAgent;
     }
 
     private static void handleCommand(String input) {
@@ -350,7 +401,7 @@ public class Main {
             return name;
         }
         if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
-            Character.isUpperCase(name.charAt(0))) {
+                Character.isUpperCase(name.charAt(0))) {
             return name;
         }
         char chars[] = name.toCharArray();

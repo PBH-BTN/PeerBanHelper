@@ -1,0 +1,12 @@
+#!/bin/sh -e
+
+# migrate <= 7.1.2
+if getent passwd peerbanhelper | grep --quiet /nonexistent; then
+	deluser --quiet peerbanhelper
+	adduser --quiet --system --group --home /var/lib/peerbanhelper peerbanhelper
+	chown -R peerbanhelper: /etc/peerbanhelper
+	mv /etc/peerbanhelper/config/config.yml /etc/peerbanhelper/config/profile.yml /etc/peerbanhelper
+	rm -rf /etc/peerbanhelper/config /etc/peerbanhelper/data
+	mv /etc/peerbanhelper/logs /var/log/peerbanhelper
+	find /etc/peerbanhelper -mindepth 1 -maxdepth 1 -type d -exec mv {} /var/lib/peerbanhelper \;
+fi

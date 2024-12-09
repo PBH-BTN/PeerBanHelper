@@ -55,6 +55,20 @@ export function setPHBPlusKey(key: string): Promise<CommonResponseWithoutData> {
   })
 }
 
+export function obtainFreeTrial(): Promise<CommonResponseWithoutData> {
+  const url = new URL(
+    urlJoin(useEndpointStore().endpoint, 'api/pbhplus/renewFreeLicense'),
+    location.href
+  )
+  return fetch(url, {
+    method: 'POST',
+    headers: getCommonHeader()
+  }).then((res) => {
+    useEndpointStore().assertResponseLogin(res)
+    return res.json()
+  })
+}
+
 export function getManifest(endpoint = useEndpointStore().endpoint): Promise<mainfest> {
   const url = new URL(urlJoin(endpoint, '/api/metadata/manifest'), location.href)
   return (

@@ -1,5 +1,10 @@
-#!/bin/sh
-USER=peerbanhelper
-adduser --system $USER
-mkdir -p /etc/peerbanhelper
-chown $USER /etc/peerbanhelper
+#!/bin/sh -e
+
+getent passwd peerbanhelper > /dev/null || adduser --quiet --system --group --home /var/lib/peerbanhelper peerbanhelper
+chown -R peerbanhelper: /etc/peerbanhelper
+chown -R root: /usr/lib/peerbanhelper
+mkdir /var/log/peerbanhelper
+chown peerbanhelper: /var/log/peerbanhelper
+
+systemctl daemon-reload
+systemctl start peerbanhelper.service

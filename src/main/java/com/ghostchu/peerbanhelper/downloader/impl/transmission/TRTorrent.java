@@ -41,6 +41,11 @@ public final class TRTorrent implements Torrent {
     }
 
     @Override
+    public long getCompletedSize() {
+        return (long) (backend.getSizeWhenDone() * backend.getPercentDone());
+    }
+
+    @Override
     public long getRtUploadSpeed() {
         return backend.getRateUpload();
     }
