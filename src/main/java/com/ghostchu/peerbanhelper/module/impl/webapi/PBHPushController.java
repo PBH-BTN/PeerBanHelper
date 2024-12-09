@@ -101,7 +101,7 @@ public class PBHPushController extends AbstractFeatureModule {
             return;
         }
         // 可能重命名了？
-        pushManager.getProviderList().stream()
+        List.copyOf(pushManager.getProviderList()).stream() // Copy 一下来避免并发修改错误
                 .filter(d -> d.getName().equals(pushProviderName))
                 .forEach(d -> pushManager.removePushProvider(d));
         if (pushManager.addPushProvider(pushProvider)) {
