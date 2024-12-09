@@ -258,7 +258,16 @@ public class Main {
             configuration.load(file);
         } catch (IOException | InvalidConfigurationException e) {
             log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
-            JOptionPane.showMessageDialog(null, "Invalid/Corrupted YAML configuration | 无效或损坏的 YAML 配置文件", String.format("Failed to read configuration: %s", file), JOptionPane.ERROR_MESSAGE);
+            if (!Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+                try {
+                    log.error("Bad configuration:  {}", Files.readString(file.toPath()));
+                } catch (IOException ex) {
+                    log.error("Unable to output the bad configuration content", ex);
+                }
+                log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid/Corrupted YAML configuration | 无效或损坏的 YAML 配置文件", String.format("Failed to read configuration: %s", file), JOptionPane.ERROR_MESSAGE);
+            }
             System.exit(1);
         }
         return configuration;
