@@ -162,7 +162,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
 
     private Map<String, Object> generateSystemData(Context context, SystemInfo systemInfo) {
 
-        Map<String, Object> os = new LinkedHashMap<>(); var osMXBean = ManagementFactory.getOperatingSystemMXBean();
+        Map<String, Object> os = new LinkedHashMap<>();
+        var osMXBean = ManagementFactory.getOperatingSystemMXBean();
         var operatingSystem = systemInfo.getOperatingSystem();
         if (osMXBean.getName().contains("Windows")) {
             os.put("os", "Windows");
@@ -173,15 +174,6 @@ public class PBHGeneralController extends AbstractFeatureModule {
         }
         os.put("architecture", osMXBean.getArch());
         os.put("cores", osMXBean.getAvailableProcessors());
-        //os.put("family", operatingSystem.getFamily());
-        //os.put("bitness", operatingSystem.getBitness());
-        //os.put("manufacturer", operatingSystem.getManufacturer());
-        //var versionInfo = operatingSystem.getVersionInfo();
-        //os.put("build_number", versionInfo.getBuildNumber());
-        //os.put("code_name", versionInfo.getCodeName());
-        //os.put("os_version", versionInfo.getVersion());
-        //os.put("boot_time", operatingSystem.getSystemBootTime());
-        //os.put("up_time", operatingSystem.getSystemUptime());
         var mem = generateSystemMemoryData(systemInfo.getHardware());
         os.put("memory", mem);
         os.put("load", osMXBean.getSystemLoadAverage());
@@ -191,7 +183,6 @@ public class PBHGeneralController extends AbstractFeatureModule {
     }
 
     private Map<String, Object> generateNetworkStats(Context context) {
-        //var clientIp = IPAddressUtil.getIPAddress(context.ip()).toCompressedString();
         var userIp = IPAddressUtil.getIPAddress(userIp(context)).toCompressedString();
         Map<String, Object> network = new LinkedHashMap<>();
         var proxy = Main.getMainConfig().getInt("proxy.setting");
@@ -199,7 +190,6 @@ public class PBHGeneralController extends AbstractFeatureModule {
         network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
         network.put("reverse_proxy", MiscUtil.isUsingReserveProxy(context));
         network.put("client_ip", userIp);
-        //network.put("user_ip", userIp);
         return network;
     }
 
@@ -210,10 +200,6 @@ public class PBHGeneralController extends AbstractFeatureModule {
         jvm.put("vendor", runtimeMXBean.getVmVendor());
         jvm.put("runtime", runtimeMXBean.getVmName());
         jvm.put("bitness", Short.parseShort(System.getProperty("sun.arch.data.model")));
-        //jvm.put("specification", runtimeMXBean.getSpecName());
-        //jvm.put("class_version", System.getProperty("java.class.version"));
-        //jvm.put("uptime", runtimeMXBean.getUptime());
-        //jvm.put("start_time", runtimeMXBean.getStartTime());
         Map<String, Object> mem = new LinkedHashMap<>();
         mem.put("heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));
         mem.put("non_heap", generateMemoryData(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage()));
