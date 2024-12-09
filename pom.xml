@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
-        <flatlafVersion>3.5.2</flatlafVersion>
+        <flatlafVersion>3.5.4</flatlafVersion>
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
     </properties>
@@ -498,7 +498,7 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
-            <version>3.5.2</version>
+            <version>3.5.4</version>
         </dependency>
         <dependency>
             <groupId>com.offbynull.portmapper</groupId>
