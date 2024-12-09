@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 @Slf4j
@@ -40,7 +39,7 @@ public class SmtpPushProvider extends AbstractPushProvider {
         var sender = section.getString("sender");
         var senderName = section.getString("name", "PeerBanHelper");
         var receivers = section.getStringList("receiver");
-        var encryption = Encryption.valueOf(section.getString("encryption", "SSLTLS").toUpperCase(Locale.ROOT));
+        var encryption = section.getString("encryption", "SSLTLS");
         var sendPartial = section.getBoolean("sendPartial", true);
         Config config = new Config(section.getString("host"),
                 section.getInt("port"), auth, username, password,
