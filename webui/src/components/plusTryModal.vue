@@ -9,11 +9,13 @@
     </a-typography>
     <template #footer>
       <a-space>
-        <a-button @click="handleCancel">Cancel</a-button>
-        <a-button v-if="okDisabled" disabled type="primary" @click="handleOk"
-          >OK({{ countDown }})</a-button
-        >
-        <a-button v-else type="primary" :loading="loading" @click="handleOk">OK</a-button>
+        <a-button @click="handleCancel">{{ t('plus.tryModal.cancel') }}</a-button>
+        <a-button v-if="okDisabled" disabled type="primary" @click="handleOk">{{
+          `${t('plus.tryModal.ok')}(${countDown})`
+        }}</a-button>
+        <a-button v-else type="primary" :loading="loading" @click="handleOk">{{
+          t('plus.tryModal.ok')
+        }}</a-button>
       </a-space>
     </template>
   </a-modal>
@@ -22,23 +24,35 @@
 import { obtainFreeTrial } from '@/service/version'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+const DEFAULT_COUNTDOWN = 10
+
 const { t } = useI18n()
 const timer = ref<NodeJS.Timeout | null>()
-const countDown = ref(10)
+const countDown = ref(DEFAULT_COUNTDOWN)
 const visible = ref(false)
 const okDisabled = computed(() => countDown.value !== 0)
 defineExpose({
   try: () => {
-    countDown.value = 10
+    countDown.value = DEFAULT_COUNTDOWN
     timer.value = setInterval(() => {
       countDown.value--
       if (countDown.value === 0) {
-        if (timer.value) clearInterval(timer.value)
+        if (timer.value) {
+          clearInterval(timer.value)
+          timer.value = null
+        }
       }
     }, 1000)
     visible.value = true
+  }
+})
+onUnmounted(() => {
+  if (timer.value) {
+    clearInterval(timer.value)
+    timer.value = null
   }
 })
 const loading = ref(false)

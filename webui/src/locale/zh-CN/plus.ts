@@ -27,6 +27,7 @@ export default {
     ' 即使你不想捐赠，PBH-BTN 依旧可以向你提供15天的 Plus 订阅，在15天到期后，可以重新进行上述步骤激活。',
   'plus.tryModal.content2': `PBH-BTN 同时维护着多个需要持续投入的在线服务和基础设施，例如 GeoIP DB分发、BTN、公共 BitTorrent Tracker 和国内 CDN 加速，所有这些在线服务均需每月消耗一定的成本，并随着用户的增加而增多。 如果
         PBH 帮助到了你，请考虑捐赠我们。只需一杯咖啡的价格，您就可以获得一个 PBH Plus
-        的永久许可证，并能帮助我们在维护 BitTorrent
-        环境的道路上走得更远。未来我们也将不断努力提供更多的 SaaS 服务给 Plus 订阅用户。`
+        的永久许可证，并能帮助我们在维护 BitTorrent 环境的道路上走得更远。`,
+  'plus.tryModal.ok': '确定',
+  'plus.tryModal.cancel': '取消'
 }
