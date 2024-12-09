@@ -59,7 +59,7 @@ public class TelegramPushProvider extends AbstractPushProvider {
         YamlConfiguration section = new YamlConfiguration();
         section.set("type", "telegram");
         section.set("token", config.getToken());
-        section.set("chatid", config.getChatid());
+        section.set("chatid", config.getChatId());
         return section;
     }
 
@@ -67,7 +67,7 @@ public class TelegramPushProvider extends AbstractPushProvider {
     public boolean push(String title, String content) throws Exception {
         String markdown = "*" + title + "*\n" + content;
         Map<String, Object> map = new HashMap<>();
-        map.put("chat_id", config.getChatid());
+        map.put("chat_id", config.getChatId());
         map.put("caption", markdown);
         map.put("text", markdown);
         map.put("photo", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
@@ -88,7 +88,7 @@ public class TelegramPushProvider extends AbstractPushProvider {
     @Data
     public static class Config{
         private String token;
-        private String chatid;
+        private String chatId;
     }
 
     @NoArgsConstructor
