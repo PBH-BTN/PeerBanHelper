@@ -20,5 +20,10 @@ export default {
   'plus.activeSuccess': 'Activation successful',
 
   'plus.or': 'Or',
-  'plus.try': "I don't want to donate"
+  'plus.try': "I don't want to donate",
+
+  'plus.tryModal.title': 'Get Plus subscription for free',
+  'plus.tryModal.content1':
+    "Even if you don't want to donate, PBH-BTN can still provide you with a 15-day Plus subscription. After 15 days, you can activate it again.",
+  'plus.tryModal.content2': `PBH-BTN also maintains multiple online services and infrastructure that require continuous investment, such as GeoIP DB distribution, BTN, public BitTorrent Tracker, and China CDN acceleration. All these online services require a certain cost every month, which increases with the increase of users. If PBH helps you, please consider donating to us. For the price of a cup of coffee, you can get a permanent license for PBH Plus, and help us go further in maintaining the BitTorrent environment. In the future, we will continue to provide more SaaS services to Plus subscribers.`
 }
