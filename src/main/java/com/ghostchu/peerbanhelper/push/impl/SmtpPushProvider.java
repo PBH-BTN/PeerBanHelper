@@ -77,13 +77,17 @@ public class SmtpPushProvider extends AbstractPushProvider {
         mail.setCharset("UTF-8");
         mail.setHostName(config.getHost());
         mail.setSmtpPort(config.getPort());
-        switch (config.getEncryption()) {
-            case STARTTLS -> mail.setStartTLSEnabled(true);
-            case ENFORCE_STARTTLS -> {
-                mail.setStartTLSEnabled(true);
-                mail.setStartTLSRequired(true);
+        try {
+            switch (Encryption.valueOf(config.getEncryption())) {
+                case STARTTLS -> mail.setStartTLSEnabled(true);
+                case ENFORCE_STARTTLS -> {
+                    mail.setStartTLSEnabled(true);
+                    mail.setStartTLSRequired(true);
+                }
+                case SSLTLS -> mail.setSSLOnConnect(true);
             }
-            case SSLTLS -> mail.setSSLOnConnect(true);
+        } catch (Exception e) {
+            log.error("Unable to load mail encryption type: {}, it's valid?", config.getEncryption(), e);
         }
         mail.setSendPartial(config.isSendPartial());
         mail.setSubject(subject);
@@ -140,7 +144,7 @@ public class SmtpPushProvider extends AbstractPushProvider {
         private String sender;
         private String senderName;
         private @NotNull List<String> receivers;
-        private Encryption encryption;
+        private String encryption;
         private boolean sendPartial;
     }
 }
