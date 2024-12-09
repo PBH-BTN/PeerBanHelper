@@ -29,12 +29,14 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import oshi.SystemInfo;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -83,6 +85,9 @@ public class Main {
     private static String[] startupArgs;
     @Getter
     private static long startupAt = System.currentTimeMillis();
+    private static String userAgent;
+    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 8;
+    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.0.3";
 
     public static void main(String[] args) {
         startupArgs = args;
@@ -325,7 +330,26 @@ public class Main {
     }
 
     public static String getUserAgent() {
-        return "PeerBanHelper/" + meta.getVersion() + " BTN-Protocol/0.0.2";
+        if (userAgent != null) return userAgent;
+        String userAgentTemplate = "PeerBanHelper/%s (%s; %s,%s,%s) BTN-Protocol/%s BTN-Protocol-Version/%s";
+        var osMXBean = ManagementFactory.getOperatingSystemMXBean();
+        String release = System.getProperty("pbh.release");
+        if (release == null) {
+            release = "unknown";
+        }
+        String os = osMXBean.getName();
+        String osVersion = osMXBean.getVersion();
+        String buildNumber = "unknown";
+        String codeName = "";
+        try {
+            SystemInfo info = new SystemInfo();
+            var verInfo = info.getOperatingSystem().getVersionInfo();
+            buildNumber = verInfo.getBuildNumber();
+            codeName = verInfo.getCodeName();
+        } catch (Throwable ignored) {
+        }
+        userAgent = String.format(userAgentTemplate, meta.getVersion(), release, os, osVersion, codeName + buildNumber, PBH_BTN_PROTOCOL_READABLE_VERSION, PBH_BTN_PROTOCOL_IMPL_VERSION);
+        return userAgent;
     }
 
     private static void handleCommand(String input) {
@@ -368,7 +392,7 @@ public class Main {
             return name;
         }
         if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
-            Character.isUpperCase(name.charAt(0))) {
+                Character.isUpperCase(name.charAt(0))) {
             return name;
         }
         char chars[] = name.toCharArray();
