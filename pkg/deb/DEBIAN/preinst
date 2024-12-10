@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-# migrate <= 7.1.2
+# migrate < 7.2
 if getent passwd peerbanhelper | grep --quiet /nonexistent; then
 	deluser --quiet peerbanhelper
 	adduser --quiet --system --group --home /var/lib/peerbanhelper peerbanhelper
