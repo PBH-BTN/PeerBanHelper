@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { LicenseType } from '@/api/model/manifest'
 import { useEndpointStore } from '@/stores/endpoint'
-import { Button, Notification, Space } from '@arco-design/web-vue'
+import { Button, Notification } from '@arco-design/web-vue'
 import { IconHistory } from '@arco-design/web-vue/es/icon'
 import { RequestError } from '@octokit/request-error'
 import { compare } from 'compare-versions'
@@ -85,25 +85,17 @@ watch(hasNewVersion, () => {
       title: t('footer.newVersion'),
       content: t('footer.newVersion.body', { version: latestVersion.value?.tagName }),
       footer: () =>
-        h(Space, {}, [
-          h(
-            Button,
-            {
-              onClick: () =>
-                changeLogViewer.value?.showModal(
-                  endpointStore.latestVersion?.changeLog,
-                  latestVersion.value?.tagName
-                )
-            },
-            {
-              default: () => t('footer.viewChangeLog'),
-              icon: () => h(IconHistory)
-            }
-          ),
-          h(Button, { href: latestVersion.value?.url, type: 'primary' }, () =>
-            t('footer.newVersion.updateNow')
-          )
-        ]),
+        h(
+          Button,
+          {
+            onClick: () => changeLogViewer.value?.showModal(),
+            type: 'primary'
+          },
+          {
+            default: () => t('footer.newVersion.updateNow'),
+            icon: () => h(IconHistory)
+          }
+        ),
       duration: 5000,
       closable: true
     })

@@ -23,11 +23,12 @@ export default {
   'footer.newVersion': 'New Version Found!',
   'footer.newVersion.body': '{version} is available, click to view',
   'footer.newVersionTips': 'New version {version} is available, click to view',
-  'footer.newVersion.updateNow': 'Update Now',
-  'footer.viewChangeLog': 'View Change Log',
+  'footer.newVersion.updateNow': 'View Details',
 
   'changeLogModel.title': '🎉 New Version Found: {0}!',
   'changeLogModel.changelog': 'Change Log',
+  'changeLogModel.notNow': 'Not Now',
+  'changeLogModel.updateNow': 'Update Now',
 
   'router.login': 'Login',
   'router.dashboard': 'Status',

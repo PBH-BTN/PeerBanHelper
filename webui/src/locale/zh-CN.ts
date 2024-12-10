@@ -22,11 +22,12 @@ export default {
   'footer.newVersion': '发现新版本！',
   'footer.newVersion.body': '{version} 已发布，点击查看',
   'footer.newVersionTips': '有新版本 {version} 可用，点击查看',
-  'footer.newVersion.updateNow': '立即更新',
-  'footer.viewChangeLog': '查看更新日志',
+  'footer.newVersion.updateNow': '查看详情',
 
   'changeLogModel.title': '🎉 发现新版本：{0}！',
   'changeLogModel.changelog': '更新日志',
+  'changeLogModel.notNow': '不是现在',
+  'changeLogModel.updateNow': '立即更新',
 
   'router.login': '登录',
   'router.dashboard': '状态',
