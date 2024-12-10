@@ -1,5 +1,6 @@
 export default {
   'page.charts.loading': '加载中...',
+  'page.charts.options': '视图选项',
   'page.charts.options.more': '更多选项',
   'page.charts.options.thresold': '只显示1%以上的数据',
   'page.charts.options.field': '维度',
@@ -43,5 +44,6 @@ export default {
     '由于图表对不齐很丑，所以听从Ghost_chu的建议，放一个2048在这，限时直到新的图表加入',
   'page.charts.error.title': '图表加载失败',
   'page.charts.error.refresh': '重试',
-  'page.charts.all': '全部下载器'
+  'page.charts.all': '全部下载器',
+  'page.charts.title.fieldPie': '维度分析'
 }

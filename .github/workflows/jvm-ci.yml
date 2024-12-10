@@ -50,7 +50,7 @@ jobs:
         password: ${{ secrets.DOCKER_TOKEN }}
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v5.5.1
+      uses: docker/metadata-action@v5.6.1
       with:
         images: ghostchu/peerbanhelper-snapshot
         tags: |
@@ -63,7 +63,7 @@ jobs:
           type=raw,ci
           type=sha
     - name: Build and push Docker image
-      uses: docker/build-push-action@v6.9.0
+      uses: docker/build-push-action@v6.10.0
       with:
         context: .
         file: ./Dockerfile

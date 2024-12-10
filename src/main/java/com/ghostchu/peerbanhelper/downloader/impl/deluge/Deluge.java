@@ -132,6 +132,7 @@ public class Deluge extends AbstractDownloader {
                         activeTorrent.getInfoHash(),
                         activeTorrent.getProgress() / 100.0d,
                         activeTorrent.getSize(),
+                        activeTorrent.getCompletedSize(),
                         activeTorrent.getUploadPayloadRate(),
                         activeTorrent.getDownloadPayloadRate(),
                         peers,

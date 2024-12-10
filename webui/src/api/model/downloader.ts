@@ -21,8 +21,7 @@ export enum ClientTypeEnum {
   Transmission = 'transmission',
   BiglyBT = 'biglybt',
   Deluge = 'deluge',
-  BitComet = 'bitcomet',
-  Unknown = 'Unknown'
+  BitComet = 'bitcomet'
 }
 
 export interface Downloader {

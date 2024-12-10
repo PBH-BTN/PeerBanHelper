@@ -19,7 +19,7 @@ public class MainConfigUpdateScript {
 
     private void validate() {
         String installationId = conf.getString("installation-id");
-        if(installationId == null || installationId.isBlank()){
+        if (installationId == null || installationId.isBlank()) {
             conf.set("installation-id", UUID.randomUUID().toString());
         }
 //        String token = conf.getString("server.token");
@@ -27,6 +27,60 @@ public class MainConfigUpdateScript {
 //            conf.set("server.token", UUID.randomUUID().toString());
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
+    }
+
+
+    @UpdateScript(version = 26)
+    public void pushProvidersSMTPStructUpgrade() {
+        var pushNotification = conf.getConfigurationSection("push-notification");
+        if (pushNotification == null) return;
+        for (String key : pushNotification.getKeys(false)) {
+            var single = pushNotification.getConfigurationSection(key);
+            if (single == null) continue;
+            if(single.getBoolean("enabled", false)){
+                pushNotification.set(key, null); // 删除未启用的推送渠道
+            }else {
+                var type = single.getString("type");
+                if ("smtp".equals(type)) {
+                    single.set("auth", true);
+                    if (single.getBoolean("ssl")) {
+                        single.set("encryption", "STARTTLS");
+                    } else {
+                        single.set("encryption", "NONE");
+                    }
+                    single.set("ssl", null);
+                    single.set("sendPartial", true);
+                }
+                pushNotification.set(key, single);
+            }
+
+            conf.set("push-notification", pushNotification);
+        }
+    }
+
+    @UpdateScript(version = 25)
+    public void pushProvidersCleanup() {
+        var pushNotification = conf.getConfigurationSection("push-notification");
+        if (pushNotification == null) return;
+        for (String key : pushNotification.getKeys(false)) {
+            var single = pushNotification.getConfigurationSection(key);
+            if (single == null) continue;
+            single.set("enabled", null);
+            var sendKey = single.get("send-key");
+            if (sendKey != null) {
+                single.set("sendkey", sendKey);
+                single.set("send-key", null);
+            }
+            pushNotification.set(key, single);
+        }
+        conf.set("push-notification", pushNotification);
+    }
+
+    @UpdateScript(version = 24)
+    public void decentralizedConfiguration() {
+        conf.set("decentralized.enabled", true);
+        conf.set("decentralized.kubo-rpc", "/ip4/127.0.0.1/tcp/5001");
+        conf.set("decentralized.features.publish-banlist", 3600000);
     }
 
     @UpdateScript(version = 23)

@@ -13,11 +13,11 @@ Following function are provided by PeerBanHelper:
 - [IP/GeoIP/IP type Blacklist](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker)
 - [Fake progress checker (heuristic client detection)](https://docs.pbh-btn.com/en/docs/module/progress-cheat-blocker)
 - [Auto range ban](https://docs.pbh-btn.com/en/docs/module/auto-range-ban)
-- [Multi-dail ban](https://docs.pbh-btn.com/en/docs/module/multi-dial)
+- [Multi-dial ban](https://docs.pbh-btn.com/en/docs/module/multi-dial)
 - Peer ID/Client Name camouflage check, powered by [AviatorScript Engine](https://docs.pbh-btn.com/en/docs/module/expression-engine)
 - [Active monitoring(data analysis)](https://docs.pbh-btn.com/en/docs/module/active-monitoring)
 - [IP set subscribe](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker-rules)
-- a mordern WebUI
+- A modern WebUI
 
 In addition, PeerBanHelper downloads the GeoIP library at startup, and supports the following functions once it successful loaded:
 - View IP address attribution, AS information (ASN, ISP, AS name, etc.), network type information (broadband, base station, IoT, data center, etc.) in the blocking list.
@@ -34,8 +34,8 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 - BiglyBT([plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT) is required)
 - Deluge([plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge) is required)
 - Azureus(Vuze)([plugin](https://github.com/PBH-BTN/PBH-Adapter-Azureus) is required)
-- Transmission **(deprected；3.00-20 or higher)**
-- BitComet **v2.10 Beta6 [20240928] or higher**
+- Transmission **(deprecated；3.00-20 or higher)**
+- BitComet **v2.10 Beta6 [20240928] or higher** (P2SP LTSeed mode is not supported)
 
 
 # Screenshots
@@ -51,7 +51,7 @@ Please read the [docs](https://docs.pbh-btn.com/en/docs/category/%E5%AE%89%E8%A3
 
 ## FAQ
 
-Before submit issue, please read the [FAQ](https://docs.pbh-btn.com/en/docs/faq)
+Before submitting an issue, please read the [FAQ](https://docs.pbh-btn.com/en/docs/faq)
 
 ## Support
 Consider join our [Telegram](https://t.me/+_t3Nt5GZ6bJmYjBl) group.
@@ -67,6 +67,12 @@ Any consequences caused by the user's use of this software are borne by the user
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
+
+### Install4j
+
+PeerBanHelper use [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) to build its multi-platform installer. Thanks the open-source license provided by ej-technolgies. Click the link or the image below to download install4j.
+
+[![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
 ## Credit
 
@@ -85,15 +91,16 @@ Any consequences caused by the user's use of this software are borne by the user
 - [GeoIP2](https://dev.maxmind.com/geoip)
 - [ormlite](https://ormlite.com/)
 - [SimpleReloadLib](https://github.com/Ghost-chu/SimpleReloadLib)
+- [java-ipfs-http-client](https://github.com/ipfs-shipyard/java-ipfs-http-client)
+- [java-multiaddr](https://github.com/multiformats/java-multiaddr)
+- [portmapper](https://github.com/offbynull/portmapper)
+- [xz](https://github.com/tukaani-project/xz-java)
+- [commonmark](https://github.com/commonmark/commonmark-java)
+- [oshi](https://github.com/oshi/oshi)
+- [semver4j](https://github.com/vdurmont/semver4j)
 
 ### WebUI
 
 - [Vue](https://vuejs.org/)
 - [ArcoDesign](https://arco.design/)
 - [ECharts](https://echarts.apache.org/en/index.html)
-
-### Install4j
-
-PeerBanHelper use [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) to build its multi-platform installer. Thanks the open-source license provided by ej-technolgies. Click the link or the image below to download install4j.
-
-[![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)

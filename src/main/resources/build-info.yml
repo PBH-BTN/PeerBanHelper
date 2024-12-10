@@ -1,7 +1,5 @@
 maven:
   version: "${project.version}"
-javafx:
-  version: "${javafx.version}"
 git:
   branch: "${git.branch}"
   dirty: ${git.dirty}
@@ -16,8 +14,6 @@ git:
     user:
       name: "${git.commit.user.name}"
       email: "${git.commit.user.email}"
-    message:
-      short: "${git.commit.message.short}"
     time: "${git.commit.time}"
   build:
     user:

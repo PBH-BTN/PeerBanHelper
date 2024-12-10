@@ -15,6 +15,7 @@ public final class DelugeTorrent implements Torrent {
     private String hash;
     private double progress;
     private long size;
+    private long completedSize;
     private long rtUploadSpeed;
     private long rtDownloadSpeed;
     private List<Peer> peers;

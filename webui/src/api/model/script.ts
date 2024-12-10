@@ -24,3 +24,8 @@ export interface Script {
    */
   version: string
 }
+
+export interface EditableResult {
+  reason: string
+  editable: boolean
+}

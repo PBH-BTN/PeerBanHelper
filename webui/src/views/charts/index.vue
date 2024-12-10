@@ -1,90 +1,59 @@
 <template>
   <a-tabs :default-active-key="0" lazy-load animation type="rounded">
-    <a-tab-pane :key="0" :title="t('page.charts.all')">
-      <a-row
-        justify="center"
-        align="stretch"
-        :wrap="true"
-        :gutter="[
-          { xs: 12, sm: 12, md: 12, lg: 12, xl: 24 },
-          { xs: 12, sm: 12, md: 12, lg: 12, xl: 24 }
-        ]"
-      >
-        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <banTrends />
-        </a-col>
-        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <fieldPie />
-        </a-col>
-        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <plusWarpper :title="t('page.charts.title.geoip')">
-            <ispPie />
-          </plusWarpper>
-        </a-col>
-        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <plusWarpper :title="t('page.charts.title.traffic')">
-            <traffic />
-          </plusWarpper>
-        </a-col>
-        <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
-          <plusWarpper :title="t('page.charts.title.trends')"> <trends /></plusWarpper>
-        </a-col>
-      </a-row>
-    </a-tab-pane>
-    <a-tab-pane
-      v-for="(downloader, i) of downloaderList?.data ?? []"
-      :key="i + 1"
-      :title="downloader.name"
-    >
-      <a-row
-        justify="center"
-        align="stretch"
-        :wrap="true"
-        :gutter="[
-          { xs: 12, sm: 12, md: 12, lg: 12, xl: 24 },
-          { xs: 12, sm: 12, md: 12, lg: 12, xl: 24 }
-        ]"
-      >
-        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <banTrends :downloader="downloader.name" />
-        </a-col>
-        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <fieldPie :downloader="downloader.name" />
-        </a-col>
-        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <plusWarpper :title="t('page.charts.title.geoip')">
-            <ispPie :downloader="downloader.name" />
-          </plusWarpper>
-        </a-col>
-        <a-col :xl="12" :lg="24" :md="24" :sm="24" :xs="24">
-          <plusWarpper :title="t('page.charts.title.traffic')">
-            <traffic :downloader="downloader.name" />
-          </plusWarpper>
-        </a-col>
-        <a-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
-          <plusWarpper :title="t('page.charts.title.trends')">
-            <trends :downloader="downloader.name"
-          /></plusWarpper>
-        </a-col>
-      </a-row>
+    <template #extra>
+      <a-popover position="bottom">
+        <a-button>
+          <template #icon><icon-eye /></template>{{ t('page.charts.options') }}
+        </a-button>
+        <template #content>
+          <a-space direction="vertical">
+            <a-checkbox v-model="showCharts.banTrends">{{
+              t('page.charts.title.line')
+            }}</a-checkbox>
+            <a-checkbox v-model="showCharts.fieldPie">{{
+              t('page.charts.title.fieldPie')
+            }}</a-checkbox>
+            <a-checkbox v-model="showCharts.ispPie">{{ t('page.charts.title.geoip') }}</a-checkbox>
+            <a-checkbox v-model="showCharts.traffic">{{
+              t('page.charts.title.traffic')
+            }}</a-checkbox>
+            <a-checkbox v-model="showCharts.trends">{{ t('page.charts.title.trends') }}</a-checkbox>
+          </a-space>
+        </template>
+      </a-popover>
+    </template>
+    <a-tab-pane v-for="(downloader, i) of tabList" :key="i" :title="downloader.title">
+      <chartGrid :downloader="downloader.name" :show-charts="showCharts" />
     </a-tab-pane>
   </a-tabs>
 </template>
 
 <script setup lang="ts">
 import { getDownloaders } from '@/service/downloaders'
-import ispPie from '@/views/charts/components/ispPie.vue'
-import { useI18n } from 'vue-i18n'
-import { useRequest } from 'vue-request'
-import banTrends from './components/banTrends.vue'
-import fieldPie from './components/fieldPie.vue'
-import plusWarpper from './components/plusWarpper.vue'
-import traffic from './components/traffic.vue'
-import trends from './components/trends.vue'
-
+import chartGrid from './grid.vue'
 const { t } = useI18n()
 
+import { useUserStore } from '@/stores/userStore'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRequest } from 'vue-request'
+
+const userStore = useUserStore()
+const showCharts = ref(userStore.showCharts)
 const { data: downloaderList } = useRequest(getDownloaders)
+watch(showCharts, () => {
+  userStore.setShowCharts(showCharts.value)
+})
+const tabList = computed(() => [
+  {
+    name: 'all',
+    title: t('page.charts.all')
+  },
+  ...(downloaderList.value?.data.map((i) => ({
+    name: i.name,
+    title: i.name
+  })) ?? [])
+])
 </script>
 
 <style>

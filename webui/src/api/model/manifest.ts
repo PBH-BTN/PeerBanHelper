@@ -9,6 +9,7 @@ export interface version {
 export interface release {
   tagName: string
   url: string
+  changeLog: string
 }
 
 export interface module {
@@ -27,6 +28,10 @@ export interface donateStatus {
   keyData?: KeyData
 }
 
+export enum LicenseType {
+  LicenseLocal = 'local',
+  LicenseAifadian = 'afdian'
+}
 export interface KeyData {
   createAt: number
   description: string
@@ -35,4 +40,5 @@ export interface KeyData {
   licenseTo: string
   source: string
   verifyMagic: string
+  type: LicenseType
 }

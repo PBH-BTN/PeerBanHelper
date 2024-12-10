@@ -1,6 +1,7 @@
 import serviceLocale from '@/service/locale/zh-CN'
 import banListPageLocale from '@/views/banlist/locale/zh-CN'
 import chartsLocale from '@/views/charts/locale/zh-CN'
+import scriptLocale from '@/views/custom-script/locale/zh-CN'
 import dashboardPageLocale from '@/views/dashboard/locale/zh-CN'
 import dataLocale from '@/views/data-view/locale/zh-CN'
 import loginLocale from '@/views/login/locale/zh-CN'
@@ -21,7 +22,12 @@ export default {
   'footer.newVersion': '发现新版本！',
   'footer.newVersion.body': '{version} 已发布，点击查看',
   'footer.newVersionTips': '有新版本 {version} 可用，点击查看',
-  'footer.newVersion.updateNow': '立即更新',
+  'footer.newVersion.updateNow': '查看详情',
+
+  'changeLogModel.title': '🎉 发现新版本：{0}！',
+  'changeLogModel.changelog': '更新日志',
+  'changeLogModel.notNow': '不是现在',
+  'changeLogModel.updateNow': '立即更新',
 
   'router.login': '登录',
   'router.dashboard': '状态',
@@ -36,6 +42,7 @@ export default {
   'router.metrics.charts': '图表',
   'router.rule_management': '规则管理',
   'router.config': '设置',
+  'router.script': '自定义脚本',
 
   'router.moduleNotEnable': '{moduleName}功能未启用',
   'router.moduleNotEnable.tips': '请在配置文件中开启相关功能',
@@ -62,5 +69,6 @@ export default {
   ...chartsLocale,
   ...configLocale,
   ...alertLocale,
-  ...copierLocale
+  ...copierLocale,
+  ...scriptLocale
 }

@@ -9,13 +9,12 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 @NoArgsConstructor
 @AllArgsConstructor
 public final class BuildMeta {
-    private String version = "unknown";
-    private String os;
-    private String branch;
-    private String commit;
-    private String abbrev;
-    private String javafx;
-    private String compileTime;
+    private String version = "0.0.0";
+    private String os = "Unknown";
+    private String branch = "Unknown";
+    private String commit = "Unknown";
+    private String abbrev = "Unknown";
+    private String compileTime = "Unknown";
 
     public void loadBuildMeta(YamlConfiguration configuration) {
         this.version = configuration.getString("maven.version");
@@ -23,7 +22,6 @@ public final class BuildMeta {
         this.commit = configuration.getString("git.commit.id.commit-id");
         this.abbrev = configuration.getString("git.commit.id.abbrev");
         this.os = System.getProperty("os.name");
-        this.javafx = configuration.getString("javafx.version");
         this.compileTime = configuration.getString("git.build.time");
     }
 

@@ -1,0 +1,28 @@
+name: Empty S3 directory
+
+on:
+  workflow_call:
+    secrets:
+      S3_ACCESS_KEY:
+        required: true
+      S3_SECRET_KEY:
+        required: true
+      S3_ENDPOINT:
+        required: true
+      S3_BUCKET:
+        required: true
+jobs:
+  delete-files-from-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove from S3
+        uses: vitorsgomes/s3-rm-action@master
+        with:
+          args: --recursive
+        env:
+          AWS_S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+          AWS_S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+          PATH_TO_DELETE: updates/latest
