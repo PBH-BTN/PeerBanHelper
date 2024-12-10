@@ -107,14 +107,13 @@
 import { Level, type Alert } from '@/api/model/alert'
 import { DismissAlert, DismissAll, GetUnreadAlerts } from '@/service/alert'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import md from '@/utils/markdown'
 import { Button, Message, Notification } from '@arco-design/web-vue'
-import markdownit from 'markdown-it'
 import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 const { t, d } = useI18n()
 const visable = ref(false)
-const md = new markdownit()
 useRequest(
   GetUnreadAlerts,
   {

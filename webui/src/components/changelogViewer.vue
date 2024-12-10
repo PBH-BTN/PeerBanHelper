@@ -9,19 +9,19 @@
     @cancel="showModal = false"
   >
     <a-space direction="vertical" size="mini" style="padding-left: 20px; padding-right: 20px">
-      <a-typography-title :heading="4"> 更新日志 </a-typography-title>
+      <a-typography-title :heading="4">{{ t('changeLogModel.changelog') }} </a-typography-title>
       <iframe class="changelog" :srcdoc="md.render(changeLogMd)" />
     </a-space>
   </a-modal>
 </template>
 <script setup lang="ts">
-import MarkdownIt from 'markdown-it'
+import md from '@/utils/markdown'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const changeLogMd = ref('')
 const showModal = ref(false)
-const md = new MarkdownIt()
+
 const version = ref('')
 const { t } = useI18n()
 

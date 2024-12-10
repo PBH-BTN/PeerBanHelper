@@ -73,9 +73,9 @@
 </template>
 <script setup lang="ts">
 import { GetExperimentList, SetExperimentStatus, SetLabConfig } from '@/service/labs'
+import md from '@/utils/markdown'
 import { Message } from '@arco-design/web-vue'
-import markdownit from 'markdown-it'
-import { ref, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
 const { t } = useI18n()
@@ -89,7 +89,7 @@ const { data, loading, refresh } = useRequest(GetExperimentList, {
     config.enabled = data.data.labEnabled
   }
 })
-const md = new markdownit()
+
 const switchExperimentStatus = async (id: string, activated: boolean) => {
   try {
     const res = await SetExperimentStatus(id, activated)
