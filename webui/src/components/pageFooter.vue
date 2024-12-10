@@ -49,18 +49,21 @@
       </a-descriptions>
     </a-col>
   </a-row>
-  <plusModal ref="plusInfo" />
+  <PlusModal ref="plusInfo" />
+  <ChangelogViewer ref="changeLogViewer" />
 </template>
 
 <script setup lang="ts">
+import { LicenseType } from '@/api/model/manifest'
 import { useEndpointStore } from '@/stores/endpoint'
-import { Button, Notification } from '@arco-design/web-vue'
+import { Button, Notification, Space } from '@arco-design/web-vue'
+import { IconHistory } from '@arco-design/web-vue/es/icon'
 import { RequestError } from '@octokit/request-error'
 import { compare } from 'compare-versions'
 import { computed, h, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import plusModal from './plusModal.vue'
-import { LicenseType } from '@/api/model/manifest'
+import ChangelogViewer from './changelogViewer.vue'
+import PlusModal from './plus/plusModal.vue'
 
 const { t } = useI18n()
 const version = __APP_VERSION__
@@ -75,15 +78,32 @@ const hasNewVersion = computed(() => {
     '>'
   )
 })
+const changeLogViewer = ref<typeof ChangelogViewer>()
 watch(hasNewVersion, () => {
   if (hasNewVersion.value) {
     Notification.info({
       title: t('footer.newVersion'),
       content: t('footer.newVersion.body', { version: latestVersion.value?.tagName }),
       footer: () =>
-        h(Button, { href: latestVersion.value?.url, type: 'primary' }, () =>
-          t('footer.newVersion.updateNow')
-        ),
+        h(Space, {}, [
+          h(
+            Button,
+            {
+              onClick: () =>
+                changeLogViewer.value?.showModal(
+                  endpointStore.latestVersion?.changeLog,
+                  latestVersion.value?.tagName
+                )
+            },
+            {
+              default: () => t('footer.viewChangeLog'),
+              icon: () => h(IconHistory)
+            }
+          ),
+          h(Button, { href: latestVersion.value?.url, type: 'primary' }, () =>
+            t('footer.newVersion.updateNow')
+          )
+        ]),
       duration: 5000,
       closable: true
     })
@@ -117,7 +137,7 @@ watch(
   }
 )
 
-const plusInfo = ref<InstanceType<typeof plusModal>>()
+const plusInfo = ref<InstanceType<typeof PlusModal>>()
 endpointStore.emitter.on('open-plus-modal', () => {
   plusInfo.value?.showModal()
 })

@@ -1,6 +1,7 @@
 import serviceLocale from '@/service/locale/zh-CN'
 import banListPageLocale from '@/views/banlist/locale/zh-CN'
 import chartsLocale from '@/views/charts/locale/zh-CN'
+import scriptLocale from '@/views/custom-script/locale/zh-CN'
 import dashboardPageLocale from '@/views/dashboard/locale/zh-CN'
 import dataLocale from '@/views/data-view/locale/zh-CN'
 import loginLocale from '@/views/login/locale/zh-CN'
@@ -8,7 +9,6 @@ import oobeLocale from '@/views/oobe/locale/zh-CN'
 import topBanPageLocale from '@/views/ranks/locale/zh-CN'
 import ruleManageMentLocale from '@/views/rule-management/locale/zh-CN'
 import configLocale from '@/views/settings/locale/zh-CN'
-import scriptLocale from '@/views/custom-script/locale/zh-CN'
 import alertLocale from './zh-CN/alert'
 import copierLocale from './zh-CN/copier'
 import plusLocale from './zh-CN/plus'
@@ -23,6 +23,10 @@ export default {
   'footer.newVersion.body': '{version} 已发布，点击查看',
   'footer.newVersionTips': '有新版本 {version} 可用，点击查看',
   'footer.newVersion.updateNow': '立即更新',
+  'footer.viewChangeLog': '查看更新日志',
+
+  'changeLogModel.title': '🎉 发现新版本：{0}！',
+  'changeLogModel.changelog': '更新日志',
 
   'router.login': '登录',
   'router.dashboard': '状态',

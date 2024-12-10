@@ -1,6 +1,7 @@
 import serviceLocale from '@/service/locale/en-US'
 import banListPageLocale from '@/views/banlist/locale/en-US'
 import chartsLocale from '@/views/charts/locale/en-US'
+import scriptLocale from '@/views/custom-script/locale/en-US'
 import dashboardPageLocale from '@/views/dashboard/locale/en-US'
 import dataLocale from '@/views/data-view/locale/en-US'
 import loginLocale from '@/views/login/locale/en-US'
@@ -8,7 +9,6 @@ import oobeLocale from '@/views/oobe/locale/en-US'
 import topBanPageLocale from '@/views/ranks/locale/en-US'
 import ruleManageMentLocale from '@/views/rule-management/locale/en-US'
 import configLocale from '@/views/settings/locale/en-US'
-import scriptLocale from '@/views/custom-script/locale/en-US'
 import alertLocale from './en-US/alert'
 import copierLocale from './en-US/copier'
 import plusLocale from './en-US/plus'
@@ -24,6 +24,10 @@ export default {
   'footer.newVersion.body': '{version} is available, click to view',
   'footer.newVersionTips': 'New version {version} is available, click to view',
   'footer.newVersion.updateNow': 'Update Now',
+  'footer.viewChangeLog': 'View Change Log',
+
+  'changeLogModel.title': '🎉 New Version Found: {0}!',
+  'changeLogModel.changelog': 'Change Log',
 
   'router.login': 'Login',
   'router.dashboard': 'Status',
