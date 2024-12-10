@@ -9,7 +9,11 @@
   >
     <a-space direction="vertical" size="mini" style="padding-left: 20px; padding-right: 20px">
       <a-typography-title :heading="4">{{ t('changeLogModel.changelog') }} </a-typography-title>
-      <iframe class="changelog" :srcdoc="md.render(endpointStore.latestVersion?.changeLog ?? '')" />
+      <Markdown
+        style="max-height: 60vh"
+        :content="endpointStore.latestVersion?.changeLog ?? ''"
+        use-github-markdown
+      />
     </a-space>
     <template #footer>
       <a-space size="large">
@@ -23,9 +27,9 @@
 </template>
 <script setup lang="ts">
 import { useEndpointStore } from '@/stores/endpoint'
-import md from '@/utils/markdown'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Markdown from './markdown.vue'
 const endpointStore = useEndpointStore()
 
 const showModal = ref(false)

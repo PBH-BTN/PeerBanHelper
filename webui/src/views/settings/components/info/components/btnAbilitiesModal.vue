@@ -22,8 +22,7 @@
           <a-list-item action-layout="vertical">
             <a-list-item-meta :title="item.displayName">
               <template #description>
-                <!-- eslint-disable-next-line vue/no-v-html-->
-                <div v-html="md.render(item.description)"></div>
+                <Markdown :content="item.description" />
               </template>
             </a-list-item-meta>
             <template #actions>
@@ -57,7 +56,7 @@
 </template>
 <script setup lang="ts">
 import type { Ability } from '@/api/model/status'
-import md from '@/utils/markdown'
+import Markdown from '@/components/markdown.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 

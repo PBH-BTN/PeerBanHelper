@@ -60,8 +60,7 @@
                   }}</a-tag>
                 </template>
                 <template #description>
-                  <!--eslint-disable-next-line vue/no-v-html-->
-                  <div v-html="md.render(item.description)"></div>
+                  <Markdown :content="item.description" />
                 </template>
               </a-list-item-meta>
             </a-list-item>
@@ -72,8 +71,8 @@
   </a-space>
 </template>
 <script setup lang="ts">
+import Markdown from '@/components/markdown.vue'
 import { GetExperimentList, SetExperimentStatus, SetLabConfig } from '@/service/labs'
-import md from '@/utils/markdown'
 import { Message } from '@arco-design/web-vue'
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
