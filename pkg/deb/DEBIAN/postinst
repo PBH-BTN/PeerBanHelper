@@ -3,7 +3,7 @@
 getent passwd peerbanhelper > /dev/null || adduser --quiet --system --group --home /var/lib/peerbanhelper peerbanhelper
 chown -R peerbanhelper: /etc/peerbanhelper
 chown -R root: /usr/lib/peerbanhelper
-mkdir /var/log/peerbanhelper
+mkdir -p /var/log/peerbanhelper
 chown peerbanhelper: /var/log/peerbanhelper
 
 systemctl daemon-reload
