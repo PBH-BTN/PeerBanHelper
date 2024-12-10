@@ -10,9 +10,9 @@
   <div v-else v-html="md.render(content)"></div>
 </template>
 <script lang="ts" setup>
-import { useDarkStore } from '@/stores/dark';
-import md from '@/utils/markdown';
-import { computed } from 'vue';
+import { useDarkStore } from '@/stores/dark'
+import md from '@/utils/markdown'
+import { computed } from 'vue'
 const darkStore = useDarkStore()
 
 const srcDoc = computed(() => {
