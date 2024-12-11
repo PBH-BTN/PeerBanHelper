@@ -110,6 +110,7 @@ import { Button, Message, Notification } from '@arco-design/web-vue'
 import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+import Markdown from './markdown.vue'
 const { t, d } = useI18n()
 const visable = ref(false)
 useRequest(
