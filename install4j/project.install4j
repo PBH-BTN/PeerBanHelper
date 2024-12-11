@@ -519,6 +519,7 @@ return !Files.getFileStore(dir).isReadOnly() &amp;&amp; ((Util.isWindows() &amp;
               </action>
               <action id="150" beanClass="com.install4j.runtime.beans.actions.update.CheckForUpdateAction" actionElevationType="none" failureStrategy="quit">
                 <serializedBean>
+                  <property name="showError" type="boolean" value="false" />
                   <property name="url" type="string">${installer:updatesUrl?:${compiler:sys.updatesUrl}}</property>
                   <property name="variable" type="string">updateDescriptor</property>
                 </serializedBean>
