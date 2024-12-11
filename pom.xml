@@ -211,7 +211,7 @@
                                         <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
                                     </variables>
                                     <!--                                    <incremental>true</incremental>-->
-                                    <jvmArguments>-Xmx2G</jvmArguments>
+                                    <jvmArguments>-Xmx4G</jvmArguments>
                                 </configuration>
                             </execution>
                         </executions>
