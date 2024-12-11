@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
-import com.ghostchu.peerbanhelper.decentralized.IPFSBanListShare;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -140,8 +139,8 @@ public class PeerBanHelperServer implements Reloadable {
     private BanListDao banListDao;
     @Autowired
     private Laboratory laboratory;
-    @Autowired
-    private IPFSBanListShare share;
+//    @Autowired
+//    private IPFSBanListShare share;
 
     public PeerBanHelperServer() {
         reloadConfig();
@@ -419,7 +418,7 @@ public class PeerBanHelperServer implements Reloadable {
         }
         try {
             int count = banListDao.saveBanList(BAN_LIST);
-            share.publishUpdate();
+            //share.publishUpdate();
             log.info(tlUI(Lang.SAVED_BANLIST, count));
         } catch (Exception e) {
             log.error(tlUI(Lang.SAVE_BANLIST_FAILED), e);
