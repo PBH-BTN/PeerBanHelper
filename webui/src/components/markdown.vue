@@ -2,7 +2,7 @@
   <iframe
     v-if="useGithubMarkdown"
     title="changelog"
-    style="border: none; width: 80vh; height: 60vh"
+    style="border: none; width: 100%; height: 100%"
     :srcdoc="srcDoc"
     sandbox=""
   />
@@ -26,18 +26,3 @@ const { content, useGithubMarkdown = false } = defineProps<{
   useGithubMarkdown?: boolean
 }>()
 </script>
-<style>
-.markdown-body {
-  box-sizing: border-box;
-  min-width: 200px;
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-@media (max-width: 767px) {
-  .markdown-body {
-    padding: 15px;
-  }
-}
-</style>
