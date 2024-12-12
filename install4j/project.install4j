@@ -1599,12 +1599,6 @@ return true;</property>
     <unixInstaller name="riscv64 Linux Installer" id="133" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
       <jreBundle platform="linux-riscv64" />
     </unixInstaller>
-    <unixInstaller name="alpine x64 Linux Installer" id="136" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
-      <jreBundle platform="alpine-linux-amd64" />
-    </unixInstaller>
-    <unixInstaller name="alpine aarch64 Linux Installer" id="139" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
-      <jreBundle platform="alpine-linux-aarch64" />
-    </unixInstaller>
   </mediaSets>
   <buildIds>
     <mediaSet refId="38" />
