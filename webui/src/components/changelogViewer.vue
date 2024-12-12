@@ -10,7 +10,7 @@
     <a-space direction="vertical" size="mini" style="padding-left: 20px; padding-right: 20px">
       <a-typography-title :heading="4">{{ t('changeLogModel.changelog') }} </a-typography-title>
       <Markdown
-        style="max-height: 60vh"
+        style="height: 60vh; width: 80vh"
         :content="endpointStore.latestVersion?.changeLog ?? ''"
         use-github-markdown
       />

@@ -2,7 +2,7 @@
   <iframe
     v-if="useGithubMarkdown"
     title="changelog"
-    style="border: none; width: 80vh; height: 60vh"
+    style="border: none; width: 100%; height: 100%"
     :srcdoc="srcDoc"
     sandbox=""
   />
@@ -10,9 +10,9 @@
   <div v-else v-html="md.render(content)"></div>
 </template>
 <script lang="ts" setup>
-import { useDarkStore } from '@/stores/dark';
-import md from '@/utils/markdown';
-import { computed } from 'vue';
+import { useDarkStore } from '@/stores/dark'
+import md from '@/utils/markdown'
+import { computed } from 'vue'
 const darkStore = useDarkStore()
 
 const srcDoc = computed(() => {
