@@ -6,7 +6,7 @@ Automatically block unwanted, leeches and abnormal BT peers with support for cus
 ![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
 ## Introduction
 
-Following function are provided by PeerBanHelper:
+The following functions are provided by PeerBanHelper:
 
 - [PeerID Blacklist](https://docs.pbh-btn.com/en/docs/module/peer-id)
 - [Client Name Blacklist](https://docs.pbh-btn.com/en/docs/module/client-name)
@@ -19,7 +19,7 @@ Following function are provided by PeerBanHelper:
 - [IP set subscribe](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker-rules)
 - A modern WebUI
 
-In addition, PeerBanHelper downloads the GeoIP library at startup, and supports the following functions once it successful loaded:
+In addition, PeerBanHelper downloads the GeoIP library at startup and supports the following functions once it has been successfully loaded:
 - View IP address attribution, AS information (ASN, ISP, AS name, etc.), network type information (broadband, base station, IoT, data center, etc.) in the blocking list.
 - Based on GeoIP information, block IP addresses by country/region, city, network type, ASN and so on.
 - View GeoIP statistics
@@ -34,7 +34,7 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 - BiglyBT([plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT) is required)
 - Deluge([plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge) is required)
 - Azureus(Vuze)([plugin](https://github.com/PBH-BTN/PBH-Adapter-Azureus) is required)
-- Transmission **(deprecated；3.00-20 or higher)**
+- Transmission **(deprecated; 3.00-20 or higher)**
 - BitComet **v2.10 Beta6 [20240928] or higher** (P2SP LTSeed mode is not supported)
 
 
