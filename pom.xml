@@ -364,7 +364,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.2.0</version>
+            <version>6.2.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
         <dependency>
