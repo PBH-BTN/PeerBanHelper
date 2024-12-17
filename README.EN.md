@@ -68,11 +68,21 @@ Any consequences caused by the user's use of this software are borne by the user
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
 
+## Tools
+
+In the development process of PeerBanHelper, we have used many excellent professional tools. Thanks to the following companies or projects for providing open-source licenses:
+
 ### Install4j
 
 PeerBanHelper use [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) to build its multi-platform installer. Thanks the open-source license provided by ej-technolgies. Click the link or the image below to download install4j.
 
 [![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)
+
+### JProfiler
+
+PeerBanHelper use [JProfiler all-in one Java profiler](https://www.ej-technologies.com/jprofiler) to analyze and optimize the program. Thanks the open-source license provided by ej-technolgies. Click the link or the image below to download JProfiler.
+
+[![JProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_large.png)](https://www.ej-technologies.com/jprofiler)
 
 ## Credit
 
