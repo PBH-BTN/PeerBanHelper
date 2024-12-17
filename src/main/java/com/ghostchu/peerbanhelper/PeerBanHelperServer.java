@@ -50,6 +50,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
