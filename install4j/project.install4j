@@ -285,6 +285,23 @@ return true;
           </screen>
           <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true" rollbackBarrierExitCode="0">
             <actions>
+              <action id="246" beanClass="com.install4j.runtime.beans.actions.services.StopServiceAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="launcherId" type="string">70</property>
+                </serializedBean>
+              </action>
+              <action id="248" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="script">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">try{
+    Runtime.getRuntime().exec(new String[] {"taskkill", "/f", "/t", "/im", "PeerBanHelper*"}).waitFor();
+} catch (Exception ignored) {}
+return true;</property>
+                    </object>
+                  </property>
+                </serializedBean>
+              </action>
               <action id="121" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
                   <property name="files" type="array" class="java.io.File" length="1">
