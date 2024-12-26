@@ -219,7 +219,7 @@
                 </plugins>
             </build>
             <properties>
-                <install4j.home>C:\Program Files\install4j10</install4j.home>
+                <install4j.home>C:\Program Files\install4j11</install4j.home>
             </properties>
         </profile>
     </profiles>
