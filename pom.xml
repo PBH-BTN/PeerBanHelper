@@ -510,5 +510,10 @@
             <artifactId>java-multiaddr</artifactId>
             <version>v1.4.12</version>
         </dependency>
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>3.6.2</version>
+        </dependency>
     </dependencies>
 </project>

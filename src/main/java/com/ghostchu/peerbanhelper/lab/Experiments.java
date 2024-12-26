@@ -6,7 +6,8 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import java.util.List;
 
 public enum Experiments {
-    IPFS(new Experiment("ipfs", List.of(0), new TranslationComponent(Lang.LAB_EXPERIMENT_IPFS_TITLE), new TranslationComponent(Lang.LAB_EXPERIMENT_IPFS_DESCRIPTION)));
+    IPFS(new Experiment("ipfs", List.of(0), new TranslationComponent(Lang.LAB_EXPERIMENT_IPFS_TITLE), new TranslationComponent(Lang.LAB_EXPERIMENT_IPFS_DESCRIPTION))),
+    DNSJAVA(new Experiment("dnsjava", List.of(0, 1, 2), new TranslationComponent(Lang.LAB_EXPERIMENT_DNSJAVA_TITLE), new TranslationComponent(Lang.LAB_EXPERIMENT_DNSJAVA_DESCRIPTION)));
 
     private final Experiment experiment;
 

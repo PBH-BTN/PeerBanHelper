@@ -536,3 +536,5 @@ FREE_LICENSE_SOURCE: "Locally generated free license."
 FREE_LICENSE_LICENSE_TO: "{} for personal use."
 FREE_LICENSE_DESCRIPTION: "Local generated renewable free license, for personal use only."
 DOWNLOADER_PAUSED: Downloader paused
+LAB_EXPERIMENT_DNSJAVA_TITLE: "DNSJava DNS"
+LAB_EXPERIMENT_DNSJAVA_DESCRIPTION: "Use [dnsjava/dnsjava](https://github.com/dnsjava/dnsjava) to replace the default JDK DNS resolver in some modules, providing more reliable hostname and reverse DNS lookup capabilities, and supporting custom DNS servers and load balancing. DNSJava only works for certain functions (such as reverse DNS lookup), while other functions will continue to use JDK DNS.  \nAfter enabling this experiment, you can configure the DNS server addresses for DNSJava in the configuration file."

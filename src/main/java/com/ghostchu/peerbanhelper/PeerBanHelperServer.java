@@ -23,6 +23,7 @@ import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.lab.Experiments;
 import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
@@ -34,6 +35,7 @@ import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
@@ -59,6 +61,7 @@ import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
 import io.javalin.util.JavalinBindException;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -139,6 +142,8 @@ public class PeerBanHelperServer implements Reloadable {
     private BanListDao banListDao;
     @Autowired
     private Laboratory laboratory;
+    @Autowired
+    private DNSLookup dnsLookup;
 //    @Autowired
 //    private IPFSBanListShare share;
 
@@ -197,7 +202,15 @@ public class PeerBanHelperServer implements Reloadable {
         Main.getReloadManager().register(this);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
         sendSnapshotAlert();
+        runTestCode();
+    }
 
+    @SneakyThrows
+    private void runTestCode() {
+        if (!"LiveDebug".equalsIgnoreCase(System.getProperty("pbh.release"))) {
+            return;
+        }
+        // run some junky test code here
     }
 
     private void setupScriptEngine() {
@@ -675,7 +688,7 @@ public class PeerBanHelperServer implements Reloadable {
         try {
             var loginResult = downloader.login();
             if (!loginResult.success()) {
-                if(loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED) {
+                if (loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED) {
                     log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
                     downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
                 }
@@ -769,7 +782,7 @@ public class PeerBanHelperServer implements Reloadable {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         var loginResult = downloader.login();
         if (!loginResult.success()) {
-            if(loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED){
+            if (loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED) {
                 log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
                 downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
                 if (loginResult.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS || loginResult.getStatus() == DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS) {
@@ -920,9 +933,19 @@ public class PeerBanHelperServer implements Reloadable {
         banMetadata.setReverseLookup("N/A");
         if (Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
             executor.submit(() -> {
-                String hostName = peer.getPeerAddress().getAddress().toInetAddress().getHostName();
-                if (!peer.getPeerAddress().getIp().equals(hostName)) {
-                    banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toInetAddress().getHostName());
+                if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
+                    dnsLookup.ptr(peer.getPeerAddress().getAddress().toReverseDNSLookupString()).thenAccept(hostName -> {
+                        if (hostName.isPresent()) {
+                            if (!peer.getPeerAddress().getIp().equals(hostName.get())) {
+                                banMetadata.setReverseLookup(hostName.get());
+                            }
+                        }
+                    });
+                } else {
+                    String hostName = peer.getPeerAddress().getAddress().toInetAddress().getHostName();
+                    if (!peer.getPeerAddress().getIp().equals(hostName)) {
+                        banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toInetAddress().getHostName());
+                    }
                 }
             });
         }
