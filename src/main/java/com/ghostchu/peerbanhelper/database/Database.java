@@ -53,6 +53,7 @@ public class Database {
             try (var stmt = rawConnection.createStatement()) {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
                 stmt.executeUpdate("PRAGMA journal_mode = WAL");
+                stmt.executeUpdate("PRAGMA auto_vacuum = INCREMENTAL");
             } catch (Exception e) {
                 log.warn(tlUI(Lang.UNABLE_SET_SQLITE_OPTIMIZED_PRAGMA), e);
             }
