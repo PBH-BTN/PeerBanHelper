@@ -538,3 +538,10 @@ FREE_LICENSE_DESCRIPTION: "Local generated renewable free license, for personal 
 DOWNLOADER_PAUSED: Downloader paused
 LAB_EXPERIMENT_DNSJAVA_TITLE: "DNSJava DNS"
 LAB_EXPERIMENT_DNSJAVA_DESCRIPTION: "Use [dnsjava/dnsjava](https://github.com/dnsjava/dnsjava) to replace the default JDK DNS resolver in some modules, providing more reliable hostname and reverse DNS lookup capabilities, and supporting custom DNS servers and load balancing. DNSJava only works for certain functions (such as reverse DNS lookup), while other functions will continue to use JDK DNS.  \nAfter enabling this experiment, you can configure the DNS server addresses for DNSJava in the configuration file."
+LAB_EXPERIMENT_SQLITE_VACUUM_TITLE: "SQLite VACUUM Optimization"
+LAB_EXPERIMENT_SQLITE_VACUUM_DESCRIPTION: "PeerBanHelper will check the SQLite data file for vacuuming (VACUUM) when starting up, and will perform a vacuum operation every 60 days by default (you can modify `persist.vacuum-interval-days` to change the vacuum interval). The vacuum operation will optimize the database file, reduce the file size, and improve query performance at the same time."
+SQLITE_VACUUM_BACKUP: "Backing up SQLite database file for vacuum operation..."
+SQLITE_VACUUM_BACKUP_COMPLETED: "SQLite database file backup completed, preparing for vacuum..."
+SQLITE_VACUUM_BACKUP_FAILED: "SQLite database file backup failed, unable to perform vacuum operation. This may be due to insufficient disk space, IO errors, or insufficient permissions. Please check the error message."
+SQLITE_VACUUM_IN_PROGRESS: "Vacuuming SQLite database in progress, do not close PeerBanHelper as it may cause database corruption! [In Progress]...."
+SQLITE_VACUUM_SUCCESS: "SQLite database vacuumed successfully, original file size: {} vacuumed file size: {}"
