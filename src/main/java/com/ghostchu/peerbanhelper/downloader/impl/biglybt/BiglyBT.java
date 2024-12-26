@@ -138,6 +138,16 @@ public class BiglyBT extends AbstractDownloader {
     }
 
     @Override
+    public boolean isPaused() {
+        return config.isPaused();
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        config.setPaused(paused);
+    }
+
+    @Override
     public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
@@ -301,6 +311,7 @@ public class BiglyBT extends AbstractDownloader {
         private boolean incrementBan;
         private boolean verifySsl;
         private boolean ignorePrivate;
+        private boolean paused;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -314,6 +325,7 @@ public class BiglyBT extends AbstractDownloader {
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
+            config.setPaused(section.getBoolean("paused", false));
             return config;
         }
 
@@ -326,6 +338,7 @@ public class BiglyBT extends AbstractDownloader {
             section.set("increment-ban", incrementBan);
             section.set("ignore-private", ignorePrivate);
             section.set("verify-ssl", verifySsl);
+            section.set("paused", paused);
             return section;
         }
     }

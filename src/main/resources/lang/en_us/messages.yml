@@ -535,3 +535,4 @@ FREE_LICENSE_RENEW_STILL_ACTIVE: "The current license is still active and does n
 FREE_LICENSE_SOURCE: "Locally generated free license."
 FREE_LICENSE_LICENSE_TO: "{} for personal use."
 FREE_LICENSE_DESCRIPTION: "Local generated renewable free license, for personal use only."
+DOWNLOADER_PAUSED: Downloader paused

@@ -19,10 +19,11 @@ public class DownloaderLoginResult {
 
     public enum Status {
         SUCCESS,
+        PAUSED,
         INCORRECT_CREDENTIAL,
         MISSING_COMPONENTS,
         NETWORK_ERROR,
         EXCEPTION,
-        REQUIRE_TAKE_ACTIONS
+        REQUIRE_TAKE_ACTIONS,
     }
 }

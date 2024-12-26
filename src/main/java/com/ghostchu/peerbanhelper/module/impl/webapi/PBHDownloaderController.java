@@ -260,7 +260,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .count();
 
         JsonObject config = downloader.saveDownloaderJson();
-        ctx.json(new StdResp(true, null, new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config)));
+        ctx.json(new StdResp(true, null, new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config, downloader.isPaused())));
     }
 
     private void handleDownloaderList(@NotNull Context ctx) {
@@ -281,7 +281,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
     record DownloaderStatus(DownloaderLastStatus lastStatus, String lastStatusMessage,
                             long activeTorrents,
-                            long activePeers, JsonObject config) {
+                            long activePeers, JsonObject config, boolean paused) {
 
     }
 

@@ -532,3 +532,4 @@ FREE_LICENSE_RENEW_STILL_ACTIVE: "当前许可证仍在有效期内，无需重�
 FREE_LICENSE_SOURCE: "本地生成的免费许可证"
 FREE_LICENSE_LICENSE_TO: "{} 用于个人用途"
 FREE_LICENSE_DESCRIPTION: "本地生成的循环免费许可证，仅用于个人用途"
+DOWNLOADER_PAUSED: "下载器已暂停"

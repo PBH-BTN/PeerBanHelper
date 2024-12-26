@@ -191,6 +191,16 @@ public class BitComet extends AbstractDownloader {
         return "BitComet";
     }
 
+    @Override
+    public boolean isPaused() {
+        return config.isPaused();
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        config.setPaused(paused);
+    }
+
     public boolean isLoggedIn() {
         try {
             queryNeedReConfigureIpFilter();
@@ -460,6 +470,7 @@ public class BitComet extends AbstractDownloader {
         private String httpVersion;
         private boolean verifySsl;
         private boolean ignorePrivate;
+        private boolean paused;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -474,6 +485,7 @@ public class BitComet extends AbstractDownloader {
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
+            config.setPaused(section.getBoolean("paused", false));
             return config;
         }
 
@@ -487,6 +499,7 @@ public class BitComet extends AbstractDownloader {
             section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
+            section.set("paused", paused);
             return section;
         }
     }

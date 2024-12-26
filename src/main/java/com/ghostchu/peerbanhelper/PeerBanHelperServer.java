@@ -50,7 +50,6 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.EvalMode;
@@ -676,8 +675,10 @@ public class PeerBanHelperServer implements Reloadable {
         try {
             var loginResult = downloader.login();
             if (!loginResult.success()) {
-                log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
-                downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
+                if(loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED) {
+                    log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
+                    downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
+                }
                 return;
             } else {
                 downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.getMessage());
@@ -768,10 +769,12 @@ public class PeerBanHelperServer implements Reloadable {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         var loginResult = downloader.login();
         if (!loginResult.success()) {
-            log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
-            downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
-            if (loginResult.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS || loginResult.getStatus() == DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS) {
-                downloader.setLastStatus(DownloaderLastStatus.NEED_TAKE_ACTION, loginResult.getMessage());
+            if(loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED){
+                log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
+                downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
+                if (loginResult.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS || loginResult.getStatus() == DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS) {
+                    downloader.setLastStatus(DownloaderLastStatus.NEED_TAKE_ACTION, loginResult.getMessage());
+                }
             }
             return Collections.emptyMap();
         }
