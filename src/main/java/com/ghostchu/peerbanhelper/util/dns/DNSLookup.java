@@ -50,11 +50,11 @@ public class DNSLookup implements Reloadable {
         for (String dns : servers) {
             if (dns.startsWith("http")) {
                 resolvers.add(new DohResolver(dns));
-                log.info("Added DoH resolver: {}", dns);
+                log.debug("Added DoH resolver: {}", dns);
             } else {
                 try {
                     resolvers.add(new SimpleResolver(dns));
-                    log.info("Added resolver: {}", dns);
+                    log.debug("Added resolver: {}", dns);
                 } catch (UnknownHostException e) {
                     log.warn("Failed to add resolver: {}", dns, e);
                 }
