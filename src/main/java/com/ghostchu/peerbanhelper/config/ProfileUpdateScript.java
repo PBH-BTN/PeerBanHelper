@@ -25,7 +25,10 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
-
+    @UpdateScript(version = 23)
+    public void ptrBlacklist(YamlConfiguration bundled) {
+        conf.set("module.ptr-blacklist", bundled.get("module.ptr-blacklist"));
+    }
 
     @UpdateScript(version = 22)
     public void workaroundForBadWebUI() {

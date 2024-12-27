@@ -545,3 +545,4 @@ SQLITE_VACUUM_BACKUP_COMPLETED: "SQLite database file backup completed, preparin
 SQLITE_VACUUM_BACKUP_FAILED: "SQLite database file backup failed, unable to perform vacuum operation. This may be due to insufficient disk space, IO errors, or insufficient permissions. Please check the error message."
 SQLITE_VACUUM_IN_PROGRESS: "Vacuuming SQLite database in progress, do not close PeerBanHelper as it may cause database corruption! [In Progress]...."
 SQLITE_VACUUM_SUCCESS: "SQLite database vacuumed successfully, original file size: {} vacuumed file size: {}"
+MODULE_PTR_MATCH_PTR_RULE: "Match PTR rule: {}"

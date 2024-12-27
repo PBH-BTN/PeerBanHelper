@@ -542,3 +542,4 @@ SQLITE_VACUUM_BACKUP_COMPLETED: "SQLite 数据库文件备份完成，准备进�
 SQLITE_VACUUM_BACKUP_FAILED: "SQLite 数据库文件备份失败，无法进行真空操作，这可能是由于磁盘空间不足，IO 错误或者权限不足导致的，请检查错误信息。"
 SQLITE_VACUUM_IN_PROGRESS: "正在对 SQLite 数据库进行真空操作，请勿关闭 PeerBanHelper 否则将可能导致数据库损坏！ 【进行中】...."
 SQLITE_VACUUM_SUCCESS: "SQLite 数据库已成功真空，原文件大小: {} 真空后文件大小: {}"
+MODULE_PTR_MATCH_PTR_RULE: "匹配 PTR 规则: {}"
