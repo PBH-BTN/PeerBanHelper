@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-v-html -->
 <template>
   <a-trigger
     v-model:popup-visible="visable"
@@ -63,18 +62,18 @@
                     <a-typography-text type="secondary"
                       ><icon-clock-circle /> {{ d(item.createAt, 'long') }}</a-typography-text
                     >
-                    <div
+                    <Markdown
                       v-if="item.readAt === null"
                       class="md-container"
                       style="max-width: 25rem"
-                      v-html="md.render(item.content)"
-                    ></div>
-                    <del
-                      v-else
-                      class="md-container"
-                      style="max-width: 25rem"
-                      v-html="md.render(item.content)"
-                    >
+                      :content="item.content"
+                    />
+                    <del v-else>
+                      <Markdown
+                        class="md-container"
+                        style="max-width: 25rem"
+                        :content="item.content"
+                      />
                     </del>
                   </a-space>
                 </template>
@@ -108,13 +107,12 @@ import { Level, type Alert } from '@/api/model/alert'
 import { DismissAlert, DismissAll, GetUnreadAlerts } from '@/service/alert'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { Button, Message, Notification } from '@arco-design/web-vue'
-import markdownit from 'markdown-it'
 import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+import Markdown from './markdown.vue'
 const { t, d } = useI18n()
 const visable = ref(false)
-const md = new markdownit()
 useRequest(
   GetUnreadAlerts,
   {

@@ -53,9 +53,21 @@ public class PBHLabController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         javalinWebContainer.javalin()
+                .post("/api/laboratory/config", this::handleConfig, Role.USER_WRITE)
+                .get("/api/laboratory/config", this::handleConfigGet, Role.USER_WRITE)
                 .get("/api/laboratory/experiments", this::handleExperiments, Role.USER_READ)
                 .get("/api/laboratory/isExperimentActivated", this::handleExperimentActivated, Role.USER_READ)
                 .put("/api/laboratory/experiment/{id}", this::handleExperimentSet, Role.USER_WRITE);
+    }
+
+    private void handleConfigGet(Context context) {
+        context.json(new StdResp(true, null, new ConfigBody(laboratory.isEnabled())));
+    }
+
+    private void handleConfig(Context context) {
+        var configBody = context.bodyAsClass(ConfigBody.class);
+        laboratory.setEnabled(configBody.isEnabled());
+        context.json(new StdResp(true, null, configBody.isEnabled()));
     }
 
     private void handleExperimentSet(@NotNull Context context) {
@@ -97,6 +109,7 @@ public class PBHLabController extends AbstractFeatureModule {
         Map<String, Object> map = new HashMap<>();
         map.put("experiments", availableExperiments);
         map.put("mygroup", laboratory.getExperimentalGroup());
+        map.put("labEnabled", laboratory.isEnabled());
         context.json(new StdResp(true, null, map));
     }
 
@@ -109,6 +122,11 @@ public class PBHLabController extends AbstractFeatureModule {
     @Data
     static class ExperimentPutBody {
         private String status;
+    }
+    @AllArgsConstructor
+    @Data
+    static class ConfigBody{
+        private boolean enabled;
     }
 
     record ExperimentRecord(

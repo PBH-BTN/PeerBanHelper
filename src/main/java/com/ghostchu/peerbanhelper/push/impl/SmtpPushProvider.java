@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 @Slf4j
@@ -38,10 +37,10 @@ public class SmtpPushProvider extends AbstractPushProvider {
         var username = section.getString("username");
         var password = section.getString("password");
         var sender = section.getString("sender");
-        var senderName = section.getString("name");
+        var senderName = section.getString("name", "PeerBanHelper");
         var receivers = section.getStringList("receiver");
-        var encryption = Encryption.valueOf(section.getString("encryption", "STARTTLS").toUpperCase(Locale.ROOT));
-        var sendPartial = section.getBoolean("sendPartial");
+        var encryption = section.getString("encryption", "SSLTLS");
+        var sendPartial = section.getBoolean("sendPartial", true);
         Config config = new Config(section.getString("host"),
                 section.getInt("port"), auth, username, password,
                 sender, senderName, receivers, encryption, sendPartial
@@ -77,17 +76,21 @@ public class SmtpPushProvider extends AbstractPushProvider {
         mail.setCharset("UTF-8");
         mail.setHostName(config.getHost());
         mail.setSmtpPort(config.getPort());
-        switch (config.getEncryption()) {
-            case STARTTLS -> mail.setStartTLSEnabled(true);
-            case ENFORCE_STARTTLS -> {
-                mail.setStartTLSEnabled(true);
-                mail.setStartTLSRequired(true);
+        try {
+            switch (Encryption.valueOf(config.getEncryption())) {
+                case STARTTLS -> mail.setStartTLSEnabled(true);
+                case ENFORCE_STARTTLS -> {
+                    mail.setStartTLSEnabled(true);
+                    mail.setStartTLSRequired(true);
+                }
+                case SSLTLS -> mail.setSSLOnConnect(true);
             }
-            case SSLTLS -> mail.setSSLOnConnect(true);
+        } catch (Exception e) {
+            log.error("Unable to load mail encryption type: {}, it's valid?", config.getEncryption(), e);
         }
         mail.setSendPartial(config.isSendPartial());
         mail.setSubject(subject);
-        mail.setContent(text, "text/html");
+        mail.setContent(markdown2Html(text), "text/html");
         mail.setFrom(config.getSender(), config.getSenderName(), "UTF-8");
         mail.setTo(email.stream().map(str -> {
             try {
@@ -140,7 +143,7 @@ public class SmtpPushProvider extends AbstractPushProvider {
         private String sender;
         private String senderName;
         private @NotNull List<String> receivers;
-        private Encryption encryption;
+        private String encryption;
         private boolean sendPartial;
     }
 }

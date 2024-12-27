@@ -4,7 +4,13 @@
       v-model:value="model"
       theme="vs-dark"
       class="editor"
-      :options="MONACO_EDITOR_OPTIONS"
+      :options="{
+        automaticLayout: true,
+        formatOnType: true,
+        formatOnPaste: true,
+        foldingStrategy: 'indentation',
+        autoIndent: 'brackets'
+      }"
       :default-language="AV"
       @mount="handleMount"
       @change="handleChange"
@@ -48,11 +54,6 @@ loader.config({
   }
 })
 const AV = 'aviatorscript'
-const MONACO_EDITOR_OPTIONS = {
-  automaticLayout: true,
-  formatOnType: true,
-  formatOnPaste: true
-}
 type onMountF = VueMonacoEditorEmitsOptions['mount']
 type editor = Parameters<onMountF>[0] // monacoEditor.editor.IStandaloneCodeEditor
 const editorRef = shallowRef<editor>()

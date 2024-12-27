@@ -6,7 +6,7 @@ Automatically block unwanted, leeches and abnormal BT peers with support for cus
 ![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
 ## Introduction
 
-Following function are provided by PeerBanHelper:
+The following functions are provided by PeerBanHelper:
 
 - [PeerID Blacklist](https://docs.pbh-btn.com/en/docs/module/peer-id)
 - [Client Name Blacklist](https://docs.pbh-btn.com/en/docs/module/client-name)
@@ -19,7 +19,7 @@ Following function are provided by PeerBanHelper:
 - [IP set subscribe](https://docs.pbh-btn.com/en/docs/module/ip-address-blocker-rules)
 - A modern WebUI
 
-In addition, PeerBanHelper downloads the GeoIP library at startup, and supports the following functions once it successful loaded:
+In addition, PeerBanHelper downloads the GeoIP library at startup and supports the following functions once it has been successfully loaded:
 - View IP address attribution, AS information (ASN, ISP, AS name, etc.), network type information (broadband, base station, IoT, data center, etc.) in the blocking list.
 - Based on GeoIP information, block IP addresses by country/region, city, network type, ASN and so on.
 - View GeoIP statistics
@@ -34,7 +34,7 @@ In addition, PeerBanHelper downloads the GeoIP library at startup, and supports 
 - BiglyBT([plugin](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT) is required)
 - Deluge([plugin](https://github.com/PBH-BTN/PBH-Adapter-Deluge) is required)
 - Azureus(Vuze)([plugin](https://github.com/PBH-BTN/PBH-Adapter-Azureus) is required)
-- Transmission **(deprecated；3.00-20 or higher)**
+- Transmission **(deprecated; 3.00-20 or higher)**
 - BitComet **v2.10 Beta6 [20240928] or higher** (P2SP LTSeed mode is not supported)
 
 
@@ -68,11 +68,21 @@ Any consequences caused by the user's use of this software are borne by the user
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PBH-BTN/PeerBanHelper&type=Date)](https://star-history.com/#PBH-BTN/PeerBanHelper&Date)
 
+## Tools
+
+In the development process of PeerBanHelper, we have used many excellent professional tools. Thanks to the following companies or projects for providing open-source licenses:
+
 ### Install4j
 
 PeerBanHelper use [Install4j multi-platform installer builder](https://www.ej-technologies.com/products/install4j/overview.html) to build its multi-platform installer. Thanks the open-source license provided by ej-technolgies. Click the link or the image below to download install4j.
 
 [![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](https://www.ej-technologies.com/products/install4j/overview.html)
+
+### JProfiler
+
+PeerBanHelper use [JProfiler all-in one Java profiler](https://www.ej-technologies.com/jprofiler) to analyze and optimize the program. Thanks the open-source license provided by ej-technolgies. Click the link or the image below to download JProfiler.
+
+[![JProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_large.png)](https://www.ej-technologies.com/jprofiler)
 
 ## Credit
 
@@ -91,6 +101,13 @@ PeerBanHelper use [Install4j multi-platform installer builder](https://www.ej-te
 - [GeoIP2](https://dev.maxmind.com/geoip)
 - [ormlite](https://ormlite.com/)
 - [SimpleReloadLib](https://github.com/Ghost-chu/SimpleReloadLib)
+- [java-ipfs-http-client](https://github.com/ipfs-shipyard/java-ipfs-http-client)
+- [java-multiaddr](https://github.com/multiformats/java-multiaddr)
+- [portmapper](https://github.com/offbynull/portmapper)
+- [xz](https://github.com/tukaani-project/xz-java)
+- [commonmark](https://github.com/commonmark/commonmark-java)
+- [oshi](https://github.com/oshi/oshi)
+- [semver4j](https://github.com/vdurmont/semver4j)
 
 ### WebUI
 

@@ -85,6 +85,16 @@ public class Deluge extends AbstractDownloader {
     }
 
     @Override
+    public boolean isPaused() {
+        return config.isPaused();
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        config.setPaused(paused);
+    }
+
+    @Override
     public DownloaderLoginResult login0() {
         try {
             if (!this.client.login().isLoggedIn()) {
@@ -244,6 +254,7 @@ public class Deluge extends AbstractDownloader {
         private String rpcUrl;
         private boolean incrementBan;
         private boolean ignorePrivate;
+        private boolean paused;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -258,6 +269,7 @@ public class Deluge extends AbstractDownloader {
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
+            config.setPaused(section.getBoolean("paused", false));
             return config;
         }
 
@@ -271,6 +283,7 @@ public class Deluge extends AbstractDownloader {
             section.set("increment-ban", incrementBan);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
+            section.set("paused", paused);
             return section;
         }
     }

@@ -108,6 +108,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                                     .header("Content-Type", "application/x-www-form-urlencoded")
                             , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() == 200 && isLoggedIn()) {
+                updatePreferences();
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
             }
             return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, request.body()));
@@ -116,6 +117,24 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
+
+    public void updatePreferences(){
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest
+                            .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()
+                                    .query("json", JsonUtil.getGson().toJson(Map.of("enable_multi_connections_from_same_ip", false))).build())
+                            .header("Content-Type", "application/x-www-form-urlencoded")
+                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (request.statusCode() != 200) {
+                log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                throw new IllegalStateException("Save qBittorrent preferences error: statusCode=" + request.statusCode());
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            throw new IllegalStateException(e);
+        }
+    }
+
 
     @Override
     public String getEndpoint() {

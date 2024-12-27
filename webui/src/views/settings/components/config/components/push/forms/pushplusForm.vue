@@ -6,12 +6,6 @@
   >
     <a-input-password v-model="model.token" />
   </a-form-item>
-  <a-form-item
-    field="config.template"
-    :label="t('page.settings.tab.config.push.form.pushplus.template')"
-  >
-    <a-input v-model="model.template" />
-  </a-form-item>
   <a-form-item field="config.topic" :label="t('page.settings.tab.config.push.form.pushplus.topic')">
     <a-input v-model="model.topic" />
   </a-form-item>

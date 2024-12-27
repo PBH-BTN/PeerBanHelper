@@ -20,12 +20,7 @@
   >
     <a-input v-model="model.sender" />
   </a-form-item>
-  <a-form-item
-    field="config.senderName"
-    :label="t('page.settings.tab.config.push.form.stmp.senderName')"
-  >
-    <a-input v-model="model.senderName" />
-  </a-form-item>
+
   <a-form-item
     field="config.receivers"
     :label="t('page.settings.tab.config.push.form.stmp.receivers')"
@@ -47,12 +42,6 @@
       <a-option :value="SMTPEncryption.StartTLS">{{ SMTPEncryption.StartTLS }}</a-option>
       <a-option :value="SMTPEncryption.SSLTLS">SSL/TLS</a-option>
     </a-select>
-  </a-form-item>
-  <a-form-item
-    field="config.sendPartial"
-    :label="t('page.settings.tab.config.push.form.stmp.sendPartial')"
-  >
-    <a-switch v-model="model.sendPartial" />
   </a-form-item>
   <a-form-item field="config.auth" :label="t('page.settings.tab.config.push.form.stmp.auth')">
     <a-switch v-model="model.auth" />
@@ -80,6 +69,22 @@
       </a-form-item>
     </a-space>
   </a-form-item>
+  <a-collapse :bordered="false">
+    <a-collapse-item :header="t('page.settings.tab.config.push.form.stmp.advance')">
+      <a-form-item
+        field="config.sendPartial"
+        :label="t('page.settings.tab.config.push.form.stmp.sendPartial')"
+      >
+        <a-switch v-model="model.sendPartial" />
+      </a-form-item>
+      <a-form-item
+        field="config.senderName"
+        :label="t('page.settings.tab.config.push.form.stmp.senderName')"
+      >
+        <a-input v-model="model.senderName" />
+      </a-form-item>
+    </a-collapse-item>
+  </a-collapse>
 </template>
 <script setup lang="ts">
 import { type SMTPConfig, SMTPEncryption } from '@/api/model/push'

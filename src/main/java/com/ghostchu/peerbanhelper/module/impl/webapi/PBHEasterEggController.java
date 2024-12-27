@@ -8,15 +8,41 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
 @Slf4j
 @Component
 @IgnoreScan
 public class PBHEasterEggController  extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
+    private final List<String> urls = new ArrayList<>();
 
     public PBHEasterEggController(JavalinWebContainer javalinWebContainer) {
         super();
         this.javalinWebContainer = javalinWebContainer;
+        urls.add("https://www.bilibili.com/video/BV1S3UaYvE5o");
+        urls.add("https://www.bilibili.com/video/BV1QQ4y1d7Rd");
+        urls.add("https://www.bilibili.com/video/BV1by4y1F7nS");
+        urls.add("https://www.bilibili.com/video/BV1ztzBY1EPy");
+        urls.add("https://www.bilibili.com/video/BV15Z4y1Q7mz");
+        urls.add("https://www.bilibili.com/video/BV1GJ411x7h7");
+        urls.add("https://www.bilibili.com/video/BV1a14y187U5");
+        urls.add("https://www.bilibili.com/video/BV1na411Q7qH");
+        urls.add("https://music.163.com/song?id=2647873613&uct2=U2FsdGVkX1+Uch9IV1F1N/gLpHilPuUZQXy0xDGsKrM=");
+        urls.add("https://music.163.com/song?id=2165896793&uct2=U2FsdGVkX19w55MRVVy7ZG3Yf9d6QL+CIwgE8jPc4N0=");
+        urls.add("https://www.youtube.com/watch?v=tSLI6PjAfns");
+        urls.add("https://www.bilibili.com/video/BV1Nb41117L3");
+        urls.add("https://www.bilibili.com/video/BV1js411A71E");
+        urls.add("https://store.steampowered.com/app/365450/Hacknet/");
+        urls.add("https://store.steampowered.com/app/753640/Outer_Wilds/");
+        urls.add("https://store.steampowered.com/app/739630/Phasmophobia/");
+        urls.add("https://store.steampowered.com/app/3590/Plants_vs_Zombies_GOTY_Edition/");
+        urls.add("https://store.steampowered.com/app/333600/NEKOPARA_Vol_1/");
+        urls.add("https://store.steampowered.com/app/391540/Undertale/");
+        urls.add("https://store.steampowered.com/app/646570/Slay_the_Spire/");
+        urls.add("https://store.steampowered.com/app/457140/_/");
     }
 
     @Override
@@ -41,27 +67,8 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
     }
 
     private void handleEgg(Context context) {
-        // get today's in week
-        int day = java.time.LocalDate.now().getDayOfWeek().getValue();
-        switch (day){
-            case 1:
-                context.redirect("https://www.bilibili.com/video/BV1S3UaYvE5o");
-                break;
-            case 3:
-                context.redirect("https://www.bilibili.com/video/BV1QQ4y1d7Rd");
-                break;
-            case 4:
-                context.redirect("https://www.bilibili.com/video/BV1by4y1F7nS");
-                break;
-            case 5:
-                context.redirect("https://www.bilibili.com/video/BV1ztzBY1EP");
-                break;
-            case 7:
-                context.redirect("https://www.bilibili.com/video/BV15Z4y1Q7mz");
-                break;
-            default:
-                context.redirect("https://www.bilibili.com/video/BV1GJ411x7h7");
-        }
+        int index = ThreadLocalRandom.current().nextInt(urls.size());
+        context.redirect(urls.get(index));
     }
 
     @Override

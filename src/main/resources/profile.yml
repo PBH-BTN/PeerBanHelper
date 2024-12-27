@@ -92,7 +92,6 @@ module:
       - '{"method":"STARTS_WITH","content":"qbittorrent/3.3.15"}'
       - '{"method":"STARTS_WITH","content":"github.com/thank423/trafficconsume"}'
       - '{"method":"STARTS_WITH","content":"ޭ__"}' # 0xde-0xad-0xbe-0xef
-      - '{"method":"STARTS_WITH","content":"taipei-torrent"}'
       - '{"method":"STARTS_WITH","content":"-XL"}'
   # 进度作弊检查器：Progress Cheat Blocker
   # 注：有时这会错误的封禁部分启用“超级做种”的客户端。但在大多数情况下，此模块能够有效阻止循环下载的流量消耗器，建议启用。

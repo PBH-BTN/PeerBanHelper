@@ -211,7 +211,7 @@
                                         <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
                                     </variables>
                                     <!--                                    <incremental>true</incremental>-->
-                                    <jvmArguments>-Xmx2G</jvmArguments>
+                                    <jvmArguments>-Xmx4G</jvmArguments>
                                 </configuration>
                             </execution>
                         </executions>
@@ -219,7 +219,7 @@
                 </plugins>
             </build>
             <properties>
-                <install4j.home>C:\Program Files\install4j10</install4j.home>
+                <install4j.home>C:\Program Files\install4j11</install4j.home>
             </properties>
         </profile>
     </profiles>
@@ -276,7 +276,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.3.1-jre</version>
+            <version>33.4.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -319,7 +319,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.12</version>
+            <version>1.5.15</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -330,7 +330,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.11.3</version>
+            <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -446,11 +446,6 @@
             <version>1.79</version>
         </dependency>
         <dependency>
-            <groupId>name.neuhalfen.projects.crypto.bouncycastle.openpgp</groupId>
-            <artifactId>bouncy-gpg</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.vdurmont</groupId>
             <artifactId>semver4j</artifactId>
             <version>3.1.0</version>
@@ -514,6 +509,11 @@
             <groupId>com.github.multiformats</groupId>
             <artifactId>java-multiaddr</artifactId>
             <version>v1.4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>3.6.2</version>
         </dependency>
     </dependencies>
 </project>

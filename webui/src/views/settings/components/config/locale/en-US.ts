@@ -106,6 +106,7 @@ export default {
   'page.settings.tab.config.push.form.stmp.receivers.placeholder':
     "Enter one receivers, then press 'Enter'",
   'page.settings.tab.config.push.form.stmp.sendPartial': 'Send Partial',
+  'page.settings.tab.config.push.form.stmp.advance': 'Advance Config',
 
   'page.settings.tab.config.push.form.pushplus.token': 'Token',
   'page.settings.tab.config.push.form.pushplus.topic': 'Topic',

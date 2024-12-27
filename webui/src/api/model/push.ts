@@ -43,7 +43,6 @@ export interface ServerChanConfig {
 export interface PushPlusConfig {
   token: string
   topic: string
-  template: string
   channel: string
 }
 

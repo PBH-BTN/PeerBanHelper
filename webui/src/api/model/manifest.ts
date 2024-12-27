@@ -9,6 +9,7 @@ export interface version {
 export interface release {
   tagName: string
   url: string
+  changeLog: string
 }
 
 export interface module {

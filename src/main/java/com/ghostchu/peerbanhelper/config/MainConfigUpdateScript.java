@@ -6,6 +6,7 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Slf4j
@@ -28,6 +29,15 @@ public class MainConfigUpdateScript {
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
     }
+
+
+    @UpdateScript(version = 27)
+    public void updateResolvers() {
+        conf.set("resolvers.use-system", true);
+        conf.set("resolvers.servers", new ArrayList<>());
+        conf.set("persist.vacuum-interval-days", 60);
+    }
+
 
 
     @UpdateScript(version = 26)
@@ -78,7 +88,7 @@ public class MainConfigUpdateScript {
 
     @UpdateScript(version = 24)
     public void decentralizedConfiguration() {
-        conf.set("decentralized.enabled", true);
+        conf.set("decentralized.enabled", false);
         conf.set("decentralized.kubo-rpc", "/ip4/127.0.0.1/tcp/5001");
         conf.set("decentralized.features.publish-banlist", 3600000);
     }

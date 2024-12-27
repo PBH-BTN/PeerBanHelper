@@ -78,7 +78,7 @@
           style="width: 100%"
         >
           <template #first>
-            <a-space direction="vertical" size="small">
+            <a-space direction="vertical" size="small" style="max-width: 20rem; height: 6rem">
               <a-typography-text type="secondary">{{ t('plus.activeTips') }}</a-typography-text>
               <a-input-search
                 button-text="Go!"
@@ -92,7 +92,9 @@
             <a-space style="display: flex; justify-content: center; align-items: center">
               <a-typography-text type="secondary">{{ t('plus.or') }}</a-typography-text>
               &nbsp;
-              <a-button :loading="loading" @click="handleTry">{{ t('plus.try') }}</a-button>
+              <a-button :loading="loading" @click="handleTry">
+                <template #icon><icon-face-frown-fill /></template>{{ t('plus.try') }}
+              </a-button>
             </a-space>
           </template>
         </a-split>
@@ -110,14 +112,15 @@
       />
     </a-space>
   </a-modal>
+  <tryModal ref="modalCountDown" />
 </template>
 <script lang="ts" setup>
-import medal from '@/components/plusMedal.vue'
-import { obtainFreeTrial } from '@/service/version'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import medal from './plusMedal.vue'
+import tryModal from './plusTryModal.vue'
 
 import { LicenseType } from '@/api/model/manifest'
 const { t, d } = useI18n()
@@ -142,18 +145,8 @@ const submitKey = async (key: string) => {
     loading.value = false
   }
 }
+const modalCountDown = ref<typeof tryModal>()
 const handleTry = async () => {
-  loading.value = true
-  try {
-    const res = await obtainFreeTrial()
-    if (res.success) {
-      Message.success(res.message)
-      endpointStore.getPlusStatus()
-    } else throw new Error(res.message)
-  } catch (e: unknown) {
-    if (e instanceof Error) Message.error(e.message)
-  } finally {
-    loading.value = false
-  }
+  modalCountDown.value?.try()
 }
 </script>

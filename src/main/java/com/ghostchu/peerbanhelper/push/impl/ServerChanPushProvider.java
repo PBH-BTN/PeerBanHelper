@@ -49,7 +49,7 @@ public class ServerChanPushProvider extends AbstractPushProvider {
         section.set("type", "serverchan");
         section.set("sendkey", config.getSendKey());
         section.set("channel", config.getChannel());
-        section.set("openid", config.getOpenid());
+        section.set("openid", config.getOpenId());
         return section;
     }
 
@@ -80,8 +80,8 @@ public class ServerChanPushProvider extends AbstractPushProvider {
         if (config.getChannel() != null) {
             map.put("channel", config.getChannel());
         }
-        if (config.getOpenid() != null) {
-            map.put("openid", config.getOpenid());
+        if (config.getOpenId() != null) {
+            map.put("openid", config.getOpenId());
         }
         HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                 MutableRequest.POST("https://sctapi.ftqq.com/" + config.getSendKey() + ".send"
@@ -100,7 +100,7 @@ public class ServerChanPushProvider extends AbstractPushProvider {
     public static class Config{
         private String sendKey;
         private String channel;
-        private String openid;
+        private String openId;
     }
 
     @NoArgsConstructor

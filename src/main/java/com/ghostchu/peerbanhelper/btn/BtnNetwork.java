@@ -36,8 +36,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Getter
 @Component
+// 特别注意：该类不允许静态初始化任何内容
 public class BtnNetwork implements Reloadable {
-    private static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 8;
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     private final ScriptEngine scriptEngine;
@@ -102,22 +102,26 @@ public class BtnNetwork implements Reloadable {
     }
 
     public void configBtnNetwork() {
+        String response = "<Not Provided>";
+        int statusCode = 0;
         try {
             HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body(), 600));
                 return;
             }
-            JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
+            statusCode = resp.statusCode();
+            response = resp.body();
+            JsonObject json = JsonParser.parseString(response).getAsJsonObject();
             if (!json.has("min_protocol_version")) {
                 throw new IllegalStateException(tlUI(Lang.MISSING_VERSION_PROTOCOL_FIELD));
             }
             int min_protocol_version = json.get("min_protocol_version").getAsInt();
-            if (PBH_BTN_PROTOCOL_IMPL_VERSION < min_protocol_version) {
+            if (Main.PBH_BTN_PROTOCOL_IMPL_VERSION < min_protocol_version) {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             int max_protocol_version = json.get("max_protocol_version").getAsInt();
-            if (PBH_BTN_PROTOCOL_IMPL_VERSION > max_protocol_version) {
+            if (Main.PBH_BTN_PROTOCOL_IMPL_VERSION > max_protocol_version) {
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             resetScheduler();
@@ -154,7 +158,7 @@ public class BtnNetwork implements Reloadable {
             });
             configSuccess.set(true);
         } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_CONFIG_FAILS, 600), e);
+            log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode+" - "+response, 600), e);
         }
     }
 

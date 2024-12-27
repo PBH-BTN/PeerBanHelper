@@ -96,6 +96,16 @@ public class Transmission extends AbstractDownloader {
         return "Transmission";
     }
 
+    @Override
+    public boolean isPaused() {
+        return config.isPaused();
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        config.setPaused(paused);
+    }
+
     @SneakyThrows(InterruptedException.class)
     @Override
     public DownloaderLoginResult login0() {
@@ -125,7 +135,7 @@ public class Transmission extends AbstractDownloader {
 
     @Override
     public List<Torrent> getTorrents() {
-        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE);
+        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.SIZE_WHEN_DONE);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
         return rsp.getArgs().getTorrents().stream()
                 .filter(t -> t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING)
@@ -178,7 +188,7 @@ public class Transmission extends AbstractDownloader {
         RqTorrentGet torrentList = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME,
                 Fields.PEERS_CONNECTED,
                 Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD,
-                Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.IS_PRIVATE);
+                Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.IS_PRIVATE, Fields.SIZE_WHEN_DONE);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrentList);
         List<Long> torrents = rsp.getArgs().getTorrents().stream()
                 .filter(t -> t.getStatus() != Status.STOPPED)
@@ -280,6 +290,7 @@ public class Transmission extends AbstractDownloader {
         private boolean verifySsl;
         private String rpcUrl;
         private boolean ignorePrivate;
+        private boolean paused;
 
         public static Transmission.Config readFromYaml(ConfigurationSection section) {
             Transmission.Config config = new Transmission.Config();
@@ -294,6 +305,7 @@ public class Transmission extends AbstractDownloader {
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
+            config.setPaused(section.getBoolean("paused", false));
             return config;
         }
 
@@ -307,6 +319,7 @@ public class Transmission extends AbstractDownloader {
             section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
+            section.set("paused", paused);
             return section;
         }
     }

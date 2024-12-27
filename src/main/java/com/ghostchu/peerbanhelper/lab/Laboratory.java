@@ -37,6 +37,9 @@ public class Laboratory {
     }
 
     public boolean isExperimentActivated(Experiment experiment) {
+        if (!isEnabled()) {
+            return false;
+        }
         var value = labConfig.getString(experiment.getId());
         if (value == null) {
             labConfig.set(experiment.getId(), "default");
@@ -54,16 +57,16 @@ public class Laboratory {
         }
     }
 
-    public void setExperimentActivated(String id, Boolean activated) throws IllegalArgumentException{
+    public void setExperimentActivated(String id, Boolean activated) throws IllegalArgumentException {
         for (Experiments value : Experiments.values()) {
-            if(!value.getExperiment().getId().equals(id)){
+            if (!value.getExperiment().getId().equals(id)) {
                 continue;
             }
             labConfig.set(value.getExperiment().getId(), activated == null ? "default" : activated);
             saveLabConfig();
             return;
         }
-        throw new IllegalArgumentException("Invalid experiment id: "+id+", it's not exists in Experiments registry");
+        throw new IllegalArgumentException("Invalid experiment id: " + id + ", it's not exists in Experiments registry");
     }
 
     private void saveLabConfig() {
@@ -80,5 +83,14 @@ public class Laboratory {
 
     public boolean isExperimentalGroup(List<Integer> group) {
         return group.contains(experimentalGroup);
+    }
+
+    public void setEnabled(boolean enabled) {
+        labConfig.set("enabled", enabled);
+        saveLabConfig();
+    }
+
+    public boolean isEnabled() {
+        return labConfig.getBoolean("enabled");
     }
 }
