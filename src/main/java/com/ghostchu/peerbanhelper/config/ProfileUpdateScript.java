@@ -26,8 +26,11 @@ public class ProfileUpdateScript {
     }
 
     @UpdateScript(version = 23)
-    public void ptrBlacklist(YamlConfiguration bundled) {
+    public void ptrBlacklistAndUpdateTorExitNodeList(YamlConfiguration bundled) {
         conf.set("module.ptr-blacklist", bundled.get("module.ptr-blacklist"));
+        if("https://cdn.jsdelivr.net/gh/platformcosmo/Tor-IP-Addresses/tor-exit-nodes.lst".equals(conf.getString("module.ip-address-blocker-rules.rules.tor-exit-nodes.url"))){
+            conf.set("module.ip-address-blocker-rules.rules.tor-exit-nodes.url", "https://cdn.jsdelivr.net/gh/7c/torfilter/lists/txt/torfilter-1d-flat.txt");
+        }
     }
 
     @UpdateScript(version = 22)
