@@ -17,7 +17,6 @@ import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
-import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
@@ -31,17 +30,12 @@ import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
-import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
-import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.time.ExceptedTime;
-import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.ghostchu.peerbanhelper.util.time.TimeoutProtect;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -53,17 +47,12 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
-import com.googlecode.aviator.AviatorEvaluator;
-import com.googlecode.aviator.EvalMode;
-import com.googlecode.aviator.Options;
-import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
 import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -77,7 +66,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.math.MathContext;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -185,7 +173,6 @@ public class PeerBanHelperServer implements Reloadable {
         log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
         loadDownloaders();
         registerBanListInvokers();
-        setupScriptEngine();
         registerModules();
         setupIPDB();
         registerHttpServer();
@@ -213,55 +200,6 @@ public class PeerBanHelperServer implements Reloadable {
         // run some junky test code here
     }
 
-    private void setupScriptEngine() {
-        AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
-        // ASM 性能优先
-        AviatorEvaluator.getInstance().setOption(Options.EVAL_MODE, EvalMode.ASM);
-        // EVAL 性能优先
-        AviatorEvaluator.getInstance().setOption(Options.OPTIMIZE_LEVEL, AviatorEvaluator.EVAL);
-        // 降低浮点计算精度
-        AviatorEvaluator.getInstance().setOption(Options.MATH_CONTEXT, MathContext.DECIMAL32);
-        // 启用变量语法糖
-        AviatorEvaluator.getInstance().setOption(Options.ENABLE_PROPERTY_SYNTAX_SUGAR, true);
-//        // 表达式允许序列化和反序列化
-//        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
-        // 启用反射方法查找
-        AviatorEvaluator.getInstance().setFunctionMissing(JavaMethodReflectionFunctionMissing.getInstance());
-        // 注册反射调用
-        registerFunctions(IPAddressUtil.class);
-        registerFunctions(HTTPUtil.class);
-        registerFunctions(JsonUtil.class);
-        registerFunctions(Lang.class);
-        registerFunctions(StrUtil.class);
-        registerFunctions(PeerBanHelperServer.class);
-        registerFunctions(InfoHashUtil.class);
-        registerFunctions(CommonUtil.class);
-        registerFunctions(ByteUtil.class);
-        registerFunctions(MiscUtil.class);
-        registerFunctions(MsgUtil.class);
-        registerFunctions(SharedObject.class);
-        registerFunctions(UrlEncoderDecoder.class);
-        registerFunctions(URLUtil.class);
-        registerFunctions(WebUtil.class);
-        registerFunctions(RSAUtils.class);
-        registerFunctions(Pageable.class);
-        registerFunctions(TextManager.class);
-        registerFunctions(ExchangeMap.class);
-        registerFunctions(Main.class);
-    }
-
-    private void registerFunctions(Class<?> clazz) {
-        try {
-            AviatorEvaluator.addInstanceFunctions(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
-        }
-        try {
-            AviatorEvaluator.addStaticFunctions(StringUtils.capitalize(clazz.getSimpleName()), clazz);
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
-        }
-    }
 
     private void sendSnapshotAlert() {
         if (Main.getMeta().isSnapshotOrBeta()) {
