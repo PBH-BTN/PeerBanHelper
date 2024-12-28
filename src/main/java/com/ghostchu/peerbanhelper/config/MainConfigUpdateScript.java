@@ -81,6 +81,11 @@ public class MainConfigUpdateScript {
                 single.set("sendkey", sendKey);
                 single.set("send-key", null);
             }
+            var chatId = single.get("chat-id");
+            if (chatId != null) {
+                single.set("chatid", chatId);
+                single.set("chat-id", null);
+            }
             pushNotification.set(key, single);
         }
         conf.set("push-notification", pushNotification);
