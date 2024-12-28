@@ -55,12 +55,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @IgnoreScan
 public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable {
     private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.GENERAL_NA), new TranslationComponent("BtnManager not initialized"));
-    @Autowired(required = false)
-    private BtnNetwork manager;
     private long banDuration;
     @Autowired
     private JavalinWebContainer javalinWebContainer;
-    @Autowired
+    @Autowired(required = false)
     private BtnNetwork btnNetwork;
     @Autowired
     private ScriptEngine scriptEngine;
@@ -168,7 +166,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
-        if (manager == null) {
+        if (btnNetwork == null) {
             return BTN_MANAGER_NOT_INITIALIZED;
         }
         // TODO: 需要重构
@@ -186,7 +184,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
-        var abilityObject = manager.getAbilities().get(BtnAbilityRules.class);
+        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
         }
@@ -262,7 +260,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private @NotNull CheckResult checkShouldSkip(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
-        var abilityObject = manager.getAbilities().get(BtnAbilityException.class);
+        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityException.class);
         if (abilityObject == null) {
             return pass();
         }
@@ -296,7 +294,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private @NotNull CheckResult checkShouldBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
-        var abilityObject = manager.getAbilities().get(BtnAbilityRules.class);
+        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
         }
