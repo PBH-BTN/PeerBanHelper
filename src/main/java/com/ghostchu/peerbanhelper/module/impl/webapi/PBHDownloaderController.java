@@ -197,25 +197,26 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             return;
         }
         Downloader downloader = selected.get();
+        boolean ptr = Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup");
         List<PopulatedPeerDTO> peerWrappers = getServer().getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::parallelStream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .filter(p -> p.getTorrent().getId().equals(torrentId))
                 .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
-                .map(this::populatePeerDTO)
+                .map(dat -> populatePeerDTO(dat, ptr))
                 .toList();
         ctx.json(new StdResp(true, null, peerWrappers));
     }
 
-    private PopulatedPeerDTO populatePeerDTO(PeerMetadata p) {
+    private PopulatedPeerDTO populatePeerDTO(PeerMetadata p, boolean resolvePTR) {
         PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null, null);
         PeerBanHelperServer.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
         IPGeoData geoData = response.geoData().get();
         if (geoData != null) {
             dto.setGeo(geoData);
         }
-        if (dto.getPtrRecord() == null && Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
+        if (dto.getPtrRecord() == null && resolvePTR) {
             if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
                 dto.setPtrRecord(dnsLookup.ptr(IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp()).toReverseDNSLookupString()).join().orElse(null));
             } else {
