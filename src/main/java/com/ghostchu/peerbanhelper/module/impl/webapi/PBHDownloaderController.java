@@ -4,11 +4,15 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.lab.Experiments;
+import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -24,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +42,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 public class PBHDownloaderController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private Laboratory laboratory;
+    @Autowired
+    private DNSLookup dnsLookup;
 
     @Override
     public boolean isConfigurable() {
@@ -188,7 +198,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         Downloader downloader = selected.get();
         List<PopulatedPeerDTO> peerWrappers = getServer().getLivePeersSnapshot().values()
                 .stream()
-                .flatMap(Collection::stream)
+                .flatMap(Collection::parallelStream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .filter(p -> p.getTorrent().getId().equals(torrentId))
                 .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
@@ -198,12 +208,24 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     }
 
     private PopulatedPeerDTO populatePeerDTO(PeerMetadata p) {
-        PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null);
+        PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null, null);
         PeerBanHelperServer.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
         IPGeoData geoData = response.geoData().get();
         if (geoData != null) {
             dto.setGeo(geoData);
         }
+        if (dto.getPtrRecord() == null) {
+            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
+                dto.setPtrRecord(dnsLookup.ptr(IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp()).toReverseDNSLookupString()).join().orElse(null));
+            } else {
+                try {
+                    dto.setPtrRecord(InetAddress.getByName(p.getPeer().getAddress().getIp()).getCanonicalHostName());
+                } catch (UnknownHostException e) {
+                    dto.setPtrRecord(null);
+                }
+            }
+        }
+
         return dto;
     }
 
