@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
@@ -214,7 +215,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         if (geoData != null) {
             dto.setGeo(geoData);
         }
-        if (dto.getPtrRecord() == null) {
+        if (dto.getPtrRecord() == null && Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
             if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
                 dto.setPtrRecord(dnsLookup.ptr(IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp()).toReverseDNSLookupString()).join().orElse(null));
             } else {
