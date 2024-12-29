@@ -103,6 +103,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         }
 
         info.put("configSuccess", btnNetwork.getConfigSuccess());
+        info.put("configResult", btnNetwork.getConfigResult());
         var abilities = new ArrayList<>();
         for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {
             Map<String, Object> abilityStatus = new HashMap<>();
