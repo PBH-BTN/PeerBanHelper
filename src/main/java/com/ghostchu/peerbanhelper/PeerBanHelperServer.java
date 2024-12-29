@@ -680,6 +680,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(BtnNetworkOnline.class);
         moduleManager.register(BlockListController.class);
         moduleManager.register(IPBlackRuleList.class);
+        moduleManager.register(PTRBlacklist.class);
         moduleManager.register(PBHMetricsController.class);
         moduleManager.register(PBHBanController.class);
         moduleManager.register(PBHMetadataController.class);
@@ -699,6 +700,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHPushController.class);
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
+
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
