@@ -20,7 +20,7 @@ export default {
   'page.torrentList.accessHistory.column.traffic': '流量',
   'page.torrentList.accessHistory.column.offset': '偏移量',
   'page.torrentList.accessHistory.column.offsetDescription':
-    '从开始或者上次对端重置数据后，上传/下载数据增量信息',
+    '从开始或者上次对端重置数据后，上传 / 下载数据增量信息',
   'page.torrentList.accessHistory.column.timeseen': '会话区间',
   'page.torrentList.accessHistory.column.timeseen.first': '开始于',
   'page.torrentList.accessHistory.column.timeseen.last': '更新于'

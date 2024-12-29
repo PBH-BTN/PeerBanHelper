@@ -50,7 +50,7 @@ export default {
     'Torrent 小于此值不进行检查，对等体可能来不及同步正确的下载进度',
   'page.settings.tab.profile.module.progressCheatBlocker.maxDifference': '最大进度差异',
   'page.settings.tab.profile.module.progressCheatBlocker.maxDifference.tips':
-    'PeerBanHelper 根据 BT 客户端记录的向此对等体实际上传的字节数，计算该对等体的最小下载进度，并与对等体汇报给 BT 客户端下载进度进行比较，如果对等体汇报的总体下载进度远远低于我们上传给此对等体的数据量的比例，我们应考虑客户端正在汇报假进度，对于自动识别迅雷、QQ旋风的变种非常有效，能够在不更新规则的情况下自动封禁报假进度的吸血客户端',
+    'PeerBanHelper 根据 BT 客户端记录的向此对等体实际上传的字节数，计算该对等体的最小下载进度，并与对等体汇报给 BT 客户端下载进度进行比较，如果对等体汇报的总体下载进度远远低于我们上传给此对等体的数据量的比例，我们应考虑客户端正在汇报假进度，对于自动识别迅雷、QQ 旋风的变种非常有效，能够在不更新规则的情况下自动封禁报假进度的吸血客户端',
   'page.settings.tab.profile.module.progressCheatBlocker.progressRewindDetection': '进度倒退检测',
   'page.settings.tab.profile.module.progressCheatBlocker.rewindMaxDifference': '最大回退进度差异',
   'page.settings.tab.profile.module.progressCheatBlocker.rewindMaxDifference.tips':
@@ -75,13 +75,13 @@ export default {
     '有时由于下载器网络原因，Peer 可能无法及时同步其进度信息，当 Peer 达到封禁阈值后开始计时，如果 Peer 未在给定时间内更新自己的进度到正常水平，则将被封禁',
   'page.settings.tab.profile.module.progressCheatBlocker.enableFastPCBTest': '启用快速 PCB 测试',
   'page.settings.tab.profile.module.progressCheatBlocker.enableFastPCBTest.tips':
-    '此选项将允许 PCB 在 Peer 下载指定量的数据后，将其短暂的封禁一段时间以便断开其连接，这有助于快速预热进度重置检查',
+    '此选项将容许 PCB 在 Peer 下载指定量的数据后，将其短暂的封禁一段时间以便断开其连接，这有助于快速预热进度重置检查',
   'page.settings.tab.profile.module.progressCheatBlocker.fastPCBTestPercentage':
     '快速 PCB 测试启动阈值',
 
   'page.settings.tab.profile.module.ipAddressBlocker.title': 'IP 地址封禁',
   'page.settings.tab.profile.module.ipAddressBlocker.useGlobalBanTime': '使用全局封禁时间',
-  'page.settings.tab.profile.module.ipAddressBlocker.rules': '配置规则请前往{link}页面',
+  'page.settings.tab.profile.module.ipAddressBlocker.rules': '配置规则请前往 {link} 页面',
   'page.settings.tab.profile.module.ipAddressBlocker.rules.link': '规则配置',
 
   'page.settings.tab.profile.module.autoRangeBan.title': '连锁封禁',
@@ -98,7 +98,7 @@ export default {
   'page.settings.tab.profile.module.multiDialingBlocker.subnet-mask-v6-length': 'IPv6子网掩码长度',
   'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num': '封禁阈值（{version}）',
   'page.settings.tab.profile.module.multiDialingBlocker.tolerate-num.tips':
-    '容许同一网段下载同一种子的IP数量，防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判',
+    '容许同一网段下载同一种子的 IP 数量，防止 DHCP 重新分配 IP、碰巧有同一小区的用户下载同一种子等导致的误判',
   'page.settings.tab.profile.module.multiDialingBlocker.timeWindow': '检测窗口',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting': '是否追猎',
   'page.settings.tab.profile.module.multiDialingBlocker.keep-hunting.tips':
@@ -112,7 +112,7 @@ export default {
 
   'page.settings.tab.profile.module.ruleSubscribe.title': '规则订阅',
   'page.settings.tab.profile.module.ruleSubscribe.useGlobalBanTime': '使用全局封禁时间',
-  'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置请前往{link}页面',
+  'page.settings.tab.profile.module.ruleSubscribe.subscribe': '其他配置请前往 {link} 页面',
   'page.settings.tab.profile.module.ruleSubscribe.subscribe.link': '规则订阅',
 
   'page.settings.tab.profile.module.activeMonitor.title': '主动监控',

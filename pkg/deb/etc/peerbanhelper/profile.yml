@@ -117,8 +117,8 @@ module:
     # It works well on detecting new various and cheat clients.
     maximum-difference: 0.1
     # 进度倒退检测 - Progress rewind detection
-    # 默认：最多允许倒退 7% 的进度 - Default: Up to 7% rewind is allowed
-    # (考虑到有时文件片段在传输时可能因损坏而未通过校验被丢弃，我们允许客户端出现合理的进度倒退)
+    # 默认：最多容许倒退 7% 的进度 - Default: Up to 7% rewind is allowed
+    # (考虑到有时文件片段在传输时可能因损坏而未通过校验被丢弃，我们容许客户端出现合理的进度倒退)
     # (Sometimes the pisces may break during transfer, client may drop those pisces, we allow client have rewind in reasonable range)
     # 设置为 -1 以禁用此检测
     # Set to -1 for disabling

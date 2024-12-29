@@ -48,9 +48,9 @@ export default {
   'router.moduleNotEnable.tips': '请在配置文件中开启相关功能',
   'router.moduleNotEnable.viewDoc': '查看文档',
 
-  'service.networkErrorRetry': '网络连接失败，将于{time}后重试',
+  'service.networkErrorRetry': '网络连接失败，将于 {time} 后重试',
   'service.networkErrorRetry.loading': '网络连接失败，正在重新连接',
-  'service.networkErrorRetry.second': '{count}秒',
+  'service.networkErrorRetry.second': '{count} 秒',
   'service.networkErrorRetry.cancel': '取消重试',
   'service.networkErrorRetry.retry': '重试',
 

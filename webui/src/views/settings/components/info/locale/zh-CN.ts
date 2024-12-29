@@ -11,7 +11,7 @@ export default {
   'page.settings.tab.info.version.plus.active': '已激活',
   'page.settings.tab.info.version.plus.inactive': '未激活',
   'page.settings.tab.info.version.webui.versionNotMatch':
-    'WebUI Commit 与后端不同，这可能是由于你在使用外部 WebUI 或者浏览器缓存，请硬刷新后再试试。',
+    'WebUI Commit 与后端不同，这可能是由于你在使用外部 WebUI 或者浏览器缓存，请硬刷新后再查看 WebUI。',
 
   'page.settings.tab.info.system': '系统信息',
   'page.settings.tab.info.system.os': '操作系统',
@@ -29,7 +29,7 @@ export default {
   'page.settings.tab.info.network.reverseProxy': '反向代理',
   'page.settings.tab.info.network.clientIP': '浏览器 IP',
   'page.settings.tab.info.network.clientIP.tips':
-    'PBH视角当前浏览器的 IP 地址，可用于排查反向代理的相关问题',
+    'PBH 视角当前浏览器的 IP 地址，可用于排查反向代理的相关问题',
   'page.settings.tab.info.network.clientIP.warning':
     'PBH 获取到了一个本地的 IP 地址，这通常是非预期的并意味着您的反向代理配置有误，请检查您的反向代理配置',
   'page.settings.tab.info.network.yes': '是',
@@ -50,7 +50,7 @@ export default {
   'page.settings.tab.info.btn.status.fail': '配置文件获取失败',
   'page.settings.tab.info.btn.status.configUrl': '服务器地址',
   'page.settings.tab.info.btn.abilities': '能力列表',
-  'page.settings.tab.info.btn.abilities.enable': '{number}个能力已启用',
+  'page.settings.tab.info.btn.abilities.enable': '{number} 个能力已启用',
   'page.settings.tab.info.btn.abilities.tips':
     'BTN 服务端提供了多种能力，以下是当前服务器提供的能力列表：',
 

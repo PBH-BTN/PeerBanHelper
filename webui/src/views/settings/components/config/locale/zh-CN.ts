@@ -1,6 +1,6 @@
 export default {
   'page.settings.tab.config.title': '基础设置',
-  'page.settings.tab.config.tips': '这里保存了PBH运行必不可少的一些基础设置',
+  'page.settings.tab.config.tips': '这里保存了 PBH 运行必不可少的一些基础设置',
 
   'page.settings.tab.config.unit.day': '天',
 
@@ -16,7 +16,7 @@ export default {
 
   'page.settings.tab.config.server.title': 'WebUI',
   'page.settings.tab.config.server.port': '端口',
-  'page.settings.tab.config.server.port.error': '端口号必须在1-65535之间',
+  'page.settings.tab.config.server.port.error': '端口号必须在 1-65535 之间',
   'page.settings.tab.config.server.address': '地址',
   'page.settings.tab.config.server.prefix': '前缀',
   'page.settings.tab.config.server.prefix.tips':
@@ -46,7 +46,7 @@ export default {
   'page.settings.tab.config.btn.enableSubmit.modal.title': '警告',
   'page.settings.tab.config.btn.enableSubmit.modal.content': `BTN 网络基于所有启用此功能的用户提交的数据，对 Peers 进行可信度验证，通过启用此选项，您也会加入 BTN 网络并提交您的 Torrent 上的活动。以下信息将被发送到 BTN 实例:`,
   'page.settings.tab.config.btn.enableSubmit.modal.content2':
-    '您的 Torrent 列表（包括：Torrent 种子摘要的二次不可逆哈希和 Torrent 大小），连接到您的 Torrent 的所有 Peers （包括：IP地址、端口号、PeerID、UserAgent（ClientName），Peer协议，Peer总下载量，Peer总上传量，Peer瞬时上传速度，Peer瞬时下载速度，Peer下载进度，以及您的下载器名称）',
+    '您的 Torrent 列表（包括：Torrent 种子摘要的二次不可逆哈希和 Torrent 大小），连接到您的 Torrent 的所有 Peers （包括：IP地址、端口号、PeerID、UserAgent（ClientName），Peer 协议，Peer 总下载量，Peer 总上传量，Peer 瞬时上传速度，Peer 瞬时下载速度，Peer 下载进度，以及您的下载器名称）',
   'page.settings.tab.config.btn.enableSubmit.modal.content3': '确定要开启提交吗？',
   'page.settings.tab.config.btn.allowScript': '允许 BTN 服务器下发脚本',
   'page.settings.tab.config.btn.allowScript.warning':
@@ -74,7 +74,7 @@ export default {
   'page.settings.tab.config.performance.title': '性能',
   'page.settings.tab.config.performance.useEcoQOS': '使用 Windows EcoQos API',
   'page.settings.tab.config.performance.useEcoQOS.tips':
-    '启用 Windows 平台上的 {link}以节约能源消耗，程序运行速度将降低，定时任务可能推迟',
+    '启用 Windows 平台上的 {link} 以节约能源消耗，程序运行速度将降低，定时任务可能推迟',
 
   'page.settings.tab.config.push.title': '消息通知',
   'page.settings.tab.config.push.description':
@@ -89,7 +89,7 @@ export default {
   'page.settings.tab.config.push.form.type': '类型',
   'page.settings.tab.config.push.form.type.smtp': '邮件',
   'page.settings.tab.config.push.form.type.pushplus': 'Push+',
-  'page.settings.tab.config.push.form.type.serverchan': 'Server酱',
+  'page.settings.tab.config.push.form.type.serverchan': 'Server 酱',
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
 
   'page.settings.tab.config.push.form.stmp.host': '主机',
