@@ -105,6 +105,11 @@ public final class QBittorrentPeer implements Peer {
     }
 
     @Override
+    public boolean isHandshaking() {
+        return upSpeed <= 0 && dlSpeed <= 0;
+    }
+
+    @Override
     public List<PeerMessage> getSupportedMessages() {
         return Collections.emptyList();
     }

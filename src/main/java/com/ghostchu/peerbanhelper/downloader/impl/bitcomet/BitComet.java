@@ -355,7 +355,8 @@ public class BitComet extends AbstractDownloader {
                     peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10
                     peer.getUpRate(),
                     peer.getUpSize() != null ? peer.getUpSize() : -1, // 兼容 2.10
-                    peer.getPermillage() / 1000.0d, null, Collections.emptyList())
+                    peer.getPermillage() / 1000.0d, null, Collections.emptyList(),
+                    peer.getDlRate() <= 0 && peer.getUpRate() <= 0)
             ).collect(Collectors.toList());
         } catch (Exception e) {
             throw new IllegalStateException(e);

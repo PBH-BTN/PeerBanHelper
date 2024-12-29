@@ -255,7 +255,8 @@ public class BiglyBT extends AbstractDownloader {
                     peer.getStats().getTotalSent(),
                     peer.getPercentDoneInThousandNotation() / 1000d,
                     null,
-                    supportedMessages
+                    supportedMessages,
+                     peer.getState() != 30 && peer.getState() != 40
             ));
         }
         return peersList;
