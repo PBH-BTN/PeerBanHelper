@@ -74,5 +74,9 @@ const handleOk = async () => {
 }
 const handleCancel = () => {
   visible.value = false
+  if (timer.value) {
+    clearInterval(timer.value)
+    timer.value = null
+  }
 }
 </script>
