@@ -47,8 +47,7 @@
       scrollbar
       :virtual-list-props="{
         height: 650,
-        buffer: 50,
-        fixedSize: true
+        buffer: 50
       }"
       :data="list"
     >
