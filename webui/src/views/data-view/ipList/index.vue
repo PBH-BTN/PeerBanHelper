@@ -278,8 +278,8 @@ onMounted(() => {
   justify-content: center;
 }
 .searchBox {
-  transform: scale(2);
-  width: 400px;
+  transform: scale(1.5);
+  width: 30rem;
 }
 .result-container {
   margin-top: 1em;
