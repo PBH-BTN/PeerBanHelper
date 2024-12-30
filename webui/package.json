@@ -17,7 +17,7 @@
   "dependencies": {
     "@arco-design/web-vue": "^2.56.3",
     "@dzangolab/flag-icon-css": "^3.4.5",
-    "@formatjs/intl-durationformat": "^0.6.4",
+    "@formatjs/intl-durationformat": "^0.7.0",
     "@guolao/vue-monaco-editor": "^1.5.4",
     "@octokit/core": "^6.1.2",
     "@octokit/request-error": "^6.1.5",
