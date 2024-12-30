@@ -58,10 +58,10 @@ export default {
   "page.dashboard.editModal.label.ignorePrivate": "忽略私有种子",
   "page.dashboard.editModal.label.ignorePrivate.description":
     "在低于 qBittorrent 5.x 版本上时启用此开关可能增加下载器的 WebAPI 压力",
-  "page.dashboard.editModal.biglybt": "请先安装 {url}",
+  "page.dashboard.editModal.biglybt": "请先安装{url}",
   "page.dashboard.editModal.biglybt.url": "插件",
   "page.dashboard.editModal.transmission.discourage":
-    "警告：Transmission 适配器已被废弃，并将在将来的版本移除。 https://github.com/PBH-BTN/PeerBanHelper/issues/382",
+    "警告：Transmission 适配器已被废弃，并将在将来的版本移除。https://github.com/PBH-BTN/PeerBanHelper/issues/382",
   "page.dashboard.peerList.title": "活动 Peer 列表：",
   "page.dashboard.peerList.column.address": "地址",
   "page.dashboard.peerList.column.port": "端口",
