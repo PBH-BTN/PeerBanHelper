@@ -28,6 +28,7 @@ public abstract class AbstractDownloader implements Downloader {
     @Override
     public DownloaderLoginResult login() {
         if(isPaused()){
+            lastStatus = DownloaderLastStatus.PAUSED;
             return new DownloaderLoginResult(DownloaderLoginResult.Status.PAUSED, new TranslationComponent(Lang.DOWNLOADER_PAUSED));
         }
         if (nextLoginTry >= System.currentTimeMillis()) {
