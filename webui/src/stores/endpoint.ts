@@ -147,7 +147,7 @@ export const useEndpointStore = defineStore('endpoint', () => {
   const getPlusStatus = async () => {
     const result = await getPBHPlusStatus()
     plusStatus.value = result.data
-    if (result.data.activated) {
+    if (result?.data?.activated) {
       console.log('PBH Plus Activated! Thanks for your support ❤️')
     }
   }
