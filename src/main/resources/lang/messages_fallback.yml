@@ -332,7 +332,7 @@ WEBVIEW_DEFAULT_DISABLED: "WebUI 现在默认禁用，建议使用系统浏览�
 
 PCB_SHUTTING_DOWN: "请等待 ProgressCheatBlocker 将缓存在内存中的数据刷写到数据库，最多 5 秒……"
 
-PBHPLUS_LICENSE_FAILED: "PBH Plus 鉴权失败，请在 config.yml 中填写一个有效的 PeerBanHelper Plus Key"
+PBHPLUS_LICENSE_FAILED: "PBH Plus 鉴权失败，请在 config.yml 中填写一个有效的 PeerBanHelper+ Key"
 CHARTS_IPDB_NEED_INIT: "请先配置 GeoIP 数据库"
 
 IP_BLACKLIST_PUT_IP_INVALID_IP: "无效 IP 地址，请输入一个有效的 IPV4/IPV6 地址，或者 CIDR 表达式"

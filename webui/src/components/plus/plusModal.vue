@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:visible="showModal"
-    title="PeerBanHelper Plus"
+    title="PeerBanHelper+"
     unmount-on-close
     hide-cancel
     width="auto"

@@ -27,7 +27,7 @@ export default {
   'page.charts.trends.options.bans': '封禁数',
   'page.charts.traffic.options.download': '下载',
   'page.charts.traffic.options.upload': '上传',
-  'page.charts.locked': '此图表需要激活 PeerBanHelper Plus 才能查看',
+  'page.charts.locked': '此图表需要激活 PeerBanHelper+ 才能查看',
   'page.charts.locked.tips': '已经捐赠？点击立即激活订阅',
   'page.charts.locked.active': '立即激活',
   'page.charts.title.geoip': '位置与运营商 ',
