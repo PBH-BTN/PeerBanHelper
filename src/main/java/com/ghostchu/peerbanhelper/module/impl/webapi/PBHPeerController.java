@@ -78,7 +78,6 @@ public class PBHPeerController extends AbstractFeatureModule {
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
         activeMonitoringModule.flush();
-        @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         long banCount = historyDao.queryBuilder()
                 .where()
@@ -153,7 +152,6 @@ public class PBHPeerController extends AbstractFeatureModule {
 
 
     private void handleBanHistory(Context ctx) throws SQLException {
-        @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
         var builder = historyDao.queryBuilder()
@@ -169,7 +167,6 @@ public class PBHPeerController extends AbstractFeatureModule {
 
     private void handleAccessHistory(Context ctx) throws SQLException {
         activeMonitoringModule.flush();
-        @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
         var builder = peerRecordDao.queryBuilder()
