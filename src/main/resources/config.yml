@@ -181,7 +181,7 @@ decentralized:
     # Publish current banlist to IPFS to allow others subscribe your banlist, time unit: milliseconds, set to -1 to disable
     publish-banlist: 3600000
 
-# 自定义 DNS 解析器，暂不支持 DoH/DoT/DoQ
+# 自定义 DNS 解析器，暂不支持 DoT/DoQ
 # 留空则使用系统 DNS
 # 部分 DNS 存在速率限制，建议使用与系统 DNS 不同的 DNS，以避免影响正常上网解析
 # 要使此配置生效，需要启用 DNSJava 实验
