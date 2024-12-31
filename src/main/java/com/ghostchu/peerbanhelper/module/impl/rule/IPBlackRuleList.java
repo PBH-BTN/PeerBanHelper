@@ -51,10 +51,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -363,26 +360,30 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      */
     private int stringToIPList(String data, DualIPv4v6AssociativeTries<String> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
-        Arrays.stream(data.split("\n")).filter(s -> !s.isBlank()).forEach(ele -> {
+        StringJoiner sj = new StringJoiner("\n");
+        for (String ele : data.split("\n")) {
+            if(ele.isBlank()) continue;
             if (ele.startsWith("#")) {
-                return; // 注释
+                // add into sj but without hashtag prefix
+                sj.add(ele.substring(1));
+                continue;
             }
             try {
-                var parsedIp = parseRuleLine(ele);
+                var parsedIp = parseRuleLine(ele, sj.toString());
                 if (parsedIp != null) {
                     count.getAndIncrement();
                     ips.put(parsedIp.getLeft(), parsedIp.getRight());
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
+            }finally {
+                sj = new StringJoiner("\n");
             }
-        });
+        }
         return count.get();
     }
 
-    private Pair<IPAddress, @Nullable String> parseRuleLine(String ele) {
-        // 注释？
-        if (ele.startsWith("#")) return null;
+    private Pair<IPAddress, @Nullable String> parseRuleLine(String ele, String preReadComment) {
         // 检查是否是 DAT/eMule 格式
         // 016.000.000.000 , 016.255.255.255 , 200 , Yet another organization
         // 032.000.000.000 , 032.255.255.255 , 200 , And another
@@ -394,7 +395,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             IPAddress start = IPAddressUtil.getIPAddress(spilted[0]);
             IPAddress end = IPAddressUtil.getIPAddress(spilted[1]);
             int level = Integer.parseInt(spilted[2]);
-            String comment = spilted.length > 3 ? spilted[3] : null;
+            String comment = spilted.length > 3 ? spilted[3] : preReadComment;
             if (level >= 128) return null;
             if (start == null || end == null) return null;
             return Pair.of(start.spanWithRange(end).coverWithPrefixBlock(), comment);
@@ -407,9 +408,9 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                 if (ele.contains("#")) {
                     comment = ele.substring(ele.indexOf("#") + 1);
                 }
-                return Pair.of(IPAddressUtil.getIPAddress(ip), comment);
+                return Pair.of(IPAddressUtil.getIPAddress(ip), Optional.ofNullable(comment).orElse(preReadComment));
             }else{
-                return Pair.of(IPAddressUtil.getIPAddress(ele), null);
+                return Pair.of(IPAddressUtil.getIPAddress(ele), preReadComment);
             }
         }
     }
