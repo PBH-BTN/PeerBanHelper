@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -25,7 +27,7 @@ public abstract class AbstractJsonMatcher extends AbstractMatcher {
         }
         if (condition != null) {
             if (condition.match(content).result() == MatchResultEnum.FALSE) {
-                return new MatchResult(MatchResultEnum.FALSE, "Condition not met: " + condition.toPrintableText(Main.DEF_LOCALE) + " on " + toPrintableText(Main.DEF_LOCALE));
+                return new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.JSON_MATCHER_NOT_MET, condition.toPrintableText(Main.DEF_LOCALE), toPrintableText(Main.DEF_LOCALE)));
             }
         }
         return match0(content);

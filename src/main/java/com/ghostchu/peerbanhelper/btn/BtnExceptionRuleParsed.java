@@ -39,7 +39,7 @@ public class BtnExceptionRuleParsed {
                     @Override
                     public @NotNull MatchResult match0(@NotNull String content) {
                         boolean hit = Integer.parseInt(content) == s;
-                        return hit ? new MatchResult(MatchResultEnum.TRUE, "Port matched") : new MatchResult(MatchResultEnum.DEFAULT, "Port seems OK");
+                        return hit ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_PORT_MATCH)) : new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("Port seems OK"));
                     }
 
                     @Override

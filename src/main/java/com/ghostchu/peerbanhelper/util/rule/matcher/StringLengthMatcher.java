@@ -16,18 +16,18 @@ public class StringLengthMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_LENGTH);
     private final int min;
     private final int max;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, "StringLength Hit");
-    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, "StringLength Miss");
+    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_LENGTH, "<Not Provided>"));
+    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_STRING_LENGTH, "<Not Provided>"));
 
     public StringLengthMatcher(JsonObject syntax) {
         super(syntax);
         this.min = syntax.get("min").getAsInt();
         this.max = syntax.get("max").getAsInt();
         if (syntax.has("hit")) {
-            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), "StringLength Hit");
+            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent(Lang.MATCH_STRING_LENGTH, "Hit-Min-" + min + ", Max-" + max));
         }
         if (syntax.has("miss")) {
-            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), "StringLength Miss");
+            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), new TranslationComponent(Lang.MATCH_STRING_LENGTH, "Miss-Min-" + min + ", Max-" + max));
         }
     }
 

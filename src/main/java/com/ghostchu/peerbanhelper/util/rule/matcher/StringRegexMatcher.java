@@ -17,17 +17,17 @@ import java.util.regex.Pattern;
 public class StringRegexMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_REGEX);
     private final Pattern rule;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, "StringRegex Hit");
-    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, "StringRegex Miss");
+    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_REGEX, "<Not Provided>"));
+    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_STRING_REGEX, "<Not Provided>"));
 
     public StringRegexMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = Pattern.compile(syntax.get("content").getAsString());
         if (syntax.has("hit")) {
-            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), "StringRegex Hit");
+            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent(Lang.MATCH_STRING_REGEX, "Hit=" + rule.pattern()));
         }
         if (syntax.has("miss")) {
-            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), "StringRegex Miss");
+            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), new TranslationComponent(Lang.MATCH_STRING_REGEX, "Miss=" + rule.pattern()));
         }
     }
 

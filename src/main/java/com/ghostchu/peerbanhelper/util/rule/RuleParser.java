@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.matcher.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -78,7 +80,7 @@ public class RuleParser {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsBoolean() ? new MatchResult(MatchResultEnum.TRUE, "Boolean condition") : new MatchResult(MatchResultEnum.FALSE, "Boolean condition");
+                        return primitive.getAsBoolean() ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN)) : new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN));
                     }
 
                     @Override
@@ -96,7 +98,7 @@ public class RuleParser {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsBoolean() ? new MatchResult(MatchResultEnum.TRUE, "Boolean (by Integer) condition") : new MatchResult(MatchResultEnum.FALSE, "Boolean (by Integer) condition");
+                        return primitive.getAsBoolean() ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_INTEGER)) : new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_INTEGER));
                     }
 
                     @Override
@@ -115,7 +117,7 @@ public class RuleParser {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
                         String str = primitive.getAsString();
-                        return Boolean.parseBoolean(str) ? new MatchResult(MatchResultEnum.TRUE, "Boolean (by String) condition") : new MatchResult(MatchResultEnum.FALSE, "Boolean (by String) condition");
+                        return Boolean.parseBoolean(str) ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_STRING)) : new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_STRING));
                     }
 
                     @Override

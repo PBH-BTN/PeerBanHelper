@@ -17,17 +17,17 @@ import java.util.Locale;
 public class StringContainsMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_CONTAINS);
     private final String rule;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, "StringContains Hit");
-    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, "StringContains Miss");
+    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
+    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
 
     public StringContainsMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString().toLowerCase(Locale.ROOT);
         if (syntax.has("hit")) {
-            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), "StringContains Hit");
+            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "Hit-" + rule));
         }
         if (syntax.has("miss")) {
-            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), "StringContains Miss");
+            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "Miss-" + rule));
         }
     }
 

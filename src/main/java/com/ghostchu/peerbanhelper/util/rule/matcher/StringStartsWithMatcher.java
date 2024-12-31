@@ -17,17 +17,17 @@ import java.util.Locale;
 public class StringStartsWithMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_STARTS_WITH);
     private final String rule;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, "StringStatsWith Hit");
-    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, "StringStatsWith Miss");
+    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent("StringStatsWith Hit"));
+    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, new TranslationComponent("StringStatsWith Miss"));
 
     public StringStartsWithMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString().toLowerCase(Locale.ROOT);
         if (syntax.has("hit")) {
-            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), "StringStatsWith Hit");
+            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent("StringStatsWith Hit"));
         }
         if (syntax.has("miss")) {
-            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), "StringStatsWith Miss");
+            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), new TranslationComponent("StringStatsWith Miss"));
         }
     }
 
