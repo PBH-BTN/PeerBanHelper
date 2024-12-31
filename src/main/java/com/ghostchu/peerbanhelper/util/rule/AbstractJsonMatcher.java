@@ -24,8 +24,8 @@ public abstract class AbstractJsonMatcher extends AbstractMatcher {
             content = "";
         }
         if (condition != null) {
-            if (condition.match(content) == MatchResult.FALSE) {
-                return MatchResult.FALSE;
+            if (condition.match(content).result() == MatchResultEnum.FALSE) {
+                return new MatchResult(MatchResultEnum.FALSE, "Condition not met: " + condition.toPrintableText(Main.DEF_LOCALE) + " on " + toPrintableText(Main.DEF_LOCALE));
             }
         }
         return match0(content);

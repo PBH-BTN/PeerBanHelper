@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public class RuleParser {
@@ -21,14 +20,14 @@ public class RuleParser {
     }
 
     public static RuleMatchResult matchRule(List<Rule> rules, String content) {
-        RuleMatchResult matchResult = new RuleMatchResult(false, null);
+        RuleMatchResult matchResult = new RuleMatchResult(false, null, null);
         for (Rule rule : rules) {
             MatchResult result = rule.match(content);
-            if (result == MatchResult.FALSE) { // 规则的优先级最高
-                return new RuleMatchResult(false, rule);
+            if (result.result() == MatchResultEnum.FALSE) { // 规则的优先级最高
+                return new RuleMatchResult(false, rule, result.comment());
             }
-            if (result == MatchResult.TRUE) { // 其次，可被覆盖
-                matchResult = new RuleMatchResult(true, rule);
+            if (result.result() == MatchResultEnum.TRUE) { // 其次，可被覆盖
+                matchResult = new RuleMatchResult(true, rule,result.comment());
             }
         }
 
@@ -41,7 +40,7 @@ public class RuleParser {
             return new Rule() {
                 @Override
                 public @NotNull MatchResult match(@NotNull String content) {
-                    return MatchResult.TRUE;
+                    return new MatchResult(MatchResultEnum.TRUE, null);
                 }
 
                 @Override
@@ -59,7 +58,7 @@ public class RuleParser {
             return new Rule() {
                 @Override
                 public @NotNull MatchResult match(@NotNull String content) {
-                    return MatchResult.DEFAULT;
+                    return new MatchResult(MatchResultEnum.TRUE, null);
                 }
 
                 @Override
@@ -79,7 +78,7 @@ public class RuleParser {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsBoolean() ? MatchResult.TRUE : MatchResult.FALSE;
+                        return primitive.getAsBoolean() ? new MatchResult(MatchResultEnum.TRUE, "Boolean condition") : new MatchResult(MatchResultEnum.FALSE, "Boolean condition");
                     }
 
                     @Override
@@ -97,7 +96,7 @@ public class RuleParser {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsInt() != 0 ? MatchResult.TRUE : MatchResult.FALSE;
+                        return primitive.getAsBoolean() ? new MatchResult(MatchResultEnum.TRUE, "Boolean (by Integer) condition") : new MatchResult(MatchResultEnum.FALSE, "Boolean (by Integer) condition");
                     }
 
                     @Override
@@ -116,7 +115,7 @@ public class RuleParser {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
                         String str = primitive.getAsString();
-                        return Boolean.parseBoolean(str) ? MatchResult.TRUE : MatchResult.FALSE;
+                        return Boolean.parseBoolean(str) ? new MatchResult(MatchResultEnum.TRUE, "Boolean (by String) condition") : new MatchResult(MatchResultEnum.FALSE, "Boolean (by String) condition");
                     }
 
                     @Override

@@ -21,10 +21,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.NullUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.rule.MatchResult;
-import com.ghostchu.peerbanhelper.util.rule.Rule;
-import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
-import com.ghostchu.peerbanhelper.util.rule.RuleParser;
+import com.ghostchu.peerbanhelper.util.rule.*;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -413,7 +410,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         for (String category : rule.getIpRules().keySet()) {
             var ipMatcher = rule.getIpRules().get(category);
             MatchResult matchResult = ipMatcher.match(pa.toString());
-            if (matchResult == MatchResult.TRUE) {
+            if (matchResult.result() == MatchResultEnum.TRUE) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, category), new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
             }
         }
