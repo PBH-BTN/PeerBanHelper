@@ -5,12 +5,9 @@ import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.rule.AbstractMatcher;
-import com.ghostchu.peerbanhelper.util.rule.MatchResult;
-import com.ghostchu.peerbanhelper.util.rule.Rule;
-import com.ghostchu.peerbanhelper.util.rule.RuleParser;
+import com.ghostchu.peerbanhelper.util.rule.*;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
-import inet.ipaddr.format.util.DualIPv4v6Tries;
+import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +67,7 @@ public class BtnRuleParsed {
                     @Override
                     public @NotNull MatchResult match0(@NotNull String content) {
                         boolean hit = Integer.parseInt(content) == s;
-                        return hit ? MatchResult.TRUE : MatchResult.DEFAULT;
+                        return hit ? new MatchResult(MatchResultEnum.TRUE, "Port matched") : new MatchResult(MatchResultEnum.DEFAULT, "Port seems OK");
                     }
 
                     @Override
@@ -97,7 +94,7 @@ public class BtnRuleParsed {
     public Map<String, IPMatcher> parseIPRule(Map<String, List<String>> raw) {
         Map<String, IPMatcher> rules = new HashMap<>();
         raw.forEach((k, v) -> {
-            DualIPv4v6Tries tries = new DualIPv4v6Tries();
+            DualIPv4v6AssociativeTries<String> tries = new DualIPv4v6AssociativeTries<>();
             v.stream().map(IPAddressUtil::getIPAddress).forEach(tries::add);
             rules.put(k,new IPMatcher(version, k, List.of(tries)));
         });

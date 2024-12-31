@@ -4,9 +4,10 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
+import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatcher;
 import inet.ipaddr.IPAddress;
-import inet.ipaddr.format.util.DualIPv4v6Tries;
+import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +18,10 @@ import java.util.List;
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class IPMatcher extends RuleMatcher<DualIPv4v6Tries> {
-    private DualIPv4v6Tries ips;
+public class IPMatcher extends RuleMatcher<DualIPv4v6AssociativeTries<String>> {
+    private DualIPv4v6AssociativeTries<String> ips;
 
-    public IPMatcher(String ruleId, String ruleName, List<DualIPv4v6Tries> ruleData) {
+    public IPMatcher(String ruleId, String ruleName, List<DualIPv4v6AssociativeTries<String>> ruleData) {
         super(ruleId, ruleName, ruleData);
         this.ips = ruleData.getFirst();
     }
@@ -31,7 +32,7 @@ public class IPMatcher extends RuleMatcher<DualIPv4v6Tries> {
      * @param ruleName 规则名
      * @param ruleData 规则数据
      */
-    public void setData(String ruleName, List<DualIPv4v6Tries> ruleData) {
+    public void setData(String ruleName, List<DualIPv4v6AssociativeTries<String>> ruleData) {
         setRuleName(ruleName);
         this.ips = ruleData.getFirst();
     }
@@ -43,14 +44,14 @@ public class IPMatcher extends RuleMatcher<DualIPv4v6Tries> {
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         final IPAddress ip = IPAddressUtil.getIPAddress(content);
-        if (ip == null) return MatchResult.DEFAULT;
+        if (ip == null) return new MatchResult(MatchResultEnum.DEFAULT, "IP is null");
         if (ips == null) {
-            return MatchResult.DEFAULT;
+            new MatchResult(MatchResultEnum.DEFAULT, "IPs set is null");
         }
         if (ips.elementContains(ip)) {
-            return MatchResult.TRUE;
+            return new MatchResult(MatchResultEnum.DEFAULT, ips.get(ip));
         }
-        return MatchResult.DEFAULT;
+        return new MatchResult(MatchResultEnum.DEFAULT, "Given IP not in IPs set");
     }
 
     @Override

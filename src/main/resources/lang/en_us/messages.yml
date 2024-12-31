@@ -18,7 +18,7 @@ CHECK_COMPLETED: "[Completed] Checked {} downloaders with {} active torrents and
 ERR_INVALID_RULE_SYNTAX: "The expression of rule {} is invalid, please check for spelling errors"
 MODULE_CNB_MATCH_CLIENT_NAME: "Match ClientName (UserAgent): {}"
 MODULE_IBL_MATCH_IP: "Match IP rule: {}"
-MODULE_IBL_MATCH_IP_RULE: "Match IP blacklist subscription rule: {}, IP address: {}"
+MODULE_IBL_MATCH_IP_RULE: "Match IP blacklist subscription rule: {}, IP address: {}, Comment: {}"
 MODULE_IBL_MATCH_ASN: "Match ASN rule: {}"
 MODULE_IBL_MATCH_REGION: "Match country or city ISO code rule: {}"
 MODULE_IBL_MATCH_CITY: "Match city rule: {}"

@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
-public enum MatchResult {
-    DEFAULT,
-    TRUE,
-    FALSE
+import org.jetbrains.annotations.Nullable;
+
+public record MatchResult(MatchResultEnum result, @Nullable String comment) {
+
 }
