@@ -42,6 +42,7 @@ public class PTRBlacklist extends AbstractRuleFeatureModule implements Reloadabl
     @Autowired
     private DNSLookup dnsLookup;
     private long banDuration;
+    @Autowired
     private Laboratory laboratory;
 
     @Override
