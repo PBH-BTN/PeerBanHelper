@@ -51,7 +51,10 @@ import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -334,20 +337,27 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      */
     private int fileToIPList(File ruleFile, DualIPv4v6AssociativeTries<String> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
-        Files.readLines(ruleFile, StandardCharsets.UTF_8).stream().filter(s -> !s.isBlank()).forEach(ele -> {
+        StringJoiner sj = new StringJoiner("\n");
+        var lines = Files.readLines(ruleFile, StandardCharsets.UTF_8);
+        for (String ele : lines) {
+            if (ele.isBlank()) continue;
             if (ele.startsWith("#")) {
-                return; // 注释
+                // add into sj but without hashtag prefix
+                sj.add(ele.substring(1));
+                continue;
             }
             try {
-                var parsedIp = parseRuleLine(ele);
+                var parsedIp = parseRuleLine(ele, sj.toString());
                 if (parsedIp != null) {
                     count.getAndIncrement();
                     ips.put(parsedIp.getLeft(), parsedIp.getRight());
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
+            } finally {
+                sj = new StringJoiner("\n");
             }
-        });
+        }
         return count.get();
     }
 
@@ -362,7 +372,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         AtomicInteger count = new AtomicInteger();
         StringJoiner sj = new StringJoiner("\n");
         for (String ele : data.split("\n")) {
-            if(ele.isBlank()) continue;
+            if (ele.isBlank()) continue;
             if (ele.startsWith("#")) {
                 // add into sj but without hashtag prefix
                 sj.add(ele.substring(1));
@@ -376,7 +386,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
-            }finally {
+            } finally {
                 sj = new StringJoiner("\n");
             }
         }
@@ -399,7 +409,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             if (level >= 128) return null;
             if (start == null || end == null) return null;
             return Pair.of(start.spanWithRange(end).coverWithPrefixBlock(), comment);
-        }else{
+        } else {
             // ip #end-line-comment
             String ip;
             if (ele.contains("#")) {
@@ -409,7 +419,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                     comment = ele.substring(ele.indexOf("#") + 1);
                 }
                 return Pair.of(IPAddressUtil.getIPAddress(ip), Optional.ofNullable(comment).orElse(preReadComment));
-            }else{
+            } else {
                 return Pair.of(IPAddressUtil.getIPAddress(ele), preReadComment);
             }
         }
