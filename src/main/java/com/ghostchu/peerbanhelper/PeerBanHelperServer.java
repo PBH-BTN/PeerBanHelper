@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
+import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
@@ -132,6 +133,8 @@ public class PeerBanHelperServer implements Reloadable {
     private Laboratory laboratory;
     @Autowired
     private DNSLookup dnsLookup;
+    @Getter
+    private boolean globalPaused = false;
 //    @Autowired
 //    private IPFSBanListShare share;
 
@@ -442,6 +445,9 @@ public class PeerBanHelperServer implements Reloadable {
     public void banWave() {
         try {
             if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
+                return;
+            }
+            if (isGlobalPaused()) {
                 return;
             }
             banWaveWatchDog.setLastOperation("Ban wave - start");
@@ -939,6 +945,14 @@ public class PeerBanHelperServer implements Reloadable {
         return LIVE_PEERS;
     }
 
+    public void setGlobalPaused(boolean globalPaused) {
+        this.globalPaused = globalPaused;
+        if (globalPaused) {
+            ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("global-paused", 20, tlUI(Lang.STATUS_BAR_GLOBAL_PAUSED)));
+        } else {
+            ExchangeMap.GUI_DISPLAY_FLAGS.removeIf(f -> "global-paused".equals(f.getId()));
+        }
+    }
 
     /**
      * Use @Autowired if available
