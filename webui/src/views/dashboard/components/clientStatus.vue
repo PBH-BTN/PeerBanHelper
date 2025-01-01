@@ -51,7 +51,7 @@
           :disable-remove="data.length === 1"
           :downloader="client"
           @downloader-deleted="refresh"
-          @edit-click="(e) => editDownloaderModal?.showModal(false, e)"
+          @edit-click="(e) => editDownloaderModal?.showModal(false, client.paused, e)"
         />
       </a-col>
     </a-row>
@@ -79,6 +79,7 @@ import { useRequest } from 'vue-request'
 import ClientStatusCard from './clientStatusCard.vue'
 import EditDownloaderModal from './editDownloaderModal.vue'
 import torrentList from './torrentList.vue'
+
 const { t } = useI18n()
 const endpointState = useEndpointStore()
 const data = ref<Downloader[]>()

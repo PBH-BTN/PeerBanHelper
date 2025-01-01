@@ -144,6 +144,7 @@ public class BiglyBT extends AbstractDownloader {
 
     @Override
     public void setPaused(boolean paused) {
+        super.setPaused(paused);
         config.setPaused(paused);
     }
 

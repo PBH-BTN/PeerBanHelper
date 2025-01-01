@@ -43,6 +43,9 @@
       >
         <a-input v-model="form.name" allow-clear />
       </a-form-item>
+      <a-form-item field="paused" :label="t('page.dashboard.editModal.label.paused')" required>
+        <a-switch v-model="form.paused" />
+      </a-form-item>
       <component :is="formMap[form.config.type]" v-model="form.config" />
     </a-form>
   </a-modal>
@@ -50,8 +53,8 @@
 <script setup lang="ts">
 import { ClientTypeEnum, type downloaderConfig } from '@/api/model/downloader'
 import { CreateDownloader, TestDownloaderConfig, UpdateDownloader } from '@/service/downloaders'
-import { Message, type Form } from '@arco-design/web-vue'
-import { defineAsyncComponent, reactive, ref, type Component } from 'vue'
+import { type Form, Message } from '@arco-design/web-vue'
+import { type Component, defineAsyncComponent, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
@@ -76,6 +79,7 @@ const formMap: Record<ClientTypeEnum, Component> = {
 
 const form = reactive({
   name: '',
+  paused: false,
   config: {
     basicAuth: {},
     verifySsl: true,
@@ -85,10 +89,15 @@ const form = reactive({
 })
 const oldName = ref('')
 defineExpose({
-  showModal: (isNewItem: boolean, currentConfig?: { name: string; config: downloaderConfig }) => {
+  showModal: (
+    isNewItem: boolean,
+    paused: boolean,
+    currentConfig?: { name: string; config: downloaderConfig }
+  ) => {
     newItem.value = isNewItem
     if (!isNewItem && currentConfig) {
       form.name = currentConfig.name
+      form.paused = paused
       oldName.value = currentConfig.name
       form.config = currentConfig.config
     } else {

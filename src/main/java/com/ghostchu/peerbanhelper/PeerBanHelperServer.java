@@ -299,7 +299,7 @@ public class PeerBanHelperServer implements Reloadable {
 
     private void resetKnownDownloaders() {
         try {
-            for (Downloader downloader : downloaders) {
+            for (Downloader downloader : getDownloaders()) {
                 var result = downloader.login();
                 if (result.success()) {
                     downloader.setBanList(Collections.emptyList(), null, null, true);
@@ -351,13 +351,13 @@ public class PeerBanHelperServer implements Reloadable {
             Map<PeerAddress, BanMetadata> data = banListDao.readBanList();
             this.BAN_LIST.putAll(data);
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
-            downloaders.forEach(downloader -> {
+            getDownloaders().forEach(downloader -> {
                 if (downloader.login().success()) {
                     downloader.setBanList(BAN_LIST.keySet(), null, null, true);
                 }
             });
             Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
-            downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
+            getDownloaders().forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
         } catch (Exception e) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST), e);
         }
@@ -453,7 +453,7 @@ public class PeerBanHelperServer implements Reloadable {
             Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
             // 执行计划任务
             banWaveWatchDog.setLastOperation("Run scheduled tasks");
-            downloaders.forEach(Downloader::runScheduleTasks);
+            getDownloaders().forEach(Downloader::runScheduleTasks);
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
@@ -471,7 +471,7 @@ public class PeerBanHelperServer implements Reloadable {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_CHECK_BANS));
             })) {
-                downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader))));
+                getDownloaders().forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader))));
             }
 
 
@@ -543,13 +543,13 @@ public class PeerBanHelperServer implements Reloadable {
                 log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST));
             })) {
                 if (!needReApplyBanList.get()) {
-                    downloaders.forEach(downloader -> protect.getService().submit(() ->
+                    getDownloaders().forEach(downloader -> protect.getService().submit(() ->
                             updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
                                     needRelaunched.getOrDefault(downloader, Collections.emptyList()),
                                     bannedPeers, unbannedPeers, false)));
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
-                    downloaders.forEach(downloader -> protect.getService().submit(() -> {
+                    getDownloaders().forEach(downloader -> protect.getService().submit(() -> {
                         List<Torrent> torrents = downloader.getTorrents();
                         var list = BAN_LIST.values().stream().map(meta -> meta.getTorrent().getId()).toList();
                         torrents.removeIf(torrent -> !list.contains(torrent.getId()));
@@ -559,7 +559,7 @@ public class PeerBanHelperServer implements Reloadable {
                     needReApplyBanList.set(false);
                 }
             }
-            if (!hideFinishLogs && !downloaders.isEmpty()) {
+            if (!hideFinishLogs && !getDownloaders().isEmpty()) {
                 long downloadersCount = peers.keySet().size();
                 long torrentsCount = peers.values().stream().mapToLong(e -> e.keySet().size()).sum();
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
@@ -706,7 +706,7 @@ public class PeerBanHelperServer implements Reloadable {
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
         Map<Downloader, Map<Torrent, List<Peer>>> peers = new HashMap<>();
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
-            downloaders.forEach(downloader -> service.submit(() -> {
+            getDownloaders().forEach(downloader -> service.submit(() -> {
                 try {
                     Map<Torrent, List<Peer>> p = collectPeers(downloader);
                     peers.put(downloader, p);

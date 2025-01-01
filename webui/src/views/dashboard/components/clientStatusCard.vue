@@ -88,6 +88,7 @@
             <icon-check-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.HEALTHY" />
             <icon-close-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.ERROR" />
             <icon-question-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.UNKNOWN" />
+            <icon-pause-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.PAUSED" />
             <icon-exclamation-polygon-fill
               v-if="client.data.lastStatus == ClientStatusEnum.NEED_TAKE_ACTION"
             />
@@ -114,8 +115,8 @@
 </template>
 <script setup lang="ts">
 import {
-  ClientStatusEnum,
   type ClientStatus,
+  ClientStatusEnum,
   type Downloader,
   type downloaderConfig
 } from '@/api/model/downloader'
@@ -126,11 +127,13 @@ import { Message } from '@arco-design/web-vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+
 const { t } = useI18n()
 const statusMap: Record<ClientStatusEnum, [string, string]> = {
   [ClientStatusEnum.HEALTHY]: ['success', 'page.dashboard.clientStatus.card.status.normal'],
   [ClientStatusEnum.ERROR]: ['warning', 'page.dashboard.clientStatus.card.status.error'],
   [ClientStatusEnum.UNKNOWN]: ['info', 'page.dashboard.clientStatus.card.status.unknown'],
+  [ClientStatusEnum.PAUSED]: ['info', 'page.dashboard.clientStatus.card.status.paused'],
   [ClientStatusEnum.NEED_TAKE_ACTION]: [
     'danger',
     'page.dashboard.clientStatus.card.status.need_take_action'

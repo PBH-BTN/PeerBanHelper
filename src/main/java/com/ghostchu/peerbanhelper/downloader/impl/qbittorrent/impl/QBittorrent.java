@@ -22,6 +22,7 @@ public class QBittorrent extends AbstractQbittorrent {
 
     @Override
     public void setPaused(boolean paused) {
+        super.setPaused(paused);
         config.setPaused(paused);
     }
 
