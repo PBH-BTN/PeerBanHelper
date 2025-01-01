@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
+import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -23,6 +24,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.Weigher;
+import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import lombok.AllArgsConstructor;
@@ -103,12 +105,30 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         Main.getReloadManager().register(this);
     }
 
+    @Subscribe
+    public void onPeerUnBan(PeerUnbanEvent event) {
+        var ip = event.getPeer().getIp();
+        // search in cache
+        progressRecorder.asMap().forEach((client, tasks) -> tasks.removeIf(task -> task.getPeerIp().equals(ip)));
+        // remove from pending persist queue
+        pendingPersistQueue.removeIf(record -> record.task().stream().anyMatch(task -> task.getPeerIp().equals(ip)));
+        // remove from database
+        if (enablePersist) {
+            try {
+                var builder = progressCheatBlockerPersistDao.deleteBuilder();
+                builder.setWhere(builder.where().eq("address", ip));
+                builder.delete();
+            } catch (SQLException e) {
+                log.error("Unable to remove peer from database", e);
+            }
+        }
+    }
+
     private void cleanDatabase() {
         try {
             progressCheatBlockerPersistDao.cleanupDatabase(new Timestamp(System.currentTimeMillis() - persistDuration));
         } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
-            ;
         }
     }
 
@@ -330,7 +350,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         }
     }
 
-    private boolean isUploadingToPeer(Peer peer){
+    private boolean isUploadingToPeer(Peer peer) {
         return peer.getUploadSpeed() > 0 || peer.getUploaded() > 0;
     }
 
