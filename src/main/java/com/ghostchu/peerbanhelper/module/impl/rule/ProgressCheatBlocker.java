@@ -107,20 +107,35 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
 
     @Subscribe
     public void onPeerUnBan(PeerUnbanEvent event) {
-        var ip = event.getPeer().getIp();
-        // search in cache
-        progressRecorder.asMap().forEach((client, tasks) -> tasks.removeIf(task -> task.getPeerIp().equals(ip)));
-        // remove from pending persist queue
-        pendingPersistQueue.removeIf(record -> record.task().stream().anyMatch(task -> task.getPeerIp().equals(ip)));
-        // remove from database
-        if (enablePersist) {
-            try {
-                var builder = progressCheatBlockerPersistDao.deleteBuilder();
-                builder.setWhere(builder.where().eq("address", ip));
-                builder.delete();
-            } catch (SQLException e) {
-                log.error("Unable to remove peer from database", e);
-            }
+        IPAddress peerPrefix;
+        IPAddress peerIp = event.getPeer().getAddress();
+        if (peerIp.isIPv4()) {
+            peerPrefix = IPAddressUtil.toPrefixBlock(peerIp, ipv4PrefixLength);
+        } else {
+            peerPrefix = IPAddressUtil.toPrefixBlock(peerIp, ipv6PrefixLength);
+        }
+        String peerIpString = peerIp.toString();
+        Client client = new Client(peerPrefix.toString(), event.getBanMetadata().getTorrent().getId());
+        // 从缓存取数据
+        List<ClientTask> lastRecordedProgress = null;
+        try {
+            // 如果未命中缓存 只导入当前种子记录的ip
+            lastRecordedProgress = progressRecorder.get(client, () -> loadClientTasks(client));
+        } catch (ExecutionException e) {
+            log.error("Unhandled exception during load cached record data", e);
+        }
+        if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
+        ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
+        if (clientTask != null) {
+            clientTask.setDownloader("<UNBAN UPDATE>");
+            clientTask.setBanDelayWindowEndAt(0L);
+            clientTask.setLastReportProgress(0);
+            clientTask.setLastReportUploaded(0);
+            clientTask.setTrackingUploadedIncreaseTotal(0);
+            clientTask.setRewindCounter(0);
+            clientTask.setProgressDifferenceCounter(0);
+            clientTask.setFastPcbTestExecuteAt(0);
+            progressRecorder.put(client, lastRecordedProgress);
         }
     }
 

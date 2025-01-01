@@ -103,6 +103,7 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
         Pageable pageable = new Pageable(0, 10000); // 再多的话，担心爆内存
         return btnNetwork.getPeerRecordDao().getPendingSubmitPeerRecords(pageable,
                         new Timestamp(lastSubmitAt)).getResults().stream()
+                .filter(r -> !r.getDownloader().equals("<UNBAN UPDATE>"))
                 .map(BtnPeerHistory::from).collect(Collectors.toList());
     }
 
