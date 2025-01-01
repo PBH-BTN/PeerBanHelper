@@ -2,13 +2,20 @@
   <a-space direction="vertical" fill>
     <a-space class="list-header" wrap>
       <a-typography-text>{{ t('page.banlist.banlist.description') }}</a-typography-text>
-      <a-input-search
-        :style="{ width: '250px' }"
-        :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
-        allow-clear
-        search-button
-        @search="handleSearch"
-      />
+      <a-space class="list-header-right-group" wrap>
+        <AsyncMethod v-slot="{ run, loading }" once :async-fn="() => handleUnban('*')">
+          <a-button type="secondary" :loading="loading" @click="run">
+            {{ t('page.banlist.banlist.listItem.unbanall') }}
+          </a-button>
+        </AsyncMethod>
+        <a-input-search
+          :style="{ width: '250px' }"
+          :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
+          allow-clear
+          search-button
+          @search="handleSearch"
+        />
+      </a-space>
     </a-space>
     <a-list
       ref="banlist"
@@ -35,9 +42,9 @@
         />
         <a-empty v-else-if="list.length === 0" :style="{ height: `${virtualListHeight}px` }" />
         <div v-if="loadingMore" style="position: absolute; transform: translateY(-50%)">
-          <a-typography-text v-if="bottom">{{
-            t('page.banlist.banlist.bottomReached')
-          }}</a-typography-text>
+          <a-typography-text v-if="bottom"
+            >{{ t('page.banlist.banlist.bottomReached') }}
+          </a-typography-text>
           <a-spin v-else />
         </div>
       </template>
@@ -47,7 +54,7 @@
 
 <script setup lang="ts">
 import type { BanList } from '@/api/model/banlist'
-import { getBanList } from '@/service/banList'
+import { getBanList, unbanIP } from '@/service/banList'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
@@ -55,7 +62,9 @@ import { useWindowSize } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
+import AsyncMethod from '@/components/asyncMethod.vue'
 import banListItem from './banListItem.vue'
+import { Message } from '@arco-design/web-vue'
 
 const { height } = useWindowSize()
 const banlist = ref()
@@ -139,6 +148,24 @@ const loadMore = async () => {
     data.value = data.value.concat(newData)
   }
   loadingMore.value = false
+}
+
+const handleUnban = async (address: string) => {
+  const { count } = await (await unbanIP(address)).data
+  if (!count || count < 1) {
+    Message.error({
+      content: t('page.banlist.banlist.listItem.unbanUnexcepted'),
+      resetOnHover: true
+    })
+    return false
+  } else {
+    Message.success({
+      content: t('page.banlist.banlist.listItem.unbanSuccess', { count: count }),
+      resetOnHover: true
+    })
+    emits('unban', address)
+    return true
+  }
 }
 
 watch(

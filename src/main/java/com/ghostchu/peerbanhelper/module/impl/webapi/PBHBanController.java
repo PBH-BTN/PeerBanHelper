@@ -71,9 +71,13 @@ public class PBHBanController extends AbstractFeatureModule {
     private void handleBanDelete(Context context) {
         List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
         List<PeerAddress> pendingRemovals = new ArrayList<>();
-        for (PeerAddress address : getServer().getBannedPeers().keySet()) {
-            if (request.contains(address.getIp())) {
-                pendingRemovals.add(address);
+        if (request.contains("*")) {
+            pendingRemovals.addAll(getServer().getBannedPeers().keySet());
+        } else {
+            for (PeerAddress address : getServer().getBannedPeers().keySet()) {
+                if (request.contains(address.getIp())) {
+                    pendingRemovals.add(address);
+                }
             }
         }
         pendingRemovals.forEach(pa -> getServer().scheduleUnBanPeer(pa));
@@ -116,7 +120,7 @@ public class PBHBanController extends AbstractFeatureModule {
                 .entrySet()
                 .stream()
                 .filter(b -> {
-                    if(!ignoreBanForDisconnect) return true;
+                    if (!ignoreBanForDisconnect) return true;
                     return !b.getValue().isBanForDisconnect();
                 })
                 .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue())))
