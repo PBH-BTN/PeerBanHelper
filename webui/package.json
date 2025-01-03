@@ -63,7 +63,7 @@
     "monaco-editor": "^0.52.2",
     "npm-run-all2": "^7.0.2",
     "prettier": "^3.4.2",
-    "typescript": "~5.6.3",
+    "typescript": "~5.7.2",
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.6",
     "vite-bundle-analyzer": "^0.15.2",
@@ -71,7 +71,7 @@
     "vite-plugin-remove-console": "^2.2.0",
     "vite-plugin-vue-devtools": "^7.6.8",
     "vue-eslint-parser": "^9.4.3",
-    "vue-tsc": "^2.1.10"
+    "vue-tsc": "^2.2.0"
   },
   "engines": {
     "node": ">=20.0.0",
