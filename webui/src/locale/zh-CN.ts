@@ -15,6 +15,8 @@ import plusLocale from './zh-CN/plus'
 import settingsLocale from './zh-CN/settings'
 
 export default {
+  'global.alert.globalPause': '全局暂停模式已启动，所有功能已经暂停',
+  'global.alert.globalPause.disable': '点击关闭',
   'navbar.action.locale': '切换为中文',
   'navbar.action.autoUpdate': '自动刷新',
   'navbar.action.autoUpdate.lastUpdate': '最后更新于：',

@@ -15,6 +15,9 @@ import plusLocale from './en-US/plus'
 import settingsLocale from './en-US/settings'
 
 export default {
+  'global.alert.globalPause':
+    'Global pause mode has been enabled, all functions have been disabled',
+  'global.alert.globalPause.disable': 'Click to disable',
   'navbar.action.locale': 'Switch to English',
   'navbar.action.autoUpdate': 'Auto Update',
   'navbar.action.autoUpdate.lastUpdate': 'Last updated at: ',
