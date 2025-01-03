@@ -95,6 +95,9 @@
           </template>
         </a-dropdown>
         <a-space class="right-side" wrap>
+          <a-tooltip :content="t('settings.globalPause')">
+            <global-pause-btn />
+          </a-tooltip>
           <template v-if="!disableAutoUpdate">
             <auto-update-btn />
           </template>
@@ -164,7 +167,9 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import alert from './alert.vue'
 import autoUpdateBtn from './autoUpdateBtn.vue'
+import globalPauseBtn from './globalPauseBtn.vue'
 import settingsModal from './settingsModal.vue'
+
 const { t, locale } = useI18n()
 const { changeLocale } = useLocale()
 const locales = [...LOCALE_OPTIONS]

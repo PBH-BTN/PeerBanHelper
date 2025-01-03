@@ -28,3 +28,4 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+vite.config.ts.timestamp*

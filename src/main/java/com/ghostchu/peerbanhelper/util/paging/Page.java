@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Page<T> {
+public final class Page<T> {
     private long page;
     private long size;
     private long total;

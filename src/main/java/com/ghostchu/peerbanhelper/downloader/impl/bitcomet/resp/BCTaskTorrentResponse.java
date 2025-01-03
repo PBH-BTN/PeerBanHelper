@@ -4,11 +4,9 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @NoArgsConstructor
 @Data
-public class BCTaskTorrentResponse {
+public final class BCTaskTorrentResponse {
 
     @SerializedName("error_code")
     private String errorCode;

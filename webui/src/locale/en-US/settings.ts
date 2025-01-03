@@ -3,6 +3,7 @@ export default {
   'settings.navbar.theme.toDark': 'Click to use dark mode',
   'settings.open': 'Goto Settings',
   'settings.language': 'Language',
+  'settings.globalPause': 'Global Pause',
   'settings.modal.title': 'Settings',
   'settings.modal.endpointTips':
     "If you can't access the backend of the PBH, you can try to set the Endpoint here",

@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
+import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
@@ -23,6 +24,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.Weigher;
+import com.google.common.eventbus.Subscribe;
 import inet.ipaddr.IPAddress;
 import io.javalin.http.Context;
 import lombok.AllArgsConstructor;
@@ -103,12 +105,45 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         Main.getReloadManager().register(this);
     }
 
+    @Subscribe
+    public void onPeerUnBan(PeerUnbanEvent event) {
+        IPAddress peerPrefix;
+        IPAddress peerIp = event.getPeer().getAddress();
+        if (peerIp.isIPv4()) {
+            peerPrefix = IPAddressUtil.toPrefixBlock(peerIp, ipv4PrefixLength);
+        } else {
+            peerPrefix = IPAddressUtil.toPrefixBlock(peerIp, ipv6PrefixLength);
+        }
+        String peerIpString = peerIp.toString();
+        Client client = new Client(peerPrefix.toString(), event.getBanMetadata().getTorrent().getId());
+        // 从缓存取数据
+        List<ClientTask> lastRecordedProgress = null;
+        try {
+            // 如果未命中缓存 只导入当前种子记录的ip
+            lastRecordedProgress = progressRecorder.get(client, () -> loadClientTasks(client));
+        } catch (ExecutionException e) {
+            log.error("Unhandled exception during load cached record data", e);
+        }
+        if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
+        ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
+        if (clientTask != null) {
+            clientTask.setDownloader("<UNBAN UPDATE>");
+            clientTask.setBanDelayWindowEndAt(0L);
+            clientTask.setLastReportProgress(0);
+            clientTask.setLastReportUploaded(0);
+            clientTask.setTrackingUploadedIncreaseTotal(0);
+            clientTask.setRewindCounter(0);
+            clientTask.setProgressDifferenceCounter(0);
+            clientTask.setFastPcbTestExecuteAt(0);
+            progressRecorder.put(client, lastRecordedProgress);
+        }
+    }
+
     private void cleanDatabase() {
         try {
             progressCheatBlockerPersistDao.cleanupDatabase(new Timestamp(System.currentTimeMillis() - persistDuration));
         } catch (Throwable e) {
             log.error("Unable to remove expired data from database", e);
-            ;
         }
     }
 
@@ -330,7 +365,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         }
     }
 
-    private boolean isUploadingToPeer(Peer peer){
+    private boolean isUploadingToPeer(Peer peer) {
         return peer.getUploadSpeed() > 0 || peer.getUploaded() > 0;
     }
 

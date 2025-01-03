@@ -21,10 +21,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.NullUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.rule.MatchResult;
-import com.ghostchu.peerbanhelper.util.rule.Rule;
-import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
-import com.ghostchu.peerbanhelper.util.rule.RuleParser;
+import com.ghostchu.peerbanhelper.util.rule.*;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -55,12 +52,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @IgnoreScan
 public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable {
     private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.GENERAL_NA), new TranslationComponent("BtnManager not initialized"));
-    @Autowired(required = false)
-    private BtnNetwork manager;
     private long banDuration;
     @Autowired
     private JavalinWebContainer javalinWebContainer;
-    @Autowired
+    @Autowired(required = false)
     private BtnNetwork btnNetwork;
     @Autowired
     private ScriptEngine scriptEngine;
@@ -105,6 +100,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         }
 
         info.put("configSuccess", btnNetwork.getConfigSuccess());
+        info.put("configResult", tl(locale(context), btnNetwork.getConfigResult()));
         var abilities = new ArrayList<>();
         for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {
             Map<String, Object> abilityStatus = new HashMap<>();
@@ -168,7 +164,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
-        if (manager == null) {
+        if (btnNetwork == null) {
             return BTN_MANAGER_NOT_INITIALIZED;
         }
         // TODO: 需要重构
@@ -186,7 +182,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
-        var abilityObject = manager.getAbilities().get(BtnAbilityRules.class);
+        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
         }
@@ -262,7 +258,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private @NotNull CheckResult checkShouldSkip(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
-        var abilityObject = manager.getAbilities().get(BtnAbilityException.class);
+        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityException.class);
         if (abilityObject == null) {
             return pass();
         }
@@ -296,7 +292,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
     }
 
     private @NotNull CheckResult checkShouldBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
-        var abilityObject = manager.getAbilities().get(BtnAbilityRules.class);
+        var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
         }
@@ -414,7 +410,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         for (String category : rule.getIpRules().keySet()) {
             var ipMatcher = rule.getIpRules().get(category);
             MatchResult matchResult = ipMatcher.match(pa.toString());
-            if (matchResult == MatchResult.TRUE) {
+            if (matchResult.result() == MatchResultEnum.TRUE) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, category), new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
             }
         }

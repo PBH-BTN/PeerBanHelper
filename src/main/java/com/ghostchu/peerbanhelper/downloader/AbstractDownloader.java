@@ -27,6 +27,11 @@ public abstract class AbstractDownloader implements Downloader {
 
     @Override
     public DownloaderLoginResult login() {
+        if(isPaused()){
+            lastStatus = DownloaderLastStatus.PAUSED;
+            statusMessage = new TranslationComponent(Lang.STATUS_TEXT_PAUSED);
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.PAUSED, new TranslationComponent(Lang.DOWNLOADER_PAUSED));
+        }
         if (nextLoginTry >= System.currentTimeMillis()) {
             alertManager.publishAlert(true,
                     AlertLevel.WARN,
@@ -57,6 +62,17 @@ public abstract class AbstractDownloader implements Downloader {
                 nextLoginTry = System.currentTimeMillis() + (1000 * 60 * 30);
                 failedLoginAttempts = 0;
             }
+        }
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        if (paused) {
+            lastStatus = DownloaderLastStatus.PAUSED;
+            statusMessage = new TranslationComponent(Lang.STATUS_TEXT_PAUSED);
+        } else {
+            lastStatus = DownloaderLastStatus.UNKNOWN;
+            statusMessage = null;
         }
     }
 

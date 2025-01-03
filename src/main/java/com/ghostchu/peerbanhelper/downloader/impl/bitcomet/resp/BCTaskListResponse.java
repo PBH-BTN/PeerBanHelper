@@ -8,7 +8,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @Data
-public class BCTaskListResponse {
+public final class BCTaskListResponse {
 
     @SerializedName("tasks")
     private List<TasksDTO> tasks;

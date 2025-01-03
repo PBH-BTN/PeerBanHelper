@@ -74,6 +74,12 @@ public interface Peer extends Comparable<Peer> {
     PeerFlag getFlags();
 
     /**
+     * 对等体是否连接中或者握手中（总之就是还没准备好传输数据）
+     * @return 是否连接中或者握手中
+     */
+    boolean isHandshaking();
+
+    /**
      * 获取此 Peer 支持的消息集合，需要下载器支持
      * 不支持的下载器此处将返回空集合
      * @return 支持的消息集合

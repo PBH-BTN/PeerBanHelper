@@ -29,6 +29,17 @@ export default {
   'changeLogModel.changelog': 'Change Log',
   'changeLogModel.notNow': 'Not Now',
   'changeLogModel.updateNow': 'Update Now',
+  'globalPauseModel.title': 'Are you sure to enable global pause mode?',
+  'globalPauseModel.description':
+    'This will pause all ban and check operations of all downloaders until the next restart or cancel pause.',
+  'global.pause.pauseAll': 'Pause',
+  'global.pause.pauseAll.tips':
+    "This will stop PeerBanhelper's all functions and unban all Peers, suitable for modifying downloader configuration",
+  'global.pause.pauseAll.result': 'Global pause mode has been started',
+  'global.pause.pauseAll.stop': 'Global pause mode has been stopped',
+  'global.pause.alert':
+    'Global pause mode has been enabled, all ban and check operations have been disabled',
+  'global.pause.alert.disable': 'Click to disable',
 
   'router.login': 'Login',
   'router.dashboard': 'Status',

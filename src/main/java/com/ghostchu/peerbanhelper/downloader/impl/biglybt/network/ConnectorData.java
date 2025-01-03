@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConnectorData {
+public final class ConnectorData {
     private String software;
     private String version;
     private String abbrev;

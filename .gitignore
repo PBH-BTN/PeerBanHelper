@@ -50,3 +50,4 @@ dependency-reduced-pom.xml
 
 PeerBanHelper.jar
 *.pkg
+install4j/output

@@ -26,6 +26,10 @@ public interface QBittorrentConfig {
 
     boolean isIgnorePrivate();
 
+    boolean isPaused();
+
+    void setPaused(boolean paused);
+
     void setType(String type);
 
     void setEndpoint(String endpoint);

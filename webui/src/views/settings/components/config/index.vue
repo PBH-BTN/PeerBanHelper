@@ -45,7 +45,7 @@
           <a-divider />
           <btn v-model="form.btn" />
           <a-divider />
-          <proxy v-model="form.proxy" />
+          <network v-model:proxy="form.proxy" v-model:resolvers="form.resolvers" />
           <a-divider />
           <ipDatabase v-model="form.ip_database" />
           <a-divider />
@@ -76,9 +76,9 @@ import btn from './components/btn.vue'
 import ipDatabase from './components/ipDatabase.vue'
 import logger from './components/logger.vue'
 import lookup from './components/lookup.vue'
+import network from './components/network.vue'
 import performance from './components/performance.vue'
 import persist from './components/persist.vue'
-import proxy from './components/proxy.vue'
 import push from './components/push.vue'
 import webui from './components/webui.vue'
 
@@ -92,7 +92,8 @@ const form = reactive({
   ip_database: {},
   privacy: {},
   proxy: {},
-  performance: {}
+  performance: {},
+  resolvers: {}
 } as Config)
 const { loading } = useRequest(GetConfig, {
   onSuccess: (data) => {

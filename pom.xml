@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.2.2</version>
+    <version>7.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -358,7 +358,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20240303</version>
+            <version>20241224</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
         <dependency>
@@ -509,6 +509,11 @@
             <groupId>com.github.multiformats</groupId>
             <artifactId>java-multiaddr</artifactId>
             <version>v1.4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>3.6.2</version>
         </dependency>
     </dependencies>
 </project>

@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +35,7 @@ public class IPAddressUtil {
      * @param ip
      * @return
      */
-    @Nullable
+    @Contract(value = "null -> null", pure = true)
     public static IPAddress getIPAddress(String ip) {
         if (ip == null) return null;
         if (ip.startsWith("[") && ip.endsWith("]")) {

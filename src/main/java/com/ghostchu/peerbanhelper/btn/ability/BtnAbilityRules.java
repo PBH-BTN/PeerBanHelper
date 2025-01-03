@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class BtnAbilityRules extends AbstractBtnAbility {
+public final class BtnAbilityRules extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;

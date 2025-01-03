@@ -52,6 +52,10 @@ public interface Downloader extends AutoCloseable {
      */
     DownloaderLoginResult login();
 
+    boolean isPaused();
+
+    void setPaused(boolean paused);
+
     /**
      * 一个执行调度任务的窗口，该方法总是在 banWave 中调用
      */

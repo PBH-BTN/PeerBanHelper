@@ -13,6 +13,7 @@ import VueDevTools from 'vite-plugin-vue-devtools'
 const exec = promisify(execCallBack)
 
 const isAnalyze = process.env.ANALYZE === 'true'
+const isProduction = process.env.NODE_ENV === 'production'
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '',
@@ -24,7 +25,7 @@ export default defineConfig({
     }),
     nodePolyfills({ include: ['path'] }),
     ...(isAnalyze ? [analyzer()] : []),
-    removeConsole()
+    ...(isProduction ? [removeConsole()] : [])
   ],
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),

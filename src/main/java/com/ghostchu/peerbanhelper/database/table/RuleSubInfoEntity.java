@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @DatabaseTable(tableName = "rule_sub_info")
-public class RuleSubInfoEntity {
+public final class RuleSubInfoEntity {
     @DatabaseField(id = true, index = true)
     private String ruleId;
     @DatabaseField

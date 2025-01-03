@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
+public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;
@@ -103,6 +103,7 @@ public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
         Pageable pageable = new Pageable(0, 10000); // 再多的话，担心爆内存
         return btnNetwork.getPeerRecordDao().getPendingSubmitPeerRecords(pageable,
                         new Timestamp(lastSubmitAt)).getResults().stream()
+                .filter(r -> !r.getDownloader().equals("<UNBAN UPDATE>"))
                 .map(BtnPeerHistory::from).collect(Collectors.toList());
     }
 

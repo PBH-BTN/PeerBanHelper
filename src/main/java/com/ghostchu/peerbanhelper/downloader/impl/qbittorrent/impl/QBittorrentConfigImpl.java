@@ -22,6 +22,7 @@ public class QBittorrentConfigImpl implements QBittorrentConfig {
     private boolean useShadowBan;
     private boolean verifySsl;
     private boolean ignorePrivate;
+    private boolean paused;
 
     public static QBittorrentConfigImpl readFromYaml(ConfigurationSection section) {
         QBittorrentConfigImpl config = new QBittorrentConfigImpl();
@@ -41,6 +42,7 @@ public class QBittorrentConfigImpl implements QBittorrentConfig {
         config.setUseShadowBan(section.getBoolean("use-shadow-ban", false));
         config.setVerifySsl(section.getBoolean("verify-ssl", true));
         config.setIgnorePrivate(section.getBoolean("ignore-private", false));
+        config.setPaused(section.getBoolean("paused", false));
         return config;
     }
 
@@ -58,6 +60,7 @@ public class QBittorrentConfigImpl implements QBittorrentConfig {
         section.set("use-shadow-ban", useShadowBan);
         section.set("verify-ssl", verifySsl);
         section.set("ignore-private", ignorePrivate);
+        section.set("paused", paused);
         return section;
     }
 }

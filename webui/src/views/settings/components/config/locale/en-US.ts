@@ -60,6 +60,10 @@ export default {
   'page.settings.tab.config.ipDatabase.city': 'City Database',
   'page.settings.tab.config.ipDatabase.asn': 'ASN Database',
 
+  'page.settings.tab.config.network': 'Network',
+
+  'page.settings.tab.config.reslolver.useSystem': 'Use system DNS',
+  'page.settings.tab.config.reslolver.customServer': 'Custom DNS server',
   'page.settings.tab.config.proxy': 'Proxy',
   'page.settings.tab.config.proxy.type': 'Proxy type',
   'page.settings.tab.config.proxy.type.0': 'No proxy',

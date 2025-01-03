@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Setter
-public class PeerImpl implements Peer {
+public final class PeerImpl implements Peer {
     private PeerAddress peerAddress;
     private String rawIp;
     private String peerId;
@@ -18,8 +18,9 @@ public class PeerImpl implements Peer {
     private double progress;
     private PeerFlag flags;
     private List<PeerMessage> supportedMessages;
+    private boolean handshaking;
 
-    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, List<PeerMessage> supportedMessages) {
+    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, List<PeerMessage> supportedMessages, boolean handshaking) {
         this.peerAddress = peerAddress;
         this.rawIp = rawIp;
         this.peerId = peerId;
@@ -31,6 +32,7 @@ public class PeerImpl implements Peer {
         this.progress = progress;
         this.flags = flags;
         this.supportedMessages = supportedMessages;
+        this.handshaking = handshaking;
     }
 
     @Override
@@ -76,6 +78,11 @@ public class PeerImpl implements Peer {
     @Override
     public PeerFlag getFlags() {
         return flags;
+    }
+
+    @Override
+    public boolean isHandshaking() {
+        return handshaking;
     }
 
     @Override

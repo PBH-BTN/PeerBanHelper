@@ -3,6 +3,7 @@ export default {
   'settings.navbar.theme.toDark': '点击切换为暗黑模式',
   'settings.open': '前往设置',
   'settings.language': '语言',
+  'settings.globalPause': '全局暂停',
   'settings.modal.title': '设置',
   'settings.modal.endpointTips': '如果你无法访问PBH后端，可以尝试在此设置Endpoint',
   'settings.modal.pollInterval': '轮询间隔：',

@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BtnPeerHistory {
+public final class BtnPeerHistory {
     @SerializedName("ip_address")
     private String ipAddress;
     @SerializedName("peer_id")
