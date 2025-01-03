@@ -133,7 +133,7 @@ const statusMap: Record<ClientStatusEnum, [string, string]> = {
   [ClientStatusEnum.HEALTHY]: ['success', 'page.dashboard.clientStatus.card.status.normal'],
   [ClientStatusEnum.ERROR]: ['warning', 'page.dashboard.clientStatus.card.status.error'],
   [ClientStatusEnum.UNKNOWN]: ['info', 'page.dashboard.clientStatus.card.status.unknown'],
-  [ClientStatusEnum.PAUSED]: ['info', 'page.dashboard.clientStatus.card.status.paused'],
+  [ClientStatusEnum.PAUSED]: ['danger', 'page.dashboard.clientStatus.card.status.paused'],
   [ClientStatusEnum.NEED_TAKE_ACTION]: [
     'danger',
     'page.dashboard.clientStatus.card.status.need_take_action'
