@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -42,7 +43,7 @@ public class BtnNetwork implements Reloadable {
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
     private final ScriptEngine scriptEngine;
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
-    private String configResult;
+    private TranslationComponent configResult;
     private boolean scriptExecute;
     @Getter
     private ScheduledExecutorService executeService = null;
@@ -109,7 +110,7 @@ public class BtnNetwork implements Reloadable {
             HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body(), 600));
-                configResult = "Unsuccessful HTTP request to " + configUrl + " with status code " + resp.statusCode()+": "+resp.body();
+                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, resp.statusCode(), resp.body());
                 return;
             }
             statusCode = resp.statusCode();
@@ -120,12 +121,12 @@ public class BtnNetwork implements Reloadable {
             }
             int min_protocol_version = json.get("min_protocol_version").getAsInt();
             if (Main.PBH_BTN_PROTOCOL_IMPL_VERSION < min_protocol_version) {
-                configResult = "Incompatible protocol version: " + Main.PBH_BTN_PROTOCOL_IMPL_VERSION + " < " + min_protocol_version;
-                throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
+                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, min_protocol_version);
+                throw new IllegalStateException(tlUI(configResult));
             }
             int max_protocol_version = json.get("max_protocol_version").getAsInt();
             if (Main.PBH_BTN_PROTOCOL_IMPL_VERSION > max_protocol_version) {
-                configResult = "Incompatible protocol version: " + Main.PBH_BTN_PROTOCOL_IMPL_VERSION + " > " + max_protocol_version;
+                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, max_protocol_version);
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
             resetScheduler();
@@ -161,10 +162,10 @@ public class BtnNetwork implements Reloadable {
                 }
             });
             configSuccess.set(true);
-            configResult = "Successfully configured";
+            configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
         } catch (Throwable e) {
             log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode+" - "+response, 600), e);
-            configResult = "Failed to configure: "+e.getClass().getName()+": "+e.getMessage();
+            configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
             configSuccess.set(false);
         }
     }
