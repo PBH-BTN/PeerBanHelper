@@ -14,7 +14,7 @@ import java.util.Locale;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class StringEndsWithMatcher extends AbstractJsonMatcher {
+public final class StringEndsWithMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_ENDS_WITH);
     private final String rule;
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_ENDS_WITH, "<Not Provided>"));

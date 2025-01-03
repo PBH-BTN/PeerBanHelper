@@ -4,7 +4,7 @@ import io.javalin.http.Context;
 import lombok.Data;
 
 @Data
-public class Pageable {
+public final class Pageable {
     private long page;
     private long size;
 

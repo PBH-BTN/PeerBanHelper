@@ -8,7 +8,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @Data
-public class BCTaskPeersResponse {
+public final class BCTaskPeersResponse {
 
     @SerializedName("error_code")
     private String errorCode;

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class BCIpFilterResponse {
+public final class BCIpFilterResponse {
 
     @SerializedName("ip_filter_config")
     private IpFilterConfigDTO ipFilterConfig;

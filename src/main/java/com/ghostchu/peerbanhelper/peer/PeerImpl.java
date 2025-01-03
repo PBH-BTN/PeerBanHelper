@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Setter
-public class PeerImpl implements Peer {
+public final class PeerImpl implements Peer {
     private PeerAddress peerAddress;
     private String rawIp;
     private String peerId;

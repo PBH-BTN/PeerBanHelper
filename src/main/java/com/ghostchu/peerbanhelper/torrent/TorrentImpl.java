@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.torrent;
 import lombok.Setter;
 
 @Setter
-public class TorrentImpl implements Torrent {
+public final class TorrentImpl implements Torrent {
     private boolean privateTorrent;
     private double progress;
     private long rtUploadSpeed;

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class StringEqualsMatcher extends AbstractJsonMatcher {
+public final class StringEqualsMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_EQUALS);
     private final String rule;
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_EQUALS, "<Not Provided>"));

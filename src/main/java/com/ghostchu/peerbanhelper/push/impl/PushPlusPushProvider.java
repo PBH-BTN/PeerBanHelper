@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class PushPlusPushProvider extends AbstractPushProvider {
+public final class PushPlusPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
 

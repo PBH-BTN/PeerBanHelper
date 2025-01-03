@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class StatisticsRecord {
+public final class StatisticsRecord {
     private Long overallDataBytesReceived;
     private Long overallDataBytesSent;
     private Long sessionUptimeSeconds;

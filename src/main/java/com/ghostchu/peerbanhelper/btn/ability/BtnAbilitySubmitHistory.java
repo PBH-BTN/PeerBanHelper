@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class BtnAbilitySubmitHistory extends AbstractBtnAbility {
+public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final BtnNetwork btnNetwork;
     private final long interval;
     private final String endpoint;

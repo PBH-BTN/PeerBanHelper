@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class StringRegexMatcher extends AbstractJsonMatcher {
+public final class StringRegexMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_REGEX);
     private final Pattern rule;
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_REGEX, "<Not Provided>"));

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 @Slf4j
-public class RuleParser {
+public final class RuleParser {
     public static List<Rule> parse(List<String> string) {
         return string.stream()
                 .map(JsonParser::parseString)
