@@ -15,7 +15,7 @@
         v-if="!resolverModel.use_system"
         v-model="resolverModel.servers"
         :label="t('page.settings.tab.config.reslolver.customServer')"
-        :pagination-props="{ pageSize: 10, total: resolverModel.servers.length }"
+        :pagination-props="{ pageSize: 10, total: resolverModel?.servers?.length ?? 0 }"
       />
     </a-space>
     <a-space direction="vertical" fill>
