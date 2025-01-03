@@ -3,7 +3,11 @@
     <a-space class="list-header" wrap>
       <a-typography-text>{{ t('page.banlist.banlist.description') }}</a-typography-text>
       <a-space class="list-header-right-group" wrap>
-        <AsyncMethod v-slot="{ run:unban, loading:unbaning }" once :async-fn="() => handleUnban('*')">
+        <AsyncMethod
+          v-slot="{ run: unban, loading: unbaning }"
+          once
+          :async-fn="() => handleUnban('*')"
+        >
           <a-button type="secondary" :loading="unbaning" @click="unban">
             {{ t('page.banlist.banlist.listItem.unbanall') }}
           </a-button>

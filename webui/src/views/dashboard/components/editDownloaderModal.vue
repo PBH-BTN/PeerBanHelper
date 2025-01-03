@@ -89,10 +89,7 @@ const form = reactive({
 })
 const oldName = ref('')
 defineExpose({
-  showModal: (
-    isNewItem: boolean,
-    currentConfig?: { name: string; config: downloaderConfig }
-  ) => {
+  showModal: (isNewItem: boolean, currentConfig?: { name: string; config: downloaderConfig }) => {
     newItem.value = isNewItem
     if (!isNewItem && currentConfig) {
       form.name = currentConfig.name
