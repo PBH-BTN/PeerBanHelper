@@ -8,7 +8,12 @@
           once
           :async-fn="() => handleUnban('*')"
         >
-          <a-button type="secondary" :loading="unbaning" @click="unban">
+          <a-button
+            type="secondary"
+            :disabled="(list?.length ?? 0) === 0"
+            :loading="unbaning"
+            @click="unban"
+          >
             {{ t('page.banlist.banlist.listItem.unbanall') }}
           </a-button>
         </AsyncMethod>
