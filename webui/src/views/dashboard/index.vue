@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import IconFont from '@/components/iconFont'
 import { useViewRoute } from '@/router'
+import { unbanIP } from '@/service/banList'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { useI18n } from 'vue-i18n'
@@ -59,6 +60,7 @@ const pauseAll = async (): Promise<boolean> => {
   try {
     await endpointStore.updateGlobalConfig({ globalPaused: true })
     Message.warning(t('page.dashboard.pauseAll.result'))
+    unbanIP('*')
     return true
   } catch (e) {
     if (e instanceof Error) {
