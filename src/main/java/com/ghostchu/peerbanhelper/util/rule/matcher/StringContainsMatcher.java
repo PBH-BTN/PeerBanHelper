@@ -18,7 +18,7 @@ public final class StringContainsMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_CONTAINS);
     private final String rule;
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
-    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
+    private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
 
     public StringContainsMatcher(JsonObject syntax) {
         super(syntax);

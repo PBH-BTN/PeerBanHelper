@@ -17,7 +17,7 @@ public final class StringLengthMatcher extends AbstractJsonMatcher {
     private final int min;
     private final int max;
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_LENGTH, "<Not Provided>"));
-    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_STRING_LENGTH, "<Not Provided>"));
+    private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_LENGTH, "<Not Provided>"));
 
     public StringLengthMatcher(JsonObject syntax) {
         super(syntax);

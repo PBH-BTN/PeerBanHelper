@@ -31,6 +31,7 @@ public final class RuleParser {
             if (result.result() == MatchResultEnum.TRUE) { // 其次，可被覆盖
                 matchResult = new RuleMatchResult(true, rule,result.comment());
             }
+
         }
 
         return matchResult;

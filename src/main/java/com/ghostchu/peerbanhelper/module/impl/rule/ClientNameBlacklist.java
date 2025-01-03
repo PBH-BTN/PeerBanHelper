@@ -20,6 +20,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+@Slf4j
 @Getter
 @Component
 @IgnoreScan
@@ -89,9 +91,9 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule implements Re
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
-        if (isHandShaking(peer) && (peer.getClientName() == null || peer.getClientName().isBlank())) {
-            return handshaking();
-        }
+//        if (isHandShaking(peer) && (peer.getClientName() == null || peer.getClientName().isBlank())) {
+//            return handshaking();
+//        }
         //return getCache().readCache(this, peer.getClientName(), () -> {
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
         if (matchResult.hit()) {

@@ -18,7 +18,7 @@ public final class StringStartsWithMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_STARTS_WITH);
     private final String rule;
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent("StringStatsWith Hit"));
-    private MatchResult miss = new MatchResult(MatchResultEnum.FALSE, new TranslationComponent("StringStatsWith Miss"));
+    private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("StringStatsWith Miss"));
 
     public StringStartsWithMatcher(JsonObject syntax) {
         super(syntax);
