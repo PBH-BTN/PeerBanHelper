@@ -135,6 +135,7 @@ public class PeerBanHelperServer implements Reloadable {
     private DNSLookup dnsLookup;
     @Getter
     private boolean globalPaused = false;
+    private boolean debugPeerCondition;
 //    @Autowired
 //    private IPFSBanListShare share;
 
@@ -151,6 +152,7 @@ public class PeerBanHelperServer implements Reloadable {
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
             ignoreAddresses.add(ignored);
         });
+        this.debugPeerCondition = Main.getMainConfig().getBoolean("debug.peer-condition");
     }
 
     @Override
@@ -602,7 +604,7 @@ public class PeerBanHelperServer implements Reloadable {
                         try {
                             CheckResult checkResult = checkBan(torrent, peer, downloader);
                             details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
-                            log.info("[DEBUG] {}: {}", peer, checkResult); // TODO: delete it before release
+
                         } catch (Exception e) {
                             log.error("Unexpected error occurred while checking bans", e);
                             throw e;
@@ -838,6 +840,9 @@ public class PeerBanHelperServer implements Reloadable {
             }
             CheckResult result = NO_MATCHES_CHECK_RESULT;
             for (CheckResult r : results) {
+                if (debugPeerCondition) {
+                    log.info("[DEBUG] {}: {}", peer, r);
+                }
                 if (r.action() == PeerAction.SKIP) {
                     result = r;
                     break; // 立刻离开循环，处理跳过
