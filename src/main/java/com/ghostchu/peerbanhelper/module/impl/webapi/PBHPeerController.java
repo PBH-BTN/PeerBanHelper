@@ -78,7 +78,7 @@ public class PBHPeerController extends AbstractFeatureModule {
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
         activeMonitoringModule.flush();
-        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
+        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         long banCount = historyDao.queryBuilder()
                 .where()
                 .eq("ip", new SelectArg(ip))
