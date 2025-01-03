@@ -58,7 +58,7 @@ const [_r, _c, goto] = useViewRoute()
 const pauseAll = async (): Promise<boolean> => {
   try {
     await endpointStore.updateGlobalConfig({ globalPaused: true })
-    Message.info(t('page.dashboard.pauseAll.result'))
+    Message.warning(t('page.dashboard.pauseAll.result'))
     return true
   } catch (e) {
     if (e instanceof Error) {
