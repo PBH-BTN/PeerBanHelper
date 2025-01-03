@@ -599,8 +599,13 @@ public class PeerBanHelperServer implements Reloadable {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
                     protect.getService().submit(() -> {
-                        CheckResult checkResult = checkBan(torrent, peer, downloader);
-                        details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
+                        try {
+                            CheckResult checkResult = checkBan(torrent, peer, downloader);
+                            details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
+                        } catch (Exception e) {
+                            log.error("Unexpected error occurred while checking bans", e);
+                            throw e;
+                        }
                     });
                 }
             }
