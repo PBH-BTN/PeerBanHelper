@@ -135,7 +135,6 @@ public class PeerBanHelperServer implements Reloadable {
     private DNSLookup dnsLookup;
     @Getter
     private boolean globalPaused = false;
-    private boolean debugPeerCondition;
 //    @Autowired
 //    private IPFSBanListShare share;
 
@@ -152,7 +151,6 @@ public class PeerBanHelperServer implements Reloadable {
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
             ignoreAddresses.add(ignored);
         });
-        this.debugPeerCondition = Main.getMainConfig().getBoolean("debug.peer-condition");
     }
 
     @Override
@@ -840,9 +838,6 @@ public class PeerBanHelperServer implements Reloadable {
             }
             CheckResult result = NO_MATCHES_CHECK_RESULT;
             for (CheckResult r : results) {
-                if (debugPeerCondition) {
-                    log.info("[DEBUG] {}: {}", peer, r);
-                }
                 if (r.action() == PeerAction.SKIP) {
                     result = r;
                     break; // 立刻离开循环，处理跳过
