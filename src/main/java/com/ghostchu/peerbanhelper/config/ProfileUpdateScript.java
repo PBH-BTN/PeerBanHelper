@@ -25,7 +25,7 @@ public class ProfileUpdateScript {
         this.conf = conf;
     }
 
-    @UpdateScript(version = 23)
+    @UpdateScript(version = 24)
     public void ptrBlacklistAndUpdateTorExitNodeList(YamlConfiguration bundled) {
         conf.set("module.ptr-blacklist", bundled.get("module.ptr-blacklist"));
         if("https://cdn.jsdelivr.net/gh/platformcosmo/Tor-IP-Addresses/tor-exit-nodes.lst".equals(conf.getString("module.ip-address-blocker-rules.rules.tor-exit-nodes.url"))){
