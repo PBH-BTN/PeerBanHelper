@@ -477,7 +477,14 @@ public class PeerBanHelperServer implements Reloadable {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_CHECK_BANS));
             })) {
-                getDownloaders().forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader))));
+                getDownloaders().forEach(downloader -> protect.getService().submit(() -> {
+                    try {
+                        downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader));
+                    } catch (Exception e) {
+                        log.error("Unexpected fatal error occurred while checking bans!", e);
+                        throw e;
+                    }
+                }));
             }
 
 
