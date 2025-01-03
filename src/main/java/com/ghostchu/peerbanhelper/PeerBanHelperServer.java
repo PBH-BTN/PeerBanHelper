@@ -602,6 +602,7 @@ public class PeerBanHelperServer implements Reloadable {
                         try {
                             CheckResult checkResult = checkBan(torrent, peer, downloader);
                             details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
+                            log.info("[DEBUG] {}: {}", peer, checkResult); // TODO: delete it before release
                         } catch (Exception e) {
                             log.error("Unexpected error occurred while checking bans", e);
                             throw e;
