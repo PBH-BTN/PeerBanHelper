@@ -1,12 +1,14 @@
-import type { donateStatus, mainfest, release } from '@/api/model/manifest'
+import type { donateStatus, GlobalConfig, mainfest, release } from '@/api/model/manifest'
 import { basePath } from '@/router'
 import { IncorrectTokenError, login, NeedInitError } from '@/service/login'
 import {
+  GetGlobalConfig,
   getLatestVersion,
   getManifest,
   GetManifestError,
   getPBHPlusStatus,
-  setPHBPlusKey
+  setPHBPlusKey,
+  UpdateGlobalConfig
 } from '@/service/version'
 import networkFailRetryNotication from '@/utils/networkRetry'
 import { useStorage } from '@vueuse/core'
@@ -159,11 +161,29 @@ export const useEndpointStore = defineStore('endpoint', () => {
       throw new Error(result.message)
     }
   }
+  const globalConfig = ref<GlobalConfig>()
+  const getGlobalConfig = async () => {
+    const result = await GetGlobalConfig()
+    if (result.success) {
+      globalConfig.value = result.data
+    } else {
+      throw new Error(result.message)
+    }
+  }
+  const updateGlobalConfig = async (config: GlobalConfig) => {
+    const result = await UpdateGlobalConfig(config)
+    if (result.success) {
+      getGlobalConfig()
+    } else {
+      throw new Error(result.message)
+    }
+  }
   // init
   setEndpoint(endpoint.value, { retryOnNetWorkFail: true })
 
   setTimeout(async () => getPlusStatus())
   setTimeout(async () => setAccessToken(accessToken.value), 3000)
+  setTimeout(async () => getGlobalConfig())
   return {
     endpointSaved: readonly(endpoint),
     endpoint: computed(() => {
@@ -194,6 +214,9 @@ export const useEndpointStore = defineStore('endpoint', () => {
       } else if (res.status === 303) {
         throw new NeedInitError()
       }
-    }
+    },
+    getGlobalConfig,
+    updateGlobalConfig,
+    globalConfig: readonly(globalConfig)
   }
 })

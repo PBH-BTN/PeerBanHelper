@@ -1,9 +1,9 @@
+import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
+import type { donateStatus, GlobalConfig, mainfest } from '@/api/model/manifest'
 import { useEndpointStore } from '@/stores/endpoint'
+import { Octokit } from '@octokit/core'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
-import { Octokit } from '@octokit/core'
-import type { donateStatus, mainfest } from '@/api/model/manifest'
-import type { CommonResponse, CommonResponseWithoutData } from '@/api/model/common'
 export class GetManifestError extends Error {
   static name = 'GetManifestError' as const
   name = GetManifestError.name
@@ -90,4 +90,24 @@ export function getManifest(endpoint = useEndpointStore().endpoint): Promise<mai
         return res
       })
   )
+}
+
+export function GetGlobalConfig(): Promise<CommonResponse<GlobalConfig>> {
+  const url = new URL(urlJoin(useEndpointStore().endpoint, 'api/general/global'), location.href)
+  return fetch(url, { headers: getCommonHeader() }).then((res) => {
+    useEndpointStore().assertResponseLogin(res)
+    return res.json()
+  })
+}
+
+export function UpdateGlobalConfig(config: GlobalConfig): Promise<CommonResponseWithoutData> {
+  const url = new URL(urlJoin(useEndpointStore().endpoint, 'api/general/global'), location.href)
+  return fetch(url, {
+    method: 'PATCH',
+    body: JSON.stringify(config),
+    headers: getCommonHeader()
+  }).then((res) => {
+    useEndpointStore().assertResponseLogin(res)
+    return res.json()
+  })
 }
