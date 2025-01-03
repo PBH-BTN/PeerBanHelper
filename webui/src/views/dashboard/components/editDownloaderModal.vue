@@ -44,7 +44,7 @@
         <a-input v-model="form.name" allow-clear />
       </a-form-item>
       <a-form-item field="paused" :label="t('page.dashboard.editModal.label.paused')" required>
-        <a-switch v-model="form.paused" />
+        <a-switch v-model="form.config.paused" />
       </a-form-item>
       <component :is="formMap[form.config.type]" v-model="form.config" />
     </a-form>
@@ -91,13 +91,11 @@ const oldName = ref('')
 defineExpose({
   showModal: (
     isNewItem: boolean,
-    paused: boolean,
     currentConfig?: { name: string; config: downloaderConfig }
   ) => {
     newItem.value = isNewItem
     if (!isNewItem && currentConfig) {
       form.name = currentConfig.name
-      form.paused = paused
       oldName.value = currentConfig.name
       form.config = currentConfig.config
     } else {

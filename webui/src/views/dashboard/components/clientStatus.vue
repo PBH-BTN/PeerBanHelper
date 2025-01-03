@@ -51,7 +51,7 @@
           :disable-remove="data.length === 1"
           :downloader="client"
           @downloader-deleted="refresh"
-          @edit-click="(e) => editDownloaderModal?.showModal(false, client.paused, e)"
+          @edit-click="(e) => editDownloaderModal?.showModal(false, e)"
         />
       </a-col>
     </a-row>

@@ -3,8 +3,8 @@
     <a-space class="list-header" wrap>
       <a-typography-text>{{ t('page.banlist.banlist.description') }}</a-typography-text>
       <a-space class="list-header-right-group" wrap>
-        <AsyncMethod v-slot="{ run, loading }" once :async-fn="() => handleUnban('*')">
-          <a-button type="secondary" :loading="loading" @click="run">
+        <AsyncMethod v-slot="{ run:unban, loading:unbaning }" once :async-fn="() => handleUnban('*')">
+          <a-button type="secondary" :loading="unbaning" @click="unban">
             {{ t('page.banlist.banlist.listItem.unbanall') }}
           </a-button>
         </AsyncMethod>
@@ -54,17 +54,17 @@
 
 <script setup lang="ts">
 import type { BanList } from '@/api/model/banlist'
+import AsyncMethod from '@/components/asyncMethod.vue'
 import { getBanList, unbanIP } from '@/service/banList'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
+import { Message } from '@arco-design/web-vue'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { useWindowSize } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'
-import AsyncMethod from '@/components/asyncMethod.vue'
 import banListItem from './banListItem.vue'
-import { Message } from '@arco-design/web-vue'
 
 const { height } = useWindowSize()
 const banlist = ref()
@@ -163,7 +163,7 @@ const handleUnban = async (address: string) => {
       content: t('page.banlist.banlist.listItem.unbanSuccess', { count: count }),
       resetOnHover: true
     })
-    emits('unban', address)
+    refresh()
     return true
   }
 }
