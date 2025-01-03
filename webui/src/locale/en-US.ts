@@ -15,9 +15,6 @@ import plusLocale from './en-US/plus'
 import settingsLocale from './en-US/settings'
 
 export default {
-  'global.alert.globalPause':
-    'Global pause mode has been enabled, all ban and check operations have been disabled',
-  'global.alert.globalPause.disable': 'Click to disable',
   'navbar.action.locale': 'Switch to English',
   'navbar.action.autoUpdate': 'Auto Update',
   'navbar.action.autoUpdate.lastUpdate': 'Last updated at: ',
@@ -35,6 +32,14 @@ export default {
   'globalPauseModel.title': 'Are you sure to enable global pause mode?',
   'globalPauseModel.description':
     'This will pause all ban and check operations of all downloaders until the next restart or cancel pause.',
+  'global.pause.pauseAll': 'Pause',
+  'global.pause.pauseAll.tips':
+    "This will stop PeerBanhelper's all functions and unban all Peers, suitable for modifying downloader configuration",
+  'global.pause.pauseAll.result': 'Global pause mode has been started',
+  'global.pause.pauseAll.stop': 'Global pause mode has been stopped',
+  'global.pause.alert':
+    'Global pause mode has been enabled, all ban and check operations have been disabled',
+  'global.pause.alert.disable': 'Click to disable',
 
   'router.login': 'Login',
   'router.dashboard': 'Status',

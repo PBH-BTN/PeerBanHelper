@@ -95,12 +95,12 @@
           </template>
         </a-dropdown>
         <a-space class="right-side" wrap>
-          <template v-if="!disableAutoUpdate">
-            <auto-update-btn />
-          </template>
           <a-tooltip :content="t('settings.globalPause')">
             <global-pause-btn />
           </a-tooltip>
+          <template v-if="!disableAutoUpdate">
+            <auto-update-btn />
+          </template>
           <div class="lang-selector">
             <a-dropdown
               trigger="click"

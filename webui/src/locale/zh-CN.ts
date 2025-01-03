@@ -15,8 +15,6 @@ import plusLocale from './zh-CN/plus'
 import settingsLocale from './zh-CN/settings'
 
 export default {
-  'global.alert.globalPause': '全局暂停模式已启动，所有检查和封禁操作均已暂停',
-  'global.alert.globalPause.disable': '点击关闭',
   'navbar.action.locale': '切换为中文',
   'navbar.action.autoUpdate': '自动刷新',
   'navbar.action.globalPause': '全局暂停',
@@ -35,6 +33,13 @@ export default {
   'changeLogModel.updateNow': '立即更新',
   'globalPauseModel.title': '确定启用全局暂停模式吗？',
   'globalPauseModel.description': '这将暂停所有下载器的封禁和检查操作，直至下次重启或者取消暂停。',
+  'global.pause.pauseAll': '暂停',
+  'global.pause.pauseAll.tips':
+    '这将停止 PeerBanhelper 的全部功能并解封全部 Peer，适用于修改下载器配置等场景',
+  'global.pause.pauseAll.result': '全局暂停模式已启动',
+  'global.pause.pauseAll.stop': '全局暂停模式已停止',
+  'global.pause.alert': '全局暂停模式已启动，所有检查和封禁操作均已暂停',
+  'global.pause.alert.disable': '点击关闭',
 
   'router.login': '登录',
   'router.dashboard': '状态',

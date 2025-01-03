@@ -1,6 +1,5 @@
 <template>
   <a-button
-    ref="globalPauseBtn"
     class="global-pause-btn"
     :type="pausingStatus ? 'primary' : 'outline'"
     :status="pausingStatus ? 'warning' : 'normal'"
@@ -20,76 +19,46 @@
 import { unbanIP } from '@/service/banList'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message, Modal } from '@arco-design/web-vue'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const endpointStore = useEndpointStore()
-const globalPauseBtn = ref()
-// const loadingHolding = ref(false)
-// onMounted(() => {
-//   container.value = window.document.querySelector('body') as HTMLElement
-//   eventAbortController = new AbortController()
-//   globalPauseBtn.value.$el.addEventListener(
-//     'animationstart',
-//     () => {
-//       loadingHolding.value = true
-//     },
-//     { signal: eventAbortController.signal }
-//   )
-//   globalPauseBtn.value.$el.addEventListener(
-//     'animationend',
-//     () => {
-//       loadingHolding.value = false
-//     },
-//     { signal: eventAbortController.signal }
-//   )
-// })
-
-// onUnmounted(() => {
-//   eventAbortController.abort()
-// })
 
 const pausingStatus = computed(() => endpointStore.globalConfig?.globalPaused)
 
-const globalPause = async (): Promise<boolean> => {
-  try {
-    await endpointStore.updateGlobalConfig({ globalPaused: true })
-    Message.warning(t('page.dashboard.pauseAll.result'))
-    unbanIP('*')
-    return true
-  } catch (e) {
-    if (e instanceof Error) {
-      Message.error(e.message)
-    }
-    return false
-  }
-}
-
-const handleGlobalPauseBtnClick = () => {
+const handleGlobalPauseBtnClick = async () => {
   if (pausingStatus.value) {
-    cancelGlobalPause()
+    try {
+      await endpointStore.updateGlobalConfig({ globalPaused: false })
+      Message.warning(t('global.pause.pauseAll.stop'))
+      unbanIP('*')
+      return true
+    } catch (e) {
+      if (e instanceof Error) {
+        Message.error(e.message)
+      }
+      return false
+    }
   } else {
     Modal.warning({
       title: t('globalPauseModel.title'),
       content: t('globalPauseModel.description'),
-      onBeforeOk: () => globalPause(),
+      onBeforeOk: async (): Promise<boolean> => {
+        try {
+          await endpointStore.updateGlobalConfig({ globalPaused: true })
+          Message.warning(t('global.pause.pauseAll.result'))
+          unbanIP('*')
+          return true
+        } catch (e) {
+          if (e instanceof Error) {
+            Message.error(e.message)
+          }
+          return false
+        }
+      },
       hideCancel: false
     })
-  }
-}
-
-const cancelGlobalPause = async (): Promise<boolean> => {
-  try {
-    await endpointStore.updateGlobalConfig({ globalPaused: false })
-    Message.warning(t('page.dashboard.pauseAll.stop'))
-    unbanIP('*')
-    return true
-  } catch (e) {
-    if (e instanceof Error) {
-      Message.error(e.message)
-    }
-    return false
   }
 }
 </script>

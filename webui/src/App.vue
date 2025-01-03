@@ -1,6 +1,6 @@
 <template>
   <a-alert v-if="endPointStore.globalConfig?.globalPaused" type="warning" banner center>
-    {{ t('global.alert.globalPause') }}
+    {{ t('global.pause.alert') }}
     <template #action>
       <AsyncMethod
         v-slot="{ run, loading }"
@@ -12,7 +12,7 @@
         "
       >
         <a-button size="small" :loading="loading" status="warning" type="text" @click="run">{{
-          t('global.alert.globalPause.disable')
+          t('global.pause.alert.disable')
         }}</a-button>
       </AsyncMethod>
     </template>
