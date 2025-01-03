@@ -5,6 +5,7 @@ export default {
   'page.dashboard.pauseAll.tips':
     "This will stop PeerBanhelper's all functions and unban all Peers, suitable for modifying downloader configuration",
   'page.dashboard.pauseAll.result': 'Global pause mode has been started',
+  ' page.dashboard.pauseAll.stop': 'Global pause mode has been stopped',
   'page.dashboard.clientStatus.title': 'Connected Downloaders',
   'page.dashboard.clientStatus.card.title': 'Downloader Status',
   'page.dashboard.clientStatus.card.status': 'Status',

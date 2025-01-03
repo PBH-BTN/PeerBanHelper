@@ -5,6 +5,7 @@ export default {
   'page.dashboard.pauseAll.tips':
     '这将停止 PeerBanhelper 的全部功能并解封全部 Peer，适用于修改下载器配置等场景',
   'page.dashboard.pauseAll.result': '全局暂停模式已启动',
+  'page.dashboard.pauseAll.stop': '全局暂停模式已停止',
   'page.dashboard.clientStatus.title': '已连接的下载器',
   'page.dashboard.clientStatus.card.title': '下载器状态',
   'page.dashboard.clientStatus.card.status': '状态',

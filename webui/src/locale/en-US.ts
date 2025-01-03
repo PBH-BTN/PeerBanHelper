@@ -16,7 +16,7 @@ import settingsLocale from './en-US/settings'
 
 export default {
   'global.alert.globalPause':
-    'Global pause mode has been enabled, all functions have been disabled',
+    'Global pause mode has been enabled, all ban and check operations have been disabled',
   'global.alert.globalPause.disable': 'Click to disable',
   'navbar.action.locale': 'Switch to English',
   'navbar.action.autoUpdate': 'Auto Update',
@@ -32,6 +32,9 @@ export default {
   'changeLogModel.changelog': 'Change Log',
   'changeLogModel.notNow': 'Not Now',
   'changeLogModel.updateNow': 'Update Now',
+  'globalPauseModel.title': 'Are you sure to enable global pause mode?',
+  'globalPauseModel.description':
+    'This will pause all ban and check operations of all downloaders until the next restart or cancel pause.',
 
   'router.login': 'Login',
   'router.dashboard': 'Status',

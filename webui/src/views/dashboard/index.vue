@@ -17,7 +17,7 @@
           </a-button>
         </a-tooltip>
         <a-popconfirm
-          v-else
+          v-if="false"
           type="warning"
           :content="t('page.dashboard.pauseAll.tips')"
           :on-before-ok="pauseAll"
