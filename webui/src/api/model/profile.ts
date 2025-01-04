@@ -19,6 +19,7 @@ export interface Module {
   expression_engine: ExpressionEngine
   ip_address_blocker_rules: IpAddressBlockerRules
   active_monitoring: ActiveMonitoring
+  ptr_blacklist: PtrBlacklist
 }
 
 export interface PeerIdBlacklist {
@@ -134,4 +135,10 @@ export interface ActiveMonitoring {
   traffic_monitoring: {
     daily: number
   }
+}
+
+export interface PtrBlacklist {
+  enabled: boolean
+  ban_duration: BanDuration
+  ptr_rules: PeerRule[]
 }

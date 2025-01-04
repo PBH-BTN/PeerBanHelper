@@ -41,7 +41,7 @@ export default {
   'page.settings.tab.profile.module.clientNameBlackList.useGlobalBanTime':
     'Use global ban duration',
   'page.settings.tab.profile.module.clientNameBlackList.banClientName': 'Banned ClientName',
-  'page.settings.tab.profile.module.clientNameBlackList.rule': 'Rule',
+  'page.settings.tab.profile.module.clientNameBlackList.placeholder': 'Client Name',
 
   'page.settings.tab.profile.module.progressCheatBlocker': 'Cheating Progress blocker',
   'page.settings.tab.profile.module.progressCheatBlocker.tips':
@@ -137,5 +137,12 @@ export default {
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.tips':
     'Set the traffic alert threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
-    'Daily traffic alert threshold'
+    'Daily traffic alert threshold',
+
+  'page.settings.tab.profile.module.ptrBlackList.title': 'DNS Reserve Lookup blocker',
+  'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': 'Use global ban duration',
+  'page.settings.tab.profile.module.ptrBlackList.reserveName': 'Banned name',
+  'page.settings.tab.profile.module.ptrBlackList.placeholder': 'Domain name',
+  'page.settings.tab.profile.module.ptrBlackList.tooltip':
+    'This module will force to do PTR query on Peer IP, and try to resolve the hostname that bind with IP address. If the IP address bind with a hostname and the hostname match the rules below, then do the action'
 }

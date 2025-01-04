@@ -4,7 +4,7 @@
       <a-switch v-model="model.enabled" />
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.clientNameBlackList.useGlobalBanTime')"
+      :label="t('page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime')"
       field="model.ban_duration"
     >
       <a-space>
@@ -22,29 +22,28 @@
       </template>
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.clientNameBlackList.banClientName')"
+      :label="t('page.settings.tab.profile.module.ptrBlackList.reserveName')"
       field="model.banned_client_name"
+      :tooltip="t('page.settings.tab.profile.module.ptrBlackList.tooltip')"
       :rules="[{ validator: nonEmptyValidator }]"
     >
       <a-space direction="vertical">
-        <a-button @click="model.banned_client_name.push({ method: 'STARTS_WITH', content: '' })">
+        <a-button @click="model.ptr_rules.push({ method: 'STARTS_WITH', content: '' })">
           <template #icon>
             <icon-plus />
           </template>
         </a-button>
         <a-list
           style="min-width: 800px"
-          :pagination-props="{ pageSize: 5, total: model.banned_client_name.length }"
+          :pagination-props="{ pageSize: 5, total: model.ptr_rules.length }"
           :data="dataWithIndex"
         >
           <template #item="{ item }">
             <a-list-item style="min-width: 250px">
               <a-space>
                 <banRuleListItem
-                  :placeholder="
-                    t('page.settings.tab.profile.module.clientNameBlackList.placeholder')
-                  "
-                  v-model="model.banned_client_name[item.index]"
+                  :placeholder="t('page.settings.tab.profile.module.ptrBlackList.placeholder')"
+                  v-model="model.ptr_rules[item.index]"
                 />
                 <br />
               </a-space>
@@ -54,7 +53,7 @@
                   status="danger"
                   shape="circle"
                   type="text"
-                  @click="model.banned_client_name.splice(item.index, 1)"
+                  @click="model.ptr_rules.splice(item.index, 1)"
                 >
                   <template #icon>
                     <icon-delete />
@@ -69,13 +68,13 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { type ClientNameBlacklist } from '@/api/model/profile'
+import { type PtrBlacklist } from '@/api/model/profile'
 import { formatMilliseconds } from '@/utils/time'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import banRuleListItem from './banRuleListItem.vue'
 const { t } = useI18n()
-const model = defineModel<ClientNameBlacklist>({ required: true })
+const model = defineModel<PtrBlacklist>({ required: true })
 const useGlobalBanTime = computed({
   get: () => model.value.ban_duration === 'default',
   set: (value: boolean) => {
@@ -83,10 +82,10 @@ const useGlobalBanTime = computed({
   }
 })
 const dataWithIndex = computed(() => {
-  return model.value.banned_client_name.map((item, index) => ({ ...item, index }))
+  return model.value.ptr_rules.map((item, index) => ({ ...item, index }))
 })
 const nonEmptyValidator = (_: unknown, cb: (error?: string) => void) => {
-  if (model.value.banned_client_name.some((item) => item.content === ''))
+  if (model.value.ptr_rules.some((item) => item.content === ''))
     cb(t('page.settings.tab.profile.module.banRuleTips.empty'))
   else cb()
 }
