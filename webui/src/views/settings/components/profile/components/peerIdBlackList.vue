@@ -41,7 +41,7 @@
           <template #item="{ item }">
             <a-list-item>
               <a-space>
-                <banRuleListItem v-model="model.banned_peer_id[item.index]" />
+                <banRuleListItem placeholder="Peer ID" v-model="model.banned_peer_id[item.index]" />
                 <br />
               </a-space>
               <template #actions>

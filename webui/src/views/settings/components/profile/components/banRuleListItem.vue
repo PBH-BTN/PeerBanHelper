@@ -14,7 +14,7 @@
         ></a-space>
       </a-option>
     </a-select>
-    <a-input v-model="model.content" placeholder="PeerID"></a-input>
+    <a-input v-model="model.content" :placeholder="placeholder"></a-input>
     {{ t('page.settings.tab.profile.module.peerIdBlackList.hit') }}
     <a-select v-model="model.hit" style="width: 100px">
       <a-option v-for="action in actions" :key="action" :value="action">{{
@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import type { PeerRule } from '@/api/model/profile'
 import { useI18n } from 'vue-i18n'
-
+const { placeholder } = defineProps<{ placeholder: string }>()
 const { t } = useI18n()
 const ruleMethod = ['STARTS_WITH', 'ENDS_WITH', 'LENGTH', 'CONTAINS', 'EQUALS', 'REGEX']
 const actions = ['TRUE', 'FALSE', 'DEFAULT']
