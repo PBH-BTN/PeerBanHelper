@@ -295,6 +295,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 yamlConfiguration.load(Main.getProfileConfigFile());
                 stringListToMapList(yamlConfiguration, "module.peer-id-blacklist", "banned-peer-id");
                 stringListToMapList(yamlConfiguration, "module.client-name-blacklist", "banned-client-name");
+                stringListToMapList(yamlConfiguration, "module.ptr-blacklist", "ptr-rules");
             }
             default -> {
                 context.status(HttpStatus.NOT_FOUND);
@@ -426,6 +427,15 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 }
                 case "banned-client-name" -> {
                     if ("module.client-name-blacklist".equals(path)) {
+                        List<String> bannedList = ((List<?>) value).stream()
+                                .filter(Map.class::isInstance)
+                                .map(GSON::toJson)
+                                .toList();
+                        value = bannedList;
+                    }
+                }
+                case "ptr-rules" -> {
+                    if ("module.ptr-blacklist".equals(path)) {
                         List<String> bannedList = ((List<?>) value).stream()
                                 .filter(Map.class::isInstance)
                                 .map(GSON::toJson)
