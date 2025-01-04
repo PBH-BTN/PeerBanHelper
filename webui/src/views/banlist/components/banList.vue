@@ -18,11 +18,12 @@
           </a-button>
         </AsyncMethod>
         <a-input-search
+          v-model="searchString"
           :style="{ width: '250px' }"
           :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
           allow-clear
           search-button
-          @search="handleSearch"
+          @search="refresh()"
         />
       </a-space>
     </a-space>
@@ -82,6 +83,7 @@ const bottom = ref(false)
 const limit = ref(5)
 const step = 5
 const loadingMore = ref(false)
+const searchString = ref('')
 const { t } = useI18n()
 
 let firstGet = true
@@ -97,7 +99,7 @@ async function getMoreBanList(): Promise<BanList[]> {
     // load more data until the limit or get the same data with the top one
     while (newData.length < limit.value && !match) {
       const moreData = await (
-        await getBanList(step, newData[newData.length - 1]?.banMetadata.banAt)
+        await getBanList(step, searchString.value, newData[newData.length - 1]?.banMetadata.banAt)
       ).data
       for (const item of moreData) {
         if (item.banMetadata.randomId !== data.value[0].banMetadata.randomId) {
@@ -125,14 +127,6 @@ const { data, refresh, run, loading } = useRequest(
   },
   [useAutoUpdatePlugin]
 )
-const handleSearch = (value: string) => {
-  if (value) {
-    const index = data.value?.map((item) => item.address).findIndex((item) => item.includes(value))
-    if (index !== -1) {
-      banlist.value?.scrollIntoView({ index: index, align: 'auto' })
-    }
-  }
-}
 
 const loadMore = async () => {
   if (!data.value) return
@@ -146,6 +140,7 @@ const loadMore = async () => {
       const moreData = (
         await getBanList(
           step,
+          searchString.value,
           (newData[newData.length - 1] || data.value[data.value.length - 1])?.banMetadata.banAt
         )
       ).data
