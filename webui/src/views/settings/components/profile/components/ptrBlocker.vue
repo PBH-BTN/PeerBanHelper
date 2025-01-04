@@ -42,8 +42,8 @@
             <a-list-item style="min-width: 250px">
               <a-space>
                 <banRuleListItem
-                  :placeholder="t('page.settings.tab.profile.module.ptrBlackList.placeholder')"
                   v-model="model.ptr_rules[item.index]"
+                  :placeholder="t('page.settings.tab.profile.module.ptrBlackList.placeholder')"
                 />
                 <br />
               </a-space>

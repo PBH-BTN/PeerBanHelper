@@ -6,6 +6,7 @@ import { getCommonHeader } from './utils'
 
 export async function getBanList(
   limit: number,
+  search?: string,
   lastBanTime?: number
 ): Promise<CommonResponse<BanList[]>> {
   const endpointStore = useEndpointStore()
@@ -15,6 +16,9 @@ export async function getBanList(
   url.searchParams.set('limit', String(limit))
   if (lastBanTime) {
     url.searchParams.set('lastBanTime', String(lastBanTime))
+  }
+  if (search && search !== '') {
+    url.searchParams.set('search', search)
   }
   return fetch(url, {
     headers: getCommonHeader()
