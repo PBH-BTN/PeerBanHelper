@@ -41,10 +41,10 @@
             <a-list-item style="min-width: 250px">
               <a-space>
                 <banRuleListItem
+                  v-model="model.banned_client_name[item.index]"
                   :placeholder="
                     t('page.settings.tab.profile.module.clientNameBlackList.placeholder')
                   "
-                  v-model="model.banned_client_name[item.index]"
                 />
                 <br />
               </a-space>
