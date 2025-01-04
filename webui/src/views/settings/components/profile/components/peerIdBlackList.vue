@@ -27,7 +27,7 @@
       :rules="[{ validator: nonEmptyValidator }]"
     >
       <a-space direction="vertical">
-        <a-button @click="model.banned_peer_id.push({ method: 'STARTS_WITH', content: '' })">
+        <a-button @click="model.banned_peer_id.unshift({ method: 'STARTS_WITH', content: '' })">
           <template #icon>
             <icon-plus />
           </template>
