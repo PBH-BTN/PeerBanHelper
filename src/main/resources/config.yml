@@ -185,10 +185,12 @@ decentralized:
 # 留空则使用系统 DNS
 # 部分 DNS 存在速率限制，建议使用与系统 DNS 不同的 DNS，以避免影响正常上网解析
 # 要使此配置生效，需要启用 DNSJava 实验
+# 只有部分功能（如 DNS 反向查询）会使用此功能，其它部分仍然默认使用 JDK 解析器
 # Custom DNS resolver, DoT/DoQ are not supported yet
 # Leave it empty to use system DNS
 # Some DNS have rate limit, it's recommended to use different DNS with system DNS to avoid affect normal internet access
 # To make this config take effect, you need enable DNSJava experiment
+# Only some features (like DNS reverse lookup) will use this feature, others still use JDK resolver by default
 resolvers:
   # 使用系统 DNS - Use system DNS
   use-system: true
