@@ -42,3 +42,7 @@ export interface KeyData {
   verifyMagic: string
   type: LicenseType
 }
+
+export interface GlobalConfig {
+  globalPaused: boolean
+}

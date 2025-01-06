@@ -12,7 +12,8 @@ export enum ClientStatusEnum {
   HEALTHY = 'HEALTHY',
   ERROR = 'ERROR',
   UNKNOWN = 'UNKNOWN',
-  NEED_TAKE_ACTION = 'NEED_TAKE_ACTION'
+  NEED_TAKE_ACTION = 'NEED_TAKE_ACTION',
+  PAUSED = 'PAUSED'
 }
 
 export enum ClientTypeEnum {
@@ -28,6 +29,7 @@ export interface Downloader {
   name: string
   endpoint: string
   type: ClientStatusEnum
+  paused: boolean
 }
 
 export interface Torrent {
@@ -204,6 +206,7 @@ export interface qBittorrentConfig {
   incrementBan: boolean
   verifySsl: boolean
   ignorePrivate: boolean
+  paused: boolean
 }
 
 export interface qBittorrentEEConfig {
@@ -217,6 +220,7 @@ export interface qBittorrentEEConfig {
   useShadowBan: boolean
   verifySsl: boolean
   ignorePrivate: boolean
+  paused: boolean
 }
 
 interface BasicAuth {
@@ -232,6 +236,7 @@ export interface transmissionConfig {
   httpVersion: string
   verifySsl: boolean
   ignorePrivate: boolean
+  paused: boolean
   rpcUrl: string
 }
 
@@ -242,6 +247,7 @@ export interface biglybtConfig {
   httpVersion: string
   verifySsl: boolean
   ignorePrivate: boolean
+  paused: boolean
 }
 
 export interface delugeConfig {
@@ -252,6 +258,7 @@ export interface delugeConfig {
   incrementBan: boolean
   verifySsl: boolean
   ignorePrivate: boolean
+  paused: boolean
   rpcUrl: string
 }
 
@@ -264,6 +271,7 @@ export interface bitCometConfig {
   incrementBan: boolean
   verifySsl: boolean
   ignorePrivate: boolean
+  paused: boolean
 }
 
 export interface CreateDownloadRequest {

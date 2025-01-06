@@ -71,6 +71,7 @@ export interface BTNStatus {
    * BTN 配置文件获取 URL
    */
   configUrl: string
+  configResult: string
 }
 
 export interface Ability {

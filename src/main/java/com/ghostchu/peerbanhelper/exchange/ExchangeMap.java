@@ -16,6 +16,7 @@ public class ExchangeMap {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class DisplayFlag implements Comparable<DisplayFlag> {
+        private String id;
         private int priority;
         private String content;
 

@@ -29,6 +29,11 @@ public final class DelugePeer implements Peer {
     }
 
     @Override
+    public boolean isHandshaking() {
+        return downloadSpeed <= 0 && uploadSpeed <= 0;
+    }
+
+    @Override
     public List<PeerMessage> getSupportedMessages() {
         return Collections.emptyList();
     }

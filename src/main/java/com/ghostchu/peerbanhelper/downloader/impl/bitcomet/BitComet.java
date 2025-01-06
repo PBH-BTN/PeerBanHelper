@@ -191,6 +191,17 @@ public class BitComet extends AbstractDownloader {
         return "BitComet";
     }
 
+    @Override
+    public boolean isPaused() {
+        return config.isPaused();
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        super.setPaused(paused);
+        config.setPaused(paused);
+    }
+
     public boolean isLoggedIn() {
         try {
             queryNeedReConfigureIpFilter();
@@ -345,7 +356,8 @@ public class BitComet extends AbstractDownloader {
                     peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10
                     peer.getUpRate(),
                     peer.getUpSize() != null ? peer.getUpSize() : -1, // 兼容 2.10
-                    peer.getPermillage() / 1000.0d, null, Collections.emptyList())
+                    peer.getPermillage() / 1000.0d, null, Collections.emptyList(),
+                    peer.getDlRate() <= 0 && peer.getUpRate() <= 0)
             ).collect(Collectors.toList());
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -460,6 +472,7 @@ public class BitComet extends AbstractDownloader {
         private String httpVersion;
         private boolean verifySsl;
         private boolean ignorePrivate;
+        private boolean paused;
 
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
@@ -474,6 +487,7 @@ public class BitComet extends AbstractDownloader {
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
+            config.setPaused(section.getBoolean("paused", false));
             return config;
         }
 
@@ -487,6 +501,7 @@ public class BitComet extends AbstractDownloader {
             section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
+            section.set("paused", paused);
             return section;
         }
     }

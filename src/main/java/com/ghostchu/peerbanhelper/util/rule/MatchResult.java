@@ -1,7 +1,8 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
-public enum MatchResult {
-    DEFAULT,
-    TRUE,
-    FALSE
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import org.jetbrains.annotations.Nullable;
+
+public record MatchResult(MatchResultEnum result, @Nullable TranslationComponent comment) {
+
 }

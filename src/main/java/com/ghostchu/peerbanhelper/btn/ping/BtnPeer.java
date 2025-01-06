@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BtnPeer {
+public final class BtnPeer {
     @SerializedName("ip_address")
     private String ipAddress;
     @SerializedName("peer_port")

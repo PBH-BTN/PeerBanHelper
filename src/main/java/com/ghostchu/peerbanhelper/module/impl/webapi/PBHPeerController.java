@@ -4,11 +4,14 @@ import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.lab.Experiments;
+import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -32,15 +35,20 @@ public class PBHPeerController extends AbstractFeatureModule {
     private final HistoryDao historyDao;
     private final PeerRecordDao peerRecordDao;
     private final ActiveMonitoringModule activeMonitoringModule;
+    private final Laboratory laboratory;
+    private final DNSLookup dnsLookup;
 
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
-                             ActiveMonitoringModule activeMonitoringModule) {
+                             ActiveMonitoringModule activeMonitoringModule,
+                             Laboratory laboratory, DNSLookup dnsLookup) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
         this.activeMonitoringModule = activeMonitoringModule;
+        this.laboratory = laboratory;
+        this.dnsLookup = dnsLookup;
     }
 
     @Override
@@ -70,15 +78,14 @@ public class PBHPeerController extends AbstractFeatureModule {
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
         activeMonitoringModule.flush();
-        @SuppressWarnings("DataFlowIssue")
-        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
+        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         long banCount = historyDao.queryBuilder()
                 .where()
                 .eq("ip", new SelectArg(ip))
                 .countOf();
         long torrentAccessCount = peerRecordDao.queryBuilder()
                 .where()
-                .eq("address",new SelectArg( ip))
+                .eq("address", new SelectArg(ip))
                 .countOf();
         long uploadedToPeer;
         long downloadedFromPeer;
@@ -128,15 +135,23 @@ public class PBHPeerController extends AbstractFeatureModule {
         } catch (Exception e) {
             log.warn("Unable to perform GeoIP query for ip {}", ip);
         }
+        String ptrLookup = null;
+        try {
+            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
+                ptrLookup = dnsLookup.ptr(ip).join().orElse(null);
+            } else {
+                ptrLookup = InetAddress.getByName(ip).getCanonicalHostName();
+            }
+        } catch (Exception ignored) {
+        }
         var info = new PeerInfo(
                 upDownResult != null || banCount > 0 || torrentAccessCount > 0,
-                ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP);
+                ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP, ptrLookup);
         ctx.json(new StdResp(true, null, info));
     }
 
 
     private void handleBanHistory(Context ctx) throws SQLException {
-        @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
         var builder = historyDao.queryBuilder()
@@ -152,7 +167,6 @@ public class PBHPeerController extends AbstractFeatureModule {
 
     private void handleAccessHistory(Context ctx) throws SQLException {
         activeMonitoringModule.flush();
-        @SuppressWarnings("DataFlowIssue")
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
         var builder = peerRecordDao.queryBuilder()
@@ -179,7 +193,8 @@ public class PBHPeerController extends AbstractFeatureModule {
             long torrentAccessCount,
             long uploadedToPeer,
             long downloadedFromPeer,
-            IPGeoData geo
+            IPGeoData geo,
+            String ptrLookup
     ) {
     }
 }

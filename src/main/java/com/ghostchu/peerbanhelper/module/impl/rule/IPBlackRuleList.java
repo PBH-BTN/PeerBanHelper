@@ -21,6 +21,7 @@ import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.util.rule.MatchResult;
+import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -32,13 +33,15 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.j256.ormlite.stmt.SelectArg;
 import inet.ipaddr.IPAddress;
-import inet.ipaddr.format.util.DualIPv4v6Tries;
+import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
 import io.ipfs.cid.Cid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -49,9 +52,9 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -122,28 +125,21 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         return getCache().readCacheButWritePassOnly(this, peer.getPeerAddress().getIp(), () -> {
-            long t1 = System.currentTimeMillis();
             String ip = peer.getPeerAddress().getIp();
             List<IPBanResult> results = new ArrayList<>();
             ipBanMatchers.forEach(rule -> results.add(new IPBanResult(rule.getRuleName(), rule.match(ip))));
-            AtomicReference<IPBanResult> matchRule = new AtomicReference<>();
-            boolean mr = results.stream().anyMatch(ipBanResult -> {
+            for (IPBanResult ipBanResult : results) {
                 try {
-                    if (ipBanResult == null) return false;
-                    boolean match = ipBanResult.matchResult() == MatchResult.TRUE;
+                    if (ipBanResult == null) return pass();
+                    boolean match = ipBanResult.matchResult().result() == MatchResultEnum.TRUE || ipBanResult.matchResult().result() == MatchResultEnum.DEFAULT;
                     if (match) {
-                        matchRule.set(ipBanResult);
+                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(ipBanResult.ruleName()), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE, ipBanResult.ruleName(), ip, Optional.ofNullable(ipBanResult.matchResult().comment()).orElse(new TranslationComponent(Lang.MODULE_IBL_COMMENT_UNKNOWN))));
                     }
-                    return match;
+                    return pass();
                 } catch (Exception e) {
                     log.error(tlUI(Lang.IP_BAN_RULE_MATCH_ERROR), e);
-                    return false;
+                    return pass();
                 }
-            });
-            long t2 = System.currentTimeMillis();
-            log.debug(tlUI(Lang.IP_BAN_RULE_MATCH_TIME, t2 - t1));
-            if (mr) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(matchRule.get().ruleName()), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE, matchRule.get().ruleName(), ip));
             }
             return pass();
         }, true);
@@ -203,7 +199,7 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             File dir = new File(Main.getDataDirectory(), "/sub");
             dir.mkdirs();
             File ruleFile = new File(dir, ruleFileName);
-            DualIPv4v6Tries ipAddresses = new DualIPv4v6Tries();
+            DualIPv4v6AssociativeTries<String> ipAddresses = new DualIPv4v6AssociativeTries<>();
             getResource(url)
                     .whenComplete((dataUpdateResult, throwable) -> {
                         if (throwable != null) {
@@ -300,15 +296,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             }
             // IPNS
             if (uri.getScheme().equalsIgnoreCase("ipns")) {
-               var ipnsCid = uri.getHost();
+                var ipnsCid = uri.getHost();
                 var ipfs = decentralizedManager.getIpfs();
                 if (ipfs == null) {
                     throw new IllegalStateException(tlUI(Lang.MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE));
                 }
                 try {
-                   var cid = ipfs.name.resolve(Cid.decode(ipnsCid), true);
-                   var data = ipfs.cat(Cid.decode(StringUtils.substringAfter(cid,"/ipfs/")));
-                   return new DataUpdateResult(200, "Data get from IPFS via IPNS", data);
+                    var cid = ipfs.name.resolve(Cid.decode(ipnsCid), true);
+                    var data = ipfs.cat(Cid.decode(StringUtils.substringAfter(cid, "/ipfs/")));
+                    return new DataUpdateResult(200, "Data get from IPFS via IPNS", data);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -339,22 +335,29 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      * @param ips      ip列表
      * @return 加载的行数
      */
-    private int fileToIPList(File ruleFile, DualIPv4v6Tries ips) throws IOException {
+    private int fileToIPList(File ruleFile, DualIPv4v6AssociativeTries<String> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
-        Files.readLines(ruleFile, StandardCharsets.UTF_8).stream().filter(s -> !s.isBlank()).forEach(ele -> {
+        StringJoiner sj = new StringJoiner("\n");
+        var lines = Files.readLines(ruleFile, StandardCharsets.UTF_8);
+        for (String ele : lines) {
+            if (ele.isBlank()) continue;
             if (ele.startsWith("#")) {
-                return; // 注释
+                // add into sj but without hashtag prefix
+                sj.add(ele.substring(1));
+                continue;
             }
             try {
-                var parsedIp = parseRuleLine(ele);
+                var parsedIp = parseRuleLine(ele, sj.toString());
                 if (parsedIp != null) {
                     count.getAndIncrement();
-                    ips.add(parsedIp);
+                    ips.put(parsedIp.getLeft(), parsedIp.getRight());
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
+            } finally {
+                sj = new StringJoiner("\n");
             }
-        });
+        }
         return count.get();
     }
 
@@ -365,28 +368,32 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
      * @param ips      ip列表
      * @return 加载的行数
      */
-    private int stringToIPList(String data, DualIPv4v6Tries ips) throws IOException {
+    private int stringToIPList(String data, DualIPv4v6AssociativeTries<String> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
-        Arrays.stream(data.split("\n")).filter(s -> !s.isBlank()).forEach(ele -> {
+        StringJoiner sj = new StringJoiner("\n");
+        for (String ele : data.split("\n")) {
+            if (ele.isBlank()) continue;
             if (ele.startsWith("#")) {
-                return; // 注释
+                // add into sj but without hashtag prefix
+                sj.add(ele.substring(1));
+                continue;
             }
             try {
-                var parsedIp = parseRuleLine(ele);
+                var parsedIp = parseRuleLine(ele, sj.toString());
                 if (parsedIp != null) {
                     count.getAndIncrement();
-                    ips.add(parsedIp);
+                    ips.put(parsedIp.getLeft(), parsedIp.getRight());
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
+            } finally {
+                sj = new StringJoiner("\n");
             }
-        });
+        }
         return count.get();
     }
 
-    private IPAddress parseRuleLine(String ele) {
-        // 注释？
-        if (ele.startsWith("#")) return null;
+    private Pair<IPAddress, @Nullable String> parseRuleLine(String ele, String preReadComment) {
         // 检查是否是 DAT/eMule 格式
         // 016.000.000.000 , 016.255.255.255 , 200 , Yet another organization
         // 032.000.000.000 , 032.255.255.255 , 200 , And another
@@ -398,11 +405,24 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
             IPAddress start = IPAddressUtil.getIPAddress(spilted[0]);
             IPAddress end = IPAddressUtil.getIPAddress(spilted[1]);
             int level = Integer.parseInt(spilted[2]);
+            String comment = spilted.length > 3 ? spilted[3] : preReadComment;
             if (level >= 128) return null;
             if (start == null || end == null) return null;
-            return start.spanWithRange(end).coverWithPrefixBlock();
+            return Pair.of(start.spanWithRange(end).coverWithPrefixBlock(), comment);
+        } else {
+            // ip #end-line-comment
+            String ip;
+            if (ele.contains("#")) {
+                ip = ele.substring(0, ele.indexOf("#"));
+                String comment = null;
+                if (ele.contains("#")) {
+                    comment = ele.substring(ele.indexOf("#") + 1);
+                }
+                return Pair.of(IPAddressUtil.getIPAddress(ip), Optional.ofNullable(comment).orElse(preReadComment));
+            } else {
+                return Pair.of(IPAddressUtil.getIPAddress(ele), preReadComment);
+            }
         }
-        return IPAddressUtil.getIPAddress(ele);
     }
 
     /**

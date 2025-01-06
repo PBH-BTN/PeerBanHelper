@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class BCLoginResponse {
+public final class BCLoginResponse {
 
     @SerializedName("error_code")
     private String errorCode;

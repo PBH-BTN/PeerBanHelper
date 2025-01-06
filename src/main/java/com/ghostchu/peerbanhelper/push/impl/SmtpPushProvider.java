@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-public class SmtpPushProvider extends AbstractPushProvider {
+public final class SmtpPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
 

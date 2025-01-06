@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TelegramPushProvider extends AbstractPushProvider {
+public final class TelegramPushProvider extends AbstractPushProvider {
 
     private final Config config;
     private final String name;

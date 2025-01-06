@@ -96,6 +96,17 @@ public class Transmission extends AbstractDownloader {
         return "Transmission";
     }
 
+    @Override
+    public boolean isPaused() {
+        return config.isPaused();
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        super.setPaused(paused);
+        config.setPaused(paused);
+    }
+
     @SneakyThrows(InterruptedException.class)
     @Override
     public DownloaderLoginResult login0() {
@@ -280,6 +291,7 @@ public class Transmission extends AbstractDownloader {
         private boolean verifySsl;
         private String rpcUrl;
         private boolean ignorePrivate;
+        private boolean paused;
 
         public static Transmission.Config readFromYaml(ConfigurationSection section) {
             Transmission.Config config = new Transmission.Config();
@@ -294,6 +306,7 @@ public class Transmission extends AbstractDownloader {
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
+            config.setPaused(section.getBoolean("paused", false));
             return config;
         }
 
@@ -307,6 +320,7 @@ public class Transmission extends AbstractDownloader {
             section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
+            section.set("paused", paused);
             return section;
         }
     }

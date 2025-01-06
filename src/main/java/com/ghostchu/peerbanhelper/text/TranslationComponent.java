@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 @Getter
-public class TranslationComponent implements Serializable {
+public final class TranslationComponent implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 

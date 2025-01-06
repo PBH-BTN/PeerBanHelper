@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BtnPeerPing {
+public final class BtnPeerPing {
     @SerializedName("populate_time")
     private long populateTime;
     @SerializedName("peers")

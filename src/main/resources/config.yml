@@ -1,4 +1,4 @@
-config-version: 26
+config-version: 27
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -54,6 +54,13 @@ persist:
   # 您是否想要持久化保存封禁列表？如果不持久化，重启 PBH 将重置封禁列表。
   # Do you want persist the banlist? If you disable it, PBH will reset the banlist when you restarting it.
   banlist: true
+  # 数据库维护操作间隔时间，单位：天
+  # 定时维护数据库将可以提升性能，并释放未使用的空间；过于频繁的维护可能会导致嵌入式设备的闪存磨损
+  # 此操作仅在 PeerBanHelper 启动时才会检查是否需要执行
+  # Database maintenance interval, time unit: days
+  # Regular maintenance will improve performance and release unused space; too frequent maintenance may cause flash wear on embedded devices
+  # This operation only check and execute when PeerBanHelper starting
+  vacuum-interval-days: 60
 # BitTorrent Threat Network 威胁防护网络（测试版）
 # BitTorrent Threat Network (BETA)
 btn:
@@ -173,3 +180,19 @@ decentralized:
     # 发布当前封禁列表到 IPFS 以允许它人订阅您的封禁列表内容，时间单位：毫秒，设置为 -1 以禁用
     # Publish current banlist to IPFS to allow others subscribe your banlist, time unit: milliseconds, set to -1 to disable
     publish-banlist: 3600000
+
+# 自定义 DNS 解析器，暂不支持 DoT/DoQ
+# 留空则使用系统 DNS
+# 部分 DNS 存在速率限制，建议使用与系统 DNS 不同的 DNS，以避免影响正常上网解析
+# 要使此配置生效，需要启用 DNSJava 实验
+# 只有部分功能（如 DNS 反向查询）会使用此功能，其它部分仍然默认使用 JDK 解析器
+# Custom DNS resolver, DoT/DoQ are not supported yet
+# Leave it empty to use system DNS
+# Some DNS have rate limit, it's recommended to use different DNS with system DNS to avoid affect normal internet access
+# To make this config take effect, you need enable DNSJava experiment
+# Only some features (like DNS reverse lookup) will use this feature, others still use JDK resolver by default
+resolvers:
+  # 使用系统 DNS - Use system DNS
+  use-system: true
+  # 自定义 DNS 服务器列表 - Custom DNS server list
+  servers: []

@@ -1,4 +1,22 @@
 <template>
+  <a-alert v-if="endPointStore.globalConfig?.globalPaused" type="warning" banner center>
+    {{ t('global.pause.alert') }}
+    <template #action>
+      <AsyncMethod
+        v-slot="{ run, loading }"
+        once
+        :async-fn="
+          async () => {
+            await endPointStore.updateGlobalConfig({ globalPaused: false })
+          }
+        "
+      >
+        <a-button size="small" :loading="loading" status="warning" type="text" @click="run">{{
+          t('global.pause.alert.disable')
+        }}</a-button>
+      </AsyncMethod>
+    </template>
+  </a-alert>
   <a-config-provider :locale="ArcoI18nMessages[locale]">
     <a-layout>
       <a-layout-header>
@@ -54,12 +72,13 @@
   </a-config-provider>
 </template>
 <script setup lang="ts">
+import { computed, defineAsyncComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
+import AsyncMethod from './components/asyncMethod.vue'
 import pageFooter from './components/pageFooter.vue'
 import pageHeader from './components/pageHeader.vue'
-import { useI18n } from 'vue-i18n'
 import { ArcoI18nMessages } from './locale'
-import { useEndpointStore, isModuleEnable } from './stores/endpoint'
-import { computed, defineAsyncComponent } from 'vue'
+import { isModuleEnable, useEndpointStore } from './stores/endpoint'
 import './transition.less'
 
 const endPointStore = useEndpointStore()

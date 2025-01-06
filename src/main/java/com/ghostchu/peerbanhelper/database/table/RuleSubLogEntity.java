@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @DatabaseTable(tableName = "rule_sub_log")
-public class RuleSubLogEntity {
+public final class RuleSubLogEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;
     @DatabaseField(index = true)

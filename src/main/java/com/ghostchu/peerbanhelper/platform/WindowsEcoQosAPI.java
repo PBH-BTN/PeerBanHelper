@@ -31,7 +31,7 @@ public class WindowsEcoQosAPI {
         if (os.startsWith("win")) {
             if (ecoMode.ecoMode(true)) {
                 log.info(tlUI(Lang.IN_ECOMODE_DESCRIPTION));
-                ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag(10, tlUI(Lang.IN_ECOMODE_SHORT)));
+                ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("eco-mode", 10, tlUI(Lang.IN_ECOMODE_SHORT)));
             }
         }
     }

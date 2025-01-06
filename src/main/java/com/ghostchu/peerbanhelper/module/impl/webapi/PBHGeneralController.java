@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
@@ -58,6 +59,8 @@ public class PBHGeneralController extends AbstractFeatureModule {
     private ModuleMatchCache moduleMatchCache;
     @Autowired
     private ModuleManager moduleManager;
+    @Autowired
+    private PeerBanHelperServer peerBanHelperServer;
 
     @Override
     public boolean isConfigurable() {
@@ -81,8 +84,24 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
                 .get("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
                 .post("/api/general/reload", this::handleReloading, Role.USER_WRITE)
+                .get("/api/general/global", this::handleGlobalConfigRead, Role.USER_READ)
+                .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_WRITE)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleGlobalConfigRead(Context context) {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("globalPaused", peerBanHelperServer.isGlobalPaused());
+        context.json(new StdResp(true, null, data));
+    }
+
+    private void handleGlobalConfig(Context context) {
+        var body = context.bodyAsClass(GlobalOptionPatch.class);
+        if (body.globalPaused() != null) {
+            peerBanHelperServer.setGlobalPaused(body.globalPaused());
+        }
+        context.json(new StdResp(true, "OK!", null));
     }
 
     private void handleModuleAvailable(Context context) {
@@ -92,9 +111,9 @@ public class PBHGeneralController extends AbstractFeatureModule {
         }
         for (FeatureModule module : moduleManager.getModules()) {
             if (module.getName().equalsIgnoreCase(moduleName)
-                || module.getConfigName().equalsIgnoreCase(moduleName)
-                || module.getClass().getName().equalsIgnoreCase(moduleName)
-                || module.getClass().getSimpleName().equalsIgnoreCase(moduleName)) {
+                    || module.getConfigName().equalsIgnoreCase(moduleName)
+                    || module.getClass().getName().equalsIgnoreCase(moduleName)
+                    || module.getClass().getSimpleName().equalsIgnoreCase(moduleName)) {
                 if (module.isModuleEnabled()) {
                     context.json(new StdResp(true, null, true));
                     return;
@@ -276,6 +295,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 yamlConfiguration.load(Main.getProfileConfigFile());
                 stringListToMapList(yamlConfiguration, "module.peer-id-blacklist", "banned-peer-id");
                 stringListToMapList(yamlConfiguration, "module.client-name-blacklist", "banned-client-name");
+                stringListToMapList(yamlConfiguration, "module.ptr-blacklist", "ptr-rules");
             }
             default -> {
                 context.status(HttpStatus.NOT_FOUND);
@@ -414,6 +434,15 @@ public class PBHGeneralController extends AbstractFeatureModule {
                         value = bannedList;
                     }
                 }
+                case "ptr-rules" -> {
+                    if ("module.ptr-blacklist".equals(path)) {
+                        List<String> bannedList = ((List<?>) value).stream()
+                                .filter(Map.class::isInstance)
+                                .map(GSON::toJson)
+                                .toList();
+                        value = bannedList;
+                    }
+                }
             }
             // 如果值是 Map，递归替换子 cfg 中的键
             if (value instanceof Map<?, ?> map) {
@@ -438,6 +467,12 @@ public class PBHGeneralController extends AbstractFeatureModule {
 
     @Override
     public void onDisable() {
+
+    }
+
+    public record GlobalOptionPatch(
+            Boolean globalPaused
+    ) {
 
     }
 
