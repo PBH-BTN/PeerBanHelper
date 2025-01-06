@@ -8,11 +8,12 @@
       <a-form-item
         :label="t('page.settings.tab.config.reslolver.useSystem')"
         field="resolver.use_system"
+        disabled
       >
         <a-switch v-model="resolverModel.use_system" />
       </a-form-item>
       <formArray
-        v-if="!resolverModel.use_system"
+        v-if="resolverModel.use_system === false"
         v-model="resolverModel.servers"
         :label="t('page.settings.tab.config.reslolver.customServer')"
         :pagination-props="{ pageSize: 10, total: resolverModel?.servers?.length ?? 0 }"
