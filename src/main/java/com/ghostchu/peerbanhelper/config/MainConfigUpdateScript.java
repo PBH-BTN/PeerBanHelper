@@ -6,7 +6,6 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.UUID;
 
 @Slf4j
@@ -32,9 +31,7 @@ public class MainConfigUpdateScript {
 
 
     @UpdateScript(version = 27)
-    public void updateResolvers() {
-        conf.set("resolvers.use-system", true);
-        conf.set("resolvers.servers", new ArrayList<>());
+    public void updateVacuum() {
         conf.set("persist.vacuum-interval-days", 60);
     }
 
