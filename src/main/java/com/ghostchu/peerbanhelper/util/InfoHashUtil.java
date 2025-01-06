@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.util.time;
+package com.ghostchu.peerbanhelper.util;
 
 import com.google.common.hash.Hashing;
 
