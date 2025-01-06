@@ -85,6 +85,7 @@ public class PeerBanHelperServer implements Reloadable {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
+    @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
     private final List<Downloader> downloaders = new CopyOnWriteArrayList<>();
@@ -448,6 +449,13 @@ public class PeerBanHelperServer implements Reloadable {
                 return;
             }
             if (isGlobalPaused()) {
+                if (needReApplyBanList.get()) {
+                    getDownloaders().forEach(downloader -> {
+                        if (downloader.login().success()) {
+                            downloader.setBanList(BAN_LIST.keySet(), null, null, true);
+                        }
+                    });
+                }
                 return;
             }
             banWaveWatchDog.setLastOperation("Ban wave - start");

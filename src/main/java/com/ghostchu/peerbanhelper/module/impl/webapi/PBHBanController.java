@@ -73,6 +73,7 @@ public class PBHBanController extends AbstractFeatureModule {
         List<PeerAddress> pendingRemovals = new ArrayList<>();
         if (request.contains("*")) {
             pendingRemovals.addAll(getServer().getBannedPeers().keySet());
+            getServer().getNeedReApplyBanList().set(true);
         } else {
             for (PeerAddress address : getServer().getBannedPeers().keySet()) {
                 if (request.contains(address.getIp())) {
