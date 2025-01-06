@@ -18,12 +18,11 @@
           </a-button>
         </AsyncMethod>
         <a-input-search
-          v-model="searchString"
           :style="{ width: '250px' }"
           :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
           allow-clear
           search-button
-          @search="refresh()"
+          @search="handleSearch"
         />
       </a-space>
     </a-space>
@@ -86,11 +85,11 @@ const loadingMore = ref(false)
 const searchString = ref('')
 const { t } = useI18n()
 
-let firstGet = true
+const firstGet = ref(true)
 async function getMoreBanList(): Promise<BanList[]> {
-  if (firstGet || !data.value) {
-    firstGet = false
-    return (await getBanList(step)).data
+  if (firstGet.value || !data.value) {
+    firstGet.value = false
+    return (await getBanList(step, searchString.value)).data
   }
   if (data.value.length > limit.value - step) {
     // refresh the new data
@@ -194,6 +193,13 @@ const virtualListMaxHeight = useResponsiveState(
   800
 )
 const virtualListHeight = computed(() => Math.min(virtualListMaxHeight.value, height.value - 200))
+
+const handleSearch = (v: string) => {
+  if (searchString.value === v) return
+  searchString.value = v
+  firstGet.value = true
+  refresh()
+}
 </script>
 
 <style scoped lang="less">

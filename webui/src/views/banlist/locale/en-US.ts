@@ -1,7 +1,7 @@
 export default {
   'page.banlist.banlist': 'Ban List',
   'page.banlist.banlist.description': 'Following is the ban list (sorted by time descending)',
-  'page.banlist.banlist.searchPlaceHolder': 'Search an IP address',
+  'page.banlist.banlist.searchPlaceHolder': 'Search...',
   'page.banlist.banlist.listItem.reserveDNSLookup': 'Reverse DNS Lookup',
   'page.banlist.banlist.listItem.banTime': 'Ban Time',
   'page.banlist.banlist.listItem.expireTime': 'Unban Time',
