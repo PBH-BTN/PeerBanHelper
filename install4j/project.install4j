@@ -12,6 +12,8 @@
       <variable name="registerSystemService" value="registerSystemService" />
       <variable name="jarPath" value="../target/PeerBanHelper.jar" />
       <variable name="librariesPath" value="../target/libraries" />
+      <variable name="startupFlagPlatform" value="-Xmx512M -Xms16M -Xss512k-XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Dlauncher.directory=${launcher:sys.launcherDirectory}" />
+      <variable name="startupFlagPlatformNoGUI" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true -Dlauncher.directory=${launcher:sys.launcherDirectory}" />
     </variables>
     <jreBundles jdkProviderId="Liberica" release="23/23.0.1+13" />
   </application>
@@ -37,7 +39,7 @@
       <executable name="PeerBanHelper-GUI" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Dlauncher.directory=${launcher:sys.launcherDirectory}">
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatform}">
         <classPath>
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
@@ -51,7 +53,7 @@
       <executable name="PeerBanHelper-GUI-Silent" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Dlauncher.directory=${launcher:sys.launcherDirectory}" arguments="silent">
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatform}" arguments="silent">
         <classPath>
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
@@ -65,7 +67,7 @@
       <executable name="PeerBanHelper-NoGUI" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M  -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true -Dlauncher.directory=${launcher:sys.launcherDirectory}" arguments="nogui">
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatformNoGUI}" arguments="nogui">
         <classPath>
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
@@ -79,7 +81,7 @@
       <executable name="PeerBanHelper-Service" iconSet="true" executableDir="." redirectStderr="false" stderrFile="~/PeerBanHelper/error.log" stdoutFile="~/PeerBanHelper/output.log" executableMode="service" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true -Dlauncher.directory=${launcher:sys.launcherDirectory}" arguments="nogui">
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatformNoGUI}" arguments="nogui">
         <classPath>
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
@@ -93,7 +95,7 @@
       <executable name="PeerBanHelper-Updater" iconSet="true" executableDir="." failOnStderrOutput="false" executableMode="gui" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainEmpty" vmParameters="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Dlauncher.directory=${launcher:sys.launcherDirectory}">
+      <java mainClass="com.ghostchu.peerbanhelper.MainEmpty" vmParameters="${compiler:startupFlagPlatform}">
         <classPath>
           <scanDirectory location="libraries" failOnError="false" />
           <archive location="PeerBanHelper.jar" failOnError="false" />
