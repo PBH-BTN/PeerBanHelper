@@ -78,7 +78,6 @@ public class Database {
         config.setDriverClassName("org.sqlite.JDBC");
         config.setJdbcUrl("jdbc:sqlite:" + file);
         config.setConnectionTestQuery("SELECT 1");
-        config.setMaxLifetime(60000); // 60 Sec
         config.setMaximumPoolSize(1); // 50 Connections (including idle connections)
         this.hikari = new HikariDataSource(config);
         Connection rawConnection = this.hikari.getConnection();
