@@ -62,17 +62,29 @@ jobs:
           type=raw,ci-jvm-universal
           type=raw,ci
           type=sha
-    - name: Build and push Docker image
+    - name: Build and push Docker image (Primary)
       uses: docker/build-push-action@v6.10.0
       with:
         context: .
-        file: ./Dockerfile
+        file: ./Dockerfile-Primary
         push: true
         platforms: |
           linux/amd64
           linux/arm64/v8
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    - name: Build and push Docker image (Secondary)
+      uses: docker/build-push-action@v6.10.0
+      with:
+        context: .
+        file: ./Dockerfile-Secondary
+        push: true
+        platforms: |
           linux/riscv64
           linux/ppc64le
+          linux/s390x
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha
