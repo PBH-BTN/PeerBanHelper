@@ -1,4 +1,4 @@
-FROM docker.io/eclipse-temurin:23-jre-noble
+FROM docker.io/bellsoft/liberica-runtime-container:jre-23-slim-musl
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 COPY target/libraries /app/libraries
 COPY target/PeerBanHelper.jar /app/PeerBanHelper.jar
