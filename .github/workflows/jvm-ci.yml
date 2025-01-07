@@ -84,7 +84,6 @@ jobs:
         platforms: |
           linux/riscv64
           linux/ppc64le
-          linux/s390x
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha
