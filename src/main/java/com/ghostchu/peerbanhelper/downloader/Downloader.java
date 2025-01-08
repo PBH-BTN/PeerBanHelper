@@ -52,8 +52,18 @@ public interface Downloader extends AutoCloseable {
      */
     DownloaderLoginResult login();
 
+    /**
+     * Check if the downloader is in paused state
+     *
+     * @return true if paused, false otherwise
+     */
     boolean isPaused();
 
+    /**
+     * Set the paused state of the downloader
+     *
+     * @param paused true to pause, false to resume
+     */
     void setPaused(boolean paused);
 
     /**
