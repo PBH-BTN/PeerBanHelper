@@ -60,7 +60,7 @@ public class Database {
         }
         try {
             return Long.parseLong(Files.readString(dbMaintenanceFile.toPath()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             return 0;
         }
     }
