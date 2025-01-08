@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.net.InetAddress;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -138,7 +139,7 @@ public class PBHPeerController extends AbstractFeatureModule {
         String ptrLookup = null;
         try {
             if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
-                ptrLookup = dnsLookup.ptr(ip).join().orElse(null);
+                ptrLookup = dnsLookup.ptr(ip).get(3, TimeUnit.SECONDS).orElse(null);
             } else {
                 ptrLookup = InetAddress.getByName(ip).getCanonicalHostName();
             }
