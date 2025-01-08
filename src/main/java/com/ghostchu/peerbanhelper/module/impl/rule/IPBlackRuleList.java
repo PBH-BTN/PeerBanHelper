@@ -135,7 +135,6 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
                     if (match) {
                         return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(ipBanResult.ruleName()), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE, ipBanResult.ruleName(), ip, Optional.ofNullable(ipBanResult.matchResult().comment()).orElse(new TranslationComponent(Lang.MODULE_IBL_COMMENT_UNKNOWN))));
                     }
-                    return pass();
                 } catch (Exception e) {
                     log.error(tlUI(Lang.IP_BAN_RULE_MATCH_ERROR), e);
                     return pass();
