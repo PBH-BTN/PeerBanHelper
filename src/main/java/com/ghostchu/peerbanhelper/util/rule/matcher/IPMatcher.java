@@ -46,7 +46,7 @@ public class IPMatcher extends RuleMatcher<DualIPv4v6AssociativeTries<String>> {
         final IPAddress ip = IPAddressUtil.getIPAddress(content);
         if (ip == null) return new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("IP is null"));
         if (ips == null) {
-            new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("IPs set is null"));
+            return new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("IPs set is null"));
         }
         if (ips.elementContains(ip)) {
             return new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(ips.get(ip)));
