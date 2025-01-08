@@ -66,7 +66,7 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     @Override
-    public void setPaused(boolean paused) {
+    public synchronized void setPaused(boolean paused) {
         if (paused) {
             lastStatus = DownloaderLastStatus.PAUSED;
             statusMessage = new TranslationComponent(Lang.STATUS_TEXT_PAUSED);
