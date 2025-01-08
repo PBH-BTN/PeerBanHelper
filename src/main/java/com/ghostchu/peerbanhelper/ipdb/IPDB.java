@@ -268,6 +268,21 @@ public class IPDB implements AutoCloseable {
         this.geoCN = new Reader(mmdbGeoCNFile);
     }
 
+    /**
+     * Updates a MaxMind database file by downloading it from specified mirror sources.
+     *
+     * @param databaseName The name of the database to be updated
+     * @param target The target file where the updated database will be saved
+     * @throws IOException If an I/O error occurs during file download or movement
+     *
+     * This method attempts to download the specified database from multiple mirror sources.
+     * If the download fails and the target database has never been downloaded before, 
+     * it throws an IllegalStateException. If the target database exists and the update fails, 
+     * a warning is logged.
+     *
+     * The download process uses a temporary file and moves it to the target location 
+     * if successful, replacing any existing file.
+     */
     private void updateMMDB(String databaseName, File target) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
         IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/PBH-BTN/GeoLite.mmdb/releases/latest/download/", databaseName, true);

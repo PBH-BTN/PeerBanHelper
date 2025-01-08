@@ -122,6 +122,22 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         return Reloadable.super.reloadModule();
     }
 
+    /**
+     * Determines whether a peer should be banned based on its IP address.
+     *
+     * This method checks the peer's IP address against a list of IP ban rules and returns
+     * a {@code CheckResult} indicating whether the peer should be banned. It uses a cache
+     * mechanism to optimize repeated checks and prevent unnecessary rule matching.
+     *
+     * @param torrent The torrent associated with the peer
+     * @param peer The peer to be evaluated for banning
+     * @param downloader The downloader context
+     * @param ruleExecuteExecutor The executor service for rule execution
+     * @return A {@code CheckResult} indicating the peer's ban status, with details about
+     *         the matching rule if banned, or a pass result if no matching rule is found
+     *
+     * @throws Exception If an error occurs during IP rule matching
+     */
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         return getCache().readCacheButWritePassOnly(this, peer.getPeerAddress().getIp(), () -> {
@@ -174,9 +190,13 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     }
 
     /**
-     * 更新规则
+     * Updates an IP ban rule by fetching and processing remote subscription data.
      *
-     * @param rule 规则
+     * @param locale The locale for localized messages
+     * @param rule The configuration section containing rule details
+     * @param updateType The type of rule update being performed
+     * @return A standard response indicating the result of the rule update operation
+     * @throws IllegalArgumentException If the rule name contains an illegal character
      */
     public StdResp updateRule(String locale, @NotNull ConfigurationSection rule, IPBanRuleUpdateType updateType) {
         AtomicReference<StdResp> result = new AtomicReference<>();
@@ -280,6 +300,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         return result.get();
     }
 
+    /**
+     * Retrieves resource data from a specified URL using different protocols (HTTP, IPNS, IPFS).
+     *
+     * @param url The URL of the resource to retrieve, supporting HTTP, IPNS, and IPFS protocols
+     * @return A CompletableFuture containing the DataUpdateResult with status code, message, and resource data
+     * @throws IllegalArgumentException If an unsupported URL scheme is provided
+     * @throws IllegalStateException If IPFS is not available for IPNS or IPFS protocols
+     * @throws RuntimeException If there are errors during URL parsing, HTTP request, or IPFS/IPNS resolution
+     */
     private CompletableFuture<DataUpdateResult> getResource(String url) {
         return CompletableFuture.supplyAsync(() -> {
             URI uri;
@@ -328,11 +357,21 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
 
 
     /**
-     * 读取规则文件并转为IpList
+     * Reads a rule file and converts it to an IP list.
      *
-     * @param ruleFile 规则文件
-     * @param ips      ip列表
-     * @return 加载的行数
+     * This method parses a text file containing IP rules, supporting comments and IP address entries.
+     * It processes each line of the file, skipping blank lines and handling comment lines separately.
+     *
+     * @param ruleFile The file containing IP rules to be loaded
+     * @param ips A dual IPv4/IPv6 associative tries data structure to store parsed IP addresses and their associated metadata
+     * @return The number of successfully parsed and added IP rules
+     * @throws IOException If an error occurs while reading the rule file
+     *
+     * @implNote
+     * - Blank lines are skipped
+     * - Lines starting with '#' are treated as comments
+     * - Comments are preserved and associated with their corresponding IP addresses
+     * - Parsing errors for individual lines are logged but do not stop the entire file processing
      */
     private int fileToIPList(File ruleFile, DualIPv4v6AssociativeTries<String> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
@@ -361,11 +400,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     }
 
     /**
-     * 读取规则文本并转为IpList
+     * Parses a rule text and converts it to an IP list.
      *
-     * @param data 规则文本
-     * @param ips      ip列表
-     * @return 加载的行数
+     * @param data The rule text containing IP addresses and optional comments
+     * @param ips A dual IPv4/IPv6 associative tries data structure to store IP addresses and their associated metadata
+     * @return The number of successfully loaded IP addresses
+     * @throws IOException If an error occurs while processing the rule text
      */
     private int stringToIPList(String data, DualIPv4v6AssociativeTries<String> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
@@ -392,6 +432,17 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         return count.get();
     }
 
+    /**
+     * Parses a single rule line to extract IP address information and associated comments.
+     *
+     * This method supports two input formats:
+     * 1. DAT/eMule format: "start_ip, end_ip, level, comment"
+     * 2. Simple IP format: "ip [#comment]"
+     *
+     * @param ele The input rule line to parse
+     * @param preReadComment A pre-existing comment to use if no specific comment is found
+     * @return A Pair containing the parsed IPAddress and an optional comment, or null if parsing fails
+     */
     private Pair<IPAddress, @Nullable String> parseRuleLine(String ele, String preReadComment) {
         // 检查是否是 DAT/eMule 格式
         // 016.000.000.000 , 016.255.255.255 , 200 , Yet another organization

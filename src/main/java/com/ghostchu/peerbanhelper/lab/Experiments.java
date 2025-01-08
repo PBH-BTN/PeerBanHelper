@@ -12,10 +12,21 @@ public enum Experiments {
 
     private final Experiment experiment;
 
+    /**
+     * Constructs an enum constant with the specified experiment configuration.
+     *
+     * @param experiment The {@link Experiment} instance representing the details of the experiment,
+     *                   including its identifier, associated values, title, and description.
+     */
     Experiments(Experiment experiment) {
         this.experiment = experiment;
     }
 
+    /**
+     * Retrieves the {@link Experiment} instance associated with this enum constant.
+     *
+     * @return the {@link Experiment} representing the details of the specific experiment
+     */
     public Experiment getExperiment() {
         return experiment;
     }

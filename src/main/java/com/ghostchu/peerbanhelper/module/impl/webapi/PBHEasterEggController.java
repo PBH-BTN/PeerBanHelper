@@ -63,6 +63,19 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
         return "webapi-easteregg";
     }
 
+    /**
+     * Enables the web routes for the PBHEasterEggController module.
+     *
+     * Sets up three GET endpoints on the Javalin web server:
+     * <ul>
+     *   <li>{@code /api/egg}: Redirects to a random URL from the predefined list</li>
+     *   <li>{@code /api/neuro}: Serves a specific image resource related to Neuro-sama</li>
+     *   <li>{@code /api/neurosama}: Serves the same image resource as {@code /api/neuro}</li>
+     * </ul>
+     *
+     * @see #handleEgg(Context)
+     * @see #neuro(Context)
+     */
     @Override
     public void onEnable() {
         javalinWebContainer.javalin()
@@ -72,6 +85,16 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
     }
 
 
+    /**
+     * Handles the `/api/neuro` endpoint by serving a specific PNG image resource.
+     *
+     * This method attempts to retrieve the "neuro.png" image from the classpath. If the image
+     * is not found, it responds with a 404 status and an error message. When the image is
+     * successfully located, it returns the image with a 420 (Enhance Your Calm) status code.
+     *
+     * @param context The Javalin request context used to handle the HTTP request and response
+     * @throws IOException if there are issues reading the image resource stream
+     */
     private void neuro(Context context) {
         // Yeeeeet, Neuro!
         var imageStream = Main.class.getResourceAsStream("/assets/other/neuro.png");
@@ -86,6 +109,15 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
                 .result(imageStream);
     }
 
+    /**
+     * Redirects the client to a randomly selected URL from the predefined list of URLs.
+     *
+     * This method uses {@link ThreadLocalRandom} to select a random index from the {@code urls} list
+     * and performs an HTTP redirect to the corresponding URL. It provides a simple mechanism for
+     * generating random Easter egg redirections.
+     *
+     * @param context The Javalin request context used to perform the HTTP redirect
+     */
     private void handleEgg(Context context) {
         int index = ThreadLocalRandom.current().nextInt(urls.size());
         context.redirect(urls.get(index));

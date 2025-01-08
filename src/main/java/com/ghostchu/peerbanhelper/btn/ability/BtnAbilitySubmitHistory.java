@@ -98,6 +98,15 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     }
 
 
+    /**
+     * Generates a list of peer history records pending submission.
+     *
+     * Retrieves pending peer records from the database that have been created after the last submission,
+     * filters out records with a downloader value of "<UNBAN UPDATE>", and converts them to BtnPeerHistory objects.
+     *
+     * @return A list of {@link BtnPeerHistory} objects ready for submission
+     * @throws Exception If an error occurs during record retrieval or mapping
+     */
     @SneakyThrows
     private List<BtnPeerHistory> generatePing() {
         Pageable pageable = new Pageable(0, 10000); // 再多的话，担心爆内存
@@ -107,6 +116,13 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                 .map(BtnPeerHistory::from).collect(Collectors.toList());
     }
 
+    /**
+     * Unloads the ability, performing any necessary cleanup operations.
+     * 
+     * This method is currently a no-op implementation, which means it does not perform
+     * any specific actions when the ability is being unloaded. It is likely a placeholder
+     * for potential future cleanup or resource release operations.
+     */
     @Override
     public void unload() {
 

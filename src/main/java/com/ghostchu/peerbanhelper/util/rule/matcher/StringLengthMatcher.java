@@ -19,6 +19,17 @@ public final class StringLengthMatcher extends AbstractJsonMatcher {
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_LENGTH, "<Not Provided>"));
     private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_LENGTH, "<Not Provided>"));
 
+    /**
+     * Constructs a StringLengthMatcher with configuration from a JSON object.
+     *
+     * @param syntax A JsonObject containing configuration for string length matching
+     *               Expected keys:
+     *               - "min": Minimum allowed string length (required)
+     *               - "max": Maximum allowed string length (required)
+     *               - "hit": Optional match result when length is within range
+     *               - "miss": Optional match result when length is outside range
+     * @throws IllegalArgumentException if "min" or "max" keys are missing or invalid
+     */
     public StringLengthMatcher(JsonObject syntax) {
         super(syntax);
         this.min = syntax.get("min").getAsInt();
@@ -31,6 +42,15 @@ public final class StringLengthMatcher extends AbstractJsonMatcher {
         }
     }
 
+    /**
+     * Determines whether the input string's length matches the predefined minimum and maximum length constraints.
+     *
+     * @param content The string to be evaluated for length matching
+     * @return A {@code MatchResult} indicating whether the string length is within the specified range
+     *         - Returns {@code hit} if the string length is between or equal to the minimum and maximum values
+     *         - Returns {@code miss} if the string length falls outside the defined range
+     * @throws NullPointerException if the input content is null
+     */
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         int length = content.length();

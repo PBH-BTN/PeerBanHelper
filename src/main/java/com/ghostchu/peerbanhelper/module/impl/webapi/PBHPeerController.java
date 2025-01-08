@@ -39,6 +39,16 @@ public class PBHPeerController extends AbstractFeatureModule {
     private final Laboratory laboratory;
     private final DNSLookup dnsLookup;
 
+    /**
+     * Constructs a new PBHPeerController with the necessary dependencies for managing peer-related web API functionalities.
+     *
+     * @param javalinWebContainer The web container for handling HTTP routes and requests
+     * @param historyDao Data access object for retrieving peer ban and access history
+     * @param peerRecordDao Data access object for managing peer record information
+     * @param activeMonitoringModule Module responsible for active peer monitoring
+     * @param laboratory Experimental feature management system
+     * @param dnsLookup Utility for performing DNS lookups and resolving IP addresses
+     */
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
@@ -52,6 +62,11 @@ public class PBHPeerController extends AbstractFeatureModule {
         this.dnsLookup = dnsLookup;
     }
 
+    /**
+     * Indicates whether the peer controller module is configurable.
+     *
+     * @return Always returns {@code false}, signifying that this module cannot be configured dynamically
+     */
     @Override
     public boolean isConfigurable() {
         return false;
@@ -76,6 +91,26 @@ public class PBHPeerController extends AbstractFeatureModule {
 
     }
 
+    /**
+     * Handles retrieving and processing detailed information about a specific peer IP address.
+     *
+     * This method performs multiple database queries to collect comprehensive peer information,
+     * including ban history, torrent access count, data transfer statistics, timestamps,
+     * geolocation data, and DNS lookup results.
+     *
+     * @param ctx The Javalin context containing the request information
+     * @throws SQLException If a database query error occurs during information retrieval
+     *
+     * @apiNote Performs the following key operations:
+     * - Normalizes the IP address from the request path
+     * - Queries ban count from history database
+     * - Retrieves torrent access count
+     * - Calculates total uploaded and downloaded data
+     * - Determines first and last timestamps for peer activity
+     * - Performs GeoIP lookup
+     * - Attempts PTR record lookup based on experimental settings
+     * - Returns peer information as a JSON response
+     */
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
         activeMonitoringModule.flush();
@@ -152,6 +187,20 @@ public class PBHPeerController extends AbstractFeatureModule {
     }
 
 
+    /**
+     * Handles retrieving the ban history for a specific IP address.
+     *
+     * @param ctx The Javalin context containing the request information
+     * @throws SQLException If a database error occurs during query execution
+     *
+     * This method performs the following operations:
+     * 1. Extracts the IP address from the request path parameter
+     * 2. Creates a pageable query result based on request parameters
+     * 3. Queries the history database for ban records matching the IP
+     * 4. Orders the results by ban timestamp in descending order
+     * 5. Transforms ban records into localized ban log responses
+     * 6. Returns the paginated ban history as a JSON response
+     */
     private void handleBanHistory(Context ctx) throws SQLException {
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
         Pageable pageable = new Pageable(ctx);
@@ -166,6 +215,20 @@ public class PBHPeerController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
+    /**
+     * Handles retrieving the access history for a specific IP address.
+     *
+     * @param ctx The Javalin context containing the request information
+     * @throws SQLException If a database error occurs during query execution
+     *
+     * @apiNote This method performs the following operations:
+     * - Flushes the active monitoring module
+     * - Extracts the IP address from the request path parameter
+     * - Creates a pageable query for peer records
+     * - Filters records by the specified IP address
+     * - Orders results by the last time seen in descending order
+     * - Returns the access history as a JSON response
+     */
     private void handleAccessHistory(Context ctx) throws SQLException {
         activeMonitoringModule.flush();
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();

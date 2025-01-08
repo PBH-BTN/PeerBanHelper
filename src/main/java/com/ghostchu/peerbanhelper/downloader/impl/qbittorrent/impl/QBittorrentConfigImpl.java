@@ -24,6 +24,15 @@ public class QBittorrentConfigImpl implements QBittorrentConfig {
     private boolean ignorePrivate;
     private boolean paused;
 
+    /**
+     * Creates a QBittorrentConfigImpl instance from a YAML configuration section.
+     *
+     * @param section The configuration section containing qBittorrent settings
+     * @return A configured QBittorrentConfigImpl object
+     *
+     * @implNote This method handles configuration parsing with default values and trims trailing slashes from endpoints
+     * to prevent connection issues caused by browser-copied URLs.
+     */
     public static QBittorrentConfigImpl readFromYaml(ConfigurationSection section) {
         QBittorrentConfigImpl config = new QBittorrentConfigImpl();
         config.setType("qbittorrent");
@@ -46,6 +55,26 @@ public class QBittorrentConfigImpl implements QBittorrentConfig {
         return config;
     }
 
+    /**
+     * Saves the current qBittorrent configuration to a YAML configuration section.
+     *
+     * @return A YamlConfiguration object containing the serialized configuration settings
+     * 
+     * This method converts the current qBittorrent configuration object into a YAML-compatible
+     * configuration section. It sets various configuration parameters including connection
+     * details, authentication credentials, HTTP settings, and download behavior flags.
+     * 
+     * Key configuration parameters saved include:
+     * - Configuration type (always "qbittorrent")
+     * - Endpoint URL
+     * - Username and password
+     * - Basic authentication credentials
+     * - HTTP version
+     * - Various boolean flags for download and ban management
+     * 
+     * Null-safe handling is applied to basic authentication credentials using
+     * {@code Objects.requireNonNullElse} to prevent null pointer exceptions.
+     */
     @Override
     public YamlConfiguration saveToYaml() {
         YamlConfiguration section = new YamlConfiguration();

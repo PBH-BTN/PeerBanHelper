@@ -30,6 +30,17 @@ public class BtnExceptionRuleParsed {
         this.clientNameRules = parseRule(btnRule.getClientNameRules());
     }
 
+    /**
+     * Parses port rules from a map of port configurations and creates matching rules.
+     *
+     * @param portRules A map where keys are rule identifiers and values are lists of port numbers to match
+     * @return A map of parsed port rules, with each rule capable of matching against port numbers
+     *
+     * @throws NumberFormatException if the content cannot be parsed as an integer
+     *
+     * @see AbstractMatcher
+     * @see MatchResult
+     */
     private Map<String, List<Rule>> parsePortRule(Map<String, List<Integer>> portRules) {
         Map<String, List<Rule>> rules = new HashMap<>();
         portRules.forEach((k, v) -> {
@@ -63,6 +74,18 @@ public class BtnExceptionRuleParsed {
         return rules;
     }
 
+    /**
+     * Parses IP address rules from a raw map of IP address lists.
+     *
+     * @param raw A map where keys represent rule identifiers and values are lists of IP address strings
+     * @return A map of parsed IP rules, with each rule represented by a {@code BtnRuleIpMatcher}
+     * 
+     * @throws IllegalArgumentException if an IP address cannot be parsed
+     * 
+     * @see IPAddressUtil#getIPAddress(String)
+     * @see DualIPv4v6AssociativeTries
+     * @see BtnRuleIpMatcher
+     */
     public Map<String, List<Rule>> parseIPRule(Map<String, List<String>> raw) {
         Map<String, List<Rule>> rules = new HashMap<>();
         raw.forEach((k, v) -> {
@@ -83,6 +106,14 @@ public class BtnExceptionRuleParsed {
 
         private final String version;
 
+        /**
+         * Constructs a BtnRuleIpMatcher for IP-based rule matching.
+         *
+         * @param version     The version of the IP rule set
+         * @param ruleId     Unique identifier for the rule
+         * @param ruleName   Human-readable name of the rule
+         * @param ruleData   List of dual IPv4/IPv6 associative tries containing IP address rules
+         */
         public BtnRuleIpMatcher(String version, String ruleId, String ruleName, List<DualIPv4v6AssociativeTries<String>> ruleData) {
             super(ruleId, ruleName, ruleData);
             this.version = version;

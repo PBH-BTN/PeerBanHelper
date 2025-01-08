@@ -24,15 +24,40 @@ public interface QBittorrentConfig {
 
     boolean isVerifySsl();
 
-    boolean isIgnorePrivate();
+    /**
+ * Checks whether private torrents should be ignored during processing.
+ *
+ * @return {@code true} if private torrents are to be ignored, {@code false} otherwise
+ */
+boolean isIgnorePrivate();
 
-    boolean isPaused();
+    /**
+ * Checks if the qBittorrent downloader is currently paused.
+ *
+ * @return {@code true} if the downloader is paused, {@code false} otherwise
+ */
+boolean isPaused();
 
-    void setPaused(boolean paused);
+    /**
+ * Sets the paused state of the qBittorrent downloader.
+ *
+ * @param paused A boolean flag indicating whether the downloader should be paused (true) or resumed (false)
+ */
+void setPaused(boolean paused);
 
-    void setType(String type);
+    /**
+ * Sets the type of the qBittorrent configuration.
+ *
+ * @param type A string representing the configuration type to be set
+ */
+void setType(String type);
 
-    void setEndpoint(String endpoint);
+    /**
+ * Sets the endpoint URL for the qBittorrent service.
+ *
+ * @param endpoint The URL endpoint where the qBittorrent service is hosted
+ */
+void setEndpoint(String endpoint);
 
     void setUsername(String username);
 

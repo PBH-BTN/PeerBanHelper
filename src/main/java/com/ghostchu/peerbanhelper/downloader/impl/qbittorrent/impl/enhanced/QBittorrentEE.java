@@ -32,6 +32,18 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class QBittorrentEE extends AbstractQbittorrent {
     private final BanHandler banHandler;
 
+    /**
+     * Constructs a QBittorrentEE instance with a specified name, configuration, and alert manager.
+     *
+     * @param name The unique identifier for this QBittorrentEE instance
+     * @param config The configuration settings for the QBittorrent enhanced edition downloader
+     * @param alertManager The alert management system for handling notifications and events
+     *
+     * Initializes the instance by calling the superclass constructor and selecting an appropriate
+     * ban handler based on the configuration's shadow ban setting:
+     * - If shadow ban is enabled, creates a {@link BanHandlerShadowBan}
+     * - Otherwise, creates a standard {@link BanHandlerNormal}
+     */
     public QBittorrentEE(String name, QBittorrentEEConfigImpl config, AlertManager alertManager) {
         super(name, config, alertManager);
         if (config.isUseShadowBan()) {
@@ -41,11 +53,27 @@ public class QBittorrentEE extends AbstractQbittorrent {
         }
     }
 
+    /**
+     * Checks whether the qBittorrent downloader is currently paused.
+     *
+     * @return {@code true} if the downloader is paused, {@code false} otherwise
+     */
     @Override
     public boolean isPaused() {
         return config.isPaused();
     }
 
+    /**
+     * Sets the paused state of the qBittorrent downloader.
+     *
+     * @param paused A boolean indicating whether the downloader should be paused.
+     *               When true, the downloader will pause its operations;
+     *               when false, the downloader will resume normal operations.
+     *
+     * This method first calls the superclass implementation to set the paused state,
+     * then updates the configuration's paused state if a configuration object exists.
+     * The method is synchronized to ensure thread-safe state modification.
+     */
     @Override
     public synchronized void setPaused(boolean paused) {
         super.setPaused(paused);
@@ -54,6 +82,14 @@ public class QBittorrentEE extends AbstractQbittorrent {
         }
     }
 
+    /**
+     * Creates a QBittorrentEE instance from a JSON configuration.
+     *
+     * @param name The name of the QBittorrent downloader instance
+     * @param section The JSON configuration section containing downloader settings
+     * @param alertManager The alert manager for handling system alerts
+     * @return A configured QBittorrentEE instance initialized with the provided parameters
+     */
     public static QBittorrentEE loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
         QBittorrentEEConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentEEConfigImpl.class);
         return new QBittorrentEE(name, config, alertManager);

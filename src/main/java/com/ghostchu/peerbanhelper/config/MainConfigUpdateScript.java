@@ -30,6 +30,14 @@ public class MainConfigUpdateScript {
     }
 
 
+    /**
+     * Updates the vacuum interval configuration to set a default of 60 days.
+     *
+     * This method sets the 'persist.vacuum-interval-days' configuration parameter to 60,
+     * which defines the interval for performing data cleanup or maintenance operations.
+     *
+     * @since 27
+     */
     @UpdateScript(version = 27)
     public void updateVacuum() {
         conf.set("persist.vacuum-interval-days", 60);
@@ -37,6 +45,19 @@ public class MainConfigUpdateScript {
 
 
 
+    /**
+     * Upgrades the SMTP push notification configuration structure.
+     *
+     * This method performs the following configuration updates for push notifications:
+     * - Removes disabled push notification channels
+     * - For SMTP-type notifications, updates the configuration:
+     *   - Sets authentication to true
+     *   - Converts SSL flag to encryption type (STARTTLS or NONE)
+     *   - Removes the original SSL flag
+     *   - Enables sending partial notifications
+     *
+     * @UpdateScript(version = 26)
+     */
     @UpdateScript(version = 26)
     public void pushProvidersSMTPStructUpgrade() {
         var pushNotification = conf.getConfigurationSection("push-notification");
@@ -65,6 +86,17 @@ public class MainConfigUpdateScript {
         }
     }
 
+    /**
+     * Cleans up the push notification configuration by removing the "enabled" field
+     * and renaming configuration keys for send key and chat ID.
+     *
+     * This method iterates through each push notification provider configuration and:
+     * - Removes the "enabled" field
+     * - Renames "send-key" to "sendkey"
+     * - Renames "chat-id" to "chatid"
+     *
+     * @UpdateScript(version = 25)
+     */
     @UpdateScript(version = 25)
     public void pushProvidersCleanup() {
         var pushNotification = conf.getConfigurationSection("push-notification");

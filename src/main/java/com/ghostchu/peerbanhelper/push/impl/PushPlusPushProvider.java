@@ -25,6 +25,12 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
 
+    /**
+     * Constructs a new PushPlusPushProvider with the specified name and configuration.
+     *
+     * @param name The name of the push notification provider
+     * @param config The configuration containing PushPlus service details such as token, topic, and channel
+     */
     public PushPlusPushProvider(String name, Config config) {
         this.name = name;
         this.config = config;

@@ -66,17 +66,19 @@ public interface Peer extends Comparable<Peer> {
     double getProgress();
 
     /**
-     * 对等体的 Flag 信息
+     * Retrieves the flags associated with this peer.
      *
-     * @return Flag
+     * @return A {@code PeerFlag} object representing the peer's status flags, or {@code null} if no flags are available.
+     * @see PeerFlag
      */
     @Nullable
     PeerFlag getFlags();
 
     /**
-     * 对等体是否连接中或者握手中（总之就是还没准备好传输数据）
-     * @return 是否连接中或者握手中
-     */
+ * Determines whether the peer is currently in a connection or handshaking state, indicating it is not yet ready to transfer data.
+ *
+ * @return {@code true} if the peer is in the process of connecting or performing a handshake, {@code false} otherwise
+ */
     boolean isHandshaking();
 
     /**

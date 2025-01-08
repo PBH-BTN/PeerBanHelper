@@ -79,22 +79,55 @@ public class Deluge extends AbstractDownloader {
         return config.getEndpoint();
     }
 
+    /**
+     * Returns the type of the downloader as a string.
+     *
+     * @return A constant string "Deluge" identifying this downloader implementation.
+     */
     @Override
     public String getType() {
         return "Deluge";
     }
 
+    /**
+     * Checks if the Deluge downloader is currently paused.
+     *
+     * @return {@code true} if the downloader is paused, {@code false} otherwise
+     */
     @Override
     public boolean isPaused() {
         return config.isPaused();
     }
 
+    /**
+     * Sets the paused state of the Deluge downloader.
+     *
+     * Updates the paused status in both the parent class and the configuration.
+     * This method ensures that the paused state is consistently maintained across
+     * the downloader's internal state and its configuration.
+     *
+     * @param paused {@code true} to pause the downloader, {@code false} to resume
+     */
     @Override
     public void setPaused(boolean paused) {
         super.setPaused(paused);
         config.setPaused(paused);
     }
 
+    /**
+     * Attempts to log in to the Deluge torrent client and validate the connection.
+     *
+     * This method performs three key checks:
+     * 1. Verifies successful login credentials
+     * 2. Confirms that required Deluge methods are supported
+     * 3. Handles potential login exceptions
+     *
+     * @return A {@code DownloaderLoginResult} indicating the login status
+     *         - {@code SUCCESS}: Successfully logged in and all required methods available
+     *         - {@code INCORRECT_CREDENTIAL}: Login failed due to invalid credentials
+     *         - {@code MISSING_COMPONENTS}: Required Deluge methods not supported
+     *         - {@code EXCEPTION}: Unexpected error during login process
+     */
     @Override
     public DownloaderLoginResult login0() {
         try {
@@ -257,6 +290,15 @@ public class Deluge extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
+        /**
+         * Reads Deluge downloader configuration from a YAML configuration section.
+         *
+         * @param section The configuration section containing Deluge downloader settings
+         * @return A configured {@code Config} object for the Deluge downloader
+         *
+         * @implNote This method sets default values for configuration parameters if not specified.
+         * It also handles a workaround for endpoints ending with a trailing slash to prevent connection issues.
+         */
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
             config.setType("deluge");
@@ -274,6 +316,25 @@ public class Deluge extends AbstractDownloader {
             return config;
         }
 
+        /**
+         * Saves the Deluge downloader configuration to a YAML configuration section.
+         *
+         * @return A YamlConfiguration containing the current configuration settings
+         * 
+         * This method serializes the Deluge downloader configuration parameters into a YAML format,
+         * including connection details, authentication, and download behavior settings.
+         * 
+         * Configuration parameters saved include:
+         * - Downloader type (fixed as "deluge")
+         * - Server endpoint
+         * - Authentication password
+         * - RPC URL
+         * - HTTP version
+         * - Incremental ban setting
+         * - SSL verification flag
+         * - Private peer ignore flag
+         * - Paused state
+         */
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "deluge");

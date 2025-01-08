@@ -46,28 +46,40 @@ public interface Downloader extends AutoCloseable {
     String getType();
 
     /**
-     * 登录到此下载器
-     *
-     * @return 登陆是否成功
-     */
+ * Attempts to log in to the downloader.
+ *
+ * @return The result of the login attempt, indicating whether the login was successful
+ *         or encountered any issues during the authentication process
+ * @throws RuntimeException if login encounters unexpected errors
+ */
     DownloaderLoginResult login();
 
     /**
-     * Check if the downloader is in paused state
-     *
-     * @return true if paused, false otherwise
-     */
+ * Determines whether the downloader is currently paused.
+ *
+ * @return {@code true} if the downloader is in a paused state and not actively processing torrents,
+ *         {@code false} if the downloader is actively running and processing downloads
+ */
     boolean isPaused();
 
     /**
-     * Set the paused state of the downloader
-     *
-     * @param paused true to pause, false to resume
-     */
+ * Sets the paused state of the downloader.
+ *
+ * @param paused A boolean flag indicating whether to pause (true) or resume (false) the downloader's operations
+ */
     void setPaused(boolean paused);
 
     /**
-     * 一个执行调度任务的窗口，该方法总是在 banWave 中调用
+     * Executes scheduled tasks during the ban wave process.
+     * 
+     * <p>This default method is typically invoked within the ban wave mechanism to perform
+     * periodic or scheduled maintenance tasks for the downloader. Implementing classes
+     * can override this method to provide specific scheduling logic.</p>
+     * 
+     * <p>By default, this method does nothing and serves as a placeholder for potential
+     * task scheduling in derived downloader implementations.</p>
+     * 
+     * @see #banWave()
      */
     default void runScheduleTasks() {
     }

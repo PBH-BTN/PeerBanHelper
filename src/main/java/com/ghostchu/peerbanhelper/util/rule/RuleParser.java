@@ -14,6 +14,13 @@ import java.util.List;
 
 @Slf4j
 public final class RuleParser {
+    /**
+     * Parses a list of JSON rule strings into a list of Rule objects.
+     *
+     * @param string A list of JSON rule strings to be parsed
+     * @return A list of parsed Rule objects corresponding to the input JSON strings
+     * @throws JsonParseException If any of the input strings cannot be parsed as valid JSON
+     */
     public static List<Rule> parse(List<String> string) {
         return string.stream()
                 .map(JsonParser::parseString)
@@ -21,6 +28,18 @@ public final class RuleParser {
                 .toList();
     }
 
+    /**
+     * Matches a given content against a list of rules and determines the overall match result.
+     *
+     * This method evaluates a list of rules against the provided content, applying a priority-based matching strategy:
+     * - If any rule returns a FALSE match, the method immediately returns a failed match result.
+     * - If a rule returns a TRUE match, it updates the match result but continues checking other rules.
+     * - The final match result reflects the last TRUE match or the initial FALSE state.
+     *
+     * @param rules   A list of rules to be evaluated against the content
+     * @param content The string content to be matched against the rules
+     * @return A RuleMatchResult indicating whether the content matches the rules, along with the matching rule and any associated comment
+     */
     public static RuleMatchResult matchRule(List<Rule> rules, String content) {
         RuleMatchResult matchResult = new RuleMatchResult(false, null, null);
         for (Rule rule : rules) {
@@ -37,6 +56,19 @@ public final class RuleParser {
         return matchResult;
     }
 
+    /**
+     * Parses a JsonElement into a Rule for matching content.
+     *
+     * This method handles various JSON input types and creates corresponding Rule implementations:
+     * - Null or JsonNull elements return a Rule that always matches
+     * - Primitive elements (boolean, number, string) create Rules based on their boolean interpretation
+     * - JSON objects create specific string matching Rules based on the "method" field
+     *
+     * @param element The JsonElement to parse into a Rule
+     * @return A Rule implementation for matching content
+     * @throws IllegalArgumentException If the input is an unsupported JSON type
+     * @throws IllegalStateException If an unrecognized matching method is specified
+     */
     public static Rule parse(JsonElement element) {
         if (element == null) {
             // 虚拟规则不记录数据

@@ -48,6 +48,11 @@ public class PBHDownloaderController extends AbstractFeatureModule {
     @Autowired
     private DNSLookup dnsLookup;
 
+    /**
+     * Indicates whether the module is configurable.
+     *
+     * @return Always returns {@code false}, signifying that this module cannot be dynamically configured at runtime.
+     */
     @Override
     public boolean isConfigurable() {
         return false;
@@ -76,6 +81,24 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .get("/api/downloaders/{downloaderName}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderName"), ctx.pathParam("torrentId")), Role.USER_READ);
     }
 
+    /**
+     * Handles the creation of a new downloader via HTTP PUT request.
+     *
+     * @param ctx The Javalin context containing the request details
+     * @throws IllegalArgumentException If the downloader name contains illegal characters
+     *
+     * This method processes a JSON payload to create a new downloader with optional paused state.
+     * It performs the following key operations:
+     * - Validates the downloader name (no periods allowed)
+     * - Extracts configuration and optional paused state from the request
+     * - Attempts to create and register the downloader
+     * - Saves the downloader configuration
+     *
+     * Possible HTTP responses:
+     * - 201 CREATED: Downloader successfully created
+     * - 400 BAD_REQUEST: Downloader creation failed (invalid config or already exists)
+     * - 500 INTERNAL_SERVER_ERROR: Unable to save downloader configuration
+     */
     private void handleDownloaderPut(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
@@ -107,6 +130,26 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
+    /**
+     * Handles the HTTP PATCH request to update an existing downloader configuration.
+     *
+     * @param ctx The Javalin context containing the request details
+     * @param downloaderName The name of the downloader to be updated
+     * @throws IllegalArgumentException If the new downloader name contains an illegal character (.)
+     *
+     * This method performs the following operations:
+     * 1. Parses the request body JSON to extract downloader configuration
+     * 2. Validates the new downloader name
+     * 3. Creates a new downloader with the updated configuration
+     * 4. Unregisters the old downloader
+     * 5. Registers the new downloader
+     * 6. Saves the updated downloader configuration
+     *
+     * Possible HTTP responses:
+     * - 200 OK: Successful downloader update
+     * - 400 Bad Request: Downloader creation failure or already exists
+     * - 500 Internal Server Error: I/O exception during saving
+     */
     private void handleDownloaderPatch(Context ctx, String downloaderName) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
@@ -141,6 +184,18 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
+    /**
+     * Handles the testing of a downloader configuration via HTTP request.
+     *
+     * This method validates and tests a downloader configuration by:
+     * - Parsing the incoming JSON request
+     * - Validating the downloader name
+     * - Creating a downloader instance
+     * - Optionally testing the connection based on the paused state
+     *
+     * @param ctx The Javalin context containing the HTTP request details
+     * @throws IllegalArgumentException If the downloader name contains illegal characters
+     */
     private void handleDownloaderTest(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
@@ -199,6 +254,23 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
     }
 
+    /**
+     * Retrieves and returns a list of peers for a specific torrent on a given downloader.
+     *
+     * This method performs the following operations:
+     * 1. Finds the specified downloader by name
+     * 2. Retrieves live peer snapshots filtered by downloader and torrent
+     * 3. Sorts peers by upload speed in descending order
+     * 4. Populates peer data transfer objects with optional DNS reverse lookup
+     *
+     * @param ctx The Javalin context containing the HTTP request and response
+     * @param downloaderName The name of the downloader to retrieve peers from
+     * @param torrentId The unique identifier of the torrent to filter peers
+     *
+     * @throws HttpResponseException If the specified downloader is not found
+     *
+     * @return A standard response containing a list of populated peer DTOs or an error message
+     */
     private void handlePeersInTorrentOnDownloader(Context ctx, String downloaderName, String torrentId) {
         Optional<Downloader> selected = getServer().getDownloaders().stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
         if (selected.isEmpty()) {
@@ -219,6 +291,16 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, peerWrappers));
     }
 
+    /**
+     * Populates a Peer Data Transfer Object (DTO) with detailed information about a peer.
+     *
+     * This method enriches a basic peer metadata object with geographical information
+     * and optionally resolves the PTR (Pointer) record for the peer's IP address.
+     *
+     * @param p The peer metadata containing basic peer information
+     * @param resolvePTR A flag indicating whether to attempt PTR record resolution
+     * @return A populated PeerDTO with geographical and optional PTR record information
+     */
     private PopulatedPeerDTO populatePeerDTO(PeerMetadata p, boolean resolvePTR) {
         PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null, null);
         PeerBanHelperServer.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
@@ -241,6 +323,20 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         return dto;
     }
 
+    /**
+     * Retrieves and returns a sorted list of torrents for a specific downloader.
+     *
+     * This method filters live peers by the specified downloader name, extracts unique torrents,
+     * and sorts them primarily by real-time upload speed and secondarily by real-time download speed.
+     *
+     * @param ctx The Javalin context containing the HTTP request and response
+     * @param downloaderName The name of the downloader to retrieve torrents for
+     *
+     * @throws NullPointerException if the context or downloader name is null
+     *
+     * @apiNote Returns HTTP 404 if the specified downloader does not exist
+     * @apiNote Returns a JSON response with a list of sorted {@link TorrentWrapper} objects
+     */
     private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderName) {
         Optional<Downloader> selected = getServer().getDownloaders().stream()
                 .filter(d -> d.getName().equals(downloaderName))
@@ -269,6 +365,28 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, torrentWrappers));
     }
 
+    /**
+     * Handles retrieving the status of a specific downloader.
+     *
+     * @param ctx The Javalin context for the HTTP request
+     * @param downloaderName The name of the downloader to retrieve status for
+     *
+     * @throws IllegalArgumentException if the downloader name is invalid
+     *
+     * Retrieves and returns comprehensive status information for a specified downloader, including:
+     * - Last known status
+     * - Status message
+     * - Number of active torrents
+     * - Number of active peers
+     * - Downloader configuration
+     * - Paused state
+     *
+     * Returns a 404 NOT_FOUND response if the downloader does not exist.
+     * Returns a JSON response with detailed downloader status if found.
+     *
+     * @see DownloaderStatus
+     * @see StdResp
+     */
     private void handleDownloaderStatus(@NotNull Context ctx, String downloaderName) {
         String locale = locale(ctx);
         Optional<Downloader> selected = getServer().getDownloaders().stream()
@@ -297,6 +415,12 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config, downloader.isPaused())));
     }
 
+    /**
+     * Handles the retrieval of all registered downloaders and sends them as a JSON response.
+     *
+     * @param ctx The Javalin context containing the HTTP request and response
+     * @return A standard response containing a list of downloader wrappers with their details
+     */
     private void handleDownloaderList(@NotNull Context ctx) {
         List<DownloaderWrapper> downloaders = getServer().getDownloaders()
                 .stream().map(d -> new DownloaderWrapper(d.getName(), d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))

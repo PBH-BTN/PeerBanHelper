@@ -25,6 +25,19 @@ public abstract class AbstractDownloader implements Downloader {
         this.alertManager = alertManager;
     }
 
+    /**
+     * Attempts to log in to the downloader with handling for various login scenarios.
+     *
+     * @return A {@code DownloaderLoginResult} indicating the outcome of the login attempt
+     *
+     * This method handles the following login scenarios:
+     * - Paused downloader: Immediately returns a paused status
+     * - Cooldown period after multiple failed attempts: Prevents login and alerts
+     * - Successful login: Resets failed login attempts
+     * - Failed login: Tracks failed attempts and applies cooldown after 15 consecutive failures
+     *
+     * @throws Throwable If an unexpected error occurs during the login process
+     */
     @Override
     public DownloaderLoginResult login() {
         if(isPaused()){
@@ -65,6 +78,11 @@ public abstract class AbstractDownloader implements Downloader {
         }
     }
 
+    /**
+     * Sets the paused state of the downloader.
+     *
+     * @param paused If true, marks the downloader as paused; if false, resets the downloader's status to unknown
+     */
     @Override
     public synchronized void setPaused(boolean paused) {
         if (paused) {
@@ -76,6 +94,14 @@ public abstract class AbstractDownloader implements Downloader {
         }
     }
 
+    /**
+     * Placeholder method for relaunching torrents if needed.
+     * 
+     * This method is currently unimplemented and does not perform any action.
+     * Subclasses should override this method to provide specific torrent relaunch logic.
+     * 
+     * @param torrents A collection of torrents that may require relaunching
+     */
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
 

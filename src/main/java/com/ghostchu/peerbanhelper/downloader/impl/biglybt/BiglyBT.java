@@ -132,22 +132,50 @@ public class BiglyBT extends AbstractDownloader {
         return apiEndpoint;
     }
 
+    /**
+     * Returns the type of the downloader as a string.
+     *
+     * @return A constant string identifier "BiglyBT" representing this specific downloader implementation.
+     */
     @Override
     public String getType() {
         return "BiglyBT";
     }
 
+    /**
+     * Checks if the BiglyBT downloader is currently paused.
+     *
+     * @return {@code true} if the downloader is paused, {@code false} otherwise
+     */
     @Override
     public boolean isPaused() {
         return config.isPaused();
     }
 
+    /**
+     * Sets the paused state of the BiglyBT downloader.
+     *
+     * Updates the paused status in both the parent downloader and the local configuration.
+     * This method allows pausing or resuming the downloader's operations.
+     *
+     * @param paused A boolean indicating whether the downloader should be paused (true) or resumed (false)
+     */
     @Override
     public void setPaused(boolean paused) {
         super.setPaused(paused);
         config.setPaused(paused);
     }
 
+    /**
+     * Sets the ban list for the BiglyBT downloader, either through an incremental update or a full replacement.
+     *
+     * @param fullList     A complete collection of peer addresses to be banned
+     * @param added        A collection of newly added ban metadata entries (can be null)
+     * @param removed      A collection of ban metadata entries to be removed (can be null)
+     * @param applyFullList Flag indicating whether to force a full list replacement
+     *
+     * @throws IllegalStateException If there is an error updating the ban list via API
+     */
     @Override
     public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
@@ -210,6 +238,26 @@ public class BiglyBT extends AbstractDownloader {
         return new DownloaderStatistics(statisticsRecord.getOverallDataBytesSent(), statisticsRecord.getOverallDataBytesReceived());
     }
 
+    /**
+     * Retrieves a list of peers for a specific torrent from the BiglyBT API.
+     *
+     * @param torrent The torrent for which to fetch peer information
+     * @return A list of {@code Peer} objects representing the peers connected to the torrent
+     * @throws IllegalStateException If there is an error communicating with the API or an unexpected response is received
+     *
+     * This method performs the following steps:
+     * 1. Sends a GET request to the BiglyBT API endpoint to retrieve peer information
+     * 2. Handles potential HTTP errors, including 404 (torrent not found) and non-200 status codes
+     * 3. Parses the JSON response into a list of peers
+     * 4. Filters and transforms peer records into {@code Peer} objects
+     * 5. Handles peer ID truncation, IP validation, and supported message parsing
+     *
+     * Peer filtering includes:
+     * - Skipping peers with null or blank IP addresses
+     * - Truncating peer IDs to 8 characters
+     * - Mapping supported peer messages
+     * - Excluding peers with specific states (30 and 40)
+     */
     @Override
     public List<Peer> getPeers(Torrent torrent) {
         HttpResponse<String> resp;
@@ -315,6 +363,16 @@ public class BiglyBT extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
+        /**
+         * Reads BiglyBT downloader configuration from a YAML configuration section.
+         *
+         * @param section The configuration section containing BiglyBT downloader settings
+         * @return A configured BiglyBT downloader configuration object
+         *
+         * @throws IllegalArgumentException if required configuration parameters are missing
+         *
+         * @see Config
+         */
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
             config.setType("biglybt");
@@ -331,6 +389,11 @@ public class BiglyBT extends AbstractDownloader {
             return config;
         }
 
+        /**
+         * Saves the BiglyBT downloader configuration to a YAML configuration section.
+         *
+         * @return A YamlConfiguration containing the downloader's configuration settings
+         */
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "biglybt");

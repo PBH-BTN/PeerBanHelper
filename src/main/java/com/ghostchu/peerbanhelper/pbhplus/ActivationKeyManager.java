@@ -40,6 +40,16 @@ public class ActivationKeyManager {
 
     private final Map.Entry<PrivateKey, PublicKey> localKeyPair;
 
+    /**
+     * Constructs an ActivationKeyManager and initializes the local RSA key pair.
+     *
+     * @throws Exception if there is an error loading or generating the local key pair
+     *         (e.g., file access issues, key generation failures)
+     *
+     * This constructor loads the local RSA key pair by calling {@link #loadLocalKeyPair()}.
+     * If no existing key pair is found, it will generate a new key pair and save it to files
+     * based on the hardware UUID hash.
+     */
     public ActivationKeyManager() throws Exception {
         localKeyPair = loadLocalKeyPair();
     }

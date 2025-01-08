@@ -103,6 +103,37 @@ public class BtnNetwork implements Reloadable {
         }
     }
 
+    /**
+     * Configures the BTN (Bittorrent Network) network by fetching and processing remote configuration.
+     *
+     * This method performs the following key operations:
+     * - Sends an HTTP GET request to the configuration URL
+     * - Validates the protocol version compatibility
+     * - Resets and configures network abilities based on the received configuration
+     * - Handles various error scenarios with detailed logging and status tracking
+     *
+     * @throws IllegalStateException if protocol version is incompatible or configuration is invalid
+     *
+     * Side effects:
+     * - Updates {@code abilities} map with new network abilities
+     * - Resets scheduler
+     * - Sets {@code configSuccess} and {@code configResult}
+     * - Loads individual abilities
+     *
+     * Configuration processing includes:
+     * - Checking HTTP response status
+     * - Parsing JSON configuration
+     * - Validating protocol versions
+     * - Creating abilities for:
+     *   - Submitting peers
+     *   - Submitting bans
+     *   - Submitting histories
+     *   - Rules
+     *   - Reconfiguration
+     *   - Exception handling
+     *
+     * Logs errors and sets appropriate translation components for different failure scenarios.
+     */
     public void configBtnNetwork() {
         String response = "<Not Provided>";
         int statusCode = 0;
@@ -170,6 +201,16 @@ public class BtnNetwork implements Reloadable {
         }
     }
 
+    /**
+     * Checks and attempts to retry the BTN network configuration if necessary.
+     * 
+     * This method is responsible for managing the configuration retry process for the BTN network.
+     * If the network is enabled and the previous configuration was unsuccessful, it attempts 
+     * to reconfigure the network. If the network is disabled, it sets the configuration success 
+     * flag to false.
+     * 
+     * @throws Throwable If an unexpected error occurs during the configuration retry process
+     */
     private void checkIfNeedRetryConfig() {
         try {
             if (enabled) {

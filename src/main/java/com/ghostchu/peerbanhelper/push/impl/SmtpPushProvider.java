@@ -23,6 +23,12 @@ public final class SmtpPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
 
+    /**
+     * Constructs a new SmtpPushProvider with the specified name and SMTP configuration.
+     *
+     * @param name The name of the SMTP push provider
+     * @param config The configuration settings for the SMTP connection and email sending
+     */
     public SmtpPushProvider(String name, Config config) {
         this.name = name;
         this.config = config;

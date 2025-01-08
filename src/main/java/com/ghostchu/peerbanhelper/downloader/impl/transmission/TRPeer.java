@@ -61,16 +61,39 @@ public final class TRPeer implements Peer {
         return backend.getProgress();
     }
 
+    /**
+     * Retrieves the peer flags from the backend and creates a new PeerFlag object.
+     *
+     * @return A PeerFlag object representing the peer's current flags, initialized with the flag string from the backend
+     */
     @Override
     public PeerFlag getFlags() {
         return new PeerFlag(backend.getFlagStr());
     }
 
+    /**
+     * Determines whether the peer is currently in a handshaking state.
+     *
+     * A peer is considered to be in a handshaking state when both its download
+     * and upload speeds are zero or negative, indicating that no data transfer
+     * is currently occurring.
+     *
+     * @return {@code true} if the peer is in a handshaking state (no active data transfer),
+     *         {@code false} otherwise
+     */
     @Override
     public boolean isHandshaking() {
         return getDownloadSpeed() <= 0 && getUploadSpeed() <= 0;
     }
 
+    /**
+     * Returns an empty list of supported peer messages.
+     *
+     * This method indicates that no specific peer messages are supported by this peer implementation.
+     * Always returns an immutable empty list to signify no message support.
+     *
+     * @return An empty list of {@code PeerMessage} objects
+     */
     @Override
     public List<PeerMessage> getSupportedMessages() {
         return Collections.emptyList();
