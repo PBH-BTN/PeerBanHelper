@@ -77,6 +77,7 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
         var imageStream = Main.class.getResourceAsStream("/assets/other/neuro.png");
         if (imageStream == null) {
             context.status(HttpStatus.NOT_FOUND);
+            context.result("You killed Neuro! How dare you!?");
             return;
         }
         context
