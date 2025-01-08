@@ -98,6 +98,9 @@ public class PBHGeneralController extends AbstractFeatureModule {
 
     private void handleGlobalConfig(Context context) {
         var body = context.bodyAsClass(GlobalOptionPatch.class);
+        if (body == null) {
+            throw new IllegalArgumentException("Request body cannot be null");
+        }
         if (body.globalPaused() != null) {
             peerBanHelperServer.setGlobalPaused(body.globalPaused());
         }
