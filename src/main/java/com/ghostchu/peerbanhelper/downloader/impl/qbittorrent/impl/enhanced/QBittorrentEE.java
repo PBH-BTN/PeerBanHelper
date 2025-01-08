@@ -47,9 +47,11 @@ public class QBittorrentEE extends AbstractQbittorrent {
     }
 
     @Override
-    public void setPaused(boolean paused) {
+    public synchronized void setPaused(boolean paused) {
         super.setPaused(paused);
-        config.setPaused(paused);
+        if (config != null) {
+            config.setPaused(paused);
+        }
     }
 
     public static QBittorrentEE loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
