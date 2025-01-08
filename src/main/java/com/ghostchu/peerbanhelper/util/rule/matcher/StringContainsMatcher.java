@@ -20,6 +20,16 @@ public final class StringContainsMatcher extends AbstractJsonMatcher {
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
     private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
 
+    /**
+     * Constructs a StringContainsMatcher with configuration from a JSON object.
+     *
+     * @param syntax A JsonObject containing matcher configuration parameters
+     *               - "content": The string to match against (required)
+     *               - "hit": Optional custom match result enum
+     *               - "miss": Optional custom match result enum
+     *
+     * @throws IllegalArgumentException if required "content" field is missing
+     */
     public StringContainsMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString().toLowerCase(Locale.ROOT);
@@ -31,6 +41,14 @@ public final class StringContainsMatcher extends AbstractJsonMatcher {
         }
     }
 
+    /**
+     * Matches the given content against a predefined rule by checking if the rule is contained within the content.
+     *
+     * @param content The input string to be matched, which is converted to lowercase before comparison
+     * @return A {@code MatchResult} indicating whether the rule was found in the content
+     *         - Returns the predefined {@code hit} result if the rule is contained in the content
+     *         - Returns the predefined {@code miss} result if the rule is not found
+     */
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         content = content.toLowerCase(Locale.ROOT);

@@ -58,6 +58,20 @@ public class BtnRuleParsed {
         return scripts;
     }
 
+    /**
+     * Parses port rules from a map of port configurations.
+     *
+     * This method transforms a map of port numbers into a collection of rules for matching port-based conditions.
+     * Each port number is converted into an {@code AbstractMatcher} that can evaluate whether a given content
+     * matches the specified port.
+     *
+     * @param portRules A map where keys represent rule identifiers and values are lists of port numbers to match
+     * @return A map of rule identifiers to lists of port matching rules, where each rule can evaluate port conditions
+     *
+     * @see AbstractMatcher
+     * @see MatchResult
+     * @see TranslationComponent
+     */
     private Map<String, List<Rule>> parsePortRule(Map<String, List<Integer>> portRules) {
         Map<String, List<Rule>> rules = new HashMap<>();
         portRules.forEach((k, v) -> {
@@ -91,6 +105,17 @@ public class BtnRuleParsed {
         return rules;
     }
 
+    /**
+     * Parses IP rules from a raw map of IP address lists and creates corresponding IP matchers.
+     *
+     * @param raw A map where keys represent rule identifiers and values are lists of IP address strings
+     * @return A map of rule identifiers to IP matchers, each containing parsed IP addresses
+     *
+     * @throws IllegalArgumentException if an invalid IP address is encountered during parsing
+     *
+     * @see IPMatcher
+     * @see DualIPv4v6AssociativeTries
+     */
     public Map<String, IPMatcher> parseIPRule(Map<String, List<String>> raw) {
         Map<String, IPMatcher> rules = new HashMap<>();
         raw.forEach((k, v) -> {

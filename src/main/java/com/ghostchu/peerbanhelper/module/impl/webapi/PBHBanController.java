@@ -68,6 +68,16 @@ public class PBHBanController extends AbstractFeatureModule {
                 .delete("/api/bans", this::handleBanDelete, Role.USER_WRITE);
     }
 
+    /**
+     * Handles the deletion of banned peers based on the provided request.
+     *
+     * This method processes a request to remove banned peers from the system. It supports two modes of deletion:
+     * 1. Wildcard deletion: If the request contains "*", all currently banned peers are scheduled for removal.
+     * 2. Selective deletion: If specific IP addresses are provided, only those matching banned peers are removed.
+     *
+     * @param context The Javalin request context containing the deletion request
+     * @throws IllegalArgumentException if the request body cannot be parsed
+     */
     private void handleBanDelete(Context context) {
         List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
         List<PeerAddress> pendingRemovals = new ArrayList<>();
@@ -102,6 +112,18 @@ public class PBHBanController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
+    /**
+     * Handles the retrieval of banned peers with optional filtering and pagination.
+     *
+     * @param ctx the Javalin context containing query parameters for filtering and pagination
+     *
+     * @queryParam limit maximum number of ban entries to return (default: -1, meaning no limit)
+     * @queryParam lastBanTime timestamp to start retrieving ban entries from (default: -1)
+     * @queryParam ignoreBanForDisconnect flag to filter out bans related to disconnections (default: true)
+     * @queryParam search optional search term to filter ban entries by peer address or metadata
+     *
+     * @return JSON response containing a list of banned peers matching the specified criteria
+     */
     private void handleBans(Context ctx) {
         long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
         long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
@@ -111,12 +133,31 @@ public class PBHBanController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, banResponseList.toList()));
     }
 
+    /**
+     * Handles the disabling of the PBHBanController module.
+     * 
+     * This method is called when the module is being shut down or disabled. 
+     * Currently, it does not perform any specific actions during module disablement.
+     * 
+     * @implNote This is an empty implementation that can be extended in the future 
+     *           to perform cleanup or release resources if needed.
+     */
     @Override
     public void onDisable() {
 
     }
 
 
+    /**
+     * Retrieves a stream of banned peers with optional filtering and metadata enrichment.
+     *
+     * @param locale The locale for localizing ban metadata
+     * @param lastBanTime Optional timestamp to filter bans before this time
+     * @param limit Maximum number of ban entries to return
+     * @param ignoreBanForDisconnect Flag to exclude bans triggered by disconnection
+     * @param search Optional search term to filter ban entries by address or metadata
+     * @return A stream of {@link BanResponse} objects representing banned peers
+     */
     private @NotNull Stream<BanResponse> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
         var banResponseList = getServer().getBannedPeers()
                 .entrySet()

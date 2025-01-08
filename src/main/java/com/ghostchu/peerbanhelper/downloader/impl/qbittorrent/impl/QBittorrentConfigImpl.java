@@ -24,6 +24,22 @@ public class QBittorrentConfigImpl implements QBittorrentConfig {
     private boolean ignorePrivate;
     private boolean paused;
 
+    /**
+     * Reads qBittorrent configuration from a YAML configuration section.
+     *
+     * @param section The configuration section containing qBittorrent settings
+     * @return A fully configured QBittorrentConfigImpl instance
+     *
+     * @throws IllegalArgumentException if the endpoint is invalid or missing
+     *
+     * This method populates a QBittorrentConfigImpl object with settings from the provided
+     * configuration section. It handles default values, trims trailing slashes from endpoints,
+     * and sets various configuration parameters such as authentication, HTTP version, and
+     * feature flags.
+     *
+     * @see QBittorrentConfigImpl
+     * @see ConfigurationSection
+     */
     public static QBittorrentConfigImpl readFromYaml(ConfigurationSection section) {
         QBittorrentConfigImpl config = new QBittorrentConfigImpl();
         config.setType("qbittorrent");
@@ -46,6 +62,13 @@ public class QBittorrentConfigImpl implements QBittorrentConfig {
         return config;
     }
 
+    /**
+     * Saves the current qBittorrent configuration to a YAML configuration section.
+     *
+     * @return A YamlConfiguration object populated with the current configuration settings
+     * 
+     * @see YamlConfiguration
+     */
     @Override
     public YamlConfiguration saveToYaml() {
         YamlConfiguration section = new YamlConfiguration();

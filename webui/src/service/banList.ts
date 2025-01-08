@@ -4,6 +4,26 @@ import { type CommonResponse } from '@/api/model/common'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
 
+/**
+ * Retrieves a list of banned IP addresses from the server.
+ *
+ * @param limit - Maximum number of ban entries to retrieve
+ * @param search - Optional search term to filter ban list entries
+ * @param lastBanTime - Optional timestamp to retrieve bans after a specific time
+ * @returns A promise resolving to an array of ban list entries
+ *
+ * @remarks
+ * This function fetches ban list data from the server with optional filtering capabilities.
+ * It requires an active server connection and checks login status before returning results.
+ *
+ * @example
+ * // Retrieve first 10 ban entries
+ * const banList = await getBanList(10)
+ *
+ * @example
+ * // Retrieve ban entries with a specific search term
+ * const filteredBanList = await getBanList(20, '192.168.1')
+ */
 export async function getBanList(
   limit: number,
   search?: string,

@@ -30,10 +30,20 @@ public class IPAddressUtil {
             .build();
 
     /**
-     * 将字符串转换为 IPAddress 对象，并自动进行 IPV4 in IPV6 提取转换
+     * Converts a string to an IPAddress object with automatic IPv4-in-IPv6 extraction.
      *
-     * @param ip
-     * @return
+     * This method handles IP address parsing, including removing square brackets and converting
+     * IPv4-mapped IPv6 addresses to their IPv4 representation. It uses a cache to optimize
+     * performance and reduce redundant parsing.
+     *
+     * @param ip The IP address string to convert. Can be null, IPv4, or IPv6 format.
+     * @return An IPAddress object representing the parsed IP, or null if input is null.
+     *         Returns a special invalid address constant if parsing fails.
+     *
+     * @throws ExecutionException If there is an unexpected error during IP address parsing
+     *
+     * @see IPAddressString
+     * @see IPAddress
      */
     @Contract(value = "null -> null", pure = true)
     public static IPAddress getIPAddress(String ip) {

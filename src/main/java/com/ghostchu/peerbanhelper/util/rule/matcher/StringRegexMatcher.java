@@ -20,6 +20,15 @@ public final class StringRegexMatcher extends AbstractJsonMatcher {
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_REGEX, "<Not Provided>"));
     private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_REGEX, "<Not Provided>"));
 
+    /**
+     * Constructs a StringRegexMatcher with a specified JSON configuration for regex matching.
+     *
+     * @param syntax A JsonObject containing the regex configuration
+     *               Required key: "content" - the regex pattern to compile
+     *               Optional keys: "hit" - custom match result when regex matches
+     *                              "miss" - custom match result when regex does not match
+     * @throws IllegalArgumentException if the "content" key is missing or invalid
+     */
     public StringRegexMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = Pattern.compile(syntax.get("content").getAsString());
@@ -31,6 +40,15 @@ public final class StringRegexMatcher extends AbstractJsonMatcher {
         }
     }
 
+    /**
+     * Matches the provided content against a pre-compiled regular expression pattern.
+     *
+     * @param content The string to be matched against the regex pattern
+     * @return A {@code MatchResult} indicating whether the content matches the pattern
+     *         - Returns {@code hit} if the content fully matches the regex pattern
+     *         - Returns {@code miss} if the content does not match the regex pattern
+     * @throws NullPointerException if the content is null
+     */
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         if (rule.matcher(content).matches()) {

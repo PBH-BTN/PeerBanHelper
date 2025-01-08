@@ -25,6 +25,21 @@ public abstract class AbstractDownloader implements Downloader {
         this.alertManager = alertManager;
     }
 
+    /**
+     * Attempts to log in to the downloader with robust error handling and login attempt management.
+     *
+     * This method handles various login scenarios including:
+     * - Paused downloader state
+     * - Cooldown after multiple failed login attempts
+     * - Tracking of failed login attempts
+     * - Handling login exceptions
+     *
+     * @return A {@code DownloaderLoginResult} indicating the outcome of the login attempt
+     *         with possible statuses: PAUSED, REQUIRE_TAKE_ACTIONS, EXCEPTION, or login-specific results
+     *
+     * @see DownloaderLoginResult
+     * @see DownloaderLoginResult.Status
+     */
     @Override
     public DownloaderLoginResult login() {
         if(isPaused()){
@@ -65,6 +80,13 @@ public abstract class AbstractDownloader implements Downloader {
         }
     }
 
+    /**
+     * Sets the paused state of the downloader.
+     *
+     * @param paused If true, marks the downloader as paused; if false, resets the downloader's status to unknown.
+     *               When paused, sets the last status to PAUSED and creates a translation component for the pause status.
+     *               When unpaused, resets the last status to UNKNOWN and clears the status message.
+     */
     @Override
     public void setPaused(boolean paused) {
         if (paused) {
@@ -76,6 +98,15 @@ public abstract class AbstractDownloader implements Downloader {
         }
     }
 
+    /**
+     * Placeholder method for relaunching torrents if needed.
+     *
+     * This method is intended to be overridden by subclasses to implement
+     * specific torrent relaunch logic for a particular downloader implementation.
+     * In the base implementation, it does nothing.
+     *
+     * @param torrents A collection of torrents that may require relaunching
+     */
     @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
 

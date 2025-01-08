@@ -91,22 +91,55 @@ public class Transmission extends AbstractDownloader {
         return config.getEndpoint();
     }
 
+    /**
+     * Returns the type of the downloader as a string.
+     *
+     * @return A constant string "Transmission" identifying this downloader implementation.
+     */
     @Override
     public String getType() {
         return "Transmission";
     }
 
+    /**
+     * Checks whether the Transmission downloader is currently paused.
+     *
+     * @return {@code true} if the downloader is paused, {@code false} otherwise
+     */
     @Override
     public boolean isPaused() {
         return config.isPaused();
     }
 
+    /**
+     * Sets the paused state of the Transmission downloader.
+     *
+     * This method updates the paused state in both the parent class and the configuration.
+     * When called, it propagates the paused status to the superclass and updates the configuration
+     * to persist the paused state across sessions.
+     *
+     * @param paused A boolean indicating whether the downloader should be paused (true) or active (false)
+     */
     @Override
     public void setPaused(boolean paused) {
         super.setPaused(paused);
         config.setPaused(paused);
     }
 
+    /**
+     * Performs login and configuration verification for the Transmission BitTorrent client.
+     *
+     * This method executes a session get request to validate the connection and verify critical settings.
+     * It checks the API version compatibility and ensures the blocklist is correctly configured.
+     *
+     * @return A {@code DownloaderLoginResult} indicating the login status and potential actions
+     * @throws InterruptedException If thread sleep is interrupted during blocklist configuration
+     *
+     * @implNote
+     * - Validates Transmission API version (rejects versions 0.x, 1.x, and 2.x)
+     * - Configures blocklist URL if not already set correctly
+     * - Handles a special system property to bypass discouraged status warning
+     */
     @SneakyThrows(InterruptedException.class)
     @Override
     public DownloaderLoginResult login0() {
@@ -293,6 +326,15 @@ public class Transmission extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
+        /**
+         * Reads Transmission downloader configuration from a YAML configuration section.
+         *
+         * @param section The configuration section containing Transmission settings
+         * @return A configured Transmission.Config object with settings from the YAML section
+         *
+         * @implNote This method sets default values for optional configuration parameters
+         * and handles endpoint URL normalization to prevent connection issues
+         */
         public static Transmission.Config readFromYaml(ConfigurationSection section) {
             Transmission.Config config = new Transmission.Config();
             config.setType("transmission");
@@ -310,6 +352,25 @@ public class Transmission extends AbstractDownloader {
             return config;
         }
 
+        /**
+         * Serializes the Transmission downloader configuration to a YAML configuration section.
+         *
+         * @return A {@code YamlConfiguration} containing the downloader's configuration settings
+         * 
+         * This method captures all essential configuration parameters for the Transmission downloader,
+         * including connection details, authentication credentials, and current paused state.
+         * 
+         * Configuration parameters saved include:
+         * - Downloader type (fixed as "transmission")
+         * - Endpoint URL
+         * - Username for authentication
+         * - Password for authentication
+         * - RPC URL
+         * - HTTP version
+         * - SSL verification flag
+         * - Private peer ignore flag
+         * - Current paused state
+         */
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "transmission");

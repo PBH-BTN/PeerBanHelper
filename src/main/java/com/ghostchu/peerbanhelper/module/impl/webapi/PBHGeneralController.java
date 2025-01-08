@@ -62,6 +62,11 @@ public class PBHGeneralController extends AbstractFeatureModule {
     @Autowired
     private PeerBanHelperServer peerBanHelperServer;
 
+    /**
+     * Indicates whether this module is configurable.
+     *
+     * @return Always returns {@code false}, signifying that this module does not support configuration options.
+     */
     @Override
     public boolean isConfigurable() {
         return false;
@@ -77,6 +82,21 @@ public class PBHGeneralController extends AbstractFeatureModule {
         return "webapi-general";
     }
 
+    /**
+     * Initializes and registers web API endpoints for general application functionalities.
+     * 
+     * This method sets up multiple HTTP endpoints using Javalin web container, each mapped to a specific handler method
+     * and associated with a specific user access role. The endpoints provide various functionalities such as:
+     * 
+     * - Retrieving application status
+     * - Checking module availability
+     * - Generating heap dumps
+     * - Reloading application configuration
+     * - Reading and updating global configuration
+     * - Retrieving and updating specific configuration sections
+     * 
+     * @see Role User roles for endpoint access control
+     */
     @Override
     public void onEnable() {
         webContainer.javalin()
@@ -90,12 +110,30 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
     }
 
+    /**
+     * Handles reading the global configuration status via a web API endpoint.
+     *
+     * Retrieves the current global paused state from the PeerBanHelperServer
+     * and returns it as a JSON response. The response includes a boolean
+     * indicating whether the server is globally paused.
+     *
+     * @param context The Javalin web context used for handling the HTTP request and response
+     */
     private void handleGlobalConfigRead(Context context) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("globalPaused", peerBanHelperServer.isGlobalPaused());
         context.json(new StdResp(true, null, data));
     }
 
+    /**
+     * Handles global configuration updates via a PATCH request.
+     *
+     * @param context The Javalin request context containing the HTTP request details
+     * @throws IllegalArgumentException if the request body is null
+     *
+     * Updates the global paused state of the PeerBanHelper server if a globalPaused value is provided.
+     * Responds with a standard JSON response indicating successful configuration update.
+     */
     private void handleGlobalConfig(Context context) {
         var body = context.bodyAsClass(GlobalOptionPatch.class);
         if (body == null) {
@@ -107,6 +145,22 @@ public class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(true, "OK!", null));
     }
 
+    /**
+     * Checks the availability of a specified module in the application.
+     *
+     * This method determines whether a module is available and enabled by matching 
+     * the provided module name against various module identifiers such as name, 
+     * configuration name, fully qualified class name, or simple class name.
+     *
+     * @param context The Javalin request context containing the query parameters
+     * @throws IllegalArgumentException if the module query parameter is null
+     *
+     * @apiNote Responds with a JSON object containing a boolean indicating module availability
+     *          - Returns true if the module is found and enabled
+     *          - Returns false if the module is not found or is disabled
+     *
+     * @see FeatureModule
+     */
     private void handleModuleAvailable(Context context) {
         var moduleName = context.queryParam("module");
         if (moduleName == null) {
@@ -284,6 +338,19 @@ public class PBHGeneralController extends AbstractFeatureModule {
         context.json(new StdResp(success, tl(locale(context), message), entryList));
     }
 
+    /**
+     * Retrieves and processes configuration data based on the specified configuration name.
+     *
+     * @param context The Javalin request context containing the configuration name path parameter
+     * @throws IOException If there is an error reading the configuration file
+     * @throws InvalidConfigurationException If the configuration file is invalid or cannot be parsed
+     *
+     * @apiNote Supports retrieving two types of configurations:
+     * - "config": Main configuration file with push notification settings
+     * - "profile": Profile configuration file with various blacklist and rule configurations
+     *
+     * @return JSON response containing the processed configuration data or a 404 status for unknown config names
+     */
     private void handleConfigGet(Context context) throws IOException, InvalidConfigurationException {
         YamlConfiguration yamlConfiguration = new YamlConfiguration();
         yamlConfiguration.getOptions()
@@ -400,6 +467,29 @@ public class PBHGeneralController extends AbstractFeatureModule {
                 }, LinkedHashMap::putAll);
     }
 
+    /**
+     * Recursively merges a new YAML configuration map into an existing configuration section.
+     *
+     * This method handles complex configuration updates, including:
+     * - Transforming push notification configurations
+     * - Converting object lists to string lists for specific blacklist configurations
+     * - Recursively replacing keys in nested maps and lists
+     *
+     * @param cfg The existing configuration section to merge into
+     * @param newMap The new configuration map to merge
+     * @param target The original key pattern to be replaced
+     * @param replacement The replacement key pattern
+     *
+     * @implNote
+     * Special handling is implemented for:
+     * - Push notification configurations
+     * - Banned peer ID blacklist
+     * - Banned client name blacklist
+     * - PTR (Pointer) rules blacklist
+     *
+     * The method supports nested configuration updates by recursively processing
+     * maps and lists, ensuring complex configuration structures are correctly merged.
+     */
     private static void mergeYaml(ConfigurationSection cfg, Map<String, Object> newMap, String target, String replacement) {
         String path = cfg.getCurrentPath();
         newMap.forEach((key, value) -> {
@@ -468,6 +558,13 @@ public class PBHGeneralController extends AbstractFeatureModule {
         });
     }
 
+    /**
+     * Handles the disabling of the PBHGeneralController module.
+     *
+     * Currently, this method does not perform any specific actions during module shutdown.
+     * It is a placeholder method that can be extended in the future to implement
+     * cleanup or resource release operations when the module is disabled.
+     */
     @Override
     public void onDisable() {
 

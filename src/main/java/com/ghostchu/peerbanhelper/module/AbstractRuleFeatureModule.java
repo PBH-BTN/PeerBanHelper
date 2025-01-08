@@ -21,6 +21,12 @@ public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule im
     @Getter
     private ModuleMatchCache cache;
 
+    /**
+     * Determines whether a given peer is currently in a handshaking state.
+     *
+     * @param peer the peer to check for handshaking status
+     * @return true if the peer is in the process of handshaking, false otherwise
+     */
     public boolean isHandShaking(Peer peer) {
         // 跳过此 Peer，速度都是0，可能是没有完成握手
         return peer.isHandshaking();

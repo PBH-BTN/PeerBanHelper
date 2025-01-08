@@ -69,6 +69,31 @@ export function obtainFreeTrial(): Promise<CommonResponseWithoutData> {
   })
 }
 
+/**
+ * Retrieves the manifest metadata from the server.
+ *
+ * @remarks
+ * Fetches the manifest from the specified endpoint, with error handling for network and parsing issues.
+ * Validates the manifest structure to ensure it contains a valid modules array and version object.
+ *
+ * @param endpoint - The base URL endpoint for the API, defaults to the current endpoint from the store
+ * @returns A promise resolving to the manifest metadata
+ *
+ * @throws {GetManifestError} If there are network connection issues, JSON parsing errors, or invalid manifest format
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   const manifest = await getManifest();
+ *   console.log(manifest.modules);
+ *   console.log(manifest.version);
+ * } catch (error) {
+ *   if (error instanceof GetManifestError) {
+ *     // Handle manifest retrieval errors
+ *   }
+ * }
+ * ```
+ */
 export function getManifest(endpoint = useEndpointStore().endpoint): Promise<mainfest> {
   const url = new URL(urlJoin(endpoint, '/api/metadata/manifest'), location.href)
   return (
@@ -92,6 +117,20 @@ export function getManifest(endpoint = useEndpointStore().endpoint): Promise<mai
   )
 }
 
+/**
+ * Retrieves the global configuration from the server.
+ * 
+ * @returns A promise resolving to the global configuration response
+ * @throws Will throw an error if the server response indicates a login issue or network problem
+ * 
+ * @remarks
+ * This function fetches the global configuration by making a GET request to the global configuration API endpoint.
+ * It uses the current endpoint from the endpoint store and includes common headers with the request.
+ * 
+ * @example
+ * const globalConfig = await GetGlobalConfig();
+ * console.log(globalConfig.data); // Access the global configuration data
+ */
 export function GetGlobalConfig(): Promise<CommonResponse<GlobalConfig>> {
   const url = new URL(urlJoin(useEndpointStore().endpoint, 'api/general/global'), location.href)
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
@@ -100,6 +139,18 @@ export function GetGlobalConfig(): Promise<CommonResponse<GlobalConfig>> {
   })
 }
 
+/**
+ * Updates the global configuration for the application.
+ * 
+ * @param config - The global configuration object to be updated
+ * @returns A promise resolving to the response from the server after updating the configuration
+ * 
+ * @remarks
+ * Sends a PATCH request to the global configuration endpoint with the provided configuration.
+ * Validates the user's login status before processing the request.
+ * 
+ * @throws Will throw an error if the request fails or the user is not logged in
+ */
 export function UpdateGlobalConfig(config: GlobalConfig): Promise<CommonResponseWithoutData> {
   const url = new URL(urlJoin(useEndpointStore().endpoint, 'api/general/global'), location.href)
   return fetch(url, {

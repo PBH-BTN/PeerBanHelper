@@ -26,6 +26,16 @@ public class WindowsEcoQosAPI {
         }
     }
 
+    /**
+     * Attempts to install and enable Windows Eco QoS API for performance optimization.
+     *
+     * This method checks if the current operating system is Windows and attempts to enable eco mode.
+     * If eco mode is successfully activated, it logs an informational message and adds a display flag
+     * to indicate the eco mode status in the GUI.
+     *
+     * @implNote Only executes on Windows operating systems
+     * @see EcoMode
+     */
     private void installEcoQosApi() {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         if (os.startsWith("win")) {

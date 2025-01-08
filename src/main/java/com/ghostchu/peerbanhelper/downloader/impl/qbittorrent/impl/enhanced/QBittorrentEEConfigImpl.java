@@ -24,6 +24,17 @@ public class QBittorrentEEConfigImpl implements QBittorrentConfig {
     private boolean ignorePrivate;
     private boolean paused;
 
+    /**
+     * Creates a QBittorrentEEConfigImpl configuration object from a YAML configuration section.
+     *
+     * @param section The configuration section containing qBittorrent enhanced edition settings
+     * @return A fully configured QBittorrentEEConfigImpl instance
+     *
+     * @implNote This method handles configuration parsing with default values and endpoint normalization.
+     * It removes trailing slashes from the endpoint to prevent connection issues.
+     *
+     * @see QBittorrentBasicAuth
+     */
     public static QBittorrentEEConfigImpl readFromYaml(ConfigurationSection section) {
         QBittorrentEEConfigImpl config = new QBittorrentEEConfigImpl();
         config.setType("qbittorrentee");
@@ -46,6 +57,23 @@ public class QBittorrentEEConfigImpl implements QBittorrentConfig {
         return config;
     }
 
+    /**
+     * Saves the current qBittorrent Enhanced Edition configuration to a YAML configuration section.
+     *
+     * @return A YamlConfiguration object populated with the current configuration settings
+     *
+     * This method creates a new YAML configuration and populates it with:
+     * - Configuration type (always "qbittorrentee")
+     * - Endpoint URL
+     * - Username and password
+     * - Basic authentication credentials
+     * - HTTP version
+     * - Various boolean configuration flags including increment ban, shadow ban, SSL verification,
+     *   private network handling, and paused state
+     *
+     * Null values for basic authentication user and password are replaced with empty strings
+     * to ensure configuration integrity.
+     */
     @Override
     public YamlConfiguration saveToYaml() {
         YamlConfiguration section = new YamlConfiguration();

@@ -100,6 +100,25 @@ public class Main {
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 8;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.0.3";
 
+    /**
+     * Main entry point for the PeerBanHelper application.
+     *
+     * Performs a comprehensive startup sequence including:
+     * - Initializing reloading mechanisms
+     * - Setting up configuration directories
+     * - Loading flag properties
+     * - Configuring logging
+     * - Setting up application configuration
+     * - Determining and setting locale
+     * - Initializing GUI
+     * - Configuring proxy settings
+     * - Setting up script engine
+     * - Starting Spring application context
+     * - Launching the PeerBanHelper server
+     *
+     * @param args Command-line arguments passed to the application
+     * @throws RuntimeException if there is a fatal error during application startup
+     */
     public static void main(String[] args) {
         startupArgs = args;
         setupReloading();
@@ -456,12 +475,44 @@ public class Main {
         defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
     }
 
+    /**
+     * Unregisters a bean from the Spring application context by its name.
+     *
+     * @param beanName the name of the bean to be removed from the application context
+     * @throws NoSuchBeanDefinitionException if the bean definition cannot be found
+     */
     public static void unregisterBean(String beanName) {
         ConfigurableApplicationContext configurableApplicationContext = applicationContext;
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
         defaultListableBeanFactory.removeBeanDefinition(beanName);
     }
 
+    /**
+     * Configures and initializes the Aviator script engine with performance and usability optimizations.
+     *
+     * This method sets up the Aviator expression evaluator with various performance-enhancing options:
+     * - Enables expression result caching
+     * - Sets ASM-based evaluation mode for improved performance
+     * - Configures optimization level for efficient evaluation
+     * - Reduces floating-point calculation precision
+     * - Enables variable syntax sugar
+     * - Enables method reflection for function discovery
+     *
+     * Additionally, it registers utility functions from multiple classes to extend the scripting capabilities,
+     * allowing direct invocation of methods from various utility classes within Aviator expressions.
+     *
+     * Registered utility classes include:
+     * - IP address utilities
+     * - HTTP utilities
+     * - JSON processing
+     * - String manipulation
+     * - Peer ban helper server
+     * - Hash and encoding utilities
+     * - Miscellaneous helper classes
+     *
+     * @see AviatorEvaluator
+     * @see Options
+     */
     private static void setupScriptEngine() {
         AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
         // ASM 性能优先
@@ -499,6 +550,17 @@ public class Main {
         registerFunctions(Main.class);
     }
 
+    /**
+     * Registers instance and static functions from a given class to the AviatorEvaluator.
+     *
+     * This method attempts to add both instance and static functions from the provided class
+     * to the AviatorEvaluator script engine. It handles potential registration errors by logging
+     * detailed error messages without interrupting the registration process.
+     *
+     * @param clazz The class whose functions will be registered with the AviatorEvaluator
+     * @throws IllegalAccessException If access to the class methods is restricted
+     * @throws NoSuchMethodException If a required method cannot be found during registration
+     */
     private static void registerFunctions(Class<?> clazz) {
         try {
             AviatorEvaluator.addInstanceFunctions(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);

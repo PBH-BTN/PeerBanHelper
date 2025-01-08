@@ -87,6 +87,28 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
                 .get("/api/modules/btn", this::status, Role.USER_READ);
     }
 
+    /**
+     * Generates a status report for the BtnNetwork service.
+     *
+     * This method creates a comprehensive JSON response containing the current configuration
+     * and abilities of the BtnNetwork service. If the service is not initialized, it returns
+     * a failure response indicating the need for a restart.
+     *
+     * @param context The request context used for localization and response generation
+     *
+     * @apiNote The method handles the following scenarios:
+     * - When BtnNetwork is not initialized: Returns a failure response with restart instructions
+     * - When BtnNetwork is initialized: Provides detailed service status including:
+     *   - Configuration success status
+     *   - Configuration result
+     *   - List of service abilities with their current status
+     *   - Partially masked application secret
+     *   - Application ID
+     *   - Configuration URL
+     *
+     * @see BtnNetwork
+     * @see StdResp
+     */
     private void status(Context context) {
         Map<String, Object> info = new HashMap<>();
         if (btnNetwork == null) {
@@ -100,7 +122,7 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         }
 
         info.put("configSuccess", btnNetwork.getConfigSuccess());
-        info.put("configResult", btnNetwork.getConfigResult() == null ? null : tl(locale(context), btnNetwork.getConfigResult()));
+        info.put("configResult", tl(locale(context), btnNetwork.getConfigResult()));
         var abilities = new ArrayList<>();
         for (Map.Entry<Class<? extends BtnAbility>, BtnAbility> entry : btnNetwork.getAbilities().entrySet()) {
             Map<String, Object> abilityStatus = new HashMap<>();
@@ -162,6 +184,25 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         return true;
     }
 
+    /**
+     * Determines whether a peer should be banned based on network rules and configurations.
+     *
+     * @param torrent The torrent associated with the peer
+     * @param peer The peer being evaluated for potential banning
+     * @param downloader The downloader context
+     * @param ruleExecuteExecutor Executor service for running rule checks
+     * @return A {@code CheckResult} indicating the action to take for the peer
+     *
+     * @throws NullPointerException if any input parameter is null
+     *
+     * This method performs a multi-stage evaluation of a peer:
+     * 1. Checks if the button network is initialized
+     * 2. Checks for exception rules that might skip banning
+     * 3. Optionally runs script-based checks if script execution is allowed
+     * 4. Performs final ban rule checks
+     *
+     * Returns {@link #BTN_MANAGER_NOT_INITIALIZED} if the button network is not set up.
+     */
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         if (btnNetwork == null) {
@@ -181,6 +222,24 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         return checkShouldBan(torrent, peer, downloader, ruleExecuteExecutor);
     }
 
+    /**
+     * Checks script-based rules for a peer to determine if it should be skipped or banned.
+     *
+     * @param torrent The torrent associated with the peer
+     * @param peer The peer being evaluated
+     * @param downloader The downloader context
+     * @param ruleExecuteExecutor The executor service for rule execution
+     * @return A {@code CheckResult} indicating the action to take (pass, skip, or ban)
+     *
+     * @implNote This method performs the following steps:
+     * - Retrieves ability rules from the button network
+     * - Checks if the peer is in a handshaking state
+     * - Executes script rules concurrently using virtual threads
+     * - Returns the first SKIP result or the final ban result
+     *
+     * @throws InterruptedException If thread execution is interrupted
+     * @throws ExecutionException If script execution encounters an error
+     */
     private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
@@ -257,6 +316,21 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         }, script.cacheable());
     }
 
+    /**
+     * Checks if a peer should be skipped based on exception rules defined in the BtnNetwork configuration.
+     *
+     * This method evaluates whether a peer meets any exception criteria that would prevent it from being banned.
+     * It checks various rules including peer ID, client name, IP address, and port against predefined exception rules.
+     *
+     * @param torrent The torrent associated with the peer
+     * @param peer The peer to be evaluated for skipping
+     * @param downloader The downloader context
+     * @param ruleExecuteExecutor Executor service for running rule evaluation tasks
+     * @return A {@code CheckResult} indicating whether the peer should be skipped:
+     *         - {@code pass()} if no exception rules match or no rules are defined
+     *         - {@code handshaking()} if the peer is currently in a handshake state
+     *         - A specific {@code CheckResult} if any exception rule matches
+     */
     private @NotNull CheckResult checkShouldSkip(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityException.class);
         if (abilityObject == null) {
@@ -291,6 +365,31 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         }, true);
     }
 
+    /**
+     * Checks whether a peer should be banned based on configured network rules.
+     *
+     * @param torrent The torrent associated with the peer connection
+     * @param peer The peer being evaluated for potential banning
+     * @param downloader The current downloader context
+     * @param ruleExecuteExecutor Executor service for running rule evaluation tasks
+     * @return A {@code CheckResult} indicating the action to take for the peer (pass, skip, or ban)
+     *
+     * @implNote This method performs a comprehensive evaluation of peer attributes against predefined rules:
+     * - Checks peer ID rules
+     * - Checks client name rules
+     * - Checks IP rules
+     * - Checks port rules
+     *
+     * The method uses caching to optimize repeated rule checks for the same peer.
+     * If the peer is currently in a handshaking state, it returns a handshaking result.
+     *
+     * Rule evaluation prioritizes:
+     * 1. Skipping peers that match skip conditions
+     * 2. Banning peers that match ban conditions
+     *
+     * @see BtnAbilityRules
+     * @see BtnRuleParsed
+     */
     private @NotNull CheckResult checkShouldBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
@@ -400,6 +499,17 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         return null;
     }
 
+    /**
+     * Checks if a peer's IP address matches any IP rules defined in the given rule configuration.
+     *
+     * @param rule The parsed rule configuration containing IP matching rules
+     * @param torrent The torrent context for which the peer is being checked
+     * @param peer The peer being evaluated for potential banning
+     * @param ruleExecuteExecutor The executor service for running rule checks (unused in this method)
+     * @return A {@code CheckResult} indicating a ban action if an IP rule matches, or {@code null} if no rules match
+     *
+     * @throws NullPointerException if peer address or address is null
+     */
     @Nullable
     private CheckResult checkIpRule(BtnRuleParsed rule, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
         IPAddress pa = peer.getPeerAddress().getAddress();

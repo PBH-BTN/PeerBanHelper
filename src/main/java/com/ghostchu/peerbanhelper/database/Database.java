@@ -37,6 +37,17 @@ public class Database {
     private HikariDataSource hikari;
     private DatabaseHelper helper;
 
+    /**
+     * Constructs a new Database instance for the PeerBanHelper application.
+     *
+     * Initializes the database by creating the necessary directory structure,
+     * setting up the SQLite database file and maintenance tracking file,
+     * registering data persisters, and configuring the database connection.
+     *
+     * @param laboratory The Laboratory instance associated with this database
+     * @throws SQLException if there is an error setting up the database connection
+     * @throws ClassNotFoundException if the database driver cannot be loaded
+     */
     public Database(Laboratory laboratory) throws SQLException, ClassNotFoundException {
         this.laboratory = laboratory;
         File databaseDirectory = new File(Main.getDataDirectory(), "persist");
@@ -50,10 +61,25 @@ public class Database {
 
     }
 
+    /**
+     * Registers custom data persisters with the ORMLite framework.
+     *
+     * This method adds the {@code TranslationComponentPersistener} singleton to the 
+     * {@code DataPersisterManager}, enabling custom data persistence for translation components.
+     *
+     * @see DataPersisterManager
+     * @see TranslationComponentPersistener
+     */
     private void registerPersisters() {
         DataPersisterManager.registerDataPersisters(TranslationComponentPersistener.getSingleton());
     }
 
+    /**
+     * Retrieves the timestamp of the last database maintenance operation.
+     *
+     * @return The last maintenance timestamp as a long value. Returns 0 if the maintenance file
+     *         does not exist or cannot be read due to an I/O error.
+     */
     private long getLastMaintenanceTime() {
         if (!dbMaintenanceFile.exists()) {
             return 0;
@@ -65,6 +91,12 @@ public class Database {
         }
     }
 
+    /**
+     * Updates the last database maintenance timestamp in the maintenance file.
+     *
+     * @param time The timestamp representing the last maintenance time in milliseconds.
+     *             Silently handles any IO errors during file writing to prevent disruption.
+     */
     private void setLastMaintenanceTime(long time) {
         try {
             Files.writeString(dbMaintenanceFile.toPath(), String.valueOf(time));
@@ -72,6 +104,19 @@ public class Database {
         }
     }
 
+    /**
+     * Sets up the SQLite database connection and performs maintenance tasks.
+     *
+     * This method configures a HikariCP connection pool for the SQLite database,
+     * applies performance-optimizing PRAGMA settings, and optionally performs
+     * database vacuum operations based on configured intervals.
+     *
+     * @param file The SQLite database file to be configured
+     * @throws SQLException If a database connection or configuration error occurs
+     *
+     * @see HikariConfig
+     * @see HikariDataSource
+     */
     public void setupDatabase(File file) throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setPoolName("PeerBanHelper SQLite Connection Pool");
@@ -126,6 +171,13 @@ public class Database {
         //  this.dataSource = new DataSourceConnectionSource( new HikariDataSource(config), new SqliteDatabaseType());
     }
 
+    /**
+     * Creates a gzip-compressed backup of the specified database file.
+     *
+     * @param input  The source database file to be backed up
+     * @param output The destination file where the compressed backup will be stored
+     * @throws IOException If an error occurs during file reading, writing, or compression
+     */
     private void backupDatabase(File input, File output) throws IOException {
         try (var filein = new FileInputStream(input);
              var fileout = new FileOutputStream(output)) {
@@ -133,6 +185,15 @@ public class Database {
         }
     }
 
+    /**
+     * Closes the database connection source quietly.
+     *
+     * This method safely closes the underlying data source connection pool,
+     * ensuring that all database connections are properly released without
+     * throwing any exceptions during the process.
+     *
+     * @see HikariDataSource#close()
+     */
     public void close() {
         this.dataSource.closeQuietly();
     }

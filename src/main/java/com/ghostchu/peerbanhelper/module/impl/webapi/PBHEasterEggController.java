@@ -63,6 +63,19 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
         return "webapi-easteregg";
     }
 
+    /**
+     * Configures and enables web routes for the Easter egg and Neuro-related endpoints.
+     *
+     * This method sets up three GET routes on the Javalin web server:
+     * <ul>
+     *   <li>/api/egg: Redirects to a random URL from the predefined list</li>
+     *   <li>/api/neuro: Serves a Neuro-related image</li>
+     *   <li>/api/neurosama: Alternative route serving the same Neuro-related image</li>
+     * </ul>
+     *
+     * @see #handleEgg(Context)
+     * @see #neuro(Context)
+     */
     @Override
     public void onEnable() {
         javalinWebContainer.javalin()
@@ -72,12 +85,20 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
     }
 
 
+    /**
+     * Handles requests to the Neuro-related API endpoints by serving a specific PNG image.
+     *
+     * This method attempts to retrieve an image resource for "Neuro" and responds with:
+     * - A 429 (ENHANCE_YOUR_CALM) status code if the image is found
+     * - A 404 (NOT_FOUND) status code if the image resource is unavailable
+     *
+     * @param context The Javalin request context used to handle the HTTP request and response
+     */
     private void neuro(Context context) {
         // Yeeeeet, Neuro!
         var imageStream = Main.class.getResourceAsStream("/assets/other/neuro.png");
         if (imageStream == null) {
             context.status(HttpStatus.NOT_FOUND);
-            context.result("You killed Neuro! How dare you!?");
             return;
         }
         context
@@ -86,6 +107,15 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
                 .result(imageStream);
     }
 
+    /**
+     * Handles the Easter egg endpoint by redirecting to a randomly selected URL.
+     *
+     * This method selects a random URL from the predefined list of URLs and redirects
+     * the client to that location. The randomization is achieved using thread-local
+     * random number generation to ensure thread safety and uniform distribution.
+     *
+     * @param context The Javalin web context representing the current HTTP request
+     */
     private void handleEgg(Context context) {
         int index = ThreadLocalRandom.current().nextInt(urls.size());
         context.redirect(urls.get(index));

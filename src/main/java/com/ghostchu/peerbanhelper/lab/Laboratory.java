@@ -36,6 +36,18 @@ public class Laboratory {
         }
     }
 
+    /**
+     * Determines whether a specific experiment is activated based on the laboratory configuration.
+     *
+     * @param experiment The experiment to check for activation
+     * @return true if the experiment is activated, false otherwise
+     *
+     * @implNote
+     * - If the laboratory is not enabled, returns false
+     * - If no configuration exists for the experiment, initializes a default configuration
+     * - For "default" configuration, checks against the experimental group
+     * - For explicit configuration, parses the boolean value directly
+     */
     public boolean isExperimentActivated(Experiment experiment) {
         if (!isEnabled()) {
             return false;
@@ -57,6 +69,17 @@ public class Laboratory {
         }
     }
 
+    /**
+     * Sets the activation state for a specific experiment by its ID.
+     *
+     * @param id The unique identifier of the experiment to be activated or deactivated
+     * @param activated The activation state to set. If null, defaults to "default" configuration
+     * @throws IllegalArgumentException If the provided experiment ID does not exist in the Experiments registry
+     *
+     * This method allows configuring the activation status of an experiment. It searches through
+     * the registered experiments, updates the configuration for the matching experiment, and saves
+     * the configuration. If no matching experiment is found, an exception is thrown.
+     */
     public void setExperimentActivated(String id, Boolean activated) throws IllegalArgumentException {
         for (Experiments value : Experiments.values()) {
             if (!value.getExperiment().getId().equals(id)) {
@@ -69,6 +92,15 @@ public class Laboratory {
         throw new IllegalArgumentException("Invalid experiment id: " + id + ", it's not exists in Experiments registry");
     }
 
+    /**
+     * Saves the current laboratory configuration to the specified YAML configuration file.
+     *
+     * <p>This method attempts to persist the current state of the laboratory configuration
+     * to the file system. If the save operation fails due to an I/O error, it logs an
+     * informational message with the exception details.</p>
+     *
+     * @throws IOException if an I/O error occurs during the file saving process (caught internally)
+     */
     private void saveLabConfig() {
         try {
             labConfig.save(this.labConfigFile);

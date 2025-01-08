@@ -20,6 +20,16 @@ public final class StringStartsWithMatcher extends AbstractJsonMatcher {
     private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent("StringStatsWith Hit"));
     private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("StringStatsWith Miss"));
 
+    /**
+     * Constructs a StringStartsWithMatcher with the specified JSON configuration.
+     *
+     * @param syntax A JsonObject containing the matching configuration
+     *               Required field: "content" - the substring to match against
+     *               Optional fields: "hit" - custom match result when successful
+     *               Optional fields: "miss" - custom match result when unsuccessful
+     * @throws IllegalArgumentException if the required "content" field is missing
+     * @throws IllegalStateException if an invalid match result is specified
+     */
     public StringStartsWithMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString().toLowerCase(Locale.ROOT);
@@ -31,6 +41,15 @@ public final class StringStartsWithMatcher extends AbstractJsonMatcher {
         }
     }
 
+    /**
+     * Determines if the given content starts with the predefined rule string.
+     *
+     * @param content The input string to be matched, which will be converted to lowercase
+     * @return A {@code MatchResult} indicating whether the content starts with the rule
+     *         - Returns {@code hit} if the content starts with the rule
+     *         - Returns {@code miss} if the content does not start with the rule
+     * @throws NullPointerException if the input content is null
+     */
     @Override
     public @NotNull MatchResult match0(@NotNull String content) {
         content = content.toLowerCase(Locale.ROOT);

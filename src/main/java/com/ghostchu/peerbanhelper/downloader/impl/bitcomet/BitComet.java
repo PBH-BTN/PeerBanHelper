@@ -186,22 +186,47 @@ public class BitComet extends AbstractDownloader {
         return apiEndpoint;
     }
 
+    /**
+     * Returns the type identifier for the BitComet downloader.
+     *
+     * @return A string constant representing the downloader type, which is "BitComet"
+     */
     @Override
     public String getType() {
         return "BitComet";
     }
 
+    /**
+     * Checks if the BitComet downloader is currently paused.
+     *
+     * @return {@code true} if the downloader is paused, {@code false} otherwise
+     */
     @Override
     public boolean isPaused() {
         return config.isPaused();
     }
 
+    /**
+     * Sets the paused state of the BitComet downloader.
+     *
+     * Updates the paused status in both the parent class and the configuration object.
+     * This method ensures that the paused state is consistently maintained across
+     * the downloader's runtime and configuration.
+     *
+     * @param paused A boolean indicating whether the downloader should be paused (true)
+     *               or resumed (false)
+     */
     @Override
     public void setPaused(boolean paused) {
         super.setPaused(paused);
         config.setPaused(paused);
     }
 
+    /**
+     * Checks if the BitComet client is currently logged in by attempting to query the IP filter configuration.
+     *
+     * @return {@code true} if the login is successful and the IP filter query succeeds, {@code false} otherwise
+     */
     public boolean isLoggedIn() {
         try {
             queryNeedReConfigureIpFilter();
@@ -317,6 +342,22 @@ public class BitComet extends AbstractDownloader {
         return new DownloaderStatistics(0L, 0L);
     }
 
+    /**
+     * Retrieves a list of peers for a specific torrent from the BitComet API.
+     *
+     * This method sends a POST request to fetch peers connected to the given torrent,
+     * with support for different BitComet API versions and group filtering.
+     *
+     * @param torrent The torrent for which to retrieve peer information
+     * @return A list of {@link Peer} objects representing connected peers
+     * @throws IllegalStateException If there is an error during the HTTP request or JSON parsing
+     *
+     * @implNote
+     * - Supports different BitComet API versions (2.10 and 2.11)
+     * - Filters peers based on connection group
+     * - Handles missing fields in older API versions
+     * - Converts peer data transfer rates and sizes
+     */
     @Override
     public List<Peer> getPeers(Torrent torrent) {
         HttpResponse<InputStream> resp;
@@ -474,6 +515,16 @@ public class BitComet extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
+        /**
+         * Reads BitComet configuration from a YAML configuration section.
+         *
+         * @param section The configuration section containing BitComet settings
+         * @return A configured BitComet Config object with default fallback values
+         *
+         * @throws IllegalArgumentException if the endpoint is invalid or missing
+         *
+         * @see Config
+         */
         public static Config readFromYaml(ConfigurationSection section) {
             Config config = new Config();
             config.setType("bitcomet");
@@ -491,6 +542,21 @@ public class BitComet extends AbstractDownloader {
             return config;
         }
 
+        /**
+         * Serializes the BitComet downloader configuration to a YAML configuration section.
+         *
+         * @return A YamlConfiguration containing the downloader's configuration settings
+         * 
+         * This method creates a YAML configuration section with key details of the BitComet downloader:
+         * - Downloader type
+         * - API endpoint
+         * - Authentication credentials
+         * - Ban list update mode
+         * - HTTP version
+         * - SSL verification setting
+         * - Private IP handling
+         * - Paused state
+         */
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "bitcomet");

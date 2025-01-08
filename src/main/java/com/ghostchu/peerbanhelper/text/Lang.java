@@ -501,6 +501,11 @@ public enum Lang {
     BTN_CONFIG_STATUS_SUCCESSFUL,
     BTN_CONFIG_STATUS_EXCEPTION;
 
+    /**
+     * Retrieves the name of the current language enum constant as a string.
+     *
+     * @return The name of the enum constant, which serves as its unique key
+     */
     public String getKey() {
         return name();
     }

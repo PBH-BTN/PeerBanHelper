@@ -94,6 +94,29 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         return "progress-cheat-blocker";
     }
 
+    /**
+     * Initializes and configures the ProgressCheatBlocker module when enabled.
+     *
+     * This method performs the following key actions:
+     * 1. Reloads the module's configuration
+     * 2. Sets up web API routes for retrieving module configuration and status
+     * 3. Schedules periodic database maintenance tasks
+     * 4. Registers the module with the reload manager
+     *
+     * Web routes are established for:
+     * - Retrieving module configuration at "/api/modules/{configName}"
+     * - Retrieving module status at "/api/modules/{configName}/status"
+     *
+     * Scheduled tasks include:
+     * - Database flushing every 30 seconds
+     * - Database cleaning every 8 hours
+     *
+     * @see #reloadConfig()
+     * @see #handleConfig(Context)
+     * @see #handleStatus(Context)
+     * @see #flushDatabase()
+     * @see #cleanDatabase()
+     */
     @Override
     public void onEnable() {
         reloadConfig();
@@ -105,6 +128,16 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         Main.getReloadManager().register(this);
     }
 
+    /**
+     * Handles the unbanning of a peer by updating its progress records in the cache.
+     *
+     * This method is triggered when a peer is unbanned and performs the following actions:
+     * 1. Determines the IP prefix for the peer based on IPv4 or IPv6 address
+     * 2. Retrieves or initializes the client's task records from the progress cache
+     * 3. Resets the progress tracking metrics for the specific peer
+     *
+     * @param event The peer unbanning event containing peer and ban metadata
+     */
     @Subscribe
     public void onPeerUnBan(PeerUnbanEvent event) {
         IPAddress peerPrefix;
@@ -139,6 +172,14 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         }
     }
 
+    /**
+     * Removes expired records from the progress cheat blocker database.
+     *
+     * This method cleans up database entries older than the configured persistence duration.
+     * It uses the current system time to calculate the cutoff timestamp for record deletion.
+     *
+     * @throws RuntimeException if there is an error during database cleanup
+     */
     private void cleanDatabase() {
         try {
             progressCheatBlockerPersistDao.cleanupDatabase(new Timestamp(System.currentTimeMillis() - persistDuration));
@@ -147,6 +188,15 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         }
     }
 
+    /**
+     * Flushes pending client task records to the database.
+     *
+     * This method attempts to persist the records in the {@code pendingPersistQueue} to the database
+     * using the {@code progressCheatBlockerPersistDao}. If a database-related error occurs during
+     * the flush operation, it logs the error without throwing an exception.
+     *
+     * @throws RuntimeException if an unexpected error occurs during the database flush process
+     */
     private void flushDatabase() {
         try {
             try {
@@ -221,6 +271,21 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
     }
 
 
+    /**
+     * Determines whether a peer should be banned based on its upload progress and behavior.
+     *
+     * This method performs comprehensive checks on peer upload progress, including:
+     * - Fast PCB (Progress Cheat Blocking) testing
+     * - Excessive upload threshold detection
+     * - Progress difference validation
+     * - Progress rewind detection
+     *
+     * @param torrent The torrent being downloaded
+     * @param peer The peer being evaluated
+     * @param downloader The downloader managing the torrent
+     * @param ruleExecuteExecutor Executor service for rule execution
+     * @return A {@code CheckResult} indicating the recommended action for the peer
+     */
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         if (isHandShaking(peer)) {
@@ -365,10 +430,22 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         }
     }
 
+    /**
+     * Determines whether a peer is currently uploading data to the client.
+     *
+     * @param peer the peer to check for upload activity
+     * @return true if the peer has a non-zero upload speed or has uploaded data, false otherwise
+     */
     private boolean isUploadingToPeer(Peer peer) {
         return peer.getUploadSpeed() > 0 || peer.getUploaded() > 0;
     }
 
+    /**
+     * Determines whether a torrent is considered too small for progress tracking.
+     *
+     * @param torrentSize the size of the torrent in bytes
+     * @return true if the torrent size is below the configured minimum threshold, false otherwise
+     */
     private boolean fileTooSmall(long torrentSize) {
         return torrentSize < torrentMinimumSize;
     }

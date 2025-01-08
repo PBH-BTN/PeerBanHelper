@@ -122,6 +122,24 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         return Reloadable.super.reloadModule();
     }
 
+    /**
+     * Determines whether a peer should be banned based on its IP address.
+     *
+     * This method checks the peer's IP address against a list of IP ban rules and returns
+     * a {@code CheckResult} indicating whether the peer should be banned. It uses a cache
+     * mechanism to optimize repeated checks and provides detailed logging of match results.
+     *
+     * @param torrent The torrent associated with the peer
+     * @param peer The peer being evaluated for potential banning
+     * @param downloader The downloader context
+     * @param ruleExecuteExecutor The executor service for rule execution
+     * @return A {@code CheckResult} indicating the action to take (ban or pass)
+     *         - If a matching rule is found, returns a ban result with rule details
+     *         - If no matching rule is found, returns a pass result
+     *         - If an error occurs during matching, returns a pass result with logged error
+     *
+     * @throws NullPointerException if any input parameter is null
+     */
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         return getCache().readCacheButWritePassOnly(this, peer.getPeerAddress().getIp(), () -> {
@@ -175,9 +193,13 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     }
 
     /**
-     * 更新规则
+     * Updates an IP ban rule by fetching and processing remote rule subscriptions.
      *
-     * @param rule 规则
+     * @param locale The language locale for localized messages
+     * @param rule Configuration section containing rule details
+     * @param updateType Type of rule update being performed
+     * @return Standard response indicating the result of the rule update operation
+     * @throws IllegalArgumentException If the rule name contains invalid characters
      */
     public StdResp updateRule(String locale, @NotNull ConfigurationSection rule, IPBanRuleUpdateType updateType) {
         AtomicReference<StdResp> result = new AtomicReference<>();
@@ -281,6 +303,18 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         return result.get();
     }
 
+    /**
+     * Retrieves resource data from a specified URL using various protocols.
+     *
+     * Supports HTTP, IPNS, and IPFS protocols for fetching remote resources.
+     * Handles network requests asynchronously using CompletableFuture.
+     *
+     * @param url The URL of the resource to retrieve, supporting HTTP, IPNS, and IPFS schemes
+     * @return A CompletableFuture containing the DataUpdateResult with status code, message, and resource data
+     * @throws IllegalArgumentException If an unsupported URL scheme is provided
+     * @throws IllegalStateException If IPFS is not available for IPNS or IPFS protocols
+     * @throws RuntimeException For network-related errors during resource retrieval
+     */
     private CompletableFuture<DataUpdateResult> getResource(String url) {
         return CompletableFuture.supplyAsync(() -> {
             URI uri;
@@ -329,11 +363,15 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
 
 
     /**
-     * 读取规则文件并转为IpList
+     * Reads a rule file and converts it to an IP list.
      *
-     * @param ruleFile 规则文件
-     * @param ips      ip列表
-     * @return 加载的行数
+     * This method parses a text file containing IP address rules, supporting comments and blank lines.
+     * Comments are preserved and associated with their corresponding IP addresses.
+     *
+     * @param ruleFile The file containing IP address rules to be loaded
+     * @param ips A dual-stack (IPv4 and IPv6) associative tries data structure to store IP addresses and their comments
+     * @return The number of successfully parsed and added IP address rules
+     * @throws IOException If an error occurs while reading the rule file
      */
     private int fileToIPList(File ruleFile, DualIPv4v6AssociativeTries<String> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
@@ -362,11 +400,12 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
     }
 
     /**
-     * 读取规则文本并转为IpList
+     * Parses rule text and converts it to an IP list.
      *
-     * @param data 规则文本
-     * @param ips      ip列表
-     * @return 加载的行数
+     * @param data The rule text containing IP addresses and optional comments
+     * @param ips A dual IPv4/IPv6 associative tries data structure to store IP addresses and their associated metadata
+     * @return The number of successfully loaded IP addresses
+     * @throws IOException If an error occurs while processing the rule text
      */
     private int stringToIPList(String data, DualIPv4v6AssociativeTries<String> ips) throws IOException {
         AtomicInteger count = new AtomicInteger();
@@ -393,6 +432,22 @@ public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reload
         return count.get();
     }
 
+    /**
+     * Parses a single rule line into an IP address and optional comment.
+     *
+     * Supports two input formats:
+     * 1. DAT/eMule format: "start_ip, end_ip, level, comment"
+     *    - Requires at least 3 comma-separated values
+     *    - Filters out entries with level >= 128
+     *    - Supports IP range specification
+     *
+     * 2. Single IP format: "ip [#comment]"
+     *    - Allows optional inline comment after '#'
+     *
+     * @param ele The rule line to parse
+     * @param preReadComment A default comment to use if no specific comment is found
+     * @return A Pair containing the parsed IPAddress and its associated comment, or null if parsing fails
+     */
     private Pair<IPAddress, @Nullable String> parseRuleLine(String ele, String preReadComment) {
         // 检查是否是 DAT/eMule 格式
         // 016.000.000.000 , 016.255.255.255 , 200 , Yet another organization

@@ -86,6 +86,22 @@ public class PersistMetrics implements BasicMetrics {
         inMemory.recordCheck();
     }
 
+    /**
+     * Records a peer ban in the metrics system and persists ban details to the database.
+     *
+     * This method records a peer ban in the in-memory metrics and asynchronously saves
+     * the ban details to the database using a virtual thread. It skips recording if the
+     * ban is due to a disconnection.
+     *
+     * @param address The network address of the peer being banned
+     * @param metadata Metadata containing details about the ban, including torrent, peer,
+     *                 and rule information
+     *
+     * @throws SQLException If there is an error saving the ban details to the database
+     *
+     * @implNote Uses virtual threads to offload database I/O operations and prevent
+     *           blocking the main thread during database interactions
+     */
     @Override
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
         if(metadata.isBanForDisconnect()){

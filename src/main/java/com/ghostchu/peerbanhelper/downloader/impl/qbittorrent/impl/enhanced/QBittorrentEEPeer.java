@@ -101,16 +101,36 @@ public final class QBittorrentEEPeer implements Peer {
         return progress;
     }
 
+    /**
+     * Retrieves the peer flags as a {@code PeerFlag} object.
+     *
+     * @return A {@code PeerFlag} object constructed from the peer's flags string
+     */
     @Override
     public PeerFlag getFlags() {
         return new PeerFlag(flags);
     }
 
+    /**
+     * Determines if the peer is currently in a handshaking state.
+     *
+     * A peer is considered to be in a handshaking state when both download and upload speeds
+     * are zero or negative, typically indicating that the peer connection is being established
+     * but no data transfer has begun.
+     *
+     * @return {@code true} if the peer is in a handshaking state (no active data transfer),
+     *         {@code false} otherwise
+     */
     @Override
     public boolean isHandshaking() {
         return dlSpeed <= 0 && upSpeed <= 0;
     }
 
+    /**
+     * Returns an empty list of supported peer messages.
+     *
+     * @return An unmodifiable empty list indicating no specific peer messages are supported by this peer.
+     */
     @Override
     public List<PeerMessage> getSupportedMessages() {
         return Collections.emptyList();

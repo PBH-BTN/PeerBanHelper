@@ -30,6 +30,19 @@ public class BtnExceptionRuleParsed {
         this.clientNameRules = parseRule(btnRule.getClientNameRules());
     }
 
+    /**
+     * Parses port rules from a map of port configurations and generates matching rules.
+     *
+     * @param portRules A map where keys represent rule identifiers and values are lists of port numbers to match
+     * @return A map of rule identifiers to lists of port matching rules, where each rule is an AbstractMatcher
+     *
+     * @throws NumberFormatException if the content cannot be parsed as an integer during matching
+     *
+     * This method creates custom AbstractMatcher instances for each port number, which can:
+     * - Match a given content against a specific port number
+     * - Provide metadata about the matched port
+     * - Generate translation components for match results
+     */
     private Map<String, List<Rule>> parsePortRule(Map<String, List<Integer>> portRules) {
         Map<String, List<Rule>> rules = new HashMap<>();
         portRules.forEach((k, v) -> {
@@ -63,6 +76,18 @@ public class BtnExceptionRuleParsed {
         return rules;
     }
 
+    /**
+     * Parses IP rules from a raw map of IP addresses and converts them into a map of matching rules.
+     *
+     * @param raw A map where keys represent rule identifiers and values are lists of IP address strings
+     * @return A map of rule identifiers to lists of IP matching rules, using DualIPv4v6AssociativeTries
+     *
+     * @throws IllegalArgumentException if an invalid IP address is encountered during parsing
+     *
+     * @see IPAddressUtil#getIPAddress(String)
+     * @see DualIPv4v6AssociativeTries
+     * @see BtnRuleIpMatcher
+     */
     public Map<String, List<Rule>> parseIPRule(Map<String, List<String>> raw) {
         Map<String, List<Rule>> rules = new HashMap<>();
         raw.forEach((k, v) -> {
@@ -83,6 +108,14 @@ public class BtnExceptionRuleParsed {
 
         private final String version;
 
+        /**
+         * Constructs a BtnRuleIpMatcher with version and IP matching configuration.
+         *
+         * @param version    The version identifier for the IP rule
+         * @param ruleId     Unique identifier for the IP matching rule
+         * @param ruleName   Human-readable name of the IP rule
+         * @param ruleData   List of dual IPv4/IPv6 associative tries containing IP address matching data
+         */
         public BtnRuleIpMatcher(String version, String ruleId, String ruleName, List<DualIPv4v6AssociativeTries<String>> ruleData) {
             super(ruleId, ruleName, ruleData);
             this.version = version;

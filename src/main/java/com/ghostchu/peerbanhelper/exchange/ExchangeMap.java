@@ -20,6 +20,14 @@ public class ExchangeMap {
         private int priority;
         private String content;
 
+        /**
+         * Compares this DisplayFlag with another DisplayFlag based on their priority.
+         *
+         * @param o the other DisplayFlag to compare with this instance
+         * @return a negative integer, zero, or a positive integer if this DisplayFlag's
+         *         priority is less than, equal to, or greater than the other DisplayFlag's priority
+         * @throws NullPointerException if the provided DisplayFlag is null
+         */
         @Override
         public int compareTo(@NotNull ExchangeMap.DisplayFlag o) {
             return Integer.compare(priority, o.priority);

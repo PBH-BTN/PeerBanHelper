@@ -8,6 +8,12 @@ public final class Pageable {
     private long page;
     private long size;
 
+    /**
+     * Constructs a new Pageable instance with specified page number and page size.
+     *
+     * @param page The page number to be used for pagination (must be a positive long value)
+     * @param size The number of items per page (must be a positive long value)
+     */
     public Pageable(long page, long size) {
         this.page = page;
         this.size = size;

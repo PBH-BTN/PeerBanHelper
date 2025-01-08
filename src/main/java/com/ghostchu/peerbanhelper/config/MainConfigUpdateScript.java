@@ -30,6 +30,15 @@ public class MainConfigUpdateScript {
     }
 
 
+    /**
+     * Updates the vacuum interval configuration to 60 days.
+     *
+     * Sets the configuration value for periodic data vacuum/cleanup interval
+     * to a default of 60 days. This helps manage storage and performance by
+     * periodically cleaning up old or unnecessary data.
+     *
+     * @since 27
+     */
     @UpdateScript(version = 27)
     public void updateVacuum() {
         conf.set("persist.vacuum-interval-days", 60);
@@ -37,6 +46,21 @@ public class MainConfigUpdateScript {
 
 
 
+    /**
+     * Upgrades the SMTP push notification configuration structure.
+     *
+     * This method performs the following configuration updates for push notifications:
+     * - Removes push notification channels that are not enabled
+     * - For SMTP type notifications, updates authentication and encryption settings
+     *   - Sets authentication to true
+     * - Converts SSL flag to encryption method
+     *   - If SSL is true, sets encryption to "STARTTLS"
+     *   - If SSL is false, sets encryption to "NONE"
+     * - Removes the old SSL flag
+     * - Sets sendPartial to true for SMTP notifications
+     *
+     * @see YamlConfiguration
+     */
     @UpdateScript(version = 26)
     public void pushProvidersSMTPStructUpgrade() {
         var pushNotification = conf.getConfigurationSection("push-notification");
@@ -65,6 +89,18 @@ public class MainConfigUpdateScript {
         }
     }
 
+    /**
+     * Cleans up the push notification configuration by removing the "enabled" field
+     * and renaming configuration keys for send key and chat ID.
+     *
+     * This method iterates through each push notification provider configuration and:
+     * - Removes the "enabled" field
+     * - Renames "send-key" to "sendkey"
+     * - Renames "chat-id" to "chatid"
+     *
+     * @UpdateScript(version = 25)
+     * @see YamlConfiguration
+     */
     @UpdateScript(version = 25)
     public void pushProvidersCleanup() {
         var pushNotification = conf.getConfigurationSection("push-notification");

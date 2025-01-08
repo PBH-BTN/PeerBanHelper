@@ -21,10 +21,25 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class ProfileUpdateScript {
     private final YamlConfiguration conf;
 
+    /**
+     * Constructs a new ProfileUpdateScript instance with the specified configuration.
+     *
+     * @param conf The YamlConfiguration object containing the configuration settings
+     *             for peer banning and monitoring
+     */
     public ProfileUpdateScript(YamlConfiguration conf) {
         this.conf = conf;
     }
 
+    /**
+     * Updates the PTR blacklist configuration and Tor exit node URL.
+     *
+     * This method performs two configuration updates:
+     * 1. Sets the PTR blacklist value from the bundled configuration
+     * 2. Replaces the Tor exit node URL with a new source if the current URL matches a specific value
+     *
+     * @param bundled The YAML configuration containing the source configuration values
+     */
     @UpdateScript(version = 24)
     public void ptrBlacklistAndUpdateTorExitNodeList(YamlConfiguration bundled) {
         conf.set("module.ptr-blacklist", bundled.get("module.ptr-blacklist"));
@@ -33,6 +48,15 @@ public class ProfileUpdateScript {
         }
     }
 
+    /**
+     * Corrects a WebUI bug related to IPv6 auto range ban configuration.
+     *
+     * This method checks if the IPv6 auto range ban is incorrectly set to a /32 subnet mask,
+     * which is typically too restrictive. If detected, it automatically adjusts the subnet
+     * mask to a more appropriate /60 prefix length.
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Subnet_mask">Subnet Mask Reference</a>
+     */
     @UpdateScript(version = 22)
     public void workaroundForBadWebUI() {
         if(conf.getInt("module.auto-range-ban.ipv6") == 32) { // WebUI bug

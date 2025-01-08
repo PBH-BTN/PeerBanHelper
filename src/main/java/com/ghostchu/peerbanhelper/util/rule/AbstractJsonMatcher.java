@@ -20,6 +20,17 @@ public abstract class AbstractJsonMatcher extends AbstractMatcher {
         }
     }
 
+    /**
+     * Matches the given content against a predefined JSON condition.
+     *
+     * This method first normalizes null content to an empty string, then checks if a condition exists.
+     * If a condition is present and fails to match, it returns a negative match result with a translation component.
+     * Otherwise, it delegates to the abstract {@code match0} method for further matching logic.
+     *
+     * @param content The input content to match, which may be null
+     * @return A {@code MatchResult} indicating the outcome of the matching process
+     * @throws NullPointerException if the returned match result is null
+     */
     @Override
     public @NotNull MatchResult match(@Nullable String content) {
         if (content == null) {

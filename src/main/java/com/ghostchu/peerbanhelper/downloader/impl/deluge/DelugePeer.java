@@ -23,16 +23,35 @@ public final class DelugePeer implements Peer {
     private double progress;
     private PeerFlag flags;
 
+    /**
+     * Retrieves the raw IP address of the peer.
+     *
+     * @return the IP address of the peer as a string, obtained from the associated {@code peerAddress} object
+     */
     @Override
     public String getRawIp() {
         return peerAddress.getIp();
     }
 
+    /**
+     * Determines whether the peer is currently in a handshaking state.
+     *
+     * A peer is considered to be in a handshaking state when both download and upload speeds
+     * are zero or negative, typically indicating an initial connection phase.
+     *
+     * @return {@code true} if the peer is handshaking (no active data transfer),
+     *         {@code false} otherwise
+     */
     @Override
     public boolean isHandshaking() {
         return downloadSpeed <= 0 && uploadSpeed <= 0;
     }
 
+    /**
+     * Returns an empty list of supported peer messages.
+     *
+     * @return An empty list indicating no specific peer messages are supported by this Deluge peer.
+     */
     @Override
     public List<PeerMessage> getSupportedMessages() {
         return Collections.emptyList();

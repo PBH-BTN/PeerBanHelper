@@ -137,7 +137,14 @@ public class PeerBanHelperServer implements Reloadable {
     @Getter
     private boolean globalPaused = false;
 //    @Autowired
-//    private IPFSBanListShare share;
+/**
+     * Constructs a new PeerBanHelperServer instance and initializes its configuration.
+     *
+     * This default constructor triggers the configuration reload process, ensuring that
+     * the server is set up with the latest configuration settings before further initialization.
+     * 
+     * @see #reloadConfig() The method called to load and apply configuration settings
+     */
 
     public PeerBanHelperServer() {
         reloadConfig();
@@ -173,6 +180,23 @@ public class PeerBanHelperServer implements Reloadable {
         }
     }
 
+    /**
+     * Initializes and starts the Peer Ban Helper server.
+     *
+     * This method performs a series of critical startup operations including:
+     * - Loading downloaders
+     * - Registering ban list invokers and modules
+     * - Setting up IP database
+     * - Configuring HTTP server
+     * - Resetting known downloaders
+     * - Loading ban list from memory
+     * - Scheduling periodic ban list saves
+     *
+     * @throws SQLException if there are issues during database or server initialization
+     *
+     * @see Main
+     * @see BanListInvoker
+     */
     public void start() throws SQLException {
         log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
         loadDownloaders();
@@ -196,6 +220,16 @@ public class PeerBanHelperServer implements Reloadable {
         runTestCode();
     }
 
+    /**
+     * Executes test code only when the application is running in LiveDebug mode.
+     * 
+     * <p>This method is intended for development and debugging purposes. It will only run
+     * when the system property 'pbh.release' is set to 'LiveDebug' (case-insensitive).
+     * If the system property is not set to 'LiveDebug', the method immediately returns
+     * without executing any code.</p>
+     * 
+     * @throws Any exceptions that might occur during test code execution (due to @SneakyThrows)
+     */
     @SneakyThrows
     private void runTestCode() {
         if (!"LiveDebug".equalsIgnoreCase(System.getProperty("pbh.release"))) {
@@ -205,6 +239,16 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
 
+    /**
+     * Sends an alert for snapshot or beta versions of the application.
+     * 
+     * If the current application version is a snapshot or beta release, publishes an informational alert
+     * to notify users about the unstable nature of the version. Otherwise, marks the existing
+     * "unstable-alert" as read.
+     * 
+     * @see AlertLevel
+     * @see TranslationComponent
+     */
     private void sendSnapshotAlert() {
         if (Main.getMeta().isSnapshotOrBeta()) {
             alertManager.publishAlert(false, AlertLevel.INFO, "unstable-alert", new TranslationComponent(Lang.ALERT_SNAPSHOT), new TranslationComponent(Lang.ALERT_SNAPSHOT_DESCRIPTION));
@@ -301,6 +345,15 @@ public class PeerBanHelperServer implements Reloadable {
         }
     }
 
+    /**
+     * Resets the known downloaders by attempting to log in and clear their ban lists.
+     *
+     * This method iterates through all registered downloaders, attempting to log in to each.
+     * For successfully logged-in downloaders, the ban list is cleared completely.
+     *
+     * @throws Exception If any error occurs during the downloader reset process, 
+     *                   an error is logged but not rethrown
+     */
     private void resetKnownDownloaders() {
         try {
             for (Downloader downloader : getDownloaders()) {
@@ -346,6 +399,20 @@ public class PeerBanHelperServer implements Reloadable {
         Main.getReloadManager().unregister(this);
     }
 
+    /**
+     * Loads the ban list from persistent storage into memory and updates downloaders.
+     *
+     * This method performs the following operations:
+     * 1. Checks if ban list persistence is enabled in the configuration
+     * 2. Clears the current in-memory ban list
+     * 3. Reads the ban list from the database
+     * 4. Populates the in-memory ban list with retrieved data
+     * 5. Logs the number of loaded ban entries
+     * 6. Updates all downloaders with the loaded ban list
+     * 7. Attempts to relaunch torrents associated with banned peers
+     *
+     * @throws Exception if there is an error reading or processing the ban list
+     */
     private void loadBanListToMemory() {
         if (!Main.getMainConfig().getBoolean("persist.banlist")) {
             return;
@@ -441,7 +508,34 @@ public class PeerBanHelperServer implements Reloadable {
 
 
     /**
-     * 启动新的一轮封禁序列
+     * Executes a ban wave operation to check and apply peer banning across all downloaders.
+     *
+     * This method performs a comprehensive peer ban management process, including:
+     * - Checking for global pause state
+     * - Collecting active peers from all downloaders
+     * - Running scheduled tasks
+     * - Removing expired bans
+     * - Checking and applying new bans based on configured modules
+     * - Updating downloaders with ban list changes
+     *
+     * The method uses concurrent processing and includes several safety mechanisms:
+     * - Timeout protection for critical sections
+     * - Locking to prevent concurrent ban wave executions
+     * - Error handling and logging
+     *
+     * @throws InterruptedException if the thread is interrupted during execution
+     * @throws RuntimeException if unexpected errors occur during ban wave processing
+     *
+     * Key operations:
+     * - Collects peers from all downloaders
+     * - Checks peers against ban rules
+     * - Applies bans to downloaders
+     * - Logs ban wave statistics
+     *
+     * Performance considerations:
+     * - Uses concurrent collections and executor services
+     * - Implements timeout protection for long-running tasks
+     * - Performs garbage collection after completion
      */
     public void banWave() {
         try {
@@ -600,6 +694,19 @@ public class PeerBanHelperServer implements Reloadable {
         }
     }
 
+    /**
+     * Checks peers for potential banning across multiple torrents using concurrent processing.
+     *
+     * @param provided A map of torrents to their associated peers to be checked for potential bans
+     * @param downloader The downloader associated with the peers being checked
+     * @return A synchronized list of {@code BanDetail} containing the results of ban checks for each peer
+     *
+     * @throws Exception If an unexpected error occurs during the ban checking process
+     *
+     * @implNote This method uses a timeout-protected concurrent execution to evaluate each peer
+     * against ban criteria. It submits individual peer checks to a service and collects the results
+     * in a thread-safe manner.
+     */
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
@@ -641,12 +748,28 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     /**
-     * 如果需要，则更新下载器的封禁列表
-     * 对于 Transmission 等下载器来说，传递 needToRelaunch 会重启对应 Torrent
+     * Updates the ban list for a specific downloader and optionally relaunches torrents.
      *
-     * @param downloader     要操作的下载器
-     * @param updateBanList  是否需要从 BAN_LIST 常量更新封禁列表到下载器
-     * @param needToRelaunch 传递一个集合，包含需要重启的种子；并非每个下载器都遵守此行为；对于 qbittorrent 等 banlist 可被实时应用的下载器来说，不会重启 Torrent
+     * This method handles the process of updating a downloader's ban list, including login verification,
+     * ban list application, and potential torrent relaunching. It provides flexibility for different
+     * downloader implementations with varying ban list and relaunch behaviors.
+     *
+     * @param downloader The downloader to be updated
+     * @param updateBanList Whether to update the ban list from the global BAN_LIST
+     * @param needToRelaunch A collection of torrents that may need to be relaunched (support varies by downloader)
+     * @param added Optional collection of newly added ban metadata
+     * @param removed Optional collection of removed ban metadata
+     * @param applyFullList Flag to indicate whether to apply the full ban list
+     *
+     * @throws Exception If any error occurs during downloader login or ban list update
+     *
+     * @implNote
+     * - Skips update if no ban list update is needed and no torrents require relaunching
+     * - Attempts to log in to the downloader before performing operations
+     * - Sets downloader status based on login result
+     * - Applies ban list to the downloader
+     * - Relaunches specified torrents if supported by the downloader
+     * - Handles and logs any exceptions during the process
      */
     public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (!updateBanList && needToRelaunch.isEmpty()) return;
@@ -692,7 +815,24 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     /**
-     * 注册 Modules
+     * Registers all modules for the Peer Ban Helper application.
+     *
+     * This method initializes and registers various modules that provide different
+     * functionalities such as blacklisting, rule enforcement, monitoring, and
+     * system controllers. It uses the moduleManager to register each module class.
+     *
+     * Registered modules cover a wide range of features including:
+     * - IP and Peer ID blacklisting
+     * - Cheat prevention
+     * - Network monitoring
+     * - Metrics tracking
+     * - Authentication
+     * - Torrent and peer management
+     * - Alerting
+     * - Logging
+     * - Experimental features
+     *
+     * @see ModuleManager
      */
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
@@ -730,6 +870,16 @@ public class PeerBanHelperServer implements Reloadable {
 
     }
 
+    /**
+     * Collects active peers from all registered downloaders concurrently.
+     *
+     * This method uses virtual threads to efficiently gather peers from each downloader,
+     * capturing peers for each torrent in a thread-safe manner. If a downloader fails
+     * to collect peers, the error is logged without interrupting the overall collection process.
+     *
+     * @return A map containing downloaders as keys and their corresponding map of torrents to peer lists
+     * @throws RuntimeException If there are issues with thread execution or peer collection
+     */
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
         Map<Downloader, Map<Torrent, List<Peer>>> peers = new HashMap<>();
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -745,6 +895,25 @@ public class PeerBanHelperServer implements Reloadable {
         return peers;
     }
 
+    /**
+     * Collects peers for a given downloader across all its torrents.
+     *
+     * @param downloader The downloader from which to collect peers
+     * @return A concurrent map of torrents to their associated peers, or an empty map if login fails
+     * 
+     * @throws InterruptedException If peer collection is interrupted
+     * 
+     * This method performs the following key operations:
+     * - Attempts to log in to the downloader
+     * - Handles various login failure scenarios
+     * - Retrieves torrents for the downloader
+     * - Concurrently collects peers for each torrent using a semaphore to limit parallel requests
+     * - Manages potential timeout and error conditions during peer collection
+     * 
+     * @see Downloader
+     * @see Torrent
+     * @see Peer
+     */
     public Map<Torrent, List<Peer>> collectPeers(Downloader downloader) {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         var loginResult = downloader.login();
@@ -882,11 +1051,22 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     /**
-     * 以指定元数据封禁一个特定的对等体
+     * Bans a specific peer with the provided metadata.
      *
-     * @param compareWith 对比 BanList，默认 BAN_LIST 或者 BAN_LIST 的克隆
-     * @param peer        对等体 IP 地址
-     * @param banMetadata 封禁元数据
+     * This method adds a peer to the ban list, records the ban in metrics, 
+     * and triggers associated ban list invokers. It also performs an optional 
+     * reverse DNS lookup for the peer's address based on configuration.
+     *
+     * @param compareWith A collection of peer addresses to check for duplicates, typically the ban list
+     * @param banMetadata Metadata associated with the ban
+     * @param torrentObj The torrent object associated with the banned peer
+     * @param peer The peer to be banned
+     *
+     * @throws NullPointerException if any of the parameters are null
+     *
+     * @see PeerAddress
+     * @see BanMetadata
+     * @see PeerBanEvent
      */
     private void banPeer(@NotNull Collection<PeerAddress> compareWith, @NotNull BanMetadata banMetadata, @NotNull Torrent torrentObj, @NotNull Peer peer) {
         if (compareWith.contains(peer.getPeerAddress())) {
@@ -962,10 +1142,27 @@ public class PeerBanHelperServer implements Reloadable {
         return metadata;
     }
 
+    /**
+     * Retrieves a snapshot of currently live peers.
+     *
+     * @return A map containing live peer addresses as keys and their corresponding metadata as values
+     * @see PeerAddress
+     * @see PeerMetadata
+     */
     public Map<PeerAddress, List<PeerMetadata>> getLivePeersSnapshot() {
         return LIVE_PEERS;
     }
 
+    /**
+     * Sets the global pause state for the peer ban helper server.
+     *
+     * When set to true, this method pauses global operations and adds a visual indicator
+     * to the GUI display flags. When set to false, it removes the pause indicator.
+     *
+     * @param globalPaused A boolean flag indicating whether global operations should be paused
+     *                     - true to pause all operations
+     *                     - false to resume normal operations
+     */
     public void setGlobalPaused(boolean globalPaused) {
         this.globalPaused = globalPaused;
         if (globalPaused) {

@@ -103,6 +103,38 @@ public class BtnNetwork implements Reloadable {
         }
     }
 
+    /**
+     * Configures the BTN (Blacklist Tracker Network) network by fetching and processing configuration from a remote source.
+     *
+     * This method performs the following key operations:
+     * - Sends an HTTP GET request to the configured URL
+     * - Validates the protocol version compatibility
+     * - Resets the current scheduler and abilities
+     * - Loads new network abilities based on the received configuration
+     *
+     * @throws IllegalStateException if protocol version is incompatible or configuration is invalid
+     *
+     * Side effects:
+     * - Updates {@code abilities} map with new network abilities
+     * - Sets {@code configSuccess} flag
+     * - Populates {@code configResult} with configuration status
+     * - Logs configuration errors and exceptions
+     *
+     * Configuration processing includes:
+     * - Checking HTTP response status
+     * - Parsing JSON configuration
+     * - Validating protocol versions
+     * - Loading abilities like:
+     *   - Submit peers
+     *   - Submit bans
+     *   - Submit histories
+     *   - Rules
+     *   - Reconfiguration
+     *   - Exception handling
+     *
+     * @see BtnAbility
+     * @see TranslationComponent
+     */
     public void configBtnNetwork() {
         String response = "<Not Provided>";
         int statusCode = 0;
@@ -170,6 +202,14 @@ public class BtnNetwork implements Reloadable {
         }
     }
 
+    /**
+     * Checks if a configuration retry is needed for the BTN network.
+     *
+     * This method attempts to configure the BTN network if it is enabled and the current configuration
+     * has not been successful. If the network is disabled, it sets the configuration success flag to false.
+     *
+     * @throws Throwable If an unexpected error occurs during the configuration retry process
+     */
     private void checkIfNeedRetryConfig() {
         try {
             if (enabled) {
