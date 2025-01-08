@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class ExchangeMap {
-    public static final Set<DisplayFlag> GUI_DISPLAY_FLAGS = Collections.synchronizedSet(new TreeSet<>());
+    public static volatile Set<DisplayFlag> GUI_DISPLAY_FLAGS = Collections.synchronizedSet(new TreeSet<>());
 
     @Data
     @AllArgsConstructor
