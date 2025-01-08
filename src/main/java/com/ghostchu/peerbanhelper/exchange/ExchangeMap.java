@@ -22,7 +22,8 @@ public class ExchangeMap {
 
         @Override
         public int compareTo(@NotNull ExchangeMap.DisplayFlag o) {
-            return Integer.compare(priority, o.priority);
+            int priorityCompare = Integer.compare(priority, o.priority);
+            return priorityCompare != 0 ? priorityCompare : id.compareTo(o.id);
         }
     }
 }
