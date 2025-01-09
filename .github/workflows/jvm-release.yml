@@ -158,39 +158,23 @@ jobs:
             type=raw,latest-jvm-universal
             type=raw,latest
             type=sha
-      - name: Build and push Docker image (Primary - Popular architecture)
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6.10.0
         with:
           context: .
-          file: ./Dockerfile-Primary
+          file: ./Dockerfile
           push: true
           platforms: |
             linux/amd64
             linux/arm64/v8
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}-jvm-universal
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            GIT_HASH=${{ github.sha }}
-      - name: Build and push Docker image (Secondary - Non popular architecture)
-        uses: docker/build-push-action@v6.10.0
-        with:
-          context: .
-          file: ./Dockerfile-Secondary
-          push: true
-          platforms: |
             linux/riscv64
             linux/ppc64le
-            linux/s390x
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
             GIT_HASH=${{ github.sha }}
-      
-
       # ---------------- ALIYUN ACR --------------------
       - name: Log in to Aliyun ACR
         uses: docker/login-action@v3
@@ -198,7 +182,7 @@ jobs:
           registry: "registry.cn-hangzhou.aliyuncs.com"
           username: ${{ secrets.ALIYUN_ACR_USERNAME }}
           password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
-      - name: Extract metadata (tags, labels) for Aliyun ACR (Primary - Popular architecture)
+      - name: Extract metadata (tags, labels) for Aliyun ACR
         id: meta-acr
         uses: docker/metadata-action@v5.6.1
         with:
@@ -212,29 +196,17 @@ jobs:
             type=raw,latest-jvm-universal
             type=raw,latest
             type=sha
-      - name: Build and push Aliyun ACR (Primary)
+      - name: Build and push Aliyun ACR
         uses: docker/build-push-action@v6.10.0
         with:
           context: .
-          file: ./Dockerfile-Primary
+          file: ./Dockerfile-Release
           push: true
           platforms: |
             linux/amd64
             linux/arm64/v8
-          tags: ${{ steps.meta-acr.outputs.tags }}
-          labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Build and push Aliyun ACR (Secondary - Non popular architecture)
-        uses: docker/build-push-action@v6.10.0
-        with:
-          context: .
-          file: ./Dockerfile-Secondary
-          push: true
-          platforms: |
             linux/riscv64
             linux/ppc64le
-            linux/s390x
           tags: ${{ steps.meta-acr.outputs.tags }}
           labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
           cache-from: type=gha
