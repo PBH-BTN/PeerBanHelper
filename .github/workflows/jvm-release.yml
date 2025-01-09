@@ -182,6 +182,7 @@ jobs:
           platforms: |
             linux/riscv64
             linux/ppc64le
+            linux/s390x
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
           cache-from: type=gha
@@ -233,6 +234,7 @@ jobs:
           platforms: |
             linux/riscv64
             linux/ppc64le
+            linux/s390x
           tags: ${{ steps.meta-acr.outputs.tags }}
           labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
           cache-from: type=gha
