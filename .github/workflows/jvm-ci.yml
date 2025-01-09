@@ -88,3 +88,40 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha
         cache-to: type=gha,mode=max
+  Build_Docker_Standalone:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set Up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set Up Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v5.6.1
+      with:
+        images: ghostchu/peerbanhelper-snapshot
+        tags: |
+          type=ref,event=branch
+          type=ref,event=tag
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=raw,ci-jvm-universal
+          type=raw,ci
+          type=sha
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6.10.0
+      with:
+        context: .
+        file: ./Dockerfile
+        push: false
+        platforms: |
+          linux/amd64
+          linux/arm64/v8
+          linux/riscv64
+          linux/ppc64le
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
