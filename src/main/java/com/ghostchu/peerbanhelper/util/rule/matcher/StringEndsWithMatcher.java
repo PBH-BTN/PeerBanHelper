@@ -45,7 +45,7 @@ public final class StringEndsWithMatcher extends AbstractJsonMatcher {
 
     @Override
     public TranslationComponent matcherName() {
-        return nameComponent;
+        return new TranslationComponent(Lang.MATCH_STRING_ENDS_WITH, rule);
     }
 
     @Override

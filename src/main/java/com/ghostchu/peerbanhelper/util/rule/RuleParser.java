@@ -29,7 +29,7 @@ public final class RuleParser {
                 return new RuleMatchResult(false, rule, result.comment());
             }
             if (result.result() == MatchResultEnum.TRUE) { // 其次，可被覆盖
-                matchResult = new RuleMatchResult(true, rule,result.comment());
+                matchResult = new RuleMatchResult(true, rule, result.comment());
             }
 
         }

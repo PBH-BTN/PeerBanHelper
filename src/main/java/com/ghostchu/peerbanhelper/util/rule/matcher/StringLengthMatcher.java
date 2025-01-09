@@ -41,7 +41,7 @@ public final class StringLengthMatcher extends AbstractJsonMatcher {
 
     @Override
     public TranslationComponent matcherName() {
-        return nameComponent;
+        return new TranslationComponent(Lang.MATCH_STRING_LENGTH, "Min-" + min + ", Max-" + max);
     }
 
     @Override

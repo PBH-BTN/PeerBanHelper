@@ -51,11 +51,20 @@ public final class StringStartsWithMatcher extends AbstractJsonMatcher {
 
     @Override
     public TranslationComponent matcherName() {
-        return nameComponent;
+        return new TranslationComponent(Lang.MATCH_STRING_STARTS_WITH, rule);
     }
 
     @Override
     public String metadata() {
         return rule;
+    }
+
+    @Override
+    public String toString() {
+        return "StringStartsWithMatcher{" +
+                "rule='" + rule + '\'' +
+                ", hit=" + hit +
+                ", miss=" + miss +
+                '}';
     }
 }

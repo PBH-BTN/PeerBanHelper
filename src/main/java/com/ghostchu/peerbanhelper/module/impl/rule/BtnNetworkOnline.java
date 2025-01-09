@@ -336,7 +336,9 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         for (String category : rule.getPortRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getPortRules().get(category), Integer.toString(peer.getPeerAddress().getPort()));
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()), new TranslationComponent(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule().toString()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                        new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule().matcherName()));
             }
         }
         return null;
@@ -346,7 +348,9 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         for (String category : rule.getPortRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getPortRules().get(category), Integer.toString(peer.getPeerAddress().getPort()));
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()), new TranslationComponent(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule().toString()));
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
+                        new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule().matcherName()));
             }
         }
         return null;
@@ -358,7 +362,9 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
             List<Rule> rules = rule.getClientNameRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()), new TranslationComponent(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule().toString()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                        new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule().matcherName()));
             }
         }
         return null;
@@ -370,7 +376,9 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
             List<Rule> rules = rule.getClientNameRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()), new TranslationComponent(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule().toString()));
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
+                        new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule().matcherName()));
             }
         }
         return null;
@@ -382,7 +390,9 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
             List<Rule> rules = rule.getPeerIdRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getPeerId());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()), new TranslationComponent(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule().toString()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                        new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule().matcherName()));
             }
         }
         return null;
@@ -394,7 +404,9 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
             List<Rule> rules = rule.getPeerIdRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getPeerId());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()), new TranslationComponent(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule().toString()));
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
+                        new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule().matcherName()));
             }
         }
         return null;
@@ -411,7 +423,9 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
             var ipMatcher = rule.getIpRules().get(category);
             MatchResult matchResult = ipMatcher.match(pa.toString());
             if (matchResult.result() == MatchResultEnum.TRUE) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, category), new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                        new TranslationComponent(Lang.BTN_BTN_RULE, category, category),
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
             }
         }
         return null;
@@ -427,7 +441,9 @@ public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloa
         for (String category : rule.getIpRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getIpRules().get(category), pa.toString());
             if (matchResult.hit()) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()), new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
+                        new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()),
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
             }
         }
         return null;

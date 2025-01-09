@@ -42,7 +42,7 @@ public final class StringEqualsMatcher extends AbstractJsonMatcher {
 
     @Override
     public TranslationComponent matcherName() {
-        return nameComponent;
+        return new TranslationComponent(Lang.MATCH_STRING_EQUALS, rule);
     }
 
     @Override

@@ -45,7 +45,7 @@ public final class StringContainsMatcher extends AbstractJsonMatcher {
 
     @Override
     public TranslationComponent matcherName() {
-        return nameComponent;
+        return new TranslationComponent(Lang.MATCH_STRING_CONTAINS, rule);
     }
 
     @Override

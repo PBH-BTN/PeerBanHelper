@@ -114,8 +114,8 @@ public class PTRBlacklist extends AbstractRuleFeatureModule implements Reloadabl
             if (ptr.isPresent()) {
                 RuleMatchResult matchResult = RuleParser.matchRule(ptrRules, ptr.get());
                 if (matchResult.hit()) {
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(matchResult.rule().toString()),
-                            new TranslationComponent(Lang.MODULE_PTR_MATCH_PTR_RULE, matchResult.rule().toString()));
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, matchResult.rule().matcherName(),
+                            new TranslationComponent(Lang.MODULE_PTR_MATCH_PTR_RULE, matchResult.rule().matcherName()));
                 }
             }
             return pass();

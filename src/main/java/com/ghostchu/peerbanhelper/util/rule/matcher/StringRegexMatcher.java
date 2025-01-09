@@ -49,7 +49,7 @@ public final class StringRegexMatcher extends AbstractJsonMatcher {
 
     @Override
     public TranslationComponent matcherName() {
-        return nameComponent;
+        return new TranslationComponent(Lang.MATCH_STRING_REGEX, rule);
     }
 
     @Override
