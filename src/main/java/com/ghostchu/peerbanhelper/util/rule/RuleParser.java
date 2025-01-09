@@ -99,7 +99,7 @@ public final class RuleParser {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsBoolean() ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_INTEGER)) : new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_INTEGER));
+                        return primitive.getAsInt() != 0 ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_INTEGER)) : new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_INTEGER));
                     }
 
                     @Override
