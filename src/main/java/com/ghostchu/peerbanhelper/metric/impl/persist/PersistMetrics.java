@@ -114,7 +114,7 @@ public class PersistMetrics implements BasicMetrics {
                         null,
                         new Timestamp(metadata.getBanAt()),
                         new Timestamp(metadata.getUnbanAt()),
-                        address.getIp(),
+                        address.getAddress().toNormalizedString(),
                         address.getPort(),
                         metadata.getPeer().getId(),
                         metadata.getPeer().getClientName(),

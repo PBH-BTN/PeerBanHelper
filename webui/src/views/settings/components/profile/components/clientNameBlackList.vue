@@ -27,7 +27,7 @@
       :rules="[{ validator: nonEmptyValidator }]"
     >
       <a-space direction="vertical">
-        <a-button @click="model.banned_client_name.push({ method: 'STARTS_WITH', content: '' })">
+        <a-button @click="model.banned_client_name.unshift({ method: 'STARTS_WITH', content: '' })">
           <template #icon>
             <icon-plus />
           </template>
@@ -40,7 +40,12 @@
           <template #item="{ item }">
             <a-list-item style="min-width: 250px">
               <a-space>
-                <banRuleListItem v-model="model.banned_client_name[item.index]" />
+                <banRuleListItem
+                  v-model="model.banned_client_name[item.index]"
+                  :placeholder="
+                    t('page.settings.tab.profile.module.clientNameBlackList.placeholder')
+                  "
+                />
                 <br />
               </a-space>
               <template #actions>

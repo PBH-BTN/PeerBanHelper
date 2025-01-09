@@ -11,15 +11,15 @@ RUN apk add --update npm curl git && \
     mv webui/dist src/main/resources/static && \
     mvn -B clean package --file pom.xml -T 1.5C -P thin-sqlite-packaging
 
-FROM docker.io/eclipse-temurin:23-jre-noble
+FROM docker.io/bellsoft/liberica-runtime-container:jre-23-slim-musl
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 EXPOSE 9898
 ENV TZ=UTC
-ENV JAVA_OPTS="-Dpbh.release=docker -Djava.awt.headless=true -Xmx512M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
+ENV JAVA_OPTS="-Dpbh.release=docker -Djava.awt.headless=true -Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/libraries /app/libraries
 COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
-ENTRYPOINT ${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar
+ENTRYPOINT ["sh", "-c", "${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar"]

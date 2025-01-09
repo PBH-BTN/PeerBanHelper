@@ -1,4 +1,4 @@
-config-version: 26
+config-version: 27
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -54,6 +54,13 @@ persist:
   # 您是否想要持久化保存封禁列表？如果不持久化，重启 PBH 将重置封禁列表。
   # Do you want persist the banlist? If you disable it, PBH will reset the banlist when you restarting it.
   banlist: true
+  # 数据库维护操作间隔时间，单位：天
+  # 定时维护数据库将可以提升性能，并释放未使用的空间；过于频繁的维护可能会导致嵌入式设备的闪存磨损
+  # 此操作仅在 PeerBanHelper 启动时才会检查是否需要执行
+  # Database maintenance interval, time unit: days
+  # Regular maintenance will improve performance and release unused space; too frequent maintenance may cause flash wear on embedded devices
+  # This operation only check and execute when PeerBanHelper starting
+  vacuum-interval-days: 60
 # BitTorrent Threat Network 威胁防护网络（测试版）
 # BitTorrent Threat Network (BETA)
 btn:

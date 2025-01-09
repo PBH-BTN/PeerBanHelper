@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.btn.ping;
 
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
-import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
+import com.ghostchu.peerbanhelper.util.InfoHashUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BtnPeerHistory {
+public final class BtnPeerHistory {
     @SerializedName("ip_address")
     private String ipAddress;
     @SerializedName("peer_id")

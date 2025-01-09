@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class TimeoutProtect implements AutoCloseable {
+public final class TimeoutProtect implements AutoCloseable {
     @Getter
     private final ExecutorService service;
     @Getter

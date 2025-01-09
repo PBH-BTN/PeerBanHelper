@@ -20,6 +20,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+@Slf4j
 @Getter
 @Component
 @IgnoreScan
@@ -95,7 +97,10 @@ public class ClientNameBlacklist extends AbstractRuleFeatureModule implements Re
         //return getCache().readCache(this, peer.getClientName(), () -> {
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
         if (matchResult.hit()) {
-            return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(matchResult.rule().toString()), new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME, String.valueOf(matchResult.rule())));
+            return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                    matchResult.rule().matcherName(),
+                    new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME,
+                            matchResult.comment()));
         }
         return pass();
         //}, true);

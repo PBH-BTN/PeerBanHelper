@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BtnBanPing {
+public final class BtnBanPing {
     @SerializedName("populate_time")
     private long populateTime;
     @SerializedName("bans")

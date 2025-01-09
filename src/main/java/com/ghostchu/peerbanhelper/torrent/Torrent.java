@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.torrent;
 
-import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
+import com.ghostchu.peerbanhelper.util.InfoHashUtil;
 
 public interface Torrent {
     /**

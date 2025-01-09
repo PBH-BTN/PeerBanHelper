@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BtnBan {
+public final class BtnBan {
     @SerializedName("btn_ban")
     private boolean btnBan;
     @SerializedName("ban_unique_id")

@@ -59,6 +59,10 @@ export default {
   'page.settings.tab.config.ipDatabase.city': '城市数据库',
   'page.settings.tab.config.ipDatabase.asn': 'ASN 数据库',
 
+  'page.settings.tab.config.network': '网络',
+
+  'page.settings.tab.config.reslolver.useSystem': '使用系统 DNS',
+  'page.settings.tab.config.reslolver.customServer': '自定义 DNS 服务器',
   'page.settings.tab.config.proxy': '代理',
   'page.settings.tab.config.proxy.type': '代理类型',
   'page.settings.tab.config.proxy.type.0': '不使用代理',

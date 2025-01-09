@@ -178,7 +178,8 @@ export const routerOptions: RouteRecordRaw[] = [
         name: 'charts',
         meta: {
           label: 'router.metrics.charts',
-          needLogin: true
+          needLogin: true,
+          disableAutoUpdate: true
         },
         component: () => import('@/views/charts/index.vue')
       },

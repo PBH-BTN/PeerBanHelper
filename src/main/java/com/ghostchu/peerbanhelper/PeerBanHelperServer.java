@@ -23,6 +23,7 @@ import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
 import com.ghostchu.peerbanhelper.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.lab.Experiments;
 import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
@@ -30,16 +31,12 @@ import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.*;
-import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
-import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.time.ExceptedTime;
-import com.ghostchu.peerbanhelper.util.time.InfoHashUtil;
 import com.ghostchu.peerbanhelper.util.time.TimeoutProtect;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -51,16 +48,12 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
-import com.googlecode.aviator.AviatorEvaluator;
-import com.googlecode.aviator.EvalMode;
-import com.googlecode.aviator.Options;
-import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
 import io.javalin.util.JavalinBindException;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -74,7 +67,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.math.MathContext;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -83,8 +75,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
-import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
@@ -93,6 +83,7 @@ public class PeerBanHelperServer implements Reloadable {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
+    @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
     private final List<Downloader> downloaders = new CopyOnWriteArrayList<>();
@@ -139,6 +130,10 @@ public class PeerBanHelperServer implements Reloadable {
     private BanListDao banListDao;
     @Autowired
     private Laboratory laboratory;
+    @Autowired
+    private DNSLookup dnsLookup;
+    @Getter
+    private boolean globalPaused = false;
 //    @Autowired
 //    private IPFSBanListShare share;
 
@@ -170,7 +165,8 @@ public class PeerBanHelperServer implements Reloadable {
 
     private void unbanWhitelistedPeers() {
         for (PeerAddress peerAddress : BAN_LIST.keySet()) {
-            if (ignoreAddresses.elementContains(peerAddress.getAddress())) {
+            var node = ignoreAddresses.elementsContaining(peerAddress.getAddress());
+            if (node != null) {
                 scheduleUnBanPeer(peerAddress);
             }
         }
@@ -180,7 +176,6 @@ public class PeerBanHelperServer implements Reloadable {
         log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
         loadDownloaders();
         registerBanListInvokers();
-        setupScriptEngine();
         registerModules();
         setupIPDB();
         registerHttpServer();
@@ -197,58 +192,17 @@ public class PeerBanHelperServer implements Reloadable {
         Main.getReloadManager().register(this);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
         sendSnapshotAlert();
-
+        runTestCode();
     }
 
-    private void setupScriptEngine() {
-        AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
-        // ASM 性能优先
-        AviatorEvaluator.getInstance().setOption(Options.EVAL_MODE, EvalMode.ASM);
-        // EVAL 性能优先
-        AviatorEvaluator.getInstance().setOption(Options.OPTIMIZE_LEVEL, AviatorEvaluator.EVAL);
-        // 降低浮点计算精度
-        AviatorEvaluator.getInstance().setOption(Options.MATH_CONTEXT, MathContext.DECIMAL32);
-        // 启用变量语法糖
-        AviatorEvaluator.getInstance().setOption(Options.ENABLE_PROPERTY_SYNTAX_SUGAR, true);
-//        // 表达式允许序列化和反序列化
-//        AviatorEvaluator.getInstance().setOption(Options.SERIALIZABLE, true);
-        // 启用反射方法查找
-        AviatorEvaluator.getInstance().setFunctionMissing(JavaMethodReflectionFunctionMissing.getInstance());
-        // 注册反射调用
-        registerFunctions(IPAddressUtil.class);
-        registerFunctions(HTTPUtil.class);
-        registerFunctions(JsonUtil.class);
-        registerFunctions(Lang.class);
-        registerFunctions(StrUtil.class);
-        registerFunctions(PeerBanHelperServer.class);
-        registerFunctions(InfoHashUtil.class);
-        registerFunctions(CommonUtil.class);
-        registerFunctions(ByteUtil.class);
-        registerFunctions(MiscUtil.class);
-        registerFunctions(MsgUtil.class);
-        registerFunctions(SharedObject.class);
-        registerFunctions(UrlEncoderDecoder.class);
-        registerFunctions(URLUtil.class);
-        registerFunctions(WebUtil.class);
-        registerFunctions(RSAUtils.class);
-        registerFunctions(Pageable.class);
-        registerFunctions(TextManager.class);
-        registerFunctions(ExchangeMap.class);
-        registerFunctions(Main.class);
-    }
-
-    private void registerFunctions(Class<?> clazz) {
-        try {
-            AviatorEvaluator.addInstanceFunctions(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
+    @SneakyThrows
+    private void runTestCode() {
+        if (!"LiveDebug".equalsIgnoreCase(System.getProperty("pbh.release"))) {
+            return;
         }
-        try {
-            AviatorEvaluator.addStaticFunctions(StringUtils.capitalize(clazz.getSimpleName()), clazz);
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
-        }
+        // run some junky test code here
     }
+
 
     private void sendSnapshotAlert() {
         if (Main.getMeta().isSnapshotOrBeta()) {
@@ -348,7 +302,7 @@ public class PeerBanHelperServer implements Reloadable {
 
     private void resetKnownDownloaders() {
         try {
-            for (Downloader downloader : downloaders) {
+            for (Downloader downloader : getDownloaders()) {
                 var result = downloader.login();
                 if (result.success()) {
                     downloader.setBanList(Collections.emptyList(), null, null, true);
@@ -400,13 +354,13 @@ public class PeerBanHelperServer implements Reloadable {
             Map<PeerAddress, BanMetadata> data = banListDao.readBanList();
             this.BAN_LIST.putAll(data);
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
-            downloaders.forEach(downloader -> {
+            getDownloaders().forEach(downloader -> {
                 if (downloader.login().success()) {
                     downloader.setBanList(BAN_LIST.keySet(), null, null, true);
                 }
             });
             Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
-            downloaders.forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
+            getDownloaders().forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
         } catch (Exception e) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST), e);
         }
@@ -493,6 +447,16 @@ public class PeerBanHelperServer implements Reloadable {
             if (!banWaveLock.tryLock(3, TimeUnit.SECONDS)) {
                 return;
             }
+            if (isGlobalPaused()) {
+                if (needReApplyBanList.get()) {
+                    getDownloaders().forEach(downloader -> {
+                        if (downloader.login().success()) {
+                            downloader.setBanList(BAN_LIST.keySet(), null, null, true);
+                        }
+                    });
+                }
+                return;
+            }
             banWaveWatchDog.setLastOperation("Ban wave - start");
             long startTimer = System.currentTimeMillis();
             // 重置所有下载器状态为健康，这样后面失败就会对其降级
@@ -502,7 +466,7 @@ public class PeerBanHelperServer implements Reloadable {
             Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
             // 执行计划任务
             banWaveWatchDog.setLastOperation("Run scheduled tasks");
-            downloaders.forEach(Downloader::runScheduleTasks);
+            getDownloaders().forEach(Downloader::runScheduleTasks);
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
@@ -520,7 +484,14 @@ public class PeerBanHelperServer implements Reloadable {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_CHECK_BANS));
             })) {
-                downloaders.forEach(downloader -> protect.getService().submit(() -> downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader))));
+                getDownloaders().forEach(downloader -> protect.getService().submit(() -> {
+                    try {
+                        downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader));
+                    } catch (Exception e) {
+                        log.error("Unexpected fatal error occurred while checking bans!", e);
+                        throw e;
+                    }
+                }));
             }
 
 
@@ -571,7 +542,15 @@ public class PeerBanHelperServer implements Reloadable {
                                         relaunch.add(detail.torrent());
                                         banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
                                         if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
-                                            log.info(tlUI(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), tl(DEF_LOCALE, detail.result().reason())));
+                                            log.info(tlUI(Lang.BAN_PEER,
+                                                    detail.peer().getPeerAddress(),
+                                                    detail.peer().getPeerId(),
+                                                    detail.peer().getClientName(),
+                                                    detail.peer().getProgress(),
+                                                    detail.peer().getUploaded(),
+                                                    detail.peer().getDownloaded(),
+                                                    detail.torrent().getName(),
+                                                    tlUI(detail.result().reason())));
                                         }
                                     }
                                 } catch (Exception e) {
@@ -592,13 +571,13 @@ public class PeerBanHelperServer implements Reloadable {
                 log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST));
             })) {
                 if (!needReApplyBanList.get()) {
-                    downloaders.forEach(downloader -> protect.getService().submit(() ->
+                    getDownloaders().forEach(downloader -> protect.getService().submit(() ->
                             updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
                                     needRelaunched.getOrDefault(downloader, Collections.emptyList()),
                                     bannedPeers, unbannedPeers, false)));
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
-                    downloaders.forEach(downloader -> protect.getService().submit(() -> {
+                    getDownloaders().forEach(downloader -> protect.getService().submit(() -> {
                         List<Torrent> torrents = downloader.getTorrents();
                         var list = BAN_LIST.values().stream().map(meta -> meta.getTorrent().getId()).toList();
                         torrents.removeIf(torrent -> !list.contains(torrent.getId()));
@@ -608,7 +587,7 @@ public class PeerBanHelperServer implements Reloadable {
                     needReApplyBanList.set(false);
                 }
             }
-            if (!hideFinishLogs && !downloaders.isEmpty()) {
+            if (!hideFinishLogs && !getDownloaders().isEmpty()) {
                 long downloadersCount = peers.keySet().size();
                 long torrentsCount = peers.values().stream().mapToLong(e -> e.keySet().size()).sum();
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
@@ -635,8 +614,14 @@ public class PeerBanHelperServer implements Reloadable {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
                     protect.getService().submit(() -> {
-                        CheckResult checkResult = checkBan(torrent, peer, downloader);
-                        details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
+                        try {
+                            CheckResult checkResult = checkBan(torrent, peer, downloader);
+                            details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
+
+                        } catch (Exception e) {
+                            log.error("Unexpected error occurred while checking bans", e);
+                            throw e;
+                        }
                     });
                 }
             }
@@ -675,8 +660,10 @@ public class PeerBanHelperServer implements Reloadable {
         try {
             var loginResult = downloader.login();
             if (!loginResult.success()) {
-                log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
-                downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
+                if (loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED) {
+                    log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
+                    downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
+                }
                 return;
             } else {
                 downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.getMessage());
@@ -727,6 +714,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(BtnNetworkOnline.class);
         moduleManager.register(BlockListController.class);
         moduleManager.register(IPBlackRuleList.class);
+        moduleManager.register(PTRBlacklist.class);
         moduleManager.register(PBHMetricsController.class);
         moduleManager.register(PBHBanController.class);
         moduleManager.register(PBHMetadataController.class);
@@ -746,12 +734,13 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHPushController.class);
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
+
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
         Map<Downloader, Map<Torrent, List<Peer>>> peers = new HashMap<>();
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
-            downloaders.forEach(downloader -> service.submit(() -> {
+            getDownloaders().forEach(downloader -> service.submit(() -> {
                 try {
                     Map<Torrent, List<Peer>> p = collectPeers(downloader);
                     peers.put(downloader, p);
@@ -767,10 +756,12 @@ public class PeerBanHelperServer implements Reloadable {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         var loginResult = downloader.login();
         if (!loginResult.success()) {
-            log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
-            downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
-            if (loginResult.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS || loginResult.getStatus() == DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS) {
-                downloader.setLastStatus(DownloaderLastStatus.NEED_TAKE_ACTION, loginResult.getMessage());
+            if (loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED) {
+                log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
+                downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
+                if (loginResult.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS || loginResult.getStatus() == DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS) {
+                    downloader.setLastStatus(DownloaderLastStatus.NEED_TAKE_ACTION, loginResult.getMessage());
+                }
             }
             return Collections.emptyMap();
         }
@@ -832,7 +823,8 @@ public class PeerBanHelperServer implements Reloadable {
         if (peer.getPeerAddress().getAddress().isAnyLocal()) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-local-address"), new TranslationComponent("general-reason-skip-local-peers"));
         }
-        if (ignoreAddresses.elementContains(peer.getPeerAddress().getAddress())) {
+        var node = ignoreAddresses.elementsContaining(peer.getPeerAddress().getAddress());
+        if (node != null) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
         }
         try {
@@ -916,9 +908,19 @@ public class PeerBanHelperServer implements Reloadable {
         banMetadata.setReverseLookup("N/A");
         if (Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
             executor.submit(() -> {
-                String hostName = peer.getPeerAddress().getAddress().toInetAddress().getHostName();
-                if (!peer.getPeerAddress().getIp().equals(hostName)) {
-                    banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toInetAddress().getHostName());
+                if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
+                    dnsLookup.ptr(peer.getPeerAddress().getAddress().toReverseDNSLookupString()).thenAccept(hostName -> {
+                        if (hostName.isPresent()) {
+                            if (!peer.getPeerAddress().getIp().equals(hostName.get())) {
+                                banMetadata.setReverseLookup(hostName.get());
+                            }
+                        }
+                    });
+                } else {
+                    String hostName = peer.getPeerAddress().getAddress().toInetAddress().getHostName();
+                    if (!peer.getPeerAddress().getIp().equals(hostName)) {
+                        banMetadata.setReverseLookup(peer.getPeerAddress().getAddress().toInetAddress().getHostName());
+                    }
                 }
             });
         }
@@ -933,7 +935,9 @@ public class PeerBanHelperServer implements Reloadable {
                 downloader,
                 new BanDetail(torrent,
                         peer,
-                        new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE), new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON))
+                        new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                                new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE),
+                                new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON))
                         , banDuration)
         )));
     }
@@ -972,6 +976,14 @@ public class PeerBanHelperServer implements Reloadable {
         return LIVE_PEERS;
     }
 
+    public void setGlobalPaused(boolean globalPaused) {
+        this.globalPaused = globalPaused;
+        if (globalPaused) {
+            ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("global-paused", 20, tlUI(Lang.STATUS_BAR_GLOBAL_PAUSED)));
+        } else {
+            ExchangeMap.GUI_DISPLAY_FLAGS.removeIf(f -> "global-paused".equals(f.getId()));
+        }
+    }
 
     /**
      * Use @Autowired if available

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class BCDeviceTokenResult {
+public final class BCDeviceTokenResult {
 
     @SerializedName("device_token")
     private String deviceToken;

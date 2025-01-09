@@ -270,7 +270,7 @@ public class IPDB implements AutoCloseable {
 
     private void updateMMDB(String databaseName, File target) throws IOException {
         log.info(tlUI(Lang.IPDB_UPDATING, databaseName));
-        IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/", databaseName);
+        IPDBDownloadSource mirror1 = new IPDBDownloadSource("https://github.com/PBH-BTN/GeoLite.mmdb/releases/latest/download/", databaseName, true);
         //IPDBDownloadSource mirror2 = new IPDBDownloadSource("https://ghp.ci/https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/", databaseName);
         IPDBDownloadSource mirror3 = new IPDBDownloadSource("https://pbh-static.paulzzh.com/ipdb/", databaseName, true);
         IPDBDownloadSource mirror4 = new IPDBDownloadSource("https://pbh-static.ghostchu.com/ipdb/", databaseName, true);

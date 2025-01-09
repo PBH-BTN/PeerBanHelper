@@ -8,7 +8,6 @@
       field="server.address"
       required
       validate-trigger="focus"
-      :rules="[{ type: 'ip', required: true }]"
     >
       <a-input v-model="model.address" style="width: 100px" />
     </a-form-item>

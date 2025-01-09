@@ -30,6 +30,13 @@ public class MainConfigUpdateScript {
     }
 
 
+    @UpdateScript(version = 27)
+    public void updateVacuum() {
+        conf.set("persist.vacuum-interval-days", 60);
+    }
+
+
+
     @UpdateScript(version = 26)
     public void pushProvidersSMTPStructUpgrade() {
         var pushNotification = conf.getConfigurationSection("push-notification");
@@ -70,6 +77,11 @@ public class MainConfigUpdateScript {
             if (sendKey != null) {
                 single.set("sendkey", sendKey);
                 single.set("send-key", null);
+            }
+            var chatId = single.get("chat-id");
+            if (chatId != null) {
+                single.set("chatid", chatId);
+                single.set("chat-id", null);
             }
             pushNotification.set(key, single);
         }

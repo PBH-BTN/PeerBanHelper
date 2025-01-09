@@ -413,13 +413,15 @@
       </a-descriptions-item>
       <a-descriptions-item v-if="btnEnable?.data" :label="t('page.settings.tab.info.btn.status')">
         <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
-        <a-typography-text v-else :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
-          {{
-            btnStatus?.data.configSuccess
-              ? t('page.settings.tab.info.btn.status.success')
-              : t('page.settings.tab.info.btn.status.fail')
-          }}
-        </a-typography-text>
+        <a-tooltip v-else :content="btnStatus?.data.configResult">
+          <a-typography-text :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
+            {{
+              btnStatus?.data.configSuccess
+                ? t('page.settings.tab.info.btn.status.success')
+                : t('page.settings.tab.info.btn.status.fail')
+            }}
+          </a-typography-text>
+        </a-tooltip>
       </a-descriptions-item>
       <a-descriptions-item
         v-if="btnEnable?.data"

@@ -79,6 +79,7 @@ import { useRequest } from 'vue-request'
 import ClientStatusCard from './clientStatusCard.vue'
 import EditDownloaderModal from './editDownloaderModal.vue'
 import torrentList from './torrentList.vue'
+
 const { t } = useI18n()
 const endpointState = useEndpointStore()
 const data = ref<Downloader[]>()

@@ -23,7 +23,7 @@ public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule im
 
     public boolean isHandShaking(Peer peer) {
         // 跳过此 Peer，速度都是0，可能是没有完成握手
-        return peer.getDownloadSpeed() <= 0 && peer.getUploadSpeed() <= 0;
+        return peer.isHandshaking();
     }
 
     /**

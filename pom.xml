@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.2.2</version>
+    <version>7.3.0</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -219,7 +219,7 @@
                 </plugins>
             </build>
             <properties>
-                <install4j.home>C:\Program Files\install4j10</install4j.home>
+                <install4j.home>C:\Program Files\install4j11</install4j.home>
             </properties>
         </profile>
     </profiles>
@@ -276,7 +276,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.3.1-jre</version>
+            <version>33.4.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -313,13 +313,13 @@
         <dependency>
             <groupId>com.github.mizosoft.methanol</groupId>
             <artifactId>methanol</artifactId>
-            <version>1.7.0</version>
+            <version>1.8.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.12</version>
+            <version>1.5.16</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -330,7 +330,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.11.3</version>
+            <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -341,7 +341,7 @@
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
-            <version>6.3.0</version>
+            <version>6.4.0</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jetty-server</artifactId>
@@ -358,13 +358,13 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20240303</version>
+            <version>20250107</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.2.0</version>
+            <version>6.2.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
         <dependency>
@@ -509,6 +509,11 @@
             <groupId>com.github.multiformats</groupId>
             <artifactId>java-multiaddr</artifactId>
             <version>v1.4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>3.6.2</version>
         </dependency>
     </dependencies>
 </project>

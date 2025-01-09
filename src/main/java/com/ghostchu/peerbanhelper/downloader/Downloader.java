@@ -53,6 +53,20 @@ public interface Downloader extends AutoCloseable {
     DownloaderLoginResult login();
 
     /**
+     * Check if the downloader is in paused state
+     *
+     * @return true if paused, false otherwise
+     */
+    boolean isPaused();
+
+    /**
+     * Set the paused state of the downloader
+     *
+     * @param paused true to pause, false to resume
+     */
+    void setPaused(boolean paused);
+
+    /**
      * 一个执行调度任务的窗口，该方法总是在 banWave 中调用
      */
     default void runScheduleTasks() {

@@ -67,6 +67,11 @@ public final class TRPeer implements Peer {
     }
 
     @Override
+    public boolean isHandshaking() {
+        return getDownloadSpeed() <= 0 && getUploadSpeed() <= 0;
+    }
+
+    @Override
     public List<PeerMessage> getSupportedMessages() {
         return Collections.emptyList();
     }

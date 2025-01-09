@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServerChanPushProvider extends AbstractPushProvider {
+public final class ServerChanPushProvider extends AbstractPushProvider {
 
     private final Config config;
     private final String name;

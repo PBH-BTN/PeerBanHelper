@@ -1,5 +1,5 @@
 package com.ghostchu.peerbanhelper.web.exception;
 
-public class NotLoggedInException extends Exception {
+public final class NotLoggedInException extends Exception {
 
 }

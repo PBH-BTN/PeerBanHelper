@@ -14,20 +14,7 @@
       <a-form-item field="showThreadName" :label="t('page.settings.tab.info.log.showThread')">
         <a-switch v-model="showThreadName" />
       </a-form-item>
-      <a-form-item field="hideThreads" :label="t('page.settings.tab.info.log.hideThreads')">
-        <a-select
-          v-model="options.hideThreads"
-          :placeholder="t('page.settings.tab.info.log.hideThreads.placeholder')"
-          :style="{ width: '15rem' }"
-          multiple
-          :max-tag-count="1"
-          allow-create
-          scrollbar
-          :options="threadList"
-          :virtual-list-props="{ height: 200, fixedSize: true }"
-        />
-      </a-form-item>
-      <a-form-item field="hideThreads" :label="t('page.settings.tab.info.log.showLevel')">
+      <a-form-item field="showLevel" :label="t('page.settings.tab.info.log.showLevel')">
         <a-space>
           <a-tag
             v-for="level of Object.keys(options.showLevel) as LogLevel[]"
@@ -40,6 +27,18 @@
           >
         </a-space>
       </a-form-item>
+      <a-form-item field="hideThreads" :label="t('page.settings.tab.info.log.hideThreads')">
+        <a-select
+          v-model="options.hideThreads"
+          :placeholder="t('page.settings.tab.info.log.hideThreads.placeholder')"
+          :style="{ width: '15rem' }"
+          multiple
+          :max-tag-count="1"
+          allow-create
+          scrollbar
+          :options="threadList"
+        />
+      </a-form-item>
     </a-form>
     <a-list
       ref="logList"
@@ -48,8 +47,7 @@
       scrollbar
       :virtual-list-props="{
         height: 650,
-        buffer: 50,
-        fixedSize: true
+        buffer: 50
       }"
       :data="list"
     >
@@ -109,25 +107,26 @@ const options = reactive({
   }
 })
 
-const threadList = ref<SelectOptionData[]>([])
-const logBuffer = reactive([] as Log[])
+const threadList = computed((): SelectOptionData[] =>
+  Array.from(modules.value).map((it) => ({
+    value: it,
+    tagProps: { color: getThreadColor(it) }
+  }))
+)
+const modules = ref(new Set<string>())
+const logBuffer = ref([] as Log[])
 useRequest(GetHistoryLogs, {
   onSuccess: (data) => {
-    logBuffer.splice(0, logBuffer.length)
-    logBuffer.push(...data.data)
+    logBuffer.value.splice(0, logBuffer.value.length)
+    logBuffer.value.push(...data.data)
     loading.value = false
     // calculate modules
-    const modules = new Set<string>()
-    data.data.forEach((log) => modules.add(log.thread))
-    threadList.value = Array.from(modules).map((it) => ({
-      value: it,
-      tagProps: { color: getThreadColor(it) }
-    }))
+    data.data.forEach((log) => modules.value.add(log.thread))
   }
 })
 
 const list = computed(() =>
-  logBuffer
+  logBuffer.value
     .filter((log) => options.showLevel[log.level])
     .filter((log) => !options.hideThreads.includes(log.thread))
 )
@@ -139,13 +138,14 @@ const changeAutoRefresh = async (enable: boolean | string | number) => {
     if (enable) {
       console.log('open auto refresh')
       return ws.open(
-        logBuffer.length > 0 ? logBuffer[logBuffer.length - 1].offset : 0,
+        logBuffer.value.length > 0 ? logBuffer.value[logBuffer.value.length - 1].offset : 0,
         (newLog) => {
-          logBuffer.push(newLog)
-          console.log('scroll to', logBuffer.length - 1)
+          logBuffer.value.push(newLog)
+          modules.value.add(newLog.thread)
+          console.log('scroll to', logBuffer.value.length - 1)
           if (options.autoScroll) {
             logList.value?.scrollIntoView({
-              index: logBuffer.length - 1,
+              index: logBuffer.value.length - 1,
               align: 'bottom'
             } as ScrollIntoViewOptions)
           }

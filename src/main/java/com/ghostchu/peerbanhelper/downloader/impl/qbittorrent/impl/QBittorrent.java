@@ -15,6 +15,17 @@ public class QBittorrent extends AbstractQbittorrent {
         super(name, config, alertManager);
     }
 
+    @Override
+    public boolean isPaused() {
+        return config.isPaused();
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        super.setPaused(paused);
+        config.setPaused(paused);
+    }
+
     public static QBittorrent loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
         QBittorrentConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentConfigImpl.class);
         return new QBittorrent(name, config, alertManager);

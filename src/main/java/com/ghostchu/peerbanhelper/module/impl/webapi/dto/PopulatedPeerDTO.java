@@ -13,4 +13,5 @@ import lombok.Data;
 public final class PopulatedPeerDTO {
     private PeerWrapper peer;
     private IPGeoData geo;
+    private String ptrRecord;
 }

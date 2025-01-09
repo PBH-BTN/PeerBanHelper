@@ -41,6 +41,19 @@ public class QBittorrentEE extends AbstractQbittorrent {
         }
     }
 
+    @Override
+    public boolean isPaused() {
+        return config.isPaused();
+    }
+
+    @Override
+    public synchronized void setPaused(boolean paused) {
+        super.setPaused(paused);
+        if (config != null) {
+            config.setPaused(paused);
+        }
+    }
+
     public static QBittorrentEE loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
         QBittorrentEEConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentEEConfigImpl.class);
         return new QBittorrentEE(name, config, alertManager);

@@ -1,14 +1,19 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.lab.Experiments;
+import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -24,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +43,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 public class PBHDownloaderController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private Laboratory laboratory;
+    @Autowired
+    private DNSLookup dnsLookup;
 
     @Override
     public boolean isConfigurable() {
@@ -71,6 +82,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         if (name.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
+        boolean paused = draftDownloader.has("paused") && draftDownloader.get("paused").getAsBoolean();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
@@ -78,6 +90,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
             return;
         }
+        downloader.setPaused(paused);
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.CREATED);
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_CREATED), null));
@@ -100,6 +113,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         if (name.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
+        boolean paused = draftDownloader.has("paused") && draftDownloader.get("paused").getAsBoolean();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
@@ -107,6 +121,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATE_FAILURE), null));
             return;
         }
+        downloader.setPaused(paused);
         // 可能重命名了？
         getServer().getDownloaders().stream()
                 .filter(d -> d.getName().equals(downloaderName))
@@ -132,6 +147,7 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         if (name.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
+        boolean paused = draftDownloader.has("paused") && draftDownloader.get("paused").getAsBoolean();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
 //        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
 //            ctx.status(HttpStatus.CONFLICT);
@@ -144,14 +160,19 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
             return;
         }
+        downloader.setPaused(paused);
         try {
-            var testResult = downloader.login();
-            if (testResult.success()) {
-                ctx.json(new StdResp(testResult.success(), tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));
+            if (!paused) {
+                var testResult = downloader.login();
+                if (testResult.success()) {
+                    ctx.json(new StdResp(testResult.success(), tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));
+                } else {
+                    ctx.json(new StdResp(testResult.success(), tl(locale(ctx), testResult.getMessage()), null));
+                }
+                downloader.close();
             } else {
-                ctx.json(new StdResp(testResult.success(), tl(locale(ctx), testResult.getMessage()), null));
+                ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_TEST_BYPASS_PAUSED), null));
             }
-            downloader.close();
         } catch (Exception e) {
             log.error("Validate downloader failed", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -186,24 +207,37 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             return;
         }
         Downloader downloader = selected.get();
+        boolean ptr = Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup");
         List<PopulatedPeerDTO> peerWrappers = getServer().getLivePeersSnapshot().values()
                 .stream()
-                .flatMap(Collection::stream)
+                .flatMap(Collection::parallelStream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .filter(p -> p.getTorrent().getId().equals(torrentId))
                 .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
-                .map(this::populatePeerDTO)
+                .map(dat -> populatePeerDTO(dat, ptr))
                 .toList();
         ctx.json(new StdResp(true, null, peerWrappers));
     }
 
-    private PopulatedPeerDTO populatePeerDTO(PeerMetadata p) {
-        PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null);
+    private PopulatedPeerDTO populatePeerDTO(PeerMetadata p, boolean resolvePTR) {
+        PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null, null);
         PeerBanHelperServer.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
         IPGeoData geoData = response.geoData().get();
         if (geoData != null) {
             dto.setGeo(geoData);
         }
+        if (dto.getPtrRecord() == null && resolvePTR) {
+            if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
+                dto.setPtrRecord(dnsLookup.ptr(IPAddressUtil.getIPAddress(p.getPeer().getAddress().getIp()).toReverseDNSLookupString()).join().orElse(null));
+            } else {
+                try {
+                    dto.setPtrRecord(InetAddress.getByName(p.getPeer().getAddress().getIp()).getCanonicalHostName());
+                } catch (UnknownHostException e) {
+                    dto.setPtrRecord(null);
+                }
+            }
+        }
+
         return dto;
     }
 
@@ -260,12 +294,12 @@ public class PBHDownloaderController extends AbstractFeatureModule {
                 .count();
 
         JsonObject config = downloader.saveDownloaderJson();
-        ctx.json(new StdResp(true, null, new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config)));
+        ctx.json(new StdResp(true, null, new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config, downloader.isPaused())));
     }
 
     private void handleDownloaderList(@NotNull Context ctx) {
         List<DownloaderWrapper> downloaders = getServer().getDownloaders()
-                .stream().map(d -> new DownloaderWrapper(d.getName(), d.getEndpoint(), d.getType().toLowerCase()))
+                .stream().map(d -> new DownloaderWrapper(d.getName(), d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))
                 .toList();
         ctx.json(new StdResp(true, null, downloaders));
     }
@@ -281,10 +315,10 @@ public class PBHDownloaderController extends AbstractFeatureModule {
 
     record DownloaderStatus(DownloaderLastStatus lastStatus, String lastStatusMessage,
                             long activeTorrents,
-                            long activePeers, JsonObject config) {
+                            long activePeers, JsonObject config, boolean paused) {
 
     }
 
-    record DownloaderWrapper(String name, String endpoint, String type) {
+    record DownloaderWrapper(String name, String endpoint, String type, boolean paused) {
     }
 }

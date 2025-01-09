@@ -2,13 +2,29 @@
   <a-space direction="vertical" fill>
     <a-space class="list-header" wrap>
       <a-typography-text>{{ t('page.banlist.banlist.description') }}</a-typography-text>
-      <a-input-search
-        :style="{ width: '250px' }"
-        :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
-        allow-clear
-        search-button
-        @search="handleSearch"
-      />
+      <a-space class="list-header-right-group" wrap>
+        <AsyncMethod
+          v-slot="{ run: unban, loading: unbaning }"
+          once
+          :async-fn="() => handleUnban('*')"
+        >
+          <a-button
+            type="secondary"
+            :disabled="(list?.length ?? 0) === 0"
+            :loading="unbaning"
+            @click="unban"
+          >
+            {{ t('page.banlist.banlist.listItem.unbanall') }}
+          </a-button>
+        </AsyncMethod>
+        <a-input-search
+          :style="{ width: '250px' }"
+          :placeholder="t('page.banlist.banlist.searchPlaceHolder')"
+          allow-clear
+          search-button
+          @search="handleSearch"
+        />
+      </a-space>
     </a-space>
     <a-list
       ref="banlist"
@@ -35,9 +51,9 @@
         />
         <a-empty v-else-if="list.length === 0" :style="{ height: `${virtualListHeight}px` }" />
         <div v-if="loadingMore" style="position: absolute; transform: translateY(-50%)">
-          <a-typography-text v-if="bottom">{{
-            t('page.banlist.banlist.bottomReached')
-          }}</a-typography-text>
+          <a-typography-text v-if="bottom"
+            >{{ t('page.banlist.banlist.bottomReached') }}
+          </a-typography-text>
           <a-spin v-else />
         </div>
       </template>
@@ -47,9 +63,11 @@
 
 <script setup lang="ts">
 import type { BanList } from '@/api/model/banlist'
-import { getBanList } from '@/service/banList'
+import AsyncMethod from '@/components/asyncMethod.vue'
+import { getBanList, unbanIP } from '@/service/banList'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
+import { Message } from '@arco-design/web-vue'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { useWindowSize } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -64,13 +82,14 @@ const bottom = ref(false)
 const limit = ref(5)
 const step = 5
 const loadingMore = ref(false)
+const searchString = ref('')
 const { t } = useI18n()
 
-let firstGet = true
+const firstGet = ref(true)
 async function getMoreBanList(): Promise<BanList[]> {
-  if (firstGet || !data.value) {
-    firstGet = false
-    return (await getBanList(step)).data
+  if (firstGet.value || !data.value) {
+    firstGet.value = false
+    return (await getBanList(step, searchString.value)).data
   }
   if (data.value.length > limit.value - step) {
     // refresh the new data
@@ -79,7 +98,7 @@ async function getMoreBanList(): Promise<BanList[]> {
     // load more data until the limit or get the same data with the top one
     while (newData.length < limit.value && !match) {
       const moreData = await (
-        await getBanList(step, newData[newData.length - 1]?.banMetadata.banAt)
+        await getBanList(step, searchString.value, newData[newData.length - 1]?.banMetadata.banAt)
       ).data
       for (const item of moreData) {
         if (item.banMetadata.randomId !== data.value[0].banMetadata.randomId) {
@@ -107,14 +126,6 @@ const { data, refresh, run, loading } = useRequest(
   },
   [useAutoUpdatePlugin]
 )
-const handleSearch = (value: string) => {
-  if (value) {
-    const index = data.value?.map((item) => item.address).findIndex((item) => item.includes(value))
-    if (index !== -1) {
-      banlist.value?.scrollIntoView({ index: index, align: 'auto' })
-    }
-  }
-}
 
 const loadMore = async () => {
   if (!data.value) return
@@ -128,6 +139,7 @@ const loadMore = async () => {
       const moreData = (
         await getBanList(
           step,
+          searchString.value,
           (newData[newData.length - 1] || data.value[data.value.length - 1])?.banMetadata.banAt
         )
       ).data
@@ -139,6 +151,24 @@ const loadMore = async () => {
     data.value = data.value.concat(newData)
   }
   loadingMore.value = false
+}
+
+const handleUnban = async (address: string) => {
+  const { count } = await (await unbanIP(address)).data
+  if (!count || count < 1) {
+    Message.error({
+      content: t('page.banlist.banlist.listItem.unbanUnexcepted'),
+      resetOnHover: true
+    })
+    return false
+  } else {
+    Message.success({
+      content: t('page.banlist.banlist.listItem.unbanSuccess', { count: count }),
+      resetOnHover: true
+    })
+    refresh()
+    return true
+  }
 }
 
 watch(
@@ -163,6 +193,13 @@ const virtualListMaxHeight = useResponsiveState(
   800
 )
 const virtualListHeight = computed(() => Math.min(virtualListMaxHeight.value, height.value - 200))
+
+const handleSearch = (v: string) => {
+  if (searchString.value === v) return
+  searchString.value = v
+  firstGet.value = true
+  refresh()
+}
 </script>
 
 <style scoped lang="less">

@@ -96,7 +96,7 @@ public class PeerIdBlacklist extends AbstractRuleFeatureModule implements Reload
         //return getCache().readCache(this, peer.getPeerId(), () -> {
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getPeerId());
         if (matchResult.hit()) {
-            return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(matchResult.rule().toString()), new TranslationComponent(Lang.MODULE_PID_MATCH_PEER_ID, matchResult.rule().toString()));
+            return new CheckResult(getClass(), PeerAction.BAN, banDuration, matchResult.rule().matcherName(), new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.comment()));
         }
         return pass();
         //}, true);

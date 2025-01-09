@@ -1,5 +1,7 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.matcher.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,10 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
-public class RuleParser {
+public final class RuleParser {
     public static List<Rule> parse(List<String> string) {
         return string.stream()
                 .map(JsonParser::parseString)
@@ -21,15 +22,16 @@ public class RuleParser {
     }
 
     public static RuleMatchResult matchRule(List<Rule> rules, String content) {
-        RuleMatchResult matchResult = new RuleMatchResult(false, null);
+        RuleMatchResult matchResult = new RuleMatchResult(false, null, null);
         for (Rule rule : rules) {
             MatchResult result = rule.match(content);
-            if (result == MatchResult.FALSE) { // 规则的优先级最高
-                return new RuleMatchResult(false, rule);
+            if (result.result() == MatchResultEnum.FALSE) { // 规则的优先级最高
+                return new RuleMatchResult(false, rule, result.comment());
             }
-            if (result == MatchResult.TRUE) { // 其次，可被覆盖
-                matchResult = new RuleMatchResult(true, rule);
+            if (result.result() == MatchResultEnum.TRUE) { // 其次，可被覆盖
+                matchResult = new RuleMatchResult(true, rule, result.comment());
             }
+
         }
 
         return matchResult;
@@ -41,7 +43,7 @@ public class RuleParser {
             return new Rule() {
                 @Override
                 public @NotNull MatchResult match(@NotNull String content) {
-                    return MatchResult.TRUE;
+                    return new MatchResult(MatchResultEnum.TRUE, null);
                 }
 
                 @Override
@@ -59,7 +61,7 @@ public class RuleParser {
             return new Rule() {
                 @Override
                 public @NotNull MatchResult match(@NotNull String content) {
-                    return MatchResult.DEFAULT;
+                    return new MatchResult(MatchResultEnum.TRUE, null);
                 }
 
                 @Override
@@ -79,7 +81,7 @@ public class RuleParser {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsBoolean() ? MatchResult.TRUE : MatchResult.FALSE;
+                        return primitive.getAsBoolean() ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN)) : new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN));
                     }
 
                     @Override
@@ -97,7 +99,7 @@ public class RuleParser {
                 return new Rule() {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
-                        return primitive.getAsInt() != 0 ? MatchResult.TRUE : MatchResult.FALSE;
+                        return primitive.getAsInt() != 0 ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_INTEGER)) : new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_INTEGER));
                     }
 
                     @Override
@@ -116,7 +118,7 @@ public class RuleParser {
                     @Override
                     public @NotNull MatchResult match(@NotNull String content) {
                         String str = primitive.getAsString();
-                        return Boolean.parseBoolean(str) ? MatchResult.TRUE : MatchResult.FALSE;
+                        return Boolean.parseBoolean(str) ? new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_STRING)) : new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.MATCH_CONDITION_BOOLEAN_BY_STRING));
                     }
 
                     @Override

@@ -12,6 +12,7 @@ export interface Config {
   proxy: Proxy
   privacy: Privacy
   performance: Performance
+  resolvers: Resolvers
 }
 
 export interface Server {
@@ -77,6 +78,11 @@ export interface Proxy {
   host?: string
   port?: number
   non_proxy_hosts?: string // non-proxy hosts, split by |
+}
+
+export interface Resolvers {
+  use_system: boolean
+  servers: string[]
 }
 
 export interface Privacy {
