@@ -84,8 +84,8 @@ jobs:
         platforms: |
           linux/riscv64
           linux/ppc64le
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+        tags: ${{ steps.meta.outputs.tags }}-secondary
+        labels: ${{ steps.meta.outputs.labels }}-secondary
         cache-from: type=gha
         cache-to: type=gha,mode=max
   Build_Docker_Standalone:
@@ -121,7 +121,7 @@ jobs:
           linux/arm64/v8
           linux/riscv64
           linux/ppc64le
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+        tags: ${{ steps.meta.outputs.tags }}-secondary
+        labels: ${{ steps.meta.outputs.labels }}-secondary
         cache-from: type=gha
         cache-to: type=gha,mode=max
