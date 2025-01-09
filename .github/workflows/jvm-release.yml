@@ -233,7 +233,7 @@ jobs:
           platforms: |
             linux/riscv64
             linux/ppc64le
-          tags: ${{ steps.meta-acr.outputs.tags }}-secondary
-          labels: ${{ steps.meta-acr.outputs.labels }}-secondary
+          tags: ${{ steps.meta-acr.outputs.tags }}
+          labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
           cache-from: type=gha
           cache-to: type=gha,mode=max
