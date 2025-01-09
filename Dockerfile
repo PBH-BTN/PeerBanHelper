@@ -22,4 +22,4 @@ VOLUME /tmp
 COPY --from=build build/target/libraries /app/libraries
 COPY --from=build build/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
-ENTRYPOINT ${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar
+ENTRYPOINT ["sh", "-c", "${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar"]
