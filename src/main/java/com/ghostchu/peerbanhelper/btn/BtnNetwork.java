@@ -25,6 +25,7 @@ import java.net.CookiePolicy;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -40,7 +41,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 // 特别注意：该类不允许静态初始化任何内容
 public class BtnNetwork implements Reloadable {
     @Getter
-    private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = new HashMap<>();
+    private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = Collections.synchronizedMap(new HashMap<>());
+
     private final ScriptEngine scriptEngine;
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
     private TranslationComponent configResult;
@@ -70,6 +72,7 @@ public class BtnNetwork implements Reloadable {
     @Override
     public ReloadResult reloadModule() throws Exception {
         reloadConfig();
+        log.info("BtnNetwork reloaded");
         return Reloadable.super.reloadModule();
     }
 
@@ -80,6 +83,8 @@ public class BtnNetwork implements Reloadable {
         this.appId = Main.getMainConfig().getString("btn.app-id");
         this.appSecret = Main.getMainConfig().getString("btn.app-secret");
         this.scriptExecute = Main.getMainConfig().getBoolean("btn.allow-script-execute");
+        configSuccess.set(false);
+        configResult = null;
         resetAbilities();
         setupHttpClient();
         resetScheduler();
@@ -97,13 +102,13 @@ public class BtnNetwork implements Reloadable {
         }
         if (enabled) {
             executeService = Executors.newScheduledThreadPool(2);
-            executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 600, 600, TimeUnit.SECONDS);
+            executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 0, 600, TimeUnit.SECONDS);
         } else {
             executeService = null;
         }
     }
 
-    public void configBtnNetwork() {
+    public synchronized void configBtnNetwork() {
         String response = "<Not Provided>";
         int statusCode = 0;
         try {
