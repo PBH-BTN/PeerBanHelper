@@ -31,7 +31,7 @@ export default {
   'changeLogModel.updateNow': 'Update Now',
   'globalPauseModel.title': 'Are you sure to enable global pause mode?',
   'globalPauseModel.description':
-    'This will pause all ban and check operations of all downloaders until the next restart or cancel pause. IPs in banlist will be unbanned immediately.',
+    'This will pause all ban and check operations of all downloaders until the next restart or cancel pause.',
   'global.pause.pauseAll': 'Pause',
   'global.pause.pauseAll.tips':
     "This will stop PeerBanhelper's all functions and unban all Peers, suitable for modifying downloader configuration",
