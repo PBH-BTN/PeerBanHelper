@@ -17,12 +17,14 @@ import java.util.Locale;
 public final class StringEndsWithMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_ENDS_WITH);
     private final String rule;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_ENDS_WITH, "<Not Provided>"));
-    private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_ENDS_WITH, "<Not Provided>"));
+    private MatchResult hit;
+    private MatchResult miss;
 
     public StringEndsWithMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString().toLowerCase(Locale.ROOT);
+        this.hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_ENDS_WITH, rule));
+        this.miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_ENDS_WITH, rule));
         if (syntax.has("hit")) {
             this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent(Lang.MATCH_STRING_ENDS_WITH, "Hit-" + rule));
         }

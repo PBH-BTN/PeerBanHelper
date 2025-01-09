@@ -27,7 +27,10 @@ public abstract class AbstractJsonMatcher extends AbstractMatcher {
         }
         if (condition != null) {
             if (condition.match(content).result() == MatchResultEnum.FALSE) {
-                return new MatchResult(MatchResultEnum.FALSE, new TranslationComponent(Lang.JSON_MATCHER_NOT_MET, condition.toPrintableText(Main.DEF_LOCALE), toPrintableText(Main.DEF_LOCALE)));
+                return new MatchResult(MatchResultEnum.FALSE,
+                        new TranslationComponent(Lang.JSON_MATCHER_NOT_MET,
+                                condition.toPrintableText(Main.DEF_LOCALE),
+                                toPrintableText(Main.DEF_LOCALE)));
             }
         }
         return match0(content);

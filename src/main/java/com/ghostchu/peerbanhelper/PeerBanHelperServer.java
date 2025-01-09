@@ -542,7 +542,15 @@ public class PeerBanHelperServer implements Reloadable {
                                         relaunch.add(detail.torrent());
                                         banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
                                         if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
-                                            log.info(tlUI(Lang.BAN_PEER, detail.peer().getPeerAddress(), detail.peer().getPeerId(), detail.peer().getClientName(), detail.peer().getProgress(), detail.peer().getUploaded(), detail.peer().getDownloaded(), detail.torrent().getName(), tl(DEF_LOCALE, detail.result().reason())));
+                                            log.info(tlUI(Lang.BAN_PEER,
+                                                    detail.peer().getPeerAddress(),
+                                                    detail.peer().getPeerId(),
+                                                    detail.peer().getClientName(),
+                                                    detail.peer().getProgress(),
+                                                    detail.peer().getUploaded(),
+                                                    detail.peer().getDownloaded(),
+                                                    detail.torrent().getName(),
+                                                    tlUI(detail.result().reason())));
                                         }
                                     }
                                 } catch (Exception e) {

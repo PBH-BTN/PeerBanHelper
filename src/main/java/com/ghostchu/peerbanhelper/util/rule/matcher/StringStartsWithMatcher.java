@@ -17,17 +17,19 @@ import java.util.Locale;
 public final class StringStartsWithMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_STARTS_WITH);
     private final String rule;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent("StringStatsWith Hit"));
-    private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("StringStatsWith Miss"));
+    private MatchResult hit;
+    private MatchResult miss;
 
     public StringStartsWithMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString().toLowerCase(Locale.ROOT);
+        this.hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_STARTS_WITH, rule));
+        this.miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_STARTS_WITH, rule));
         if (syntax.has("hit")) {
-            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent("StringStatsWith Hit"));
+            this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent(Lang.MATCH_STRING_STARTS_WITH, "Hit-" + rule));
         }
         if (syntax.has("miss")) {
-            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), new TranslationComponent("StringStatsWith Miss"));
+            this.miss = new MatchResult(MatchResultEnum.valueOf(syntax.get("miss").getAsString()), new TranslationComponent(Lang.MATCH_STRING_STARTS_WITH, "Hit-" + rule));
         }
     }
 

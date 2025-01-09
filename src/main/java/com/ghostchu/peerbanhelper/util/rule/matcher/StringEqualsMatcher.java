@@ -15,12 +15,14 @@ import org.jetbrains.annotations.NotNull;
 public final class StringEqualsMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_EQUALS);
     private final String rule;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_EQUALS, "<Not Provided>"));
-    private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_EQUALS, "<Not Provided>"));
+    private MatchResult hit;
+    private MatchResult miss;
 
     public StringEqualsMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString();
+        this.hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_EQUALS, rule));
+        this.miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_EQUALS, rule));
         if (syntax.has("hit")) {
             this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent(Lang.MATCH_STRING_EQUALS, "Hit-" + rule));
         }

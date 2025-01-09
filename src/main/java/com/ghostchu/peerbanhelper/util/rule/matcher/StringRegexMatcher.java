@@ -17,12 +17,14 @@ import java.util.regex.Pattern;
 public final class StringRegexMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_REGEX);
     private final Pattern rule;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_REGEX, "<Not Provided>"));
-    private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_REGEX, "<Not Provided>"));
+    private MatchResult hit;
+    private MatchResult miss;
 
     public StringRegexMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = Pattern.compile(syntax.get("content").getAsString());
+        this.hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_REGEX, rule));
+        this.miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_REGEX, rule));
         if (syntax.has("hit")) {
             this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent(Lang.MATCH_STRING_REGEX, "Hit=" + rule.pattern()));
         }

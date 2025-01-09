@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Data
@@ -42,5 +44,15 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
         this.description = description;
     }
 
-
+    @Override
+    public String toString() {
+        return "BanMetadata{" +
+                "context='" + context + '\'' +
+                ", banAt=" + banAt +
+                ", unbanAt=" + unbanAt +
+                ", banForDisconnect=" + banForDisconnect +
+                ", rule=" + tlUI(rule) +
+                ", description=" + tlUI(description) +
+                '}';
+    }
 }

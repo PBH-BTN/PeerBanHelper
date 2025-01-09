@@ -73,6 +73,12 @@ public class TextManager implements Reloadable {
                 return "Unsupported locale " + locale;
             }
         }
+        if (translationComponent == null) {
+            return "null";
+        }
+        if (translationComponent.getKey().isBlank()) {
+            return "";
+        }
         String str = yamlConfiguration.getString(translationComponent.getKey());
         if (str == null) {
             str = translationComponent.getKey();
@@ -113,6 +119,7 @@ public class TextManager implements Reloadable {
 //                    continue;
 //                }
                 components[i] = obj.toString();
+
             } catch (Exception exception) {
                 log.debug("Failed to process the object: {}", obj);
                 components[i] = String.valueOf(obj); // null safe

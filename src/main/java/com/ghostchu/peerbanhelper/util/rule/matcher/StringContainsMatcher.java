@@ -17,12 +17,14 @@ import java.util.Locale;
 public final class StringContainsMatcher extends AbstractJsonMatcher {
     private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_CONTAINS);
     private final String rule;
-    private MatchResult hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
-    private MatchResult miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "<Not Provided>"));
+    private MatchResult hit;
+    private MatchResult miss;
 
     public StringContainsMatcher(JsonObject syntax) {
         super(syntax);
         this.rule = syntax.get("content").getAsString().toLowerCase(Locale.ROOT);
+        this.hit = new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, rule));
+        this.miss = new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent(Lang.MATCH_STRING_CONTAINS, rule));
         if (syntax.has("hit")) {
             this.hit = new MatchResult(MatchResultEnum.valueOf(syntax.get("hit").getAsString()), new TranslationComponent(Lang.MATCH_STRING_CONTAINS, "Hit-" + rule));
         }
