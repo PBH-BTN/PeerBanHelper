@@ -9,4 +9,4 @@ ENV TZ=UTC
 ENV JAVA_OPTS="-Dpbh.release=docker -Djava.awt.headless=true -Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
 WORKDIR /app
 VOLUME /tmp
-ENTRYPOINT ${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar
+ENTRYPOINT ["sh", "-c", "${JAVA_HOME}/bin/java ${JAVA_OPTS} -jar PeerBanHelper.jar"]
