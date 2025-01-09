@@ -48,8 +48,9 @@ public class IPMatcher extends RuleMatcher<DualIPv4v6AssociativeTries<String>> {
         if (ips == null) {
             return new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("IPs set is null"));
         }
-        if (ips.elementContains(ip)) {
-            return new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(ips.get(ip)));
+        var node = ips.elementsContaining(ip);
+        if (node != null) {
+            return new MatchResult(MatchResultEnum.TRUE, new TranslationComponent(node.getValue()));
         }
         return new MatchResult(MatchResultEnum.DEFAULT, new TranslationComponent("Given IP not in IPs set"));
     }

@@ -75,8 +75,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
-import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
@@ -167,7 +165,8 @@ public class PeerBanHelperServer implements Reloadable {
 
     private void unbanWhitelistedPeers() {
         for (PeerAddress peerAddress : BAN_LIST.keySet()) {
-            if (ignoreAddresses.elementContains(peerAddress.getAddress())) {
+            var node = ignoreAddresses.elementsContaining(peerAddress.getAddress());
+            if (node != null) {
                 scheduleUnBanPeer(peerAddress);
             }
         }
@@ -816,7 +815,8 @@ public class PeerBanHelperServer implements Reloadable {
         if (peer.getPeerAddress().getAddress().isAnyLocal()) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-local-address"), new TranslationComponent("general-reason-skip-local-peers"));
         }
-        if (ignoreAddresses.elementContains(peer.getPeerAddress().getAddress())) {
+        var node = ignoreAddresses.elementsContaining(peer.getPeerAddress().getAddress());
+        if (node != null) {
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
         }
         try {
@@ -927,7 +927,9 @@ public class PeerBanHelperServer implements Reloadable {
                 downloader,
                 new BanDetail(torrent,
                         peer,
-                        new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE), new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON))
+                        new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                                new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE),
+                                new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON))
                         , banDuration)
         )));
     }
