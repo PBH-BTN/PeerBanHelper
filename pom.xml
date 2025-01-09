@@ -403,7 +403,7 @@
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-dom</artifactId>
-            <version>0.8.11</version>
+            <version>0.8.12</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
