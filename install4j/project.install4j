@@ -12,7 +12,7 @@
       <variable name="registerSystemService" value="registerSystemService" />
       <variable name="jarPath" value="../target/PeerBanHelper.jar" />
       <variable name="librariesPath" value="../target/libraries" />
-      <variable name="startupFlagPlatform" value="-Xmx512M -Xms16M -Xss512k-XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" separatorConversion="target" />
+      <variable name="startupFlagPlatform" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" separatorConversion="target" />
       <variable name="startupFlagPlatformNoGUI" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true" separatorConversion="target" />
     </variables>
     <jreBundles jdkProviderId="Liberica" release="23/23.0.1+13" />
