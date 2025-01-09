@@ -32,7 +32,6 @@ const handleGlobalPauseBtnClick = async () => {
     try {
       await endpointStore.updateGlobalConfig({ globalPaused: false })
       Message.warning(t('global.pause.pauseAll.stop'))
-      unbanIP('*')
       return true
     } catch (e) {
       if (e instanceof Error) {

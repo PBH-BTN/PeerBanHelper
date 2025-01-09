@@ -41,7 +41,7 @@
       <a-form-item
         :label="t('page.settings.tab.config.proxy.port')"
         field="proxy.port"
-        validate-trigger="focus"
+        validate-trigger="blur"
         :disabled="proxyModel.setting < ProxySetting.HTTP_PROXY"
         :rules="[
           {

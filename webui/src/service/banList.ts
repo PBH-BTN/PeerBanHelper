@@ -17,8 +17,8 @@ export async function getBanList(
   if (lastBanTime) {
     url.searchParams.set('lastBanTime', String(lastBanTime))
   }
-  if (search && search !== '') {
-    url.searchParams.set('search', search)
+  if (search && search.trim() !== '') {
+    url.searchParams.set('search', encodeURIComponent(search.trim()))
   }
   return fetch(url, {
     headers: getCommonHeader()
