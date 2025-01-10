@@ -3,8 +3,7 @@
     v-model:visible="showModal"
     :title="t('page.rule_management.ruleSubscribe.updateLog')"
     unmount-on-close
-    width="auto"
-    :modal-style="{ width: '35vw' }"
+    :modal-style="{ width: '30vw' }"
   >
     <a-table
       :stripe="true"
@@ -44,12 +43,12 @@
   </a-modal>
 </template>
 <script setup lang="ts">
+import { updateType } from '@/api/model/ruleSubscribe'
 import { GetUpdateLogs } from '@/service/ruleSubscribe'
+import { getColor } from '@/utils/color'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
-import { getColor } from '@/utils/color'
-import { updateType } from '@/api/model/ruleSubscribe'
 const { t, d } = useI18n()
 const showModal = ref(false)
 defineExpose({
