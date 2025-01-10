@@ -111,18 +111,16 @@ const loadingOptions = computed(() => ({
 const { t, d } = useI18n()
 
 const err = ref<Error>()
-const usedOption = computed(() => chartOptions.value)
-
-const chartOptions = ref({
+const usedOption = computed(() => ({
   tooltip: {
     trigger: 'axis',
     axisPointer: {
       type: 'shadow'
     },
-    backgroundColor: darkStore.isDark ? '#333335' : '',
-    borderColor: darkStore.isDark ? '#333335' : '',
+    backgroundColor: darkStore.isDark ? '#333335' : '#ffffff',
+    borderColor: darkStore.isDark ? '#333335' : '#ffffff',
     textStyle: {
-      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : ''
+      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : undefined
     },
     formatter: function (value: CallbackDataParams[]) {
       return (
@@ -137,6 +135,10 @@ const chartOptions = ref({
     }
   },
   backgroundColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.0)' : undefined,
+  ...chartOptions.value
+}))
+
+const chartOptions = ref({
   legend: {
     data: [t('page.charts.traffic.options.download'), t('page.charts.traffic.options.upload')]
   },
