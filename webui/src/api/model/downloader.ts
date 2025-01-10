@@ -12,8 +12,7 @@ export enum ClientStatusEnum {
   HEALTHY = 'HEALTHY',
   ERROR = 'ERROR',
   UNKNOWN = 'UNKNOWN',
-  NEED_TAKE_ACTION = 'NEED_TAKE_ACTION',
-  PAUSED = 'PAUSED'
+  NEED_TAKE_ACTION = 'NEED_TAKE_ACTION'
 }
 
 export enum ClientTypeEnum {
@@ -29,7 +28,6 @@ export interface Downloader {
   name: string
   endpoint: string
   type: ClientStatusEnum
-  paused: boolean
 }
 
 export interface Torrent {

@@ -11,9 +11,6 @@ export default {
   'page.dashboard.clientStatus.card.status.need_take_action': 'Need Take Action',
   'page.dashboard.clientStatus.card.status.torrentNumber': 'Active Torrents',
   'page.dashboard.clientStatus.card.status.peerNumber': 'Connected Peers',
-  'page.dashboard.clientStatus.card.status.paused': 'Paused',
-  'page.dashboard.clientStatus.card.status.paused.info':
-    "PeerBanHelper won't check paused downloaders, please unpause",
   'page.dashboard.clientStatus.card.lastDelete': 'Last downloader cannot be deleted',
   'page.dashboard.statics.currentStatus': 'Current Status',
   'page.dashboard.statics.checked': 'Total checked',
@@ -59,7 +56,6 @@ export default {
   'page.dashboard.editModal.biglybt.url': 'here',
   'page.dashboard.editModal.transmission.discourage':
     'Warning: Support for Transmission is deprecated, support will be removed in the future. https://github.com/PBH-BTN/PeerBanHelper/issues/382',
-  'page.dashboard.editModal.label.paused': 'Pause',
   'page.dashboard.peerList.title': 'Active Peer List for ',
   'page.dashboard.peerList.column.address': 'Address',
   'page.dashboard.peerList.column.port': 'Port',
