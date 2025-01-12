@@ -88,6 +88,7 @@
             <icon-check-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.HEALTHY" />
             <icon-close-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.ERROR" />
             <icon-question-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.UNKNOWN" />
+            <icon-pause-circle-fill v-if="client.data.lastStatus == ClientStatusEnum.PAUSED" />
             <icon-exclamation-polygon-fill
               v-if="client.data.lastStatus == ClientStatusEnum.NEED_TAKE_ACTION"
             />
@@ -132,6 +133,7 @@ const statusMap: Record<ClientStatusEnum, [string, string]> = {
   [ClientStatusEnum.HEALTHY]: ['success', 'page.dashboard.clientStatus.card.status.normal'],
   [ClientStatusEnum.ERROR]: ['warning', 'page.dashboard.clientStatus.card.status.error'],
   [ClientStatusEnum.UNKNOWN]: ['info', 'page.dashboard.clientStatus.card.status.unknown'],
+  [ClientStatusEnum.PAUSED]: ['danger', 'page.dashboard.clientStatus.card.status.paused'],
   [ClientStatusEnum.NEED_TAKE_ACTION]: [
     'danger',
     'page.dashboard.clientStatus.card.status.need_take_action'

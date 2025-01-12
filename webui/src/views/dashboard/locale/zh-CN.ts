@@ -12,6 +12,9 @@ export default {
   'page.dashboard.clientStatus.card.status.unknown': '未知',
   'page.dashboard.clientStatus.card.status.unknown.info': 'PeerBanHelper 可能还没有与此客户端通信',
   'page.dashboard.clientStatus.card.status.need_take_action': '需要采取行动',
+  'page.dashboard.clientStatus.card.status.paused': '已暂停',
+  'page.dashboard.clientStatus.card.status.paused.info':
+    'PeerBanHelper 不会检查已暂停的下载器，请取消暂停',
   'page.dashboard.clientStatus.card.status.torrentNumber': '活动种子数',
   'page.dashboard.clientStatus.card.status.peerNumber': '已连接的Peers',
   'page.dashboard.clientStatus.card.lastDelete': '最后一个下载器不能被删除',
@@ -57,6 +60,7 @@ export default {
   'page.dashboard.editModal.biglybt.url': '插件',
   'page.dashboard.editModal.transmission.discourage':
     '警告：Transmission 适配器已被废弃，并将在将来的版本移除。https://github.com/PBH-BTN/PeerBanHelper/issues/382',
+  'page.dashboard.editModal.label.paused': '暂停检查',
   'page.dashboard.peerList.title': '活动 Peer 列表：',
   'page.dashboard.peerList.column.address': '地址',
   'page.dashboard.peerList.column.port': '端口',
