@@ -149,7 +149,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     public boolean isLoggedIn() {
         HttpResponse<String> resp;
         try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/version"), HttpResponse.BodyHandlers.ofString());
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/buildInfo"), HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() != 200) {
                 return false;
             }
@@ -162,6 +162,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
             }
             return !info.getQt().isBlank();
         } catch (Exception e) {
+            log.error("Failed to check login status", e);
             return false;
         }
     }
