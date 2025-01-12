@@ -56,7 +56,7 @@ body:
           required: false
         - label: "RedHat/Fedora 软件包 (RedHat/Fedora .rpm package)"
           required: false
-        - label: "FreeBSD 软件包(FreeeBSD .pkg package)"
+        - label: "FreeBSD 软件包(FreeBSD .pkg package)"
           required: false
   - type: checkboxes
     id: downloaders
