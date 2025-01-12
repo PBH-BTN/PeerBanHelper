@@ -75,7 +75,7 @@ public class Database {
         if (System.getProperty("disableSQLitePragmaSettings") == null) {
             try (var stmt = rawConnection.createStatement()) {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
-                //stmt.executeUpdate("PRAGMA journal_mode = WAL");
+                stmt.executeUpdate("PRAGMA journal_mode = WAL");
                 stmt.executeUpdate("PRAGMA mmap_size = 50331648");
                 stmt.executeUpdate("PRAGMA cache_spill = 100");
                 try {
