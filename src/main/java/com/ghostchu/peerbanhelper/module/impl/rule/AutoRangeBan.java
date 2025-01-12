@@ -96,14 +96,14 @@ public class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadabl
         if (isHandShaking(peer)) {
             return pass();
         }
-        if (getServer().getBannedPeers().containsKey(peer.getPeerAddress())) {
+        if (getServer().getBannedPeersDirect().containsKey(peer.getPeerAddress())) {
             return pass();
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
-        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : getServer().getBannedPeers().entrySet()) {
+        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : getServer().getBannedPeersDirect().entrySet()) {
             if (bannedPeerEntry.getValue().isBanForDisconnect()) {
                 continue;
             }

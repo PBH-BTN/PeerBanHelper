@@ -82,7 +82,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class PeerBanHelperServer implements Reloadable {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
-    private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
+    private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentSkipListMap<>();
     @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
@@ -524,6 +524,7 @@ public class PeerBanHelperServer implements Reloadable {
                 log.error(tlUI(Lang.TIMING_ADD_BANS));
             })) {
                 var banlistClone = List.copyOf(BAN_LIST.keySet());
+
                 downloaderBanDetailMap.forEach((downloader, details) -> {
                     try {
                         List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
@@ -603,7 +604,6 @@ public class PeerBanHelperServer implements Reloadable {
             banWaveWatchDog.feed();
             metrics.recordCheck();
             banWaveLock.unlock();
-            System.gc();
         }
     }
 
