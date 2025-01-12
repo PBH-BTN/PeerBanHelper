@@ -9,8 +9,6 @@ import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.j256.ormlite.field.DataPersisterManager;
 import com.j256.ormlite.jdbc.JdbcSingleConnectionSource;
 import com.j256.ormlite.jdbc.db.SqliteDatabaseType;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.Duration;
 
@@ -34,7 +33,6 @@ public class Database {
     private final File dbMaintenanceFile;
     private final Laboratory laboratory;
     private JdbcSingleConnectionSource dataSource;
-    private HikariDataSource hikari;
     private DatabaseHelper helper;
 
     public Database(Laboratory laboratory) throws SQLException, ClassNotFoundException {
@@ -73,14 +71,7 @@ public class Database {
     }
 
     public void setupDatabase(File file) throws SQLException {
-        HikariConfig config = new HikariConfig();
-        config.setPoolName("PeerBanHelper SQLite Connection Pool");
-        config.setDriverClassName("org.sqlite.JDBC");
-        config.setJdbcUrl("jdbc:sqlite:" + file);
-        config.setConnectionTestQuery("SELECT 1");
-        config.setMaximumPoolSize(1); // 50 Connections (including idle connections)
-        this.hikari = new HikariDataSource(config);
-        Connection rawConnection = this.hikari.getConnection();
+        Connection rawConnection = DriverManager.getConnection("jdbc:sqlite:" + file);
         if (System.getProperty("disableSQLitePragmaSettings") == null) {
             try (var stmt = rawConnection.createStatement()) {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
