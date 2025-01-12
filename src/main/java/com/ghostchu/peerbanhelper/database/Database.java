@@ -77,7 +77,7 @@ public class Database {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
                 stmt.executeUpdate("PRAGMA journal_mode = WAL");
                 stmt.executeUpdate("PRAGMA mmap_size = 50331648");
-                stmt.executeUpdate("PRAGMA cache_spill = 100");
+                ;
                 try {
                     if (System.currentTimeMillis() - getLastMaintenanceTime() >= Duration.ofDays(Main.getMainConfig().getInt("persist.vacuum-interval-days")).toMillis()) {
                         if (System.getProperty("pbh.disableSQLiteVacuum") == null) {
