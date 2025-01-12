@@ -83,7 +83,6 @@ const formMap: Record<ClientTypeEnum, Component> = {
 
 const form = reactive({
   name: '',
-  paused: false,
   config: {
     basicAuth: {},
     verifySsl: true,
