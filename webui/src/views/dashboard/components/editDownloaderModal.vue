@@ -43,7 +43,11 @@
       >
         <a-input v-model="form.name" allow-clear />
       </a-form-item>
-      <a-form-item field="paused" :label="t('page.dashboard.editModal.label.paused')" required>
+      <a-form-item
+        field="config.paused"
+        :label="t('page.dashboard.editModal.label.paused')"
+        required
+      >
         <a-switch v-model="form.config.paused" checked-color="orange" />
       </a-form-item>
       <component :is="formMap[form.config.type]" v-model="form.config" />
