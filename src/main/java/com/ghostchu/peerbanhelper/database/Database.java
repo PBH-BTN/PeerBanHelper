@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.concurrent.Executors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -45,7 +46,6 @@ public class Database {
         this.dbMaintenanceFile = new File(databaseDirectory, "peerbanhelper.db.maintenance");
         registerPersisters();
         setupDatabase(sqliteDb);
-
     }
 
     private void registerPersisters() {
@@ -75,8 +75,9 @@ public class Database {
         if (System.getProperty("disableSQLitePragmaSettings") == null) {
             try (var stmt = rawConnection.createStatement()) {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
-                stmt.executeUpdate("PRAGMA journal_mode = WAL");
-                stmt.executeUpdate("PRAGMA auto_vacuum = INCREMENTAL");
+                //stmt.executeUpdate("PRAGMA journal_mode = WAL");
+                stmt.executeUpdate("PRAGMA mmap_size = 50331648");
+                stmt.executeUpdate("PRAGMA cache_spill = 100");
                 try {
                     if (System.currentTimeMillis() - getLastMaintenanceTime() >= Duration.ofDays(Main.getMainConfig().getInt("persist.vacuum-interval-days")).toMillis()) {
                         if (System.getProperty("pbh.disableSQLiteVacuum") == null) {
@@ -108,6 +109,13 @@ public class Database {
                 } finally {
                     setLastMaintenanceTime(System.currentTimeMillis());
                 }
+                Executors.newScheduledThreadPool(1).scheduleWithFixedDelay(() -> {
+                    try {
+                        stmt.executeUpdate("PRAGMA optimize;");
+                    } catch (SQLException e) {
+                        log.warn("Unable to optimize the SQLite database.");
+                    }
+                }, 0, 1, java.util.concurrent.TimeUnit.HOURS);
             } catch (Exception e) {
                 log.warn(tlUI(Lang.UNABLE_SET_SQLITE_OPTIMIZED_PRAGMA), e);
             }
