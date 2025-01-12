@@ -13,7 +13,7 @@
       <a-form-item field="config.type" :label="t('page.dashboard.editModal.label.type')" required>
         <a-select
           v-model="form.config.type"
-          style="width: 10em"
+          style="width: 11em"
           :trigger-props="{ autoFitPopupMinWidth: true }"
         >
           <a-option :value="ClientTypeEnum.qBittorrent">qBittorrent</a-option>
