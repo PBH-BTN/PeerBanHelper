@@ -21,9 +21,7 @@ public class TranslationComponentTypeAdapter extends TypeAdapter<TranslationComp
         out.beginArray();  // 开始 JSON 数组
         // 遍历 params 数组并写入元素
         for (Object param : value.getParams()) {
-            if (param instanceof String) {
-                out.value((String) param);  // 如果是 String，直接写入
-            } else if (param instanceof TranslationComponent) {
+            if (param instanceof TranslationComponent) {
                 // 如果是 TranslationComponent，递归调用 write 方法
                 TranslationComponentTypeAdapter.INSTANCE.write(out, (TranslationComponent) param);
             } else {
