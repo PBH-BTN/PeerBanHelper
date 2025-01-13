@@ -20,6 +20,6 @@ export default {
   'page.banlist.banlist.listItem.unbanall': 'Unban all',
   'page.banlist.banlist.listItem.unbanUnexcepted': 'No IP address(s) unbanned',
   'page.banlist.banlist.listItem.unbanSuccess': 'Unbanned {count} IP address',
-  'page.banlist.banlist.listItem.threatAnalyse': 'Threat Analyse',
-  'page.banlist.banlist.listItem.hashCopiedToClipboard': 'InfoHash: {hash} 已复制到剪贴板'
+  'page.banlist.banlist.listItem.threatAnalyse': 'Threat Analysis',
+  'page.banlist.banlist.listItem.hashCopiedToClipboard': 'InfoHash:{hash} copied to clipboard'
 }
