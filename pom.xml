@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.3.0</version>
+    <version>7.3.1</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -304,11 +304,6 @@
             <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>
             <artifactId>sqlite-jdbc-loongarch64</artifactId>
             <version>3.47.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>6.2.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.mizosoft.methanol</groupId>

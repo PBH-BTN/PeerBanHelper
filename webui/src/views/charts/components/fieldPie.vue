@@ -97,19 +97,22 @@ const loadingOptions = computed(() => ({
 }))
 const err = ref<Error>()
 
-const usedOption = computed(() => chartOption.value)
-
-const chartOption = ref({
+const usedOption = computed(() => ({
   tooltip: {
     trigger: 'item',
     appendToBody: true,
     formatter: '<p style="word-wrap:break-all"><b>{b}</b></p>  {c} ({d}%)',
-    backgroundColor: darkStore.isDark ? '#333335' : '',
-    borderColor: darkStore.isDark ? '#333335' : '',
+    backgroundColor: darkStore.isDark ? '#333335' : '#ffffff',
+    borderColor: darkStore.isDark ? '#333335' : '#ffffff',
     textStyle: {
-      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : ''
+      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : undefined
     }
   },
+  backgroundColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.0)' : undefined,
+  ...chartOption.value
+}))
+
+const chartOption = ref({
   legend: {
     orient: 'vertical',
     left: 'right',
@@ -126,7 +129,6 @@ const chartOption = ref({
       show: true
     }
   },
-  backgroundColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.0)' : undefined,
   series: [
     {
       name: t('page.charts.options.field.' + option.field),

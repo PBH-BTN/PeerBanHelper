@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
@@ -24,6 +25,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -143,13 +147,24 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
 
     public boolean isLoggedIn() {
-        HttpResponse<Void> resp;
+        HttpResponse<String> resp;
         try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/version"), HttpResponse.BodyHandlers.discarding());
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/buildInfo"), HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() != 200) {
+                return false;
+            }
+            QBittorrentBuildInfo info = JsonUtil.getGson().fromJson(resp.body(), QBittorrentBuildInfo.class);
+            if (info == null) {
+                return false;
+            }
+            if (info.getQt() == null) {
+                return false;
+            }
+            return !info.getQt().isBlank();
         } catch (Exception e) {
+            log.error("Failed to check login status", e);
             return false;
         }
-        return resp.statusCode() == 200;
     }
 
     @Override
@@ -354,4 +369,24 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     public record TorrentProperties(boolean isPrivate, long completed, long pieceSize, long piecesHave) {}
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    public static class QBittorrentBuildInfo {
+        @JsonProperty("bitness")
+        private Integer bitness;
+        @JsonProperty("boost")
+        private String boost;
+        @JsonProperty("libtorrent")
+        private String libtorrent;
+        @JsonProperty("openssl")
+        private String openssl;
+        @JsonProperty("platform")
+        private String platform;
+        @JsonProperty("qt")
+        private String qt;
+        @JsonProperty("zlib")
+        private String zlib;
+    }
 }

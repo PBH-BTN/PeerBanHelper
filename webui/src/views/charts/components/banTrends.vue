@@ -99,7 +99,18 @@ const option = reactive({
   range: [dayjs().startOf('day').add(-7, 'day').toDate(), new Date()]
 })
 
-const usedOption = computed(() => chartOptions.value)
+const usedOption = computed(() => ({
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: darkStore.isDark ? '#333335' : '#ffffff',
+    borderColor: darkStore.isDark ? '#333335' : '#ffffff',
+    textStyle: {
+      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : undefined
+    }
+  },
+  backgroundColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.0)' : undefined,
+  ...chartOptions.value
+}))
 
 const chartOptions = ref({
   xAxis: {
@@ -108,14 +119,6 @@ const chartOptions = ref({
   },
   yAxis: {
     type: 'value'
-  },
-  tooltip: {
-    trigger: 'axis',
-    backgroundColor: darkStore.isDark ? '#333335' : '',
-    borderColor: darkStore.isDark ? '#333335' : '',
-    textStyle: {
-      color: darkStore.isDark ? 'rgba(255, 255, 255, 0.7)' : ''
-    }
   },
   grid: {
     left: '15%'
@@ -126,8 +129,7 @@ const chartOptions = ref({
       type: 'line',
       name: t('page.charts.line.options.field')
     }
-  ],
-  backgroundColor: darkStore.isDark ? 'rgba(0, 0, 0, 0.0)' : undefined
+  ]
 })
 
 watch(option, (v) => {

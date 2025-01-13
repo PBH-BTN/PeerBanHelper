@@ -8,9 +8,7 @@ import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.maxmind.db.MaxMindDbConstructor;
-import com.maxmind.db.MaxMindDbParameter;
-import com.maxmind.db.Reader;
+import com.maxmind.db.*;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.AsnResponse;
 import com.maxmind.geoip2.model.CityResponse;
@@ -19,6 +17,7 @@ import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Country;
 import com.maxmind.geoip2.record.Location;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
@@ -42,7 +41,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -51,10 +49,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class IPDB implements AutoCloseable {
-    private final Cache<InetAddress, IPGeoData> MINI_CACHE = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .expireAfterAccess(5, TimeUnit.SECONDS)
-            .build();
     private final File dataFolder;
     private final long updateInterval = 3888000000L; // 45天
     private final String accountId;
@@ -98,25 +92,19 @@ public class IPDB implements AutoCloseable {
     }
 
     public IPGeoData query(InetAddress address) {
-        try {
-            return MINI_CACHE.get(address, () -> {
-                IPGeoData geoData = new IPGeoData();
-                geoData.setAs(queryAS(address));
-                geoData.setCountry(queryCountry(address));
-                geoData.setCity(queryCity(address));
-                geoData.setNetwork(queryNetwork(address));
-                if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
-                    String iso = geoData.getCountry().getIso();
-                    if (iso.equalsIgnoreCase("CN") || iso.equalsIgnoreCase("TW")
-                            || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
-                        queryGeoCN(address, geoData);
-                    }
-                }
-                return geoData;
-            });
-        } catch (ExecutionException e) {
-            return new IPGeoData();
+        IPGeoData geoData = new IPGeoData();
+        geoData.setAs(queryAS(address));
+        geoData.setCountry(queryCountry(address));
+        geoData.setCity(queryCity(address));
+        geoData.setNetwork(queryNetwork(address));
+        if (geoData.getCountry() != null && geoData.getCountry().getIso() != null) {
+            String iso = geoData.getCountry().getIso();
+            if (iso.equalsIgnoreCase("CN") || iso.equalsIgnoreCase("TW")
+                    || iso.equalsIgnoreCase("HK") || iso.equalsIgnoreCase("MO")) {
+                queryGeoCN(address, geoData);
+            }
         }
+        return geoData;
 
     }
 
@@ -262,10 +250,16 @@ public class IPDB implements AutoCloseable {
     private void loadMMDB() throws IOException {
         this.languageTag = List.of(Main.DEF_LOCALE, "en");
         this.mmdbCity = new DatabaseReader.Builder(mmdbCityFile)
-                .locales(List.of(Main.DEF_LOCALE, "en")).build();
+                .locales(List.of(Main.DEF_LOCALE, "en"))
+                .fileMode(Reader.FileMode.MEMORY_MAPPED)
+                .withCache(new MaxMindNodeCache())
+                .build();
         this.mmdbASN = new DatabaseReader.Builder(mmdbASNFile)
-                .locales(List.of(Main.DEF_LOCALE, "en")).build();
-        this.geoCN = new Reader(mmdbGeoCNFile);
+                .locales(List.of(Main.DEF_LOCALE, "en"))
+                .fileMode(Reader.FileMode.MEMORY_MAPPED)
+                .withCache(new MaxMindNodeCache())
+                .build();
+        this.geoCN = new Reader(mmdbGeoCNFile, Reader.FileMode.MEMORY_MAPPED, new MaxMindNodeCache());
     }
 
     private void updateMMDB(String databaseName, File target) throws IOException {
@@ -429,6 +423,19 @@ public class IPDB implements AutoCloseable {
             this.cityCode = Long.parseLong(cityCode.toString());
             this.districts = districts;
             this.districtsCode = Long.parseLong(districtsCode.toString());
+        }
+    }
+
+    public static final class MaxMindNodeCache implements NodeCache {
+        private final static Cache<CacheKey, DecodedValue> cache = CacheBuilder.newBuilder()
+                .maximumSize(2000)
+                .expireAfterAccess(1, TimeUnit.HOURS)
+                .build();
+
+        @SneakyThrows
+        @Override
+        public DecodedValue get(CacheKey cacheKey, Loader loader) throws IOException {
+            return cache.get(cacheKey, () -> loader.load(cacheKey));
         }
     }
 

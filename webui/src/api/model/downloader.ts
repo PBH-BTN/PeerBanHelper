@@ -29,7 +29,6 @@ export interface Downloader {
   name: string
   endpoint: string
   type: ClientStatusEnum
-  paused: boolean
 }
 
 export interface Torrent {

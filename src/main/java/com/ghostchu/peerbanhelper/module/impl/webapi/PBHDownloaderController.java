@@ -82,7 +82,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         if (name.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
-        boolean paused = draftDownloader.has("paused") && draftDownloader.get("paused").getAsBoolean();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
@@ -90,7 +89,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
             return;
         }
-        downloader.setPaused(paused);
         if (getServer().registerDownloader(downloader)) {
             ctx.status(HttpStatus.CREATED);
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_CREATED), null));
@@ -113,7 +111,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         if (name.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
-        boolean paused = draftDownloader.has("paused") && draftDownloader.get("paused").getAsBoolean();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
         Downloader downloader = getServer().createDownloader(name, config);
         if (downloader == null) {
@@ -121,7 +118,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATE_FAILURE), null));
             return;
         }
-        downloader.setPaused(paused);
         // 可能重命名了？
         getServer().getDownloaders().stream()
                 .filter(d -> d.getName().equals(downloaderName))
@@ -147,7 +143,6 @@ public class PBHDownloaderController extends AbstractFeatureModule {
         if (name.contains(".")) {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
-        boolean paused = draftDownloader.has("paused") && draftDownloader.get("paused").getAsBoolean();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
 //        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
 //            ctx.status(HttpStatus.CONFLICT);
@@ -160,9 +155,8 @@ public class PBHDownloaderController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
             return;
         }
-        downloader.setPaused(paused);
         try {
-            if (!paused) {
+            if (!downloader.isPaused()) {
                 var testResult = downloader.login();
                 if (testResult.success()) {
                     ctx.json(new StdResp(testResult.success(), tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));

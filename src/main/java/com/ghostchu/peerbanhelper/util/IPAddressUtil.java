@@ -66,9 +66,7 @@ public class IPAddressUtil {
     @Nullable
     public static IPAddress getIPAddressNoAutoConversation(String ip) {
         try {
-            return IP_ADDRESS_CACHE.get(ip, () -> {
-                return new IPAddressString(ip).toAddress();
-            });
+            return IP_ADDRESS_CACHE.get(ip, () -> new IPAddressString(ip).toAddress());
         } catch (ExecutionException e) {
             log.error("Unable to get ipaddress from ip {}", ip, e);
             return null;

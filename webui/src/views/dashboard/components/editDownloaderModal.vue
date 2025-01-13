@@ -13,7 +13,7 @@
       <a-form-item field="config.type" :label="t('page.dashboard.editModal.label.type')" required>
         <a-select
           v-model="form.config.type"
-          style="width: 10em"
+          style="width: 11em"
           :trigger-props="{ autoFitPopupMinWidth: true }"
         >
           <a-option :value="ClientTypeEnum.qBittorrent">qBittorrent</a-option>
@@ -43,7 +43,11 @@
       >
         <a-input v-model="form.name" allow-clear />
       </a-form-item>
-      <a-form-item field="paused" :label="t('page.dashboard.editModal.label.paused')" required>
+      <a-form-item
+        field="config.paused"
+        :label="t('page.dashboard.editModal.label.paused')"
+        required
+      >
         <a-switch v-model="form.config.paused" checked-color="orange" />
       </a-form-item>
       <component :is="formMap[form.config.type]" v-model="form.config" />
@@ -79,7 +83,6 @@ const formMap: Record<ClientTypeEnum, Component> = {
 
 const form = reactive({
   name: '',
-  paused: false,
   config: {
     basicAuth: {},
     verifySsl: true,

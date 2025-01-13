@@ -82,7 +82,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class PeerBanHelperServer implements Reloadable {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
-    private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentHashMap<>();
+    private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentSkipListMap<>();
     @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
@@ -484,7 +484,7 @@ public class PeerBanHelperServer implements Reloadable {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_CHECK_BANS));
             })) {
-                getDownloaders().forEach(downloader -> protect.getService().submit(() -> {
+                peers.keySet().forEach(downloader -> protect.getService().submit(() -> {
                     try {
                         downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader));
                     } catch (Exception e) {
@@ -524,6 +524,7 @@ public class PeerBanHelperServer implements Reloadable {
                 log.error(tlUI(Lang.TIMING_ADD_BANS));
             })) {
                 var banlistClone = List.copyOf(BAN_LIST.keySet());
+
                 downloaderBanDetailMap.forEach((downloader, details) -> {
                     try {
                         List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
@@ -603,7 +604,6 @@ public class PeerBanHelperServer implements Reloadable {
             banWaveWatchDog.feed();
             metrics.recordCheck();
             banWaveLock.unlock();
-            System.gc();
         }
     }
 
@@ -617,7 +617,6 @@ public class PeerBanHelperServer implements Reloadable {
                         try {
                             CheckResult checkResult = checkBan(torrent, peer, downloader);
                             details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
-
                         } catch (Exception e) {
                             log.error("Unexpected error occurred while checking bans", e);
                             throw e;
@@ -743,7 +742,9 @@ public class PeerBanHelperServer implements Reloadable {
             getDownloaders().forEach(downloader -> service.submit(() -> {
                 try {
                     Map<Torrent, List<Peer>> p = collectPeers(downloader);
-                    peers.put(downloader, p);
+                    if (p != null) {
+                        peers.put(downloader, p);
+                    }
                 } catch (Exception e) {
                     log.error(tlUI(Lang.DOWNLOADER_UNHANDLED_EXCEPTION), e);
                 }
@@ -752,6 +753,7 @@ public class PeerBanHelperServer implements Reloadable {
         return peers;
     }
 
+    @Nullable
     public Map<Torrent, List<Peer>> collectPeers(Downloader downloader) {
         Map<Torrent, List<Peer>> peers = new ConcurrentHashMap<>();
         var loginResult = downloader.login();
@@ -763,7 +765,7 @@ public class PeerBanHelperServer implements Reloadable {
                     downloader.setLastStatus(DownloaderLastStatus.NEED_TAKE_ACTION, loginResult.getMessage());
                 }
             }
-            return Collections.emptyMap();
+            return null;
         }
         List<Torrent> torrents = downloader.getTorrents();
         Semaphore parallelReqRestrict = new Semaphore(downloader.getMaxConcurrentPeerRequestSlots());

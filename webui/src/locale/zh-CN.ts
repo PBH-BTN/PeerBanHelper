@@ -32,7 +32,8 @@ export default {
   'changeLogModel.notNow': '不是现在',
   'changeLogModel.updateNow': '立即更新',
   'globalPauseModel.title': '确定启用全局暂停模式吗？',
-  'globalPauseModel.description': '这将暂停所有下载器的封禁和检查操作，直至下次重启或者取消暂停。',
+  'globalPauseModel.description':
+    '这将暂停所有下载器的封禁和检查操作，直至下次重启或者取消暂停。已封禁的 IP 地址将全部立刻解除封禁。',
   'global.pause.pauseAll': '暂停',
   'global.pause.pauseAll.tips':
     '这将停止 PeerBanhelper 的全部功能并解封全部 Peer，适用于修改下载器配置等场景',
