@@ -210,6 +210,8 @@ export const useEndpointStore = defineStore('endpoint', () => {
         throw new IncorrectTokenError()
       } else if (res.status === 303) {
         throw new NeedInitError()
+      } else if (res.status === 401) {
+        throw new IncorrectTokenError()
       }
     },
     getGlobalConfig,

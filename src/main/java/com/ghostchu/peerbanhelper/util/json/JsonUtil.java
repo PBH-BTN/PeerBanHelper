@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.json;
 
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +14,7 @@ public class JsonUtil {
             .setExclusionStrategies(new HiddenAnnotationExclusionStrategy())
             .serializeNulls()
             .registerTypeAdapter(Timestamp.class, TimestampTypeAdapter.INSTANCE)
+            .registerTypeAdapter(TranslationComponent.class, TranslationComponentTypeAdapter.INSTANCE)
             .disableHtmlEscaping()
             .create();
 
