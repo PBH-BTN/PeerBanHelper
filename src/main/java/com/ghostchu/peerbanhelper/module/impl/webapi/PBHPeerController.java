@@ -153,7 +153,7 @@ public class PBHPeerController extends AbstractFeatureModule {
 
 
     private void handleBanHistory(Context ctx) throws SQLException {
-        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
+        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
         var builder = historyDao.queryBuilder()
                 .orderBy("banAt", false);
@@ -168,7 +168,7 @@ public class PBHPeerController extends AbstractFeatureModule {
 
     private void handleAccessHistory(Context ctx) throws SQLException {
         activeMonitoringModule.flush();
-        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toString();
+        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
         var builder = peerRecordDao.queryBuilder()
                 .orderBy("lastTimeSeen", false);
