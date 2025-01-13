@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.database.table;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.database.TranslationComponentPersistener;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -26,8 +26,8 @@ public final class AlertEntity {
     private AlertLevel level;
     @DatabaseField(canBeNull = false, index = true)
     private String identifier;
-    @DatabaseField(canBeNull = false, dataType = DataType.SERIALIZABLE)
+    @DatabaseField(canBeNull = false, persisterClass = TranslationComponentPersistener.class)
     private TranslationComponent title;
-    @DatabaseField(canBeNull = false, dataType = DataType.SERIALIZABLE)
+    @DatabaseField(canBeNull = false, persisterClass = TranslationComponentPersistener.class)
     private TranslationComponent content;
 }
