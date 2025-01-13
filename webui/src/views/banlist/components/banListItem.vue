@@ -136,7 +136,7 @@
     </a-descriptions-item>
     <a-descriptions-item :label="t('page.banlist.banlist.listItem.location')" :span="12">
       <!-- 这里非常离奇，只要用了a-typography-text就会被下面一行覆盖，怀疑框架有毛病 -->
-      <a-tooltip :content="item.banMetadata.torrent.hash">
+      <a-tooltip :content="item.banMetadata.torrent.hash" position="bottom">
         <a-typography-text style="margin-bottom: 0" :ellipsis="{ showTooltip: true }">
           {{ item.banMetadata.torrent.name }}
         </a-typography-text>
