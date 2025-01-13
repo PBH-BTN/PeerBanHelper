@@ -25,7 +25,7 @@ public class TranslationComponentTypeAdapter extends TypeAdapter<TranslationComp
                 // 如果是 TranslationComponent，递归调用 write 方法
                 TranslationComponentTypeAdapter.INSTANCE.write(out, (TranslationComponent) param);
             } else {
-                out.value(value.toString());
+                out.value(param.toString());
             }
         }
         out.endArray();  // 结束 JSON 数组
