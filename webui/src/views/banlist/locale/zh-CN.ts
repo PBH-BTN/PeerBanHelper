@@ -20,5 +20,6 @@ export default {
   'page.banlist.banlist.listItem.unbanall': '解封全部',
   'page.banlist.banlist.listItem.unbanUnexcepted': '没有 IP 地址被成功解除封禁',
   'page.banlist.banlist.listItem.unbanSuccess': '成功解封 {count} 个 IP 地址',
-  'page.banlist.banlist.listItem.threatAnalyse': '威胁分析'
+  'page.banlist.banlist.listItem.threatAnalyse': '威胁分析',
+  'page.banlist.banlist.listItem.hashCopiedToClipboard': 'InfoHash: {hash} 已复制到剪贴板'
 }

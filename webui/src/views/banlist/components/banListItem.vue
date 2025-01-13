@@ -137,7 +137,11 @@
     <a-descriptions-item :label="t('page.banlist.banlist.listItem.location')" :span="12">
       <!-- 这里非常离奇，只要用了a-typography-text就会被下面一行覆盖，怀疑框架有毛病 -->
       <a-tooltip :content="item.banMetadata.torrent.hash">
-        <a-typography-text style="margin-bottom: 0" :ellipsis="{ showTooltip: true }">
+        <a-typography-text
+          style="margin-bottom: 0"
+          :ellipsis="{ showTooltip: true }"
+          @click="copyToClipboard(item.banMetadata.torrent.hash)"
+        >
           {{ item.banMetadata.torrent.name }}
         </a-typography-text>
       </a-tooltip>
@@ -167,8 +171,10 @@ import { Message } from '@arco-design/web-vue'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import useClipboard from 'vue-clipboard3'
 
 const { t, d } = useI18n()
+const { toClipboard } = useClipboard()
 defineProps<{
   item: BanList
 }>()
@@ -178,6 +184,18 @@ const descriptionLayout = useResponsiveState(
   }),
   0
 )
+const copyToClipboard = async (toCopyText: string) => {
+  try {
+    await toClipboard(toCopyText)
+    console.log('Copied to clipboard: ' + toCopyText)
+    Message.success({
+      content: t('page.banlist.banlist.listItem.hashCopiedToClipboard', { hash: toCopyText }),
+      resetOnHover: true
+    })
+  } catch (e) {
+    console.error(e)
+  }
+}
 const emits = defineEmits<{
   (e: 'unban', address: string): void
 }>()

@@ -23,5 +23,6 @@ export default {
     '从开始或者上次对端重置数据后，上传/下载数据增量信息',
   'page.torrentList.accessHistory.column.timeseen': '会话区间',
   'page.torrentList.accessHistory.column.timeseen.first': '开始于',
-  'page.torrentList.accessHistory.column.timeseen.last': '更新于'
+  'page.torrentList.accessHistory.column.timeseen.last': '更新于',
+  'page.torrentList.column.torrent.hashCopiedToClipboard': 'InfoHash: {hash} 已复制到剪贴板'
 }

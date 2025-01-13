@@ -24,5 +24,7 @@ export default {
     'Upload/download data increment information from the beginning or the last time the peer resets data',
   'page.torrentList.accessHistory.column.timeseen': 'Discovery Time',
   'page.torrentList.accessHistory.column.timeseen.first': 'First Seen',
-  'page.torrentList.accessHistory.column.timeseen.last': 'Last Seen'
+  'page.torrentList.accessHistory.column.timeseen.last': 'Last Seen',
+  'page.torrentList.column.torrent.hashCopiedToClipboard':
+    'InfoHash: {hash} has been copied to the clipboard'
 }

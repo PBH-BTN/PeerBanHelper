@@ -37,6 +37,7 @@
     "url-join": "^5.0.0",
     "uuid": "^11.0.4",
     "vue": "^3.5.13",
+    "vue-clipboard3": "^2.0.0",
     "vue-echarts": "^7.0.3",
     "vue-i18n": "^11.0.1",
     "vue-request": "^2.0.4",

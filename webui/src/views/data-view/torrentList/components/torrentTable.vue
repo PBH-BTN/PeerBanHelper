@@ -34,9 +34,12 @@
         {{ formatFileSize(record.size) }}
       </template>
       <template #hash="{ record }">
-        <a-typography-text code style="white-space: nowrap">{{
-          record.infoHash
-        }}</a-typography-text>
+        <a-typography-text
+          code
+          style="white-space: nowrap"
+          @click="copyToClipboard(record.infoHash)"
+          >{{ record.infoHash }}</a-typography-text
+        >
       </template>
       <template #count="{ record }">
         <a-space fill direction="vertical">
@@ -120,9 +123,26 @@ import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 import AccessHistoryModal from './accessHistoryModal.vue'
 import BanHistoryModal from './banHistoryModal.vue'
+import { Message } from '@arco-design/web-vue'
+import useClipboard from 'vue-clipboard3'
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t } = useI18n()
+const { toClipboard } = useClipboard()
+
+const copyToClipboard = async (toCopyText: string) => {
+  try {
+    await toClipboard(toCopyText)
+    console.log('Copied to clipboard: ' + toCopyText)
+    Message.success({
+      content: t('page.torrentList.column.torrent.hashCopiedToClipboard', { hash: toCopyText }),
+      resetOnHover: true
+    })
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh, run } =
   usePagination(
     GetTorrentInfoList,

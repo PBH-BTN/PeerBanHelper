@@ -11,5 +11,6 @@ export default {
   'page.banlog.banlogTable.column.torrentSize': '大小',
   'page.banlog.banlogTable.column.description': '描述',
   'page.banlog.radio.viewMode': '视图模式',
-  'page.banlog.radio.table': '表格'
+  'page.banlog.radio.table': '表格',
+  'page.banlog.hashCopiedToClipboard': 'InfoHash: {hash} 已复制到剪贴板'
 }

@@ -11,5 +11,6 @@ export default {
   'page.banlog.banlogTable.column.torrentSize': 'Size',
   'page.banlog.banlogTable.column.description': 'Description',
   'page.banlog.radio.viewMode': 'View Mode',
-  'page.banlog.radio.table': 'Table'
+  'page.banlog.radio.table': 'Table',
+  'page.banlog.hashCopiedToClipboard': 'InfoHash: {hash} has been copied to the clipboard'
 }

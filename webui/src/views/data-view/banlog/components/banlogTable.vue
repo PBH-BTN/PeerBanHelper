@@ -65,6 +65,13 @@
         </a-tooltip>
       </p>
     </template>
+    <template #torrentName="{ record }">
+      <a-tooltip :content="record.torrentInfoHash">
+        <a-typography-text ellipsis @click="copyToClipboard(record.torrentInfoHash)">{{
+          record.torrentName
+        }}</a-typography-text>
+      </a-tooltip>
+    </template>
     <template #torrentSize="{ record }">
       <a-tooltip :content="`Hash: ${record.torrentInfoHash}`">
         <p>{{ formatFileSize(record.torrentSize) }}</p>
@@ -81,9 +88,13 @@ import { formatFileSize } from '@/utils/file'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
+import useClipboard from 'vue-clipboard3'
+import { Message } from '@arco-design/web-vue'
+
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()
+const { toClipboard } = useClipboard()
 const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh } =
   usePagination(
     getBanlogs,
@@ -113,6 +124,19 @@ watch([pageSize, current], () => {
 })
 
 watch(() => endpointState.endpoint, refresh)
+
+const copyToClipboard = async (toCopyText: string) => {
+  try {
+    await toClipboard(toCopyText)
+    console.log('Copied to clipboard: ' + toCopyText)
+    Message.success({
+      content: t('page.banlog.hashCopiedToClipboard', { hash: toCopyText }),
+      resetOnHover: true
+    })
+  } catch (e) {
+    console.error(e)
+  }
+}
 
 const tableLoading = computed(() => {
   return forceLoading.value || loading.value || !list.value
@@ -144,7 +168,7 @@ const columns = [
   },
   {
     title: () => t('page.banlog.banlogTable.column.torrentName'),
-    dataIndex: 'torrentName',
+    slotName: 'torrentName',
     ellipsis: true,
     tooltip: true
   },
@@ -167,6 +191,7 @@ const list = computed(() => data.value?.data.results)
 .red {
   color: rgb(var(--red-5));
 }
+
 .green {
   color: rgb(var(--green-5));
 }
