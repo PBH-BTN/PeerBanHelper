@@ -162,7 +162,6 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
             }
             return !info.getQt().isBlank();
         } catch (Exception e) {
-            log.error("Failed to check login status", e);
             return false;
         }
     }
