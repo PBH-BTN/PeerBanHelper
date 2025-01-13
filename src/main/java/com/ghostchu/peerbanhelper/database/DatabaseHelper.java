@@ -75,6 +75,11 @@ public class DatabaseHelper {
             TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
             v = 7;
         }
+        if (v == 7) {
+            TableUtils.dropTable(getDataSource(), AlertEntity.class, true);
+            TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
+            v = 8;
+        }
         version.setValue(String.valueOf(v));
         metadata.update(version);
     }
