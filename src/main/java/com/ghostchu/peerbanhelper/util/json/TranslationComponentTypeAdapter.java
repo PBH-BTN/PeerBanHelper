@@ -27,11 +27,13 @@ public class TranslationComponentTypeAdapter extends TypeAdapter<TranslationComp
                 // 如果是 TranslationComponent，递归调用 write 方法
                 TranslationComponentTypeAdapter.INSTANCE.write(out, (TranslationComponent) param);
             } else {
-                out.nullValue();  // 如果是其他类型，写入 null（可以根据需求调整）
+                out.value(value.toString());
             }
         }
         out.endArray();  // 结束 JSON 数组
         out.endObject();  // 结束 JSON 对象
+
+        // 特别注意嵌套里面不允许出现除了 TranslationComponent 以外的 JsonObject，否则必翻车
     }
 
     @Override
