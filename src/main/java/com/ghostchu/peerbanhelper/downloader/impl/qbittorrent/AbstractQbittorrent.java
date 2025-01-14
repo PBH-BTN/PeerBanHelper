@@ -157,10 +157,10 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
             if (info == null) {
                 return false;
             }
-            if (info.getQt() == null) {
+            if (info.getLibtorrent() == null) {
                 return false;
             }
-            return !info.getQt().isBlank();
+            return !info.getLibtorrent().isBlank();
         } catch (Exception e) {
             return false;
         }
