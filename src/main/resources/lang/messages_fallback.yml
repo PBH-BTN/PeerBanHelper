@@ -333,7 +333,6 @@ WEBVIEW_DEFAULT_DISABLED: "WebUI 现在默认禁用，建议使用系统浏览�
 
 PCB_SHUTTING_DOWN: "请等待 ProgressCheatBlocker 将缓存在内存中的数据刷写到数据库，最多 5 秒……"
 
-PBHPLUS_LICENSE_FAILED: "PBH Plus 鉴权失败，请在 config.yml 中填写一个有效的 pbh-plus-key"
 CHARTS_IPDB_NEED_INIT: "请先配置 GeoIP 数据库"
 
 IP_BLACKLIST_PUT_IP_INVALID_IP: "无效 IP 地址，请输入一个有效的 IPV4/IPV6 地址，或者 CIDR 表达式"
@@ -345,7 +344,6 @@ SCHEDULED_FULL_BANLIST_APPLY: "[修复] PeerBanHelper 已计划在下次封禁�
 CLEANED_BANLOGS: "[清理] 已清理 {} 条封禁日志"
 
 OPERATION_EXECUTE_SUCCESSFULLY: "操作执行成功"
-PBH_PLUS_LICENSE_UPDATED: "许可证信息已保存"
 PBH_PLUS_LICENSE_EXPIRED: "许可证已过期"
 PBH_PLUS_LICENSE_INVALID: "许可证无效"
 
@@ -533,7 +531,6 @@ MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE: "无法从 IPFS/IPNS 更新规则订阅，
 FREE_LICENSE_RENEW_SUCCESS: "新的许可证已生成并激活"
 FREE_LICENSE_RENEW_STILL_ACTIVE: "当前许可证仍在有效期内，无需重新生成"
 FREE_LICENSE_SOURCE: "本地生成的免费许可证"
-FREE_LICENSE_LICENSE_TO: "{} 用于个人用途"
 FREE_LICENSE_DESCRIPTION: "本地生成的循环免费许可证，仅用于个人用途"
 DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED: "禁用 {} ({}) 的高级设置 “允许来自不同 IP 地址的多重连接” 失败：{} - {}！此功能必须关闭，否则将导致 PCB 封禁误判。"
 DOWNLOADER_PAUSED: "下载器已暂停"
