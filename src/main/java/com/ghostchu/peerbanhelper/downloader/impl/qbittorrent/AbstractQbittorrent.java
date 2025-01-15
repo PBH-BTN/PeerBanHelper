@@ -180,30 +180,22 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     @Override
     public List<Torrent> getTorrents() {
-        HttpResponse<String> request;
-        try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/torrents/info?filter=active"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (request.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
-        }
-        List<QBittorrentTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrent>>() {
-        }.getType());
-
-        fillTorrentProperties(qbTorrent);
-
-        return qbTorrent.stream().map(t -> (Torrent) t)
-                .filter(t -> !config.isIgnorePrivate() || !t.isPrivate())
-                .collect(Collectors.toList());
+        return fetchTorrents(true, !config.isIgnorePrivate());
     }
 
     @Override
     public List<Torrent> getAllTorrents() {
+        return fetchTorrents(false, true);
+    }
+
+    private List<Torrent> fetchTorrents(boolean onlyActive, boolean includePrivate) {
         HttpResponse<String> request;
         try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/torrents/info"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            String url = apiEndpoint + "/torrents/info";
+            if (onlyActive) {
+                url += "?filter=active";
+            }
+            request = httpClient.send(MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -216,6 +208,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         fillTorrentProperties(qbTorrent);
 
         return qbTorrent.stream().map(t -> (Torrent) t)
+                .filter(t -> includePrivate || !t.isPrivate())
                 .collect(Collectors.toList());
     }
 
