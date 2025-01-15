@@ -265,53 +265,7 @@ public class BitComet extends AbstractDownloader {
         requirements.put("group_state", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
-        HttpResponse<String> request;
-        try {
-            request = httpClient.send(
-                    MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint(),
-                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
-                            .header("Authorization", "Bearer " + this.deviceToken)
-                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (request.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
-        }
-        var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
-
-        Semaphore semaphore = new Semaphore(4);
-        List<BCTaskTorrentResponse> torrentResponses = Collections.synchronizedList(new ArrayList<>(response.getTasks().size()));
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            response.getTasks().stream().filter(t -> t.getType().equals("BT"))
-                    .forEach(torrent -> executor.submit(() -> {
-                        try {
-                            semaphore.acquire();
-                            Map<String, String> taskIds = new HashMap<>();
-                            taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
-                            HttpResponse<String> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
-                                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
-                                            .header("Authorization", "Bearer " + this.deviceToken),
-                                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                            var torrentResp = JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
-                            torrentResponses.add(torrentResp);
-                        } catch (IOException | InterruptedException e) {
-                            log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY), e);
-                        } finally {
-                            semaphore.release();
-                        }
-                    }));
-        }
-        return torrentResponses.stream().map(torrent -> new TorrentImpl(Long.toString(torrent.getTask().getTaskId()),
-                torrent.getTask().getTaskName(),
-                torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
-                torrent.getTaskDetail().getTotalSize(),
-                torrent.getTask().getSelectedDownloadedSize(),
-                torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
-                torrent.getTask().getUploadRate(),
-                torrent.getTask().getDownloadRate(),
-                torrent.getTaskDetail().getTorrentPrivate()
-        )).collect(Collectors.toList());
+        return fetchTorrents(requirements);
     }
 
     @Override
@@ -320,6 +274,11 @@ public class BitComet extends AbstractDownloader {
         requirements.put("group_state", "ALL");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
+        return fetchTorrents(requirements);
+    }
+
+
+    public List<Torrent> fetchTorrents(Map<String, String> requirements) {
         HttpResponse<String> request;
         try {
             request = httpClient.send(
@@ -375,7 +334,7 @@ public class BitComet extends AbstractDownloader {
         try {
             Map<String, Object> requirements = new HashMap<>();
             requirements.put("task_id", torrent.getId());
-            requirements.put("max_count", String.valueOf(Integer.MAX_VALUE)); // 获取全量列表，因为我们需要检查所有 Peers
+            requirements.put("max_count", String.valueOf(Integer.MAX_VALUE));
             resp = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_TRACKERS.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
                             .header("Authorization", "Bearer " + this.deviceToken),
@@ -519,25 +478,6 @@ public class BitComet extends AbstractDownloader {
             throw new IllegalStateException(e);
         }
     }
-
-//    private void operateBanListNew(String mode, String content) {
-//        Map<String, String> banListSettings = new HashMap<>();
-//        banListSettings.put("data_type", "manual_list");
-//        banListSettings.put("content_base64", Base64.getEncoder().encodeToString(content.getBytes(StandardCharsets.UTF_8)));
-//        try {
-//            HttpResponse<String> request = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.IP_FILTER_UPLOAD.getEndpoint(),
-//                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(banListSettings)))
-//                            .header("Authorization", "Bearer " + this.deviceToken),
-//                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-//            if (request.statusCode() != 200) {
-//                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-//                throw new IllegalStateException("Save BitComet banlist error: statusCode=" + request.statusCode());
-//            }
-//        } catch (Exception e) {
-//            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
-//            throw new IllegalStateException(e);
-//        }
-//    }
 
     @Override
     public void close() throws Exception {
