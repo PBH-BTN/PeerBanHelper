@@ -244,7 +244,7 @@ public class BiglyBT extends AbstractDownloader {
         HttpResponse<String> resp;
         try {
             resp = httpClient.send(
-                    MutableRequest.PATCH(apiEndpoint + "/download/{infoHash}/trackers",
+                    MutableRequest.PATCH(apiEndpoint + "/download/" + torrent.getId() + "/trackers",
                             HttpRequest.BodyPublishers.ofString(sb.toString().trim())),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
