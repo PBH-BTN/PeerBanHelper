@@ -12,7 +12,12 @@ public class TrackerImpl implements Tracker {
     private final List<String> trackers;
 
     public TrackerImpl(String string) {
-        this.trackers = Stream.of(string.split("\n")).sorted().collect(Collectors.toList());
+        Objects.requireNonNull(string, "tracker string cannot be null");
+        this.trackers = Stream.of(string.split("\n"))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .sorted()
+            .collect(Collectors.toUnmodifiableList());
     }
 
     public TrackerImpl(List<String> string) {
@@ -30,7 +35,13 @@ public class TrackerImpl implements Tracker {
     }
 
     public static List<Tracker> parseFromTrackerList(String trackerList) {
-        return Stream.of(trackerList.split("\n\n")).filter(str -> !str.isBlank()).map(TrackerImpl::new).collect(Collectors.toList());
+        if (trackerList == null) {
+            return Collections.emptyList();
+        }
+        return Stream.of(trackerList.split("\n\n"))
+            .filter(str -> !str.isBlank())
+            .map(TrackerImpl::new)
+            .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
