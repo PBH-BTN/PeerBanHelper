@@ -232,32 +232,29 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         }
         List<QBittorrentTorrentTrackers> qbTorrentTrackers = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrentTrackers>>() {
         }.getType());
-        qbTorrentTrackers = qbTorrentTrackers.stream().sorted(Comparator.comparingInt(QBittorrentTorrentTrackers::getTier)).toList();
-        StringBuilder builder = new StringBuilder();
-        int lastTier = -1;
+        qbTorrentTrackers = qbTorrentTrackers.stream()
+                .filter(t -> !t.getUrl().startsWith("**"))
+                .sorted(Comparator.comparingInt(QBittorrentTorrentTrackers::getTier)).toList();
+        Map<Integer, List<String>> trackerMap = new HashMap<>();
         for (QBittorrentTorrentTrackers qbTorrentTracker : qbTorrentTrackers) {
-            if (qbTorrentTracker.getTier() != lastTier && lastTier != -1) {
-                lastTier = qbTorrentTracker.getTier();
-                builder.append(qbTorrentTracker.getUrl()).append("\n");
-            } else {
-                lastTier = qbTorrentTracker.getTier();
-                builder.append(qbTorrentTracker.getUrl()).append("\n\n");
-            }
+            trackerMap.computeIfAbsent(qbTorrentTracker.getTier(), k -> new ArrayList<>()).add(qbTorrentTracker.getUrl());
         }
-        return TrackerImpl.parseFromTrackerList(builder.toString());
+        List<Tracker> trackers = new ArrayList<>();
+        trackerMap.forEach((k, v) -> {
+            trackers.add(new TrackerImpl(v));
+        });
+        return trackers;
     }
 
     @Override
     public void setTrackers(Torrent torrent, List<Tracker> trackers) {
         List<Tracker> trackerList = getTrackers(torrent);
-        List<Tracker> newAdded = trackers.stream().filter(t -> !trackerList.contains(t)).toList();
-        List<Tracker> removed = trackerList.stream().filter(t -> !trackers.contains(t)).toList();
-        addTracker(torrent, newAdded);
-        removeTracker(torrent, removed);
+        removeTracker(torrent, trackerList);
+        addTracker(torrent, trackers);
     }
 
     private void addTracker(Torrent torrent, List<Tracker> newAdded) {
-        StringJoiner joiner = new StringJoiner("|");
+        StringJoiner joiner = new StringJoiner("\n");
         newAdded.forEach(t -> t.getTrackersInGroup().forEach(joiner::add));
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest

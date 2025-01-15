@@ -737,7 +737,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHPushController.class);
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
-
+        moduleManager.register(PBHUtilitiesController.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
