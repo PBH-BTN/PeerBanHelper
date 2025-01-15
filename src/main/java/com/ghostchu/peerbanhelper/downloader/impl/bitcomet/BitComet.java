@@ -265,7 +265,7 @@ public class BitComet extends AbstractDownloader {
         requirements.put("group_state", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
-        return fetchTorrents(requirements);
+        return fetchTorrents(requirements, config.isIgnorePrivate());
     }
 
     @Override
@@ -274,11 +274,11 @@ public class BitComet extends AbstractDownloader {
         requirements.put("group_state", "ALL");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
-        return fetchTorrents(requirements);
+        return fetchTorrents(requirements, true);
     }
 
 
-    public List<Torrent> fetchTorrents(Map<String, String> requirements) {
+    public List<Torrent> fetchTorrents(Map<String, String> requirements, boolean includePrivate) {
         HttpResponse<String> request;
         try {
             request = httpClient.send(
@@ -325,7 +325,9 @@ public class BitComet extends AbstractDownloader {
                 torrent.getTask().getUploadRate(),
                 torrent.getTask().getDownloadRate(),
                 torrent.getTaskDetail().getTorrentPrivate()
-        )).collect(Collectors.toList());
+                ))
+                .filter(torrent -> includePrivate || !torrent.isPrivate())
+                .collect(Collectors.toList());
     }
 
     @Override
