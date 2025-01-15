@@ -432,7 +432,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.79</version>
+            <version>1.80</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpg-jdk18on -->
         <dependency>
