@@ -59,7 +59,7 @@ public class PBHUtilitiesController extends AbstractFeatureModule {
 
     private void handleReplaceTracker(Context context) {
         ReplaceTrackerDTO dto = context.bodyAsClass(ReplaceTrackerDTO.class);
-        if (dto == null || dto.from() == null || dto.to() == null) {
+        if (dto == null || dto.from() == null || dto.to() == null || dto.from().isEmpty() || dto.to().isEmpty()) {
             context.status(400);
             return;
         }
