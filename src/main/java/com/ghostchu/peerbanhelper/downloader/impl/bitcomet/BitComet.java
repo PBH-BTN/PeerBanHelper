@@ -265,7 +265,7 @@ public class BitComet extends AbstractDownloader {
         requirements.put("group_state", "ACTIVE");
         requirements.put("sort_key", "");
         requirements.put("sort_order", "unsorted");
-        return fetchTorrents(requirements, config.isIgnorePrivate());
+        return fetchTorrents(requirements, !config.isIgnorePrivate());
     }
 
     @Override
