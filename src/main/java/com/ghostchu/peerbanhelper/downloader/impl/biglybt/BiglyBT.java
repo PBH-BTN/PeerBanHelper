@@ -161,47 +161,23 @@ public class BiglyBT extends AbstractDownloader {
 
     @Override
     public List<Torrent> getTorrents() {
-        HttpResponse<String> request;
-        try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/downloads?filter="
-                            + BiglyBTDownloadStateConst.ST_DOWNLOADING
-                            + "&filter=" + BiglyBTDownloadStateConst.ST_SEEDING
-                            + "&filter=" + BiglyBTDownloadStateConst.ST_ERROR),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (request.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, request.statusCode(), request.body()));
-        }
-        List<DownloadRecord> torrentDetail = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<DownloadRecord>>() {
-        }.getType());
-        List<Torrent> torrents = new ArrayList<>();
-        for (DownloadRecord detail : torrentDetail) {
-            if (config.isIgnorePrivate() && detail.getTorrent().isPrivateTorrent()) {
-                continue;
-            }
-            torrents.add(new BiglyBTTorrent(
-                    detail.getTorrent().getInfoHash(),
-                    detail.getName(),
-                    detail.getTorrent().getInfoHash(),
-                    detail.getTorrent().getSize(),
-                    detail.getTorrent().getSize() - detail.getStats().getRemainingBytes(), // 种子总大小 减去 (包含未选择文件的)尚未下载大小 等于 已下载内容大小
-                    detail.getStats().getCompletedInThousandNotation() / 1000d,
-                    detail.getStats().getRtUploadSpeed(),
-                    detail.getStats().getRtDownloadSpeed(),
-                    detail.getTorrent().isPrivateTorrent(),
-                    detail.getTrackers()));
-        }
-        return torrents;
+        return fetchTorrents(List.of(BiglyBTDownloadStateConst.ST_DOWNLOADING, BiglyBTDownloadStateConst.ST_SEEDING, BiglyBTDownloadStateConst.ST_ERROR), true);
     }
-
 
     @Override
     public List<Torrent> getAllTorrents() {
+        return fetchTorrents(Collections.emptyList(), true);
+    }
+
+    private List<Torrent> fetchTorrents(List<Object> filtersUrlEncoded, boolean includePrivate) {
         HttpResponse<String> request;
         try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/downloads"),
+            StringBuilder urlBuilder = new StringBuilder(apiEndpoint + "/downloads");
+            if (!filtersUrlEncoded.isEmpty()) {
+                urlBuilder.append("?filter=");
+                urlBuilder.append(String.join("&filter=", filtersUrlEncoded.toString()));
+            }
+            request = httpClient.send(MutableRequest.GET(urlBuilder.toString()),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -213,6 +189,9 @@ public class BiglyBT extends AbstractDownloader {
         }.getType());
         List<Torrent> torrents = new ArrayList<>();
         for (DownloadRecord detail : torrentDetail) {
+            if (!includePrivate && detail.getTorrent().isPrivateTorrent()) {
+                continue;
+            }
             torrents.add(new BiglyBTTorrent(
                     detail.getTorrent().getInfoHash(),
                     detail.getName(),
