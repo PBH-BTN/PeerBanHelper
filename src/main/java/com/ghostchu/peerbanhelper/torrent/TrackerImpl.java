@@ -18,7 +18,7 @@ public class TrackerImpl implements Tracker {
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .sorted()
-            .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     public TrackerImpl(List<String> string) {
