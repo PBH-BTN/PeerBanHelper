@@ -138,19 +138,25 @@ public class Transmission extends AbstractDownloader {
 
     @Override
     public List<Torrent> getTorrents() {
-        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.SIZE_WHEN_DONE, Fields.TRACKER_LIST, Fields.TRACKER_STATS);
-        TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
-        return rsp.getArgs().getTorrents().stream()
-                .filter(t -> t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING)
-                .filter(t -> !(config.isIgnorePrivate() && t.getIsPrivate()))
-                .map(TRTorrent::new).collect(Collectors.toList());
+        return fetchTorrents(true, !config.isIgnorePrivate());
     }
 
     @Override
     public List<Torrent> getAllTorrents() {
+        return fetchTorrents(false, true);
+    }
+
+    public List<Torrent> fetchTorrents(boolean onlyActiveTorrent, boolean includePrivate) {
         RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.SIZE_WHEN_DONE, Fields.TRACKER_LIST, Fields.TRACKER_STATS);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
         return rsp.getArgs().getTorrents().stream()
+                .filter(t -> {
+                    if (onlyActiveTorrent) {
+                        return t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING;
+                    }
+                    return true;
+                })
+                .filter(t -> includePrivate || !t.getIsPrivate())
                 .map(TRTorrent::new).collect(Collectors.toList());
     }
 
