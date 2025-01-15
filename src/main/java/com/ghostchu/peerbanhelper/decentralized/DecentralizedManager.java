@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.decentralized;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.lab.Experiments;
 import com.ghostchu.peerbanhelper.lab.Laboratory;
@@ -41,11 +42,8 @@ public class DecentralizedManager implements AutoCloseable, Reloadable {
         }
         try {
             var ipfsRpc = Main.getMainConfig().getString("decentralized.kubo-rpc", "/ip4/127.0.0.1/tcp/5001");
-            if (System.getProperty("pbh.kuboRPC") != null) {
-                ipfsRpc = System.getProperty("pbh.kuboRPC");
-            }
-            if(System.getenv("PBH_KUBO_RPC") != null) {
-                ipfsRpc = System.getenv("PBH_KUBO_RPC");
+            if (ExternalSwitch.parse("pbh.kuboRPC") != null) {
+                ipfsRpc = ExternalSwitch.parse("pbh.kuboRPC");
             }
             this.ipfs = new IPFS(ipfsRpc);
             log.info(tlUI(Lang.IPFS_INIT_WELCOME, ipfs.version()));

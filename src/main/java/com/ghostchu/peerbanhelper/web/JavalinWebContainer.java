@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.web;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -64,8 +65,7 @@ public class JavalinWebContainer {
                     c.useVirtualThreads = true;
                     c.bundledPlugins.enableRouteOverview("/route-overview");
                     if (Main.getMainConfig().getBoolean("server.allow-cors")
-                        || System.getenv("PBH_ALLOW_CORS") != null
-                        || System.getProperty("PBH_ALLOW_CORS") != null
+                            || ExternalSwitch.parse("PBH_ALLOW_CORS") != null
                     ) {
                         c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
                     }

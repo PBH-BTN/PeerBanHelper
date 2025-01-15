@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -166,7 +167,7 @@ public class ExpressionRule extends AbstractRuleFeatureModule implements Reloada
     }
 
     private boolean isSafeNetworkEnvironment(Context context){
-        var value = System.getProperty("pbh.please-disable-safe-network-environment-check-i-know-this-is-very-dangerous-and-i-may-lose-my-data-and-hacker-may-attack-me-via-this-endpoint-and-steal-my-data-or-destroy-my-computer-i-am-fully-responsible-for-this-action-and-i-will-not-blame-the-developer-for-any-loss");
+        var value = ExternalSwitch.parse("pbh.please-disable-safe-network-environment-check-i-know-this-is-very-dangerous-and-i-may-lose-my-data-and-hacker-may-attack-me-via-this-endpoint-and-steal-my-data-or-destroy-my-computer-i-am-fully-responsible-for-this-action-and-i-will-not-blame-the-developer-for-any-loss");
         if(value != null && value.equals("true")){
             return true;
         }

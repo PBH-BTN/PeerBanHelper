@@ -17,8 +17,8 @@ public final class BuildMeta {
     private String compileTime = "Unknown";
 
     public void loadBuildMeta(YamlConfiguration configuration) {
-        this.version = configuration.getString("maven.version");
-        this.branch = configuration.getString("git.branch");
+        this.version = ExternalSwitch.parse("pbh.buildmeta.maven.version", configuration.getString("maven.version"));
+        this.branch = ExternalSwitch.parse("pbh.buildmeta.git.branch", configuration.getString("git.branch"));
         this.commit = configuration.getString("git.commit.id.commit-id");
         this.abbrev = configuration.getString("git.commit.id.abbrev");
         this.os = System.getProperty("os.name");
