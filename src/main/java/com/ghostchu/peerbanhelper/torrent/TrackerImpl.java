@@ -30,7 +30,13 @@ public class TrackerImpl implements Tracker {
     }
 
     public static List<Tracker> parseFromTrackerList(String trackerList) {
-        return Stream.of(trackerList.split("\n\n")).filter(str -> !str.isBlank()).map(TrackerImpl::new).collect(Collectors.toList());
+        if (trackerList == null) {
+            return Collections.emptyList();
+        }
+        return Stream.of(trackerList.split("\n\n"))
+            .filter(str -> !str.isBlank())
+            .map(TrackerImpl::new)
+            .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
