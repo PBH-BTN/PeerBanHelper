@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.offbynull.portmapper.PortMapperFactory;
 import com.offbynull.portmapper.gateway.Bus;
@@ -110,7 +111,7 @@ public class PBHPortMapper {
                                 var newMapperPort = mapper.refreshPort(mappedPort, 600);
                                 originalToRefreshedPortMap.put(mappedPort, newMapperPort);
                             } catch (Exception e) {
-                                if(System.getProperty("pbh.portMapper.disableRefreshFailRetry", "false").equals("true")) {
+                                if (ExternalSwitch.parse("pbh.portMapper.disableRefreshFailRetry", "false").equals("true")) {
                                     return;
                                 }
                                 log.error(tlUI(Lang.PORT_MAPPER_PORT_MAPPING_FAILED, mapper.getSourceAddress().getHostAddress(), mappedPort.getPortType().name(), mappedPort.getInternalPort()), e);
