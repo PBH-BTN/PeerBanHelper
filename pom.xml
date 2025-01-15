@@ -438,7 +438,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpg-jdk18on</artifactId>
-            <version>1.79</version>
+            <version>1.80</version>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
