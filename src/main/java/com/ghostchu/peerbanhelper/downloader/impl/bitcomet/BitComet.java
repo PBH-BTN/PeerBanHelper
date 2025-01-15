@@ -13,6 +13,8 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
+import com.ghostchu.peerbanhelper.torrent.Tracker;
+import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -313,6 +315,93 @@ public class BitComet extends AbstractDownloader {
     }
 
     @Override
+    public List<Torrent> getAllTorrents() {
+        Map<String, String> requirements = new HashMap<>();
+        requirements.put("group_state", "ALL");
+        requirements.put("sort_key", "");
+        requirements.put("sort_order", "unsorted");
+        HttpResponse<String> request;
+        try {
+            request = httpClient.send(
+                    MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint(),
+                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
+                            .header("Authorization", "Bearer " + this.deviceToken)
+                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (request.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
+        }
+        var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
+
+        Semaphore semaphore = new Semaphore(4);
+        List<BCTaskTorrentResponse> torrentResponses = Collections.synchronizedList(new ArrayList<>(response.getTasks().size()));
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            response.getTasks().stream().filter(t -> t.getType().equals("BT"))
+                    .forEach(torrent -> executor.submit(() -> {
+                        try {
+                            semaphore.acquire();
+                            Map<String, String> taskIds = new HashMap<>();
+                            taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
+                            HttpResponse<String> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
+                                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
+                                            .header("Authorization", "Bearer " + this.deviceToken),
+                                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                            var torrentResp = JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
+                            torrentResponses.add(torrentResp);
+                        } catch (IOException | InterruptedException e) {
+                            log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY), e);
+                        } finally {
+                            semaphore.release();
+                        }
+                    }));
+        }
+        return torrentResponses.stream().map(torrent -> new TorrentImpl(Long.toString(torrent.getTask().getTaskId()),
+                torrent.getTask().getTaskName(),
+                torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
+                torrent.getTaskDetail().getTotalSize(),
+                torrent.getTask().getSelectedDownloadedSize(),
+                torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
+                torrent.getTask().getUploadRate(),
+                torrent.getTask().getDownloadRate(),
+                torrent.getTaskDetail().getTorrentPrivate()
+        )).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Tracker> getTrackers(Torrent torrent) {
+        HttpResponse<InputStream> resp;
+        try {
+            Map<String, Object> requirements = new HashMap<>();
+            requirements.put("task_id", torrent.getId());
+            requirements.put("max_count", String.valueOf(Integer.MAX_VALUE)); // 获取全量列表，因为我们需要检查所有 Peers
+            resp = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_TRACKERS.getEndpoint(),
+                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
+                            .header("Authorization", "Bearer " + this.deviceToken),
+                    HttpResponse.BodyHandlers.ofInputStream());
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (resp.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
+        }
+        try (InputStreamReader reader = new InputStreamReader(resp.body())) {
+            var trackers = JsonUtil.standard().fromJson(reader, BCTaskTrackersResponse.class);
+            return trackers.getTrackers().stream()
+                    .filter(t -> t.getName().startsWith("http") || t.getName().startsWith("udp") || t.getName().startsWith("ws"))
+                    .map(t -> (Tracker) new TrackerImpl(t.getName())).toList();
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+        // Unsupported Operation
+    }
+
+    @Override
     public DownloaderStatistics getStatistics() {
         return new DownloaderStatistics(0L, 0L);
     }
@@ -345,8 +434,8 @@ public class BitComet extends AbstractDownloader {
 
             if (!noGroupField) { // 对于新版本，添加一个 group 过滤
                 stream = stream.filter(dto -> dto.getGroup().equals("connected") // 2.10 正式版
-                                              || dto.getGroup().equals("connected_peers") // 2.11 Beta 1-2
-                                              || dto.getGroup().equals("peers_connected")); // 2.11 Beta 3
+                        || dto.getGroup().equals("connected_peers") // 2.11 Beta 1-2
+                        || dto.getGroup().equals("peers_connected")); // 2.11 Beta 3
             }
             return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
                     peer.getIp(),

@@ -564,3 +564,5 @@ BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT: "The cu
 BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER: "The current server BTN protocol implementation version is too old, server implementation version: {}, local requires at least: {}"
 BTN_CONFIG_STATUS_SUCCESSFUL: "Successfully connected to the BTN server"
 BTN_CONFIG_STATUS_EXCEPTION: "An unexpected error occurred while connecting to the BTN server: {}"
+DOWNLOADER_QB_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "Request tracker list on torrent {} failed：{} - {}"
+TRACKER_FAILED_TO_UPDATE_TRACKER: "Failed to update tracker list on torrent {}：{} - {}"

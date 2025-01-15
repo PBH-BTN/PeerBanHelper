@@ -9,10 +9,13 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentMainData;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPeer;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentTorrent;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentTorrentTrackers;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.torrent.Tracker;
+import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -122,7 +125,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         }
     }
 
-    public void updatePreferences(){
+    public void updatePreferences() {
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()
@@ -194,6 +197,99 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         return qbTorrent.stream().map(t -> (Torrent) t)
                 .filter(t -> !config.isIgnorePrivate() || !t.isPrivate())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Torrent> getAllTorrents() {
+        HttpResponse<String> request;
+        try {
+            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/torrents/info"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (request.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
+        }
+        List<QBittorrentTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrent>>() {
+        }.getType());
+
+        fillTorrentProperties(qbTorrent);
+
+        return qbTorrent.stream().map(t -> (Torrent) t)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Tracker> getTrackers(Torrent torrent) {
+        HttpResponse<String> request;
+        try {
+            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/torrents/trackers?hash=" + torrent.getId()), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (request.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT, torrent.getHash(), request.statusCode(), request.body()));
+        }
+        List<QBittorrentTorrentTrackers> qbTorrentTrackers = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrentTrackers>>() {
+        }.getType());
+        qbTorrentTrackers = qbTorrentTrackers.stream().sorted(Comparator.comparingInt(QBittorrentTorrentTrackers::getTier)).toList();
+        StringBuilder builder = new StringBuilder();
+        int lastTier = -1;
+        for (QBittorrentTorrentTrackers qbTorrentTracker : qbTorrentTrackers) {
+            if (qbTorrentTracker.getTier() != lastTier && lastTier != -1) {
+                lastTier = qbTorrentTracker.getTier();
+                builder.append(qbTorrentTracker.getUrl()).append("\n");
+            } else {
+                lastTier = qbTorrentTracker.getTier();
+                builder.append(qbTorrentTracker.getUrl()).append("\n\n");
+            }
+        }
+        return TrackerImpl.parseFromTrackerList(builder.toString());
+    }
+
+    @Override
+    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+        List<Tracker> trackerList = getTrackers(torrent);
+        List<Tracker> newAdded = trackers.stream().filter(t -> !trackerList.contains(t)).toList();
+        List<Tracker> removed = trackerList.stream().filter(t -> !trackers.contains(t)).toList();
+        addTracker(torrent, newAdded);
+        removeTracker(torrent, removed);
+    }
+
+    private void addTracker(Torrent torrent, List<Tracker> newAdded) {
+        StringJoiner joiner = new StringJoiner("|");
+        newAdded.forEach(t -> t.getTrackersInGroup().forEach(joiner::add));
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest
+                            .POST(apiEndpoint + "/torrents/addTrackers", FormBodyPublisher.newBuilder()
+                                    .query("hash", torrent.getId())
+                                    .query("urls", joiner.toString()).build())
+                            .header("Content-Type", "application/x-www-form-urlencoded")
+                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (request.statusCode() != 200) {
+                throw new IllegalStateException("Add qBittorrent tracker error: statusCode=" + request.statusCode());
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private void removeTracker(Torrent torrent, List<Tracker> trackers) throws IllegalStateException {
+        StringJoiner joiner = new StringJoiner("|");
+        trackers.forEach(t -> t.getTrackersInGroup().forEach(joiner::add));
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest
+                            .POST(apiEndpoint + "/torrents/removeTrackers", FormBodyPublisher.newBuilder()
+                                    .query("hash", torrent.getId())
+                                    .query("urls", joiner.toString()).build())
+                            .header("Content-Type", "application/x-www-form-urlencoded")
+                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (request.statusCode() != 200) {
+                throw new IllegalStateException("Remove qBittorrent tracker error: statusCode=" + request.statusCode());
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     protected void fillTorrentProperties(List<QBittorrentTorrent> qbTorrent) {
@@ -367,7 +463,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     }
 
-    public record TorrentProperties(boolean isPrivate, long completed, long pieceSize, long piecesHave) {}
+    public record TorrentProperties(boolean isPrivate, long completed, long pieceSize, long piecesHave) {
+    }
 
     @AllArgsConstructor
     @NoArgsConstructor

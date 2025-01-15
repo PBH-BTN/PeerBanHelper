@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.downloader;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -80,6 +81,13 @@ public interface Downloader extends AutoCloseable {
     List<Torrent> getTorrents();
 
     /**
+     * 获取此下载器的所有 Torrents
+     *
+     * @return 返回所有的 Torrents
+     */
+    List<Torrent> getAllTorrents();
+
+    /**
      * 获取指定 Torrent 的对等体列表
      *
      * @param torrent Torrent
@@ -87,6 +95,19 @@ public interface Downloader extends AutoCloseable {
      */
     List<Peer> getPeers(Torrent torrent);
 
+    /**
+     * 获取指定 Torrent 的 Tracker 列表
+     * @param torrent Torrent
+     * @return Tracker 列表
+     */
+    List<Tracker> getTrackers(Torrent torrent);
+
+    /**
+     * 设置指定 Torrent 的 Tracker 列表
+     * @param torrent Torrent
+     * @param trackers Tracker 列表
+     */
+    void setTrackers(Torrent torrent, List<Tracker> trackers);
 
     /**
      * 设置并使新的 BanList 生效

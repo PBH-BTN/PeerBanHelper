@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -158,11 +159,26 @@ public class Deluge extends AbstractDownloader {
     }
 
     @Override
+    public List<Torrent> getAllTorrents() {
+        return getTorrents();
+    }
+
+    @Override
     public List<Peer> getPeers(Torrent torrent) {
         if (!(torrent instanceof DelugeTorrent delugeTorrent)) {
             throw new IllegalStateException("The torrent object not a instance of DelugeTorrent");
         }
         return delugeTorrent.getPeers();
+    }
+
+    @Override
+    public List<Tracker> getTrackers(Torrent torrent) {
+        return List.of();
+    }
+
+    @Override
+    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+
     }
 
     @SneakyThrows
