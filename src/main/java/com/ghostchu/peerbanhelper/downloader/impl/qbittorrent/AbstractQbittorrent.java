@@ -114,6 +114,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                                                     .query("password", config.getPassword()).build())
                                     .header("Content-Type", "application/x-www-form-urlencoded")
                             , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
             if (request.statusCode() == 200 && isLoggedIn()) {
                 updatePreferences();
                 return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
