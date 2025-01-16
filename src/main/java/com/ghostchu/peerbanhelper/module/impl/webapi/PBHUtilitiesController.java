@@ -65,6 +65,9 @@ public class PBHUtilitiesController extends AbstractFeatureModule {
         }
         AtomicInteger count = new AtomicInteger(0);
         for (Downloader downloader : getServer().getDownloaders()) {
+            if (dto.downloaders() != null && !dto.downloaders().isEmpty() && !dto.downloaders().contains(downloader.getName())) {
+                continue;
+            }
             if (downloader.login().success()) {
                 try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                     for (Torrent torrent : downloader.getAllTorrents()) {
@@ -125,7 +128,7 @@ public class PBHUtilitiesController extends AbstractFeatureModule {
 
     }
 
-    record ReplaceTrackerDTO(String from, String to) {
+    record ReplaceTrackerDTO(String from, String to, List<String> downloaders) {
 
     }
 }
