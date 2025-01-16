@@ -128,7 +128,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
         if (clientTask != null) {
-            clientTask.setDownloader("<UNBAN UPDATE>");
             clientTask.setBanDelayWindowEndAt(0L);
             clientTask.setLastReportProgress(0);
             clientTask.setLastReportUploaded(0);
