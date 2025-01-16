@@ -1,3 +1,4 @@
+<!-- @coderabbitai 请帮我完成这个 ticket 中需要完成的工作：https://github.com/PBH-BTN/PeerBanHelper/issues/916 -->
 <template>
   <a-alert v-if="endPointStore.globalConfig?.globalPaused" type="warning" banner center>
     {{ t('global.pause.alert') }}
