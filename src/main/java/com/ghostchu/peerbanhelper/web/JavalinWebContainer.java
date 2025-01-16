@@ -45,6 +45,7 @@ public class JavalinWebContainer {
     private final Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
+    private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
 
     public JavalinWebContainer(ActivationManager activationManager) {
         JsonMapper gsonMapper = new JsonMapper() {
@@ -121,6 +122,11 @@ public class JavalinWebContainer {
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
+                    if (!securityCheck(ctx)) {
+                        ctx.status(404);
+                        ctx.result("404 not found");
+                        return;
+                    }
                     if (ctx.routeRoles().isEmpty()) {
                         return;
                     }
@@ -154,7 +160,20 @@ public class JavalinWebContainer {
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200));
-                //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
+        //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
+    }
+
+    private boolean securityCheck(Context ctx) {
+        var userAgent = ctx.userAgent();
+        if (userAgent == null) return false;
+        if (userAgent.isBlank()) return false;
+        var ua = userAgent.toLowerCase();
+        for (String s : blockUserAgent) {
+            if (ua.contains(s)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean isContextAuthorized(Context ctx) {
