@@ -8,6 +8,12 @@
 .markdown-body table tr {
   background-color: var(--bgColor-default);
 }
+html {
+  background-color: #fff;
+}
+html[data-theme='dark'] {
+  background-color: #2a2a2b;
+}
 .markdown-body {
   --base-size-4: 0.25rem;
   --base-size-8: 0.5rem;
@@ -40,7 +46,7 @@
   --fgColor-attention: #d29922;
   --fgColor-danger: #f85149;
   --fgColor-done: #ab7df8;
-  --bgColor-default: var(--color-bg-3);
+  --bgColor-default: #2a2a2b;
   --bgColor-muted: #151b23;
   --bgColor-neutral-muted: #656c7633;
   --bgColor-attention-muted: #bb800926;
@@ -93,7 +99,7 @@
   --fgColor-attention: #9a6700;
   --fgColor-danger: #d1242f;
   --fgColor-done: #8250df;
-  --bgColor-default: var(--color-bg-3);
+  --bgColor-default: #fff;
   --bgColor-muted: #f6f8fa;
   --bgColor-neutral-muted: #818b981f;
   --bgColor-attention-muted: #fff8c5;
