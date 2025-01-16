@@ -56,7 +56,8 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
                 null,
                 torrent.getHash(),
                 torrent.getName(),
-                torrent.getSize()
+                torrent.getSize(),
+                torrent.isPrivateTorrent()
         ));
         PeerRecordEntity currentSnapshot = new PeerRecordEntity(
                 null,
