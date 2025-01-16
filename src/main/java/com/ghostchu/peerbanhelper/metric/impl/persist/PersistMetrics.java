@@ -99,7 +99,8 @@ public class PersistMetrics implements BasicMetrics {
                         null,
                         metadata.getTorrent().getHash(),
                         metadata.getTorrent().getName(),
-                        metadata.getTorrent().getSize()
+                        metadata.getTorrent().getSize(),
+                        metadata.getTorrent().isPrivateTorrent()
                 ));
                 ModuleEntity module = moduleDao.createIfNotExists(new ModuleEntity(
                         null,
