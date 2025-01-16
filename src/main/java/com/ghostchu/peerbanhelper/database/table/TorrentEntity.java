@@ -19,4 +19,6 @@ public final class TorrentEntity {
     private String name;
     @DatabaseField(canBeNull = false)
     private Long size;
+    @DatabaseField()
+    private Boolean privateTorrent;
 }
