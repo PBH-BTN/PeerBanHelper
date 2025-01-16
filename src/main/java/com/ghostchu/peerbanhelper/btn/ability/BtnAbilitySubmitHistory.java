@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.btn.ability;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeerHistory;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeerHistoryPing;
@@ -13,12 +14,16 @@ import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -29,13 +34,40 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private long lastSubmitAt = System.currentTimeMillis();
+    private final File file;
 
     public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
+
+        this.file = new File(Main.getDataDirectory(), "btn_submit_history_timestamp.dat");
+        if (!this.file.exists()) {
+            try {
+                this.file.createNewFile();
+                writeLastSubmitAtTimestamp(System.currentTimeMillis());
+            } catch (Exception e) {
+                log.error("Unable to create file for record btn submit_history_timestamp, default to current timestamp", e);
+            }
+        }
+    }
+
+    private void writeLastSubmitAtTimestamp(long timestamp) {
+        try {
+            Files.writeString(file.toPath(), String.valueOf(timestamp));
+        } catch (IOException e) {
+            log.error("Unable to write timestamp to file", e);
+        }
+    }
+
+    private long getLastSubmitAtTimestamp() {
+        try {
+            return Long.parseLong(Files.readString(file.toPath()));
+        } catch (Exception e) {
+            log.error("Unable to read timestamp from file", e);
+            return System.currentTimeMillis();
+        }
     }
 
 
@@ -63,34 +95,41 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private void submit() {
         try {
             log.info(tlUI(Lang.BTN_SUBMITTING_HISTORIES));
-            List<BtnPeerHistory> btnPeers = generatePing();
-            if (btnPeers.isEmpty()) {
-                setLastStatus(true, new TranslationComponent(Lang.BTN_LAST_REPORT_EMPTY));
-                return;
+            AtomicLong lastSubmitAt = new AtomicLong(getLastSubmitAtTimestamp());
+            List<BtnPeerHistory> btnPeers = generatePing(lastSubmitAt.get());
+            while (!btnPeers.isEmpty()) {
+                BtnPeerHistoryPing ping = new BtnPeerHistoryPing(
+                        System.currentTimeMillis(),
+                        btnPeers
+                );
+                MutableRequest request = MutableRequest.POST(endpoint
+                        , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
+                ).header("Content-Encoding", "gzip");
+                HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
+                        .thenAccept(r -> {
+                            if (r.statusCode() != 200) {
+                                log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
+                                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
+                            } else {
+                                log.info(tlUI(Lang.BTN_SUBMITTED_HISTORIES, btnPeers.size()));
+                                setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, btnPeers.size()));
+
+                            }
+                        })
+                        .exceptionally(e -> {
+                            log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
+                            setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
+                            return null;
+                        });
             }
-            BtnPeerHistoryPing ping = new BtnPeerHistoryPing(
-                    System.currentTimeMillis(),
-                    btnPeers
-            );
-            MutableRequest request = MutableRequest.POST(endpoint
-                    , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
-            ).header("Content-Encoding", "gzip");
-            HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
-                    .thenAccept(r -> {
-                        if (r.statusCode() != 200) {
-                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
-                        } else {
-                            log.info(tlUI(Lang.BTN_SUBMITTED_HISTORIES, btnPeers.size()));
-                            setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, btnPeers.size()));
-                            lastSubmitAt = System.currentTimeMillis();
-                        }
-                    })
-                    .exceptionally(e -> {
-                        log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
-                        setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
-                        return null;
-                    });
+            var lastRecordAt = btnPeers.getLast().getLastTimeSeen().getTime();
+            if (lastRecordAt >= lastSubmitAt.get()) {
+                lastSubmitAt.set(lastRecordAt);
+                writeLastSubmitAtTimestamp(lastRecordAt);
+            } else {
+                lastSubmitAt.set(System.currentTimeMillis());
+                writeLastSubmitAtTimestamp(System.currentTimeMillis());
+            }
         } catch (Throwable e) {
             log.error("Unable to submit peer histories", e);
             setLastStatus(false, new TranslationComponent("Unknown Error: " + e.getClass().getName() + ": " + e.getMessage()));
@@ -99,7 +138,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
 
 
     @SneakyThrows
-    private List<BtnPeerHistory> generatePing() {
+    private List<BtnPeerHistory> generatePing(long lastSubmitAt) {
         Pageable pageable = new Pageable(0, 10000); // 再多的话，担心爆内存
         return btnNetwork.getPeerRecordDao().getPendingSubmitPeerRecords(pageable,
                         new Timestamp(lastSubmitAt)).getResults().stream()

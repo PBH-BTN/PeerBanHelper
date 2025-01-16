@@ -47,7 +47,7 @@ public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
                 .or()
                 .isNull("lastTimeSeen")
                 .queryBuilder()
-                .orderBy("lastTimeSeen", false);
+                .orderBy("lastTimeSeen", true);
         return queryByPaging(queryBuilder, pageable);
     }
 
