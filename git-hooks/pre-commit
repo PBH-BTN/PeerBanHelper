@@ -16,7 +16,7 @@ cd webui || exit 1
 CHANGED_FILES=$(echo "$CHANGED_FILES" | sed 's/webui\///g')
 
 # 对有改动的文件执行 prettier 格式化
-echo "$CHANGED_FILES" | xargs pnpm prettier --write
+echo "$CHANGED_FILES" | xargs -P 4 pnpm prettier --write
 
 if [ $? -ne 0 ]; then
   echo "Prettier formatting failed."
@@ -24,7 +24,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # 对有改动的文件执行 eslint 检查
-echo "$CHANGED_FILES" | xargs pnpm eslint --ignore-pattern 'dist/*' --fix
+echo "$CHANGED_FILES" | xargs -P 4 pnpm eslint --cache --ignore-pattern 'dist/*' --fix
 
 if [ $? -ne 0 ]; then
   echo "ESLint check failed."
