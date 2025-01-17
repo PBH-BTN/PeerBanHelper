@@ -111,25 +111,30 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                             } else {
-                                log.info(tlUI(Lang.BTN_SUBMITTED_HISTORIES, btnPeers.size()));
-                                setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, btnPeers.size()));
-
+                                log.info(tlUI(Lang.BTN_SUBMITTED_HISTORIES, ping.getPeers().size()));
+                                setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, ping.getPeers().size()));
                             }
                         })
                         .exceptionally(e -> {
                             log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
                             setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
                             return null;
-                        });
+                        })
+                        .join();
+                var lastRecordAt = btnPeers.getLast().getLastTimeSeen().getTime();
+                if (lastRecordAt >= lastSubmitAt.get()) {
+                    if (lastRecordAt == lastSubmitAt.get()) {
+                        lastRecordAt++; // avoid inf loop
+                    }
+                    lastSubmitAt.set(lastRecordAt);
+                    writeLastSubmitAtTimestamp(lastRecordAt);
+                } else {
+                    lastSubmitAt.set(System.currentTimeMillis());
+                    writeLastSubmitAtTimestamp(System.currentTimeMillis());
+                }
+                btnPeers = generatePing(lastSubmitAt.get());
             }
-            var lastRecordAt = btnPeers.getLast().getLastTimeSeen().getTime();
-            if (lastRecordAt >= lastSubmitAt.get()) {
-                lastSubmitAt.set(lastRecordAt);
-                writeLastSubmitAtTimestamp(lastRecordAt);
-            } else {
-                lastSubmitAt.set(System.currentTimeMillis());
-                writeLastSubmitAtTimestamp(System.currentTimeMillis());
-            }
+
         } catch (Throwable e) {
             log.error("Unable to submit peer histories", e);
             setLastStatus(false, new TranslationComponent("Unknown Error: " + e.getClass().getName() + ": " + e.getMessage()));
