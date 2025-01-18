@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -35,6 +37,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final String endpoint;
     private final long randomInitialDelay;
     private final File file;
+    private final Lock lock = new ReentrantLock();
 
     public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
@@ -99,6 +102,9 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     }
 
     private void submit() {
+        if (!lock.tryLock()) {
+            return; // this is possible since we can send multiple requests
+        }
         try {
             log.info(tlUI(Lang.BTN_SUBMITTING_HISTORIES));
             AtomicLong lastSubmitAt = new AtomicLong(getLastSubmitAtTimestamp());
@@ -112,6 +118,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                         , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
                 ).header("Content-Encoding", "gzip");
                 HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
+                        .orTimeout(30, TimeUnit.SECONDS)
                         .thenAccept(r -> {
                             if (r.statusCode() != 200) {
                                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
@@ -144,6 +151,8 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
         } catch (Throwable e) {
             log.error("Unable to submit peer histories", e);
             setLastStatus(false, new TranslationComponent("Unknown Error: " + e.getClass().getName() + ": " + e.getMessage()));
+        } finally {
+            lock.unlock();
         }
     }
 
