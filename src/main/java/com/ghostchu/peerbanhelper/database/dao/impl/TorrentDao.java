@@ -43,6 +43,10 @@ public class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
             entity.setSize(data.getSize());
             anyUpdated = true;
         }
+        if (entity.getPrivateTorrent() == null && data.getPrivateTorrent() != null) {
+            entity.setPrivateTorrent(data.getPrivateTorrent());
+            anyUpdated = true;
+        }
         if (anyUpdated) {
             update(entity);
         }

@@ -197,7 +197,7 @@ public class PeerBanHelperServer implements Reloadable {
 
     @SneakyThrows
     private void runTestCode() {
-        if (!"LiveDebug".equalsIgnoreCase(System.getProperty("pbh.release"))) {
+        if (!"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
             return;
         }
         // run some junky test code here
@@ -384,10 +384,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void registerHttpServer() {
-        String token = System.getenv("PBH_API_TOKEN");
-        if (token == null) {
-            token = System.getProperty("pbh.api_token");
-        }
+        String token = ExternalSwitch.parse("pbh.api_token");
         if (token == null) {
             token = Main.getMainConfig().getString("server.token");
         }
@@ -737,7 +734,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHPushController.class);
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
-
+        moduleManager.register(PBHUtilitiesController.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

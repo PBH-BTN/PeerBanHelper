@@ -80,6 +80,16 @@ public class DatabaseHelper {
             TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
             v = 8;
         }
+        if (v == 8) {
+            try {
+                // add new column: privateTorrent, nullable
+                var torrentDao = DaoManager.createDao(getDataSource(), TorrentEntity.class);
+                torrentDao.executeRaw("ALTER TABLE " + torrentDao.getTableName() + " ADD COLUMN privateTorrent BOOLEAN NULL");
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 9;
+        }
         version.setValue(String.valueOf(v));
         metadata.update(version);
     }

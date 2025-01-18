@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -8,6 +9,7 @@ import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -35,6 +37,7 @@ import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -127,7 +130,7 @@ public class Transmission extends AbstractDownloader {
             }
             Thread.sleep(3000);
         }
-        if (System.getProperty("pbh.downloader.transmission.i-know-transmission-is-discourage-and-could-be-removed-in-future-please-dont-show-require-take-actions-status-text-and-i-know-what-i-am-doing") != null) {
+        if (ExternalSwitch.parse("pbh.downloader.transmission.i-know-transmission-is-discourage-and-could-be-removed-in-future-please-dont-show-require-take-actions-status-text-and-i-know-what-i-am-doing") != null) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
         } else {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_TRANSMISSION_DISCOURAGE));
@@ -136,11 +139,25 @@ public class Transmission extends AbstractDownloader {
 
     @Override
     public List<Torrent> getTorrents() {
-        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.SIZE_WHEN_DONE);
+        return fetchTorrents(true, !config.isIgnorePrivate());
+    }
+
+    @Override
+    public List<Torrent> getAllTorrents() {
+        return fetchTorrents(false, true);
+    }
+
+    public List<Torrent> fetchTorrents(boolean onlyActiveTorrent, boolean includePrivate) {
+        RqTorrentGet torrent = new RqTorrentGet(Fields.ID, Fields.HASH_STRING, Fields.NAME, Fields.PEERS_CONNECTED, Fields.STATUS, Fields.TOTAL_SIZE, Fields.PEERS, Fields.RATE_DOWNLOAD, Fields.RATE_UPLOAD, Fields.PEER_LIMIT, Fields.PERCENT_DONE, Fields.SIZE_WHEN_DONE, Fields.TRACKER_LIST, Fields.TRACKER_STATS);
         TypedResponse<RsTorrentGet> rsp = client.execute(torrent);
         return rsp.getArgs().getTorrents().stream()
-                .filter(t -> t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING)
-                .filter(t -> !(config.isIgnorePrivate() && t.getIsPrivate()))
+                .filter(t -> {
+                    if (onlyActiveTorrent) {
+                        return t.getStatus() == Status.DOWNLOADING || t.getStatus() == Status.SEEDING;
+                    }
+                    return true;
+                })
+                .filter(t -> includePrivate || !t.getIsPrivate())
                 .map(TRTorrent::new).collect(Collectors.toList());
     }
 
@@ -148,6 +165,23 @@ public class Transmission extends AbstractDownloader {
     public List<Peer> getPeers(Torrent torrent) {
         TRTorrent trTorrent = (TRTorrent) torrent;
         return trTorrent.getPeers();
+    }
+
+    @Override
+    public List<Tracker> getTrackers(Torrent torrent) {
+        TRTorrent trTorrent = (TRTorrent) torrent;
+        return trTorrent.getTrackers();
+    }
+
+    @Override
+    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+        StringJoiner trackersJoiner = new StringJoiner("\n\n"); // 空一行
+        trackers.forEach(t -> trackersJoiner.add(t.toString()));
+        RqTorrentSet set = RqTorrentSet.builder()
+                .ids(List.of(torrent.getId()))
+                .trackerList(trackersJoiner.toString())
+                .build();
+        client.execute(set);
     }
 
 
@@ -207,7 +241,7 @@ public class Transmission extends AbstractDownloader {
 
     @Override
     public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-        if(System.getProperty("pbh.transmission.disable-torrent-relaunch") != null) {
+        if (ExternalSwitch.parse("pbh.transmission.disable-torrent-relaunch") != null) {
             return;
         }
         relaunchTorrents(torrents.stream().filter(t -> {

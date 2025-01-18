@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.web;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -44,6 +45,7 @@ public class JavalinWebContainer {
     private final Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
+    private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
 
     public JavalinWebContainer(ActivationManager activationManager) {
         JsonMapper gsonMapper = new JsonMapper() {
@@ -62,10 +64,8 @@ public class JavalinWebContainer {
                     c.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
-                    c.bundledPlugins.enableRouteOverview("/route-overview");
                     if (Main.getMainConfig().getBoolean("server.allow-cors")
-                        || System.getenv("PBH_ALLOW_CORS") != null
-                        || System.getProperty("PBH_ALLOW_CORS") != null
+                            || ExternalSwitch.parse("PBH_ALLOW_CORS") != null
                     ) {
                         c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
                     }
@@ -121,6 +121,11 @@ public class JavalinWebContainer {
                     log.error("500 Internal Server Error", e);
                 })
                 .beforeMatched(ctx -> {
+                    if (!securityCheck(ctx)) {
+                        ctx.status(404);
+                        ctx.result("404 not found");
+                        return;
+                    }
                     if (ctx.routeRoles().isEmpty()) {
                         return;
                     }
@@ -154,7 +159,20 @@ public class JavalinWebContainer {
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200));
-                //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
+        //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
+    }
+
+    private boolean securityCheck(Context ctx) {
+        var userAgent = ctx.userAgent();
+        if (userAgent == null) return false;
+        if (userAgent.isBlank()) return false;
+        var ua = userAgent.toLowerCase();
+        for (String s : blockUserAgent) {
+            if (ua.contains(s)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean isContextAuthorized(Context ctx) {

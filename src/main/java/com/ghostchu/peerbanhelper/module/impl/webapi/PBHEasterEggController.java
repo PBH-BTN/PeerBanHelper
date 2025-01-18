@@ -67,14 +67,14 @@ public class PBHEasterEggController  extends AbstractFeatureModule {
     public void onEnable() {
         javalinWebContainer.javalin()
                 .get("/api/egg", this::handleEgg)
-                .get("/api/neuro", this::neuro) // AI VTuber made by Vedal on Twitch: https://www.twitch.tv/vedal987
-                .get("/api/neurosama", this::neuro);
+                .get("/api/egg/neuro", this::neuro) // AI VTuber made by Vedal on Twitch: https://www.twitch.tv/vedal987
+                .get("/api/egg/neurosama", this::neuro);
     }
 
 
     private void neuro(Context context) {
         // Yeeeeet, Neuro!
-        var imageStream = Main.class.getResourceAsStream("/assets/other/neuro.png");
+        var imageStream = Main.class.getResourceAsStream("/assets/other/Neuro.png");
         if (imageStream == null) {
             context.status(HttpStatus.NOT_FOUND);
             context.result("You killed Neuro! How dare you!?");

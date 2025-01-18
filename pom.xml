@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.3.2</version>
+    <version>7.3.3-RC1</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -432,13 +432,13 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.79</version>
+            <version>1.80</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpg-jdk18on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpg-jdk18on</artifactId>
-            <version>1.79</version>
+            <version>1.80</version>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
