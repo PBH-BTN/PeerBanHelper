@@ -22,6 +22,7 @@ public class TrackerImpl implements Tracker {
     }
 
     public TrackerImpl(List<String> string) {
+        Objects.requireNonNull(string, "tracker list cannot be null");
         this.trackers = string;
     }
 
