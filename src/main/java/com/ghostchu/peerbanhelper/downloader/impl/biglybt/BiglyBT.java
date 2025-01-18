@@ -175,7 +175,7 @@ public class BiglyBT extends AbstractDownloader {
             StringBuilder urlBuilder = new StringBuilder(apiEndpoint + "/downloads");
             if (!filtersUrlEncoded.isEmpty()) {
                 urlBuilder.append("?filter=");
-                urlBuilder.append(String.join("&filter=", filtersUrlEncoded.toString()));
+                urlBuilder.append(String.join("&filter=", filtersUrlEncoded.stream().map(Object::toString).toArray(String[]::new)));
             }
             request = httpClient.send(MutableRequest.GET(urlBuilder.toString()),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
