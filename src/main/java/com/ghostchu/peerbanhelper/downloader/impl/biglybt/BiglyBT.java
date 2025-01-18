@@ -220,6 +220,9 @@ public class BiglyBT extends AbstractDownloader {
     @Override
     public List<Tracker> getTrackers(Torrent torrent) {
         BiglyBTTorrent biglyBTTorrent = (BiglyBTTorrent) torrent;
+        if (biglyBTTorrent.getTrackers() == null) {
+            return Collections.emptyList();
+        }
         return biglyBTTorrent.getTrackers().stream().map(t -> (Tracker) new TrackerImpl(t)).toList();
     }
 
