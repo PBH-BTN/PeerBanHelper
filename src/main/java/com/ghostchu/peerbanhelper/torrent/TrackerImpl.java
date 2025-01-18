@@ -32,6 +32,9 @@ public class TrackerImpl implements Tracker {
 
     @Override
     public String getLeadingTracker() {
+        if (trackers.isEmpty()) {
+            throw new IllegalStateException("No trackers available");
+        }
         return trackers.getFirst();
     }
 
