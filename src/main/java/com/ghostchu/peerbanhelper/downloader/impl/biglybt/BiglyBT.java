@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.MetadataCallbackBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerManagerRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerRecord;
@@ -31,6 +32,7 @@ import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.vdurmont.semver4j.Semver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -109,10 +111,18 @@ public class BiglyBT extends AbstractDownloader {
 
     @Override
     public DownloaderLoginResult login0() {
-        HttpResponse<Void> resp;
+        HttpResponse<String> resp;
         try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.discarding());
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() == 200) {
+                MetadataCallbackBean metadataCallbackBean = JsonUtil.standard().fromJson(resp.body(), MetadataCallbackBean.class);
+                // 验证版本号
+                var version = metadataCallbackBean.getPluginVersion();
+                Semver semver = new Semver(version);
+                // 检查是否大于等于 1.2.8
+                if (semver.isLowerThan("1.2.9")) {
+                    return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.2.9"));
+                }
                 MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(connectorPayload));
                 try {
                     httpClient.send(request, HttpResponse.BodyHandlers.discarding());

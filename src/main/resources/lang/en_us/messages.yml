@@ -567,3 +567,4 @@ BTN_CONFIG_STATUS_EXCEPTION: "An unexpected error occurred while connecting to t
 DOWNLOADER_QB_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "Request tracker list on torrent {} failed：{} - {}"
 TRACKER_FAILED_TO_UPDATE_TRACKER: "Failed to update tracker list on torrent {}：{} - {}"
 UTILITIES_TRACKER_REPLACED: "Successfully replaced {} torrent's tracker"
+DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION: "Currently installed BiglyBT adapter version is NOT supported, please upgrade to  {} or higher."
