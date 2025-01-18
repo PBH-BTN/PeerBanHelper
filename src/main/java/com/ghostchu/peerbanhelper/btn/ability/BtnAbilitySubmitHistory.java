@@ -63,7 +63,13 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
 
     private long getLastSubmitAtTimestamp() {
         try {
-            return Long.parseLong(Files.readString(file.toPath()));
+            long time = Long.parseLong(Files.readString(file.toPath()));
+            // check if timestamp more than past 30 days
+            if (time < System.currentTimeMillis() - 30 * 24 * 60 * 60 * 1000L) {
+                // discard any outdated data and use current time
+                return System.currentTimeMillis();
+            }
+            return time;
         } catch (Exception e) {
             log.error("Unable to read timestamp from file", e);
             return System.currentTimeMillis();
