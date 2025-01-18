@@ -22,6 +22,7 @@ public class TrackerImpl implements Tracker {
     }
 
     public TrackerImpl(List<String> string) {
+        Objects.requireNonNull(string, "tracker list cannot be null");
         this.trackers = string;
     }
 
@@ -32,6 +33,9 @@ public class TrackerImpl implements Tracker {
 
     @Override
     public String getLeadingTracker() {
+        if (trackers.isEmpty()) {
+            throw new IllegalStateException("No trackers available");
+        }
         return trackers.getFirst();
     }
 
