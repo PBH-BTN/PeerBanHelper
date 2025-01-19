@@ -205,7 +205,6 @@ public class PeerBanHelperServer implements Reloadable {
 //        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
 //                .getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 //        root.setLevel(ch.qos.logback.classic.Level.TRACE);
-
     }
 
 

@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.StringJoiner;
@@ -135,22 +136,20 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 try {
                     var logEntry = JListAppender.logEntryDeque.poll(1, TimeUnit.HOURS);
                     if (logEntry == null) continue;
-                    SwingUtilities.invokeLater(() -> {
+                    SwingUtilities.invokeAndWait(() -> {
                         DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
                         model.addElement(logEntry);
-
                         // 限制最大元素数量为 500
                         while (model.size() > 300) {
                             model.removeElementAt(0);
                         }
-
                         // 如果用户在底部，则自动滚动
                         if (autoScroll.get()) {
                             logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
                         }
                     });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException | InvocationTargetException e) {
+                    log.warn("Failed to update log list", e);
                 }
             }
         });
