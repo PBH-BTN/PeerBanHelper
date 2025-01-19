@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.database.dao.impl;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
+import com.ghostchu.peerbanhelper.lab.Experiments;
+import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.j256.ormlite.stmt.SelectArg;
@@ -22,8 +24,11 @@ import java.util.function.Consumer;
 
 @Component
 public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long> {
-    public TrafficJournalDao(@Autowired Database database) throws SQLException {
+    private final Laboratory laboratory;
+
+    public TrafficJournalDao(@Autowired Database database, Laboratory laboratory) throws SQLException {
         super(database.getDataSource(), TrafficJournalEntity.class);
+        this.laboratory = laboratory;
     }
 
     public TrafficJournalEntity getTodayJournal(String downloader) throws SQLException {
@@ -48,6 +53,22 @@ public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long
             if (base == null) {
                 base = target;
                 continue; // 跳过插入当天的总数据，直接计算增量
+            }
+
+            if (laboratory.isExperimentActivated(Experiments.FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY.getExperiment())) {
+                // 计算时间差
+                long timeDifference = target.getTimestamp().getTime() - base.getTimestamp().getTime();
+
+                // 如果时间差大于一天，说明有跳过的日期，使用上一条数据填充中间跳过的所有天
+                if (timeDifference > 86400000) {
+                    long days = timeDifference / 86400000;
+                    for (long i = 1; i < days; i++) {
+                        var newTimestamp = new Timestamp(base.getTimestamp().getTime() + 86400000 * i);
+                        var newRecord = new TrafficJournalDao.TrafficData(newTimestamp, base.getDataOverallUploaded(), base.getDataOverallDownloaded());
+                        fixTimeZone.accept(newRecord);
+                        records.add(newRecord);
+                    }
+                }
             }
 
             long uploadedOffset = target.getDataOverallUploaded() - base.getDataOverallUploaded();
