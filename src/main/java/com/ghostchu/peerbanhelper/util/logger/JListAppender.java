@@ -47,13 +47,15 @@ public class JListAppender extends AppenderBase<ILoggingEvent> {
         } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.OFF) {
             return;
         }
-        var postAccessLog = new LogEntry(
-                eventObject.getTimeStamp(),
-                eventObject.getThreadName(),
-                slf4jLevel,
-                formattedMessage.trim(),
-                seq.incrementAndGet());
-        logEntryDeque.add(postAccessLog);
+        if (Main.getGuiManager().isGuiAvailable()) {
+            var postAccessLog = new LogEntry(
+                    eventObject.getTimeStamp(),
+                    eventObject.getThreadName(),
+                    slf4jLevel,
+                    formattedMessage.trim(),
+                    seq.incrementAndGet());
+            logEntryDeque.add(postAccessLog);
+        }
         var rawLog = new LogEntry(
                 eventObject.getTimeStamp(),
                 eventObject.getThreadName(),
