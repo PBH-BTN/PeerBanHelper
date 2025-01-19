@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 @IgnoreScan
 public class BackgroundModule extends AbstractFeatureModule implements Reloadable {
     private final TorrentDao torrentDao;
+    private ScheduledExecutorService pool;
 
     public BackgroundModule(TorrentDao torrentDao) {
         super();
@@ -41,7 +43,8 @@ public class BackgroundModule extends AbstractFeatureModule implements Reloadabl
 
     @Override
     public void onEnable() {
-        Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory()).scheduleWithFixedDelay(this::runOptimizeTask, 1, 1, TimeUnit.HOURS);
+        this.pool = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+        this.pool.scheduleWithFixedDelay(this::runOptimizeTask, 1, 1, TimeUnit.HOURS);
     }
 
     private void runOptimizeTask() {
@@ -59,7 +62,9 @@ public class BackgroundModule extends AbstractFeatureModule implements Reloadabl
 
     @Override
     public void onDisable() {
-
+        if (pool != null) {
+            pool.shutdownNow();
+        }
     }
 
 }
