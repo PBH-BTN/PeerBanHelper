@@ -132,6 +132,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
         // 日志插入线程
         Thread.ofVirtual().start(() -> {
+            JListAppender.allowWriteLogEntryDeque.set(true);
             while (true) {
                 try {
                     var logEntry = JListAppender.logEntryDeque.poll(1, TimeUnit.HOURS);

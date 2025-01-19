@@ -9,11 +9,13 @@ import com.google.common.collect.EvictingQueue;
 import org.slf4j.event.Level;
 
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JListAppender extends AppenderBase<ILoggingEvent> {
 
     public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>(200);
+    public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(false);
     public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(100);
     private static final AtomicInteger seq = new AtomicInteger(0);
     private PatternLayout layout;
@@ -47,7 +49,7 @@ public class JListAppender extends AppenderBase<ILoggingEvent> {
         } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.OFF) {
             return;
         }
-        if (Main.getGuiManager().isGuiAvailable()) {
+        if (allowWriteLogEntryDeque.get()) {
             var postAccessLog = new LogEntry(
                     eventObject.getTimeStamp(),
                     eventObject.getThreadName(),
