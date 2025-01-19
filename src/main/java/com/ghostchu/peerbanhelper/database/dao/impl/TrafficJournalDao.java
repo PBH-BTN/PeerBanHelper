@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long> {
     private final Laboratory laboratory;
 
-    public TrafficJournalDao(@Autowired Database database, Laboratory laboratory) throws SQLException {
+    public TrafficJournalDao(@Autowired Database database, @Autowired Laboratory laboratory) throws SQLException {
         super(database.getDataSource(), TrafficJournalEntity.class);
         this.laboratory = laboratory;
     }
