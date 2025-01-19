@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.lab.Experiments;
 import com.ghostchu.peerbanhelper.lab.Laboratory;
@@ -71,7 +72,7 @@ public class Database {
 
     public void setupDatabase(File file) throws SQLException {
         Connection rawConnection = DriverManager.getConnection("jdbc:sqlite:" + file);
-        if (System.getProperty("disableSQLitePragmaSettings") == null) {
+        if (ExternalSwitch.parse("pbh.database.disableSQLitePragmaSettings") == null) {
             try (var stmt = rawConnection.createStatement()) {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
                 stmt.executeUpdate("PRAGMA journal_mode = WAL");
@@ -79,7 +80,7 @@ public class Database {
                 stmt.executeUpdate("PRAGMA OPTIMIZE");
                 try {
                     if (System.currentTimeMillis() - getLastMaintenanceTime() >= Duration.ofDays(Main.getMainConfig().getInt("persist.vacuum-interval-days")).toMillis()) {
-                        if (System.getProperty("pbh.disableSQLiteVacuum") == null) {
+                        if (ExternalSwitch.parse("pbh.database.disableSQLiteVacuum") == null) {
                             if (laboratory.isExperimentActivated(Experiments.SQLITE_VACUUM.getExperiment())) {
                                 log.info(tlUI(Lang.SQLITE_VACUUM_BACKUP));
                                 // 防强关备份

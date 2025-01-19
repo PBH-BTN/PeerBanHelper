@@ -24,6 +24,8 @@ public final class BtnPeer {
     private String clientName;
     @SerializedName("torrent_identifier")
     private String torrentIdentifier;
+    @SerializedName("torrent_is_private")
+    private boolean torrentIsPrivate;
     @SerializedName("torrent_size")
     private long torrentSize;
     @SerializedName("downloaded")
@@ -53,6 +55,7 @@ public final class BtnPeer {
         btnPeer.setClientName(peer.getClientName());
         String hashedId = InfoHashUtil.getHashedIdentifier(torrent.getHash());
         btnPeer.setTorrentIdentifier(hashedId);
+        btnPeer.setTorrentIsPrivate(torrent.isPrivateTorrent());
         btnPeer.setTorrentSize(torrent.getSize());
         btnPeer.setDownloaded(peer.getDownloaded());
         btnPeer.setRtDownloadSpeed(peer.getDownloadSpeed());

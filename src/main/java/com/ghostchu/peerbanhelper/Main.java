@@ -97,7 +97,7 @@ public class Main {
     @Getter
     private static long startupAt = System.currentTimeMillis();
     private static String userAgent;
-    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 8;
+    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 10;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.0.3";
 
     public static void main(String[] args) {
@@ -112,7 +112,7 @@ public class Main {
         log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
-            DEF_LOCALE = System.getenv("PBH_USER_LOCALE");
+            DEF_LOCALE = ExternalSwitch.parse("PBH_USER_LOCALE");
             if (DEF_LOCALE == null) {
                 DEF_LOCALE = defLocaleTag;
             }
@@ -180,7 +180,7 @@ public class Main {
         }
 
         try {
-            var targetLevel = System.getProperty("pbh.log.level");
+            var targetLevel = ExternalSwitch.parse("pbh.log.level");
             if (targetLevel != null) {
                 var rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
                 ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
@@ -230,7 +230,7 @@ public class Main {
     private static void setupConfDirectory(String[] args) {
         String osName = System.getProperty("os.name");
         String root = "data";
-        if ("true".equalsIgnoreCase(System.getProperty("pbh.usePlatformConfigLocation"))) {
+        if (ExternalSwitch.parseBoolean("pbh.usePlatformConfigLocation")) {
             if (osName.contains("Windows")) {
                 root = new File(System.getenv("LOCALAPPDATA"), "PeerBanHelper").getAbsolutePath();
             } else {
@@ -243,8 +243,8 @@ public class Main {
                 root = dataDirectory.resolve("PeerBanHelper").toAbsolutePath().toString();
             }
         }
-        if (System.getProperty("pbh.datadir") != null) {
-            root = System.getProperty("pbh.datadir");
+        if (ExternalSwitch.parse("pbh.datadir") != null) {
+            root = ExternalSwitch.parse("pbh.datadir");
         }
 
         dataDirectory = new File(root);
@@ -252,11 +252,11 @@ public class Main {
         configDirectory = new File(dataDirectory, "config");
         pluginDirectory = new File(dataDirectory, "plugins");
         debugDirectory = new File(dataDirectory, "debug");
-        if (System.getProperty("pbh.configdir") != null) {
-            configDirectory = new File(System.getProperty("pbh.configdir"));
+        if (ExternalSwitch.parse("pbh.configdir") != null) {
+            configDirectory = new File(ExternalSwitch.parse("pbh.configdir"));
         }
-        if (System.getProperty("pbh.logsdir") != null) {
-            logsDirectory = new File(System.getProperty("pbh.logsdir"));
+        if (ExternalSwitch.parse("pbh.logsdir") != null) {
+            logsDirectory = new File(ExternalSwitch.parse("pbh.logsdir"));
         }
         // other directories aren't allowed to change by user to keep necessary structure
     }
@@ -270,7 +270,7 @@ public class Main {
             configuration.load(file);
         } catch (IOException | InvalidConfigurationException e) {
             log.error("Unable to load configuration: invalid YAML configuration // 无法加载配置文件：无效的 YAML 配置，请检查是否有语法错误", e);
-            if (!Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+            if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(startupArgs).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
                 try {
                     log.error("Bad configuration:  {}", Files.readString(file.toPath()));
                 } catch (IOException ex) {
@@ -338,7 +338,7 @@ public class Main {
 
     private static void initGUI(String[] args) {
         String guiType = "swing";
-        if (!Desktop.isDesktopSupported() || System.getProperty("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
             guiType = "console";
         } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
             guiType = "swing";
@@ -354,7 +354,7 @@ public class Main {
         if (userAgent != null) return userAgent;
         String userAgentTemplate = "PeerBanHelper/%s (%s; %s,%s,%s) BTN-Protocol/%s BTN-Protocol-Version/%s";
         var osMXBean = ManagementFactory.getOperatingSystemMXBean();
-        String release = System.getProperty("pbh.release");
+        String release = ExternalSwitch.parse("pbh.release");
         if (release == null) {
             release = "unknown";
         }

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.network;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.HandshakeCompletedListener;
@@ -33,7 +34,7 @@ public class DFSSLSocketFactory extends SSLSocketFactory {
 
     @Override
     public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
-        if (Boolean.parseBoolean(System.getProperty("pbh.domain-fronting", "true"))) {
+        if (ExternalSwitch.parseBoolean("pbh.domain-fronting", true)) {
             return ((SSLSocketFactory) getDefault()).createSocket(s, host, port, autoClose);
         }
         InetAddress address = s.getInetAddress();

@@ -334,7 +334,6 @@ WEBVIEW_DEFAULT_DISABLED: "WebUI 现在默认禁用，建议使用系统浏览�
 
 PCB_SHUTTING_DOWN: "请等待 ProgressCheatBlocker 将缓存在内存中的数据刷写到数据库，最多 5 秒……"
 
-PBHPLUS_LICENSE_FAILED: "PBH Plus 鉴权失败，请在 config.yml 中填写一个有效的 pbh-plus-key"
 CHARTS_IPDB_NEED_INIT: "请先配置 GeoIP 数据库"
 
 IP_BLACKLIST_PUT_IP_INVALID_IP: "无效 IP 地址，请输入一个有效的 IPV4/IPV6 地址，或者 CIDR 表达式"
@@ -346,7 +345,6 @@ SCHEDULED_FULL_BANLIST_APPLY: "[修复] PeerBanHelper 已计划在下次封禁�
 CLEANED_BANLOGS: "[清理] 已清理 {} 条封禁日志"
 
 OPERATION_EXECUTE_SUCCESSFULLY: "操作执行成功"
-PBH_PLUS_LICENSE_UPDATED: "许可证信息已保存"
 PBH_PLUS_LICENSE_EXPIRED: "许可证已过期"
 PBH_PLUS_LICENSE_INVALID: "许可证无效"
 
@@ -532,7 +530,6 @@ MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE: "无法从 IPFS/IPNS 更新规则订阅，
 FREE_LICENSE_RENEW_SUCCESS: "新的许可证已生成并激活"
 FREE_LICENSE_RENEW_STILL_ACTIVE: "当前许可证仍在有效期内，无需重新生成"
 FREE_LICENSE_SOURCE: "本地生成的免费许可证"
-FREE_LICENSE_LICENSE_TO: "{} 用于个人用途"
 FREE_LICENSE_DESCRIPTION: "本地生成的循环免费许可证，仅用于个人用途"
 DOWNLOADER_PAUSED: "下载器已暂停"
 LAB_EXPERIMENT_DNSJAVA_TITLE: "DNSJava DNS 解析"
@@ -564,3 +561,9 @@ BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT: "当前
 BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER: "当前服务器 BTN 协议实现版本过旧，服务器实现版本号: {}，本地要求最低: {}"
 BTN_CONFIG_STATUS_SUCCESSFUL: "已成功连接到 BTN 服务器"
 BTN_CONFIG_STATUS_EXCEPTION: "配置 BTN 功能时发生意外错误：{}: {}"
+DOWNLOADER_QB_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "请求种子 {} 的 Tracker 列表失败：{} - {}"
+TRACKER_FAILED_TO_UPDATE_TRACKER: "请求更新种子 {} 的 Tracker 列表失败：{} - {}"
+UTILITIES_TRACKER_REPLACED: "已成功替换 {} 个种子的 Tracker"
+DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION: "当前使用的 BiglyBT 适配器版本不受支持，请升级到 {} 或更高版本"
+LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_TITLE: "使用已知数据填充流量统计缺失的数据"
+LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_DESCRIPTION: "使用上一条的已知的数据尝试填充流量统计中缺失的数据以尝试修正错误的流量统计数据（仅在非开头区域中缺失记录时有效）。这是一种实验性算法，且提供的数据可能仍旧不准确。"

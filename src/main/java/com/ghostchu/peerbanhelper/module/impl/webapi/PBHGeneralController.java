@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -160,7 +161,7 @@ public class PBHGeneralController extends AbstractFeatureModule {
 
     private Map<String, Object> generatePbhData() {
         long compile_time = 0;
-        String release = System.getProperty("pbh.release");
+        String release = ExternalSwitch.parse("pbh.release");
         if (release == null) {
             release = "unknown";
         }

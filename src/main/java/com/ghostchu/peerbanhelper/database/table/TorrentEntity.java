@@ -5,6 +5,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,4 +20,7 @@ public final class TorrentEntity {
     private String name;
     @DatabaseField(canBeNull = false)
     private Long size;
+    @Nullable
+    @DatabaseField()
+    private Boolean privateTorrent;
 }

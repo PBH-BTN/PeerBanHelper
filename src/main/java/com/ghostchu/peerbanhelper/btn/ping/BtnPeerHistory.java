@@ -21,6 +21,8 @@ public final class BtnPeerHistory {
     private String clientName;
     @SerializedName("torrent_identifier")
     private String torrentIdentifier;
+    @SerializedName("torrent_is_private")
+    private boolean torrentIsPrivate;
     @SerializedName("torrent_size")
     private long torrentSize;
     @SerializedName("downloaded")

@@ -27,6 +27,7 @@ import com.ghostchu.peerbanhelper.lab.Experiments;
 import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
+import com.ghostchu.peerbanhelper.module.impl.background.BackgroundModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
@@ -197,14 +198,13 @@ public class PeerBanHelperServer implements Reloadable {
 
     @SneakyThrows
     private void runTestCode() {
-        if (!"LiveDebug".equalsIgnoreCase(System.getProperty("pbh.release"))) {
+        if (!"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
             return;
         }
         // run some junky test code here
 //        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
 //                .getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 //        root.setLevel(ch.qos.logback.classic.Level.TRACE);
-
     }
 
 
@@ -384,10 +384,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void registerHttpServer() {
-        String token = System.getenv("PBH_API_TOKEN");
-        if (token == null) {
-            token = System.getProperty("pbh.api_token");
-        }
+        String token = ExternalSwitch.parse("pbh.api_token");
         if (token == null) {
             token = Main.getMainConfig().getString("server.token");
         }
@@ -737,7 +734,8 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHPushController.class);
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
-
+        moduleManager.register(PBHUtilitiesController.class);
+        moduleManager.register(BackgroundModule.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

@@ -14,6 +14,7 @@ public final class TorrentWrapper {
     private long completedSize;
     private String name;
     private String hash;
+    private boolean privateTorrent;
     private double progress;
     private long rtUploadSpeed;
     private long rtDownloadSpeed;
@@ -24,6 +25,7 @@ public final class TorrentWrapper {
         this.completedSize = torrent.getCompletedSize();
         this.name = torrent.getName();
         this.hash = torrent.getHash();
+        this.privateTorrent = torrent.isPrivate();
         this.progress = torrent.getProgress();
         this.rtDownloadSpeed = torrent.getRtDownloadSpeed();
         this.rtUploadSpeed = torrent.getRtUploadSpeed();

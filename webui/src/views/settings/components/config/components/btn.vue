@@ -3,8 +3,8 @@
     <a-typography-title :heading="3"> BTN </a-typography-title>
     <a-alert>
       {{ t('page.settings.tab.config.btn.doc') }}
-      <a-link target="_blank" href="https://docs.pbh-btn.com/docs/btn/intro/">
-        https://docs.pbh-btn.com/docs/btn/intro/
+      <a-link target="_blank" href="https://docs.pbh-btn.com/docs/btn/connect/">
+        https://docs.pbh-btn.com/docs/btn/connect/
       </a-link>
     </a-alert>
     <a-form-item :label="t('page.settings.tab.config.btn.enable')" field="btn.enabled">
@@ -48,6 +48,7 @@ import { type Btn } from '@/api/model/config'
 import { Modal, Typography, TypographyParagraph } from '@arco-design/web-vue'
 import { h } from 'vue'
 import { useI18n } from 'vue-i18n'
+
 const { t } = useI18n()
 const model = defineModel<Btn>({ required: true })
 

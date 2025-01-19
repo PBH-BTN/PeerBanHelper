@@ -333,7 +333,6 @@ WEBVIEW_DEFAULT_DISABLED: "WebUI is disabled by default, recommend to access Web
 
 PCB_SHUTTING_DOWN: "Please wait ProgressCheatBlocker flush its data to disk from memory……"
 
-PBHPLUS_LICENSE_FAILED: "PBH Plus check failure, please fill a valid key in `pbh-plus-key` configuration in config.yml"
 CHARTS_IPDB_NEED_INIT: "Please configure GeoIP database in config.yml"
 
 IP_BLACKLIST_PUT_IP_INVALID_IP: "Invalid IP address, please input a valid IPV4/IPV6 address or CIDR."
@@ -345,7 +344,6 @@ SCHEDULED_FULL_BANLIST_APPLY: "[Repair] PeerBanHelper scheduled full banlist re-
 CLEANED_BANLOGS: "[Cleanup] Cleaned {} history records"
 
 OPERATION_EXECUTE_SUCCESSFULLY: "Operation execute successfully"
-PBH_PLUS_LICENSE_UPDATED: "License saved"
 PBH_PLUS_LICENSE_EXPIRED: "License expired"
 PBH_PLUS_LICENSE_INVALID: "License invalid"
 
@@ -534,7 +532,6 @@ MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE: "Couldn't update Rule Subscription from IP
 FREE_LICENSE_RENEW_SUCCESS: "A new license has been generated and activated."
 FREE_LICENSE_RENEW_STILL_ACTIVE: "The current license is still active and does not need to be regenerated."
 FREE_LICENSE_SOURCE: "Locally generated free license."
-FREE_LICENSE_LICENSE_TO: "{} for personal use."
 FREE_LICENSE_DESCRIPTION: "Local generated renewable free license, for personal use only."
 DOWNLOADER_PAUSED: Downloader paused
 LAB_EXPERIMENT_DNSJAVA_TITLE: "DNSJava DNS"
@@ -567,3 +564,9 @@ BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT: "The cu
 BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER: "The current server BTN protocol implementation version is too old, server implementation version: {}, local requires at least: {}"
 BTN_CONFIG_STATUS_SUCCESSFUL: "Successfully connected to the BTN server"
 BTN_CONFIG_STATUS_EXCEPTION: "An unexpected error occurred while connecting to the BTN server: {}"
+DOWNLOADER_QB_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "Request tracker list on torrent {} failed：{} - {}"
+TRACKER_FAILED_TO_UPDATE_TRACKER: "Failed to update tracker list on torrent {}：{} - {}"
+UTILITIES_TRACKER_REPLACED: "Successfully replaced {} torrent's tracker"
+DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION: "Currently installed BiglyBT adapter version is NOT supported, please upgrade to  {} or higher."
+LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_TITLE: "Use known data to fill in missing data in traffic summary"
+LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_DESCRIPTION: "Use known data to fill in missing data in traffic summary to try to correct incorrect traffic statistics data (only effective when records are missing in the non-starting area). This is an experimental algorithm, and the provided data may still be inaccurate."

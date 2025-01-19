@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
@@ -127,7 +128,6 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
         if (clientTask != null) {
-            clientTask.setDownloader("<UNBAN UPDATE>");
             clientTask.setBanDelayWindowEndAt(0L);
             clientTask.setLastReportProgress(0);
             clientTask.setLastReportUploaded(0);
@@ -302,7 +302,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                                         actualUploaded,
                                         maxAllowedExcessiveThreshold));
                     }
-                } else if (System.getProperty("pbh.pcb.disable-completed-excessive") == null && completedSize > 0 && actualUploaded > completedSize) {
+                } else if (ExternalSwitch.parse("pbh.pcb.disable-completed-excessive") == null && completedSize > 0 && actualUploaded > completedSize) {
                     // 下载量超过任务大小，检查
                     long maxAllowedExcessiveThreshold = (long) (completedSize * excessiveThreshold);
                     if (actualUploaded > maxAllowedExcessiveThreshold) {

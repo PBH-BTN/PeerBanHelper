@@ -4,12 +4,12 @@ import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 @Slf4j
 public class ConsoleGuiImpl implements GuiImpl {
-    private final AtomicBoolean wakeLock = new AtomicBoolean(false);
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     public ConsoleGuiImpl(String[] args) {
     }
@@ -27,19 +27,12 @@ public class ConsoleGuiImpl implements GuiImpl {
     @SneakyThrows
     @Override
     public void sync() {
-        while (!wakeLock.get()) {
-            synchronized (wakeLock) {
-                wakeLock.wait(1000 * 5);
-            }
-        }
+        countDownLatch.await();
     }
 
     @Override
     public void close() {
-        synchronized (wakeLock) {
-            wakeLock.set(true);
-            wakeLock.notifyAll();
-        }
+        countDownLatch.countDown();
     }
 
     @Override
