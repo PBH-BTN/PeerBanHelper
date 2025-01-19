@@ -27,6 +27,7 @@ import com.ghostchu.peerbanhelper.lab.Experiments;
 import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
+import com.ghostchu.peerbanhelper.module.impl.background.BackgroundModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
@@ -735,6 +736,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHLabController.class);
         moduleManager.register(PBHEasterEggController.class);
         moduleManager.register(PBHUtilitiesController.class);
+        moduleManager.register(BackgroundModule.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
