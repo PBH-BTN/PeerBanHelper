@@ -21,7 +21,7 @@ public class ConsoleProgressDialog implements ProgressDialog {
         if (comment != null && !comment.isBlank()) {
             log.info("({})", comment);
         }
-        log.info("> {}% - {}", String.format("%.2f", progress * 100), description);
+        log.info("> {}%", String.format("%.2f", progress * 100));
 
     }
 

@@ -339,7 +339,7 @@ public class IPDB implements AutoCloseable {
                 progressDialog.updateProgress(0);
             }
         });
-        return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), bodyHandler)
+        return HTTPUtil.retryableSend(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), bodyHandler)
                 .thenAccept(r -> {
                     if (r.statusCode() == 200) {
                         if (mirror.supportXzip()) {
