@@ -2,12 +2,24 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
+import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.jcef.JCEFAppFactory;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
+import com.google.common.eventbus.Subscribe;
+import lombok.Cleanup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import me.friwi.jcefmaven.CefInitializationException;
+import me.friwi.jcefmaven.EnumProgress;
+import me.friwi.jcefmaven.UnsupportedPlatformException;
+import org.cef.CefApp;
+import org.cef.CefClient;
+import org.cef.browser.CefBrowser;
+import org.cef.browser.CefMessageRouter;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -22,6 +34,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -38,6 +51,8 @@ public class MainWindow extends JFrame {
     private final WindowMenuBar windowTitleBar;
     @Getter
     private final TrayMenu trayMenu;
+    @Getter
+    private final WebUITab webuiTab;
     private JPanel mainPanel;
     private JTabbedPane tabbedPane;
     private JPanel tabbedPaneLogs;
@@ -52,7 +67,10 @@ public class MainWindow extends JFrame {
         if (SystemInfo.isMacFullWindowContentSupported)
             getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
         setTitle(tlUI(Lang.GUI_TITLE_LOADING, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
-        setSize(1000, 600);
+        // max dimension size or 720p
+        var maxAllowedWidth = Math.min(1280, Toolkit.getDefaultToolkit().getScreenSize().width);
+        var maxAllowedHeight = Math.min(720, Toolkit.getDefaultToolkit().getScreenSize().height);
+        setSize(maxAllowedWidth, maxAllowedHeight);
         setContentPane(mainPanel);
         this.windowTitleBar = new WindowMenuBar(this);
         setupTabbedPane();
@@ -68,6 +86,7 @@ public class MainWindow extends JFrame {
         setIconImage(imageIcon.getImage());
         setVisible(!swingGUI.isSilentStart());
         this.logsTab = new LogsTab(this);
+        this.webuiTab = new WebUITab(this);
     }
 
     public static void setTabTitle(JPanel tab, String title) {
@@ -95,7 +114,7 @@ public class MainWindow extends JFrame {
 
     private void openWebUI() {
         if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
-            swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()));
+            swingGUI.openWebpage(URI.create("http://127.0.0.1:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()));
         }
     }
 
@@ -106,6 +125,7 @@ public class MainWindow extends JFrame {
     @Override
     public void dispose() {
         Main.getEventBus().unregister(this);
+        this.webuiTab.close();
         super.dispose();
     }
 
@@ -166,6 +186,115 @@ public class MainWindow extends JFrame {
 
     private void createUIComponents() {
         // TODO: place custom component creation code here
+    }
+
+    public static class WebUITab implements AutoCloseable {
+        private final MainWindow parent;
+        private CefApp app;
+        private CefClient client;
+        private CefBrowser browser;
+        private Component awtComponent;
+
+        public WebUITab(MainWindow parent) {
+            this.parent = parent;
+            Main.getEventBus().register(this);
+        }
+
+        @Subscribe
+        public void onPeerBanHelperStarted(PBHServerStartedEvent event) {
+            Thread.startVirtualThread(this::initJCEFEngine);
+        }
+
+        private void initJCEFEngine() {
+            if (ExternalSwitch.parseBoolean("pbh.nojcef", false) || Arrays.asList(Main.getStartupArgs()).contains("nojcef")) {
+                return;
+            }
+            try {
+                var jcefBuilder = JCEFAppFactory.createBuilder(Main.getDataDirectory(), Main.DEF_LOCALE);
+                @Cleanup
+                var progressDialog = Main.getGuiManager().createProgressDialog(
+                        tlUI(Lang.JCEF_DOWNLOAD_TITLE),
+                        tlUI(Lang.JCEF_DOWNLOAD_DESCRIPTION),
+                        tlUI(Lang.GUI_COMMON_CANCEL),
+                        null, false);
+                jcefBuilder.setProgressHandler((enumProgress, v) -> {
+                    if (enumProgress == EnumProgress.DOWNLOADING) {
+                        progressDialog.show();
+                        progressDialog.setProgressDisplayIndeterminate(false);
+                        progressDialog.updateProgress(v);
+                    }
+                    if (enumProgress == EnumProgress.EXTRACTING) {
+                        progressDialog.setDescription(tlUI(Lang.JCEF_DOWNLOAD_UNZIP_DESCRIPTION));
+                        progressDialog.show();
+                        progressDialog.updateProgress(v);
+                        progressDialog.setProgressDisplayIndeterminate(true);
+                    }
+                });
+                this.app = jcefBuilder.build();
+                this.parent.tabbedPane.addTab(tlUI(Lang.GUI_TABBED_WEBUI), null);
+                this.parent.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowActivated(WindowEvent e) {
+                        checkIfBrowserShouldActive();
+                    }
+
+                    @Override
+                    public void windowDeactivated(WindowEvent e) {
+                        checkIfBrowserShouldActive();
+                    }
+                });
+                checkIfBrowserShouldActive();
+            } catch (IOException e) {
+                log.error("Unable to load WebUI component", e);
+            } catch (UnsupportedPlatformException e) {
+                log.warn(tlUI(Lang.JCEF_BROWSER_UNSUPPORTED_PLATFORM));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (CefInitializationException e) {
+                log.warn(tlUI(Lang.JCEF_BROWSER_UNSUPPORTED_EXCEPTION));
+            }
+        }
+
+        private void checkIfBrowserShouldActive() {
+            // debug output the event id mapping to the event name
+            SwingUtilities.invokeLater(() -> {
+                if (parent.isDisplayable() && parent.isVisible()) {
+                    activeBrowser(this.parent.tabbedPane.indexOfTab(tlUI(Lang.GUI_TABBED_WEBUI)));
+                } else {
+                    deActiveBrowser(this.parent.tabbedPane.indexOfTab(tlUI(Lang.GUI_TABBED_WEBUI)));
+                }
+            });
+        }
+
+        private void activeBrowser(int tabPos) {
+            if (this.browser == null) {
+                this.client = app.createClient();
+                CefMessageRouter msgRouter = CefMessageRouter.create();
+                client.addMessageRouter(msgRouter);
+                this.browser = client.createBrowser(URI.create("http://127.0.0.1:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()).toString(), false, false);
+                this.awtComponent = this.browser.getUIComponent();
+                this.parent.tabbedPane.setComponentAt(tabPos, this.awtComponent);
+            }
+        }
+
+        private void deActiveBrowser(int tabPos) {
+            this.parent.tabbedPane.setComponentAt(tabPos, new JPanel());
+            if (this.browser != null) {
+                this.browser.close(true);
+                this.browser = null;
+                if (this.client != null) {
+                    this.client.dispose();
+                    this.client = null;
+                }
+            }
+        }
+
+        @Override
+        public void close() {
+            deActiveBrowser(this.parent.tabbedPane.indexOfTab(tlUI(Lang.GUI_TABBED_WEBUI)));
+            this.app.dispose();
+            CefApp.getInstance().dispose();
+        }
     }
 
     public static class TrayMenu {

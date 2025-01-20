@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
+import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -96,6 +97,11 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     public void createMainWindow() {
         mainWindow = new MainWindow(this);
         initLoggerRedirection();
+    }
+
+    @Override
+    public ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
+        return new SwingProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
     }
 
     public boolean openWebpage(URI uri) {

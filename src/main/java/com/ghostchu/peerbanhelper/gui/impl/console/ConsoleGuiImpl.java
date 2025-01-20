@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.console;
 
+import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +60,11 @@ public class ConsoleGuiImpl implements GuiImpl {
         if (level.equals(Level.SEVERE)) {
             log.error("{}: {}", title, description);
         }
+    }
+
+    @Override
+    public ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
+        return new ConsoleProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
     }
 
 
