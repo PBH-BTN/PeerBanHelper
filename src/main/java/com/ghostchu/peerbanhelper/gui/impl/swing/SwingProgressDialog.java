@@ -10,6 +10,7 @@ public class SwingProgressDialog implements ProgressDialog {
     private final JProgressBar progressBar = new JProgressBar();
     private final JFrame frame = new JFrame("Unknown Title");
     private final JLabel descriptionLabel = new JLabel("Unknown Description");
+    private final JLabel commentLabel = new JLabel("");
     private final JButton stopButton;
 
     public SwingProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
@@ -21,7 +22,7 @@ public class SwingProgressDialog implements ProgressDialog {
 
         // 创建一个面板来存放图标和描述文本
         JPanel topPanel = new JPanel();
-        topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+        topPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         // 使用 Swing 内置的信息图标
         JLabel iconLabel = new JLabel(UIManager.getIcon("OptionPane.informationIcon"));
@@ -29,10 +30,10 @@ public class SwingProgressDialog implements ProgressDialog {
 
         // 创建描述文本
         setDescription("<html>" + description + "</html>");
-        descriptionLabel.setLayout(new FlowLayout(FlowLayout.TRAILING));
-        descriptionLabel.setVerticalAlignment(SwingConstants.CENTER);
+        descriptionLabel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        descriptionLabel.setVerticalAlignment(SwingConstants.TOP);
         // 根据文本自动调整大小
-        descriptionLabel.setPreferredSize(new Dimension(300, 100));
+        descriptionLabel.setPreferredSize(new Dimension(350, 80));
         topPanel.add(descriptionLabel);
 
         setProgressDisplayIndeterminate(true);
@@ -51,6 +52,7 @@ public class SwingProgressDialog implements ProgressDialog {
         // 创建底部面板
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BorderLayout());
+        bottomPanel.add(commentLabel, BorderLayout.NORTH);
         bottomPanel.add(progressBar, BorderLayout.CENTER);
         bottomPanel.add(stopButton, BorderLayout.EAST);
 
@@ -122,6 +124,13 @@ public class SwingProgressDialog implements ProgressDialog {
         SwingUtilities.invokeLater(() -> {
             progressBar.setIndeterminate(indeterminate);
             progressBar.setStringPainted(!indeterminate);
+        });
+    }
+
+    @Override
+    public void setComment(String comment) {
+        SwingUtilities.invokeLater(() -> {
+            commentLabel.setText(comment);
         });
     }
 }
