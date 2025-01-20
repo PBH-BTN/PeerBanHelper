@@ -579,3 +579,5 @@ JCEF_DOWNLOAD_DESCRIPTION: |
   如果不希望启用 JCEF 功能，请添加启动附加参数 nojcef。
 GUI_COMMON_CANCEL: "取消"
 JCEF_DOWNLOAD_UNZIP_DESCRIPTION: 正在解压缩 JCEF 数据包，请稍等...
+IPDB_DOWNLOAD_TITLE: "下载 GeoIP 数据库: {}"
+IPDB_DOWNLOAD_DESCRIPTION: "PeerBanHelper 需要下载 GeoIP 数据库以为反吸血提供 IP 地址的地理位置信息支持，这可能需要一点时间..."

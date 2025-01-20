@@ -18,4 +18,6 @@ public interface ProgressDialog extends AutoCloseable {
     void setAllowCancel(boolean allowCancel);
 
     void setProgressDisplayIndeterminate(boolean indeterminate);
+
+    void setComment(String comment);
 }
