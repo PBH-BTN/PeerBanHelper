@@ -2,11 +2,11 @@ name: WebUI Build
 
 on:
   push:
-    branches: ["master"]
+    branches: ["master","dev"]
     paths:
       - "webui/**"
   pull_request:
-    branches: ["master"]
+    branches: ["master","dev"]
     paths:
       - "webui/**"
 
