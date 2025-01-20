@@ -1,3 +1,4 @@
+import { isIPv6 } from 'is-ip'
 export function hashString(str: string) {
   let hash = 0,
     i,
@@ -10,3 +11,6 @@ export function hashString(str: string) {
   }
   return hash
 }
+
+export const formatIPAddressPort = (address: string, port: number) =>
+  isIPv6(address) ? `[${address}]:${port}` : `${address}:${port}`

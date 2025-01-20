@@ -32,7 +32,7 @@
     <template #peerAddress="{ record }">
       <a-typography-text copyable code>
         <queryIpLink :ip="record.peerIp" style="color: var(--color-text-2)">
-          {{ record.peerIp }}:{{ record.peerPort }}
+          {{ formatIPAddressPort(record.peerIp, record.peerPort) }}
         </queryIpLink>
       </a-typography-text>
     </template>
@@ -79,6 +79,7 @@ import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
 import { computed, ref, watch } from 'vue'
+import { formatIPAddressPort } from '@/utils/string'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 const forceLoading = ref(true)

@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   vue-request@2.0.4:
-    hash: imva7qnbqmkxs76or73cwn5jom
+    hash: d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78
     path: patches/vue-request@2.0.4.patch
 
 importers:
@@ -87,7 +87,7 @@ importers:
         version: 11.0.1(vue@3.5.13(typescript@5.6.3))
       vue-request:
         specifier: ^2.0.4
-        version: 2.0.4(patch_hash=imva7qnbqmkxs76or73cwn5jom)(vue@3.5.13(typescript@5.6.3))
+        version: 2.0.4(patch_hash=d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78)(vue@3.5.13(typescript@5.6.3))
       vue-router:
         specifier: ^4.5.0
         version: 4.5.0(vue@3.5.13(typescript@5.6.3))
@@ -2528,7 +2528,7 @@ packages:
         optional: true
 
   vue-demi@0.14.10:
-    resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
+    resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==, tarball: https://registry.npmjs.org/vue-demi/-/vue-demi-0.14.10.tgz}
     engines: {node: '>=12'}
     hasBin: true
     peerDependencies:
@@ -5147,7 +5147,7 @@ snapshots:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.13(typescript@5.6.3)
 
-  vue-request@2.0.4(patch_hash=imva7qnbqmkxs76or73cwn5jom)(vue@3.5.13(typescript@5.6.3)):
+  vue-request@2.0.4(patch_hash=d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78)(vue@3.5.13(typescript@5.6.3)):
     dependencies:
       vue: 3.5.13(typescript@5.6.3)
       vue-demi: 0.14.10(vue@3.5.13(typescript@5.6.3))
