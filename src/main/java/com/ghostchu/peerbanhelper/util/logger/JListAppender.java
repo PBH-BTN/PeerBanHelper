@@ -8,14 +8,15 @@ import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
 import com.google.common.collect.EvictingQueue;
 import org.slf4j.event.Level;
 
-import javax.swing.*;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JListAppender extends AppenderBase<ILoggingEvent> {
 
-    public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>();
-    public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(300);
+    public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>(200);
+    public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(false);
+    public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(100);
     private static final AtomicInteger seq = new AtomicInteger(0);
     private PatternLayout layout;
 
@@ -36,20 +37,19 @@ public class JListAppender extends AppenderBase<ILoggingEvent> {
             this.layout = layout;
         }
         String formattedMessage = layout.doLayout(eventObject);
-        // Ensure the update to the JList is done on the Event Dispatch Thread (EDT)
-        SwingUtilities.invokeLater(() -> {
-            Level slf4jLevel = Level.INFO;
-            if (eventObject.getLevel() == ch.qos.logback.classic.Level.WARN) {
-                slf4jLevel = Level.WARN;
-            } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.ERROR) {
-                slf4jLevel = Level.ERROR;
-            } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.DEBUG) {
-                slf4jLevel = Level.DEBUG;
-            } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.TRACE) {
-                slf4jLevel = Level.TRACE;
-            } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.OFF) {
-                return;
-            }
+        Level slf4jLevel = Level.INFO;
+        if (eventObject.getLevel() == ch.qos.logback.classic.Level.WARN) {
+            slf4jLevel = Level.WARN;
+        } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.ERROR) {
+            slf4jLevel = Level.ERROR;
+        } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.DEBUG) {
+            slf4jLevel = Level.DEBUG;
+        } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.TRACE) {
+            slf4jLevel = Level.TRACE;
+        } else if (eventObject.getLevel() == ch.qos.logback.classic.Level.OFF) {
+            return;
+        }
+        if (allowWriteLogEntryDeque.get()) {
             var postAccessLog = new LogEntry(
                     eventObject.getTimeStamp(),
                     eventObject.getThreadName(),
@@ -57,14 +57,14 @@ public class JListAppender extends AppenderBase<ILoggingEvent> {
                     formattedMessage.trim(),
                     seq.incrementAndGet());
             logEntryDeque.add(postAccessLog);
-            var rawLog = new LogEntry(
-                    eventObject.getTimeStamp(),
-                    eventObject.getThreadName(),
-                    slf4jLevel,
-                    eventObject.getFormattedMessage().trim(),
-                    seq.incrementAndGet());
-            ringDeque.add(rawLog);
-            Main.getEventBus().post(new NewLogEntryCreatedEvent(rawLog));
-        });
+        }
+        var rawLog = new LogEntry(
+                eventObject.getTimeStamp(),
+                eventObject.getThreadName(),
+                slf4jLevel,
+                eventObject.getFormattedMessage().trim(),
+                seq.incrementAndGet());
+        ringDeque.add(rawLog);
+        Main.getEventBus().post(new NewLogEntryCreatedEvent(rawLog));
     }
 }

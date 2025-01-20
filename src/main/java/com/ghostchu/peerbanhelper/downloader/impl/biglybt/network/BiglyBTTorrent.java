@@ -7,7 +7,7 @@ import java.util.List;
 
 @Setter
 public final class BiglyBTTorrent implements Torrent {
-    private final List<List<String>> trackers;
+    private List<List<String>> trackers;
     private boolean privateTorrent;
     private double progress;
     private long rtUploadSpeed;

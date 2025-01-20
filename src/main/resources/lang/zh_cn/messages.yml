@@ -565,3 +565,5 @@ DOWNLOADER_QB_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "请求种子 {} 的 Track
 TRACKER_FAILED_TO_UPDATE_TRACKER: "请求更新种子 {} 的 Tracker 列表失败：{} - {}"
 UTILITIES_TRACKER_REPLACED: "已成功替换 {} 个种子的 Tracker"
 DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION: "当前使用的 BiglyBT 适配器版本不受支持，请升级到 {} 或更高版本"
+LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_TITLE: "使用已知数据填充流量统计缺失的数据"
+LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_DESCRIPTION: "使用上一条的已知的数据尝试填充流量统计中缺失的数据以尝试修正错误的流量统计数据（仅在非开头区域中缺失记录时有效）。这是一种实验性算法，且提供的数据可能仍旧不准确。"

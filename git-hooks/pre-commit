@@ -12,15 +12,20 @@ fi
 # 如果有修改，进入 webui 目录
 cd webui || exit 1
 
-# 执行 prettier 格式化
-pnpm prettier --write src/
+# 去除CHANGED_FILES的webui/前缀
+CHANGED_FILES=$(echo "$CHANGED_FILES" | sed 's/webui\///g')
+
+# 对有改动的文件执行 prettier 格式化
+echo "$CHANGED_FILES" | xargs -P 4 pnpm prettier --write
+
 if [ $? -ne 0 ]; then
   echo "Prettier formatting failed."
   exit 1
 fi
 
-# 执行 eslint 检查
-pnpm eslint . --ignore-pattern 'dist/*' --fix
+# 对有改动的文件执行 eslint 检查
+echo "$CHANGED_FILES" | xargs -P 4 pnpm eslint --cache --ignore-pattern 'dist/*' --fix
+
 if [ $? -ne 0 ]; then
   echo "ESLint check failed."
   exit 1

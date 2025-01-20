@@ -17,8 +17,10 @@ const darkStore = useDarkStore()
 
 const srcDoc = computed(() => {
   return `
+    <html data-theme="${darkStore.isDark ? 'dark' : 'light'}">
     <link rel="stylesheet" href="./style/github-markdown-css.css"/>
     <div class="markdown-body" data-theme="${darkStore.isDark ? 'dark' : 'light'}">${md.render(content)}</div>
+    </html>
     `
 })
 const { content, useGithubMarkdown = false } = defineProps<{
