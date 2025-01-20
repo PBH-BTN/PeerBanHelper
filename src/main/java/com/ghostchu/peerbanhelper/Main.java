@@ -117,7 +117,7 @@ public class Main {
                 DEF_LOCALE = defLocaleTag;
             }
         }
-        DEF_LOCALE = DEF_LOCALE.toLowerCase(Locale.ROOT).replace("-", "_");
+        DEF_LOCALE = DEF_LOCALE.toLowerCase(Locale.ROOT);
         initGUI(args);
         guiManager.createMainWindow();
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
