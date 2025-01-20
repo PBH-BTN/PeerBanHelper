@@ -196,7 +196,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Override
     public void createNotification(Level level, String title, String description) {
 
-        var swingTray = mainWindow.getSwingTrayDialog();
+        var swingTray = mainWindow.getTrayMenu().getSwingTrayDialog();
         if (swingTray != null) {
             var icon = swingTray.getTrayIcon();
             if (swingTray.getTrayIcon() != null) {
@@ -217,7 +217,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     private synchronized void refreshTrayIcon() {
-        var swingTray = mainWindow.getSwingTrayDialog();
+        var swingTray = mainWindow.getTrayMenu().getSwingTrayDialog();
         if (swingTray != null) {
             var icon = swingTray.getTrayIcon();
             if (icon != null) {

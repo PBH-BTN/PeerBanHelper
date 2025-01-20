@@ -510,5 +510,10 @@
             <artifactId>dnsjava</artifactId>
             <version>3.6.2</version>
         </dependency>
+        <dependency>
+            <groupId>me.friwi</groupId>
+            <artifactId>jcefmaven</artifactId>
+            <version>127.3.1</version>
+        </dependency>
     </dependencies>
 </project>

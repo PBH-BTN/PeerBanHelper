@@ -30,7 +30,14 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class MainWindow extends JFrame {
+    @Getter
     private final SwingGuiImpl swingGUI;
+    @Getter
+    private final LogsTab logsTab;
+    @Getter
+    private final WindowMenuBar windowTitleBar;
+    @Getter
+    private final TrayMenu trayMenu;
     private JPanel mainPanel;
     private JTabbedPane tabbedPane;
     private JPanel tabbedPaneLogs;
@@ -38,38 +45,29 @@ public class MainWindow extends JFrame {
     private JList<LogEntry> loggerTextList;
     @Getter
     private JScrollPane loggerScrollPane;
-    @Nullable
-    @Getter
-    private SwingTray swingTrayDialog;
-    private boolean persistFlagTrayMessageSent;
+
 
     public MainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
         if (SystemInfo.isMacFullWindowContentSupported)
             getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
         setTitle(tlUI(Lang.GUI_TITLE_LOADING, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
-        setJMenuBar(setupMenuBar());
         setSize(1000, 600);
         setContentPane(mainPanel);
+        this.windowTitleBar = new WindowMenuBar(this);
         setupTabbedPane();
-        setupSystemTray();
-        setComponents();
+        this.trayMenu = new TrayMenu(this);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                minimizeToTray();
+                trayMenu.minimizeToTray();
             }
         });
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("/assets/icon.png"));
         setIconImage(imageIcon.getImage());
         setVisible(!swingGUI.isSilentStart());
-        loggerTextList.setModel(new DefaultListModel<>());
-        loggerTextList.setFont(new Font("微软雅黑", Font.PLAIN, 14));
-        loggerTextList.setCellRenderer(new LogEntryRenderer());
-        loggerTextList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        loggerTextList.setLayoutOrientation(JList.VERTICAL);
-        loggerTextList.setFixedCellHeight(-1);
+        this.logsTab = new LogsTab(this);
     }
 
     public static void setTabTitle(JPanel tab, String title) {
@@ -90,138 +88,15 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void minimizeToTray() {
-        if (swingTrayDialog != null) {
-            setVisible(false);
-            if (!persistFlagTrayMessageSent) {
-                persistFlagTrayMessageSent = true;
-                swingGUI.createNotification(Level.INFO, tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
-            }
-        }
-    }
 
-    private void setComponents() {
+    public void sync() {
 
-    }
-
-    private void setupSystemTray() {
-        if (SystemTray.isSupported()) {
-            TrayIcon icon = new TrayIcon(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/assets/icon.png")));
-            icon.setImageAutoSize(true);
-            SystemTray sysTray = SystemTray.getSystemTray();//获取系统托盘
-            try {
-                var tray = new SwingTray(icon, mouseEvent -> setVisible(true), mouseEvent -> updateTrayMenus());
-                sysTray.add(icon);//将托盘图表添加到系统托盘
-                updateTrayMenus();
-                this.swingTrayDialog = tray;
-            } catch (AWTException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void updateTrayMenus() {
-        if (this.swingTrayDialog == null) return;
-        List<JMenuItem> items = new ArrayList<>();
-        JMenuItem openMainWindow = new JMenuItem(tlUI(Lang.GUI_MENU_SHOW_WINDOW), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/open.svg")));
-        JMenuItem openWebUI = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/browser.svg")));
-        JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/close.svg")));
-        openMainWindow.addActionListener(e -> setVisible(true));
-        openWebUI.addActionListener(e -> openWebUI());
-        quit.addActionListener(e -> System.exit(0));
-        items.add(menuDisplayItem(new JMenuItem(tlUI(Lang.GUI_MENU_STATS))));
-        items.add(menuBanStats());
-        items.add(menuDownloaderStats());
-        items.add(menuDisplayItem(new JMenuItem(tlUI(Lang.GUI_MENU_QUICK_OPERATIONS))));
-        items.add(openMainWindow);
-        items.add(openWebUI);
-        items.add(null);
-        items.add(quit);
-        this.swingTrayDialog.set(items);
-    }
-
-    private JMenuItem menuDownloaderStats() {
-        var totalDownloaders = 0L;
-        var healthDownloaders = 0L;
-        if (Main.getServer() != null) {
-            totalDownloaders = Main.getServer().getDownloaders().size();
-            healthDownloaders = Main.getServer().getDownloaders().stream().filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
-        }
-        return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_DOWNLOADER, healthDownloaders, totalDownloaders), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/connection.svg")));
-    }
-
-    private JMenuItem menuBanStats() {
-        var bannedPeers = 0L;
-        var bannedIps = 0L;
-        var server = Main.getServer();
-        if (server != null) {
-            bannedIps = Main.getServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
-            bannedPeers = Main.getServer().getBannedPeers().values().size();
-        }
-        return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/banned.svg")));
-    }
-
-    private JMenuItem menuDisplayItem(JMenuItem jMenuItem) {
-        jMenuItem.setEnabled(false);
-        return jMenuItem;
-    }
-
-    private JMenuBar setupMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.add(generateProgramMenu());
-        menuBar.add(generateWebUIMenu());
-        this.add(menuBar, BorderLayout.NORTH);
-        return menuBar;
-    }
-
-    private Component generateProgramMenu() {
-        JMenu menu = new JMenu(tlUI(Lang.GUI_MENU_PROGRAM));
-        JMenuItem openDataDirectory = new JMenuItem(tlUI(Lang.GUI_MENU_OPEN_DATA_DIRECTORY));
-        openDataDirectory.addActionListener(e -> {
-            try {
-                Desktop.getDesktop().open(Main.getDataDirectory());
-            } catch (IOException ex) {
-                log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
-            }
-        });
-        menu.add(openDataDirectory);
-        JMenuItem viewOnGithub = new JMenuItem(tlUI(Lang.ABOUT_VIEW_GITHUB));
-        viewOnGithub.addActionListener(e -> swingGUI.openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
-        menu.add(viewOnGithub);
-        menu.addSeparator();
-        JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT));
-        quit.addActionListener(e -> System.exit(0));
-        menu.add(quit);
-        return menu;
-    }
-
-    private JMenu generateWebUIMenu() {
-        JMenu webUIMenu = new JMenu(tlUI(Lang.GUI_MENU_WEBUI));
-        JMenuItem openWebUIMenuItem = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
-        openWebUIMenuItem.addActionListener(e -> {
-            this.openWebUI();
-        });
-        webUIMenu.add(openWebUIMenuItem);
-        JMenuItem copyWebUIToken = new JMenuItem(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
-        copyWebUIToken.addActionListener(e -> {
-            if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
-                String content = Main.getServer().getWebContainer().getToken();
-                copyText(content);
-                swingGUI.createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)));
-            }
-        });
-        webUIMenu.add(copyWebUIToken);
-        return webUIMenu;
     }
 
     private void openWebUI() {
         if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
             swingGUI.openWebpage(URI.create("http://localhost:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()));
         }
-    }
-
-    public void sync() {
-
     }
 
     private void setupTabbedPane() {
@@ -293,6 +168,167 @@ public class MainWindow extends JFrame {
         // TODO: place custom component creation code here
     }
 
+    public static class TrayMenu {
+        private final MainWindow parent;
+        private boolean persistFlagTrayMessageSent;
+        @Nullable
+        @Getter
+        private SwingTray swingTrayDialog;
+
+        public TrayMenu(MainWindow parent) {
+            this.parent = parent;
+            setupSystemTray();
+        }
+
+        private void setupSystemTray() {
+            if (SystemTray.isSupported()) {
+                TrayIcon icon = new TrayIcon(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/assets/icon.png")));
+                icon.setImageAutoSize(true);
+                SystemTray sysTray = SystemTray.getSystemTray();//获取系统托盘
+                try {
+                    var tray = new SwingTray(icon, mouseEvent -> parent.setVisible(true), mouseEvent -> updateTrayMenus());
+                    sysTray.add(icon);//将托盘图表添加到系统托盘
+                    updateTrayMenus();
+                    this.swingTrayDialog = tray;
+                } catch (AWTException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        private void minimizeToTray() {
+            if (swingTrayDialog != null) {
+                parent.setVisible(false);
+                if (!persistFlagTrayMessageSent) {
+                    persistFlagTrayMessageSent = true;
+                    parent.swingGUI.createNotification(Level.INFO, tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION), tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
+                }
+            }
+        }
+
+
+        private void updateTrayMenus() {
+            if (swingTrayDialog == null) return;
+            List<JMenuItem> items = new ArrayList<>();
+            JMenuItem openMainWindow = new JMenuItem(tlUI(Lang.GUI_MENU_SHOW_WINDOW), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/open.svg")));
+            JMenuItem openWebUI = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/browser.svg")));
+            JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/close.svg")));
+            openMainWindow.addActionListener(e -> parent.setVisible(true));
+            openWebUI.addActionListener(e -> parent.openWebUI());
+            quit.addActionListener(e -> System.exit(0));
+            items.add(menuDisplayItem(new JMenuItem(tlUI(Lang.GUI_MENU_STATS))));
+            items.add(menuBanStats());
+            items.add(menuDownloaderStats());
+            items.add(menuDisplayItem(new JMenuItem(tlUI(Lang.GUI_MENU_QUICK_OPERATIONS))));
+            items.add(openMainWindow);
+            items.add(openWebUI);
+            items.add(null);
+            items.add(quit);
+            swingTrayDialog.set(items);
+        }
+
+        private JMenuItem menuDownloaderStats() {
+            var totalDownloaders = 0L;
+            var healthDownloaders = 0L;
+            if (Main.getServer() != null) {
+                totalDownloaders = Main.getServer().getDownloaders().size();
+                healthDownloaders = Main.getServer().getDownloaders().stream().filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
+            }
+            return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_DOWNLOADER, healthDownloaders, totalDownloaders), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/connection.svg")));
+        }
+
+        private JMenuItem menuBanStats() {
+            var bannedPeers = 0L;
+            var bannedIps = 0L;
+            var server = Main.getServer();
+            if (server != null) {
+                bannedIps = Main.getServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
+                bannedPeers = Main.getServer().getBannedPeers().values().size();
+            }
+            return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/banned.svg")));
+        }
+
+        private JMenuItem menuDisplayItem(JMenuItem jMenuItem) {
+            jMenuItem.setEnabled(false);
+            return jMenuItem;
+        }
+
+    }
+
+    public static class WindowMenuBar {
+        private final MainWindow parent;
+
+        public WindowMenuBar(MainWindow parent) {
+            this.parent = parent;
+            parent.setJMenuBar(setupMenuBar());
+        }
+
+
+        private JMenuBar setupMenuBar() {
+            JMenuBar menuBar = new JMenuBar();
+            menuBar.add(generateProgramMenu());
+            menuBar.add(generateWebUIMenu());
+            parent.add(menuBar, BorderLayout.NORTH);
+            return menuBar;
+        }
+
+        private Component generateProgramMenu() {
+            JMenu menu = new JMenu(tlUI(Lang.GUI_MENU_PROGRAM));
+            JMenuItem openDataDirectory = new JMenuItem(tlUI(Lang.GUI_MENU_OPEN_DATA_DIRECTORY));
+            openDataDirectory.addActionListener(e -> {
+                try {
+                    Desktop.getDesktop().open(Main.getDataDirectory());
+                } catch (IOException ex) {
+                    log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
+                }
+            });
+            menu.add(openDataDirectory);
+            JMenuItem viewOnGithub = new JMenuItem(tlUI(Lang.ABOUT_VIEW_GITHUB));
+            viewOnGithub.addActionListener(e -> parent.swingGUI.openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
+            menu.add(viewOnGithub);
+            menu.addSeparator();
+            JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT));
+            quit.addActionListener(e -> System.exit(0));
+            menu.add(quit);
+            return menu;
+        }
+
+        private JMenu generateWebUIMenu() {
+            JMenu webUIMenu = new JMenu(tlUI(Lang.GUI_MENU_WEBUI));
+            JMenuItem openWebUIMenuItem = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
+            openWebUIMenuItem.addActionListener(e -> {
+                parent.openWebUI();
+            });
+            webUIMenu.add(openWebUIMenuItem);
+            JMenuItem copyWebUIToken = new JMenuItem(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
+            copyWebUIToken.addActionListener(e -> {
+                if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
+                    String content = Main.getServer().getWebContainer().getToken();
+                    copyText(content);
+                    parent.swingGUI.createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)));
+                }
+            });
+            webUIMenu.add(copyWebUIToken);
+            return webUIMenu;
+        }
+
+
+    }
+
+    public static class LogsTab {
+        private final MainWindow parent;
+
+        public LogsTab(MainWindow parent) {
+            this.parent = parent;
+
+            parent.loggerTextList.setModel(new DefaultListModel<>());
+            parent.loggerTextList.setFont(new Font("微软雅黑", Font.PLAIN, 14));
+            parent.loggerTextList.setCellRenderer(new LogEntryRenderer());
+            parent.loggerTextList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            parent.loggerTextList.setLayoutOrientation(JList.VERTICAL);
+            parent.loggerTextList.setFixedCellHeight(-1);
+        }
+    }
 
     public static class LogEntryRenderer extends JTextArea implements ListCellRenderer<LogEntry> {
         public LogEntryRenderer() {
@@ -329,5 +365,6 @@ public class MainWindow extends JFrame {
             return this;
         }
     }
+
 
 }
