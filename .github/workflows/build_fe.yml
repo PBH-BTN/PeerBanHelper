@@ -20,7 +20,7 @@ jobs:
       - uses: pnpm/action-setup@v3
         name: Install pnpm
         with:
-          version: latest
+          version: 10.0.0
           run_install: false
 
       - name: Get pnpm store directory
