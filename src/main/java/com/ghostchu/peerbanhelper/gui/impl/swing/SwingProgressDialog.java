@@ -66,7 +66,7 @@ public class SwingProgressDialog implements ProgressDialog {
     public void updateProgress(float progress) {
         // 让进度条显示具体进度
         SwingUtilities.invokeLater(() -> {
-            progressBar.setValue((int) progress);  // 更新进度条的值，0 到 100
+            progressBar.setValue((int) (progress * 100));  // 更新进度条的值，0 到 100
         });
     }
 
