@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
+import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
@@ -43,6 +44,8 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     private MainWindow mainWindow;
     @Getter
     private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
+    @Getter
+    private SwingTaskbarControl swingTaskbarControl;
 
     public SwingGuiImpl(String[] args) {
         super(args);
@@ -71,17 +74,9 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
         // taskbar
         if (Main.getServer().isGlobalPaused()) {
-            if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
-                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
-                    Taskbar.getTaskbar().setWindowProgressValue(mainWindow, 100);
-                }
-                Taskbar.getTaskbar().setWindowProgressState(mainWindow, Taskbar.State.PAUSED);
-            } else {
-                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
-                    Taskbar.getTaskbar().setWindowProgressValue(mainWindow, 0);
-                }
-                Taskbar.getTaskbar().setWindowProgressState(mainWindow, Taskbar.State.OFF);
-            }
+            taskbarControl().updateProgress(mainWindow, Taskbar.State.PAUSED, 100.0f);
+        } else {
+            taskbarControl().updateProgress(mainWindow, Taskbar.State.OFF, -1.0f);
         }
     }
 
@@ -168,12 +163,21 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Override
     public void createMainWindow() {
         mainWindow = new MainWindow(this);
+        swingTaskbarControl = new SwingTaskbarControl(mainWindow);
         initLoggerRedirection();
     }
 
     @Override
     public ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
         return new SwingProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
+    }
+
+    @Override
+    public TaskbarControl taskbarControl() {
+        if (swingTaskbarControl != null) {
+            return swingTaskbarControl;
+        }
+        return super.taskbarControl();
     }
 
     public boolean openWebpage(URI uri) {

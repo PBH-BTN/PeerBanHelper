@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 
 import javax.swing.*;
@@ -12,6 +13,7 @@ public class SwingProgressDialog implements ProgressDialog {
     private final JLabel descriptionLabel = new JLabel("Unknown Description");
     private final JLabel commentLabel = new JLabel("");
     private final JButton stopButton;
+    private float progress;
 
     public SwingProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
         // 创建主窗口
@@ -37,6 +39,7 @@ public class SwingProgressDialog implements ProgressDialog {
         topPanel.add(descriptionLabel);
 
         setProgressDisplayIndeterminate(true);
+        Main.getGuiManager().taskbarControl().updateProgress(frame, Taskbar.State.INDETERMINATE, 0.0f);
 
         // 创建按钮
         this.stopButton = new JButton(buttonText);
@@ -61,23 +64,14 @@ public class SwingProgressDialog implements ProgressDialog {
         frame.add(bottomPanel, BorderLayout.SOUTH);
         frame.pack();
         frame.setVisible(false);
-        if (Taskbar.isTaskbarSupported()) {
-            Taskbar.getTaskbar().setWindowProgressState(frame, Taskbar.State.INDETERMINATE);
-        }
     }
 
     public void updateProgress(float progress) {
         // 让进度条显示具体进度
+        this.progress = progress;
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue((int) (progress * 100));  // 更新进度条的值，0 到 100
-            if (Taskbar.isTaskbarSupported()) {
-                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
-                    Taskbar.getTaskbar().setWindowProgressValue(frame, (int) (progress * 100));
-                }
-                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
-                    Taskbar.getTaskbar().setWindowProgressState(frame, Taskbar.State.NORMAL);
-                }
-            }
+            Main.getGuiManager().taskbarControl().updateProgress(frame, Taskbar.State.NORMAL, progress);
         });
     }
 
@@ -90,6 +84,7 @@ public class SwingProgressDialog implements ProgressDialog {
     @Override
     public void close() {
         SwingUtilities.invokeLater(() -> frame.setVisible(false));
+        Main.getGuiManager().taskbarControl().updateProgress(frame, Taskbar.State.OFF, -1);
     }
 
     @Override
@@ -135,9 +130,7 @@ public class SwingProgressDialog implements ProgressDialog {
         SwingUtilities.invokeLater(() -> {
             progressBar.setIndeterminate(indeterminate);
             progressBar.setStringPainted(!indeterminate);
-            if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
-                Taskbar.getTaskbar().setWindowProgressState(frame, indeterminate ? Taskbar.State.INDETERMINATE : Taskbar.State.NORMAL);
-            }
+            Main.getGuiManager().taskbarControl().updateProgress(frame, indeterminate ? Taskbar.State.INDETERMINATE : Taskbar.State.NORMAL, (progress * 100));
         });
     }
 

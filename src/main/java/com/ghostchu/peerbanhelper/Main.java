@@ -119,6 +119,7 @@ public class Main {
         }
         initGUI(args);
         guiManager.createMainWindow();
+        guiManager.taskbarControl().updateProgress(null, Taskbar.State.INDETERMINATE, 0.0f);
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         setupProxySettings();
         setupScriptEngine();

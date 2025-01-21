@@ -63,12 +63,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -194,6 +196,7 @@ public class PeerBanHelperServer implements Reloadable {
         Main.getEventBus().post(new PBHServerStartedEvent(this));
         sendSnapshotAlert();
         runTestCode();
+        Main.getGuiManager().taskbarControl().updateProgress(null, Taskbar.State.OFF, 0.0f);
     }
 
     @SneakyThrows

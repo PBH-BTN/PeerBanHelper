@@ -22,4 +22,6 @@ public interface GuiManager {
     void createDialog(Level level, String title, String description);
 
     ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel);
+
+    TaskbarControl taskbarControl();
 }

@@ -89,17 +89,6 @@ public class MainWindow extends JFrame {
         setVisible(!swingGUI.isSilentStart());
         this.logsTab = new LogsTab(this);
         this.webuiTab = new WebUITab(this);
-        if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
-            Taskbar.getTaskbar().setWindowProgressState(this, Taskbar.State.INDETERMINATE);
-        }
-        Main.getEventBus().register(this);
-    }
-
-    @Subscribe
-    public void pbhStarted(PBHServerStartedEvent event) {
-        if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
-            Taskbar.getTaskbar().setWindowProgressState(this, Taskbar.State.OFF);
-        }
     }
 
     public static void setTabTitle(JPanel tab, String title) {
