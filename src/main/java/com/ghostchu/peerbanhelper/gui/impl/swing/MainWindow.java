@@ -20,6 +20,7 @@ import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefMessageRouter;
+import org.cef.handler.CefKeyboardHandlerAdapter;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -195,6 +196,7 @@ public class MainWindow extends JFrame {
         private CefClient client;
         private CefBrowser browser;
         private Component awtComponent;
+        private JCEFSwingDevTools devToolsDialog_ = null;
 
         public WebUITab(MainWindow parent) {
             this.parent = parent;
@@ -275,6 +277,24 @@ public class MainWindow extends JFrame {
                 this.client = app.createClient();
                 CefMessageRouter msgRouter = CefMessageRouter.create();
                 client.addMessageRouter(msgRouter);
+                if (ExternalSwitch.parseBoolean("jcef.dev-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
+                    client.addKeyboardHandler(new CefKeyboardHandlerAdapter() {
+                        @Override
+                        public boolean onKeyEvent(CefBrowser browser, CefKeyEvent event) {
+                            if (event.type == CefKeyEvent.EventType.KEYEVENT_KEYUP) {
+                                switch (event.windows_key_code) {
+                                    // F12 开发者工具
+                                    case 123:
+                                        devToolsShow(browser);
+                                        break;
+                                    default:
+                                        return false;
+                                }
+                            }
+                            return true;
+                        }
+                    });
+                }
                 this.browser = client.createBrowser(URI.create("http://127.0.0.1:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()).toString(), false, false);
                 this.awtComponent = this.browser.getUIComponent();
                 this.parent.tabbedPane.setComponentAt(tabPos, this.awtComponent);
@@ -291,6 +311,23 @@ public class MainWindow extends JFrame {
                     this.client = null;
                 }
             }
+        }
+
+        /**
+         * 开发者工具显示或隐藏
+         * @param cefBrowser 显示开发者工具的浏览器
+         */
+        private void devToolsShow(CefBrowser cefBrowser) {
+            if (devToolsDialog_ != null) {
+                devToolsDialog_.dispose();
+            }
+            // 因为是开发者工具，不能影响内容页面的显示，所以单独新建一个窗体显示
+            devToolsDialog_ = new JCEFSwingDevTools(new JFrame(), "PeerBanHelper WebUI DevTools", cefBrowser);
+//            devToolsDialog_ = new DevToolsDialog(owner_, "开发者工具", cefBrowser);
+            var maxAllowedWidth = Math.min(1280, Toolkit.getDefaultToolkit().getScreenSize().width);
+            var maxAllowedHeight = Math.min(720, Toolkit.getDefaultToolkit().getScreenSize().height);
+            devToolsDialog_.setSize(maxAllowedWidth, maxAllowedHeight);
+            devToolsDialog_.setVisible(true);
         }
 
         @Override
