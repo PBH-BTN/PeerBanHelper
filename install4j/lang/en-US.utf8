@@ -9,3 +9,5 @@ checkbox.registersystemservice=Register as system service (DO NOT CHECK UNLESS Y
 systemservice.note=When you install PeerBanHelper as system service，under Windows operation system, the configuration and files will store at C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper. Access this location will require Administrator privileges.
 components.peerbanhelper=PeerBanHelper
 components.peerbanhelper.description=PeerBanHelper core program, including main program code and necessary runtime files
+components.jcef=[Optional] JCEF
+components.jcef.description=Optional JCEF (Java Chromium Embedded Framework), for supporting GUI mode WebUI console. Disable this checkbox will hide WebUI console tab from GUI window, user will need access WebUI via system browser. (Download after PeerBanHelper started if checked)

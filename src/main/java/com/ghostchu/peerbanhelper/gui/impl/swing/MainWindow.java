@@ -31,6 +31,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -206,9 +207,12 @@ public class MainWindow extends JFrame {
         }
 
         private void initJCEFEngine() {
-            if (ExternalSwitch.parseBoolean("pbh.nojcef", false) || Arrays.asList(Main.getStartupArgs()).contains("nojcef")) {
+            if (ExternalSwitch.parseBoolean("pbh.nojcef", false)
+                    || Arrays.asList(Main.getStartupArgs()).contains("nojcef")
+                    || !new File("enable-jcef.txt").exists()) { // File 是可执行文件同目录下的，这是预期行为 (install4j)
                 return;
             }
+
             try {
                 var jcefBuilder = JCEFAppFactory.createBuilder(Main.getDataDirectory(), Main.DEF_LOCALE);
                 @Cleanup
