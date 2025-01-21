@@ -140,7 +140,6 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         FlatAnimatedLafChange.showSnapshot();
         try {
             if (isDark) {
-                // is macos?
                 pbhFlatLafTheme.applyDark();
             } else {
                 pbhFlatLafTheme.applyLight();
