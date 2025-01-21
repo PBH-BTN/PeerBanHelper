@@ -89,6 +89,17 @@ public class MainWindow extends JFrame {
         setVisible(!swingGUI.isSilentStart());
         this.logsTab = new LogsTab(this);
         this.webuiTab = new WebUITab(this);
+        if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
+            Taskbar.getTaskbar().setWindowProgressState(this, Taskbar.State.INDETERMINATE);
+        }
+        Main.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void pbhStarted(PBHServerStartedEvent event) {
+        if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
+            Taskbar.getTaskbar().setWindowProgressState(this, Taskbar.State.OFF);
+        }
     }
 
     public static void setTabTitle(JPanel tab, String title) {
@@ -111,7 +122,6 @@ public class MainWindow extends JFrame {
 
 
     public void sync() {
-
     }
 
     private void openWebUI() {
@@ -227,7 +237,7 @@ public class MainWindow extends JFrame {
                     if (enumProgress == EnumProgress.DOWNLOADING) {
                         progressDialog.show();
                         progressDialog.setProgressDisplayIndeterminate(false);
-                        progressDialog.updateProgress(v);
+                        progressDialog.updateProgress(v / 100.0f);
                     }
                     if (enumProgress == EnumProgress.EXTRACTING) {
                         progressDialog.setDescription(tlUI(Lang.JCEF_DOWNLOAD_UNZIP_DESCRIPTION));

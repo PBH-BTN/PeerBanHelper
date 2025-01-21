@@ -61,12 +61,23 @@ public class SwingProgressDialog implements ProgressDialog {
         frame.add(bottomPanel, BorderLayout.SOUTH);
         frame.pack();
         frame.setVisible(false);
+        if (Taskbar.isTaskbarSupported()) {
+            Taskbar.getTaskbar().setWindowProgressState(frame, Taskbar.State.INDETERMINATE);
+        }
     }
 
     public void updateProgress(float progress) {
         // 让进度条显示具体进度
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue((int) (progress * 100));  // 更新进度条的值，0 到 100
+            if (Taskbar.isTaskbarSupported()) {
+                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                    Taskbar.getTaskbar().setWindowProgressValue(frame, (int) (progress * 100));
+                }
+                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
+                    Taskbar.getTaskbar().setWindowProgressState(frame, Taskbar.State.NORMAL);
+                }
+            }
         });
     }
 
@@ -124,6 +135,9 @@ public class SwingProgressDialog implements ProgressDialog {
         SwingUtilities.invokeLater(() -> {
             progressBar.setIndeterminate(indeterminate);
             progressBar.setStringPainted(!indeterminate);
+            if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
+                Taskbar.getTaskbar().setWindowProgressState(frame, indeterminate ? Taskbar.State.INDETERMINATE : Taskbar.State.NORMAL);
+            }
         });
     }
 

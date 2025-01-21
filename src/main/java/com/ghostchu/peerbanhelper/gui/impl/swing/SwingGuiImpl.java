@@ -57,7 +57,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         }
     }
 
-    private void updateTitle() {
+    private void updateGuiStuff() {
         StringBuilder builder = new StringBuilder();
         builder.append(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         StringJoiner joiner = new StringJoiner("", " [", "]");
@@ -68,6 +68,21 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 mainWindow.setTitle(builder.append(joiner).toString());
             }
         });
+
+        // taskbar
+        if (Main.getServer().isGlobalPaused()) {
+            if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
+                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                    Taskbar.getTaskbar().setWindowProgressValue(mainWindow, 100);
+                }
+                Taskbar.getTaskbar().setWindowProgressState(mainWindow, Taskbar.State.PAUSED);
+            } else {
+                if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                    Taskbar.getTaskbar().setWindowProgressValue(mainWindow, 0);
+                }
+                Taskbar.getTaskbar().setWindowProgressState(mainWindow, Taskbar.State.OFF);
+            }
+        }
     }
 
 
@@ -96,7 +111,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void onPBHFullyStarted(PeerBanHelperServer server) {
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateTitle, 0, 1, TimeUnit.SECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateGuiStuff, 0, 1, TimeUnit.SECONDS);
     }
 
     @Subscribe
@@ -253,12 +268,14 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (level == Level.SEVERE) {
             msgType = JOptionPane.ERROR_MESSAGE;
         }
+        if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
+            Taskbar.getTaskbar().requestWindowUserAttention(mainWindow);
+        }
         JOptionPane.showMessageDialog(null, description, title, msgType);
     }
 
     @Override
     public void createNotification(Level level, String title, String description) {
-
         var swingTray = mainWindow.getTrayMenu().getSwingTrayDialog();
         if (swingTray != null) {
             var icon = swingTray.getTrayIcon();
