@@ -144,7 +144,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             } else {
                 pbhFlatLafTheme.applyLight();
             }
-            FlatLaf.updateUI();
+            FlatLaf.updateUILater();
         } finally {
             FlatAnimatedLafChange.hideSnapshotWithAnimation();
         }
