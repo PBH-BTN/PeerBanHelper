@@ -1,17 +1,24 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
+import com.google.common.eventbus.Subscribe;
 import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +41,8 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
     private MainWindow mainWindow;
+    @Getter
+    private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
 
     public SwingGuiImpl(String[] args) {
         super(args);
@@ -41,6 +50,11 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         System.setProperty("apple.awt.application.name", "PeerBanHelper");
         System.setProperty("apple.awt.application.appearance", "system");
+        // is linux?
+        if (System.getProperty("os.name").contains("Linux")) {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
+        }
     }
 
     private void updateTitle() {
@@ -85,11 +99,55 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateTitle, 0, 1, TimeUnit.SECONDS);
     }
 
+    @Subscribe
+    public void needReloadThemes(PBHLookAndFeelNeedReloadEvent event) {
+        updateTheme(OsThemeDetector.getDetector().isDark());
+    }
+
     private void updateTheme(Boolean isDark) {
-        if (isDark) {
-            FlatDarculaLaf.setup();
-        } else {
-            FlatIntelliJLaf.setup();
+        pbhFlatLafTheme = new StandardLafTheme();
+        //macos?
+        if (ExternalSwitch.parseBoolean("pbh.gui.macos-theme", true) && System.getProperty("os.name").contains("Mac")) {
+            pbhFlatLafTheme = new MacOSLafTheme();
+        }
+        //PBHPlus?
+        if (ExternalSwitch.parseBoolean("pbh.gui.pbhplus-theme", true) && ExchangeMap.PBH_PLUS_ACTIVATED) {
+            pbhFlatLafTheme = new PBHPlusTheme();
+        }
+        if (ExternalSwitch.parse("pbh.gui.theme-light") != null && ExternalSwitch.parse("pbh.gui.theme-dark") != null) {
+            pbhFlatLafTheme = new PBHFlatLafTheme() {
+                @Override
+                public void applyDark() {
+                    try {
+                        UIManager.setLookAndFeel(ExternalSwitch.parse("pbh.gui.theme-dark"));
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                             UnsupportedLookAndFeelException e) {
+                        log.error("Failed to apply user customized dark theme", e);
+                    }
+                }
+
+                @Override
+                public void applyLight() {
+                    try {
+                        UIManager.setLookAndFeel(ExternalSwitch.parse("pbh.gui.theme-light"));
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                             UnsupportedLookAndFeelException e) {
+                        log.error("Failed to apply user customized light theme", e);
+                    }
+                }
+            };
+        }
+        FlatAnimatedLafChange.showSnapshot();
+        try {
+            if (isDark) {
+                // is macos?
+                pbhFlatLafTheme.applyDark();
+            } else {
+                pbhFlatLafTheme.applyLight();
+            }
+            FlatLaf.updateUI();
+        } finally {
+            FlatAnimatedLafChange.hideSnapshotWithAnimation();
         }
     }
 

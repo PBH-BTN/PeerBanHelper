@@ -575,4 +575,7 @@ JCEF_DOWNLOAD_DESCRIPTION: |
   PeerBanHelper 正在下载 JCEF 数据包以在 GUI 窗口中启用 WebUI 控制台标签卡，这可能需要一点时间...<br/>
   如果不希望启用 JCEF 功能，请添加启动附加参数 nojcef。
 JCEF_DOWNLOAD_UNZIP_DESCRIPTION: 正在解压缩 JCEF 数据包，请稍等...
+IPDB_DOWNLOAD_TITLE: "下载 GeoIP 数据库: {}"
+IPDB_DOWNLOAD_DESCRIPTION: "PeerBanHelper 需要下载 GeoIP 数据库以为反吸血提供 IP 地址的地理位置信息支持，这可能需要一点时间..."
 GUI_COMMON_CANCEL: "取消"
+PBH_PLUS_THANKS_FOR_DONATION_GUI_TITLE: "❤感谢捐赠"
