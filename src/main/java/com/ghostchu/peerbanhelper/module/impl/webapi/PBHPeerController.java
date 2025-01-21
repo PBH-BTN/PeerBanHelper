@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -141,7 +142,7 @@ public class PBHPeerController extends AbstractFeatureModule {
             if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
                 ptrLookup = dnsLookup.ptr(ip).get(3, TimeUnit.SECONDS).orElse(null);
             } else {
-                ptrLookup = ipAddress.toInetAddress().getCanonicalHostName();
+                ptrLookup = CompletableFuture.supplyAsync(() -> ipAddress.toInetAddress().getCanonicalHostName()).get(3, TimeUnit.SECONDS);
             }
         } catch (Exception ignored) {
         }
