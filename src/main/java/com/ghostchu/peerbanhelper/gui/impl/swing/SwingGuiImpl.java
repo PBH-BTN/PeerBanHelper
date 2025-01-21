@@ -74,7 +74,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
         // taskbar
         if (Main.getServer().isGlobalPaused()) {
-            taskbarControl().updateProgress(mainWindow, Taskbar.State.PAUSED, 100.0f);
+            taskbarControl().updateProgress(mainWindow, Taskbar.State.PAUSED, 1.0f);
         } else {
             taskbarControl().updateProgress(mainWindow, Taskbar.State.OFF, -1.0f);
         }
