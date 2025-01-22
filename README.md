@@ -31,7 +31,7 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 ## 支持的客户端
 
-- qBittorrent **4.5.0 或更高版本**
+- qBittorrent/qBitorrent，**4.5.0 或更高版本**，不支持 XDown
 - BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
 - Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
 - Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
