@@ -437,8 +437,47 @@ public class MainWindow extends JFrame {
             JMenuBar menuBar = new JMenuBar();
             menuBar.add(generateProgramMenu());
             menuBar.add(generateWebUIMenu());
+            if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
+                menuBar.add(generateDebugMenu());
+            }
             parent.add(menuBar, BorderLayout.NORTH);
             return menuBar;
+        }
+
+        private Component generateDebugMenu() {
+            JMenu menu = new JMenu("-DEBUG-");
+            JMenuItem disableJCEF = new JMenuItem("Disable JCEF");
+            JMenuItem enableJCEF = new JMenuItem("Enable JCEF");
+            var f = new File("enable-jcef.txt");
+            enableJCEF.addActionListener(e -> {
+                try {
+                    if (f.exists()) {
+                        Main.getGuiManager().createDialog(Level.INFO, "Enable JCEF", "JCEF is already enabled, no operation needed.");
+                    } else {
+                        f.createNewFile();
+                        Main.getGuiManager().createDialog(Level.INFO, "Enable JCEF", "JCEF is enabled, restart the application to take effect.");
+                    }
+                } catch (IOException ex) {
+                    Main.getGuiManager().createDialog(Level.SEVERE, "Enable JCEF", "Unable to enable JCEF, please check the file system permission.");
+                    log.error("Unable to enable JCEF", ex);
+                }
+            });
+            disableJCEF.addActionListener(e -> {
+                try {
+                    if (f.exists()) {
+                        f.delete();
+                        Main.getGuiManager().createDialog(Level.INFO, "Disable JCEF", "JCEF is disabled, restart the application to take effect, delete `jcef` directory to free the disk space.");
+                    } else {
+                        Main.getGuiManager().createDialog(Level.INFO, "Disable JCEF", "JCEF is already disabled, no operation needed.");
+                    }
+                } catch (Exception ex) {
+                    Main.getGuiManager().createDialog(Level.SEVERE, "Disable JCEF", "Unable to disable JCEF, please check the file system permission.");
+                    log.error("Unable to disable JCEF", ex);
+                }
+            });
+            menu.add(disableJCEF);
+            menu.add(enableJCEF);
+            return menu;
         }
 
         private Component generateProgramMenu() {
