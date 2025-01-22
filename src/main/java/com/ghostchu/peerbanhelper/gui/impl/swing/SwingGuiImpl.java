@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.SnapshotTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
@@ -124,6 +125,11 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (ExternalSwitch.parseBoolean("pbh.gui.pbhplus-theme", true) && ExchangeMap.PBH_PLUS_ACTIVATED) {
             pbhFlatLafTheme = new PBHPlusTheme();
         }
+        // Snapshot?
+        if (Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+            pbhFlatLafTheme = new SnapshotTheme();
+        }
+        // Customized?
         if (ExternalSwitch.parse("pbh.gui.theme-light") != null && ExternalSwitch.parse("pbh.gui.theme-dark") != null) {
             pbhFlatLafTheme = new PBHFlatLafTheme() {
                 @Override

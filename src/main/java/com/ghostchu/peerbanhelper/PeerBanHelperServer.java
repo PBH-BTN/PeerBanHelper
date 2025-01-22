@@ -201,9 +201,10 @@ public class PeerBanHelperServer implements Reloadable {
 
     @SneakyThrows
     private void runTestCode() {
-        if (!"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+        if (!Main.getMeta().isSnapshotOrBeta() && !"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
             return;
         }
+        ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
         // run some junky test code here
 //        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
 //                .getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
