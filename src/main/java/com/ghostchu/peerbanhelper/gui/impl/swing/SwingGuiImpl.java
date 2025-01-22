@@ -26,10 +26,14 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Locale;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,9 +65,19 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         }
     }
 
+    private void setUIFont(String fontName) {
+        Enumeration<Object> keys = UIManager.getLookAndFeelDefaults().keys();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            Object value = UIManager.get(key);
+            if (value instanceof FontUIResource fontUIResource)
+                UIManager.put(key, getFont(fontName, -1, -1, fontUIResource));
+        }
+    }
+
     private void updateGuiStuff() {
         StringBuilder builder = new StringBuilder();
-        builder.append(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+        builder.append(tlUI(Lang.GUI_TITLE_LOADED, Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         StringJoiner joiner = new StringJoiner("", " [", "]");
         joiner.setEmptyValue("");
         ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
@@ -164,6 +178,26 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         } finally {
             FlatAnimatedLafChange.hideSnapshotWithAnimation();
         }
+    }
+
+    /** @noinspection ALL */
+    private Font getFont(String fontName, int style, int size, Font currentFont) {
+        if (currentFont == null) return null;
+        String resultName;
+        if (fontName == null) {
+            resultName = currentFont.getName();
+        } else {
+            Font testFont = new Font(fontName, Font.PLAIN, 10);
+            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
+                resultName = fontName;
+            } else {
+                resultName = currentFont.getName();
+            }
+        }
+        Font font = new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
+        boolean isMac = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH).startsWith("mac");
+        Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
+        return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
     @Override
@@ -281,7 +315,8 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
             Taskbar.getTaskbar().requestWindowUserAttention(mainWindow);
         }
-        JOptionPane.showMessageDialog(null, description, title, msgType);
+        var finalMsgType = msgType;
+        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, description, title, finalMsgType));
     }
 
     @Override

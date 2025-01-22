@@ -68,7 +68,7 @@ public class MainWindow extends JFrame {
         this.swingGUI = swingGUI;
         if (SystemInfo.isMacFullWindowContentSupported)
             getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
-        setTitle(tlUI(Lang.GUI_TITLE_LOADING, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+        setTitle(tlUI(Lang.GUI_TITLE_LOADING, Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         // max dimension size or 720p
         var maxAllowedWidth = Math.min(1280, Toolkit.getDefaultToolkit().getScreenSize().width);
         var maxAllowedHeight = Math.min(720, Toolkit.getDefaultToolkit().getScreenSize().height);
@@ -90,6 +90,7 @@ public class MainWindow extends JFrame {
         this.logsTab = new LogsTab(this);
         this.webuiTab = new WebUITab(this);
     }
+
 
     public static void setTabTitle(JPanel tab, String title) {
         JTabbedPane tabbedPane = (JTabbedPane) SwingUtilities.getAncestorOfClass(JTabbedPane.class, tab);
@@ -151,11 +152,14 @@ public class MainWindow extends JFrame {
         tabbedPaneLogs.setLayout(new BorderLayout(0, 0));
         tabbedPane.addTab("Logs", tabbedPaneLogs);
         loggerScrollPane = new JScrollPane();
-        Font loggerScrollPaneFont = this.$$$getFont$$$("Consolas", -1, -1, loggerScrollPane.getFont());
+        loggerScrollPane.setEnabled(true);
+        Font loggerScrollPaneFont = this.$$$getFont$$$(null, -1, -1, loggerScrollPane.getFont());
         if (loggerScrollPaneFont != null) loggerScrollPane.setFont(loggerScrollPaneFont);
         loggerScrollPane.setVerticalScrollBarPolicy(22);
         tabbedPaneLogs.add(loggerScrollPane, BorderLayout.CENTER);
         loggerTextList = new JList();
+        Font loggerTextListFont = UIManager.getFont("TextArea.font");
+        if (loggerTextListFont != null) loggerTextList.setFont(loggerTextListFont);
         loggerScrollPane.setViewportView(loggerTextList);
     }
 
@@ -182,6 +186,26 @@ public class MainWindow extends JFrame {
     /** @noinspection ALL */
     public JComponent $$$getRootComponent$$$() {
         return mainPanel;
+    }
+
+    /** @noinspection ALL */
+    protected Font getFont(String fontName, int style, int size, Font currentFont) {
+        if (currentFont == null) return null;
+        String resultName;
+        if (fontName == null) {
+            resultName = currentFont.getName();
+        } else {
+            Font testFont = new Font(fontName, Font.PLAIN, 10);
+            if (testFont.canDisplay('a') && testFont.canDisplay('1') && testFont.canDisplay('中')) {
+                resultName = fontName;
+            } else {
+                resultName = currentFont.getName();
+            }
+        }
+        Font font = new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
+        boolean isMac = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH).startsWith("mac");
+        Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
+        return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
 
@@ -317,11 +341,16 @@ public class MainWindow extends JFrame {
          * @param cefBrowser 显示开发者工具的浏览器
          */
         private void devToolsShow(CefBrowser cefBrowser) {
+            if (cefBrowser.getURL().startsWith("devtools://")) {
+                Thread.startVirtualThread(() -> parent.getSwingGUI().createDialog(Level.WARNING, "Cannot open devtools for a devtools page", "You cannot open PeerBanHelper devtools for a PeerBanHelper devtools page. (WHY YOU DO THAT? ARE YOU CRAZY?)"));
+                return;
+            }
             if (devToolsDialog_ != null) {
                 devToolsDialog_.dispose();
             }
             // 因为是开发者工具，不能影响内容页面的显示，所以单独新建一个窗体显示
-            devToolsDialog_ = new JCEFSwingDevTools(new JFrame(), "PeerBanHelper WebUI DevTools", cefBrowser);
+            var title = "PeerBanHelper WebUI DevTools (" + app.getVersion().toString() + ")";
+            devToolsDialog_ = new JCEFSwingDevTools(new JFrame(), title, cefBrowser);
 //            devToolsDialog_ = new DevToolsDialog(owner_, "开发者工具", cefBrowser);
             var maxAllowedWidth = Math.min(1280, Toolkit.getDefaultToolkit().getScreenSize().width);
             var maxAllowedHeight = Math.min(720, Toolkit.getDefaultToolkit().getScreenSize().height);
@@ -530,7 +559,7 @@ public class MainWindow extends JFrame {
             this.parent = parent;
 
             parent.loggerTextList.setModel(new DefaultListModel<>());
-            parent.loggerTextList.setFont(new Font("微软雅黑", Font.PLAIN, 14));
+            parent.loggerTextList.setFont(parent.loggerTextList.getFont().deriveFont(14f));
             parent.loggerTextList.setCellRenderer(new LogEntryRenderer());
             parent.loggerTextList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             parent.loggerTextList.setLayoutOrientation(JList.VERTICAL);
