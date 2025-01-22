@@ -475,33 +475,33 @@ public class MainWindow extends JFrame {
 
         private Component generateDebugMenu() {
             JMenu menu = new JMenu("-DEBUG-");
-            JMenuItem disableJCEF = new JMenuItem("Disable JCEF");
-            JMenuItem enableJCEF = new JMenuItem("Enable JCEF");
+            JMenuItem disableJCEF = new JMenuItem("禁用 JCEF");
+            JMenuItem enableJCEF = new JMenuItem("启用 JCEF");
             var f = new File("enable-jcef.txt");
             enableJCEF.addActionListener(e -> {
                 try {
                     if (f.exists()) {
-                        Main.getGuiManager().createDialog(Level.INFO, "Enable JCEF", "JCEF is already enabled, no operation needed.");
+                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已处于启用状态，无需再次启用.");
                     } else {
                         f.createNewFile();
-                        Main.getGuiManager().createDialog(Level.INFO, "Enable JCEF", "JCEF is enabled, restart the application to take effect.");
+                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已启用，请重启 PeerBanHelper 以使其生效.");
                     }
                 } catch (IOException ex) {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "Enable JCEF", "Unable to enable JCEF, please check the file system permission.");
-                    log.error("Unable to enable JCEF", ex);
+                    Main.getGuiManager().createDialog(Level.SEVERE, "启用 JCEF", "无法启用 JCEF，遇到了错误");
+                    log.error("启用 JCEF 失败", ex);
                 }
             });
             disableJCEF.addActionListener(e -> {
                 try {
                     if (f.exists()) {
                         f.delete();
-                        Main.getGuiManager().createDialog(Level.INFO, "Disable JCEF", "JCEF is disabled, restart the application to take effect, delete `jcef` directory to free the disk space.");
+                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已禁用，可关闭 PeerBanHelper 后删除 `jcef` 以释放磁盘空间.");
                     } else {
-                        Main.getGuiManager().createDialog(Level.INFO, "Disable JCEF", "JCEF is already disabled, no operation needed.");
+                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已处于禁用状态，无需再次禁用。");
                     }
                 } catch (Exception ex) {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "Disable JCEF", "Unable to disable JCEF, please check the file system permission.");
-                    log.error("Unable to disable JCEF", ex);
+                    Main.getGuiManager().createDialog(Level.SEVERE, "Disable JCEF", "无法禁用 JCEF，遇到了错误");
+                    log.error("无法禁用 JCEF", ex);
                 }
             });
             menu.add(disableJCEF);
