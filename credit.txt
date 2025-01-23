@@ -6,12 +6,20 @@ Connecting to 127.127.127.127:12345...
 Connection established.
 To escape to local shell, press '❤'.
 [speed:1000]
+[speed:50]
+User: root
+Password: peerbanhelper@admin123,./
+[speed:1000]
 [speed:10]
-
 Logged in.
-Welcome to PeerBanHelper {version} (PBH/BTN <???>)
 
-Last login: <censored>
+WARNING! The remote PeerBanHelper server rejected love forwarding request.
+
+Welcome to PeerBanHelper {version} (PBH/BTN JVM-Toolchain 8086-generic).
+CPU: 4.77Mhz MEM: 16KB/64KB SWAP: 0KB/0KB UPTIME: ?:??:??
+Counter: 365 days until the end of the world.
+
+Last login: 2138-01-23 21:16:05 from 1.1.1.1
 [speed:20]
 [root@peerbanhelper]# credit
 [speed:1000]
@@ -191,6 +199,7 @@ PeerBanHelper 测试计划 - Testing Team：
 BTN 威胁防护网络先行者 - BTN Beta Testers:
     感谢 BTN 先行者们参与早期的 BTN 开发和测试工作。所提交的宝贵数据帮助 BTN 发展并成为了今天反吸血系统的重要基石。
     (按注册时间排序)
+[speed:40]
     Radium-bit
     Iannnnnnnnnnnnnnnnn
     EdmundFu-233
@@ -290,7 +299,7 @@ BTN 威胁防护网络先行者 - BTN Beta Testers:
     sugarkingdom
     ItsDApples
     shitdarling
-
+[speed:50]
 特别致谢 - Special Thanks:
     (以下排名不分先后)
 [speed:40]
@@ -302,6 +311,10 @@ BTN 威胁防护网络先行者 - BTN Beta Testers:
     HDArea - 感谢 HDArea 帮助调查在 PT 环境下的恶意 Peer 活动情况以帮助了解 BT/PT 威胁态势现状
     我不是矿神 IMNKS - 感谢 IMNKS SPK 套件源托管了 PeerBanHelper 的 SPK 安装包，并提供了与群晖系统集成方面的重要帮助和建议
     zhuxiaoying85309 (小樱/ITZMX) - 感谢在与 BitComet 集成期间提供的大量帮助，并提供了对 Sparkle Tracker / Trunker 的多次负载测试和 Tracker 相关方面的建议
+
+    ej-technolgies - 提供 install4j 和 JProfiler 的开源项目许可证
+    coderabbitai - 提供开放源代码 Pro 许可证
+
 [speed:50]
 AI 工具人 - AI Assistant:
     (以下排名不分先后)
