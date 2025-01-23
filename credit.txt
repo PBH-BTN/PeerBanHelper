@@ -1,0 +1,323 @@
+[speed:5]
+Host 'peerbanhelper.about.console' resolved to 127.127.127.127.
+Connecting to 127.127.127.127:12345...
+[speed:2000]
+[speed:5]
+Connection established.
+To escape to local shell, press '❤'.
+[speed:1000]
+[speed:10]
+
+Logged in.
+Welcome to PeerBanHelper {version} (PBH/BTN <???>)
+
+Last login: <censored>
+[speed:20]
+[root@peerbanhelper]# credit
+[speed:1000]
+[speed:50]
+[window_maximized]
+Fullscreen mode activated.
+----------------------------------
+PeerBanHelper Credit
+----------------------------------
+核心团队 - Core Team：
+    (按字母顺序排序)
+    azicen
+    Gaojianli
+    Ghost_chu
+    KagurazakaNyaa
+    Ovler-Young
+    paulzzh
+    PluieM
+    Radium-bit
+    XiaoXice
+    yujiangqaq
+    zhongfly
+
+贡献者 - Contributors:
+    (按字母顺序排序)
+    AmeroHan
+    Anuskuss
+    BUnipendix
+    ccloli
+    cddjr
+    chisaato
+    CreeperAWA
+    cxzlw
+    DDSRem
+    MirrorCY
+    Rbqwow
+    SaikiCode
+
+先锋用户 - Early Users with Feedbacks:
+    感谢这些用户在 PeerBanHelper 发展的早期提供宝贵反馈和建议。
+    (按字母顺序排序, 使用 Github Issues 统计)
+[speed:40]
+    675658
+    aagaguai
+    Asendaushoe
+    asky88
+    autumnsentiment
+    BasaltCompass
+    Blake57H
+    cangming0703
+    CaoMeiYouRen
+    CCXXXI
+    Changcta
+    CharlesChou73
+    cherinyy
+    Cirn09
+    cjjdaq
+    cloudwindy
+    CloudyEagle
+    cmmdwl
+    DDSDerek
+    desktop4025
+    doio
+    dousha
+    DrJason33564
+    emptylight370
+    fouvromenth
+    FrzMtrsprt
+    fsxitutu
+    Fvpder
+    GalaxySnail
+    hanqingchina
+    happilying
+    HebronG
+    HiruOcha
+    Huiaei
+    iceBear67
+    IllyaTheHath
+    ixff
+    john-kacino
+    jqtmviyu
+    junyuyuan
+    k3bc999
+    Kaffu-Chino
+    Kosakanao
+    kukusyaoran
+    leosejin
+    licia-tia
+    lifegpc
+    LightmoonXD
+    LingluoYusa
+    LovelyBaibai
+    Magicgazer
+    Mintisn
+    Miraitowa-max
+    Mishasama
+    molehzy
+    MononeV
+    mslxl
+    Msopopop
+    muiyuchit
+    mzhboy
+    nacfight
+    pmman289
+    poplar-at-twilight
+    povsister
+    pullingtab
+    Puqns67
+    qwqcwcawa
+    rihalvnium76
+    Rirmach
+    sakuyamaij
+    SantaSati
+    scrpr
+    serapolis
+    shiyunjin
+    sojuo
+    soulmatelh
+    stan0577
+    Star-Dust-08
+    starxjys
+    SteveYu000
+    Sudo-Winnie
+    Tang-pure
+    ted423
+    TobisLee
+    tongxiangzheng
+    TPAXcc
+    TTsdzb
+    Unihis
+    vcup
+    wannacry601
+    whitelist2333
+    wods
+    XiaoBu39
+    xzlosats111
+    yueisme
+    yuricon
+    Zalore
+    ztmzzz
+    zxcec
+[speed:50]
+
+PeerBanHelper 测试计划 - Testing Team：
+    感谢这些用户在 PeerBanHelper 测试计划群中提供测试版的反馈和建议。
+    (按字母顺序排序)
+    42
+    ABC-Bate (ван юйсюань)
+    DQ
+    Ｈａｋｉｙｓｕ☆
+    IPP
+    kiXfKS7KETRoz9pEx37M2Q==
+    Koito Raziumu
+    l_unar
+    lang
+    LittleSho
+    LY
+    PluieM
+    ziyii
+    🐟
+    成
+    純潔ちゃんofficial
+    瓜
+    郭大明
+    嗨皮重生锚
+    吉吉
+    镜中人
+    九十九里百子
+    锟斤铐之烫烫烫
+    落花击水
+    清寂
+    水 天 泽 月
+    一只鸽子🐦
+    佚名
+    昨天👍👍👍👍👍👍
+
+BTN 威胁防护网络先行者 - BTN Beta Testers:
+    感谢 BTN 先行者们参与早期的 BTN 开发和测试工作。所提交的宝贵数据帮助 BTN 发展并成为了今天反吸血系统的重要基石。
+    (按注册时间排序)
+    Radium-bit
+    Iannnnnnnnnnnnnnnnn
+    EdmundFu-233
+    yujiangqaq
+    Car279dark
+    pigeonssss
+    HappyRespawnanchor
+    Sora39831
+    BUnipendix
+    YaleCheng404
+    8Bobo8Jun
+    bai0012
+    yesterday666
+    Kenda-12
+    Mandi-Sa
+    yemijun
+    yingseason
+    zhiwenyyn
+    StarDust189
+    zwzzrl
+    azicen
+    TTsdzb
+    KJH-x
+    xiao-sheng-vip
+    Mickeyilmaz
+    NicholasYZ
+    FranciscoTu
+    KagurazakaNyaa
+    PluieM
+    Hdm980129
+    hjfnd
+    fiiz7
+    littlesho
+    Yorutori-Hatsuki
+    changmianzzz
+    featherwit
+    fireflame-opx
+    chinaozy
+    tehcneko
+    dewcurve
+    HayauX
+    Kaffu-Chino
+    FrzMtrsprt
+    zhongfly
+    Dawn-K
+    sakuyamaij
+    Kyakui
+    poplar-at-twilight
+    YUeH885
+    Alice114514
+    Snapmali
+    asky88
+    wegood9
+    Heartbeat-Heartbreak
+    SAENE
+    Duck1998
+    Btxs
+    Cwek
+    Iensuredit
+    yume-chan
+    0Lynk
+    flewes
+    MononeV
+    xddxdd
+    yuxueco3
+    lkyu-ly
+    paulzzh
+    snfcx
+    Moraxyc
+    TobisLee
+    1016470686
+    MysteryDove
+    Jisxu
+    SlightDust
+    zccat
+    dmMaze
+    yescallop
+    Fawean
+    Msopopop
+    cls1997
+    TomoeMami
+    JZCW
+    btdwv
+    LASER-Yi
+    JamesNong
+    Yui-Yri
+    it95833
+    Adamantium1777
+    Zzzwannasleep
+    AkaMiku39
+    sixuyunqian
+    feimao999
+    JianxiaoD
+    ControlNet
+    1fantasy1
+    Iverrey
+    sugarkingdom
+    ItsDApples
+    shitdarling
+
+特别致谢 - Special Thanks:
+    (以下排名不分先后)
+[speed:40]
+    大河李斯特视频工作室 - 《【看番教程39】怎么样从网上下载资源？磁链/种子到底是啥？？评论区神秘代码要怎么用？什么是BT协议？BT入门保姆级教程，webUI、屏蔽吸血客户端PCDN详解》帮助更多人了解 BitTorrent 世界和 PeerBanHelper
+    岚子小姐 - 《利用路由器安全规则及第三方工具反PCDN放血·反吸血の不完全指南》让更多人知道被拉满上传的背后发生了什么
+    1彼岸花花1 - 《qbittorrent-pbh在吸血横行的时代教你怎么简单的使用bt第二期》提供了 PeerBanHelper 教程视频
+    io挡板无需安装 - 《在istoreos的docker中安装peerbanhelper》提供了 PeerBanHelper 教程视频
+    BitComet - 感谢开发者 wxhere15 根据反馈改进了 BitComet 的 WebUI 和 WebAPI，使 PeerBanHelper 能够与 BitComet 集成
+    HDArea - 感谢 HDArea 帮助调查在 PT 环境下的恶意 Peer 活动情况以帮助了解 BT/PT 威胁态势现状
+    我不是矿神 IMNKS - 感谢 IMNKS SPK 套件源托管了 PeerBanHelper 的 SPK 安装包，并提供了与群晖系统集成方面的重要帮助和建议
+    zhuxiaoying85309 (小樱/ITZMX) - 感谢在与 BitComet 集成期间提供的大量帮助，并提供了对 Sparkle Tracker / Trunker 的多次负载测试和 Tracker 相关方面的建议
+[speed:50]
+AI 工具人 - AI Assistant:
+    (以下排名不分先后)
+    OpenAI ChatGPT 4o - 帮助编写了大量代码
+    Github Copilot - 帮助编写了大量代码
+    DeepSeek - 正在努力接替上面的两位老前辈
+    coderabbitai - Pull Requests 审核，质量保证
+    renovate - 依赖更新
+    dependabot - 依赖更新
+
+音乐 - Music:
+
+* 关于页面：
+    MusicMenu - MiSide by AIHASTO on Steam (https://store.steampowered.com/app/2527500)
+        MIDI 米塔-MusicMenu by 一朵黑心棉 (midishow) (https://www.midishow.com/midi/musicmenu-midi-download-210590)
+    MusicMenu Update - MiSide by AIHASTO on Steam (https://store.steampowered.com/app/2527500)
+        MIDI 米塔-MusicMenu by 一朵黑心棉 (midishow) (https://www.midishow.com/midi/musicmenu-update-midi-download-210591)
+
+以及…… {username}

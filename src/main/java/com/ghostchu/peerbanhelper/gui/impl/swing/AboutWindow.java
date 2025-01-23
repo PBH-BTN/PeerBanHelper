@@ -19,7 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AboutWindow {
-
+    private JFrame frame;
     private final Map<String, String> replaces;
     private JTextPane textPane;
     private List<Object> contentItems;
@@ -58,7 +58,7 @@ public class AboutWindow {
 
 
     private void initializeUI() {
-        JFrame frame = new JFrame("[>_] PeerBanHelper Terminal") {
+        this.frame = new JFrame("[>_] PeerBanHelper Terminal") {
             @Override
             public void dispose() {
                 super.dispose();
@@ -67,7 +67,7 @@ public class AboutWindow {
                 }
             }
         };
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(1000, 500);
 
         textPane = new JTextPane();
@@ -91,6 +91,8 @@ public class AboutWindow {
                     handleColorCommand(line);
                 } else if (line.equals("[clear]")) {
                     contentItems.add(new ClearCommand());
+                } else if (line.equals("[window_maximized]")) { // 新增命令检测
+                    contentItems.add(new WindowMaximizedCommand());
                 } else {
                     for (Map.Entry<String, String> entry : replaces.entrySet()) {
                         line = line.replace(entry.getKey(), entry.getValue());
@@ -218,6 +220,8 @@ public class AboutWindow {
                 textPane.setBackground(bgColor);
             } else if (item instanceof ClearCommand) {
                 textPane.setText("");
+            } else if (item instanceof WindowMaximizedCommand) { // 处理最大化命令
+                SwingUtilities.invokeLater(() -> frame.setExtendedState(Frame.MAXIMIZED_BOTH));
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -236,7 +240,7 @@ public class AboutWindow {
         if (!cursorVisible) {
             SimpleAttributeSet attr = new SimpleAttributeSet();
             StyleConstants.setForeground(attr, fgColor);
-            doc.insertString(doc.getLength(), "_", attr);
+            doc.insertString(doc.getLength(), "▉", attr);
             cursorVisible = true;
         }
     }
@@ -260,6 +264,10 @@ public class AboutWindow {
     }
 
     private static class ClearCommand {
+    }
+
+    // 新增命令类
+    private static class WindowMaximizedCommand {
     }
 
     public static void main(String[] args) {
