@@ -35,10 +35,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -504,8 +502,16 @@ public class MainWindow extends JFrame {
                     log.error("无法禁用 JCEF", ex);
                 }
             });
+            JMenuItem testAboutWindow = new JMenuItem("测试关于窗口");
+            testAboutWindow.addActionListener(e -> {
+                var replaces = new HashMap<String, String>();
+                replaces.put("{version}", Main.getMeta().getVersion());
+                replaces.put("{username}", System.getProperty("user.name"));
+                var window = new AboutWindow(replaces);
+            });
             menu.add(disableJCEF);
             menu.add(enableJCEF);
+            menu.add(testAboutWindow);
             return menu;
         }
 
