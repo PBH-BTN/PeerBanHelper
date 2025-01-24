@@ -48,6 +48,8 @@ export default {
   'page.settings.tab.info.btn.status': 'Status',
   'page.settings.tab.info.btn.status.success': 'Configuration file obtained successfully',
   'page.settings.tab.info.btn.status.fail': 'Failed to obtain configuration file',
+  'page.settings.tab.info.btn.status.fail.tips':
+    'Failed to obtain configuration, this may be a configuration problem, click to view the document',
   'page.settings.tab.info.btn.status.configUrl': 'Server Address',
   'page.settings.tab.info.btn.abilities': 'Ability List',
   'page.settings.tab.info.btn.abilities.enable': '{number} abilities enabled',
