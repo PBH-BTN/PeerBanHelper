@@ -5,10 +5,7 @@ import com.ghostchu.peerbanhelper.util.MIDIPlayer;
 
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -28,7 +25,7 @@ public class AboutWindow {
     private Timer cursorTimer;
     private boolean cursorVisible = false;
     private int delay = 100;
-    private Color fgColor = new Color(229, 229, 229);
+    private Color fgColor = new Color(238, 205, 86);
     private Color bgColor = Color.BLACK;
 
     // 状态跟踪变量
@@ -58,7 +55,7 @@ public class AboutWindow {
 
 
     private void initializeUI() {
-        this.frame = new JFrame("[>_] PeerBanHelper Terminal") {
+        this.frame = new JFrame("[>_] PeerBanHelper Repair Terminal (Mode: Credit)") {
             @Override
             public void dispose() {
                 super.dispose();
@@ -74,8 +71,13 @@ public class AboutWindow {
         textPane.setEditable(false);
         textPane.setBackground(bgColor);
         textPane.setForeground(fgColor);
-        textPane.setFont(new Font("Monospaced", Font.PLAIN, 14));
-
+        textPane.setFont(new Font("Consolas", Font.PLAIN, 14));
+        textPane.setCaret(new DefaultCaret() {
+            @Override
+            public boolean isVisible() {
+                return false;
+            }
+        });
         frame.add(new JScrollPane(textPane));
         frame.setVisible(true);
     }

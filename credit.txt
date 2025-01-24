@@ -1,3 +1,5 @@
+[speed:0]
+[f:#000000,b:#ffffff]
 [speed:5]
 Host 'peerbanhelper.about.console' resolved to 127.127.127.127.
 Connecting to 127.127.127.127:12345...
@@ -12,14 +14,23 @@ Password: peerbanhelper@admin123,./
 [speed:1000]
 [speed:10]
 Logged in.
-
+[clear]
+[f:#eace5a,b:#000000]
+[speed:0]
+----------------------------------------------------------------------------------------------------------------
+RS232                   ONLINE                       UTF-8                 9600bps                         MIDI
+----------------------------------------------------------------------------------------------------------------
+[speed:10]
 WARNING! The remote PeerBanHelper server rejected love forwarding request.
 
 Welcome to PeerBanHelper {version} (PBH/BTN JVM-Toolchain 8086-generic).
 CPU: 4.77Mhz MEM: 16KB/64KB SWAP: 0KB/0KB UPTIME: ?:??:??
-Counter: 365 days until the end of the world.
+Counter: {worldEndingCounter} days until the end of the world.
 
-Last login: 2138-01-23 21:16:05 from 1.1.1.1
+⚠ Corrupted RAM is detected, it is recommended that the RAM module be replaced. [ECC Mode: Enabled]
+Please contact the after-sales service.
+
+Last login: {lastLogin} from 1.1.1.1
 [speed:20]
 [root@peerbanhelper]# credit
 [speed:1000]
@@ -326,7 +337,6 @@ AI 工具人 - AI Assistant:
     dependabot - 依赖更新
 
 音乐 - Music:
-
 * 关于页面：
     MusicMenu - MiSide by AIHASTO on Steam (https://store.steampowered.com/app/2527500)
         MIDI 米塔-MusicMenu by 一朵黑心棉 (midishow) (https://www.midishow.com/midi/musicmenu-midi-download-210590)
