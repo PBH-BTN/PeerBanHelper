@@ -388,7 +388,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void registerHttpServer() {
-        String token = ExternalSwitch.parse("pbh.api_token");
+        String token = ExternalSwitch.parse("pbh.apiToken");
         if (token == null) {
             token = Main.getMainConfig().getString("server.token");
         }
