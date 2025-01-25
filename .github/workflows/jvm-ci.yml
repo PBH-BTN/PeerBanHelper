@@ -84,6 +84,7 @@ jobs:
           name: torrent-dist
           path: |
             peerbanhelper.torrent
+            PeerBanHelper_Installers.tar.gz
         id: project
   Create_Torrent:
     needs: [ Create_Tarball ]
