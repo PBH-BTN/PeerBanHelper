@@ -468,8 +468,31 @@ public class MainWindow extends JFrame {
             if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
                 menuBar.add(generateDebugMenu());
             }
+            //menuBar.add(Box.createGlue());
+            menuBar.add(generateHelpAbout());
             parent.add(menuBar, BorderLayout.NORTH);
             return menuBar;
+        }
+
+        private Component generateHelpAbout() {
+            JMenu menu = new JMenu(tlUI(Lang.GUI_MENU_ABOUT));
+            JMenuItem creditMenu = new JMenuItem(tlUI(Lang.ABOUT_VIEW_CREDIT));
+            creditMenu.addActionListener(e -> {
+                var replaces = new HashMap<String, String>();
+                replaces.put("{version}", Main.getMeta().getVersion());
+                replaces.put("{username}", System.getProperty("user.name"));
+                replaces.put("{worldEndingCounter}", "365");
+                // 获取400年后的现在时刻, 格式化为 YYYY-MM-DD HH:mm:ss
+                var future = Calendar.getInstance();
+                future.add(Calendar.YEAR, 400);
+                replaces.put("{lastLogin}", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(future.getTime()));
+                var window = new AboutWindow(replaces);
+            });
+            JMenuItem viewOnGithub = new JMenuItem(tlUI(Lang.ABOUT_VIEW_GITHUB));
+            viewOnGithub.addActionListener(e -> parent.swingGUI.openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
+            menu.add(viewOnGithub);
+            menu.add(creditMenu);
+            return menu;
         }
 
         private Component generateDebugMenu() {
@@ -533,21 +556,8 @@ public class MainWindow extends JFrame {
                     Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
                 }
             });
-            JMenuItem testAboutWindow = new JMenuItem("测试关于窗口");
-            testAboutWindow.addActionListener(e -> {
-                var replaces = new HashMap<String, String>();
-                replaces.put("{version}", Main.getMeta().getVersion());
-                replaces.put("{username}", System.getProperty("user.name"));
-                replaces.put("{worldEndingCounter}", "365");
-                // 获取400年后的现在时刻, 格式化为 YYYY-MM-DD HH:mm:ss
-                var future = Calendar.getInstance();
-                future.add(Calendar.YEAR, 400);
-                replaces.put("{lastLogin}", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(future.getTime()));
-                var window = new AboutWindow(replaces);
-            });
             menu.add(disableJCEF);
             menu.add(enableJCEF);
-            menu.add(testAboutWindow);
             menu.addSeparator();
             menu.add(disableCheckUpdates);
             menu.add(enableCheckUpdates);
@@ -565,9 +575,6 @@ public class MainWindow extends JFrame {
                 }
             });
             menu.add(openDataDirectory);
-            JMenuItem viewOnGithub = new JMenuItem(tlUI(Lang.ABOUT_VIEW_GITHUB));
-            viewOnGithub.addActionListener(e -> parent.swingGUI.openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
-            menu.add(viewOnGithub);
             menu.addSeparator();
             JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT));
             quit.addActionListener(e -> System.exit(0));

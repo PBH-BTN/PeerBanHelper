@@ -69,6 +69,58 @@ PeerBanHelper Credit
     Rbqwow
     SaikiCode
 
+[speed:50]
+特别致谢 - Special Thanks:
+    (以下排名不分先后)
+[speed:40]
+    大河李斯特视频工作室 - 《【看番教程39】怎么样从网上下载资源？磁链/种子到底是啥？？评论区神秘代码要怎么用？什么是BT协议？BT入门保姆级教程，webUI、屏蔽吸血客户端PCDN详解》帮助更多人了解 BitTorrent 世界和 PeerBanHelper
+    岚子小姐 - 《利用路由器安全规则及第三方工具反PCDN放血·反吸血の不完全指南》让更多人知道被拉满上传的背后发生了什么
+    1彼岸花花1 - 《qbittorrent-pbh在吸血横行的时代教你怎么简单的使用bt第二期》提供了 PeerBanHelper 教程视频
+    io挡板无需安装 - 《在istoreos的docker中安装peerbanhelper》提供了 PeerBanHelper 教程视频
+    BitComet - 感谢开发者 wxhere15 根据反馈改进了 BitComet 的 WebUI 和 WebAPI，使 PeerBanHelper 能够与 BitComet 集成
+    HDArea - 感谢 HDArea 帮助调查在 PT 环境下的恶意 Peer 活动情况以帮助了解 BT/PT 威胁态势现状
+    我不是矿神 IMNKS - 感谢 IMNKS SPK 套件源托管了 PeerBanHelper 的 SPK 安装包，并提供了与群晖系统集成方面的重要帮助和建议
+    zhuxiaoying85309 (小樱/ITZMX) - 感谢在与 BitComet 集成期间提供的大量帮助，并提供了对 Sparkle Tracker / Trunker 的多次负载测试和 Tracker 相关方面的建议
+
+    SpecterShell - 维护和更新 winget-pkgs 上的 PeerBanHelper 程序包
+    miryo - 维护和更新 AUR 源上的 PeerBanHelper 程序包
+
+    ej-technolgies - 提供 install4j 和 JProfiler 的开源项目许可证
+    coderabbitai - 提供开放源代码 Pro 许可证
+
+PeerBanHelper 测试计划 - Testing Team：
+    感谢这些用户在 PeerBanHelper 测试计划群中提供测试版的反馈和建议。
+    (按字母顺序排序)
+    42
+    ABC-Bate (ван юйсюань)
+    DQ
+    Ｈａｋｉｙｓｕ☆
+    IPP
+    kiXfKS7KETRoz9pEx37M2Q==
+    Koito Raziumu
+    l_unar
+    lang
+    LittleSho
+    LY
+    PluieM
+    ziyii
+    🐟
+    成
+    純潔ちゃんofficial
+    瓜
+    郭大明
+    嗨皮重生锚
+    吉吉
+    镜中人
+    九十九里百子
+    锟斤铐之烫烫烫
+    落花击水
+    清寂
+    水 天 泽 月
+    一只鸽子🐦
+    佚名
+    昨天👍👍👍👍👍👍
+
 先锋用户 - Early Users with Feedbacks:
     感谢这些用户在 PeerBanHelper 发展的早期提供宝贵反馈和建议。
     (按字母顺序排序, 使用 Github Issues 统计)
@@ -174,39 +226,6 @@ PeerBanHelper Credit
     zxcec
 [speed:50]
 
-PeerBanHelper 测试计划 - Testing Team：
-    感谢这些用户在 PeerBanHelper 测试计划群中提供测试版的反馈和建议。
-    (按字母顺序排序)
-    42
-    ABC-Bate (ван юйсюань)
-    DQ
-    Ｈａｋｉｙｓｕ☆
-    IPP
-    kiXfKS7KETRoz9pEx37M2Q==
-    Koito Raziumu
-    l_unar
-    lang
-    LittleSho
-    LY
-    PluieM
-    ziyii
-    🐟
-    成
-    純潔ちゃんofficial
-    瓜
-    郭大明
-    嗨皮重生锚
-    吉吉
-    镜中人
-    九十九里百子
-    锟斤铐之烫烫烫
-    落花击水
-    清寂
-    水 天 泽 月
-    一只鸽子🐦
-    佚名
-    昨天👍👍👍👍👍👍
-
 BTN 威胁防护网络先行者 - BTN Beta Testers:
     感谢 BTN 先行者们参与早期的 BTN 开发和测试工作。所提交的宝贵数据帮助 BTN 发展并成为了今天反吸血系统的重要基石。
     (按注册时间排序)
@@ -310,24 +329,7 @@ BTN 威胁防护网络先行者 - BTN Beta Testers:
     sugarkingdom
     ItsDApples
     shitdarling
-[speed:50]
-特别致谢 - Special Thanks:
-    (以下排名不分先后)
-[speed:40]
-    大河李斯特视频工作室 - 《【看番教程39】怎么样从网上下载资源？磁链/种子到底是啥？？评论区神秘代码要怎么用？什么是BT协议？BT入门保姆级教程，webUI、屏蔽吸血客户端PCDN详解》帮助更多人了解 BitTorrent 世界和 PeerBanHelper
-    岚子小姐 - 《利用路由器安全规则及第三方工具反PCDN放血·反吸血の不完全指南》让更多人知道被拉满上传的背后发生了什么
-    1彼岸花花1 - 《qbittorrent-pbh在吸血横行的时代教你怎么简单的使用bt第二期》提供了 PeerBanHelper 教程视频
-    io挡板无需安装 - 《在istoreos的docker中安装peerbanhelper》提供了 PeerBanHelper 教程视频
-    BitComet - 感谢开发者 wxhere15 根据反馈改进了 BitComet 的 WebUI 和 WebAPI，使 PeerBanHelper 能够与 BitComet 集成
-    HDArea - 感谢 HDArea 帮助调查在 PT 环境下的恶意 Peer 活动情况以帮助了解 BT/PT 威胁态势现状
-    我不是矿神 IMNKS - 感谢 IMNKS SPK 套件源托管了 PeerBanHelper 的 SPK 安装包，并提供了与群晖系统集成方面的重要帮助和建议
-    zhuxiaoying85309 (小樱/ITZMX) - 感谢在与 BitComet 集成期间提供的大量帮助，并提供了对 Sparkle Tracker / Trunker 的多次负载测试和 Tracker 相关方面的建议
 
-    SpecterShell - 维护和更新 winget-pkgs 上的 PeerBanHelper 程序包
-    miryo - 维护和更新 AUR 源上的 PeerBanHelper 程序包
-
-    ej-technolgies - 提供 install4j 和 JProfiler 的开源项目许可证
-    coderabbitai - 提供开放源代码 Pro 许可证
 
 [speed:50]
 AI 工具人 - AI Assistant:

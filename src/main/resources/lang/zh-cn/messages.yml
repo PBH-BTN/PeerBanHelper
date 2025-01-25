@@ -588,3 +588,4 @@ DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION: |
   
   请注意：你应该正确修复 IP 问题，仅将内部网络 IP 地址从忽略列表中移除会导致 PeerBanHelper 错误地封禁全部入站连接。  
   如需帮助，请加入 PeerBanHelper 社区寻求帮助。**此提示在每个下载器上仅会提示一次。**
+ABOUT_VIEW_CREDIT: "开发人员与社区贡献者..."
