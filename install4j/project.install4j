@@ -1623,6 +1623,13 @@ return true;</property>
     <unixInstaller name="riscv64 Linux Installer" id="133" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
       <jreBundle platform="linux-riscv64" />
     </unixInstaller>
+    <windows name="Windows x86 (32-bit)" id="254" mediaFileName="_____UNSUPPORTED_${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" architecture="32" />
+    <unixInstaller name="x86 (32-bit) Linux Installer" id="259" mediaFileName="_____UNSUPPORTED_${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-x86" />
+    </unixInstaller>
+    <unixInstaller name="arm32-vfp-hflt Linux Installer" id="262" mediaFileName="_____UNSUPPORTED_${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-arm32-vfp-hflt" />
+    </unixInstaller>
   </mediaSets>
   <buildIds>
     <mediaSet refId="38" />
