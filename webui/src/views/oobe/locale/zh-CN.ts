@@ -12,8 +12,9 @@ export default {
   'page.oobe.welcome.title': '欢迎使用 PeerBanHelper!',
   'page.oobe.welcome.description':
     'PeerBanHelper 是一个 BT 反吸血工具。通过连接到您的下载器的 WebUI，PeerBanHelper 可以使用这些信息检查并封禁恶意吸血者。在一切开始之前，让我们先进行一些简单配置。',
-  'page.oobe.steps.welcome.docTips': '请在开始前阅读{doc}和{privacy}',
-  'page.oobe.steps.welcome.doc': '文档',
+  'page.oobe.steps.welcome.docTips':
+    '请在开始前阅读{privacy}并打开{doc}放在旁边以作备用，99% 的用户因为不阅读它们导致遇到了问题无法解决。',
+  'page.oobe.steps.welcome.doc': '安装和故障排除指南——也就是用户说明书',
   'page.oobe.steps.welcome.privacy': '隐私协议',
   'page.oobe.steps.welcome.privacy.accept': '我已经充分阅读并同意上述{privacy}',
   'page.oobe.setToken.title': '设置 Token',

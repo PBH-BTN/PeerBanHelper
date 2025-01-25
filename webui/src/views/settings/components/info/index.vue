@@ -413,15 +413,33 @@
       </a-descriptions-item>
       <a-descriptions-item v-if="btnEnable?.data" :label="t('page.settings.tab.info.btn.status')">
         <a-skeleton-line v-if="btnStatusLoading.value" :rows="1" />
-        <a-tooltip v-else :content="btnStatus?.data.configResult">
-          <a-typography-text :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
-            {{
-              btnStatus?.data.configSuccess
-                ? t('page.settings.tab.info.btn.status.success')
-                : t('page.settings.tab.info.btn.status.fail')
-            }}
-          </a-typography-text>
-        </a-tooltip>
+        <a-space v-else>
+          <a-tooltip :content="btnStatus?.data.configResult">
+            <a-typography-text :type="btnStatus?.data.configSuccess ? 'success' : 'warning'">
+              {{
+                btnStatus?.data.configSuccess
+                  ? t('page.settings.tab.info.btn.status.success')
+                  : t('page.settings.tab.info.btn.status.fail')
+              }}
+            </a-typography-text>
+          </a-tooltip>
+          <a-tooltip
+            v-if="!btnStatus?.data.configSuccess"
+            :content="t('page.settings.tab.info.btn.status.fail.tips')"
+          >
+            <a-button
+              status="warning"
+              type="text"
+              shape="circle"
+              href="https://docs.pbh-btn.com/en/docs/btn/connect/"
+              target="_blank"
+            >
+              <template #icon>
+                <icon-info-circle />
+              </template>
+            </a-button>
+          </a-tooltip>
+        </a-space>
       </a-descriptions-item>
       <a-descriptions-item
         v-if="btnEnable?.data"

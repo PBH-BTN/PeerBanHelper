@@ -1,9 +1,12 @@
 package com.ghostchu.peerbanhelper.gui.impl.console;
 
+import com.ghostchu.peerbanhelper.gui.ProgressDialog;
+import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
@@ -59,6 +62,26 @@ public class ConsoleGuiImpl implements GuiImpl {
         if (level.equals(Level.SEVERE)) {
             log.error("{}: {}", title, description);
         }
+    }
+
+    @Override
+    public ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
+        return new ConsoleProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
+    }
+
+    @Override
+    public TaskbarControl taskbarControl() {
+        return new TaskbarControl() {
+            @Override
+            public void updateProgress(Window window, Taskbar.State state, float progress) {
+
+            }
+
+            @Override
+            public void requestUserAttention(Window window, boolean critical) {
+
+            }
+        };
     }
 
 

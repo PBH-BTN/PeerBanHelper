@@ -19,6 +19,27 @@ jobs:
     needs: CI
     uses: ./.github/workflows/build_installers.yml
     secrets: inherit
+  Create_Torrent:
+    needs: Build_Installers
+    runs-on: ubuntu-latest
+    steps:
+      # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
+      - name: Zip medias
+        run: tar zcv PeerBanHelper_installers_${{ github.ref }}.tar.gz target/media/
+      - uses: ./.github/workflows/mktorrent.yml
+        with:
+          path: PeerBanHelper_installers_${{ github.ref }}.tar.gz
+          dest: target
+          torrentfile: PeerBanHelper_installers_${{ github.ref }}.tar.gz.torrent
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-dist
+          path: |
+            PeerBanHelper_installers_${{ github.ref }}.tar.gz.torrent
+            PeerBanHelper_installers_${{ github.ref }}.tar.gz
+
+        id: project
   Build_SPK:
     needs: CI
     uses: ./.github/workflows/build_spk.yml
@@ -63,7 +84,7 @@ jobs:
           type=raw,ci
           type=sha
     - name: Build and push Docker image
-      uses: docker/build-push-action@v6.12.0
+      uses: docker/build-push-action@v6.13.0
       with:
         context: .
         file: ./Dockerfile
@@ -74,7 +95,7 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-to: type=gha,mode=min
   Build_Docker_Standalone:
     runs-on: ubuntu-latest
     steps:
@@ -98,7 +119,7 @@ jobs:
           type=raw,ci
           type=sha
     - name: Build and push Docker image
-      uses: docker/build-push-action@v6.12.0
+      uses: docker/build-push-action@v6.13.0
       with:
         context: .
         file: ./Dockerfile
@@ -109,4 +130,4 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-to: type=gha,mode=min

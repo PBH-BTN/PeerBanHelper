@@ -64,7 +64,7 @@ public class TextManager implements Reloadable {
     }
 
     public static String tl(String locale, TranslationComponent translationComponent) {
-        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
+        locale = locale.toLowerCase(Locale.ROOT);
         YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
         if (yamlConfiguration == null) {
             yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("en_us");
@@ -163,7 +163,7 @@ public class TextManager implements Reloadable {
 
         // Remove disabled locales
         //List<String> enabledLanguagesRegex = .getStringList("enabled-languages");
-        //enabledLanguagesRegex.replaceAll(s -> s.toLowerCase(Locale.ROOT).replace("-", "_"));
+        //enabledLanguagesRegex.replaceAll(s -> s.toLowerCase(Locale.ROOT));
 //        Iterator<String> it = pending.iterator();
 //        while (it.hasNext()) {
 //            String locale = it.next();
@@ -232,7 +232,7 @@ public class TextManager implements Reloadable {
             try {
                 YamlConfiguration configuration = new YamlConfiguration();
                 configuration.loadFromString(new String(re.getContentAsByteArray(), StandardCharsets.UTF_8));
-                availableLang.put(langName.toLowerCase(Locale.ROOT).replace("-", "_"), configuration);
+                availableLang.put(langName.toLowerCase(Locale.ROOT), configuration);
             } catch (IOException | InvalidConfigurationException e) {
                 log.warn("Failed to load bundled translation.", e);
             }

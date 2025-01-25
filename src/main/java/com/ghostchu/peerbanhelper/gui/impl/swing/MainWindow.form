@@ -22,7 +22,8 @@
               <scrollpane id="f08b9" binding="loggerScrollPane">
                 <constraints border-constraint="Center"/>
                 <properties>
-                  <font name="Consolas"/>
+                  <enabled value="true"/>
+                  <font/>
                   <verticalScrollBarPolicy value="22"/>
                 </properties>
                 <border type="none">
@@ -31,7 +32,9 @@
                 <children>
                   <component id="954ba" class="javax.swing.JList" binding="loggerTextList">
                     <constraints/>
-                    <properties/>
+                    <properties>
+                      <font swing-font="TextArea.font"/>
+                    </properties>
                   </component>
                 </children>
               </scrollpane>

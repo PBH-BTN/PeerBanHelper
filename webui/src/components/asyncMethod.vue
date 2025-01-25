@@ -9,18 +9,19 @@ const loading = ref(false)
 const error = ref<Error>()
 
 defineSlots<{
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default(props: { run: (...arg: any) => Promise<any>; loading: boolean; error?: Error }): any
+  default(props: {
+    run: (...arg: unknown[]) => Promise<unknown>
+    loading: boolean
+    error?: Error
+  }): unknown
 }>()
 
 const props = defineProps<{
   once?: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  asyncFn: (...arg: any) => Promise<any>
+  asyncFn: (...arg: unknown[]) => Promise<unknown>
 }>()
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const run = async (...arg: any) => {
+const run = async (...arg: unknown[]) => {
   if (loading.value && props.once) return
   loading.value = true
   const callIdNow = ++callId.value

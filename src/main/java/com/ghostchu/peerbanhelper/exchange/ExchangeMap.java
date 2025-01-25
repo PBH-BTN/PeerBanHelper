@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class ExchangeMap {
+    public static volatile boolean PBH_PLUS_ACTIVATED = false;
+    public static volatile boolean UNSUPPORTED_PLATFORM = false;
     public static volatile Set<DisplayFlag> GUI_DISPLAY_FLAGS = Collections.synchronizedSet(new TreeSet<>());
 
     @Data
