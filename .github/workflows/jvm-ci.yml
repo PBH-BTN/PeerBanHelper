@@ -86,7 +86,7 @@ jobs:
             PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz
         id: project
   Create_Torrent:
-    needs: [ Create_Torrent ]
+    needs: [ Create_Tarball ]
     uses: ./.github/workflows/mktorrent.yml
     with:
       artifact: installers-tarball-dist
