@@ -78,6 +78,8 @@ jobs:
           path: PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz
           dest: target
           torrentfile: PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz.torrent
+          tagname: ${{ github.ref_name }}
+          tagfile: PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
