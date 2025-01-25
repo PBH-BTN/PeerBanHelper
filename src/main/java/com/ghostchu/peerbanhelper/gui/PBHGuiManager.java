@@ -53,4 +53,14 @@ public class PBHGuiManager implements GuiManager {
     public void createDialog(Level level, String title, String description) {
         gui.createDialog(level, title, description);
     }
+
+    @Override
+    public ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
+        return gui.createProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
+    }
+
+    @Override
+    public TaskbarControl taskbarControl() {
+        return gui.taskbarControl();
+    }
 }

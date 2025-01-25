@@ -191,8 +191,8 @@ WEBAPI_INTERNAL_ERROR: "An internal server error occurred while processing the W
 GITHUB_PAGE: "https://github.com/PBH-BTN/PeerBanHelper"
 GUI_COPY_TO_CLIPBOARD_TITLE: "Copy to clipboard"
 GUI_COPY_TO_CLIPBOARD_DESCRIPTION: "Successfully copied to system clipboard: \n{}"
-GUI_TITLE_LOADING: "PeerBanHelper ({}) - Loading, please wait..."
-GUI_TITLE_LOADED: "PeerBanHelper ({}) - {} ({})"
+GUI_TITLE_LOADING: "PeerBanHelper - Loading, please wait..."
+GUI_TITLE_LOADED: "PeerBanHelper - {} ({})"
 WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED: "JavaFx Web module not found, you are using a lightweight build, WebUI tab not enabled"
 WEBVIEW_ENABLED: "JavaFx Web found, WebUI tab enabled"
 STATUS_TEXT_OK: "Currently working normally"
@@ -570,3 +570,24 @@ UTILITIES_TRACKER_REPLACED: "Successfully replaced {} torrent's tracker"
 DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION: "Currently installed BiglyBT adapter version is NOT supported, please upgrade to  {} or higher."
 LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_TITLE: "Use known data to fill in missing data in traffic summary"
 LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_DESCRIPTION: "Use known data to fill in missing data in traffic summary to try to correct incorrect traffic statistics data (only effective when records are missing in the non-starting area). This is an experimental algorithm, and the provided data may still be inaccurate."
+GUI_TABBED_WEBUI: "WebUI Console"
+JCEF_BROWSER_UNSUPPORTED_PLATFORM: "JCEF initialize failed: unsupported platform"
+JCEF_BROWSER_UNSUPPORTED_EXCEPTION: "JCEF initialize failed: CEF initialize exception"
+JCEF_DOWNLOAD_TITLE: "Download JCEF data pack"
+JCEF_DOWNLOAD_DESCRIPTION: |
+  PeerBanHelper is downloading the JCEF data pack to enable the WebUI console tab in the GUI window, this may take a while...<br/>
+  If you do not want to enable the JCEF feature, please add the startup additional parameter "nojcef".
+IPDB_DOWNLOAD_TITLE: "Download GeoIP DB: {}"
+IPDB_DOWNLOAD_DESCRIPTION: "PeerBanHelper downloading GeoIP database for providing IP geolocation information, this may take a while..."
+JCEF_DOWNLOAD_UNZIP_DESCRIPTION: "Unzipping the JCEF data pack, this may take a while..."
+GUI_COMMON_CANCEL: "Cancel"
+PBH_PLUS_THANKS_FOR_DONATION_GUI_TITLE: "❤ThankYou"
+GUI_TITLE_DEBUG: "🔧Debugging"
+DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE: "Critical Error: Downloader in Incorrect Network Mode, PeerBanHelper May Not Work"
+DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION: |
+  Critical error detected: The Peer inbound connection IP address configuration of the downloader {} is incorrect ({}).  
+  PeerBanHelper requires the real IP address of the Peer to function correctly, otherwise, it will incorrectly ban all inbound connections. Therefore, PeerBanHelper is ignoring these abnormal addresses. Bans will not take effect.  
+  This is usually caused by the downloader running in a Docker environment and using the `bridge` network mode. You must switch to the `host` network mode to avoid user-space forwarding rewriting the IP address information.  
+  
+  Note: You should correctly fix the IP issue. Simply removing internal network IP addresses from the ignore list will cause PeerBanHelper to incorrectly ban all inbound connections.  
+  For assistance, please join the PeerBanHelper community. **This prompt will only appear once per downloader.**

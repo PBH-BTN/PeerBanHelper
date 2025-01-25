@@ -19,6 +19,27 @@ jobs:
     needs: CI
     uses: ./.github/workflows/build_installers.yml
     secrets: inherit
+  Create_Torrent:
+    needs: Build_Installers
+    runs-on: ubuntu-latest
+    steps:
+      # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
+      - name: Zip medias
+        run: zip -r PeerBanHelper_installers_${{ github.ref }}.zip target/media/
+      - uses: ./.github/workflows/mktorrent.yml
+        with:
+          path: PeerBanHelper_installers_${{ github.ref }}.zip
+          dest: target
+          torrentfile: PeerBanHelper_installers_${{ github.ref }}.zip.torrent
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-dist
+          path: |
+            PeerBanHelper_installers_${{ github.ref }}.zip.torrent
+            PeerBanHelper_installers_${{ github.ref }}.zip
+
+        id: project
   Build_SPK:
     needs: CI
     uses: ./.github/workflows/build_spk.yml

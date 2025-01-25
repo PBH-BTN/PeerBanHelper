@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.pbhplus;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
+import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -45,6 +47,9 @@ public class ActivationManager implements Reloadable {
         }
         if (keyData != null) {
             if (this.isActivated() && !this.isLocalLicense()) {
+                ExchangeMap.PBH_PLUS_ACTIVATED = true;
+                ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("PBH Plus", 10, tlUI(Lang.PBH_PLUS_THANKS_FOR_DONATION_GUI_TITLE)));
+                Main.getEventBus().post(new PBHLookAndFeelNeedReloadEvent());
                 log.info(tlUI(Lang.DONATION_KEY_VERIFICATION_SUCCESSFUL, keyData.getLicenseTo(), keyData.getSource(), MsgUtil.getDateFormatter().format(new Date(keyData.getExpireAt()))));
             }
         }

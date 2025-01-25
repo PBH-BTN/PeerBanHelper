@@ -55,6 +55,7 @@ import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.pqc.legacy.math.ntru.util.Util;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -63,12 +64,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -145,7 +148,7 @@ public class PeerBanHelperServer implements Reloadable {
     private void reloadConfig() {
         this.pbhServerAddress = Main.getPbhServerAddress();
         this.banDuration = Main.getProfileConfig().getLong("ban-duration");
-        this.httpdPort = Main.getMainConfig().getInt("server.http");
+        this.httpdPort = ExternalSwitch.parseInt("pbh.port", Main.getMainConfig().getInt("server.http"));
         this.hideFinishLogs = Main.getMainConfig().getBoolean("logger.hide-finish-log");
         Main.getProfileConfig().getStringList("ignore-peers-from-addresses").forEach(ip -> {
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
@@ -192,15 +195,30 @@ public class PeerBanHelperServer implements Reloadable {
         }
         Main.getReloadManager().register(this);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
+        postCompatibilityCheck();
         sendSnapshotAlert();
         runTestCode();
+        Main.getGuiManager().taskbarControl().updateProgress(null, Taskbar.State.OFF, 0.0f);
+    }
+
+    private void postCompatibilityCheck() {
+        if (!Util.is64BitJVM() || ExternalSwitch.parseBoolean("pbh.forceBitnessCheckFail")) {
+            ExchangeMap.UNSUPPORTED_PLATFORM = true;
+            ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("unsupported-platform", 10, tlUI(Lang.TITLE_INCOMPATIBLE_PLATFORM)));
+            log.warn(tlUI(Lang.INCOMPATIBLE_BITNESS_LOG));
+            if (!alertManager.identifierAlertExistsIncludeRead("incomaptible-bitness")) {
+                alertManager.publishAlert(false, AlertLevel.WARN, "incomaptible-bitness", new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_TITLE), new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
+                Main.getGuiManager().createNotification(Level.WARNING, tlUI(Lang.INCOMPATIBLE_BITNESS_TITLE), tlUI(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
+            }
+        }
     }
 
     @SneakyThrows
     private void runTestCode() {
-        if (!"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+        if (!Main.getMeta().isSnapshotOrBeta() && !"LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
             return;
         }
+        ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
         // run some junky test code here
 //        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
 //                .getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
@@ -384,11 +402,8 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void registerHttpServer() {
-        String token = ExternalSwitch.parse("pbh.api_token");
-        if (token == null) {
-            token = Main.getMainConfig().getString("server.token");
-        }
-        String host = Main.getMainConfig().getString("server.address");
+        String token = ExternalSwitch.parse("pbh.apiToken", Main.getMainConfig().getString("server.token"));
+        String host = ExternalSwitch.parse("pbh.serverAddress", Main.getMainConfig().getString("server.address"));
         if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
             host = null;
         }
@@ -829,6 +844,22 @@ public class PeerBanHelperServer implements Reloadable {
         }
         var node = ignoreAddresses.elementsContaining(peer.getPeerAddress().getAddress());
         if (node != null) {
+            // 检查 Peer 的 Flags，如果不支持 Flags 或者 Flags 同时满足这些条件：
+            // 来自 DHT、PEX、Tracker 的其中一个
+            // 是入站连接
+            // 则认为用户搞砸了 NAT 设置，发出重要提醒
+            if (peer.getFlags() == null
+                    || peer.getFlags().isFromIncoming()
+                    || !peer.getFlags().isOutgoingConnection()
+                    || peer.getFlags().isFromTracker()
+                    || peer.getFlags().isFromDHT()
+                    || peer.getFlags().isFromPEX()) {
+                if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
+                    alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
+                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
+                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
+                }
+            }
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
         }
         try {

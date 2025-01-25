@@ -9,3 +9,5 @@ checkbox.registersystemservice=注册为系统服务(除非你知道这是做什
 systemservice.note=将 PeerBanHelper 安装为系统服务时，Windows 系统下配置文件将被存储在 C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper 位置，访问此位置需要您拥有管理员权限。\nPeerBanHelper 将在系统启动时自动启动。
 components.peerbanhelper=PeerBanHelper
 components.peerbanhelper.description=PeerBanHelper 的核心主程序，包含了主程序代码和必要的运行文件
+components.jcef=[可选] JCEF
+components.jcef.description=可选的 JCEF (Java 嵌入式 Chromium 框架)，用以支持 PeerBanHelper GUI 模式下的 WebUI 控制台标签页功能，禁用后将隐藏 WebUI 控制台标签页，用户将需要通过系统浏览器访问 WebUI。（勾选后将在 PeerBanHelper 启动时下载）

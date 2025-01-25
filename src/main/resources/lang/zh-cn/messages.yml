@@ -192,8 +192,8 @@ WEBAPI_INTERNAL_ERROR: "处理 WebAPI 请求时出现了一个内部服务器错
 GITHUB_PAGE: "https://github.com/PBH-BTN/PeerBanHelper"
 GUI_COPY_TO_CLIPBOARD_TITLE: "复制到剪贴板"
 GUI_COPY_TO_CLIPBOARD_DESCRIPTION: "已成功复制到系统剪贴板: \n{}"
-GUI_TITLE_LOADING: "PeerBanHelper ({}) - 正在加载，请稍候..."
-GUI_TITLE_LOADED: "PeerBanHelper ({}) - {} ({})"
+GUI_TITLE_LOADING: "PeerBanHelper - 正在加载，请稍候..."
+GUI_TITLE_LOADED: "PeerBanHelper - {} ({})"
 WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED: "未找到 JavaFx Web 模块，您正在使用精简构建，WebUI 选项卡未启用"
 WEBVIEW_ENABLED: "已找到 JavaFx Web，WebUI 选项卡已启用"
 STATUS_TEXT_OK: "当前工作正常"
@@ -567,3 +567,25 @@ UTILITIES_TRACKER_REPLACED: "已成功替换 {} 个种子的 Tracker"
 DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION: "当前使用的 BiglyBT 适配器版本不受支持，请升级到 {} 或更高版本"
 LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_TITLE: "使用已知数据填充流量统计缺失的数据"
 LAB_EXPERIMENT_FILL_MISSING_DATA_IN_TRAFFIC_SUMMARY_DESCRIPTION: "使用上一条的已知的数据尝试填充流量统计中缺失的数据以尝试修正错误的流量统计数据（仅在非开头区域中缺失记录时有效）。这是一种实验性算法，且提供的数据可能仍旧不准确。"
+GUI_TABBED_WEBUI: "WebUI 控制台"
+JCEF_BROWSER_UNSUPPORTED_PLATFORM: "JCEF 初始化失败：平台不受支持"
+JCEF_BROWSER_UNSUPPORTED_EXCEPTION: "JCEF 初始化失败：发生 CEF 初始化错误"
+JCEF_DOWNLOAD_TITLE: "下载 JCEF 数据包"
+JCEF_DOWNLOAD_DESCRIPTION: |
+  PeerBanHelper 正在下载 JCEF 数据包以在 GUI 窗口中启用 WebUI 控制台标签卡，这可能需要一点时间...<br/>
+  如果不希望启用 JCEF 功能，请添加启动附加参数 nojcef。
+JCEF_DOWNLOAD_UNZIP_DESCRIPTION: 正在解压缩 JCEF 数据包，请稍等...
+IPDB_DOWNLOAD_TITLE: "下载 GeoIP 数据库: {}"
+IPDB_DOWNLOAD_DESCRIPTION: "PeerBanHelper 需要下载 GeoIP 数据库以为反吸血提供 IP 地址的地理位置信息支持，这可能需要一点时间..."
+GUI_COMMON_CANCEL: "取消"
+PBH_PLUS_THANKS_FOR_DONATION_GUI_TITLE: "❤感谢捐赠"
+GUI_TITLE_DEBUG: "🔧调试模式"
+DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE: "严重错误：下载器处于不正确的网络模式下，PeerBanHelper 可能不会工作"
+DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION: |
+  检测到严重错误：下载器 {} 的 Peer 入站连接 IP 地址配置不正确 ({})。  
+  PeerBanHelper 需要 Peer 的真实 IP 地址才能正常工作，否则将会错误的封禁所有入站连接，因此 PeerBanHelper 正在忽略这些异常的地址。封禁不会生效。  
+  这通常是由于下载器运行在 Docker 环境内且正在使用 `bridge` 网络模式导致的，必须切换到 `host` 网络模式以避免用户空间转发改写 IP 地址信息。  
+  
+  请注意：你应该正确修复 IP 问题，仅将内部网络 IP 地址从忽略列表中移除会导致 PeerBanHelper 错误地封禁全部入站连接。  
+  如需帮助，请加入 PeerBanHelper 社区寻求帮助。**此提示在每个下载器上仅会提示一次。**
+ABOUT_VIEW_CREDIT: "开发人员与社区贡献者..."

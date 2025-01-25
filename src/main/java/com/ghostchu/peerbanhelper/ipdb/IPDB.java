@@ -1,11 +1,13 @@
 package com.ghostchu.peerbanhelper.ipdb;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleProgressDialog;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
+import com.github.mizosoft.methanol.ProgressTracker;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
@@ -319,7 +321,25 @@ public class IPDB implements AutoCloseable {
 
     private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName) {
         IPDBDownloadSource mirror = mirrorList.removeFirst();
-        return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
+        ProgressTracker tracker = ProgressTracker.newBuilder()
+                .bytesTransferredThreshold(16 * 1024) // 16 kB
+                .timePassedThreshold(Duration.of(1, ChronoUnit.SECONDS))
+                .build();
+        var progressDialog = Main.getGuiManager().createProgressDialog(tlUI(Lang.IPDB_DOWNLOAD_TITLE, databaseName), tlUI(Lang.IPDB_DOWNLOAD_DESCRIPTION, databaseName), tlUI(Lang.GUI_COMMON_CANCEL), null, false);
+        progressDialog.show();
+        progressDialog.setComment(mirror.getIPDBUrl());
+        var bodyHandler = tracker.tracking(HttpResponse.BodyHandlers.ofFile(path), item -> {
+            if (!(progressDialog instanceof ConsoleProgressDialog)) {
+                HTTPUtil.onProgress(item);
+            }
+            progressDialog.setProgressDisplayIndeterminate(!item.determinate());
+            if (item.determinate()) {
+                progressDialog.updateProgress((float) item.totalBytesTransferred() / item.contentLength());
+            } else {
+                progressDialog.updateProgress(0);
+            }
+        });
+        return HTTPUtil.retryableSend(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), bodyHandler)
                 .thenAccept(r -> {
                     if (r.statusCode() == 200) {
                         if (mirror.supportXzip()) {
@@ -364,7 +384,7 @@ public class IPDB implements AutoCloseable {
                         file.delete(); // 删除下载不完整的文件
                     }
                     return null;
-                });
+                }).whenComplete((r, e) -> progressDialog.close());
     }
 
     @Override

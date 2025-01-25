@@ -45,7 +45,7 @@
         <template #peerAddress="{ record }">
           <a-typography-text code>
             <queryIpLink :ip="record.peerIp" style="color: var(--color-text-2)">
-              {{ record.peerIp }}:{{ record.peerPort }}
+              {{ formatIPAddressPort(record.peerIp, record.peerPort) }}
             </queryIpLink>
           </a-typography-text>
         </template>
@@ -91,6 +91,8 @@ import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { formatIPAddressPort } from '@/utils/string'
+
 import { usePagination } from 'vue-request'
 
 const endpointState = useEndpointStore()

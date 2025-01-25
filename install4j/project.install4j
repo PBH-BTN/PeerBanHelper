@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="11.0.1" transformSequenceNumber="11">
-  <directoryPresets config="target/PeerBanHelper.jar" />
+<install4j version="11.0.2" transformSequenceNumber="11">
+  <directoryPresets config="./enable-jcef.txt" />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="7.3.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="24">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
@@ -18,12 +18,20 @@
     <jreBundles jdkProviderId="Liberica" release="23/23.0.1+13" />
   </application>
   <files keepModificationTimes="true">
+    <filesets>
+      <fileset name="jcef" id="248" />
+    </filesets>
+    <roots>
+      <root id="249" fileset="248" />
+    </roots>
     <mountPoints>
       <mountPoint id="24" />
+      <mountPoint id="250" root="249" />
     </mountPoints>
     <entries>
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
       <variableEntry mountPoint="24" name="jarPath" />
+      <fileEntry mountPoint="250" file="./enable-jcef.txt" />
     </entries>
     <components>
       <component name="${i18n:components.peerbanhelper}" id="245" customizedId="peerbanhelper" changeable="false">
@@ -31,6 +39,15 @@
         <include>
           <entry defaultFileset="true" />
         </include>
+      </component>
+      <component name="${i18n:components.jcef}" id="251">
+        <description>${i18n:components.jcef.description}</description>
+        <include>
+          <entry filesetId="248" />
+        </include>
+        <dependencies>
+          <component id="245" />
+        </dependencies>
       </component>
     </components>
   </files>
@@ -513,11 +530,12 @@ return console.askYesNo(message, true);
                       <property name="value" type="string">import java.nio.file.*;
 
 Path dir = context.getInstallationDirectory().toPath();
+File disableFile = new File(context.getInstallationDirectory(), "disable-checking-updates.txt");
 // quit if the current installation is on a read only file system, for example a disk image on macOS
 // or if the directory is not writeable on Linux/Unix. 
 // If there is no "Request privileges" action in the installer, the condition should also
 // check Files.isWritable(dir)
-return !Files.getFileStore(dir).isReadOnly() &amp;&amp; ((Util.isWindows() &amp;&amp; !Util.isArchive()) || Util.isMacOS() || (Util.isLinux() &amp;&amp; !Util.isArchive()));
+return !Files.getFileStore(dir).isReadOnly() &amp;&amp; ((Util.isWindows() &amp;&amp; !Util.isArchive()) || Util.isMacOS() || (Util.isLinux() &amp;&amp; !Util.isArchive())) &amp;&amp; !disableFile.exists();
 </property>
                     </object>
                   </property>
@@ -1604,6 +1622,12 @@ return true;</property>
     </unixInstaller>
     <unixInstaller name="riscv64 Linux Installer" id="133" mediaFileName="${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
       <jreBundle platform="linux-riscv64" />
+    </unixInstaller>
+    <unixInstaller name="x86 (32-bit) Linux Installer" id="259" mediaFileName="_____UNSUPPORTED_${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-x86" />
+    </unixInstaller>
+    <unixInstaller name="arm32-vfp-hflt Linux Installer" id="262" mediaFileName="_____UNSUPPORTED_${compiler:sys.shortName}_${compiler:sys.jreBundleArch}_${compiler:sys.version}" require64BitVm="true">
+      <jreBundle platform="linux-arm32-vfp-hflt" />
     </unixInstaller>
   </mediaSets>
   <buildIds>

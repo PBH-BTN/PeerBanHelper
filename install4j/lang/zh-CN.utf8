@@ -7,3 +7,5 @@ checkbox.followsystemstartup=登录到桌面时自动启动
 peerbanhelper.description=一个能够自动封禁不受欢迎、吸血和异常的 Peers，并支持自定义规则的 BT 客户端辅助工具
 components.peerbanhelper=PeerBanHelper
 components.peerbanhelper.description=PeerBanHelper 的核心主程序，包含了主程序代码和必要的运行文件
+components.jcef=[可选] JCEF
+components.jcef.description=可选的 JCEF (Java 嵌入式 Chromium 框架)，用以支持 PeerBanHelper GUI 模式下的 WebUI 控制台标签页功能，禁用后将隐藏 WebUI 控制台标签页，用户将需要通过系统浏览器访问 WebUI。（勾选后将在 PeerBanHelper 启动时下载）

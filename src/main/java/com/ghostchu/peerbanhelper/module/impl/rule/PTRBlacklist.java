@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @IgnoreScan
@@ -103,7 +104,7 @@ public class PTRBlacklist extends AbstractRuleFeatureModule implements Reloadabl
         return getCache().readCache(this, reverseDnsLookupString, () -> {
             Optional<String> ptr;
             if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
-                ptr = dnsLookup.ptr(reverseDnsLookupString).join();
+                ptr = dnsLookup.ptr(reverseDnsLookupString).get(3, TimeUnit.SECONDS);
             } else {
                 try {
                     ptr = Optional.ofNullable(InetAddress.getByName(peer.getPeerAddress().getIp()).getHostName());
