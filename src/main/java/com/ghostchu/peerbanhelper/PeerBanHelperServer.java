@@ -392,7 +392,7 @@ public class PeerBanHelperServer implements Reloadable {
         if (token == null) {
             token = Main.getMainConfig().getString("server.token");
         }
-        String host = ExternalSwitch.parse("pbh.apiToken", Main.getMainConfig().getString("server.address"));
+        String host = ExternalSwitch.parse("pbh.serverAddress", Main.getMainConfig().getString("pbh.server.address"));
         if (host.equals("0.0.0.0") || host.equals("::") || host.equals("localhost")) {
             host = null;
         }
