@@ -140,7 +140,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             pbhFlatLafTheme = new PBHPlusTheme();
         }
         // Snapshot?
-        if (Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+        if (ExternalSwitch.parseBoolean("pbh.gui.insider-theme", true) && Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
             pbhFlatLafTheme = new SnapshotTheme();
         }
         // Customized?

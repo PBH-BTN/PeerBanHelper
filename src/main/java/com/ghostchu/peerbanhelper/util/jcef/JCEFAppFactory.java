@@ -28,7 +28,7 @@ public class JCEFAppFactory {
         if (ExternalSwitch.parseBoolean("jcef.no-sandbox", false)) {
             builder.addJcefArgs("--no_sandbox");
         }
-        if (ExternalSwitch.parseBoolean("jcef.ignore_ssl_cert", false)) {
+        if (ExternalSwitch.parseBoolean("jcef.ignore-ssl-cert", false)) {
             builder.addJcefArgs("--ignore-certificate-errors");
         }
         if (ExternalSwitch.parseBoolean("jcef.disable-gpu", false)) {
