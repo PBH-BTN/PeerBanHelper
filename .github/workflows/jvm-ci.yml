@@ -68,7 +68,7 @@ jobs:
           path: target/media
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
       - name: Zip medias
-        run: tar zcv PeerBanHelper_installers_${{ github.ref }}.tar.gz target/media/
+        run: tar -zcvf PeerBanHelper_installers_${{ github.ref }}.tar.gz target/media/
       - uses: ./.github/workflows/mktorrent.yml
         with:
           path: PeerBanHelper_installers_${{ github.ref }}.tar.gz
