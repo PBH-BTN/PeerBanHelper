@@ -112,7 +112,7 @@ public class Main {
         log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
-            DEF_LOCALE = ExternalSwitch.parse("PBH_USER_LOCALE");
+            DEF_LOCALE = ExternalSwitch.parse("pbh.userLocale");
             if (DEF_LOCALE == null) {
                 DEF_LOCALE = defLocaleTag;
             }
