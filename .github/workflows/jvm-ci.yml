@@ -33,7 +33,7 @@ jobs:
   Build_PKG:
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
-  Create_Tarball:
+  Create_Torrent:
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable ]
     runs-on: ubuntu-latest
     steps:
@@ -86,13 +86,6 @@ jobs:
             peerbanhelper.torrent
             PeerBanHelper_Installers.tar.gz
         id: project
-  Create_Torrent:
-    needs: [ Create_Tarball ]
-    uses: ./.github/workflows/mktorrent.yml
-    with:
-      artifact: installers-tarball-dist
-      tagname: ${{ github.ref_name }}
-      tagfile: PeerBanHelper_Installers.tar.gz
   Build_Docker:
     needs: Build_Executable
     runs-on: ubuntu-latest
