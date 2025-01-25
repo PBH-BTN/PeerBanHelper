@@ -83,7 +83,7 @@ jobs:
         with:
           name: installers-tarball-dist
           path: |
-            PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz
+            PeerBanHelper_Installers.tar.gz
         id: project
   Create_Torrent:
     needs: [ Create_Tarball ]
@@ -91,7 +91,7 @@ jobs:
     with:
       artifact: installers-tarball-dist
       tagname: ${{ github.ref_name }}
-      tagfile: PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz
+      tagfile: PeerBanHelper_Installers.tar.gz
   Build_Docker:
     needs: Build_Executable
     runs-on: ubuntu-latest
