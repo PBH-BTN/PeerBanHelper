@@ -592,8 +592,8 @@ DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION: |
   请注意：你应该正确修复 IP 问题，仅将内部网络 IP 地址从忽略列表中移除会导致 PeerBanHelper 错误地封禁全部入站连接。  
   如需帮助，请加入 PeerBanHelper 社区寻求帮助。**此提示在每个下载器上仅会提示一次。**
 INCOMPATIBLE_PLATFORM_TITLE: "当前平台不受支持"
-INCOMPATIBLE_PLATFORM_DESCRIPTION: "当前平台未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。"
+INCOMPATIBLE_PLATFORM_DESCRIPTION: "当前平台未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。回退兼容性可能在未来随时被移除。"
 INCOMPATIBLE_BITNESS_TITLE: "32 位平台不受支持"
-INCOMPATIBLE_BITNESS_DESCRIPTION: "在 32 位操作系统/JVM 上运行 PeerBanHelper 未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。此提示信息仅显示一次。"
-INCOMPATIBLE_BITNESS_LOG: "在 32 位操作系统/JVM 上运行 PeerBanHelper 未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。"
+INCOMPATIBLE_BITNESS_DESCRIPTION: "在 32 位操作系统/JVM 上运行 PeerBanHelper 未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。回退兼容性可能在未来随时被移除。此提示信息仅显示一次。"
+INCOMPATIBLE_BITNESS_LOG: "在 32 位操作系统/JVM 上运行 PeerBanHelper 未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。回退兼容性可能在未来随时被移除。"
 TITLE_INCOMPATIBLE_PLATFORM: "⚠不受支持的平台"
