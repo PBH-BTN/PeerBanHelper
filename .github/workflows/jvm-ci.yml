@@ -25,19 +25,19 @@ jobs:
     steps:
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
       - name: Zip medias
-        run: zip -r PeerBanHelper_installers_${{ github.ref }}.zip target/media/
+        run: tar zcv PeerBanHelper_installers_${{ github.ref }}.tar.gz target/media/
       - uses: ./.github/workflows/mktorrent.yml
         with:
-          path: PeerBanHelper_installers_${{ github.ref }}.zip
+          path: PeerBanHelper_installers_${{ github.ref }}.tar.gz
           dest: target
-          torrentfile: PeerBanHelper_installers_${{ github.ref }}.zip.torrent
+          torrentfile: PeerBanHelper_installers_${{ github.ref }}.tar.gz.torrent
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: installer-dist
           path: |
-            PeerBanHelper_installers_${{ github.ref }}.zip.torrent
-            PeerBanHelper_installers_${{ github.ref }}.zip
+            PeerBanHelper_installers_${{ github.ref }}.tar.gz.torrent
+            PeerBanHelper_installers_${{ github.ref }}.tar.gz
 
         id: project
   Build_SPK:
