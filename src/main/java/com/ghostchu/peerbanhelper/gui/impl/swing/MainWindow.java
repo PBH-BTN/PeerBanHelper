@@ -35,10 +35,9 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -504,8 +503,21 @@ public class MainWindow extends JFrame {
                     log.error("无法禁用 JCEF", ex);
                 }
             });
+            JMenuItem testAboutWindow = new JMenuItem("测试关于窗口");
+            testAboutWindow.addActionListener(e -> {
+                var replaces = new HashMap<String, String>();
+                replaces.put("{version}", Main.getMeta().getVersion());
+                replaces.put("{username}", System.getProperty("user.name"));
+                replaces.put("{worldEndingCounter}", "365");
+                // 获取400年后的现在时刻, 格式化为 YYYY-MM-DD HH:mm:ss
+                var future = Calendar.getInstance();
+                future.add(Calendar.YEAR, 400);
+                replaces.put("{lastLogin}", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(future.getTime()));
+                var window = new AboutWindow(replaces);
+            });
             menu.add(disableJCEF);
             menu.add(enableJCEF);
+            menu.add(testAboutWindow);
             return menu;
         }
 
