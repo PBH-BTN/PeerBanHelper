@@ -12,10 +12,7 @@ import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.SnapshotTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
@@ -142,6 +139,10 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         // Snapshot?
         if (ExternalSwitch.parseBoolean("pbh.gui.insider-theme", true) && Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
             pbhFlatLafTheme = new SnapshotTheme();
+        }
+        // Unsupported platform?
+        if (ExchangeMap.UNSUPPORTED_PLATFORM && ExternalSwitch.parseBoolean("pbh.gui.useIncompatiblePlatformTheme", false)) {
+            pbhFlatLafTheme = new UnsupportedPlatformTheme();
         }
         // Customized?
         if (ExternalSwitch.parse("pbh.gui.theme-light") != null && ExternalSwitch.parse("pbh.gui.theme-dark") != null) {

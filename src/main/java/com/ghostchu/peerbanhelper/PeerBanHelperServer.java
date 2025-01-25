@@ -55,6 +55,7 @@ import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.pqc.legacy.math.ntru.util.Util;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -194,9 +195,22 @@ public class PeerBanHelperServer implements Reloadable {
         }
         Main.getReloadManager().register(this);
         Main.getEventBus().post(new PBHServerStartedEvent(this));
+        postCompatibilityCheck();
         sendSnapshotAlert();
         runTestCode();
         Main.getGuiManager().taskbarControl().updateProgress(null, Taskbar.State.OFF, 0.0f);
+    }
+
+    private void postCompatibilityCheck() {
+        if (!Util.is64BitJVM() || ExternalSwitch.parseBoolean("pbh.forceBitnessCheckFail")) {
+            ExchangeMap.UNSUPPORTED_PLATFORM = true;
+            ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("unsupported-platform", 10, tlUI(Lang.TITLE_INCOMPATIBLE_PLATFORM)));
+            log.warn(tlUI(Lang.INCOMPATIBLE_BITNESS_LOG));
+            if (!alertManager.identifierAlertExistsIncludeRead("incomaptible-bitness")) {
+                alertManager.publishAlert(false, AlertLevel.WARN, "incomaptible-bitness", new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_TITLE), new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
+                Main.getGuiManager().createNotification(Level.WARNING, tlUI(Lang.INCOMPATIBLE_BITNESS_TITLE), tlUI(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
+            }
+        }
     }
 
     @SneakyThrows
