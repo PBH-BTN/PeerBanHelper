@@ -37,6 +37,10 @@ jobs:
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable ]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - id: java_info
+        uses: YunaBraska/java-info-action@main
+      - uses: actions/download-artifact@v4
       # download artifacts
       - uses: actions/download-artifact@v4
         with:
@@ -68,19 +72,19 @@ jobs:
           path: target/media
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
       - name: Zip medias
-        run: tar -zcvf PeerBanHelper_installers_${{ github.ref }}.tar.gz target/media/
+        run: tar -zcvf PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz target/media/
       - uses: ./.github/workflows/mktorrent.yml
         with:
-          path: PeerBanHelper_installers_${{ github.ref }}.tar.gz
+          path: PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz
           dest: target
-          torrentfile: PeerBanHelper_installers_${{ github.ref }}.tar.gz.torrent
+          torrentfile: PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz.torrent
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: installer-dist
           path: |
-            PeerBanHelper_installers_${{ github.ref }}.tar.gz.torrent
-            PeerBanHelper_installers_${{ github.ref }}.tar.gz
+            PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz.torrent
+            PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz
         id: project
   Build_Docker:
     needs: Build_Executable
