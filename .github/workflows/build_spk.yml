@@ -14,11 +14,25 @@ jobs:
       - uses: actions/checkout@v4
       - id: java_info
         uses: YunaBraska/java-info-action@main
+      - name: Restore cached build dependencies
+        id: cache-primes-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            /toolkit/toolkit_tarballs
+          key: ${{ runner.os }}-syno-build-cache
       - name: Run build script
         run: sudo PBH_VERSION=${{ env.PBH_VERSION }} IMAGE=${{ env.IMAGE }} bash pkg/synopkg/build-script.sh
         env:
           PBH_VERSION: ${{ steps.java_info.outputs.project_version }}
           IMAGE: ${{ inputs.image }}
+      - name: Save build dependencies
+        id: syno-build-cache-save
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            /toolkit/toolkit_tarballs
+          key: ${{ steps.cache-primes-restore.outputs.cache-primary-key }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
