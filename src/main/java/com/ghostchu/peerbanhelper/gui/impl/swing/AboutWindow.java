@@ -2,13 +2,18 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.MIDIPlayer;
+import lombok.Cleanup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AboutWindow {
+    private static final Logger log = LoggerFactory.getLogger(AboutWindow.class);
     private JFrame frame;
     private final Map<String, String> replaces;
     private JTextPane textPane;
@@ -40,7 +46,16 @@ public class AboutWindow {
     public AboutWindow(Map<String, String> replaces) {
         initializeUI();
         this.replaces = replaces;
-        loadContent("credit.txt");
+        String content = "Missing no";
+        try {
+            @Cleanup var is = Main.class.getResourceAsStream("/assets/credit.txt");
+            if (is != null) {
+                content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            log.error("Failed to load credit.txt", e);
+        }
+        loadContent(content);
         setupTimers();
         try {
             playMidi();
@@ -82,9 +97,9 @@ public class AboutWindow {
         frame.setVisible(true);
     }
 
-    private void loadContent(String filename) {
+    private void loadContent(String content) {
         contentItems = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+        try (BufferedReader br = new BufferedReader(new StringReader(content))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.startsWith("[speed:")) {

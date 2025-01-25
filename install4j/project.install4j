@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="11.0.1" transformSequenceNumber="11">
+<install4j version="11.0.2" transformSequenceNumber="11">
   <directoryPresets config="./enable-jcef.txt" />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="7.3.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="24">
     <languages languageSelectionInPrincipalLanguage="true">
@@ -530,11 +530,12 @@ return console.askYesNo(message, true);
                       <property name="value" type="string">import java.nio.file.*;
 
 Path dir = context.getInstallationDirectory().toPath();
+File disableFile = new File(context.getInstallationDirectory(), "disable-checking-updates.txt");
 // quit if the current installation is on a read only file system, for example a disk image on macOS
 // or if the directory is not writeable on Linux/Unix. 
 // If there is no "Request privileges" action in the installer, the condition should also
 // check Files.isWritable(dir)
-return !Files.getFileStore(dir).isReadOnly() &amp;&amp; ((Util.isWindows() &amp;&amp; !Util.isArchive()) || Util.isMacOS() || (Util.isLinux() &amp;&amp; !Util.isArchive()));
+return !Files.getFileStore(dir).isReadOnly() &amp;&amp; ((Util.isWindows() &amp;&amp; !Util.isArchive()) || Util.isMacOS() || (Util.isLinux() &amp;&amp; !Util.isArchive())) &amp;&amp; !disableFile.exists();
 </property>
                     </object>
                   </property>

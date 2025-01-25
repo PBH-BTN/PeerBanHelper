@@ -323,6 +323,9 @@ BTN 威胁防护网络先行者 - BTN Beta Testers:
     我不是矿神 IMNKS - 感谢 IMNKS SPK 套件源托管了 PeerBanHelper 的 SPK 安装包，并提供了与群晖系统集成方面的重要帮助和建议
     zhuxiaoying85309 (小樱/ITZMX) - 感谢在与 BitComet 集成期间提供的大量帮助，并提供了对 Sparkle Tracker / Trunker 的多次负载测试和 Tracker 相关方面的建议
 
+    SpecterShell - 维护和更新 winget-pkgs 上的 PeerBanHelper 程序包
+    miryo - 维护和更新 AUR 源上的 PeerBanHelper 程序包
+
     ej-technolgies - 提供 install4j 和 JProfiler 的开源项目许可证
     coderabbitai - 提供开放源代码 Pro 许可证
 
