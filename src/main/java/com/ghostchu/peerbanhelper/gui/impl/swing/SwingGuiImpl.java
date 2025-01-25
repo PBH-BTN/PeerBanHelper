@@ -133,7 +133,7 @@ public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             pbhFlatLafTheme = new MacOSLafTheme();
         }
         //PBHPlus?
-        if (ExternalSwitch.parseBoolean("pbh.gui.pbhplus-theme", true) && ExchangeMap.PBH_PLUS_ACTIVATED) {
+        if (ExternalSwitch.parseBoolean("pbh.gui.pbhplus-theme", false) && ExchangeMap.PBH_PLUS_ACTIVATED) {
             pbhFlatLafTheme = new PBHPlusTheme();
         }
         // Snapshot?
