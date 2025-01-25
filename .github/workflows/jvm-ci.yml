@@ -12,11 +12,11 @@ on:
   push:
   workflow_dispatch:
 jobs:
-  CI:
+  Build_Executable:
     uses: ./.github/workflows/build_maven.yml
     secrets: inherit
   Build_Installers:
-    needs: CI
+    needs: Build_Executable
     uses: ./.github/workflows/build_installers.yml
     secrets: inherit
   Create_Torrent:
@@ -69,18 +69,18 @@ jobs:
             PeerBanHelper_installers_${{ github.ref }}.tar.gz
         id: project
   Build_SPK:
-    needs: CI
+    needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
     with:
       image: ghostchu/peerbanhelper-snapshot:sha-$(git rev-parse --short ${{ github.sha }})
   Build_DEB:
-    needs: CI
+    needs: Build_Executable
     uses: ./.github/workflows/build_deb.yml
   Build_PKG:
-    needs: CI
+    needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
   Build_Docker:
-    needs: CI
+    needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
