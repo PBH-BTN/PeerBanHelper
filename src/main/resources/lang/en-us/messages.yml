@@ -583,3 +583,11 @@ JCEF_DOWNLOAD_UNZIP_DESCRIPTION: "Unzipping the JCEF data pack, this may take a 
 GUI_COMMON_CANCEL: "Cancel"
 PBH_PLUS_THANKS_FOR_DONATION_GUI_TITLE: "❤ThankYou"
 GUI_TITLE_DEBUG: "🔧Debugging"
+DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE: "Critical Error: Downloader in Incorrect Network Mode, PeerBanHelper May Not Work"
+DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION: |
+  Critical error detected: The Peer inbound connection IP address configuration of the downloader {} is incorrect ({}).  
+  PeerBanHelper requires the real IP address of the Peer to function correctly, otherwise, it will incorrectly ban all inbound connections. Therefore, PeerBanHelper is ignoring these abnormal addresses. Bans will not take effect.  
+  This is usually caused by the downloader running in a Docker environment and using the `bridge` network mode. You must switch to the `host` network mode to avoid user-space forwarding rewriting the IP address information.  
+  
+  Note: You should correctly fix the IP issue. Simply removing internal network IP addresses from the ignore list will cause PeerBanHelper to incorrectly ban all inbound connections.  
+  For assistance, please join the PeerBanHelper community. **This prompt will only appear once per downloader.**

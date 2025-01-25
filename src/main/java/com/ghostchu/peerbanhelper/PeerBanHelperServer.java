@@ -833,6 +833,22 @@ public class PeerBanHelperServer implements Reloadable {
         }
         var node = ignoreAddresses.elementsContaining(peer.getPeerAddress().getAddress());
         if (node != null) {
+            // 检查 Peer 的 Flags，如果不支持 Flags 或者 Flags 同时满足这些条件：
+            // 来自 DHT、PEX、Tracker 的其中一个
+            // 是入站连接
+            // 则认为用户搞砸了 NAT 设置，发出重要提醒
+            if (peer.getFlags() == null
+                    || peer.getFlags().isFromIncoming()
+                    || !peer.getFlags().isOutgoingConnection()
+                    || peer.getFlags().isFromTracker()
+                    || peer.getFlags().isFromDHT()
+                    || peer.getFlags().isFromPEX()) {
+                if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
+                    alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
+                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
+                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
+                }
+            }
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
         }
         try {
