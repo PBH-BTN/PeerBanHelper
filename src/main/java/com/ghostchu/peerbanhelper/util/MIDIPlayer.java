@@ -67,8 +67,8 @@ public class MIDIPlayer implements AutoCloseable {
     public void close() {
         stop();
         for (InputStream inputStream : sequence) {
-            try {
-                inputStream.close();
+            try (inputStream) {
+                // do nothing, just for auto close
             } catch (IOException ignored) {
             }
         }

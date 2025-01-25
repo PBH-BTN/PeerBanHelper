@@ -39,7 +39,7 @@ public class AboutWindow {
     private int charIndex = 0;
     private boolean processingString = false;
     private boolean cursorLock = false;
-    private MIDIPlayer midiPlayer = new MIDIPlayer(
+    private final MIDIPlayer midiPlayer = new MIDIPlayer(
             Main.class.getResourceAsStream("/assets/midi/ABOUT-MiSide-MusicMenu.mid"),
             Main.class.getResourceAsStream("/assets/midi/ABOUT-MiSide-MusicMenu-Update.mid"));
 

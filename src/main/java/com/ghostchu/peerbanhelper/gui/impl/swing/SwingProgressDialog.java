@@ -18,7 +18,8 @@ public class SwingProgressDialog implements ProgressDialog {
     public SwingProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
         // 创建主窗口
         setTitle(title);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(400, 200);
         frame.setLayout(new BorderLayout(10, 10));
 
