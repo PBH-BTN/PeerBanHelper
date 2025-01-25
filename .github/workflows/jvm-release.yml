@@ -170,7 +170,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}-jvm-universal
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
           build-args: |
             GIT_HASH=${{ github.sha }}
       # ---------------- ALIYUN ACR --------------------
@@ -206,4 +206,4 @@ jobs:
           tags: ${{ steps.meta-acr.outputs.tags }}
           labels: ${{ steps.meta-acr.outputs.labels }}-jvm-universal
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
