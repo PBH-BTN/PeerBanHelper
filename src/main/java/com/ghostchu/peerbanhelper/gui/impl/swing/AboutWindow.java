@@ -139,7 +139,19 @@ public class AboutWindow {
         }
     }
 
+    private void cleanupTimers() {
+        if (printTimer != null) {
+            printTimer.stop();
+            printTimer = null;
+        }
+        if (cursorTimer != null) {
+            cursorTimer.stop();
+            cursorTimer = null;
+        }
+    }
+
     private void setupTimers() {
+        cleanupTimers();
         // 主打印定时器
         printTimer = new Timer(delay, e -> processContent());
 
