@@ -72,6 +72,7 @@ jobs:
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
       - name: Zip medias
         run: tar -zcvf PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz target/media/
+      - uses: actions/checkout@v4
       - uses: ./.github/workflows/mktorrent.yml
         with:
           path: PeerBanHelper_installers_v${{ steps.java_info.outputs.project_version }}.tar.gz
