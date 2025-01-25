@@ -7,11 +7,11 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 public class SnapshotTheme implements PBHFlatLafTheme {
     @Override
     public void applyDark() {
-        FlatSolarizedLightIJTheme.setup();
+        FlatSolarizedDarkIJTheme.setup();
     }
 
     @Override
     public void applyLight() {
-        FlatSolarizedDarkIJTheme.setup();
+        FlatSolarizedLightIJTheme.setup();
     }
 }
