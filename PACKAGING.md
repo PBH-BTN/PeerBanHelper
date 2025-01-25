@@ -42,7 +42,7 @@ PeerBanHelper 支持从文件、环境变量、启动命令行（JVM虚拟机参
 * 从启动命令行加载
     * 使用 `-D` JVM 虚拟机参数可以更改开关参数的值，如：`-Dpbh.usePlatformConfigLocation=true`
 * 从环境变量加载
-    * 需要将 ` `, `-`, `.` 替换为 `_`，并且全部大写，如：`PBH_USE_PLATFORM_CONFIG_LOCATION=true`
+    * 需要将 ` `, `-`, `.` 替换为 `_`，并且全部大写，如：`PBH_USEPLATFORMCONFIGLOCATION=true`
 * 从文件加载
     * 在数据目录下创建一个 `flags.properties` 文件，文件内容格式为 `key=value`，如：`pbh.usePlatformConfigLocation=true`
     * 仅支持 ISO-8859-1 编码，如果包含 CJK 等编码集外字符，需要使用 Unicode 转义序列
