@@ -147,7 +147,7 @@ public class PeerBanHelperServer implements Reloadable {
     private void reloadConfig() {
         this.pbhServerAddress = Main.getPbhServerAddress();
         this.banDuration = Main.getProfileConfig().getLong("ban-duration");
-        this.httpdPort = Main.getMainConfig().getInt("server.http");
+        this.httpdPort = ExternalSwitch.parseInt("pbh.port", Main.getMainConfig().getInt("server.http"));
         this.hideFinishLogs = Main.getMainConfig().getBoolean("logger.hide-finish-log");
         Main.getProfileConfig().getStringList("ignore-peers-from-addresses").forEach(ip -> {
             IPAddress ignored = IPAddressUtil.getIPAddress(ip);
