@@ -36,7 +36,9 @@ jobs:
         with:
           name: installer-dist
           path: |
-            target/*.torrent
+            PeerBanHelper_installers_${{ github.ref }}.zip.torrent
+            PeerBanHelper_installers_${{ github.ref }}.zip
+
         id: project
   Build_SPK:
     needs: CI
