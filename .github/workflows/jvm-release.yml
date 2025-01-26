@@ -116,6 +116,22 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*"]'
+      - name: Zip medias for create torrent
+        run: tar -zcvf PeerBanHelper_Installers.tar.gz target/media/
+      # prepare mktorrent util
+      - name: Install mktorrent
+        run: sudo apt-get install -y mktorrent
+      # make torrent
+      - name: Make torrent
+        run: mktorrent -t 8 -a udp://tracker.opentrackr.org:1337/announce -a udp://tracker.publicbt.com:80/announce -a udp://tracker.openbittorrent.com:80/announce -a https://sparkle.ghostchu-services.top/annonce -a udp://opentracker.io:6969/announce -a wss://tracker.openwebtorrent.com:443/announce -c "PeerBanHelper/${{ github.ref }} (${{ github.sha }}) on ${{ github.repository }}. Published by ${{ github.repository_owner }}." -w https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/PeerBanHelper_Installers.tar.gz -o peerbanhelper.torrent PeerBanHelper_Installers.tar.gz
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: torrent-dist
+          path: |
+            peerbanhelper.torrent
+            PeerBanHelper_Installers.tar.gz
+        id: project
   Build_Docker:
     if: github.event_name != 'workflow_dispatch'
     permissions:
