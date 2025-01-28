@@ -14,6 +14,7 @@
       <variable name="librariesPath" value="../target/libraries" />
       <variable name="startupFlagPlatform" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" separatorConversion="target" />
       <variable name="startupFlagPlatformNoGUI" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true" separatorConversion="target" />
+      <variable name="startupFlagPlatformNoGUISmallRAM" value="-Xmx168M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true" separatorConversion="target" />
     </variables>
     <jreBundles jdkProviderId="Liberica" release="23/23.0.1+13" />
   </application>
@@ -133,6 +134,20 @@
       </java>
       <iconImageFiles>
         <file path="./updater.png" />
+      </iconImageFiles>
+    </launcher>
+    <launcher name="PeerBanHelper NoGUI SmallRAM" id="267" menuName="${i18n:launcher.peerbanhelper.nogui}" swtApp="true" checkUpdater="true">
+      <executable name="PeerBanHelper-NoGUI-SmallRAM" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" singleInstance="true" checkConsoleParameter="true">
+        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
+      </executable>
+      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatformNoGUISmallRAM}" arguments="nogui nojcef">
+        <classPath>
+          <scanDirectory location="libraries" failOnError="false" />
+          <archive location="PeerBanHelper.jar" failOnError="false" />
+        </classPath>
+      </java>
+      <iconImageFiles>
+        <file path="./icon.png" />
       </iconImageFiles>
     </launcher>
   </launchers>

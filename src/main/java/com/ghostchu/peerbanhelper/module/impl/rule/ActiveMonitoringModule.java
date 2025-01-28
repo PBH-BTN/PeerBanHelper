@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
@@ -42,8 +43,8 @@ public class ActiveMonitoringModule extends AbstractFeatureModule implements Rel
     private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
     private final Cache<PeerRecordDao.BatchHandleTasks, Object> diskWriteCache = CacheBuilder
             .newBuilder()
-            .expireAfterWrite(3, TimeUnit.MINUTES)
-            .maximumSize(3500)
+            .expireAfterWrite(ExternalSwitch.parseLong("pbh.module.activeMonitorModule.diskWriteCache.timeout", 180000), TimeUnit.MILLISECONDS)
+            .maximumSize(ExternalSwitch.parseInt("pbh.module.activeMonitorModule.diskWriteCache.size", 3500))
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
     private final AlertManager alertManager;

@@ -1,6 +1,7 @@
 launcher.peerbanhelper.gui=PeerBanHelper
 launcher.peerbanhelper.silent=PeerBanHelper (静默启动)
 launcher.peerbanhelper.nogui=PeerBanHelper (无GUI, 控制台)
+launcher.peerbanhelper.nogui.smallram=PeerBanHelper (无GUI, 控制台, 小内存模式(使用更多CPU和磁盘IO))
 launcher.peerbanhelper.service=PeerBanHelper (服务)
 launcher.peerbanhelper.updater=PeerBanHelper 检查更新
 checkbox.followsystemstartup=登录时自动启动到系统托盘
