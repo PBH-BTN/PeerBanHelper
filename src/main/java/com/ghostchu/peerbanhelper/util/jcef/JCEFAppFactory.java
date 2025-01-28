@@ -25,8 +25,9 @@ public class JCEFAppFactory {
         builder.getCefSettings().cache_path = cacheDir.getAbsolutePath(); // 缓存目录
         builder.getCefSettings().root_cache_path = cacheDir.getAbsolutePath(); // 缓存目录
         builder.getCefSettings().user_agent = Main.getUserAgent(); // userAgent
+        builder.addJcefArgs(Main.getStartupArgs());
         if (ExternalSwitch.parseBoolean("jcef.no-sandbox", false)) {
-            builder.addJcefArgs("--no_sandbox");
+            builder.addJcefArgs("--no-sandbox");
         }
         if (ExternalSwitch.parseBoolean("jcef.ignore-ssl-cert", false)) {
             builder.addJcefArgs("--ignore-certificate-errors");
