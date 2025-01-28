@@ -347,11 +347,14 @@ AI 工具人 - AI Assistant:
         MIDI 米塔-MusicMenu by 一朵黑心棉 (midishow) (https://www.midishow.com/midi/musicmenu-midi-download-210590)
     MusicMenu Update - MiSide by AIHASTO on Steam (https://store.steampowered.com/app/2527500)
         MIDI 米塔-MusicMenu Update by 一朵黑心棉 (midishow) (https://www.midishow.com/midi/musicmenu-update-midi-download-210591)
+
+[speed:1500]
+[speed:50]
 以及…… {username}
 
 [speed:3000]
 [speed:50]
-[root@peerbanhelper]# repair
+[root@peerbanhelper]# repair --force --ignore-warning
 [speed:1000]
 [speed:5]
 
