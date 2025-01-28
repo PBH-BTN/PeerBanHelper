@@ -15,7 +15,9 @@ public class JCEFAppFactory {
         if (!baseDir.exists()) baseDir.mkdirs();
         File installDir = new File(baseDir, "install");
         if (!installDir.exists()) installDir.mkdirs();
-        File cacheDir = new File(baseDir, "cache");
+        File userData = new File(baseDir, "userdata");
+        if (!userData.exists()) userData.mkdirs();
+        File cacheDir = new File(userData, "cache");
         if (!cacheDir.exists()) cacheDir.mkdirs();
         CefAppBuilder builder = new CefAppBuilder();
         builder.setInstallDir(installDir); // 安装目录
@@ -23,7 +25,7 @@ public class JCEFAppFactory {
         builder.getCefSettings().windowless_rendering_enabled = false; // 禁用 OSR 离屏渲染，打开会导致 Swing 窗口卡住，不知道为什么
         builder.getCefSettings().persist_session_cookies = true; // 保持会话
         builder.getCefSettings().cache_path = cacheDir.getAbsolutePath(); // 缓存目录
-        builder.getCefSettings().root_cache_path = cacheDir.getAbsolutePath(); // 缓存目录
+        builder.getCefSettings().root_cache_path = userData.getAbsolutePath(); // 缓存目录
         builder.getCefSettings().user_agent = Main.getUserAgent(); // userAgent
         builder.addJcefArgs(Main.getStartupArgs());
         if (ExternalSwitch.parseBoolean("jcef.no-sandbox", false)) {
@@ -53,6 +55,9 @@ public class JCEFAppFactory {
         //builder.getCefSettings().windowless_rendering_enabled = true; //Default - select OSR mode
         builder.setAppHandler(new MavenCefAppHandlerAdapter() {
         });
+        var b = new StringBuilder(" ");
+        builder.getJcefArgs().forEach(b::append);
+        System.out.println("JCEF App created with args: " + b);
         return builder;
     }
 }
