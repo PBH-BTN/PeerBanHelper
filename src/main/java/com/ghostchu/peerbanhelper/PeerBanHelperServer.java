@@ -99,8 +99,8 @@ public class PeerBanHelperServer implements Reloadable {
 
     private final Lock banWaveLock = new ReentrantLock();
     private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(5, TimeUnit.MINUTES)
-            .maximumSize(300)
+            .expireAfterAccess(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000), TimeUnit.MILLISECONDS)
+            .maximumSize(ExternalSwitch.parseInt("pbh.geoIpCache", 300))
             .softValues()
             .build();
     private String pbhServerAddress;
