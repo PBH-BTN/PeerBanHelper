@@ -136,7 +136,7 @@
         <file path="./updater.png" />
       </iconImageFiles>
     </launcher>
-    <launcher name="PeerBanHelper NoGUI SmallRAM" id="267" menuName="${i18n:launcher.peerbanhelper.nogui}" swtApp="true" checkUpdater="true">
+    <launcher name="PeerBanHelper NoGUI SmallRAM" id="267" menuName="${i18n:launcher.peerbanhelper.nogui.smallram}" swtApp="true" checkUpdater="true">
       <executable name="PeerBanHelper-NoGUI-SmallRAM" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
