@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="11.0.2" transformSequenceNumber="11">
-  <directoryPresets config="./enable-jcef.txt" />
+  <directoryPresets config="./disable-checking-updates.txt" />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="7.3.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="24">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
@@ -20,18 +20,22 @@
   <files keepModificationTimes="true">
     <filesets>
       <fileset name="jcef" id="248" />
+      <fileset name="disable-checking-updates" id="263" />
     </filesets>
     <roots>
       <root id="249" fileset="248" />
+      <root id="264" fileset="263" />
     </roots>
     <mountPoints>
       <mountPoint id="24" />
       <mountPoint id="250" root="249" />
+      <mountPoint id="265" root="264" />
     </mountPoints>
     <entries>
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
       <variableEntry mountPoint="24" name="jarPath" />
       <fileEntry mountPoint="250" file="./enable-jcef.txt" />
+      <fileEntry mountPoint="265" file="./disable-checking-updates.txt" />
     </entries>
     <components>
       <component name="${i18n:components.peerbanhelper}" id="245" customizedId="peerbanhelper" changeable="false">
@@ -44,6 +48,15 @@
         <description>${i18n:components.jcef.description}</description>
         <include>
           <entry filesetId="248" />
+        </include>
+        <dependencies>
+          <component id="245" />
+        </dependencies>
+      </component>
+      <component name="${i18n:components.disable-checking-updates}" id="266" selected="false" changeable="false" hidden="true">
+        <description>${i18n:components.disable-checking-updates.description}</description>
+        <include>
+          <entry filesetId="263" />
         </include>
         <dependencies>
           <component id="245" />
@@ -1630,7 +1643,8 @@ return true;</property>
       <jreBundle platform="linux-arm32-vfp-hflt" />
     </unixInstaller>
   </mediaSets>
-  <buildIds>
+  <buildIds buildAll="false">
     <mediaSet refId="38" />
   </buildIds>
+  <buildOptions faster="true" />
 </install4j>

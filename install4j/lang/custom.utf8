@@ -11,3 +11,5 @@ components.peerbanhelper=PeerBanHelper
 components.peerbanhelper.description=PeerBanHelper 的核心主程序，包含了主程序代码和必要的运行文件
 components.jcef=[可选] JCEF
 components.jcef.description=可选的 JCEF (Java 嵌入式 Chromium 框架)，用以支持 PeerBanHelper GUI 模式下的 WebUI 控制台标签页功能，禁用后将隐藏 WebUI 控制台标签页，用户将需要通过系统浏览器访问 WebUI。（勾选后将在 PeerBanHelper 启动时下载）
+components.disable-checking-updates=[可选] 禁用自动更新
+components.disable-checking-updates.description=禁用 install4j 的 PeerBanHelper 更新检查和自动升级程序。禁用后在新版本发布时您需要手动下载安装包执行更新操作。PBH-BTN 仅提供最近 3 个版本的 PeerBanHelper 技术支持和 API 服务。过期的 PeerBanHelper 版本可能无法访问 API、BTN 网络或者是订阅的规则（特别是规则格式发生变动时）。
