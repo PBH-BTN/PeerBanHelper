@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 
 public class MacOSLafTheme implements PBHFlatLafTheme {
@@ -12,6 +12,6 @@ public class MacOSLafTheme implements PBHFlatLafTheme {
 
     @Override
     public void applyLight() {
-        FlatIntelliJLaf.setup();
+        FlatMacLightLaf.setup();
     }
 }
