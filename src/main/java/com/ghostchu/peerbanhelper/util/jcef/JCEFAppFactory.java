@@ -2,13 +2,16 @@ package com.ghostchu.peerbanhelper.util.jcef;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import lombok.extern.slf4j.Slf4j;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
 import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
 
 import java.io.File;
 import java.util.List;
+import java.util.StringJoiner;
 
+@Slf4j
 public class JCEFAppFactory {
     public static CefAppBuilder createBuilder(File dataDir, String locale) {
         File baseDir = new File(dataDir, "jcef");
@@ -55,9 +58,9 @@ public class JCEFAppFactory {
         //builder.getCefSettings().windowless_rendering_enabled = true; //Default - select OSR mode
         builder.setAppHandler(new MavenCefAppHandlerAdapter() {
         });
-        var b = new StringBuilder(" ");
-        builder.getJcefArgs().forEach(b::append);
-        System.out.println("JCEF App created with args: " + b);
+        var b = new StringJoiner(" ");
+        builder.getJcefArgs().forEach(b::add);
+        log.info("JCEF App created with args: {}", b);
         return builder;
     }
 }
