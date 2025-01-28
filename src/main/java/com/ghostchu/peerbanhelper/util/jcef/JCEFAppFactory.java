@@ -60,7 +60,7 @@ public class JCEFAppFactory {
         });
         var b = new StringJoiner(" ");
         builder.getJcefArgs().forEach(b::add);
-        log.info("JCEF App created with args: {}", b);
+        log.debug("JCEF App created with args: {}", b);
         return builder;
     }
 }
