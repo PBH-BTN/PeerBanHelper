@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class ModuleMatchCache {
     public final Cache<String, CheckResult> CACHE_POOL = CacheBuilder
             .newBuilder()
-            .maximumWeight(ExternalSwitch.parseLong("pbh.modulematchcache.maxweight", 50000L))
+            .maximumWeight(ExternalSwitch.parseLong("pbh.moduleMatchCache.weight", 50000L))
             .weigher((key, value) -> {
                 if (value == AbstractRuleFeatureModule.HANDSHAKING_CHECK_RESULT
                     || value == AbstractRuleFeatureModule.TEAPOT_CHECK_RESULT
