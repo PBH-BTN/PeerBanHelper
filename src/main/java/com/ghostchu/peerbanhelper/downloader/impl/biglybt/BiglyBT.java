@@ -317,7 +317,7 @@ public class BiglyBT extends AbstractDownloader {
     }
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
-        BanBean bean = new BanBean(added.stream().map(b -> b.getPeer().getAddress().getIp()).toList());
+        BanBean bean = new BanBean(added.stream().map(b -> b.getPeer().getAddress().getIp()).distinct().toList());
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
@@ -333,7 +333,7 @@ public class BiglyBT extends AbstractDownloader {
     }
 
     private void setBanListFull(Collection<PeerAddress> peerAddresses) {
-        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(PeerAddress::getIp).toList(), false);
+        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(PeerAddress::getIp).distinct().toList(), false);
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest.newBuilder()
                             .uri(URI.create(apiEndpoint + "/bans"))

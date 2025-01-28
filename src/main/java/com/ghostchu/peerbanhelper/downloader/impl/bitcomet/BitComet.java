@@ -428,13 +428,13 @@ public class BitComet extends AbstractDownloader {
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
         StringJoiner joiner = new StringJoiner("\n");
-        added.forEach(p -> joiner.add(p.getPeer().getAddress().getIp()));
+        added.stream().map(meta -> meta.getPeer().getAddress().getIp()).distinct().forEach(joiner::add);
         operateBanListLegacy("merge", joiner.toString());
     }
 
     protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.forEach(p -> joiner.add(p.getIp()));
+        peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
         operateBanListLegacy("replace", joiner.toString());
     }
 
