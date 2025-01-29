@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
+import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
@@ -584,7 +585,9 @@ public class PeerBanHelperServer implements Reloadable {
                     return null;
                 };
                 if (laboratory.isExperimentActivated(Experiments.TRANSACTION_BATCH_BAN_HISTORY_WRITE.getExperiment())) {
-                    TransactionManager.callInTransaction(databaseManager.getDataSource(), callable);
+                    synchronized (AbstractPBHDao.class) {
+                        TransactionManager.callInTransaction(databaseManager.getDataSource(), callable);
+                    }
                 } else {
                     callable.call();
                 }
