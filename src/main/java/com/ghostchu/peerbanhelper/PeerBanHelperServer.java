@@ -49,6 +49,7 @@ import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
+import com.j256.ormlite.misc.TransactionManager;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
 import io.javalin.util.JavalinBindException;
@@ -539,13 +540,13 @@ public class PeerBanHelperServer implements Reloadable {
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> {
                 log.error(tlUI(Lang.TIMING_ADD_BANS));
             })) {
-                var banlistClone = List.copyOf(BAN_LIST.keySet());
+                Callable<Object> callable = () -> {
+                    var banlistClone = List.copyOf(BAN_LIST.keySet());
 
-                downloaderBanDetailMap.forEach((downloader, details) -> {
-                    try {
-                        List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
-                        details.forEach(detail -> {
-                            protect.getService().submit(() -> {
+                    downloaderBanDetailMap.forEach((downloader, details) -> {
+                        try {
+                            List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
+                            details.forEach(detail -> protect.getService().submit(() -> {
                                 try {
                                     if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.BAN_FOR_DISCONNECT) {
                                         long actualBanDuration = banDuration;
@@ -573,14 +574,20 @@ public class PeerBanHelperServer implements Reloadable {
                                 } catch (Exception e) {
                                     log.error(tlUI(Lang.BAN_PEER_EXCEPTION), e);
                                 }
-                            });
-                        });
+                            }));
 
-                        needRelaunched.put(downloader, relaunch);
-                    } catch (Exception e) {
-                        log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
-                    }
-                });
+                            needRelaunched.put(downloader, relaunch);
+                        } catch (Exception e) {
+                            log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
+                        }
+                    });
+                    return null;
+                };
+                if (laboratory.isExperimentActivated(Experiments.TRANSACTION_BATCH_BAN_HISTORY_WRITE.getExperiment())) {
+                    TransactionManager.callInTransaction(databaseManager.getDataSource(), callable);
+                } else {
+                    callable.call();
+                }
             }
             banWaveWatchDog.setLastOperation("Apply banlist");
             // 如果需要，则应用更改封禁列表到下载器
