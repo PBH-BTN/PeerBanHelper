@@ -1661,5 +1661,4 @@ return true;</property>
   <buildIds buildAll="false">
     <mediaSet refId="38" />
   </buildIds>
-  <buildOptions faster="true" />
 </install4j>
