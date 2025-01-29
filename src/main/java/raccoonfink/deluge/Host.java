@@ -3,7 +3,7 @@ package raccoonfink.deluge;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Host {
+public final class Host {
     private final String m_id;
     private final String m_hostname;
     private final int m_port;

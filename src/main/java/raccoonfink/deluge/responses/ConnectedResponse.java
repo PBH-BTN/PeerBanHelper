@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
-public class ConnectedResponse extends DelugeResponse {
+public final class ConnectedResponse extends DelugeResponse {
     private final boolean m_connected;
 
     public ConnectedResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {

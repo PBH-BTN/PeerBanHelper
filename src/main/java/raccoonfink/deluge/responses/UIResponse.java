@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class UIResponse extends DelugeResponse {
+public final class UIResponse extends DelugeResponse {
     private boolean m_connected = false;
     private Statistics m_statistics;
     private Set<Torrent> m_torrents = new TreeSet<Torrent>();

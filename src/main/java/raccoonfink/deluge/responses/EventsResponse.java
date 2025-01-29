@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class EventsResponse extends DelugeResponse {
+public final class EventsResponse extends DelugeResponse {
     private final List<DelugeEvent> m_events = new ArrayList<DelugeEvent>();
 
     public EventsResponse(final Integer httpResponseCode, final JSONObject result) throws DelugeException {

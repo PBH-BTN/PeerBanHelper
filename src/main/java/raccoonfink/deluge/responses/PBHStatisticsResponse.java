@@ -1,20 +1,15 @@
 package raccoonfink.deluge.responses;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
-import java.util.List;
-
 @Getter
-public class PBHStatisticsResponse extends DelugeResponse {
+public final class PBHStatisticsResponse extends DelugeResponse {
     private StatisticsResponseDTO statistics;
 
     public PBHStatisticsResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
