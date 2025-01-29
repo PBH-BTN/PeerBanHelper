@@ -111,11 +111,6 @@ jobs:
         with:
           name: freebsd-pkg-14.1-dist
           path: target/media
-      - uses: alexellis/upload-assets@0.4.1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*"]'
       - name: Zip medias for create torrent
         run: tar -zcvf PeerBanHelper_Installers.tar.gz target/media/
       # prepare mktorrent util
@@ -132,6 +127,11 @@ jobs:
             peerbanhelper.torrent
             PeerBanHelper_Installers.tar.gz
         id: project
+      - uses: alexellis/upload-assets@0.4.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
   Build_Docker:
     if: github.event_name != 'workflow_dispatch'
     permissions:
