@@ -31,7 +31,8 @@ PeerBanHelper 主要由以下几个功能模块组成：
 
 ## 支持的客户端
 
-**所有安装在 Docker 中的下载器，必须使用 host 网络驱动程序。PBH 需要下载器能获得 Peer 的真实 IP，不能使用 bridge 桥接模式！**
+> [!CAUTION]
+> 所有安装在 Docker 中的下载器，必须使用 host 网络驱动程序。PBH 需要下载器能获得 Peer 的真实 IP，不能使用 bridge 桥接模式！
 
 - qBittorrent/qBitorrent，**4.5.0 或更高版本**，不支持 XDown，
 - BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
