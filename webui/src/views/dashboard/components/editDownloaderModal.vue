@@ -55,11 +55,11 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import {ClientTypeEnum, type downloaderConfig} from '@/api/model/downloader'
-import {CreateDownloader, TestDownloaderConfig, UpdateDownloader} from '@/service/downloaders'
-import {type Form, Message} from '@arco-design/web-vue'
-import {type Component, defineAsyncComponent, reactive, ref} from 'vue'
-import {useI18n} from 'vue-i18n'
+import { ClientTypeEnum, type downloaderConfig } from '@/api/model/downloader'
+import { CreateDownloader, TestDownloaderConfig, UpdateDownloader } from '@/service/downloaders'
+import { type Form, Message } from '@arco-design/web-vue'
+import { type Component, defineAsyncComponent, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
 const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
