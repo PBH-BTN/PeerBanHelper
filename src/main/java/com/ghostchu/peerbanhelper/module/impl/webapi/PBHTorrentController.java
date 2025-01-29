@@ -29,7 +29,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 @IgnoreScan
 @Slf4j
-public class PBHTorrentController extends AbstractFeatureModule {
+public final class PBHTorrentController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final TorrentDao torrentDao;
     private final PeerRecordDao peerRecordDao;

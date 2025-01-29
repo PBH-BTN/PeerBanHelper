@@ -30,7 +30,7 @@ import java.util.function.Function;
 
 @Component
 @IgnoreScan
-public class PBHMetricsController extends AbstractFeatureModule {
+public final class PBHMetricsController extends AbstractFeatureModule {
     @Autowired
     @Qualifier("persistMetrics")
     private BasicMetrics metrics;

@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Component
-public class MetadataDao extends AbstractPBHDao<MetadataEntity, Long> {
+public final class MetadataDao extends AbstractPBHDao<MetadataEntity, Long> {
     public MetadataDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), MetadataEntity.class);
     }

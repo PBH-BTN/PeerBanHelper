@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class PBHServerStartedEvent {
+public final class PBHServerStartedEvent {
     private PeerBanHelperServer instance;
 }

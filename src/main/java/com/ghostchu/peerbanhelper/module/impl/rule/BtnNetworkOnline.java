@@ -50,7 +50,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @IgnoreScan
-public class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable {
+public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable {
     private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.GENERAL_NA), new TranslationComponent("BtnManager not initialized"));
     private long banDuration;
     @Autowired

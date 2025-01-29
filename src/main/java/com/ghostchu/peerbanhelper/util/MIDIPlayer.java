@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Slf4j
-public class MIDIPlayer implements AutoCloseable {
+public final class MIDIPlayer implements AutoCloseable {
     private final InputStream[] sequence;
     private Sequencer midip = null;
     private int currentIndex = -1;

@@ -21,7 +21,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Data
 @Slf4j
-public class BtnRuleParsed {
+public final class BtnRuleParsed {
     private final ScriptEngine scriptEngine;
     private String version;
     private Map<String, List<Rule>> peerIdRules;

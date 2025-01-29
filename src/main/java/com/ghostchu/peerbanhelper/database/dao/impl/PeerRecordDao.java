@@ -19,7 +19,7 @@ import java.util.Deque;
 
 @Component
 @Slf4j
-public class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
+public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
     private final TorrentDao torrentDao;
 
     public PeerRecordDao(@Autowired Database database, TorrentDao torrentDao) throws SQLException {

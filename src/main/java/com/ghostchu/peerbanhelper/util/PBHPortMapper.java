@@ -24,7 +24,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 //@Component
 @Slf4j
-public class PBHPortMapper {
+public final class PBHPortMapper {
     private final NetworkGateway network;
     private final ProcessGateway process;
     private final Bus networkBus;

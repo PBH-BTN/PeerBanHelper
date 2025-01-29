@@ -37,7 +37,7 @@ import java.util.List;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class Deluge extends AbstractDownloader {
+public final class Deluge extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Deluge.class);
     private static final List<String> MUST_HAVE_METHODS = ImmutableList.of(
             "peerbanhelperadapter.replace_blocklist",

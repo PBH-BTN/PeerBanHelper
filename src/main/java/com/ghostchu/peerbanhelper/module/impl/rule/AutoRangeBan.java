@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @Component
 @IgnoreScan
-public class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable {
+public final class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable {
     @Autowired
     private PeerBanHelperServer peerBanHelperServer;
     private int ipv4Prefix;

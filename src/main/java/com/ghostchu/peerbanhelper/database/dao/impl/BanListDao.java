@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class BanListDao extends AbstractPBHDao<BanListEntity, String> {
+public final class BanListDao extends AbstractPBHDao<BanListEntity, String> {
     public BanListDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), BanListEntity.class);
     }

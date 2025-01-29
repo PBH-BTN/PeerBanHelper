@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Data
 @AllArgsConstructor
-public class DownloaderLoginResult {
+public final class DownloaderLoginResult {
     @Getter
     private final Status status;
     private final TranslationComponent message;

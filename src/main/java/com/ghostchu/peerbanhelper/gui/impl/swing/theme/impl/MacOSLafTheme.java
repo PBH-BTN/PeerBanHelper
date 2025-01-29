@@ -4,7 +4,7 @@ import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 
-public class MacOSLafTheme implements PBHFlatLafTheme {
+public final class MacOSLafTheme implements PBHFlatLafTheme {
     @Override
     public void applyDark() {
         FlatMacDarkLaf.setup();

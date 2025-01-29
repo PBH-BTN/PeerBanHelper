@@ -12,7 +12,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RSAUtils {
+public final class RSAUtils {
     public static final String KEY_ALGORITHM = "RSA";
 
     public static final String SIGNATURE_ALGORITHM = "MD5withRSA";

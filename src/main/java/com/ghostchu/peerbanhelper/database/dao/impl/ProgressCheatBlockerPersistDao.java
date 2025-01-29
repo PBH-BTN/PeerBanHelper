@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheatBlockerPersistEntity, Long> {
+public final class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheatBlockerPersistEntity, Long> {
     public ProgressCheatBlockerPersistDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
     }

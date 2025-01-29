@@ -20,7 +20,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class CommandExec implements BanListInvoker {
+public final class CommandExec implements BanListInvoker {
     private List<String> resetCommands;
     private List<String> banCommands;
     private List<String> unbanCommands;

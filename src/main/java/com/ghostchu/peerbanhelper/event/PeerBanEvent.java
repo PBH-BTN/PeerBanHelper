@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PeerBanEvent {
+public final class PeerBanEvent {
     private PeerAddress peer;
     private BanMetadata banMetadata;
     private Torrent torrentObj;

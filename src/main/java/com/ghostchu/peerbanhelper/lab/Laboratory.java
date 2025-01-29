@@ -40,18 +40,18 @@ public class Laboratory {
         if (!isEnabled()) {
             return false;
         }
-        var value = labConfig.getString(experiment.getId());
+        var value = labConfig.getString(experiment.id());
         if (value == null) {
-            labConfig.set(experiment.getId(), "default");
+            labConfig.set(experiment.id(), "default");
             value = "default";
             List<String> comments = new ArrayList<>();
-            comments.addAll(Arrays.stream(tlUI(experiment.getTitle()).split("\n")).toList());
-            comments.addAll(Arrays.stream(tlUI(experiment.getDescription()).split("\n")).toList());
-            labConfig.setComments(experiment.getId(), comments);
+            comments.addAll(Arrays.stream(tlUI(experiment.title()).split("\n")).toList());
+            comments.addAll(Arrays.stream(tlUI(experiment.description()).split("\n")).toList());
+            labConfig.setComments(experiment.id(), comments);
             saveLabConfig();
         }
         if ("default".equals(value)) {
-            return isExperimentalGroup(experiment.getGroup());
+            return isExperimentalGroup(experiment.group());
         } else {
             return Boolean.parseBoolean(value);
         }
@@ -59,10 +59,10 @@ public class Laboratory {
 
     public void setExperimentActivated(String id, Boolean activated) throws IllegalArgumentException {
         for (Experiments value : Experiments.values()) {
-            if (!value.getExperiment().getId().equals(id)) {
+            if (!value.getExperiment().id().equals(id)) {
                 continue;
             }
-            labConfig.set(value.getExperiment().getId(), activated == null ? "default" : activated);
+            labConfig.set(value.getExperiment().id(), activated == null ? "default" : activated);
             saveLabConfig();
             return;
         }

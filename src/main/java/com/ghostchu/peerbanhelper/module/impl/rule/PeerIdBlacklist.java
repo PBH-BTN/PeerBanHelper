@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutorService;
 
 @Component
 @IgnoreScan
-public class PeerIdBlacklist extends AbstractRuleFeatureModule implements Reloadable {
+public final class PeerIdBlacklist extends AbstractRuleFeatureModule implements Reloadable {
     private List<Rule> bannedPeers;
     @Autowired
     private JavalinWebContainer webContainer;

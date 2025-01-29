@@ -6,7 +6,7 @@ import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.field.types.StringType;
 
-public class TranslationComponentPersistener extends StringType {
+public final class TranslationComponentPersistener extends StringType {
 
     private static final TranslationComponentPersistener INSTANCE = new TranslationComponentPersistener();
 

@@ -10,7 +10,7 @@ import java.awt.event.ComponentEvent;
 /**
  * 开发者工具弹窗类
  */
-public class JCEFSwingDevTools extends JDialog {
+public final class JCEFSwingDevTools extends JDialog {
     private final CefBrowser devTools_;
 
     public JCEFSwingDevTools(JFrame owner, String title, CefBrowser browser) {

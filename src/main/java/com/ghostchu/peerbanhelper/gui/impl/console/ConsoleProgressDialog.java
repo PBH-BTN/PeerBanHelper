@@ -4,7 +4,7 @@ import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ConsoleProgressDialog implements ProgressDialog {
+public final class ConsoleProgressDialog implements ProgressDialog {
 
     private String description;
     private String comment;

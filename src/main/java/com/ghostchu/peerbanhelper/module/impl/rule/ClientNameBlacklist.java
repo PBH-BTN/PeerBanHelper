@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
 @Getter
 @Component
 @IgnoreScan
-public class ClientNameBlacklist extends AbstractRuleFeatureModule implements Reloadable {
+public final class ClientNameBlacklist extends AbstractRuleFeatureModule implements Reloadable {
     private List<Rule> bannedPeers;
     @Autowired
     private JavalinWebContainer webContainer;

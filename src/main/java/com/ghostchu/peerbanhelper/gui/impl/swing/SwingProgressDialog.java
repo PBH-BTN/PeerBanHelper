@@ -6,7 +6,7 @@ import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import javax.swing.*;
 import java.awt.*;
 
-public class SwingProgressDialog implements ProgressDialog {
+public final class SwingProgressDialog implements ProgressDialog {
 
     private final JProgressBar progressBar = new JProgressBar();
     private final JFrame frame = new JFrame("Unknown Title");

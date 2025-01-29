@@ -8,7 +8,7 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class FirewallManager {
+public final class FirewallManager {
     private final PeerBanHelperServer server;
     private Set<Firewall> enabledFirewalls = new HashSet<>();
 

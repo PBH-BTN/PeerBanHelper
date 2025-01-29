@@ -9,7 +9,7 @@ import java.awt.*;
 import java.util.Locale;
 
 @Getter
-public class CrossDownloaderDialog extends JFrame {
+public final class CrossDownloaderDialog extends JFrame {
     private JPanel mainPane;
     private JLabel tooltip;
     private JLabel taskTitle;

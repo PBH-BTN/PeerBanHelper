@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 @Slf4j
-public class JCEFAppFactory {
+public final class JCEFAppFactory {
     public static CefAppBuilder createBuilder(File dataDir, String locale) {
         File baseDir = new File(dataDir, "jcef");
         if (!baseDir.exists()) baseDir.mkdirs();

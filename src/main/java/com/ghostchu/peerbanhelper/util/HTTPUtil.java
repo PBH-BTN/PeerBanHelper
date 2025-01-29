@@ -34,7 +34,7 @@ import java.util.zip.GZIPOutputStream;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class HTTPUtil {
+public final class HTTPUtil {
     private static final int MAX_RESEND = 5;
     private static final CookieManager cookieManager = new CookieManager();
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();

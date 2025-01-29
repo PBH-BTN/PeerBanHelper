@@ -43,7 +43,7 @@ import java.util.logging.Level;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class MainWindow extends JFrame {
+public final class MainWindow extends JFrame {
     @Getter
     private final SwingGuiImpl swingGUI;
     @Getter

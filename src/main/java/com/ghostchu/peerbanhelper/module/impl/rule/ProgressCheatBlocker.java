@@ -48,7 +48,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 @IgnoreScan
-public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
+public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
     private final Deque<ClientTaskRecord> pendingPersistQueue = new ConcurrentLinkedDeque<>();
     private final Cache<Client, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
             .expireAfterAccess(ExternalSwitch.parseLong("pbh.module.progressCheatBlocker.recorder.timeout", 1800000), TimeUnit.MILLISECONDS)

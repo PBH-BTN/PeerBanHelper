@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
-public class ExternalSwitch {
+public final class ExternalSwitch {
     public static String parse(String args, @Nullable String def) {
         var value = System.getProperty(args);
         if (value == null)

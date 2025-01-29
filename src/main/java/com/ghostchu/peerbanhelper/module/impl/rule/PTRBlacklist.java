@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @IgnoreScan
-public class PTRBlacklist extends AbstractRuleFeatureModule implements Reloadable {
+public final class PTRBlacklist extends AbstractRuleFeatureModule implements Reloadable {
     private List<Rule> ptrRules;
     @Autowired
     private JavalinWebContainer webContainer;

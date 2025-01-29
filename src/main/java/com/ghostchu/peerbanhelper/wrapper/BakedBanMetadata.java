@@ -12,7 +12,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Data
 @NoArgsConstructor
-public class BakedBanMetadata implements Comparable<BakedBanMetadata>, Serializable {
+public final class BakedBanMetadata implements Comparable<BakedBanMetadata>, Serializable {
     private String downloader;
     private UUID randomId;
     private TorrentWrapper torrent;

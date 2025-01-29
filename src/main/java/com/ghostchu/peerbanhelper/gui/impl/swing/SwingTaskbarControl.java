@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 
-public class SwingTaskbarControl implements TaskbarControl {
+public final class SwingTaskbarControl implements TaskbarControl {
 
     private final Window parent;
 

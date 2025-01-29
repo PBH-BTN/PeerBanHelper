@@ -26,7 +26,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 @IgnoreScan
 @Slf4j
-public class PBHPushController extends AbstractFeatureModule {
+public final class PBHPushController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired

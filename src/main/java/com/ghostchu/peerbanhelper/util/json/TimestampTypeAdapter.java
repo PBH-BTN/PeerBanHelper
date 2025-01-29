@@ -5,7 +5,7 @@ import com.google.gson.*;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 
-public class TimestampTypeAdapter implements JsonSerializer<Timestamp>, JsonDeserializer<Timestamp> {
+public final class TimestampTypeAdapter implements JsonSerializer<Timestamp>, JsonDeserializer<Timestamp> {
     public static final TimestampTypeAdapter INSTANCE = new TimestampTypeAdapter();
 
     @Override

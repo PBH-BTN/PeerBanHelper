@@ -13,7 +13,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class JListAppender extends AppenderBase<ILoggingEvent> {
+public final class JListAppender extends AppenderBase<ILoggingEvent> {
 
     public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200));
     public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(false);

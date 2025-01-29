@@ -5,7 +5,7 @@ import com.google.common.hash.Hashing;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-public class InfoHashUtil {
+public final class InfoHashUtil {
     public static String getHashedIdentifier(String torrentInfoHash) {
         String torrentInfoHandled = torrentInfoHash.toLowerCase(Locale.ROOT); // 转小写处理
         String salt = Hashing.crc32().hashString(torrentInfoHandled, StandardCharsets.UTF_8).toString(); // 使用 crc32 计算 info_hash 的哈希作为盐

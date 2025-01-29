@@ -1,5 +1,5 @@
 package com.ghostchu.peerbanhelper.web.exception;
 
-public class NeedInitException extends Exception {
+public final class NeedInitException extends Exception {
 
 }

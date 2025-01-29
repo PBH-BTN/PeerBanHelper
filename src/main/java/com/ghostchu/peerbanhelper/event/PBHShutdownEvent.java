@@ -5,5 +5,5 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class PBHShutdownEvent {
+public final class PBHShutdownEvent {
 }

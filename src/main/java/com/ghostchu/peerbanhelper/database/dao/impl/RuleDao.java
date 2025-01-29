@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Component
-public class RuleDao extends AbstractPBHDao<RuleEntity, Long> {
+public final class RuleDao extends AbstractPBHDao<RuleEntity, Long> {
     public RuleDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), RuleEntity.class);
     }

@@ -29,7 +29,7 @@ import java.util.*;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class QBittorrentEE extends AbstractQbittorrent {
+public final class QBittorrentEE extends AbstractQbittorrent {
     private final BanHandler banHandler;
 
     public QBittorrentEE(String name, QBittorrentEEConfigImpl config, AlertManager alertManager) {

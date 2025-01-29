@@ -40,7 +40,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
-public class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
+public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
     private MainWindow mainWindow;

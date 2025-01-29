@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Component
-public class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long> {
+public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long> {
     private final Laboratory laboratory;
 
     public TrafficJournalDao(@Autowired Database database, @Autowired Laboratory laboratory) throws SQLException {

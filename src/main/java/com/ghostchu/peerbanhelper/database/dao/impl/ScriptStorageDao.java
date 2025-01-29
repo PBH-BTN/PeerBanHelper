@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String> {
+public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String> {
     public ScriptStorageDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), ScriptStorageEntity.class);
     }

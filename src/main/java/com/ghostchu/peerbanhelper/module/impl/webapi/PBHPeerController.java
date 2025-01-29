@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 @IgnoreScan
-public class PBHPeerController extends AbstractFeatureModule {
+public final class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryDao historyDao;
     private final PeerRecordDao peerRecordDao;

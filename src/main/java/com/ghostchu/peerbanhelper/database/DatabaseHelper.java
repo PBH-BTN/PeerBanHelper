@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 @Getter
 @Slf4j
-public class DatabaseHelper {
+public final class DatabaseHelper {
     private final Database database;
 
     public DatabaseHelper(@Autowired Database database) throws SQLException {

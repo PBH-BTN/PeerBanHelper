@@ -29,7 +29,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Getter
 @Slf4j
 @Component
-public class Database {
+public final class Database {
     private final File sqliteDb;
     private final File dbMaintenanceFile;
     private final Laboratory laboratory;

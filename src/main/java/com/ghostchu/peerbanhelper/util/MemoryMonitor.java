@@ -16,7 +16,7 @@ import java.lang.management.MemoryType;
 import java.util.List;
 
 @Component
-public class MemoryMonitor {
+public final class MemoryMonitor {
     private static final long MB = 1024 * 1024; // 1 MB in bytes
     private static long maxHeapMB;
 
@@ -28,12 +28,12 @@ public class MemoryMonitor {
             long overallMax = 0;
 
             for (MemoryPoolMXBean pool : pools) {
-                long poolMax = pool.getUsage().getMax();
+                final long poolMax = pool.getUsage().getMax();
                 if (poolMax > 0 && pool.getType() == MemoryType.HEAP) {
                     overallMax += poolMax;
                 }
                 if (pool.getType() == MemoryType.HEAP && pool.isCollectionUsageThresholdSupported()) {
-                    long max = pool.getUsage().getMax();
+                    final long max = pool.getUsage().getMax();
                     if (max > ptmSize) {
                         poolToMonitor = pool;
                         ptmSize = max;
@@ -55,11 +55,11 @@ public class MemoryMonitor {
 
                             @Override
                             public void handleNotification(Notification notification, Object handback) {
-                                MemoryPoolMXBean pool = (MemoryPoolMXBean) handback;
-                                long used = pool.getCollectionUsage().getUsed();
-                                long max = pool.getUsage().getMax();
-                                long available = Math.max(0, max - used);
-                                long mbAvailable = (available + MB - 1) / MB;
+                                final MemoryPoolMXBean pool = (MemoryPoolMXBean) handback;
+                                final long used = pool.getCollectionUsage().getUsed();
+                                final long max = pool.getUsage().getMax();
+                                final long available = Math.max(0, max - used);
+                                final long mbAvailable = (available + MB - 1) / MB;
 
                                 if (mbAvailable <= 4) {
                                     synchronized (this) {

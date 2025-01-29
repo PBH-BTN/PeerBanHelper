@@ -12,7 +12,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
 
-public class MsgUtil {
+public final class MsgUtil {
     private static final DecimalFormat df = new DecimalFormat("0.00%");
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

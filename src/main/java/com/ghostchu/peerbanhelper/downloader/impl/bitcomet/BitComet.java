@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 import static com.ghostchu.peerbanhelper.text.Lang.DOWNLOADER_BC_FAILED_SAVE_BANLIST;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class BitComet extends AbstractDownloader {
+public final class BitComet extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(BitComet.class);
     private static final UUID clientId = UUID.nameUUIDFromBytes("PeerBanHelper".getBytes(StandardCharsets.UTF_8));
     protected final String apiEndpoint;

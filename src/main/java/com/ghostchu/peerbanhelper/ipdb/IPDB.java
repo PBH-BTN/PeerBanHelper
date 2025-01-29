@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class IPDB implements AutoCloseable {
+public final class IPDB implements AutoCloseable {
     private final File dataFolder;
     private final long updateInterval = 3888000000L; // 45天
     private final String accountId;
@@ -61,7 +61,7 @@ public class IPDB implements AutoCloseable {
     private final boolean autoUpdate;
     private final String userAgent;
     private final File mmdbGeoCNFile;
-    private Methanol httpClient;
+    private final Methanol httpClient;
     @Getter
     private DatabaseReader mmdbCity;
     @Getter
@@ -80,7 +80,22 @@ public class IPDB implements AutoCloseable {
         this.mmdbGeoCNFile = new File(directory, "GeoCN.mmdb");
         this.autoUpdate = autoUpdate;
         this.userAgent = userAgent;
-        setupHttpClient();
+        this.httpClient = Methanol
+                .newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .userAgent(userAgent)
+                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
+                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory()))
+                .authenticator(new Authenticator() {
+                    @Override
+                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
+                        return new PasswordAuthentication(accountId, licenseKey.toCharArray());
+                    }
+                })
+                .build();
         if (needUpdateMMDB(mmdbCityFile)) {
             updateMMDB(databaseCity, mmdbCityFile);
         }
@@ -282,24 +297,6 @@ public class IPDB implements AutoCloseable {
         Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void setupHttpClient() {
-        this.httpClient = Methanol
-                .newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(userAgent)
-                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
-                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory()))
-                .authenticator(new Authenticator() {
-                    @Override
-                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(accountId, licenseKey.toCharArray());
-                    }
-                })
-                .build();
-    }
 
     private boolean isMmdbNeverDownloaded(File target) {
         return !target.exists();

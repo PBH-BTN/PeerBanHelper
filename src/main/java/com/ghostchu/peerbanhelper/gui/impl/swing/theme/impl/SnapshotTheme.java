@@ -4,7 +4,7 @@ import com.formdev.flatlaf.intellijthemes.FlatSolarizedDarkIJTheme;
 import com.formdev.flatlaf.intellijthemes.FlatSolarizedLightIJTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 
-public class SnapshotTheme implements PBHFlatLafTheme {
+public final class SnapshotTheme implements PBHFlatLafTheme {
     @Override
     public void applyDark() {
         FlatSolarizedDarkIJTheme.setup();

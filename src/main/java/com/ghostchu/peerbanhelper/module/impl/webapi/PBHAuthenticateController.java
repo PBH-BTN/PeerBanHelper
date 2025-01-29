@@ -23,7 +23,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 @Slf4j
 @IgnoreScan
-public class PBHAuthenticateController extends AbstractFeatureModule {
+public final class PBHAuthenticateController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
 

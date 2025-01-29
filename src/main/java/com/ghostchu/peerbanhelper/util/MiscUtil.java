@@ -18,7 +18,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
-public class MiscUtil {
+public final class MiscUtil {
     public static final Object EMPTY_OBJECT = new Object();
     public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static final SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm:ss");

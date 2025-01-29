@@ -28,7 +28,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 @Slf4j
 @IgnoreScan
-public class PBHOOBEController extends AbstractFeatureModule {
+public final class PBHOOBEController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
 

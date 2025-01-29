@@ -8,7 +8,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 @Data
-public class ProxiedLocale {
+public final class ProxiedLocale {
     private Locale locale;
     @Nullable
     private String origin;

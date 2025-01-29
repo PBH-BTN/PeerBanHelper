@@ -22,7 +22,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
  */
 @Component
 @Slf4j
-public class ActivationManager implements Reloadable {
+public final class ActivationManager implements Reloadable {
     private final ActivationKeyManager activationKeyManager;
     @Getter
     private String keyText;

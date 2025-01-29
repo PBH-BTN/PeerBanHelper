@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * IP 地址工具类
  */
-public class IPAddressUtil {
+public final class IPAddressUtil {
     private static final IPAddress INVALID_ADDRESS_MISSINGNO = new IPAddressString("127.123.123.123").getAddress();
     private static final Cache<String, IPAddress> IP_ADDRESS_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(15, TimeUnit.MINUTES)

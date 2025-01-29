@@ -7,7 +7,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class SwingTray {
+public final class SwingTray {
 
     private final JDialog jDialog;
     private final JPopupMenu jPopupMenu;

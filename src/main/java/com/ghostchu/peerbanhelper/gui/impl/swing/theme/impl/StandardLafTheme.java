@@ -4,7 +4,7 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 
-public class StandardLafTheme implements PBHFlatLafTheme {
+public final class StandardLafTheme implements PBHFlatLafTheme {
     @Override
     public void applyDark() {
         FlatDarculaLaf.setup();

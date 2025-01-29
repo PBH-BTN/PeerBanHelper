@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
-public class BiglyBTDownloadStateConst {
+public final class BiglyBTDownloadStateConst {
     /**
      * waiting to be told to start preparing
      */

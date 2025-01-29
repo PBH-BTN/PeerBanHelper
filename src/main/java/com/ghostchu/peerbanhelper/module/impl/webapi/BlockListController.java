@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Component
 @IgnoreScan
-public class BlockListController extends AbstractFeatureModule {
+public final class BlockListController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
 

@@ -39,7 +39,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Getter
 @Component
 // 特别注意：该类不允许静态初始化任何内容
-public class BtnNetwork implements Reloadable {
+public final class BtnNetwork implements Reloadable {
     @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = Collections.synchronizedMap(new HashMap<>());
 

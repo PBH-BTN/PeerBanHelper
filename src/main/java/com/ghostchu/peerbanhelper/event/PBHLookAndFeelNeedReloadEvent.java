@@ -3,5 +3,5 @@ package com.ghostchu.peerbanhelper.event;
 import lombok.Data;
 
 @Data
-public class PBHLookAndFeelNeedReloadEvent {
+public final class PBHLookAndFeelNeedReloadEvent {
 }

@@ -3,7 +3,7 @@ package com.ghostchu.peerbanhelper.util;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-public class StrUtil {
+public final class StrUtil {
     public static String toLowerCaseRoot(String str) {
         return str.toLowerCase(Locale.ROOT);
     }

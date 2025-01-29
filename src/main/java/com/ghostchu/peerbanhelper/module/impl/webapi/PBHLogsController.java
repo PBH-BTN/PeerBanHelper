@@ -32,7 +32,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 @IgnoreScan
-public class PBHLogsController extends AbstractFeatureModule {
+public final class PBHLogsController extends AbstractFeatureModule {
     private final List<WsContext> session = Collections.synchronizedList(new ArrayList<>());
     @Autowired
     private JavalinWebContainer webContainer;

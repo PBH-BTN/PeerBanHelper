@@ -36,7 +36,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @IgnoreScan
-public class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable {
+public final class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable {
     private final PeerRecordDao peerRecordDao;
     private final Deque<PeerRecordDao.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
     private final TrafficJournalDao trafficJournalDao;

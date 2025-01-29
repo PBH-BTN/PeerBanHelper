@@ -37,7 +37,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Slf4j
 @Component
-public class JavalinWebContainer {
+public final class JavalinWebContainer {
     private final Javalin javalin;
     @Setter
     @Getter

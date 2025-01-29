@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class QBittorrentMainData {
+public final class QBittorrentMainData {
 
     @SerializedName("server_state")
     private ServerStateDTO serverState;

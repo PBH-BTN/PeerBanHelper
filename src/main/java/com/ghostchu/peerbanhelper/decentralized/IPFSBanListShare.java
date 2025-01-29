@@ -32,7 +32,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class IPFSBanListShare implements Reloadable {
+public final class IPFSBanListShare implements Reloadable {
     private final PeerBanHelperServer peerBanHelperServer;
     @Nullable
     private final IPFS ipfs;

@@ -24,7 +24,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Slf4j
 @Component
 @IgnoreScan
-public class PBHLabController extends AbstractFeatureModule {
+public final class PBHLabController extends AbstractFeatureModule {
 
     private final JavalinWebContainer javalinWebContainer;
     private final Laboratory laboratory;
@@ -86,7 +86,7 @@ public class PBHLabController extends AbstractFeatureModule {
     private void handleExperimentActivated(@NotNull Context context) {
         var id = context.queryParam("id");
         for (Experiments value : Experiments.values()) {
-            if (value.getExperiment().getId().equalsIgnoreCase(id)) {
+            if (value.getExperiment().id().equalsIgnoreCase(id)) {
                 context.json(new StdResp(true, null, laboratory.isExperimentActivated(value.getExperiment())));
                 return;
             }
@@ -98,11 +98,11 @@ public class PBHLabController extends AbstractFeatureModule {
         List<ExperimentRecord> availableExperiments = new ArrayList<>();
         for (Experiments value : Experiments.values()) {
             var record = new ExperimentRecord(
-                    value.getExperiment().getId(),
+                    value.getExperiment().id(),
                     laboratory.isExperimentActivated(value.getExperiment()),
-                    value.getExperiment().getGroup(),
-                    tl(locale(context), value.getExperiment().getTitle()),
-                    tl(locale(context), value.getExperiment().getDescription())
+                    value.getExperiment().group(),
+                    tl(locale(context), value.getExperiment().title()),
+                    tl(locale(context), value.getExperiment().description())
             );
             availableExperiments.add(record);
         }

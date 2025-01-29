@@ -28,7 +28,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component("persistMetrics")
-public class PersistMetrics implements BasicMetrics {
+public final class PersistMetrics implements BasicMetrics {
     private final InMemoryMetrics inMemory;
     private final TorrentDao torrentDao;
     private final ModuleDao moduleDao;

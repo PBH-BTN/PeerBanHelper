@@ -50,7 +50,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Slf4j
 @Component
 @IgnoreScan
-public class PBHGeneralController extends AbstractFeatureModule {
+public final class PBHGeneralController extends AbstractFeatureModule {
     private static final Gson GSON = JsonUtil.getGson().newBuilder()
             .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .create();

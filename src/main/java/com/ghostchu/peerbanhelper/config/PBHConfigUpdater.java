@@ -17,7 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
-public class PBHConfigUpdater {
+public final class PBHConfigUpdater {
     private static final String CONFIG_VERSION_KEY = "config-version";
     private final YamlConfiguration yaml;
     private final YamlConfiguration bundle;

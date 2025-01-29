@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-public class JsonUtil {
+public final class JsonUtil {
     private static final Gson DEFAULT_GSON = new Gson();
     private static final Gson STANDARD_GSON = new GsonBuilder()
             .enableComplexMapKeySerialization()

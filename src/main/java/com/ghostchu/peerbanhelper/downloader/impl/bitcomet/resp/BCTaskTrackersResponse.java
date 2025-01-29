@@ -8,7 +8,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @Data
-public class BCTaskTrackersResponse {
+public final class BCTaskTrackersResponse {
 
     @JsonProperty("error_code")
     private String errorCode;
