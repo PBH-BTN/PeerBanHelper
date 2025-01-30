@@ -465,8 +465,10 @@ public final class MainWindow extends JFrame {
             JMenuBar menuBar = new JMenuBar();
             menuBar.add(generateProgramMenu());
             menuBar.add(generateWebUIMenu());
-            if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
-                menuBar.add(generateDebugMenu());
+            if (!ExternalSwitch.parseBoolean("pbh.app-v")) {
+                if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
+                    menuBar.add(generateDebugMenu());
+                }
             }
             //menuBar.add(Box.createGlue());
             menuBar.add(generateHelpAbout());
@@ -574,7 +576,9 @@ public final class MainWindow extends JFrame {
                     log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
                 }
             });
-            menu.add(openDataDirectory);
+            if (!ExternalSwitch.parseBoolean("pbh.app-v")) {
+                menu.add(openDataDirectory);
+            }
             menu.addSeparator();
             JMenuItem quit = new JMenuItem(tlUI(Lang.GUI_MENU_QUIT));
             quit.addActionListener(e -> System.exit(0));
