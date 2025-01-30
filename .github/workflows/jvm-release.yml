@@ -1,11 +1,3 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Release
 
 on:
@@ -13,6 +5,7 @@ on:
   release:
     types:
       - published
+
 jobs:
   Build_Executable:
     permissions:
@@ -26,32 +19,41 @@ jobs:
       statuses: read
     secrets: inherit
     uses: ./.github/workflows/build_maven.yml
+
   Build_Installers:
     needs: Build_Executable
     uses: ./.github/workflows/build_installers.yml
     secrets: inherit
+
   Build_SPK:
     needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
     with:
       image: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:${{ github.ref_name }}
+
   Build_DEB:
     needs: Build_Executable
     uses: ./.github/workflows/build_deb.yml
+
   Build_PKG:
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
+
   Build_Portable:
     needs: Build_Executable
     uses: ./.github/workflows/build_portable.yml
+
   Empty_Old_S3_Files:
+    if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
     uses: ./.github/workflows/delete_old_s3_objects.yml
     secrets: inherit
+
   Upload_Updates_To_S3:
-     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files]
-     runs-on: ubuntu-latest
-     steps:
+    if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+    needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files ]
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/download-artifact@v4
         with:
           name: installer-dist
@@ -64,10 +66,13 @@ jobs:
           endpoint: ${{ secrets.S3_ENDPOINT }}
           source_dir: 'target/media'
           destination_dir: 'updates/latest'
+
   Clear_CloudFlare_Updates:
+    if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
     needs: [Upload_Updates_To_S3]
     uses: ./.github/workflows/flush_cloudflare_cache.yml
     secrets: inherit
+
   Upload_Artifacts:
     continue-on-error: true
     if: github.event_name != 'workflow_dispatch'
@@ -113,14 +118,33 @@ jobs:
           path: target/media
       - name: Zip medias for create torrent
         run: tar -zcvf PeerBanHelper_Installers.tar.gz target/media/
-      # prepare mktorrent util
       - name: Install mktorrent
         run: sudo apt-get install -y mktorrent
-      # make torrent
+      - name: Determine version
+        id: set_version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            SHORT_SHA=$(git rev-parse --short "${{ github.sha }}")
+            echo "version=sha-$SHORT_SHA" >> $GITHUB_OUTPUT
+          fi
+      - name: Create copy of Installers archive
+        run: cp PeerBanHelper_Installers.tar.gz "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
       - name: Make torrent
-        run: mktorrent -t 8 -a udp://tracker.opentrackr.org:1337/announce -a udp://tracker.publicbt.com:80/announce -a udp://tracker.openbittorrent.com:80/announce -a https://sparkle.ghostchu-services.top/annonce -a udp://opentracker.io:6969/announce -a wss://tracker.openwebtorrent.com:443/announce -c "PeerBanHelper/${{ github.ref }} (${{ github.sha }}) on ${{ github.repository }}. Published by ${{ github.repository_owner }}." -w https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/PeerBanHelper_Installers.tar.gz -o peerbanhelper.torrent PeerBanHelper_Installers.tar.gz
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        run: |
+          mktorrent -t 8 \
+          -a udp://tracker.opentrackr.org:1337/announce \
+          -a udp://tracker.publicbt.com:80/announce \
+          -a udp://tracker.openbittorrent.com:80/announce \
+          -a https://sparkle.ghostchu-services.top/announce \
+          -a udp://opentracker.io:6969/announce \
+          -a wss://tracker.openwebtorrent.com:443/announce \
+          -c "PeerBanHelper/${{ github.ref }} (${{ github.sha }}) on ${{ github.repository }}. Published by ${{ github.repository_owner }}." \
+          -w "https://github.com/${{ github.repository }}/releases/download/${{ steps.set_version.outputs.version }}/PeerBanHelper_Installers.tar.gz" \
+          -o peerbanhelper.torrent \
+          "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
+      - uses: actions/upload-artifact@v4
         with:
           name: torrent-dist
           path: |
@@ -131,7 +155,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
+          asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*", "target/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
+
   Build_Docker:
     if: github.event_name != 'workflow_dispatch'
     permissions:
@@ -189,7 +214,6 @@ jobs:
           cache-to: type=gha,mode=min
           build-args: |
             GIT_HASH=${{ github.sha }}
-      # ---------------- ALIYUN ACR --------------------
       - name: Log in to Aliyun ACR
         uses: docker/login-action@v3
         with:

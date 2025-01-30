@@ -70,22 +70,36 @@ jobs:
           name: freebsd-pkg-14.1-dist
           path: target/media
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
-      - name: Zip medias
+      - name: Zip medias for create torrent
         run: tar -zcvf PeerBanHelper_Installers.tar.gz target/media/
       # prepare mktorrent util
       - name: Install mktorrent
         run: sudo apt-get install -y mktorrent
       # make torrent
+      - name: Determine version
+        id: set_version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            SHORT_SHA=$(git rev-parse --short "${{ github.sha }}")
+            echo "version=sha-$SHORT_SHA" >> $GITHUB_OUTPUT
+          fi
+      - name: Create copy of Installers archive
+        run: cp PeerBanHelper_Installers.tar.gz "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
       - name: Make torrent
-        run: mktorrent -t 8 -a udp://tracker.opentrackr.org:1337/announce -a udp://tracker.publicbt.com:80/announce -a udp://tracker.openbittorrent.com:80/announce -a https://sparkle.ghostchu-services.top/annonce -a udp://opentracker.io:6969/announce -a wss://tracker.openwebtorrent.com:443/announce -c "PeerBanHelper/${{ github.ref }} (${{ github.sha }}) on ${{ github.repository }}. Published by ${{ github.repository_owner }}." -w https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/PeerBanHelper_Installers.tar.gz -o peerbanhelper.torrent PeerBanHelper_Installers.tar.gz
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: torrent-dist
-          path: |
-            peerbanhelper.torrent
-            PeerBanHelper_Installers.tar.gz
-        id: project
+        run: |
+          mktorrent -t 8 \
+          -a udp://tracker.opentrackr.org:1337/announce \
+          -a udp://tracker.publicbt.com:80/announce \
+          -a udp://tracker.openbittorrent.com:80/announce \
+          -a https://sparkle.ghostchu-services.top/announce \
+          -a udp://opentracker.io:6969/announce \
+          -a wss://tracker.openwebtorrent.com:443/announce \
+          -c "PeerBanHelper/${{ github.ref }} (${{ github.sha }}) on ${{ github.repository }}. Published by ${{ github.repository_owner }}." \
+          -w "https://github.com/${{ github.repository }}/releases/download/${{ steps.set_version.outputs.version }}/PeerBanHelper_Installers.tar.gz" \
+          -o peerbanhelper.torrent \
+          "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
   Build_Docker:
     needs: Build_Executable
     runs-on: ubuntu-latest

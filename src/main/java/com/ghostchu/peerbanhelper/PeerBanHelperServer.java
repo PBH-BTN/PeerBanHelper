@@ -849,9 +849,6 @@ public class PeerBanHelperServer implements Reloadable {
     @NotNull
     public CheckResult checkBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         List<CheckResult> results = new ArrayList<>();
-        if (peer.getPeerAddress().getAddress().isAnyLocal()) {
-            return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-local-address"), new TranslationComponent("general-reason-skip-local-peers"));
-        }
         var node = ignoreAddresses.elementsContaining(peer.getPeerAddress().getAddress());
         if (node != null) {
             // 检查 Peer 的 Flags，如果不支持 Flags 或者 Flags 同时满足这些条件：
@@ -864,10 +861,19 @@ public class PeerBanHelperServer implements Reloadable {
                     || peer.getFlags().isFromTracker()
                     || peer.getFlags().isFromDHT()
                     || peer.getFlags().isFromPEX()) {
-                if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
-                    alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
-                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
-                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
+                if (!peer.isHandshaking()) {
+                    var addr = peer.getPeerAddress().getAddress();
+                    if (addr.isIPv4Convertible()) {
+                        addr = addr.toIPv4();
+                    }
+                    var addrStr = addr.toNormalizedString();
+                    if ((addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal())) {
+                        if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
+                            alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
+                                    new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
+                                    new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
+                        }
+                    }
                 }
             }
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
