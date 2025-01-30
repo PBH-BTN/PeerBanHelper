@@ -12,6 +12,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class LivePeersUpdatedEvent {
+public final class LivePeersUpdatedEvent {
     private Map<PeerAddress, List<PeerMetadata>> livePeers;
 }

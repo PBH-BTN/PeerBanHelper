@@ -112,14 +112,14 @@ public class Main {
         log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
         if (DEF_LOCALE == null || DEF_LOCALE.equalsIgnoreCase("default")) {
-            DEF_LOCALE = ExternalSwitch.parse("PBH_USER_LOCALE");
+            DEF_LOCALE = ExternalSwitch.parse("pbh.userLocale");
             if (DEF_LOCALE == null) {
                 DEF_LOCALE = defLocaleTag;
             }
         }
-        DEF_LOCALE = DEF_LOCALE.toLowerCase(Locale.ROOT).replace("-", "_");
         initGUI(args);
         guiManager.createMainWindow();
+        guiManager.taskbarControl().updateProgress(null, Taskbar.State.INDETERMINATE, 0.0f);
         pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
         setupProxySettings();
         setupScriptEngine();

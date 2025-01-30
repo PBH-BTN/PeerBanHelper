@@ -104,7 +104,8 @@ defineExpose({
         basicAuth: {},
         verifySsl: true,
         httpVersion: 'HTTP_1_1',
-        incrementBan: true
+        incrementBan: true,
+        paused: false
       } as downloaderConfig
     }
     showModal.value = true

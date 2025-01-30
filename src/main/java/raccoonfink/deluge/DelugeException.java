@@ -1,6 +1,6 @@
 package raccoonfink.deluge;
 
-public class DelugeException extends Exception {
+public final class DelugeException extends Exception {
     private static final long serialVersionUID = 1L;
 
     public DelugeException() {

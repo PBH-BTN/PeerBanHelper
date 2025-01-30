@@ -18,7 +18,7 @@ import java.util.Locale;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class ProfileUpdateScript {
+public final class ProfileUpdateScript {
     private final YamlConfiguration conf;
 
     public ProfileUpdateScript(YamlConfiguration conf) {

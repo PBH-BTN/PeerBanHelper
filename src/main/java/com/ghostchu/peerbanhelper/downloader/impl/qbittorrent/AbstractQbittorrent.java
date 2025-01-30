@@ -431,7 +431,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.forEach(p -> joiner.add(p.getIp()));
+        peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()

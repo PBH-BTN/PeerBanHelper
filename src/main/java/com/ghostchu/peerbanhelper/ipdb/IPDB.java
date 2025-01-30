@@ -1,11 +1,13 @@
 package com.ghostchu.peerbanhelper.ipdb;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleProgressDialog;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
+import com.github.mizosoft.methanol.ProgressTracker;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
@@ -48,7 +50,7 @@ import java.util.stream.Collectors;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class IPDB implements AutoCloseable {
+public final class IPDB implements AutoCloseable {
     private final File dataFolder;
     private final long updateInterval = 3888000000L; // 45天
     private final String accountId;
@@ -59,7 +61,7 @@ public class IPDB implements AutoCloseable {
     private final boolean autoUpdate;
     private final String userAgent;
     private final File mmdbGeoCNFile;
-    private Methanol httpClient;
+    private final Methanol httpClient;
     @Getter
     private DatabaseReader mmdbCity;
     @Getter
@@ -78,7 +80,22 @@ public class IPDB implements AutoCloseable {
         this.mmdbGeoCNFile = new File(directory, "GeoCN.mmdb");
         this.autoUpdate = autoUpdate;
         this.userAgent = userAgent;
-        setupHttpClient();
+        this.httpClient = Methanol
+                .newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .userAgent(userAgent)
+                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
+                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory()))
+                .authenticator(new Authenticator() {
+                    @Override
+                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
+                        return new PasswordAuthentication(accountId, licenseKey.toCharArray());
+                    }
+                })
+                .build();
         if (needUpdateMMDB(mmdbCityFile)) {
             updateMMDB(databaseCity, mmdbCityFile);
         }
@@ -280,24 +297,6 @@ public class IPDB implements AutoCloseable {
         Files.move(tmp, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void setupHttpClient() {
-        this.httpClient = Methanol
-                .newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(userAgent)
-                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
-                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory()))
-                .authenticator(new Authenticator() {
-                    @Override
-                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(accountId, licenseKey.toCharArray());
-                    }
-                })
-                .build();
-    }
 
     private boolean isMmdbNeverDownloaded(File target) {
         return !target.exists();
@@ -319,7 +318,25 @@ public class IPDB implements AutoCloseable {
 
     private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName) {
         IPDBDownloadSource mirror = mirrorList.removeFirst();
-        return HTTPUtil.retryableSendProgressTracking(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), HttpResponse.BodyHandlers.ofFile(path))
+        ProgressTracker tracker = ProgressTracker.newBuilder()
+                .bytesTransferredThreshold(16 * 1024) // 16 kB
+                .timePassedThreshold(Duration.of(1, ChronoUnit.SECONDS))
+                .build();
+        var progressDialog = Main.getGuiManager().createProgressDialog(tlUI(Lang.IPDB_DOWNLOAD_TITLE, databaseName), tlUI(Lang.IPDB_DOWNLOAD_DESCRIPTION, databaseName), tlUI(Lang.GUI_COMMON_CANCEL), null, false);
+        progressDialog.show();
+        progressDialog.setComment(mirror.getIPDBUrl());
+        var bodyHandler = tracker.tracking(HttpResponse.BodyHandlers.ofFile(path), item -> {
+            if (!(progressDialog instanceof ConsoleProgressDialog)) {
+                HTTPUtil.onProgress(item);
+            }
+            progressDialog.setProgressDisplayIndeterminate(!item.determinate());
+            if (item.determinate()) {
+                progressDialog.updateProgress((float) item.totalBytesTransferred() / item.contentLength());
+            } else {
+                progressDialog.updateProgress(0);
+            }
+        });
+        return HTTPUtil.retryableSend(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), bodyHandler)
                 .thenAccept(r -> {
                     if (r.statusCode() == 200) {
                         if (mirror.supportXzip()) {
@@ -364,7 +381,7 @@ public class IPDB implements AutoCloseable {
                         file.delete(); // 删除下载不完整的文件
                     }
                     return null;
-                });
+                }).whenComplete((r, e) -> progressDialog.close());
     }
 
     @Override

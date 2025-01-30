@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @IgnoreScan
-public class MultiDialingBlocker extends AbstractRuleFeatureModule implements Reloadable {
+public final class MultiDialingBlocker extends AbstractRuleFeatureModule implements Reloadable {
     // 计算缓存容量
     private static final int TORRENT_PEER_MAX_NUM = 1024;
     private static final int PEER_MAX_NUM_PER_SUBNET = 16;

@@ -25,7 +25,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class PushManager implements Reloadable {
+public final class PushManager implements Reloadable {
     @Getter
     private final List<PushProvider> providerList = new ArrayList<>();
 

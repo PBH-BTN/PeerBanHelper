@@ -3,5 +3,5 @@ package com.ghostchu.peerbanhelper.event;
 import lombok.Data;
 
 @Data
-public class BtnExceptionRuleUpdateEvent {
+public final class BtnExceptionRuleUpdateEvent {
 }

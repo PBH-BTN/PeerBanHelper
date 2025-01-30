@@ -48,6 +48,7 @@ export default {
   'page.settings.tab.info.btn.status': '状态',
   'page.settings.tab.info.btn.status.success': '配置文件获取成功',
   'page.settings.tab.info.btn.status.fail': '配置文件获取失败',
+  'page.settings.tab.info.btn.status.fail.tips': '获取配置失败，这可能是配置存在问题，点击查看文档',
   'page.settings.tab.info.btn.status.configUrl': '服务器地址',
   'page.settings.tab.info.btn.abilities': '能力列表',
   'page.settings.tab.info.btn.abilities.enable': '{number}个能力已启用',

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class QBittorrentTorrentTrackers {
+public final class QBittorrentTorrentTrackers {
     @JsonProperty("msg")
     private String msg;
     @JsonProperty("num_downloaded")

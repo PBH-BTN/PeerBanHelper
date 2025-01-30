@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
-public class DNSLookup implements Reloadable {
+public final class DNSLookup implements Reloadable {
     private volatile ExtendedResolver resolver = new ExtendedResolver();
 
     public DNSLookup() {

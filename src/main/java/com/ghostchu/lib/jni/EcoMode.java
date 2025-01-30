@@ -11,7 +11,7 @@ import java.util.Locale;
 
 @Slf4j
 @Component
-public class EcoMode {
+public final class EcoMode {
 
     public boolean ecoMode(boolean enable) {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);

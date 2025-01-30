@@ -29,7 +29,7 @@ import java.util.*;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public class QBittorrentEE extends AbstractQbittorrent {
+public final class QBittorrentEE extends AbstractQbittorrent {
     private final BanHandler banHandler;
 
     public QBittorrentEE(String name, QBittorrentEEConfigImpl config, AlertManager alertManager) {
@@ -231,7 +231,7 @@ public class QBittorrentEE extends AbstractQbittorrent {
         @Override
         public void setBanListFull(Collection<PeerAddress> peerAddresses) {
             StringJoiner joiner = new StringJoiner("\n");
-            peerAddresses.forEach(p -> joiner.add(p.getIp()));
+            peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
             try {
                 HttpResponse<String> request = httpClient.send(MutableRequest
                                 .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()

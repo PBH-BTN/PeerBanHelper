@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.UUID;
 
 @Slf4j
-public class MainConfigUpdateScript {
+public final class MainConfigUpdateScript {
     private final YamlConfiguration conf;
 
     public MainConfigUpdateScript(YamlConfiguration conf) {

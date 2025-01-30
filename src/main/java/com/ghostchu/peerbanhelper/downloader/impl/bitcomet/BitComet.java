@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 import static com.ghostchu.peerbanhelper.text.Lang.DOWNLOADER_BC_FAILED_SAVE_BANLIST;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class BitComet extends AbstractDownloader {
+public final class BitComet extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(BitComet.class);
     private static final UUID clientId = UUID.nameUUIDFromBytes("PeerBanHelper".getBytes(StandardCharsets.UTF_8));
     protected final String apiEndpoint;
@@ -428,13 +428,13 @@ public class BitComet extends AbstractDownloader {
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
         StringJoiner joiner = new StringJoiner("\n");
-        added.forEach(p -> joiner.add(p.getPeer().getAddress().getIp()));
+        added.stream().map(meta -> meta.getPeer().getAddress().getIp()).distinct().forEach(joiner::add);
         operateBanListLegacy("merge", joiner.toString());
     }
 
     protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.forEach(p -> joiner.add(p.getIp()));
+        peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
         operateBanListLegacy("replace", joiner.toString());
     }
 

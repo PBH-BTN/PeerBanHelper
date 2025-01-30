@@ -10,7 +10,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class ModuleManager {
+public final class ModuleManager {
     private final List<FeatureModule> modules = new ArrayList<>();
 
     /**

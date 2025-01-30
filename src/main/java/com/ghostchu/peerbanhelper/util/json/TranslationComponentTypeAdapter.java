@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TranslationComponentTypeAdapter extends TypeAdapter<TranslationComponent> {
+public final class TranslationComponentTypeAdapter extends TypeAdapter<TranslationComponent> {
     public static final TranslationComponentTypeAdapter INSTANCE = new TranslationComponentTypeAdapter();
 
     @Override

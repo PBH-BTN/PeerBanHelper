@@ -16,7 +16,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
+public final class AlertDao extends AbstractPBHDao<AlertEntity, Long> {
     public AlertDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), AlertEntity.class);
     }

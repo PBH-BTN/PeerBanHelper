@@ -14,7 +14,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class WindowsEcoQosAPI {
+public final class WindowsEcoQosAPI {
     private final YamlConfiguration config;
     private final EcoMode ecoMode;
 

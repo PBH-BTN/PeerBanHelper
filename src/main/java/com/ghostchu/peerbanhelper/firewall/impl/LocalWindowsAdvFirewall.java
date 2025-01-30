@@ -11,7 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class LocalWindowsAdvFirewall extends CommandBasedImpl implements Firewall {
+public final class LocalWindowsAdvFirewall extends CommandBasedImpl implements Firewall {
     private static final String PBH_GUID = new UUID(7355608L, 1145141919810L).toString();
     private static final String CMD_TEST_START = """
             New-NetFirewallRule -Id "peerbanhelper-test" -DisplayName "PeerBanHelperTest"

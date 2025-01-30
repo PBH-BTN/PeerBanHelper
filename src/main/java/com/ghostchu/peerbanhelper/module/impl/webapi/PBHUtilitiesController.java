@@ -28,7 +28,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @IgnoreScan
-public class PBHUtilitiesController extends AbstractFeatureModule {
+public final class PBHUtilitiesController extends AbstractFeatureModule {
     private static final Logger log = LoggerFactory.getLogger(PBHUtilitiesController.class);
     @Autowired
     private JavalinWebContainer webContainer;

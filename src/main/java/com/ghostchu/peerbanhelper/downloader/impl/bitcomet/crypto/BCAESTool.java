@@ -13,7 +13,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Base64;
 
-public class BCAESTool {
+public final class BCAESTool {
 
     public static void init() {
         //Security.addProvider((Provider) Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider").getDeclaredConstructor().newInstance());

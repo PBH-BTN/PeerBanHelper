@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.util.logger;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
 import com.google.common.collect.EvictingQueue;
@@ -12,11 +13,11 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class JListAppender extends AppenderBase<ILoggingEvent> {
+public final class JListAppender extends AppenderBase<ILoggingEvent> {
 
-    public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>(200);
+    public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200));
     public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(false);
-    public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(100);
+    public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100));
     private static final AtomicInteger seq = new AtomicInteger(0);
     private PatternLayout layout;
 

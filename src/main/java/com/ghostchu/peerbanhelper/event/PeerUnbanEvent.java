@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PeerUnbanEvent {
+public final class PeerUnbanEvent {
     private PeerAddress peer;
     private BanMetadata banMetadata;
 }

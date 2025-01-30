@@ -22,7 +22,7 @@
           <countryFlag v-if="record.geo?.country?.iso" :iso="record.geo.country.iso" />
           <a-typography-text copyable code style="white-space: nowrap">
             <queryIpLink :ip="record.peer.address.ip" style="color: var(--color-text-2)">
-              {{ record.peer.address.ip }}:{{ record.peer.address.port }}
+              {{ formatIPAddressPort(record.peer.address.ip, record.peer.address.port) }}
             </queryIpLink>
           </a-typography-text>
         </a-space>
@@ -84,6 +84,7 @@ import countryFlag from '@/components/countryFlag.vue'
 import queryIpLink from '@/components/queryIpLink.vue'
 import { getPeer } from '@/service/downloaders'
 import { formatFileSize } from '@/utils/file'
+import { formatIPAddressPort } from '@/utils/string'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequest } from 'vue-request'

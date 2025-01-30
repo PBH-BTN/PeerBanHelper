@@ -10,7 +10,7 @@ import java.util.BitSet;
  * @author 昆蟲_不在意 https://ccas.pixnet.net/blog/post/30650179
  */
 @SuppressWarnings("all")
-public class UrlEncoderDecoder {
+public final class UrlEncoderDecoder {
     private static final BitSet safeCharacters;   //http://www.java2s.com/Code/Java/Network-Protocol/ProvidesamethodtoencodeanystringintoaURLsafeform.htm
     private static final char[] hexadecimal = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 
 @Component
-public class RuleSubInfoDao extends AbstractPBHDao<RuleSubInfoEntity, String> {
+public final class RuleSubInfoDao extends AbstractPBHDao<RuleSubInfoEntity, String> {
     public RuleSubInfoDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), RuleSubInfoEntity.class);
     }

@@ -23,15 +23,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 @IgnoreScan
-public class PBHPeerController extends AbstractFeatureModule {
+public final class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryDao historyDao;
     private final PeerRecordDao peerRecordDao;
@@ -79,7 +79,8 @@ public class PBHPeerController extends AbstractFeatureModule {
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
         activeMonitoringModule.flush();
-        String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
+        var ipAddress = IPAddressUtil.getIPAddress(ctx.pathParam("ip"));
+        String ip = ipAddress.toNormalizedString();
         long banCount = historyDao.queryBuilder()
                 .where()
                 .eq("ip", new SelectArg(ip))
@@ -131,7 +132,7 @@ public class PBHPeerController extends AbstractFeatureModule {
         IPGeoData geoIP = null;
         try {
             if (ipdb != null) {
-                geoIP = ipdb.query(InetAddress.getByName(ip));
+                geoIP = ipdb.query(ipAddress.toInetAddress());
             }
         } catch (Exception e) {
             log.warn("Unable to perform GeoIP query for ip {}", ip);
@@ -141,7 +142,7 @@ public class PBHPeerController extends AbstractFeatureModule {
             if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
                 ptrLookup = dnsLookup.ptr(ip).get(3, TimeUnit.SECONDS).orElse(null);
             } else {
-                ptrLookup = InetAddress.getByName(ip).getCanonicalHostName();
+                ptrLookup = CompletableFuture.supplyAsync(() -> ipAddress.toInetAddress().getCanonicalHostName()).get(3, TimeUnit.SECONDS);
             }
         } catch (Exception ignored) {
         }

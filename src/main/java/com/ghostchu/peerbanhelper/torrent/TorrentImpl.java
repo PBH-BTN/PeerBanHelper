@@ -4,15 +4,15 @@ import lombok.Setter;
 
 @Setter
 public final class TorrentImpl implements Torrent {
-    private boolean privateTorrent;
-    private double progress;
-    private long rtUploadSpeed;
-    private long rtDownloadSpeed;
-    private String hash;
-    private String id;
-    private String name;
-    private long size;
-    private long completedSize;
+    private final boolean privateTorrent;
+    private final double progress;
+    private final long rtUploadSpeed;
+    private final long rtDownloadSpeed;
+    private final String hash;
+    private final String id;
+    private final String name;
+    private final long size;
+    private final long completedSize;
 
     public TorrentImpl(String id, String name, String hash, long size, long completedSize, double progress, long rtUploadSpeed, long rtDownloadSpeed, boolean privateTorrent) {
         this.id = id;

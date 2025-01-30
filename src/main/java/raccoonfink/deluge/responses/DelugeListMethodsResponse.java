@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class DelugeListMethodsResponse extends DelugeResponse {
+public final class DelugeListMethodsResponse extends DelugeResponse {
     private final List<String> delugeSupportedMethods = new ArrayList<>();
 
     public DelugeListMethodsResponse(Integer httpResponseCode, JSONObject response) throws DelugeException {

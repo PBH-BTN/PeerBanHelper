@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Component
 @IgnoreScan
-public class PBHMetadataController extends AbstractFeatureModule {
+public final class PBHMetadataController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired

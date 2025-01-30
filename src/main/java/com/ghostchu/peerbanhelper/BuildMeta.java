@@ -22,7 +22,7 @@ public final class BuildMeta {
         this.commit = configuration.getString("git.commit.id.commit-id");
         this.abbrev = configuration.getString("git.commit.id.abbrev");
         this.os = System.getProperty("os.name");
-        this.compileTime = configuration.getString("git.build.time");
+        this.compileTime = configuration.getString("git.build.time", "Unknown");
     }
 
     public boolean isSnapshotOrBeta() {

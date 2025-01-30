@@ -35,11 +35,11 @@ import com.google.gson.reflect.TypeToken;
 import com.vdurmont.semver4j.Semver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -54,8 +54,8 @@ import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class BiglyBT extends AbstractDownloader {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(BiglyBT.class);
+@Slf4j
+public final class BiglyBT extends AbstractDownloader {
     private final String apiEndpoint;
     private final HttpClient httpClient;
     private final Config config;
@@ -317,7 +317,7 @@ public class BiglyBT extends AbstractDownloader {
     }
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
-        BanBean bean = new BanBean(added.stream().map(b -> b.getPeer().getAddress().getIp()).toList());
+        BanBean bean = new BanBean(added.stream().map(b -> b.getPeer().getAddress().getIp()).distinct().toList());
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
@@ -333,7 +333,7 @@ public class BiglyBT extends AbstractDownloader {
     }
 
     private void setBanListFull(Collection<PeerAddress> peerAddresses) {
-        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(PeerAddress::getIp).toList(), false);
+        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(PeerAddress::getIp).distinct().toList(), false);
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest.newBuilder()
                             .uri(URI.create(apiEndpoint + "/bans"))

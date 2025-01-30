@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class URLUtil {
+public final class URLUtil {
     /**
      * 在指定url后追加参数
      *

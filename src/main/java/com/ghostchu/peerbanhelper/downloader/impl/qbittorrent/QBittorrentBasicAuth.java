@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class QBittorrentBasicAuth {
+public final class QBittorrentBasicAuth {
     private String user;
     private String pass;
 }

@@ -17,7 +17,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class DecentralizedManager implements AutoCloseable, Reloadable {
+public final class DecentralizedManager implements AutoCloseable, Reloadable {
     private final Laboratory laboratory;
     @Getter
     @Nullable

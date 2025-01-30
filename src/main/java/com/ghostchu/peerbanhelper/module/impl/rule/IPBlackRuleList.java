@@ -72,7 +72,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Getter
 @IgnoreScan
-public class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
+public final class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
     private final RuleSubLogsDao ruleSubLogsDao;
     private final ModuleMatchCache moduleMatchCache;
     private final DecentralizedManager decentralizedManager;

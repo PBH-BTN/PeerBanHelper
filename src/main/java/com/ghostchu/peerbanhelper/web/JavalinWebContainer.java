@@ -37,13 +37,13 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Slf4j
 @Component
-public class JavalinWebContainer {
+public final class JavalinWebContainer {
     private final Javalin javalin;
     @Setter
     @Getter
     private String token;
     private final Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
-            .expireAfterWrite(15, TimeUnit.MINUTES)
+            .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
             .build();
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
 
@@ -65,7 +65,7 @@ public class JavalinWebContainer {
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
                     if (Main.getMainConfig().getBoolean("server.allow-cors")
-                            || ExternalSwitch.parse("PBH_ALLOW_CORS") != null
+                            || ExternalSwitch.parse("pbh.allowCors") != null
                     ) {
                         c.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
                     }

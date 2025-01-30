@@ -48,10 +48,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 @IgnoreScan
-public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
+public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
     private final Deque<ClientTaskRecord> pendingPersistQueue = new ConcurrentLinkedDeque<>();
     private final Cache<Client, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
-            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .expireAfterAccess(ExternalSwitch.parseLong("pbh.module.progressCheatBlocker.recorder.timeout", 1800000), TimeUnit.MILLISECONDS)
             .weigher((Weigher<Client, List<ClientTask>>) (key, value) -> {
                 int totalSize = calcClientSize(key);
                 for (ClientTask clientTask : value) {
@@ -60,7 +60,7 @@ public class ProgressCheatBlocker extends AbstractRuleFeatureModule implements R
                 totalSize += 12;
                 return totalSize;
             })
-            .maximumWeight(12000000)
+            .maximumWeight(ExternalSwitch.parseLong("pbh.module.progressCheatBlocker.recorder.weight", 12000000))
             .removalListener(notification -> {
                 Client key = notification.getKey();
                 List<ClientTask> tasks = notification.getValue();

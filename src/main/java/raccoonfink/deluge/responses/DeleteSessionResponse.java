@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
-public class DeleteSessionResponse extends DelugeResponse {
+public final class DeleteSessionResponse extends DelugeResponse {
     private final boolean m_sessionDeleted;
 
     public DeleteSessionResponse(final Integer httpResponseCode, final JSONObject result) throws DelugeException {

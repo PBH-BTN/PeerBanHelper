@@ -22,7 +22,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @Component
-public class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
+public final class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
     private final Pattern sqlSafePattern;
 
     public HistoryDao(@Autowired Database database) throws SQLException {

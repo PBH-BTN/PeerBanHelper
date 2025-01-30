@@ -19,7 +19,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-public class AlertManager {
+public final class AlertManager {
     private final AlertDao alertDao;
     private final PushManager pushManager;
 

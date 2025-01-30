@@ -28,7 +28,7 @@ import java.util.Map;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
-public class ActivationKeyManager {
+public final class ActivationKeyManager {
     public static String OFFICIAL_PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCHxgRTk+Zx/pkN8rpK+Lbr1/f1meapIRDJIgBiSfFy4xdbmDF8wE9PJhdM+3peThz9dJQlt6dkeduIVp65rGS9oZdj7gO5YKtUCDir4NgGQGe1p2C41Xv6RiOXObLmF+ubAJILsimwtDyJT8IysEh9hgaZWnvRXT8JX9wB0Ti2rwIDAQAB";
     private static final String hardwareUUIDHash;
 

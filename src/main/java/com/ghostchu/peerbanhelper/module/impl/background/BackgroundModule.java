@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @IgnoreScan
-public class BackgroundModule extends AbstractFeatureModule implements Reloadable {
+public final class BackgroundModule extends AbstractFeatureModule implements Reloadable {
     private final TorrentDao torrentDao;
     private ScheduledExecutorService pool;
 

@@ -33,7 +33,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Slf4j
 @Component
 @IgnoreScan
-public class PBHBanController extends AbstractFeatureModule {
+public final class PBHBanController extends AbstractFeatureModule {
     @Autowired
     private Database db;
     @Autowired

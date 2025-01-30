@@ -3,19 +3,19 @@ package raccoonfink.deluge;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Statistics {
+public final class Statistics {
 
-    private int m_dhtNodes;
-    private int m_downloadProtocolRate;
-    private int m_downloadRate;
-    private int m_freeSpace;
-    private boolean m_incomingConnections;
-    private double m_maxDownload;
-    private int m_maxNumConnections;
-    private double m_maxUpload;
-    private int m_numConnections;
-    private int m_uploadProtocolRate;
-    private int m_uploadRate;
+    private final int m_dhtNodes;
+    private final int m_downloadProtocolRate;
+    private final int m_downloadRate;
+    private final int m_freeSpace;
+    private final boolean m_incomingConnections;
+    private final double m_maxDownload;
+    private final int m_maxNumConnections;
+    private final double m_maxUpload;
+    private final int m_numConnections;
+    private final int m_uploadProtocolRate;
+    private final int m_uploadRate;
 
     public Statistics(final JSONObject stats) {
         m_dhtNodes = stats.optInt("dht_nodes");

@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TrackerImpl implements Tracker {
+public final class TrackerImpl implements Tracker {
 
     private final List<String> trackers;
 

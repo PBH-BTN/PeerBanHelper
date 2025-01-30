@@ -28,7 +28,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component("persistMetrics")
-public class PersistMetrics implements BasicMetrics {
+public final class PersistMetrics implements BasicMetrics {
     private final InMemoryMetrics inMemory;
     private final TorrentDao torrentDao;
     private final ModuleDao moduleDao;
@@ -88,55 +88,52 @@ public class PersistMetrics implements BasicMetrics {
 
     @Override
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
-        if(metadata.isBanForDisconnect()){
+        if (metadata.isBanForDisconnect()) {
             return;
         }
         inMemory.recordPeerBan(address, metadata);
-        // 将数据库 IO 移动到虚拟线程上
-        Thread.ofVirtual().start(() -> {
-            try {
-                TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
-                        null,
-                        metadata.getTorrent().getHash(),
-                        metadata.getTorrent().getName(),
-                        metadata.getTorrent().getSize(),
-                        metadata.getTorrent().isPrivateTorrent()
-                ));
-                ModuleEntity module = moduleDao.createIfNotExists(new ModuleEntity(
-                        null,
-                        metadata.getContext()
-                ));
-                RuleEntity rule = ruleDao.createIfNotExists(new RuleEntity(
-                        null,
-                        module,
-                        metadata.getRule()
-                ));
-                historyDao.create(new HistoryEntity(
-                        null,
-                        new Timestamp(metadata.getBanAt()),
-                        new Timestamp(metadata.getUnbanAt()),
-                        address.getAddress().toNormalizedString(),
-                        address.getPort(),
-                        metadata.getPeer().getId(),
-                        metadata.getPeer().getClientName(),
-                        metadata.getPeer().getUploaded(),
-                        metadata.getPeer().getDownloaded(),
-                        metadata.getPeer().getProgress(),
-                        torrentEntity,
-                        rule,
-                        metadata.getDescription(),
-                        metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString(),
-                        metadata.getDownloader()
-                ));
-            } catch (SQLException e) {
-                log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);
-            }
-        });
+        try {
+            TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
+                    null,
+                    metadata.getTorrent().getHash(),
+                    metadata.getTorrent().getName(),
+                    metadata.getTorrent().getSize(),
+                    metadata.getTorrent().isPrivateTorrent()
+            ));
+            ModuleEntity module = moduleDao.createIfNotExists(new ModuleEntity(
+                    null,
+                    metadata.getContext()
+            ));
+            RuleEntity rule = ruleDao.createIfNotExists(new RuleEntity(
+                    null,
+                    module,
+                    metadata.getRule()
+            ));
+            historyDao.create(new HistoryEntity(
+                    null,
+                    new Timestamp(metadata.getBanAt()),
+                    new Timestamp(metadata.getUnbanAt()),
+                    address.getAddress().toNormalizedString(),
+                    address.getPort(),
+                    metadata.getPeer().getId(),
+                    metadata.getPeer().getClientName(),
+                    metadata.getPeer().getUploaded(),
+                    metadata.getPeer().getDownloaded(),
+                    metadata.getPeer().getProgress(),
+                    torrentEntity,
+                    rule,
+                    metadata.getDescription(),
+                    metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString(),
+                    metadata.getDownloader()
+            ));
+        } catch (SQLException e) {
+            log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);
+        }
     }
 
     @Override
     public void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
-        if(metadata.isBanForDisconnect()){
+        if (metadata.isBanForDisconnect()) {
             return;
         }
         inMemory.recordPeerUnban(address, metadata);

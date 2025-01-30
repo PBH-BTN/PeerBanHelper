@@ -53,7 +53,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @IgnoreScan
-public class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
+public final class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
     private final static String VERSION = "2";
     private final long maxScriptExecuteTime = 1500;
     private final JavalinWebContainer javalinWebContainer;

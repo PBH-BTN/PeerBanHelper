@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 @Getter
 @Slf4j
-public class DatabaseHelper {
+public final class DatabaseHelper {
     private final Database database;
 
     public DatabaseHelper(@Autowired Database database) throws SQLException {
@@ -43,7 +43,7 @@ public class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "7"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "9"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {

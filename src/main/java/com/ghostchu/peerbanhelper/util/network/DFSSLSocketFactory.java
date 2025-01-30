@@ -21,7 +21,7 @@ import java.util.List;
 
 // Copy from EhViewer
 @Slf4j
-public class DFSSLSocketFactory extends SSLSocketFactory {
+public final class DFSSLSocketFactory extends SSLSocketFactory {
     @Override
     public String[] getDefaultCipherSuites() {
         return ((SSLSocketFactory) getDefault()).getDefaultCipherSuites();

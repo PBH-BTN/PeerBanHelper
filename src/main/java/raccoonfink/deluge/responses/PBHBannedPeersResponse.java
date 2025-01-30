@@ -11,7 +11,7 @@ import raccoonfink.deluge.DelugeException;
 import java.util.List;
 
 @Getter
-public class PBHBannedPeersResponse extends DelugeResponse {
+public final class PBHBannedPeersResponse extends DelugeResponse {
     private BannedPeersResponseDTO bannedPeers;
 
     public PBHBannedPeersResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {

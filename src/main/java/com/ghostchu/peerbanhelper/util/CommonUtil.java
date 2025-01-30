@@ -13,7 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * 特殊工具类，不得依赖任何外部类
  */
-public class CommonUtil {
+public final class CommonUtil {
 
     private static final ScheduledExecutorService GENERAL_SCHEDULER = Executors.newScheduledThreadPool(8, Thread.ofVirtual().factory());
 

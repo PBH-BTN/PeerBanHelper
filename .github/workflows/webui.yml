@@ -2,11 +2,11 @@ name: WebUI Build
 
 on:
   push:
-    branches: ["master"]
+    branches: ["master","dev"]
     paths:
       - "webui/**"
   pull_request:
-    branches: ["master"]
+    branches: ["master","dev"]
     paths:
       - "webui/**"
 
@@ -30,7 +30,7 @@ jobs:
       - uses: pnpm/action-setup@v3
         name: Install pnpm
         with:
-          version: 9.1.1
+          version: 10.0.0
           run_install: false
 
       - name: Get pnpm store directory

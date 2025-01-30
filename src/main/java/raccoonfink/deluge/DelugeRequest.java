@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.List;
 
-public class DelugeRequest {
+public final class DelugeRequest {
     private final String m_method;
     private final List<Object> m_params;
 

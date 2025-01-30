@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
-public class BiglyBTDownloadManagerStateConst {
+public final class BiglyBTDownloadManagerStateConst {
     public static final int STATE_START_OF_DAY = -1;   // should never actually see this one
 
     public static final int STATE_WAITING = 0;

@@ -3,31 +3,31 @@ package raccoonfink.deluge;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Torrent implements Comparable<Torrent> {
+public final class Torrent implements Comparable<Torrent> {
     private final String m_key;
-    private double m_distributedCopies;
-    private long m_downloadPayloadRate;
-    private long m_eta;
-    private boolean m_autoManaged;
-    private long m_maxDownloadSpeed;
-    private long m_maxUploadSpeed;
-    private String m_name;
-    private long m_numPeers;
-    private long m_numSeeds;
-    private double m_progress;
-    private long m_queue;
-    private double m_ratio;
-    private String m_savePath;
-    private double m_seedsPeerRatio;
-    private double m_timeAdded;
-    private long m_totalDone;
-    private long m_totalPeers;
-    private long m_totalSeeds;
-    private long m_totalSize;
-    private long m_totalUploaded;
-    private String m_trackerHost;
-    private long m_uploadPayloadRate;
-    private State m_state;
+    private final double m_distributedCopies;
+    private final long m_downloadPayloadRate;
+    private final long m_eta;
+    private final boolean m_autoManaged;
+    private final long m_maxDownloadSpeed;
+    private final long m_maxUploadSpeed;
+    private final String m_name;
+    private final long m_numPeers;
+    private final long m_numSeeds;
+    private final double m_progress;
+    private final long m_queue;
+    private final double m_ratio;
+    private final String m_savePath;
+    private final double m_seedsPeerRatio;
+    private final double m_timeAdded;
+    private final long m_totalDone;
+    private final long m_totalPeers;
+    private final long m_totalSeeds;
+    private final long m_totalSize;
+    private final long m_totalUploaded;
+    private final String m_trackerHost;
+    private final long m_uploadPayloadRate;
+    private final State m_state;
 
     public Torrent(final String key, final JSONObject data) {
         m_key = key;

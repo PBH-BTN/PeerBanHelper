@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 @Component
 @IgnoreScan
-public class PBHEasterEggController  extends AbstractFeatureModule {
+public final class PBHEasterEggController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final List<String> urls = new ArrayList<>();
 

@@ -36,7 +36,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @IgnoreScan
-public class IPBlackList extends AbstractRuleFeatureModule implements Reloadable {
+public final class IPBlackList extends AbstractRuleFeatureModule implements Reloadable {
     private Set<IPAddress> ips;
     private Set<Integer> ports;
     private Set<Long> asns;

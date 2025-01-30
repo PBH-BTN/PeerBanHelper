@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Component
-public class ModuleDao extends AbstractPBHDao<ModuleEntity, Long> {
+public final class ModuleDao extends AbstractPBHDao<ModuleEntity, Long> {
     public ModuleDao(@Autowired Database database) throws SQLException {
         super(database.getDataSource(), ModuleEntity.class);
         setObjectCache(true);

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class BtnExceptionRuleParsed {
+public final class BtnExceptionRuleParsed {
     private String version;
     private Map<String, List<Rule>> peerIdRules;
     private Map<String, List<Rule>> clientNameRules;

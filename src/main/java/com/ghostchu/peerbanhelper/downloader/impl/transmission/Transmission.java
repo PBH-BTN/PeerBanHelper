@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
-public class Transmission extends AbstractDownloader {
+public final class Transmission extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Transmission.class);
     private final TrClient client;
     private final String blocklistUrl;

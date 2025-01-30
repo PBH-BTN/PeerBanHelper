@@ -38,7 +38,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Component
 @Slf4j
 @IgnoreScan
-public class PBHChartController extends AbstractFeatureModule {
+public final class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired

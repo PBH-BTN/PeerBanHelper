@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
 @Slf4j
-public class QBittorrent extends AbstractQbittorrent {
+public final class QBittorrent extends AbstractQbittorrent {
 
     public QBittorrent(String name, QBittorrentConfig config, AlertManager alertManager) {
         super(name, config, alertManager);

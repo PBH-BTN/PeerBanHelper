@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @NoArgsConstructor
 @Data
-public class QBittorrentConfigImpl implements QBittorrentConfig {
+public final class QBittorrentConfigImpl implements QBittorrentConfig {
     private String type;
     private String endpoint;
     private String username;

@@ -32,7 +32,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @IgnoreScan
-public class RuleSubController extends AbstractFeatureModule {
+public final class RuleSubController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     IPBlackRuleList ipBlackRuleList;

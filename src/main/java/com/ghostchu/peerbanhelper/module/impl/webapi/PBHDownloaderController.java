@@ -40,7 +40,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @Slf4j
 @Component
 @IgnoreScan
-public class PBHDownloaderController extends AbstractFeatureModule {
+public final class PBHDownloaderController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired

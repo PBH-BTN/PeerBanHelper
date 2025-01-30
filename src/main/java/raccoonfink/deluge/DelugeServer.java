@@ -3,10 +3,9 @@ package raccoonfink.deluge;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import raccoonfink.deluge.responses.*;
 
 import java.io.IOException;
@@ -20,8 +19,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
-public class DelugeServer {
-    private static final Logger log = LoggerFactory.getLogger(DelugeServer.class);
+@Slf4j
+public final class DelugeServer {
     private final String m_url;
     private final String m_password;
     private final HttpClient httpClient;

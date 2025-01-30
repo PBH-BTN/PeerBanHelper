@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class ModuleMatchCache {
     public final Cache<String, CheckResult> CACHE_POOL = CacheBuilder
             .newBuilder()
-            .maximumWeight(50000L)
+            .maximumWeight(ExternalSwitch.parseLong("pbh.moduleMatchCache.weight", 50000L))
             .weigher((key, value) -> {
                 if (value == AbstractRuleFeatureModule.HANDSHAKING_CHECK_RESULT
                     || value == AbstractRuleFeatureModule.TEAPOT_CHECK_RESULT
@@ -31,7 +32,7 @@ public class ModuleMatchCache {
                 return 5;
             })
             .softValues()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .expireAfterAccess(ExternalSwitch.parseLong("pbh.modulematchcache.timeout", 600000), TimeUnit.MILLISECONDS)
             .build();
 
     public ModuleMatchCache() {

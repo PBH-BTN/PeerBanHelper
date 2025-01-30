@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
-public class CheckSessionResponse extends DelugeResponse {
+public final class CheckSessionResponse extends DelugeResponse {
     private final boolean m_sessionActive;
 
     public CheckSessionResponse(final Integer httpResponseCode, final JSONObject result) throws DelugeException {

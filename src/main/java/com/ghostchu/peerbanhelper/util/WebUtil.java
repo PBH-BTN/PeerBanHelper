@@ -4,7 +4,7 @@ import io.javalin.http.Context;
 
 import java.sql.Timestamp;
 
-public class WebUtil {
+public final class WebUtil {
 
     public static TimeQueryModel parseTimeQueryModel(Context ctx) throws IllegalArgumentException {
         var startAtStr = ctx.queryParam("startAt");
