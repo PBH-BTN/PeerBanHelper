@@ -213,6 +213,9 @@ public class PeerBanHelperServer implements Reloadable {
                 Main.getGuiManager().createNotification(Level.WARNING, tlUI(Lang.INCOMPATIBLE_BITNESS_TITLE), tlUI(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
             }
         }
+        if (ExternalSwitch.parseBoolean("pbh.app-v")) {
+            ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("app-v", 10, tlUI(Lang.TITLE_APP_V_CONTAINER)));
+        }
     }
 
     @SneakyThrows

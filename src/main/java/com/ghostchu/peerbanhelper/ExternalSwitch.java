@@ -11,6 +11,14 @@ public final class ExternalSwitch {
             value = System.getenv(args.replace(".", "_").replace("-", "_").toUpperCase(Locale.ROOT));
         if (value == null)
             return def;
+        if (Main.getStartupArgs() != null) {
+            for (var arg : Main.getStartupArgs()) {
+                if (arg.startsWith(args + "=")) {
+                    value = arg.substring(args.length() + 1);
+                    break;
+                }
+            }
+        }
         return value;
     }
 
