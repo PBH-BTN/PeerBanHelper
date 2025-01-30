@@ -593,3 +593,4 @@ DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION: |
   For assistance, please join the PeerBanHelper community. **This prompt will only appear once per downloader.**
 LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_TITLE: "Enable transaction batch write ban history"
 LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_DESCRIPTION: "Use transactions to batch write to the database when recording ban history to improve performance and reduce random disk I/O operations."
+ABOUT_VIEW_CREDIT: "Developers and community contributors..."
