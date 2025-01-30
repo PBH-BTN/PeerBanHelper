@@ -861,16 +861,18 @@ public class PeerBanHelperServer implements Reloadable {
                     || peer.getFlags().isFromTracker()
                     || peer.getFlags().isFromDHT()
                     || peer.getFlags().isFromPEX()) {
-                var addr = peer.getPeerAddress().getAddress();
-                if (addr.isIPv4Convertible()) {
-                    addr = addr.toIPv4();
-                }
-                var addrStr = addr.toNormalizedString();
-                if ((addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal())) {
-                    if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
-                        alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
-                                new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
-                                new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
+                if (!peer.isHandshaking()) {
+                    var addr = peer.getPeerAddress().getAddress();
+                    if (addr.isIPv4Convertible()) {
+                        addr = addr.toIPv4();
+                    }
+                    var addrStr = addr.toNormalizedString();
+                    if ((addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal())) {
+                        if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
+                            alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
+                                    new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
+                                    new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
+                        }
                     }
                 }
             }
