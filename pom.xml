@@ -251,7 +251,6 @@
             <id>maven-snapshots</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
-
     </repositories>
 
     <dependencies>
@@ -520,6 +519,11 @@
             <artifactId>jcefmaven</artifactId>
             <version>126.2.0</version>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>-->
+        <!--            <artifactId>intellij-uiDesigner</artifactId>-->
+        <!--            <version>1.0.0</version>-->
+        <!--        </dependency>-->
 
     </dependencies>
 </project>
