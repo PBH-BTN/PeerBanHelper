@@ -123,6 +123,9 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+        if (isHandShaking(peer)) {
+            return handshaking();
+        }
         return getCache().readCacheButWritePassOnly(this, peer.getPeerAddress().getIp(), () -> {
             String ip = peer.getPeerAddress().getIp();
             List<IPBanResult> results = new ArrayList<>();
