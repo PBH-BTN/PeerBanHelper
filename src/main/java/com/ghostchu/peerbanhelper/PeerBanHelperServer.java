@@ -870,7 +870,7 @@ public class PeerBanHelperServer implements Reloadable {
                         addr = addr.toIPv4();
                     }
                     var addrStr = addr.toNormalizedString();
-                    if ((addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal())) {
+                    if ((addrStr.endsWith(".1") || addrStr.endsWith(".0") || addrStr.endsWith(".254") || addrStr.endsWith(".255")) && (addr.isLocal() || addr.isAnyLocal())) {
                         if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
                             alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
                                     new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
