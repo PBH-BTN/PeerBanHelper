@@ -220,6 +220,11 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
+    public void throttlePeer(Torrent torrent, Peer peer, long uploadRate, long downloadRate) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Deluge does not support throttling peers");
+    }
+
+    @Override
     public void close() {
 
     }

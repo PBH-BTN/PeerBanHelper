@@ -170,4 +170,6 @@ public interface Downloader extends AutoCloseable {
     List<DownloaderFeatureFlag> getFeatureFlags();
 
     int getMaxConcurrentPeerRequestSlots();
+
+    void throttlePeer(Torrent torrent, Peer peer, long uploadRate, long downloadRate) throws UnsupportedOperationException;
 }

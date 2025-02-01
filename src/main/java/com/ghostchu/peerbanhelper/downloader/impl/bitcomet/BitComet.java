@@ -491,6 +491,11 @@ public final class BitComet extends AbstractDownloader {
         return 4;
     }
 
+    @Override
+    public void throttlePeer(Torrent torrent, Peer peer, long uploadRate, long downloadRate) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("BitComet does not support throttling peers");
+    }
+
     @NoArgsConstructor
     @Data
     public static class Config {

@@ -403,6 +403,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         return peersList;
     }
 
+    @Override
+    public void throttlePeer(Torrent torrent, Peer peer, long uploadRate, long downloadRate) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("qBittorrent does not support throttling peers");
+    }
+
     protected void setBanListIncrement(Collection<BanMetadata> added) {
         Map<String, StringJoiner> banTasks = new HashMap<>();
         added.forEach(p -> {

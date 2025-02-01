@@ -206,6 +206,11 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
+    public void throttlePeer(Torrent torrent, Peer peer, long uploadRate, long downloadRate) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Transmission does not support throttling peer");
+    }
+
+    @Override
     public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
         relaunchTorrents(torrents.stream()
                 .filter(t -> {

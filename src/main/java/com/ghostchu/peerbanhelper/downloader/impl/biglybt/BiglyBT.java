@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.PeerThrottlingBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.MetadataCallbackBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerManagerRecord;
@@ -25,6 +26,7 @@ import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
+import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -97,7 +99,33 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.THROTTLING);
+        List<DownloaderFeatureFlag> flags = new ArrayList<>();
+        flags.add(DownloaderFeatureFlag.READ_PEER_PROTOCOLS);
+        flags.add(DownloaderFeatureFlag.UNBAN_IP);
+        if (semver.isGreaterThanOrEqualTo("1.3.0")) {
+            flags.add(DownloaderFeatureFlag.THROTTLING);
+        }
+        return flags;
+    }
+
+    @Override
+    public void throttlePeer(Torrent torrent, Peer peer, long uploadRate, long downloadRate) throws UnsupportedOperationException {
+        if (!getFeatureFlags().contains(DownloaderFeatureFlag.THROTTLING)) {
+            throw new UnsupportedOperationException("BiglyBT-Adapter version is lower than 1.3.0, throttling is not supported.");
+        }
+        PeerThrottlingBean bean = new PeerThrottlingBean((int) uploadRate, (int) downloadRate);
+        HttpResponse<String> resp;
+        try {
+            var urlIp = UrlEncoderDecoder.encodeToLegalPath(peer.getRawIp());
+            resp = httpClient.send(MutableRequest.POST(apiEndpoint + "/download/" + torrent.getHash() + "/peer/" + urlIp + "/throttling",
+                            HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean), StandardCharsets.UTF_8)),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (resp.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_THROTTLE_FAILED, getName(), resp.statusCode(), resp.body()));
+        }
     }
 
     @Override
