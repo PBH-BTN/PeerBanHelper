@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.BanBehavior;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import io.javalin.http.Context;
@@ -123,7 +124,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                 .stream()
                 .filter(b -> {
                     if (!ignoreBanForDisconnect) return true;
-                    return !b.getValue().isBanForDisconnect();
+                    return b.getValue().getBanBehavior() != BanBehavior.DISCONNECT;
                 })
                 .filter(b -> search == null || b.getKey().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))

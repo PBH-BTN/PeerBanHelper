@@ -29,6 +29,11 @@ public final class DelugePeer implements Peer {
     }
 
     @Override
+    public boolean isPBHThrottled() {
+        return false;
+    }
+
+    @Override
     public boolean isHandshaking() {
         return downloadSpeed <= 0 && uploadSpeed <= 0;
     }

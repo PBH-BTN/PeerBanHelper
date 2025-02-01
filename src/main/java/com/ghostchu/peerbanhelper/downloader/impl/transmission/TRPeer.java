@@ -81,4 +81,9 @@ public final class TRPeer implements Peer {
         return backend.getAddress();
     }
 
+    @Override
+    public boolean isPBHThrottled() {
+        return false;
+    }
+
 }

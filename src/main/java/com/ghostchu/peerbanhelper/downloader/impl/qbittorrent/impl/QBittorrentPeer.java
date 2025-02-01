@@ -119,6 +119,11 @@ public final class QBittorrentPeer implements Peer {
         return rawIp == null ? ip : rawIp;
     }
 
+    @Override
+    public boolean isPBHThrottled() {
+        return false;
+    }
+
     public String getConnection() {
         return connection;
     }

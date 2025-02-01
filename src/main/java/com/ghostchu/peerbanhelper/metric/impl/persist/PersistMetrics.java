@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.wrapper.BanBehavior;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +89,7 @@ public final class PersistMetrics implements BasicMetrics {
 
     @Override
     public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
-        if (metadata.isBanForDisconnect()) {
+        if (metadata.getBanBehavior() == BanBehavior.DISCONNECT) {
             return;
         }
         inMemory.recordPeerBan(address, metadata);
@@ -133,7 +134,7 @@ public final class PersistMetrics implements BasicMetrics {
 
     @Override
     public void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
-        if (metadata.isBanForDisconnect()) {
+        if (metadata.getBanBehavior() == BanBehavior.DISCONNECT) {
             return;
         }
         inMemory.recordPeerUnban(address, metadata);

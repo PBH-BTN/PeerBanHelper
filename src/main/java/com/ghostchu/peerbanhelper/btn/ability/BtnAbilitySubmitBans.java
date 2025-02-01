@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.wrapper.BanBehavior;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
@@ -116,7 +117,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             if (e.getValue().getBanAt() <= lastReport) {
                 continue;
             }
-            if (e.getValue().isBanForDisconnect()) {
+            if (e.getValue().getBanBehavior() == BanBehavior.DISCONNECT) {
                 continue;
             }
             BtnBan btnBan = new BtnBan();
