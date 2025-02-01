@@ -277,7 +277,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     // 如果上传量大于设置的比率，我们主动断开一次连接，封禁 Peer 一段时间，并尽快解除封禁
                     if (actualUploaded >= fastPcbTestPercentage * torrentSize) {
                         clientTask.setFastPcbTestExecuteAt(actualUploaded);
-                        return new CheckResult(getClass(), PeerAction.BAN_FOR_DISCONNECT, fastPcbTestBlockingDuration,
+                        return new CheckResult(getClass(), PeerAction.BAN_FOR_DISCONNECT, fastPcbTestBlockingDuration, -1L, -1L,
                                 new TranslationComponent(Lang.PCB_RULE_PEER_PROGRESS_CHEAT_TESTING),
                                 new TranslationComponent(Lang.PCB_DESCRIPTION_PEER_PROGRESS_CHEAT_TESTING)
                         );
@@ -296,7 +296,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     if (actualUploaded > maxAllowedExcessiveThreshold) {
                         clientTask.setBanDelayWindowEndAt(0L);
                         progressRecorder.invalidate(client); // 封禁时，移除缓存
-                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
+                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
                                 new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
                                         torrentSize,
                                         actualUploaded,
@@ -308,7 +308,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     if (actualUploaded > maxAllowedExcessiveThreshold) {
                         clientTask.setBanDelayWindowEndAt(0L);
                         progressRecorder.invalidate(client); // 封禁时，移除缓存
-                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
+                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
                                 new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD_INCOMPLETE,
                                         torrentSize,
                                         completedSize,
@@ -329,7 +329,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     clientTask.setProgressDifferenceCounter(clientTask.getProgressDifferenceCounter() + 1);
                     clientTask.setBanDelayWindowEndAt(0L);
                     progressRecorder.invalidate(client); // 封禁时，移除缓存
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE),
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE),
                             new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS,
                                     percent(clientProgress),
                                     percent(actualProgress),
@@ -347,7 +347,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     clientTask.setBanDelayWindowEndAt(0L);
                     progressRecorder.invalidate(client); // 封禁时，移除缓存
                 }
-                return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
+                return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, -1L, -1L, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
                         new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
                                 percent(clientProgress),
                                 percent(actualProgress),

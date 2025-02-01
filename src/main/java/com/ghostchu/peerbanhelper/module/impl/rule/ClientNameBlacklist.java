@@ -97,7 +97,7 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
         //return getCache().readCache(this, peer.getClientName(), () -> {
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getClientName());
         if (matchResult.hit()) {
-            return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+            return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L,
                     matchResult.rule().matcherName(),
                     new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME,
                             matchResult.comment()));

@@ -171,7 +171,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                 // 落库
                 huntingList.put(torrentSubnetStr, currentTimestamp);
                 // 返回当前IP即可，其他IP会在下一周期被封禁
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MDB_MULTI_DIALING_DETECTED),
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.MDB_MULTI_DIALING_DETECTED),
                         new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_DETECTED, peerSubnet.toString(), peerIpStr));
             }
 
@@ -183,7 +183,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                         if (currentTimestamp - huntingTimestamp < keepHuntingTime) {
                             // 落库
                             huntingList.put(torrentSubnetStr, currentTimestamp);
-                            return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MDB_MULTI_HUNTING),
+                            return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.MDB_MULTI_HUNTING),
                                     new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED, peerSubnet.toString(), peerIpStr));
                         } else {
                             huntingList.invalidate(torrentSubnetStr);

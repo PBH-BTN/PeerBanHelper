@@ -125,7 +125,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                 bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress, ipv6Prefix);
             }
             if (bannedAddress.contains(peerAddress)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), bannedAddress.toString(), addressType));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), bannedAddress.toString(), addressType));
             }
         }
         return pass();

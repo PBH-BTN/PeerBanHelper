@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule implements RuleFeatureModule {
     @Getter
     private boolean register;
-    public static final CheckResult TEAPOT_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("I'm a teapot"));
-    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"));
-    public static final CheckResult HANDSHAKING_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Peer handshaking"));
+    public static final CheckResult TEAPOT_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, -1L, -1L, new TranslationComponent("N/A"), new TranslationComponent("I'm a teapot"));
+    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, -1L, -1L, new TranslationComponent("N/A"), new TranslationComponent("Check passed"));
+    public static final CheckResult HANDSHAKING_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, -1L, -1L, new TranslationComponent("N/A"), new TranslationComponent("Peer handshaking"));
     @Autowired
     @Getter
     private ModuleMatchCache cache;

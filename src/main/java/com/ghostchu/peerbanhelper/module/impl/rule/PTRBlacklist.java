@@ -115,7 +115,7 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
             if (ptr.isPresent()) {
                 RuleMatchResult matchResult = RuleParser.matchRule(ptrRules, ptr.get());
                 if (matchResult.hit()) {
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, matchResult.rule().matcherName(),
+                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, matchResult.rule().matcherName(),
                             new TranslationComponent(Lang.MODULE_PTR_MATCH_PTR_RULE, matchResult.rule().matcherName()));
                 }
             }

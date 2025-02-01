@@ -20,13 +20,13 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 public final class ScriptEngine {
-    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"));
+    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, -1L, -1L, new TranslationComponent("N/A"), new TranslationComponent("Check passed"));
 
     @Nullable
     public CheckResult handleResult(CompiledScript script, long banDuration, Object returns) {
         if (returns instanceof Boolean status) {
             if (status) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
                         new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), "true"));
             }
@@ -37,11 +37,11 @@ public final class ScriptEngine {
             if (i == 0) {
                 return null;
             } else if (i == 1) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
                         new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), String.valueOf(number)));
             } else if (i == 2) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, -1L, -1L,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
                         new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), String.valueOf(number)));
             } else {
@@ -50,7 +50,7 @@ public final class ScriptEngine {
             }
         }
         if (returns instanceof PeerAction action) {
-            return new CheckResult(getClass(), action, banDuration,
+            return new CheckResult(getClass(), action, banDuration, -1L, -1L,
                     new TranslationComponent(Lang.USER_SCRIPT_RULE),
                     new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), action.name()));
         }
@@ -58,11 +58,11 @@ public final class ScriptEngine {
             if (string.isBlank()) {
                 return OK_CHECK_RESULT;
             } else if (string.startsWith("@")) {
-                return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
+                return new CheckResult(getClass(), PeerAction.SKIP, banDuration, -1L, -1L,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
                         new TranslationComponent(string.substring(1)));
             } else {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
                         new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), string));
             }

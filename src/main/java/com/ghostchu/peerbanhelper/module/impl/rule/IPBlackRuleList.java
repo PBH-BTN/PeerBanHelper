@@ -136,6 +136,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                         return new CheckResult(getClass(),
                                 PeerAction.BAN,
                                 banDuration,
+                                -1L, -1L,
                                 new TranslationComponent(ipBanResult.ruleName()),
                                 new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE,
                                         ipBanResult.ruleName(),

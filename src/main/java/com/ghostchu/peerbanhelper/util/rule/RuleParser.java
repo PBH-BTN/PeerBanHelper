@@ -21,17 +21,20 @@ public final class RuleParser {
                 .toList();
     }
 
+    @SuppressWarnings("deprecation")
     public static RuleMatchResult matchRule(List<Rule> rules, String content) {
-        RuleMatchResult matchResult = new RuleMatchResult(false, null, null);
+        RuleMatchResult matchResult = new RuleMatchResult(MatchResultEnum.DEFAULT, null, null);
         for (Rule rule : rules) {
             MatchResult result = rule.match(content);
-            if (result.result() == MatchResultEnum.FALSE) { // 规则的优先级最高
-                return new RuleMatchResult(false, rule, result.comment());
+            if (result.result() == MatchResultEnum.FALSE || result.result() == MatchResultEnum.SKIP) { // 规则的优先级最高
+                return new RuleMatchResult(MatchResultEnum.SKIP, rule, result.comment());
             }
-            if (result.result() == MatchResultEnum.TRUE) { // 其次，可被覆盖
-                matchResult = new RuleMatchResult(true, rule, result.comment());
+            if (result.result() == MatchResultEnum.THROTTLE) { // 其次，可被覆盖，优先级最低
+                matchResult = new RuleMatchResult(MatchResultEnum.THROTTLE, rule, result.comment());
             }
-
+            if (result.result() == MatchResultEnum.TRUE || result.result() == MatchResultEnum.BAN) { // 其次，可被覆盖，比 THROTTLE 优先级高
+                matchResult = new RuleMatchResult(MatchResultEnum.BAN, rule, result.comment());
+            }
         }
 
         return matchResult;
