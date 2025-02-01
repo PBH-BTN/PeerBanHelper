@@ -91,6 +91,11 @@ public final class PeerImpl implements Peer {
     }
 
     @Override
+    public boolean isPBHThrottled() {
+        return false;
+    }
+
+    @Override
     public List<PeerMessage> getSupportedMessages() {
         return supportedMessages;
     }

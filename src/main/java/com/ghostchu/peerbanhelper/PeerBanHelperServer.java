@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
@@ -41,10 +42,7 @@ import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.time.ExceptedTime;
 import com.ghostchu.peerbanhelper.util.time.TimeoutProtect;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.ghostchu.peerbanhelper.wrapper.*;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
@@ -87,7 +85,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class PeerBanHelperServer implements Reloadable {
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
-    private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
+    private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, -1L, -1L, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentSkipListMap<>();
     @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
@@ -383,7 +381,7 @@ public class PeerBanHelperServer implements Reloadable {
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
             getDownloaders().forEach(downloader -> {
                 if (downloader.login().success()) {
-                    downloader.setBanList(BAN_LIST.keySet(), null, null, true);
+                    downloader.setBanList(BAN_LIST.values(), null, null, true);
                 }
             });
             Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
@@ -472,7 +470,7 @@ public class PeerBanHelperServer implements Reloadable {
                 if (needReApplyBanList.get()) {
                     getDownloaders().forEach(downloader -> {
                         if (downloader.login().success()) {
-                            downloader.setBanList(BAN_LIST.keySet(), null, null, true);
+                            downloader.setBanList(BAN_LIST.values(), null, null, true);
                         }
                     });
                 }
@@ -534,11 +532,9 @@ public class PeerBanHelperServer implements Reloadable {
                     }
                 }
             }
-
             if (scheduled > 0) {
                 log.info(tlUI(Lang.SCHEDULED_OPERATIONS, scheduled));
             }
-
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist");
             try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> {
@@ -546,24 +542,37 @@ public class PeerBanHelperServer implements Reloadable {
             })) {
                 Callable<Object> callable = () -> {
                     var banlistClone = List.copyOf(BAN_LIST.keySet());
-
                     downloaderBanDetailMap.forEach((downloader, details) -> {
                         try {
                             List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
                             details.forEach(detail -> protect.getService().submit(() -> {
                                 try {
-                                    if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.BAN_FOR_DISCONNECT) {
-                                        long actualBanDuration = banDuration;
-                                        if (detail.banDuration() > 0) {
-                                            actualBanDuration = detail.banDuration();
+                                    var action = detail.result().action();
+                                    if (!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.THROTTLING)) {
+                                        if (action == PeerAction.THROTTLE) {
+                                            action = PeerAction.BAN; // 如果下载器不支持节流，转换为封禁
                                         }
-                                        BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloader.getName(),
-                                                System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
-                                                detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
-                                        bannedPeers.add(banMetadata);
+                                    }
+                                    // 公共部分，开始
+                                    long actualBanDuration = banDuration;
+                                    if (detail.banDuration() > 0) {
+                                        actualBanDuration = detail.banDuration();
+                                    }
+                                    BanMetadata banMetadata = new BanMetadata(
+                                            detail.result().moduleContext().getName(),
+                                            downloader.getName(),
+                                            System.currentTimeMillis(),
+                                            System.currentTimeMillis() + actualBanDuration,
+                                            BanBehavior.fromPeerAction(action),
+                                            detail.result().throttledUploadRate(),
+                                            detail.result().throttledDownloadRate(),
+                                            detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
+                                    bannedPeers.add(banMetadata);
+                                    // 公共部分，结束
+                                    if (banMetadata.getBanBehavior() == BanBehavior.BAN) {
                                         relaunch.add(detail.torrent());
                                         banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
-                                        if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
+                                        if (banMetadata.getBanBehavior() == BanBehavior.BAN) {
                                             log.info(tlUI(Lang.BAN_PEER,
                                                     detail.peer().getPeerAddress(),
                                                     detail.peer().getPeerId(),
@@ -575,11 +584,24 @@ public class PeerBanHelperServer implements Reloadable {
                                                     tlUI(detail.result().reason())));
                                         }
                                     }
+                                    if (banMetadata.getBanBehavior() == BanBehavior.THROTTLE) {
+                                        banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
+                                        log.info(tlUI(Lang.THROTTLE_PEER,
+                                                detail.peer().getPeerAddress(),
+                                                detail.peer().getPeerId(),
+                                                detail.peer().getClientName(),
+                                                detail.peer().getProgress(),
+                                                detail.peer().getUploaded(),
+                                                detail.peer().getDownloaded(),
+                                                detail.torrent().getName(),
+                                                tlUI(detail.result().reason()),
+                                                detail.result().throttledUploadRate(),
+                                                detail.result().throttledDownloadRate()));
+                                    }
                                 } catch (Exception e) {
                                     log.error(tlUI(Lang.BAN_PEER_EXCEPTION), e);
                                 }
                             }));
-
                             needRelaunched.put(downloader, relaunch);
                         } catch (Exception e) {
                             log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
@@ -696,7 +718,7 @@ public class PeerBanHelperServer implements Reloadable {
             } else {
                 downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.getMessage());
             }
-            downloader.setBanList(BAN_LIST.keySet(), added, removed, applyFullList);
+            downloader.setBanList(BAN_LIST.values(), added, removed, applyFullList);
             downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint()), th);
@@ -719,7 +741,7 @@ public class PeerBanHelperServer implements Reloadable {
             }
         }
         removeBan.forEach(this::unbanPeer);
-        long normalUnbanCount = metadata.stream().filter(meta -> !meta.isBanForDisconnect()).count();
+        long normalUnbanCount = metadata.stream().filter(meta -> meta.getBanBehavior() != BanBehavior.DISCONNECT).count();
         if (normalUnbanCount > 0) {
             log.info(tlUI(Lang.PEER_UNBAN_WAVE, normalUnbanCount));
         }
@@ -879,7 +901,9 @@ public class PeerBanHelperServer implements Reloadable {
                     }
                 }
             }
-            return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
+            return new CheckResult(getClass(), PeerAction.SKIP, 0, -1L, -1L,
+                    new TranslationComponent("general-rule-ignored-address"),
+                    new TranslationComponent("general-reason-skip-ignored-peers"));
         }
         try {
             for (FeatureModule registeredModule : moduleManager.getModules()) {
@@ -912,6 +936,9 @@ public class PeerBanHelperServer implements Reloadable {
                     result = r;
                     break; // 立刻离开循环，处理跳过
                 }
+                if (r.action() == PeerAction.THROTTLE) {
+                    result = r;
+                }
                 if (r.action() == PeerAction.BAN || r.action() == PeerAction.BAN_FOR_DISCONNECT) {
                     result = r;
                 }
@@ -919,7 +946,8 @@ public class PeerBanHelperServer implements Reloadable {
             return result;
         } catch (Exception e) {
             log.error("Failed to execute modules", e);
-            return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("ERROR"), new TranslationComponent("ERROR"));
+            return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, -1L, -1L,
+                    new TranslationComponent("ERROR"), new TranslationComponent("ERROR"));
         }
     }
 
@@ -990,6 +1018,7 @@ public class PeerBanHelperServer implements Reloadable {
                 new BanDetail(torrent,
                         peer,
                         new CheckResult(getClass(), PeerAction.BAN, banDuration,
+                                -1L, -1L,
                                 new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE),
                                 new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON))
                         , banDuration)

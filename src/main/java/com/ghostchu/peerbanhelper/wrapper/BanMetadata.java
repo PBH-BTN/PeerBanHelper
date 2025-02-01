@@ -18,28 +18,34 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
     private String context;
     private long banAt;
     private long unbanAt;
-    private boolean banForDisconnect;
+    private BanBehavior banBehavior;
+    private long uploadRate;
+    private long downloadRate;
     private TranslationComponent rule;
     private TranslationComponent description;
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
+    public BanMetadata(String context, String downloader, long banAt, long unbanAt, BanBehavior banBehavior, long uploadRate, long downloadRate, Torrent torrent, Peer peer, TranslationComponent rule,
                        TranslationComponent description) {
         super(downloader, torrent, peer);
         this.context = context;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
-        this.banForDisconnect = banForDisconnect;
+        this.banBehavior = banBehavior;
+        this.uploadRate = uploadRate;
+        this.downloadRate = downloadRate;
         this.rule = rule;
         this.description = description;
     }
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, boolean banForDisconnect, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
+    public BanMetadata(String context, String downloader, long banAt, long unbanAt, BanBehavior banBehavior, long uploadRate, long downloadRate, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
                        TranslationComponent description) {
         super(downloader, torrent, peer);
         this.context = context;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
-        this.banForDisconnect = banForDisconnect;
+        this.banBehavior = banBehavior;
+        this.uploadRate = uploadRate;
+        this.downloadRate = downloadRate;
         this.rule = rule;
         this.description = description;
     }
@@ -50,7 +56,9 @@ public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata
                 "context='" + context + '\'' +
                 ", banAt=" + banAt +
                 ", unbanAt=" + unbanAt +
-                ", banForDisconnect=" + banForDisconnect +
+                ", banBehavior=" + banBehavior +
+                ", uploadRate=" + uploadRate +
+                ", downloadRate=" + downloadRate +
                 ", rule=" + tlUI(rule) +
                 ", description=" + tlUI(description) +
                 '}';

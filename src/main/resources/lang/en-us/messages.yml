@@ -596,3 +596,4 @@ LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_DESCRIPTION: "Use transaction
 ABOUT_VIEW_CREDIT: "Developers and community contributors..."
 TITLE_APP_V_CONTAINER: "📦App-V"
 DOWNLOADER_BIGLYBT_THROTTLE_FAILED: "Failed to set Peer throttle property for downloader {}, remote API call failed: {} - {}"
+THROTTLE_PEER: "[Throttle] {}, PeerId={}, ClientName={}, Progress={}, Uploaded={}, Downloaded={}, Torrent={}, Reason={}, UploadRate={}, DownloadRate={}"

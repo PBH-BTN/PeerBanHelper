@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.gson.JsonObject;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -117,7 +116,7 @@ public interface Downloader extends AutoCloseable {
      * @param removed       移除列表
      * @param applyFullList 强制应用全量列表
      */
-    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
+    void setBanList(Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
 
     /**
      * 如有需要，重启 Torrent 任务

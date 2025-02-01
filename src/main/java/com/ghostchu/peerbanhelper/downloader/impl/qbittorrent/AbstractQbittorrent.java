@@ -19,7 +19,6 @@ import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.FormBodyPublisher;
 import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -171,7 +170,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -434,9 +433,9 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         });
     }
 
-    protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
+    protected void setBanListFull(Collection<BanMetadata> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
-        peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
+        peerAddresses.stream().map(meta -> meta.getPeer().getAddress().getIp()).distinct().forEach(joiner::add);
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()

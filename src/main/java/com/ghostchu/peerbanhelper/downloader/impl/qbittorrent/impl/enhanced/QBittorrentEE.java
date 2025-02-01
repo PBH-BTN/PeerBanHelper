@@ -10,7 +10,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.FormBodyPublisher;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
@@ -85,7 +84,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             banHandler.setBanListIncrement(added);
         } else {
@@ -146,7 +145,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
         void setBanListIncrement(Collection<BanMetadata> added);
 
-        void setBanListFull(Collection<PeerAddress> peerAddresses);
+        void setBanListFull(Collection<BanMetadata> peerAddresses);
     }
 
     public static class BanHandlerNormal implements BanHandler {
@@ -168,7 +167,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<PeerAddress> peerAddresses) {
+        public void setBanListFull(Collection<BanMetadata> peerAddresses) {
             downloader.setBanListFull(peerAddresses);
         }
     }
@@ -229,9 +228,9 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
 
         @Override
-        public void setBanListFull(Collection<PeerAddress> peerAddresses) {
+        public void setBanListFull(Collection<BanMetadata> peerAddresses) {
             StringJoiner joiner = new StringJoiner("\n");
-            peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
+            peerAddresses.stream().map(meta -> meta.getPeer().getAddress().getIp()).distinct().forEach(joiner::add);
             try {
                 HttpResponse<String> request = httpClient.send(MutableRequest
                                 .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()

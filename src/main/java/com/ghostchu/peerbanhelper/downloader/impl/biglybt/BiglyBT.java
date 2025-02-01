@@ -28,6 +28,7 @@ import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.wrapper.BanBehavior;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.Methanol;
@@ -110,15 +111,32 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public void throttlePeer(Torrent torrent, Peer peer, long uploadRate, long downloadRate) throws UnsupportedOperationException {
+        throttlePeer(torrent.getHash(), peer.getRawIp(), uploadRate, downloadRate);
+    }
+
+    private void throttlePeer(String hash, String rawIp, long uploadRate, long downloadRate) {
         if (!getFeatureFlags().contains(DownloaderFeatureFlag.THROTTLING)) {
             throw new UnsupportedOperationException("BiglyBT-Adapter version is lower than 1.3.0, throttling is not supported.");
         }
         PeerThrottlingBean bean = new PeerThrottlingBean((int) uploadRate, (int) downloadRate);
         HttpResponse<String> resp;
         try {
-            var urlIp = UrlEncoderDecoder.encodeToLegalPath(peer.getRawIp());
-            resp = httpClient.send(MutableRequest.POST(apiEndpoint + "/download/" + torrent.getHash() + "/peer/" + urlIp + "/throttling",
+            var urlIp = UrlEncoderDecoder.encodeToLegalPath(rawIp);
+            resp = httpClient.send(MutableRequest.POST(apiEndpoint + "/download/" + hash + "/peer/" + urlIp + "/throttling",
                             HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean), StandardCharsets.UTF_8)),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (resp.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_THROTTLE_FAILED, getName(), resp.statusCode(), resp.body()));
+        }
+    }
+
+    private void resetThrottles() {
+        HttpResponse<String> resp;
+        try {
+            resp = httpClient.send(MutableRequest.POST(apiEndpoint + "/resetThrottling", HttpRequest.BodyPublishers.noBody()),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -190,12 +208,23 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<BanMetadata> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
+            setThrottling(added, false);
         } else {
             setBanListFull(fullList);
+            setThrottling(fullList, true);
         }
+    }
+
+    private void setThrottling(Collection<BanMetadata> fullList, boolean unThrottles) {
+        if (unThrottles) {
+            resetThrottles();
+        }
+        fullList.stream().filter(meta -> meta.getBanBehavior() == BanBehavior.THROTTLE)
+                .parallel()
+                .forEach(meta -> throttlePeer(meta.getTorrent().getHash(), meta.getPeer().getRawIp(), meta.getUploadRate(), meta.getDownloadRate()));
     }
 
     @Override
@@ -346,7 +375,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
-        BanBean bean = new BanBean(added.stream().map(b -> b.getPeer().getAddress().getIp()).distinct().toList());
+        BanBean bean = new BanBean(added.stream().filter(meta -> meta.getBanBehavior() == BanBehavior.BAN || meta.getBanBehavior() == BanBehavior.DISCONNECT).map(b -> b.getPeer().getAddress().getIp()).distinct().toList());
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest
                             .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
@@ -361,8 +390,8 @@ public final class BiglyBT extends AbstractDownloader {
         }
     }
 
-    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
-        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(PeerAddress::getIp).distinct().toList(), false);
+    private void setBanListFull(Collection<BanMetadata> peerAddresses) {
+        BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().filter(meta -> meta.getBanBehavior() == BanBehavior.BAN || meta.getBanBehavior() == BanBehavior.DISCONNECT).map(meta -> meta.getPeer().getRawIp()).distinct().toList(), false);
         try {
             HttpResponse<String> request = httpClient.send(MutableRequest.newBuilder()
                             .uri(URI.create(apiEndpoint + "/bans"))

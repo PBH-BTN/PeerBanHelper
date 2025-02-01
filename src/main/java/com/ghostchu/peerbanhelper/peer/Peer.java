@@ -102,4 +102,10 @@ public interface Peer extends Comparable<Peer> {
      * @return 原始IP
      */
     String getRawIp();
+
+    /**
+     * 是否被 PBH 节流
+     * @return 是否被节流
+     */
+    boolean isPBHThrottled();
 }
