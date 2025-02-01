@@ -254,7 +254,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         });
 
         // 日志插入线程
-        Thread.ofVirtual().start(() -> {
+        new Thread(() -> {
             JListAppender.allowWriteLogEntryDeque.set(true);
             while (true) {
                 try {
@@ -276,7 +276,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                     log.warn("Failed to update log list", e);
                 }
             }
-        });
+        }).start();
     }
 
 
