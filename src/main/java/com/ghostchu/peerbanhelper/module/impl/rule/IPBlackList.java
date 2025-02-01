@@ -311,6 +311,9 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+        if (isHandShaking(peer)) {
+            return handshaking();
+        }
         return getCache().readCacheButWritePassOnly(this, peer.getPeerAddress().getIp(), () -> {
             PeerAddress peerAddress = peer.getPeerAddress();
             if (ports.contains(peerAddress.getPort())) {

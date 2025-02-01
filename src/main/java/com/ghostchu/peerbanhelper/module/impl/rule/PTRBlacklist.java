@@ -100,6 +100,9 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
 
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+        if (isHandShaking(peer)) {
+            return handshaking();
+        }
         var reverseDnsLookupString = peer.getPeerAddress().getAddress().toReverseDNSLookupString();
         return getCache().readCache(this, reverseDnsLookupString, () -> {
             Optional<String> ptr;
