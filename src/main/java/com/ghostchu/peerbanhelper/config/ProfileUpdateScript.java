@@ -25,6 +25,14 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 25)
+    public void throttleRate(YamlConfiguration bundled) {
+        conf.set("throttle-rate", bundled.get("throttle-rate"));
+        conf.set("module.peer-id-blacklist.throttle-rate", bundled.get("module.peer-id-blacklist.throttle-rate"));
+        conf.set("module.client-name-blacklist.throttle-rate", bundled.get("module.client-name-blacklist.throttle-rate"));
+        conf.set("module.ptr-blacklist.throttle-rate", bundled.get("module.ptr-blacklist.throttle-rate"));
+    }
+
     @UpdateScript(version = 24)
     public void ptrBlacklistAndUpdateTorExitNodeList(YamlConfiguration bundled) {
         conf.set("module.ptr-blacklist", bundled.get("module.ptr-blacklist"));
