@@ -101,7 +101,7 @@ public final class BiglyBT extends AbstractDownloader {
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
         List<DownloaderFeatureFlag> flags = new ArrayList<>();
-        flags.add(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP);
+        flags.add(DownloaderFeatureFlag.READ_PEER_PROTOCOLS);
         flags.add(DownloaderFeatureFlag.UNBAN_IP);
         if (semver.isGreaterThanOrEqualTo("1.3.0")) {
             flags.add(DownloaderFeatureFlag.THROTTLING);
