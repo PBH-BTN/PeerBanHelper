@@ -116,6 +116,10 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
                     return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, matchResult.rule().matcherName(),
                             new TranslationComponent(Lang.MODULE_PTR_MATCH_PTR_RULE, matchResult.rule().matcherName()));
                 }
+                if (matchResult.throttle()) {
+                    return new CheckResult(getClass(), PeerAction.THROTTLE, getBanDuration(), getThrottleRate().uploadRate(), getThrottleRate().downloadRate(), matchResult.rule().matcherName(),
+                            new TranslationComponent(Lang.MODULE_PTR_MATCH_PTR_RULE, matchResult.rule().matcherName()));
+                }
             }
             return pass();
         }, true);

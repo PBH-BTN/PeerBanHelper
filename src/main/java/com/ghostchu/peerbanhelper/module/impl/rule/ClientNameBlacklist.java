@@ -100,6 +100,12 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
                     new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME,
                             matchResult.comment()));
         }
+        if (matchResult.throttle()) {
+            return new CheckResult(getClass(), PeerAction.THROTTLE, getBanDuration(), getThrottleRate().uploadRate(), -getThrottleRate().downloadRate(),
+                    matchResult.rule().matcherName(),
+                    new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME,
+                            matchResult.comment()));
+        }
         return pass();
         //}, true);
     }

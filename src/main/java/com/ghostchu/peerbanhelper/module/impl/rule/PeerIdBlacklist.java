@@ -96,6 +96,9 @@ public final class PeerIdBlacklist extends AbstractRuleFeatureModule implements 
         if (matchResult.hit()) {
             return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, matchResult.rule().matcherName(), new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.comment()));
         }
+        if (matchResult.throttle()) {
+            return new CheckResult(getClass(), PeerAction.THROTTLE, getBanDuration(), getThrottleRate().uploadRate(), getThrottleRate().downloadRate(), matchResult.rule().matcherName(), new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.comment()));
+        }
         return pass();
         //}, true);
 
