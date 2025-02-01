@@ -101,7 +101,7 @@ public final class BiglyBT extends AbstractDownloader {
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
         List<DownloaderFeatureFlag> flags = new ArrayList<>();
-        flags.add(DownloaderFeatureFlag.READ_PEER_PROTOCOLS);
+        flags.add(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP);
         flags.add(DownloaderFeatureFlag.UNBAN_IP);
         if (semver.isGreaterThanOrEqualTo("1.3.0")) {
             flags.add(DownloaderFeatureFlag.THROTTLING);
@@ -167,7 +167,7 @@ public final class BiglyBT extends AbstractDownloader {
                 var version = metadataCallbackBean.getPluginVersion();
                 this.semver = new Semver(version);
                 // 检查是否大于等于 1.2.8
-                if (this.semver.isLowerThan("1.2.9")) {
+                if (this.semver.isLowerThan("1.3.0")) {
                     return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.2.9"));
                 }
                 MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(connectorPayload));
