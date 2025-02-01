@@ -33,7 +33,6 @@ public final class PeerIdBlacklist extends AbstractRuleFeatureModule implements 
     private List<Rule> bannedPeers;
     @Autowired
     private JavalinWebContainer webContainer;
-    private long banDuration;
 
     @Override
     public @NotNull String getName() {
@@ -82,7 +81,6 @@ public final class PeerIdBlacklist extends AbstractRuleFeatureModule implements 
     }
 
     public void reloadConfig() {
-        this.banDuration = getConfig().getLong("ban-duration", 0);
         this.bannedPeers = RuleParser.parse(getConfig().getStringList("banned-peer-id"));
         getCache().invalidateAll();
     }
@@ -96,7 +94,7 @@ public final class PeerIdBlacklist extends AbstractRuleFeatureModule implements 
         //return getCache().readCache(this, peer.getPeerId(), () -> {
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getPeerId());
         if (matchResult.hit()) {
-            return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, matchResult.rule().matcherName(), new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.comment()));
+            return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, matchResult.rule().matcherName(), new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.comment()));
         }
         return pass();
         //}, true);

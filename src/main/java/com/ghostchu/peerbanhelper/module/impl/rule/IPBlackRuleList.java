@@ -78,7 +78,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
     private final DecentralizedManager decentralizedManager;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
-    private long banDuration;
 
     public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao, ModuleMatchCache moduleMatchCache, DecentralizedManager decentralizedManager) {
         super();
@@ -135,7 +134,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                     if (match) {
                         return new CheckResult(getClass(),
                                 PeerAction.BAN,
-                                banDuration,
+                                getBanDuration(),
                                 -1L, -1L,
                                 new TranslationComponent(ipBanResult.ruleName()),
                                 new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE,
@@ -159,7 +158,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
     private void reloadConfig() {
         getCache().invalidateAll();
         try {
-            this.banDuration = getConfig().getLong("ban-duration", 0);
             if (null == ipBanMatchers) {
                 ipBanMatchers = new ArrayList<>();
             }

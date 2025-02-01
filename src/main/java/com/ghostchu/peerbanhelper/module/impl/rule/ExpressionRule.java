@@ -60,7 +60,6 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private final ScriptEngine scriptEngine;
     private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
     private final ScriptStorageDao scriptStorageDao;
-    private long banDuration;
 
     public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngine scriptEngine, ScriptStorageDao scriptStorageDao) {
         super();
@@ -256,7 +255,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                 env.put("cacheable", new AtomicBoolean(false));
                 env.put("server", getServer());
                 env.put("moduleInstance", this);
-                env.put("banDuration", banDuration);
+                env.put("banDuration", getBanDuration());
                 env.put("persistStorage", scriptStorageDao);
                 env.put("ramStorage", SharedObject.SCRIPT_THREAD_SAFE_MAP);
                 Object returns;
@@ -267,7 +266,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
                         returns = script.expression().execute(env);
                     }
                 }
-                result = scriptEngine.handleResult(script,banDuration, returns);
+                result = scriptEngine.handleResult(script, getBanDuration(), returns);
             } catch (TimeoutException timeoutException) {
                 return pass();
             } catch (Exception ex) {
@@ -295,7 +294,6 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
 
     private void reloadConfig() throws IOException {
         scripts.clear();
-        this.banDuration = getConfig().getLong("ban-duration", 0);
         initScripts();
         log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
         long start = System.currentTimeMillis();

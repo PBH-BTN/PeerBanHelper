@@ -49,7 +49,6 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
     private long keepHuntingTime;
     @Autowired
     private JavalinWebContainer webContainer;
-    private long banDuration;
     private int tolerateNumV4;
     private int tolerateNumV6;
 
@@ -111,7 +110,6 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
     }
 
     private void reloadConfig() {
-        this.banDuration = getConfig().getLong("ban-duration", 0);
         subnetMaskLength = getConfig().getInt("subnet-mask-length");
         subnetMaskV6Length = getConfig().getInt("subnet-mask-v6-length");
         tolerateNumV4 = getConfig().getInt("tolerate-num-ipv4");
@@ -171,7 +169,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                 // 落库
                 huntingList.put(torrentSubnetStr, currentTimestamp);
                 // 返回当前IP即可，其他IP会在下一周期被封禁
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.MDB_MULTI_DIALING_DETECTED),
+                return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.MDB_MULTI_DIALING_DETECTED),
                         new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_DETECTED, peerSubnet.toString(), peerIpStr));
             }
 
@@ -183,7 +181,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                         if (currentTimestamp - huntingTimestamp < keepHuntingTime) {
                             // 落库
                             huntingList.put(torrentSubnetStr, currentTimestamp);
-                            return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.MDB_MULTI_HUNTING),
+                            return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.MDB_MULTI_HUNTING),
                                     new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED, peerSubnet.toString(), peerIpStr));
                         } else {
                             huntingList.invalidate(torrentSubnetStr);

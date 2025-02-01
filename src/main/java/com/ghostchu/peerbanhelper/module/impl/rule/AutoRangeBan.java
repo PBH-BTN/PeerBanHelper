@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.peerbanhelper.wrapper.BanBehavior;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -39,7 +40,6 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     private int ipv6Prefix;
     @Autowired
     private JavalinWebContainer webContainer;
-    private long banDuration;
 
     @Override
     public @NotNull String getName() {
@@ -87,7 +87,6 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     private void reloadConfig() {
         this.ipv4Prefix = getConfig().getInt("ipv4");
         this.ipv6Prefix = getConfig().getInt("ipv6");
-        this.banDuration = getConfig().getLong("ban-duration", 0);
         getCache().invalidateAll();
     }
 
@@ -104,7 +103,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
             peerAddress = peerAddress.toIPv4();
         }
         for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : getServer().getBannedPeersDirect().entrySet()) {
-            if (bannedPeerEntry.getValue().isBanForDisconnect()) {
+            if (bannedPeerEntry.getValue().getBanBehavior() == BanBehavior.DISCONNECT) {
                 continue;
             }
             PeerAddress bannedPeer = bannedPeerEntry.getKey();
@@ -125,7 +124,7 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                 bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress, ipv6Prefix);
             }
             if (bannedAddress.contains(peerAddress)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), bannedAddress.toString(), addressType));
+                return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), bannedAddress.toString(), addressType));
             }
         }
         return pass();

@@ -76,7 +76,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     private int ipv6PrefixLength;
     @Autowired
     private JavalinWebContainer webContainer;
-    private long banDuration;
     @Autowired
     private ProgressCheatBlockerPersistDao progressCheatBlockerPersistDao;
     private boolean enablePersist;
@@ -204,7 +203,6 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
     }
 
     private void reloadConfig() {
-        this.banDuration = getConfig().getLong("ban-duration", 0);
         this.torrentMinimumSize = getConfig().getLong("minimum-size");
         this.blockExcessiveClients = getConfig().getBoolean("block-excessive-clients");
         this.excessiveThreshold = getConfig().getDouble("excessive-threshold");
@@ -296,7 +294,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     if (actualUploaded > maxAllowedExcessiveThreshold) {
                         clientTask.setBanDelayWindowEndAt(0L);
                         progressRecorder.invalidate(client); // 封禁时，移除缓存
-                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
+                        return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
                                 new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD,
                                         torrentSize,
                                         actualUploaded,
@@ -308,7 +306,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     if (actualUploaded > maxAllowedExcessiveThreshold) {
                         clientTask.setBanDelayWindowEndAt(0L);
                         progressRecorder.invalidate(client); // 封禁时，移除缓存
-                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
+                        return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_ALLOWED_EXCESSIVE_THRESHOLD),
                                 new TranslationComponent(Lang.MODULE_PCB_EXCESSIVE_DOWNLOAD_INCOMPLETE,
                                         torrentSize,
                                         completedSize,
@@ -329,7 +327,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     clientTask.setProgressDifferenceCounter(clientTask.getProgressDifferenceCounter() + 1);
                     clientTask.setBanDelayWindowEndAt(0L);
                     progressRecorder.invalidate(client); // 封禁时，移除缓存
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE),
+                    return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.PCB_RULE_REACHED_MAX_DIFFERENCE),
                             new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS,
                                     percent(clientProgress),
                                     percent(actualProgress),

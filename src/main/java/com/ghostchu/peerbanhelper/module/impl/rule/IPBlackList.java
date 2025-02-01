@@ -44,7 +44,6 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     private Set<String> netTypes;
     @Autowired
     private JavalinWebContainer webContainer;
-    private long banDuration;
     private Set<String> cities;
 
     @Override
@@ -267,7 +266,6 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     }
 
     private void reloadConfig() {
-        this.banDuration = getConfig().getLong("ban-duration", 0);
         this.ips = new HashSet<>();
         for (String s : getConfig().getStringList("ips")) {
             IPAddress ipAddress = IPAddressUtil.getIPAddress(s);
@@ -314,12 +312,12 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         return getCache().readCacheButWritePassOnly(this, peer.getPeerAddress().getIp(), () -> {
             PeerAddress peerAddress = peer.getPeerAddress();
             if (ports.contains(peerAddress.getPort())) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_PORT_RULE), new TranslationComponent(Lang.MODULE_IBL_MATCH_PORT, String.valueOf(peerAddress.getPort())));
+                return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_PORT_RULE), new TranslationComponent(Lang.MODULE_IBL_MATCH_PORT, String.valueOf(peerAddress.getPort())));
             }
             IPAddress pa = IPAddressUtil.getIPAddress(peerAddress.getIp());
             for (IPAddress ra : ips) {
                 if (ra.equals(pa) || ra.contains(pa)) {
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_CIDR_RULE, ra.toString()), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, ra.toString()));
+                    return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_CIDR_RULE, ra.toString()), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, ra.toString()));
                 }
             }
             try {
@@ -345,26 +343,26 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         if (!asns.isEmpty() && geoData.getAs() != null) {
             Long asn = geoData.getAs().getNumber();
             if (asns.contains(asn)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_ASN_RULE, String.valueOf(asn)), new TranslationComponent(Lang.MODULE_IBL_MATCH_ASN, String.valueOf(asn)));
+                return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_ASN_RULE, String.valueOf(asn)), new TranslationComponent(Lang.MODULE_IBL_MATCH_ASN, String.valueOf(asn)));
             }
         }
         if (!regions.isEmpty() && geoData.getCountry() != null) {
             String iso = geoData.getCountry().getIso();
             if (regions.contains(iso)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_REGION_RULE, iso), new TranslationComponent(Lang.MODULE_IBL_MATCH_REGION, iso));
+                return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_REGION_RULE, iso), new TranslationComponent(Lang.MODULE_IBL_MATCH_REGION, iso));
             }
         }
         if (!netTypes.isEmpty() && geoData.getNetwork() != null && geoData.getNetwork().getNetType() != null) {
             String netType = geoData.getNetwork().getNetType();
             if (netTypes.contains(netType)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_NETTYPE_RULE, netType), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, netType));
+                return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_NETTYPE_RULE, netType), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, netType));
             }
         }
         if (!cities.isEmpty() && geoData.getCity() != null && geoData.getCity().getName() != null) {
             String fullCityName = geoData.getCity().getName();
             for (String s : cities) {
                 if (fullCityName.contains(s)) {
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_CITY_RULE, s), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, s));
+                    return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, new TranslationComponent(Lang.IP_BLACKLIST_CITY_RULE, s), new TranslationComponent(Lang.MODULE_IBL_MATCH_IP, s));
                 }
             }
         }

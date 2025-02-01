@@ -42,7 +42,6 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
     private JavalinWebContainer webContainer;
     @Autowired
     private DNSLookup dnsLookup;
-    private long banDuration;
     @Autowired
     private Laboratory laboratory;
 
@@ -93,7 +92,6 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
     }
 
     public void reloadConfig() {
-        this.banDuration = getConfig().getLong("ban-duration", 0);
         this.ptrRules = RuleParser.parse(getConfig().getStringList("ptr-rules"));
         getCache().invalidateAll();
     }
@@ -115,7 +113,7 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
             if (ptr.isPresent()) {
                 RuleMatchResult matchResult = RuleParser.matchRule(ptrRules, ptr.get());
                 if (matchResult.hit()) {
-                    return new CheckResult(getClass(), PeerAction.BAN, banDuration, -1L, -1L, matchResult.rule().matcherName(),
+                    return new CheckResult(getClass(), PeerAction.BAN, getBanDuration(), -1L, -1L, matchResult.rule().matcherName(),
                             new TranslationComponent(Lang.MODULE_PTR_MATCH_PTR_RULE, matchResult.rule().matcherName()));
                 }
             }
