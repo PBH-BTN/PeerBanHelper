@@ -105,9 +105,9 @@ public class Main {
         setupReloading();
         setupConfDirectory(args);
         loadFlagsProperties();
+        setupConfiguration();
         setupLogback();
         meta = buildMeta();
-        setupConfiguration();
         String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
         log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
@@ -380,13 +380,17 @@ public class Main {
     private static boolean initConfiguration() throws IOException {
         log.info("PeerBanHelper data directory: {}", dataDirectory.getAbsolutePath());
         if (!dataDirectory.exists()) {
-            configDirectory.mkdirs();
+            dataDirectory.mkdirs();
         }
         if (!configDirectory.exists()) {
             configDirectory.mkdirs();
         }
         if (!configDirectory.isDirectory()) {
-            throw new IllegalStateException("The path " + configDirectory.getAbsolutePath() + " should be a directory but found a file.");
+            configDirectory.delete();
+            configDirectory.mkdirs();
+            if (!configDirectory.isDirectory()) {
+                throw new IllegalStateException("The path " + configDirectory.getAbsolutePath() + " should be a directory but found a file, auto fix failed.");
+            }
         }
         if (!pluginDirectory.exists()) {
             pluginDirectory.mkdirs();
