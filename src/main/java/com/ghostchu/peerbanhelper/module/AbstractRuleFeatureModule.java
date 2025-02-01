@@ -46,4 +46,8 @@ public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule im
         return HANDSHAKING_CHECK_RESULT;
     }
 
+    public ModuleThrottleRate getThrottleRate() {
+        return new ModuleThrottleRate(getConfig().getLong("throttle-rate.upload", -1), getConfig().getLong("throttle-rate.download", -1));
+    }
+
 }
