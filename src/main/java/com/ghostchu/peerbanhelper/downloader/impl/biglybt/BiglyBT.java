@@ -60,6 +60,7 @@ public final class BiglyBT extends AbstractDownloader {
     private final HttpClient httpClient;
     private final Config config;
     private final String connectorPayload;
+    private Semver semver = new Semver("0.0.0");
 
     public BiglyBT(String name, Config config, AlertManager alertManager) {
         super(name, alertManager);
@@ -96,7 +97,7 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS);
+        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.THROTTLING);
     }
 
     @Override
@@ -118,9 +119,9 @@ public final class BiglyBT extends AbstractDownloader {
                 MetadataCallbackBean metadataCallbackBean = JsonUtil.standard().fromJson(resp.body(), MetadataCallbackBean.class);
                 // 验证版本号
                 var version = metadataCallbackBean.getPluginVersion();
-                Semver semver = new Semver(version);
+                this.semver = new Semver(version);
                 // 检查是否大于等于 1.2.8
-                if (semver.isLowerThan("1.2.9")) {
+                if (this.semver.isLowerThan("1.2.9")) {
                     return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.2.9"));
                 }
                 MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(connectorPayload));
