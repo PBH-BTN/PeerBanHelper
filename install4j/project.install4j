@@ -7,6 +7,9 @@
       <additionalLanguages>
         <language id="en" customLocalizationFile="./lang/en-US.utf8" />
       </additionalLanguages>
+      <additionalLanguages>
+        <language id="zh_TW" customLocalizationFile="./lang/zh-TW.utf8" />
+      </additionalLanguages>
     </languages>
     <variables>
       <variable name="registerSystemService" value="registerSystemService" />
