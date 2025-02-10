@@ -3,7 +3,9 @@ FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21-alpine A
 COPY . /build
 WORKDIR /build
 RUN apk add --update npm curl git && \
-    wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash - && \
+    wget -o pnpm-install.sh https://get.pnpm.io/install.sh && \
+    chmod +x pnpm-install.sh && \
+    ./pnpm-install.sh && \
     cd webui && \
     pnpm i && \
     npm run build && \
