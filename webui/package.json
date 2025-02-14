@@ -20,7 +20,7 @@
     "@formatjs/intl-durationformat": "^0.7.2",
     "@guolao/vue-monaco-editor": "^1.5.4",
     "@octokit/core": "^6.1.3",
-    "@octokit/request-error": "^6.1.6",
+    "@octokit/request-error": "^6.1.7",
     "@vueuse/core": "^12.3.0",
     "antlr4": "^4.13.2",
     "compare-versions": "^6.1.1",
