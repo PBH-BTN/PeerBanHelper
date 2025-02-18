@@ -28,7 +28,7 @@ public final class EcoMode {
                 Files.copy(Main.class.getResourceAsStream("/native/windows/ghost-common-jni_vc2015_amd64.dll"), tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             System.load(tmpFile.getAbsolutePath());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Unable load JNI native libraries", e);
         }
         try {
