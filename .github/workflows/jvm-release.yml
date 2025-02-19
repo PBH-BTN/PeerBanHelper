@@ -8,6 +8,7 @@ on:
 
 jobs:
   Build_Executable:
+    name: Build JAR Files
     permissions:
       contents: write
       checks: write
@@ -21,35 +22,42 @@ jobs:
     uses: ./.github/workflows/build_maven.yml
 
   Build_Installers:
+    name: Generate Installers
     needs: Build_Executable
     uses: ./.github/workflows/build_installers.yml
     secrets: inherit
 
   Build_SPK:
+    name: Generate Synology Package
     needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
     with:
       image: registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:${{ github.ref_name }}
 
   Build_DEB:
+    name: Generate Debian Package
     needs: Build_Executable
     uses: ./.github/workflows/build_deb.yml
 
   Build_PKG:
+    name: Generate FreeBSD Package
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
 
   Build_Portable:
+    name: Generate Portable Version
     needs: Build_Executable
     uses: ./.github/workflows/build_portable.yml
 
   Empty_Old_S3_Files:
+    name: Delete Outdate file in S3
     if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
     uses: ./.github/workflows/delete_old_s3_objects.yml
     secrets: inherit
 
   Upload_Updates_To_S3:
+    name: Update To S3
     if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable, Empty_Old_S3_Files ]
     runs-on: ubuntu-latest
@@ -68,12 +76,14 @@ jobs:
           destination_dir: 'updates/latest'
 
   Clear_CloudFlare_Updates:
+    name: Clear CloudFlare Cache
     if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
     needs: [Upload_Updates_To_S3]
     uses: ./.github/workflows/flush_cloudflare_cache.yml
     secrets: inherit
 
   Upload_Artifacts:
+    name: Upload Release Artifacts
     continue-on-error: true
     if: github.event_name != 'workflow_dispatch'
     needs: [Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable]
@@ -158,6 +168,7 @@ jobs:
           asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*", "target/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
 
   Build_Docker:
+    name: Build Docker Image
     if: github.event_name != 'workflow_dispatch'
     permissions:
       contents: write
