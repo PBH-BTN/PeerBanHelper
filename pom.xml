@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.4.0</version>
+    <version>7.4.3</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -270,7 +270,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.12.0</version>
+            <version>2.12.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -307,7 +307,7 @@
         <dependency>
             <groupId>com.github.mizosoft.methanol</groupId>
             <artifactId>methanol</artifactId>
-            <version>1.8.0</version>
+            <version>1.8.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
@@ -363,7 +363,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.2.2</version>
+            <version>6.2.3</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
         <dependency>
