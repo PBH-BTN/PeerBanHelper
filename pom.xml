@@ -517,7 +517,7 @@
         <dependency>
             <groupId>me.friwi</groupId>
             <artifactId>jcefmaven</artifactId>
-            <version>126.2.0</version>
+            <version>127.3.1</version>
         </dependency>
         <!--        <dependency>-->
         <!--            <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>-->
