@@ -1,0 +1,23 @@
+name: Build sqlite-jdbc for loongarch
+on:
+  workflow_call:
+  push:
+
+jobs:
+  build:
+    runs-on: LOONGARCH64
+    steps:
+      - name: Get latest release of sqlite-jdbc
+        uses: pozetroninc/github-action-get-latest-release@master
+        id: sqlite
+        with:
+          owner: xerial
+          repo: sqlite-jdbc
+          excludes: prerelease, draft
+      - uses: actions/checkout@v4
+        with:
+          repository: xerial/sqlite-jdbc
+          ref: ${{ steps.sqlite.outputs.release }}
+      - name: Build sqlite-jdbc
+        run: |
+          ls
