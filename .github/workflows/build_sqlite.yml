@@ -20,4 +20,5 @@ jobs:
           ref: ${{ steps.sqlite.outputs.release }}
       - name: Build sqlite-jdbc
         run: |
+          make native -j$(nproc)
           ls
