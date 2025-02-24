@@ -1,4 +1,4 @@
-VS2015 x64 本机工具命令提示符
+# VS2015 x64 本机工具命令提示符
 cl /LD /I"%JAVA_HOME%\include" /I"%JAVA_HOME%\include\win32" ghost-common-jni.cpp /link /out:ghost-common-jni_vc2015_amd64.dll
-VS2015 x64 ARM 兼容工具命令提示符
+# VS2015 x64 ARM 兼容工具命令提示符
 cl /LD /I"%JAVA_HOME%\include" /I"%JAVA_HOME%\include\win32" ghost-common-jni.cpp /link /out:ghost-common-jni_vc2015_aarch64.dll

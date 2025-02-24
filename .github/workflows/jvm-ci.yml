@@ -13,27 +13,34 @@ on:
   workflow_dispatch:
 jobs:
   Build_Executable:
+    name: Build JAR Files
     uses: ./.github/workflows/build_maven.yml
     secrets: inherit
   Build_Installers:
+    name: Generate Installers
     needs: Build_Executable
     uses: ./.github/workflows/build_installers.yml
     secrets: inherit
   Build_Portable:
+    name: Generate Portable Version
     needs: Build_Executable
     uses: ./.github/workflows/build_portable.yml
   Build_SPK:
+    name: Generate Synology Package
     needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
     with:
       image: ghostchu/peerbanhelper-snapshot:sha-$(git rev-parse --short ${{ github.sha }})
   Build_DEB:
+    name: Generate Debian Package
     needs: Build_Executable
     uses: ./.github/workflows/build_deb.yml
   Build_PKG:
+    name: Generate FreeBSD Package
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
   Create_Torrent:
+    name: Create Torrent
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable ]
     runs-on: ubuntu-latest
     steps:
@@ -101,6 +108,7 @@ jobs:
           -o peerbanhelper.torrent \
           "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
   Build_Docker:
+    name: Build and Push Docker Images
     needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
@@ -146,6 +154,7 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=min
   Build_Docker_Standalone:
+    name: Build Standalone Docker Images
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
