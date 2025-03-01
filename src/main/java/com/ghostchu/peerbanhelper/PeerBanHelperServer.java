@@ -639,16 +639,19 @@ public class PeerBanHelperServer implements Reloadable {
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
+            Semaphore semaphore = new Semaphore(Math.min(Runtime.getRuntime().availableProcessors(), 32));
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
                     protect.getService().submit(() -> {
                         try {
+                            semaphore.acquire();
                             CheckResult checkResult = checkBan(torrent, peer, downloader);
                             details.add(new BanDetail(torrent, peer, checkResult, checkResult.duration()));
                         } catch (Exception e) {
                             log.error("Unexpected error occurred while checking bans", e);
-                            throw e;
+                        } finally {
+                            semaphore.release();
                         }
                     });
                 }
