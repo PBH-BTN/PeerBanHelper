@@ -19,34 +19,26 @@ public final class QBittorrentEEPeer implements Peer {
     private String client;
     @SerializedName("connection")
     private String connection;
-    @SerializedName("country")
-    private String country;
-    @SerializedName("country_code")
-    private String countryCode;
     @SerializedName("dl_speed")
-    private Long dlSpeed;
+    private long dlSpeed;
     @SerializedName("downloaded")
-    private Long downloaded;
+    private long downloaded;
     @SerializedName("files")
     private String files;
     @SerializedName("flags")
     private String flags;
-    @SerializedName("flags_desc")
-    private String flagsDesc;
     @SerializedName("ip")
     private String ip;
     @SerializedName("peer_id_client")
     private String peerIdClient;
     @SerializedName("port")
-    private Integer port;
+    private int port;
     @SerializedName("progress")
-    private Double progress;
-    @SerializedName("relevance")
-    private Double relevance;
+    private double progress;
     @SerializedName("up_speed")
-    private Long upSpeed;
+    private long upSpeed;
     @SerializedName("uploaded")
-    private Long uploaded;
+    private long uploaded;
     @Getter
     @SerializedName("shadowbanned")
     private Boolean shadowBanned;
@@ -130,18 +122,14 @@ public final class QBittorrentEEPeer implements Peer {
         return "QBEEPeer{" +
                "client='" + client + '\'' +
                ", connection='" + connection + '\'' +
-               ", country='" + country + '\'' +
-               ", countryCode='" + countryCode + '\'' +
                ", dlSpeed=" + dlSpeed +
                ", downloaded=" + downloaded +
                ", files='" + files + '\'' +
                ", flags='" + flags + '\'' +
-               ", flagsDesc='" + flagsDesc + '\'' +
                ", ip='" + ip + '\'' +
                ", peerIdClient='" + peerIdClient + '\'' +
                ", port=" + port +
                ", progress=" + progress +
-               ", relevance=" + relevance +
                ", upSpeed=" + upSpeed +
                ", uploaded=" + uploaded +
                ", shadowBanned=" + shadowBanned +

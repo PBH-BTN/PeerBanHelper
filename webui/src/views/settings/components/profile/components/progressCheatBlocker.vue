@@ -95,7 +95,7 @@
       ></a-input-number>
     </a-form-item>
     <a-form-item
-      :label="t('page.settings.tab.profile.module.progressCheatBlocker.banDuration')"
+      :label="t('page.settings.tab.profile.module.progressCheatBlocker.useGlobalBanTime')"
       field="model.ban_duration"
     >
       <a-space>

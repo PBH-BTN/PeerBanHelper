@@ -20,34 +20,24 @@ public final class QBittorrentPeer implements Peer {
     private String client;
     @SerializedName("connection")
     private String connection;
-//    @SerializedName("country")
-//    private String country;
-//    @SerializedName("country_code")
-//    private String countryCode;
     @SerializedName("dl_speed")
-    private Long dlSpeed;
+    private long dlSpeed;
     @SerializedName("downloaded")
-    private Long downloaded;
-//    @SerializedName("files")
-//    private String files;
+    private long downloaded;
     @SerializedName("flags")
     private String flags;
-//    @SerializedName("flags_desc")
-//    private String flagsDesc;
     @SerializedName("ip")
     private String ip;
     @SerializedName("peer_id_client")
     private String peerIdClient;
     @SerializedName("port")
-    private Integer port;
+    private int port;
     @SerializedName("progress")
-    private Double progress;
-//    @SerializedName("relevance")
-//    private Double relevance;
+    private double progress;
     @SerializedName("up_speed")
-    private Long upSpeed;
+    private long upSpeed;
     @SerializedName("uploaded")
-    private Long uploaded;
+    private long uploaded;
     private transient PeerAddress peerAddress;
     private String rawIp;
 
