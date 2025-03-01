@@ -140,7 +140,7 @@ module:
     # IPV6 prefix length, same prefix will trick as a same user
     # 64 = 常见的 ISP 为单个接入用户分配的前缀长度
     # 64 = The common prefix length that ISP allocate for one user
-    ipv6-prefix-length: 60
+    ipv6-prefix-length: 56
     ban-duration: 2592000000
     # 启用持久化记录
     # Enable persist recording
@@ -257,7 +257,7 @@ module:
     ipv4: 30
     # IPV6 前缀长度
     # IPV6 prefix length
-    ipv6: 60
+    ipv6: 48
   # 启用来自 BTN 网络的规则
   # Enable the network rules from BTN server, only works when you configured BTN server in config.yml
   btn:
@@ -277,7 +277,7 @@ module:
     subnet-mask-length: 24
     # IPv6 地址前缀长度
     # IPv6 prefix length
-    subnet-mask-v6-length: 60
+    subnet-mask-v6-length: 56
     # 容许同一网段下载同一种子的IP数量，正整数 (IPV4)
     # 防止DHCP重新分配IP、碰巧有同一小区的用户下载同一种子等导致的误判
     # The allowed maximum amount of ips in same subnet
