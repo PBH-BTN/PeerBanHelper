@@ -639,7 +639,7 @@ public class PeerBanHelperServer implements Reloadable {
     private List<BanDetail> checkBans(Map<Torrent, List<Peer>> provided, @NotNull Downloader downloader) {
         List<BanDetail> details = Collections.synchronizedList(new ArrayList<>());
         try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
-            Semaphore semaphore = new Semaphore(Math.min(Runtime.getRuntime().availableProcessors(), 32));
+            Semaphore semaphore = new Semaphore(Math.min(Runtime.getRuntime().availableProcessors(), ExternalSwitch.parseInt("pbh.checkParallelism", 32)));
             for (Torrent torrent : provided.keySet()) {
                 List<Peer> peers = provided.get(torrent);
                 for (Peer peer : peers) {
