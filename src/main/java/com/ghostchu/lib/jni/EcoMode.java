@@ -18,10 +18,6 @@ public final class EcoMode {
         if (!os.startsWith("win")) {
             throw new IllegalStateException("Only Windows OS support EcoMode API");
         }
-        String osVersion = System.getProperty("os.version");
-        if (!isSupportedVersion(osVersion)) { // 检查是否为版本号大于22621
-            throw new IllegalStateException("EcoQoS is only supported on Windows version 22621 or higher");
-        }
         String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
         try {
             File tmpFile = Files.createTempFile("pbh-jni-lib", ".dll").toFile();
@@ -39,16 +35,6 @@ public final class EcoMode {
             String data = setEcoMode(enable);
             return data.equals("SUCCESS");
         } catch (Throwable e) {
-            return false;
-        }
-    }
-
-    // 判断是否为受支持的版本
-    private boolean isSupportedVersion(String osVersion) {
-        try {
-            int versionNumber = Integer.parseInt(osVersion.replaceAll("\\.", ""));
-            return versionNumber >= 10022621; // 10.0.22621 开始支持
-        } catch (NumberFormatException e) {
             return false;
         }
     }
