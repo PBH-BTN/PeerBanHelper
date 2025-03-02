@@ -21,7 +21,8 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Component
 public final class DNSLookup implements Reloadable {
-    private volatile ExtendedResolver resolver = new ExtendedResolver();
+    private volatile ExtendedResolver resolver;
+    private volatile boolean bootComplete = false;
 
     public DNSLookup() {
         reloadConfig();
@@ -36,13 +37,20 @@ public final class DNSLookup implements Reloadable {
 
     private void reloadConfig() {
         // get system dns via oshi
-        SystemInfo systemInfo = new SystemInfo();
-        var dnsServers = systemInfo.getOperatingSystem().getNetworkParams().getDnsServers();
-        List<String> dns = Main.getMainConfig().getStringList("resolvers.servers");
-        if (Main.getMainConfig().getBoolean("resolvers.use-system",true)) {
-            dns.addAll(Arrays.asList(dnsServers));
+        try {
+            resolver = new ExtendedResolver();
+            SystemInfo systemInfo = new SystemInfo();
+            var dnsServers = systemInfo.getOperatingSystem().getNetworkParams().getDnsServers();
+            List<String> dns = Main.getMainConfig().getStringList("resolvers.servers");
+            if (Main.getMainConfig().getBoolean("resolvers.use-system", true)) {
+                dns.addAll(Arrays.asList(dnsServers));
+            }
+            applyDnsServers(dns);
+            bootComplete = true;
+        } catch (Throwable e) {
+            log.error("Unable to complete oshi DNS Servers lookup, DNSJAVA functions may not work properly", e);
+            bootComplete = false;
         }
-        applyDnsServers(dns);
     }
 
     private void applyDnsServers(List<String> servers) {
@@ -67,6 +75,9 @@ public final class DNSLookup implements Reloadable {
     }
 
     public CompletableFuture<Optional<String>> ptr(String query) {
+        if (!bootComplete) {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Lookup lookup = new Lookup(query, Type.PTR);

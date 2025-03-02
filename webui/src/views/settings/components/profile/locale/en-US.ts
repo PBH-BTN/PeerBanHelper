@@ -71,7 +71,8 @@ export default {
   'page.settings.tab.profile.module.progressCheatBlocker.ipv6prefixlength': 'IPv6 prefix length',
   'page.settings.tab.profile.module.progressCheatBlocker.ipprefixLength.tips':
     'IPs from the same subnet are considered as the same user',
-  'page.settings.tab.profile.module.progressCheatBlocker.banDuration': 'Ban Duration',
+  'page.settings.tab.profile.module.progressCheatBlocker.useGlobalBanTime':
+    'Use global ban duration',
   'page.settings.tab.profile.module.progressCheatBlocker.enablePersist': 'Enable persist recording',
   'page.settings.tab.profile.module.progressCheatBlocker.enablePersist.tips':
     'Enable this feature may increase disk I/O and may affect performance, even may cause flash wear on embedded devices',

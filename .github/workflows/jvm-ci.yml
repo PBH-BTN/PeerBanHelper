@@ -13,27 +13,34 @@ on:
   workflow_dispatch:
 jobs:
   Build_Executable:
+    name: Build JAR Files
     uses: ./.github/workflows/build_maven.yml
     secrets: inherit
   Build_Installers:
+    name: Generate Installers
     needs: Build_Executable
     uses: ./.github/workflows/build_installers.yml
     secrets: inherit
   Build_Portable:
+    name: Generate Portable Version
     needs: Build_Executable
     uses: ./.github/workflows/build_portable.yml
   Build_SPK:
+    name: Generate Synology Package
     needs: Build_Executable
     uses: ./.github/workflows/build_spk.yml
     with:
       image: ghostchu/peerbanhelper-snapshot:sha-$(git rev-parse --short ${{ github.sha }})
   Build_DEB:
+    name: Generate Debian Package
     needs: Build_Executable
     uses: ./.github/workflows/build_deb.yml
   Build_PKG:
+    name: Generate FreeBSD Package
     needs: Build_Executable
     uses: ./.github/workflows/build_pkg.yml
   Create_Torrent:
+    name: Create Torrent
     needs: [ Build_Executable, Build_Installers, Build_SPK, Build_DEB, Build_PKG, Build_Portable ]
     runs-on: ubuntu-latest
     steps:
@@ -101,6 +108,7 @@ jobs:
           -o peerbanhelper.torrent \
           "PeerBanHelper_Installers_${{ steps.set_version.outputs.version }}.tar.gz"
   Build_Docker:
+    name: Build and Push Docker Images
     needs: Build_Executable
     runs-on: ubuntu-latest
     steps:
@@ -120,7 +128,7 @@ jobs:
         password: ${{ secrets.DOCKER_TOKEN }}
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v5.6.1
+      uses: docker/metadata-action@v5.7.0
       with:
         images: ghostchu/peerbanhelper-snapshot
         tags: |
@@ -133,7 +141,7 @@ jobs:
           type=raw,ci
           type=sha
     - name: Build and push Docker image
-      uses: docker/build-push-action@v6.13.0
+      uses: docker/build-push-action@v6.15.0
       with:
         context: .
         file: ./Dockerfile
@@ -145,38 +153,39 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}-jvm-universal
         cache-from: type=gha
         cache-to: type=gha,mode=min
-#  Build_Docker_Standalone:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v4
-#    - name: Set Up QEMU
-#      uses: docker/setup-qemu-action@v3
-#    - name: Set Up Buildx
-#      uses: docker/setup-buildx-action@v3
-#    - name: Extract metadata (tags, labels) for Docker
-#      id: meta
-#      uses: docker/metadata-action@v5.6.1
-#      with:
-#        images: ghostchu/peerbanhelper-snapshot
-#        tags: |
-#          type=ref,event=branch
-#          type=ref,event=tag
-#          type=ref,event=pr
-#          type=semver,pattern={{version}}
-#          type=semver,pattern={{major}}.{{minor}}
-#          type=raw,ci-jvm-universal
-#          type=raw,ci
-#          type=sha
-#    - name: Build and push Docker image
-#      uses: docker/build-push-action@v6.13.0
-#      with:
-#        context: .
-#        file: ./Dockerfile
-#        push: false
-#        platforms: |
-#          linux/amd64
-#          linux/arm64/v8
-#        tags: ${{ steps.meta.outputs.tags }}
-#        labels: ${{ steps.meta.outputs.labels }}-jvm-universal
-#        cache-from: type=gha
-#        cache-to: type=gha,mode=min
+  Build_Docker_Standalone:
+    name: Build Standalone Docker Images
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set Up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set Up Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v5.7.0
+      with:
+        images: ghostchu/peerbanhelper-snapshot
+        tags: |
+          type=ref,event=branch
+          type=ref,event=tag
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=raw,ci-jvm-universal
+          type=raw,ci
+          type=sha
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6.15.0
+      with:
+        context: .
+        file: ./Dockerfile
+        push: false
+        platforms: |
+          linux/amd64
+          linux/arm64/v8
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}-jvm-universal
+        cache-from: type=gha
+        cache-to: type=gha,mode=min

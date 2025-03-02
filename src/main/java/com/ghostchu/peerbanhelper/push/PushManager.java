@@ -1,10 +1,7 @@
 package com.ghostchu.peerbanhelper.push;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.push.impl.PushPlusPushProvider;
-import com.ghostchu.peerbanhelper.push.impl.ServerChanPushProvider;
-import com.ghostchu.peerbanhelper.push.impl.SmtpPushProvider;
-import com.ghostchu.peerbanhelper.push.impl.TelegramPushProvider;
+import com.ghostchu.peerbanhelper.push.impl.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -41,6 +38,7 @@ public final class PushManager implements Reloadable {
             case "serverchan" -> provider = ServerChanPushProvider.loadFromYaml(name, section);
             case "smtp" -> provider = SmtpPushProvider.loadFromYaml(name, section);
             case "telegram" -> provider = TelegramPushProvider.loadFromYaml(name, section);
+            case "bark" -> provider = BarkPushProvider.loadFromYaml(name, section);
         }
         return provider;
     }
@@ -52,6 +50,7 @@ public final class PushManager implements Reloadable {
             case "serverchan" -> provider = ServerChanPushProvider.loadFromJson(name, jsonObject);
             case "smtp" -> provider = SmtpPushProvider.loadFromJson(name, jsonObject);
             case "telegram" -> provider = TelegramPushProvider.loadFromJson(name, jsonObject);
+            case "bark" -> provider = BarkPushProvider.loadFromJson(name, jsonObject);
         }
         return provider;
     }

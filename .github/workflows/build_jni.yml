@@ -1,0 +1,31 @@
+name: Build C++ JNI Library
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch:
+          - x64
+          - amd64_arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'oracle'
+          java-version: '21'
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
+        with:
+          arch: ${{ matrix.arch }}
+      - name: Build JNI Library
+        run: |
+          cd cpp-src
+          cl /LD /I"$env:JAVA_HOME\include" /I"$env:JAVA_HOME\include\win32" ghost-common-jni.cpp /link /out:ghost-common-jni_vc2015_${{ matrix.arch == 'x64' && 'amd64' || 'aarch64'}}.dll
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jni-${{ matrix.arch == 'x64' && 'amd64' || 'aarch64'}}
+          path: cpp-src/*.dll
