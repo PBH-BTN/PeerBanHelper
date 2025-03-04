@@ -103,6 +103,9 @@ const formMap: Record<PushType, Component> = {
   ),
   [PushType.ServerChan]: defineAsyncComponent(
     () => import('@/views/settings/components/config/components/push/forms/serverchanForm.vue')
+  ),
+  [PushType.Bark]: defineAsyncComponent(
+    () => import('@/views/settings/components/config/components/push/forms/barkForm.vue')
   )
 }
 
