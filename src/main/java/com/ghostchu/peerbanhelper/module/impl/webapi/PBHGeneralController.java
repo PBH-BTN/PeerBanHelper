@@ -101,7 +101,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
             threadDump.append(MsgUtil.threadInfoToString(threadInfo));
         }
-        if (context.contentType().equals("application/json")) {
+        if ("application/json".equals(context.contentType())) {
             context.json(new StdResp(true, null, threadDump.toString()));
         } else {
             context.result(threadDump.toString());
