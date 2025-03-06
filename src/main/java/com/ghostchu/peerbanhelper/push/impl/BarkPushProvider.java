@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
@@ -80,6 +81,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
     @AllArgsConstructor
     @Data
     public static class Config {
+        @SerializedName("device_key")
         private String deviceKey;
     }
 
