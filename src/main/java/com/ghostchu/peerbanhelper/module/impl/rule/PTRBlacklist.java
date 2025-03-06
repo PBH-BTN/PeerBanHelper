@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Component
 @IgnoreScan
@@ -107,7 +108,11 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
         return getCache().readCache(this, reverseDnsLookupString, () -> {
             Optional<String> ptr;
             if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
-                ptr = dnsLookup.ptr(reverseDnsLookupString).get(3, TimeUnit.SECONDS);
+                try {
+                    ptr = dnsLookup.ptr(reverseDnsLookupString).get(3, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    ptr = Optional.empty();
+                }
             } else {
                 try {
                     ptr = Optional.ofNullable(InetAddress.getByName(peer.getPeerAddress().getIp()).getHostName());
