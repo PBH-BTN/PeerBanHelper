@@ -41,7 +41,7 @@
         required
         :disabled="!newItem"
       >
-        <a-radio-group v-model="form.type" style="width:33rem">
+        <a-radio-group v-model="form.type" style="width: 33rem">
           <a-grid :cols="5" :row-gap="16">
             <a-radio :value="PushType.Email">{{
               t('page.settings.tab.config.push.form.type.' + PushType.Email)
