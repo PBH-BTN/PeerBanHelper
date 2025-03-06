@@ -10,8 +10,12 @@
       <a-space fill style="display: flex; justify-content: space-between">
         <a-space wrap>
           <a-typography-text bold copyable>
-            <!-- TODO: 这里vue-i18n会有一个离奇的报错，Need to install with app.use function，修不好，只能先不用 -->
-            {{ item.banMetadata.peer.address.ip }}:{{ item.banMetadata.peer.address.port }}
+            {{
+              formatIPAddressPort(
+                item.banMetadata.peer.address.ip,
+                item.banMetadata.peer.address.port
+              )
+            }}
           </a-typography-text>
           <a-tooltip
             :content="
@@ -163,6 +167,7 @@ import CountryFlag from '@/components/countryFlag.vue'
 import { unbanIP } from '@/service/banList'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
+import { formatIPAddressPort } from '@/utils/string'
 import { Message } from '@arco-design/web-vue'
 import { useResponsiveState } from '@arco-design/web-vue/es/grid/hook/use-responsive-state'
 import { ref } from 'vue'
