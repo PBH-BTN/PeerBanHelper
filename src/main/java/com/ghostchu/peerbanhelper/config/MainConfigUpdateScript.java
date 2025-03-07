@@ -6,6 +6,7 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -29,13 +30,27 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 28)
+    public void updateBtnNetworkAddress() {
+        List<String> outdatedBtnAddress = List.of(
+                "https://btn-prod.ghostchu-services.top/ping/config",
+                "https://btn-dev.ghostchu-services.top/ping/config",
+                "https://btn-dev2.ghostchu-services.top/ping/config",
+                "https://sparkle.ghostchu-services.top/ping/config",
+                "http://btn-prod.ghostchu-services.top/ping/config",
+                "http://btn-dev.ghostchu-services.top/ping/config",
+                "http://btn-dev2.ghostchu-services.top/ping/config",
+                "http://sparkle.ghostchu-services.top/ping/config"
+        );
+        if (outdatedBtnAddress.contains(conf.getString("btn.config-url"))) {
+            conf.set("btn.config-url", "https://sparkle.pbh-btn.com/ping/config");
+        }
+    }
 
     @UpdateScript(version = 27)
     public void updateVacuum() {
         conf.set("persist.vacuum-interval-days", 60);
     }
-
-
 
     @UpdateScript(version = 26)
     public void pushProvidersSMTPStructUpgrade() {

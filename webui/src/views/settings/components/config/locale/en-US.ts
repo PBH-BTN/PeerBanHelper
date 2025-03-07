@@ -96,6 +96,7 @@ export default {
   'page.settings.tab.config.push.form.type.pushplus': 'Push+',
   'page.settings.tab.config.push.form.type.serverchan': 'ServerChan',
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
+  'page.settings.tab.config.push.form.type.bark': 'Bark',
 
   'page.settings.tab.config.push.form.stmp.host': 'Host',
   'page.settings.tab.config.push.form.stmp.port': 'Port',

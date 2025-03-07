@@ -41,8 +41,8 @@
         required
         :disabled="!newItem"
       >
-        <a-radio-group v-model="form.type" style="width: 30rem">
-          <a-grid :cols="4" :row-gap="16">
+        <a-radio-group v-model="form.type" style="width: 33rem">
+          <a-grid :cols="5" :row-gap="16">
             <a-radio :value="PushType.Email">{{
               t('page.settings.tab.config.push.form.type.' + PushType.Email)
             }}</a-radio>
@@ -54,6 +54,9 @@
             }}</a-radio>
             <a-radio :value="PushType.ServerChan">{{
               t('page.settings.tab.config.push.form.type.' + PushType.ServerChan)
+            }}</a-radio>
+            <a-radio :value="PushType.Bark">{{
+              t('page.settings.tab.config.push.form.type.' + PushType.Bark)
             }}</a-radio>
           </a-grid>
         </a-radio-group>
@@ -103,6 +106,9 @@ const formMap: Record<PushType, Component> = {
   ),
   [PushType.ServerChan]: defineAsyncComponent(
     () => import('@/views/settings/components/config/components/push/forms/serverchanForm.vue')
+  ),
+  [PushType.Bark]: defineAsyncComponent(
+    () => import('@/views/settings/components/config/components/push/forms/barkForm.vue')
   )
 }
 

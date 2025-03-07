@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
@@ -41,6 +42,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -83,12 +86,26 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
+                .get("/api/general/stacktrace", this::handleDumpStackTrace, Role.USER_READ)
                 .get("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
                 .post("/api/general/reload", this::handleReloading, Role.USER_WRITE)
                 .get("/api/general/global", this::handleGlobalConfigRead, Role.USER_READ)
                 .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_WRITE)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleDumpStackTrace(Context context) {
+        StringBuilder threadDump = new StringBuilder();
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
+            threadDump.append(MsgUtil.threadInfoToString(threadInfo));
+        }
+        if ("application/json".equals(context.contentType())) {
+            context.json(new StdResp(true, null, threadDump.toString()));
+        } else {
+            context.result(threadDump.toString());
+        }
     }
 
     private void handleGlobalConfigRead(Context context) {
