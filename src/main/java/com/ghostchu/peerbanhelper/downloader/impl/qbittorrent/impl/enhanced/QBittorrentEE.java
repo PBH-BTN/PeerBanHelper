@@ -130,10 +130,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                 qbPeer.setPeerIdClient("");
             }
             if (qbPeer.getClientName() != null) {
-                if (qbPeer.getClientName().startsWith("Unknown [") && qbPeer.getClientName().endsWith("]")) {
-                    String mid = qbPeer.getClientName().substring("Unknown [".length(), qbPeer.getClientName().length() - 1);
-                    qbPeer.setClient(mid);
-                }
+                qbPeer.setClient(qbPeer.getClientName());
             }
             qbPeer.setRawIp(s);
             peersList.add(qbPeer);
