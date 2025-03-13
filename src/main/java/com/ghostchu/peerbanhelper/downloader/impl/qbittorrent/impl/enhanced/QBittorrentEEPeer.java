@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -66,6 +67,11 @@ public final class QBittorrentEEPeer implements Peer {
     @Nullable
     public String getClientName() {
         return client;
+    }
+
+    @Override
+    public boolean isClientNameAvailable() {
+        return StringUtils.isBlank(client) || client.startsWith("Unknown[");
     }
 
     @Override

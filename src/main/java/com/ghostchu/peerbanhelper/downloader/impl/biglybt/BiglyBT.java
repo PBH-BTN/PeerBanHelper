@@ -36,6 +36,7 @@ import com.vdurmont.semver4j.Semver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -97,7 +98,7 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP);
+        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.PROTOCOL_CHECK_BEP0010);
     }
 
     @Override
@@ -304,6 +305,7 @@ public final class BiglyBT extends AbstractDownloader {
                     peer.getIp(),
                     peerId,
                     peer.getClient(),
+                    StringUtils.isBlank(peer.getClient()),
                     peer.getStats().getRtDownloadSpeed(),
                     peer.getStats().getTotalReceived(),
                     peer.getStats().getRtUploadSpeed(),

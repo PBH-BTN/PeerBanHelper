@@ -104,6 +104,7 @@ public final class BitComet extends AbstractDownloader {
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
+        flags.add(DownloaderFeatureFlag.PROTOCOL_CHECK_BEP0010);
         if (is211Newer()) {
             flags.add(DownloaderFeatureFlag.UNBAN_IP);
         }
@@ -402,6 +403,7 @@ public final class BitComet extends AbstractDownloader {
                     peer.getIp(),
                     new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
                     peer.getClientType(),
+                    "n/a".equalsIgnoreCase(peer.getClientType()),
                     peer.getDlRate(),
                     peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10
                     peer.getUpRate(),

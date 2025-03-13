@@ -1,4 +1,4 @@
-config-version: 23
+config-version: 24
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -442,3 +442,20 @@ module:
     # 规则从上到下执行
     ptr-rules:
       - '{"method":"EQUALS","content":"example.com"}'
+  # Peer 协议验证检查模块
+  # Peer protocol check module
+  protocol-check:
+    enabled: true
+    ban-duration: 259200000
+    # BEP-10 协议规范验证器 (https://www.bittorrent.org/beps/bep_0010.html)
+    # 这是一个相当古老的强制规范，任何 2008 年之后发布的 BT 客户端都应支持此协议
+    # 启用后 PeerBanHelper 将要求连接到下载器的所有进行数据传输 Peer 都完成 BEP-0010 握手
+    # 如果 Peer 无法完成 BEP-0010 握手以更新其客户端名称，或者发送了的客户端名称全部为不打印字符，则将被封禁。
+    # BEP-10 Validator (https://www.bittorrent.org/beps/bep_0010.html)
+    # This is a quite old mandatory specification, any BT client released after 2008 should support this protocol
+    # When enabled, the PeerBanHelper will require all data transfer Peers connected to the downloader to complete the BEP-0010 handshake.
+    # If a Peer is unable to complete the BEP-0010 handshake to update its Client Name, or sends a Client Name with all non-printing characters, it will be blocked.
+    bep10-validator: true
+    # 执行 BEP-0010 检查前，客户端至少向 Peer 传输的数据量
+    # Before execute BEP-0010, the minimum transferred data from client to peer
+    bep10-validator-minimum-transferred: 10485760

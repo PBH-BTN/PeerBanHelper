@@ -7,6 +7,7 @@ import java.util.List;
 
 @Setter
 public final class PeerImpl implements Peer {
+    private final boolean clientNameAvailable;
     private PeerAddress peerAddress;
     private String rawIp;
     private String peerId;
@@ -20,11 +21,12 @@ public final class PeerImpl implements Peer {
     private List<PeerMessage> supportedMessages;
     private boolean handshaking;
 
-    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, List<PeerMessage> supportedMessages, boolean handshaking) {
+    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, boolean clientNameAvailable, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, List<PeerMessage> supportedMessages, boolean handshaking) {
         this.peerAddress = peerAddress;
         this.rawIp = rawIp;
         this.peerId = peerId;
         this.clientName = clientName;
+        this.clientNameAvailable = clientNameAvailable;
         this.downloadSpeed = downloadSpeed;
         this.downloaded = downloaded;
         this.uploadSpeed = uploadSpeed;
@@ -48,6 +50,11 @@ public final class PeerImpl implements Peer {
     @Override
     public String getClientName() {
         return clientName;
+    }
+
+    @Override
+    public boolean isClientNameAvailable() {
+        return clientNameAvailable;
     }
 
     @Override

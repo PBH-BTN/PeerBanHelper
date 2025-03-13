@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,11 @@ public final class TRPeer implements Peer {
     @Override
     public String getClientName() {
         return backend.getClientName();
+    }
+
+    @Override
+    public boolean isClientNameAvailable() {
+        return StringUtils.isBlank(getClientName());
     }
 
     @Override

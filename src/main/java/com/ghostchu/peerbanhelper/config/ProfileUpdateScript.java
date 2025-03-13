@@ -25,6 +25,10 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 25)
+    public void addProtocolCheck(YamlConfiguration bundled) {
+        conf.set("module.protocol-check", bundled.get("module.protocol-check"));
+    }
     @UpdateScript(version = 24)
     public void ptrBlacklistAndUpdateTorExitNodeList(YamlConfiguration bundled) {
         conf.set("module.ptr-blacklist", bundled.get("module.ptr-blacklist"));

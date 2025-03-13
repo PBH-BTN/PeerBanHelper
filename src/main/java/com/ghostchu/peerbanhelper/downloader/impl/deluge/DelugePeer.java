@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,11 @@ public final class DelugePeer implements Peer {
     @Override
     public String getRawIp() {
         return peerAddress.getIp();
+    }
+
+    @Override
+    public boolean isClientNameAvailable() {
+        return StringUtils.isBlank(clientName);
     }
 
     @Override

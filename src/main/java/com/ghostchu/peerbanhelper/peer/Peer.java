@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface Peer extends Comparable<Peer> {
+
     /**
      * 获取此对等体的 IP:端口 组
      *
@@ -27,6 +28,8 @@ public interface Peer extends Comparable<Peer> {
      */
 
     String getClientName();
+
+    boolean isClientNameAvailable();
 
     /**
      * 获取您从此对等体获取数据的速度

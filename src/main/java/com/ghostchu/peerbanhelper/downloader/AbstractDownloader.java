@@ -116,7 +116,7 @@ public abstract class AbstractDownloader implements Downloader {
 
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.UNBAN_IP);
+        return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.PROTOCOL_CHECK_BEP0010);
     }
 
     @Override
