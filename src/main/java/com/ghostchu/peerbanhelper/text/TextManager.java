@@ -154,7 +154,6 @@ public final class TextManager implements Reloadable {
                 try {
                     configuration.loadFromString(Files.readString(file.toPath(), StandardCharsets.UTF_8));
                     languageFilesManager.deploy(locale, configuration);
-                    System.out.println("deployed " + locale);
                 } catch (InvalidConfigurationException | IOException e) {
                     log.warn("Failed to override translation for {}.", locale, e);
                 }
