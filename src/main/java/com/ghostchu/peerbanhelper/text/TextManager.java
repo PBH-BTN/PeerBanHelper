@@ -60,11 +60,12 @@ public final class TextManager implements Reloadable {
 //    }
 
     public static String tl(String locale, Lang key, Object... params) {
+        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
         return tl(locale, new TranslationComponent(key.getKey(), (Object[]) convert(locale, params)));
     }
 
     public static String tl(String locale, TranslationComponent translationComponent) {
-        locale = locale.toLowerCase(Locale.ROOT);
+        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
         YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
         if (yamlConfiguration == null) {
             yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("en_us");
@@ -146,12 +147,14 @@ public final class TextManager implements Reloadable {
         Collection<String> pending = getOverrideLocales(languageFilesManager.getDistributions().keySet());
         log.debug("Pending: {}", Arrays.toString(pending.toArray()));
         pending.forEach(locale -> {
+            locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
             File file = getOverrideLocaleFile(locale);
             if (file.exists()) {
                 YamlConfiguration configuration = new YamlConfiguration();
                 try {
                     configuration.loadFromString(Files.readString(file.toPath(), StandardCharsets.UTF_8));
                     languageFilesManager.deploy(locale, configuration);
+                    System.out.println("deployed " + locale);
                 } catch (InvalidConfigurationException | IOException e) {
                     log.warn("Failed to override translation for {}.", locale, e);
                 }
@@ -283,6 +286,7 @@ public final class TextManager implements Reloadable {
 
     @NotNull
     private File getOverrideLocaleFile(@NotNull String locale) {
+        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
         File file;
         // bug fixes workaround
         file = new File(overrideDirectory, locale + ".yml");

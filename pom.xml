@@ -520,6 +520,5 @@
             <artifactId>jcefmaven</artifactId>
             <version>126.2.0</version>
         </dependency>
-
     </dependencies>
 </project>

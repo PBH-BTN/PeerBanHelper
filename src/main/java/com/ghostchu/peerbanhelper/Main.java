@@ -60,7 +60,7 @@ public class Main {
     private static final EventBus eventBus = new EventBus();
     @Getter
     private static final ReloadManager reloadManager = new ReloadManager();
-    public static String DEF_LOCALE = Locale.getDefault().toLanguageTag();
+    public static String DEF_LOCALE = Locale.getDefault().toLanguageTag().toLowerCase(Locale.ROOT).replace("-", "_");
     @Getter
     private static File dataDirectory;
     @Getter
