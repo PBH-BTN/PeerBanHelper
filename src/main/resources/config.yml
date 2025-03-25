@@ -4,6 +4,7 @@ config-version: 28
 # default 跟随操作系统 (Follow the operating system)
 # en_us English (US)
 # zh_cn Chinese Simplified (简体中文)
+# zh_tw Chinese Traditional (繁體中文)
 language: default
 # PBH Plus 的捐赠密钥，填写后将激活捐赠功能。
 # PeerBanHelper 是一个非营利、开放源代码的免费软件。维护 PeerBanHelper 是一项持续的任务，
