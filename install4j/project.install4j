@@ -6,6 +6,7 @@
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
         <language id="en" customLocalizationFile="./lang/en-US.utf8" />
+        <language id="zh_TW" customLocalizationFile="./lang/zh-TW.utf8" />
       </additionalLanguages>
     </languages>
     <variables>
