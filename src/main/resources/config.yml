@@ -1,9 +1,10 @@
-config-version: 28
+config-version: 29
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
 # en_us English (US)
 # zh_cn Chinese Simplified (简体中文)
+# zh_tw Chinese Traditional (繁體中文)
 language: default
 # PBH Plus 的捐赠密钥，填写后将激活捐赠功能。
 # PeerBanHelper 是一个非营利、开放源代码的免费软件。维护 PeerBanHelper 是一项持续的任务，
@@ -169,14 +170,3 @@ performance:
   # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
-
-# PeerBanHelper 去中心化网络服务 - Decentralized network service
-# 请配置一个可用的 Kubo IPFS 节点 - Please configure an available Kubo IPFS node
-decentralized:
-  enabled: false
-  # Kubo RPC MultiAddr
-  kubo-rpc: "/ip4/127.0.0.1/tcp/5001"
-  features:
-    # 发布当前封禁列表到 IPFS 以允许它人订阅您的封禁列表内容，时间单位：毫秒，设置为 -1 以禁用
-    # Publish current banlist to IPFS to allow others subscribe your banlist, time unit: milliseconds, set to -1 to disable
-    publish-banlist: 3600000

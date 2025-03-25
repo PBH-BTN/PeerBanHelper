@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.RuleSubLogsDao;
 import com.ghostchu.peerbanhelper.database.table.RuleSubInfoEntity;
 import com.ghostchu.peerbanhelper.database.table.RuleSubLogEntity;
-import com.ghostchu.peerbanhelper.decentralized.DecentralizedManager;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
@@ -34,10 +33,8 @@ import com.google.common.io.Files;
 import com.j256.ormlite.stmt.SelectArg;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
-import io.ipfs.cid.Cid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
@@ -75,16 +72,14 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class IPBlackRuleList extends AbstractRuleFeatureModule implements Reloadable {
     private final RuleSubLogsDao ruleSubLogsDao;
     private final ModuleMatchCache moduleMatchCache;
-    private final DecentralizedManager decentralizedManager;
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private long banDuration;
 
-    public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao, ModuleMatchCache moduleMatchCache, DecentralizedManager decentralizedManager) {
+    public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao, ModuleMatchCache moduleMatchCache) {
         super();
         this.ruleSubLogsDao = ruleSubLogsDao;
         this.moduleMatchCache = moduleMatchCache;
-        this.decentralizedManager = decentralizedManager;
     }
 
     @Override
@@ -303,35 +298,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 var response = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                         MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString()).join();
                 return new DataUpdateResult(response.statusCode(), null, response.body().getBytes());
-            }
-            // IPNS
-            if (uri.getScheme().equalsIgnoreCase("ipns")) {
-                var ipnsCid = uri.getHost();
-                var ipfs = decentralizedManager.getIpfs();
-                if (ipfs == null) {
-                    throw new IllegalStateException(tlUI(Lang.MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE));
-                }
-                try {
-                    var cid = ipfs.name.resolve(Cid.decode(ipnsCid), true);
-                    var data = ipfs.cat(Cid.decode(StringUtils.substringAfter(cid, "/ipfs/")));
-                    return new DataUpdateResult(200, "Data get from IPFS via IPNS", data);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            // IPFS
-            if (uri.getScheme().equalsIgnoreCase("ipfs")) {
-                var cid = uri.getHost();
-                var ipfs = decentralizedManager.getIpfs();
-                if (ipfs == null) {
-                    throw new IllegalStateException(tlUI(Lang.MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE));
-                }
-                try {
-                    var data = ipfs.cat(Cid.decode(cid));
-                    return new DataUpdateResult(200, "Data get from IPFS", data);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
             }
             throw new IllegalArgumentException("Invalid URL");
         });
