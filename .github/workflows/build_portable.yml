@@ -21,8 +21,8 @@ jobs:
           cp target/PeerBanHelper.jar pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
           mkdir -p zulu
-          wget https://cdn.azul.com/zulu/bin/zulu23.30.13-ca-jre23.0.1-win_x64.zip -O zulu/zulu23.30.13-ca-jre23.0.1-win_x64.zip
-          (cd zulu && unzip zulu23.30.13-ca-jre23.0.1-win_x64.zip && mv zulu23.30.13-ca-jre23.0.1-win_x64 jre)
+          wget https://cdn.azul.com/zulu/bin/zulu24.28.83-ca-jre24.0.0-win_x64.zip -O zulu/zulu24.28.83-ca-jre24.0.0-win_x64.zip
+          (cd zulu && unzip zulu24.28.83-ca-jre24.0.0-win_x64.zip && mv zulu24.28.83-ca-jre24.0.0-win_x64 jre)
           mv zulu/jre pkg/portable/PeerBanHelper/
           mv pkg/portable/*.bat pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_Windows_${{ env.PBH_VERSION }}_Portable.zip PeerBanHelper)

@@ -26,20 +26,22 @@ public final class ProfileUpdateScript {
     }
 
     @UpdateScript(version = 25)
-    public void addProtocolCheck(YamlConfiguration bundled) {
+    public void removeIPFS(YamlConfiguration bundled) {
+        conf.set("decentralized", null);
         conf.set("module.protocol-check", bundled.get("module.protocol-check"));
     }
+
     @UpdateScript(version = 24)
     public void ptrBlacklistAndUpdateTorExitNodeList(YamlConfiguration bundled) {
         conf.set("module.ptr-blacklist", bundled.get("module.ptr-blacklist"));
-        if("https://cdn.jsdelivr.net/gh/platformcosmo/Tor-IP-Addresses/tor-exit-nodes.lst".equals(conf.getString("module.ip-address-blocker-rules.rules.tor-exit-nodes.url"))){
+        if ("https://cdn.jsdelivr.net/gh/platformcosmo/Tor-IP-Addresses/tor-exit-nodes.lst".equals(conf.getString("module.ip-address-blocker-rules.rules.tor-exit-nodes.url"))) {
             conf.set("module.ip-address-blocker-rules.rules.tor-exit-nodes.url", "https://cdn.jsdelivr.net/gh/7c/torfilter/lists/txt/torfilter-1d-flat.txt");
         }
     }
 
     @UpdateScript(version = 22)
     public void workaroundForBadWebUI() {
-        if(conf.getInt("module.auto-range-ban.ipv6") == 32) { // WebUI bug
+        if (conf.getInt("module.auto-range-ban.ipv6") == 32) { // WebUI bug
             conf.set("module.auto-range-ban.ipv6", 60); // Fix it
         }
     }
@@ -95,7 +97,7 @@ public final class ProfileUpdateScript {
             var rule = section.getConfigurationSection(key);
             var url = rule.getString("url", "");
             if (url.equals("https://cdn.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt") ||
-                url.equals("https://fastly.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt")) {
+                    url.equals("https://fastly.jsdelivr.net/gh/PBH-BTN/BTN-Collected-Rules@master/combine/all.txt")) {
                 rule.set("url", "https://bcr.pbh-btn.ghorg.ghostchu-services.top/combine/all.txt");
             }
         }

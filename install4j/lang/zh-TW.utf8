@@ -1,0 +1,16 @@
+launcher.peerbanhelper.gui=PeerBanHelper
+launcher.peerbanhelper.silent=PeerBanHelper (靜默啟動)
+launcher.peerbanhelper.nogui=PeerBanHelper (無GUI, 控制台)
+launcher.peerbanhelper.nogui.lowram=PeerBanHelper (無GUI, 控制台, 小記憶體模式(使用更多CPU和磁碟IO))
+launcher.peerbanhelper.service=PeerBanHelper (服務)
+launcher.peerbanhelper.updater=PeerBanHelper 檢查更新
+checkbox.followsystemstartup=登入時自動啟動到系統系統匣
+peerbanhelper.description=PeerBanHelper
+checkbox.registersystemservice=註冊為系統服務(除非你知道這是做什麼的，否則不要勾選)
+systemservice.note=將 PeerBanHelper 安裝為系統服務時，Windows 系統下設定檔將被儲存在 C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper 位置，存取此位置需要您擁有管理員權限。\nPeerBanHelper 將在系統啟動時自動啟動。
+components.peerbanhelper=PeerBanHelper
+components.peerbanhelper.description=PeerBanHelper 的核心主程式，包含了主程式碼和必要的執行文件
+components.jcef=[可選] JCEF
+components.jcef.description=可選的 JCEF (Java 嵌入式 Chromium 框架)，用以支援 PeerBanHelper GUI 模式下的 WebUI 控制台分頁功能，停用後將隱藏 WebUI 控制台分頁，使用者將需要透過系統瀏覽器存取 WebUI。（勾選後將在 PeerBanHelper 啟動時下載）
+components.disable-checking-updates=[可選] 停用自動更新
+components.disable-checking-updates.description=停用 install4j 的 PeerBanHelper 更新檢查和自動升級程式。停用後在新版本發布時您需要手動下載安裝包執行更新操作。PBH-BTN 僅提供最近 3 個版本的 PeerBanHelper 技術支援和 API 服務。過期的 PeerBanHelper 版本可能無法存取 API、BTN 網路或者是訂閱的規則（特別是規則格式發生變動時）。

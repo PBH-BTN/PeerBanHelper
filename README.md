@@ -105,8 +105,6 @@ PeerBanHelper 使用 [JProfiler all-in one Java profiler](https://www.ej-technol
 - [GeoIP2](https://dev.maxmind.com/geoip)
 - [ormlite](https://ormlite.com/)
 - [SimpleReloadLib](https://github.com/Ghost-chu/SimpleReloadLib)
-- [java-ipfs-http-client](https://github.com/ipfs-shipyard/java-ipfs-http-client)
-- [java-multiaddr](https://github.com/multiformats/java-multiaddr)
 - [portmapper](https://github.com/offbynull/portmapper)
 - [xz](https://github.com/tukaani-project/xz-java)
 - [commonmark](https://github.com/commonmark/commonmark-java)

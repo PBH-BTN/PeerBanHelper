@@ -10,12 +10,12 @@ COPY --from=build_web webui/dist src/main/resources/static
 RUN apk add git  && \
     mvn -B clean package --file pom.xml -T 1.5C -P thin-sqlite-packaging
 
-FROM docker.io/bellsoft/liberica-runtime-container:jre-23-slim-musl
+FROM docker.io/bellsoft/liberica-openjdk-alpine-musl:24
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 EXPOSE 9898
 ENV TZ=UTC
-ENV JAVA_OPTS="-Dpbh.release=docker -Djava.awt.headless=true -Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
+ENV JAVA_OPTS="-Dpbh.release=docker -Djava.awt.headless=true -Xmx512M -Xms16M -Xss512k --enable-native-access=ALL-UNNAMED -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/libraries /app/libraries
