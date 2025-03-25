@@ -9,15 +9,25 @@ import type { ArcoLang } from '@arco-design/web-vue/es/locale/interface'
 import dayjs from 'dayjs'
 
 export const LOCALE_OPTIONS = [
-  { label: '中文', value: 'zh-CN' },
-  { label: '繁體中文', value: 'zh-TW' },
-  { label: 'English', value: 'en-US' }
+  { label: '简体中文 (zh-CN)', value: 'zh-CN' },
+  { label: '繁體中文 (zh-TW)', value: 'zh-TW' },
+  { label: 'English (en-US)', value: 'en-US' }
 ]
 
 export function getNavigatorLanguage() {
   const lang = navigator.language
   if (lang.includes('zh')) {
-    return 'zh-CN'
+    if (lang.includes('zh-CN')) {
+      return 'zh-CN'
+    }
+    if (lang.includes('zh-TW')) {
+      return 'zh-TW'
+    }
+    if (lang.includes('zh-HK')) {
+      // 繁体中文（香港回退）
+      return 'zh-TW'
+    }
+    return 'zh-CN' // 简体中文（默认）
   }
   return 'en-US'
 }
