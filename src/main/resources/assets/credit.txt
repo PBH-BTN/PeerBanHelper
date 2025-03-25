@@ -70,8 +70,10 @@ PeerBanHelper Credit
     SaikiCode
 
 本地化 - Internalization:
-    简体中文(zh-CN)        : PBH-BTN
-    English(en-US)         : PBH-BTN
+    简体中文(zh-CN): PBH-BTN
+    English(en-US): PBH-BTN
+    繁體中文(zh-TW): david082321
+
 
 [speed:50]
 特别致谢 - Special Thanks:
