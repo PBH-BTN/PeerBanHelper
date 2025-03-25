@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   vue-request@2.0.4:
-    hash: imva7qnbqmkxs76or73cwn5jom
+    hash: d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78
     path: patches/vue-request@2.0.4.patch
 
 importers:
@@ -15,7 +15,7 @@ importers:
     dependencies:
       '@arco-design/web-vue':
         specifier: ^2.56.3
-        version: 2.56.3(vue@3.5.13(typescript@5.8.2))
+        version: 2.57.0(vue@3.5.13(typescript@5.8.2))
       '@dzangolab/flag-icon-css':
         specifier: ^3.4.5
         version: 3.4.5
@@ -87,7 +87,7 @@ importers:
         version: 11.1.2(vue@3.5.13(typescript@5.8.2))
       vue-request:
         specifier: ^2.0.4
-        version: 2.0.4(patch_hash=imva7qnbqmkxs76or73cwn5jom)(vue@3.5.13(typescript@5.8.2))
+        version: 2.0.4(patch_hash=d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78)(vue@3.5.13(typescript@5.8.2))
       vue-router:
         specifier: ^4.5.0
         version: 4.5.0(vue@3.5.13(typescript@5.8.2))
@@ -192,8 +192,8 @@ packages:
   '@arco-design/color@0.4.0':
     resolution: {integrity: sha512-s7p9MSwJgHeL8DwcATaXvWT3m2SigKpxx4JA1BGPHL4gfvaQsmQfrLBDpjOJFJuJ2jG2dMt3R3P8Pm9E65q18g==}
 
-  '@arco-design/web-vue@2.56.3':
-    resolution: {integrity: sha512-D2CPIXRBUPcg37TFsfWROZddCWFZnIwqGpsOhOn2BhmH89UFqtBGpTxyuMdYJEwKNXunp3dVL6V69ZMmJBRPOg==}
+  '@arco-design/web-vue@2.57.0':
+    resolution: {integrity: sha512-R5YReC3C2sG3Jv0+YuR3B7kzkq2KdhhQNCGXD8T11xAoa0zMt6SWTP1xJQOdZcM9du+q3z6tk5mRvh4qkieRJw==}
     peerDependencies:
       vue: ^3.1.0
 
@@ -2514,7 +2514,7 @@ snapshots:
     dependencies:
       color: 3.2.1
 
-  '@arco-design/web-vue@2.56.3(vue@3.5.13(typescript@5.8.2))':
+  '@arco-design/web-vue@2.57.0(vue@3.5.13(typescript@5.8.2))':
     dependencies:
       '@arco-design/color': 0.4.0
       b-tween: 0.3.3
@@ -4870,7 +4870,7 @@ snapshots:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.13(typescript@5.8.2)
 
-  vue-request@2.0.4(patch_hash=imva7qnbqmkxs76or73cwn5jom)(vue@3.5.13(typescript@5.8.2)):
+  vue-request@2.0.4(patch_hash=d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78)(vue@3.5.13(typescript@5.8.2)):
     dependencies:
       vue: 3.5.13(typescript@5.8.2)
       vue-demi: 0.14.10(vue@3.5.13(typescript@5.8.2))
