@@ -69,6 +69,10 @@ PeerBanHelper Credit
     Rbqwow
     SaikiCode
 
+本地化 - Internalization:
+    简体中文(zh-CN)        : PBH-BTN
+    English(en-US)         : PBH-BTN
+
 [speed:50]
 特别致谢 - Special Thanks:
     (以下排名不分先后)
