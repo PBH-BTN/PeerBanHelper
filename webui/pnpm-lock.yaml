@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   vue-request@2.0.4:
-    hash: imva7qnbqmkxs76or73cwn5jom
+    hash: d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78
     path: patches/vue-request@2.0.4.patch
 
 importers:
@@ -87,7 +87,7 @@ importers:
         version: 11.1.2(vue@3.5.13(typescript@5.8.2))
       vue-request:
         specifier: ^2.0.4
-        version: 2.0.4(patch_hash=imva7qnbqmkxs76or73cwn5jom)(vue@3.5.13(typescript@5.8.2))
+        version: 2.0.4(patch_hash=d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78)(vue@3.5.13(typescript@5.8.2))
       vue-router:
         specifier: ^4.5.0
         version: 4.5.0(vue@3.5.13(typescript@5.8.2))
@@ -105,8 +105,8 @@ importers:
         specifier: ^20.1.5
         version: 20.1.5
       '@types/eslint__js':
-        specifier: ^8.42.3
-        version: 8.42.3
+        specifier: ^9.0.0
+        version: 9.14.0
       '@types/lodash':
         specifier: ^4.17.16
         version: 4.17.16
@@ -778,11 +778,9 @@ packages:
   '@tsconfig/node20@20.1.5':
     resolution: {integrity: sha512-Vm8e3WxDTqMGPU4GATF9keQAIy1Drd7bPwlgzKJnZtoOsTm1tduUTbDjg0W5qERvGuxPI2h9RbMufH0YdfBylA==}
 
-  '@types/eslint@9.6.1':
-    resolution: {integrity: sha512-FXx2pKgId/WyYo2jXw63kk7/+TY7u7AziEJxJAnSFzHlqTAS3Ync6SvgYAN/k4/PQpnnVuzoMuVnByKK2qp0ag==}
-
-  '@types/eslint__js@8.42.3':
-    resolution: {integrity: sha512-alfG737uhmPdnvkrLdZLcEKJ/B8s9Y4hrZ+YAdzUeoArBlSUERA2E87ROfOaS4jd/C45fzOoZzidLc1IPwLqOw==}
+  '@types/eslint__js@9.14.0':
+    resolution: {integrity: sha512-s0jepCjOJWB/GKcuba4jISaVpBudw3ClXJ3fUK4tugChUMQsp6kSwuA8Dcx6wFd/JsJqcY8n4rEpa5RTHs5ypA==}
+    deprecated: This is a stub types definition. @eslint/js provides its own type definitions, so you do not need this installed.
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -3060,14 +3058,9 @@ snapshots:
 
   '@tsconfig/node20@20.1.5': {}
 
-  '@types/eslint@9.6.1':
+  '@types/eslint__js@9.14.0':
     dependencies:
-      '@types/estree': 1.0.6
-      '@types/json-schema': 7.0.15
-
-  '@types/eslint__js@8.42.3':
-    dependencies:
-      '@types/eslint': 9.6.1
+      '@eslint/js': 9.23.0
 
   '@types/estree@1.0.6': {}
 
@@ -4870,7 +4863,7 @@ snapshots:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.13(typescript@5.8.2)
 
-  vue-request@2.0.4(patch_hash=imva7qnbqmkxs76or73cwn5jom)(vue@3.5.13(typescript@5.8.2)):
+  vue-request@2.0.4(patch_hash=d9f1d9c8f1d7cb10d04f37ba3aa3a40d9afbd8f4c423c69a9d743ab4033bba78)(vue@3.5.13(typescript@5.8.2)):
     dependencies:
       vue: 3.5.13(typescript@5.8.2)
       vue-demi: 0.14.10(vue@3.5.13(typescript@5.8.2))
