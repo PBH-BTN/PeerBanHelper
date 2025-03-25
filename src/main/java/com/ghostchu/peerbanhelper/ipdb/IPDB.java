@@ -41,6 +41,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -221,7 +222,11 @@ public final class IPDB implements AutoCloseable {
             countryData.setIso(country.getIsoCode());
             String countryRegionName = country.getName();
             // 对 TW,HK,MO 后处理，偷个懒
-            if (languageTag.getFirst().equals("zh-CN") && (country.getIsoCode().equals("TW") || country.getIsoCode().equals("HK") || country.getIsoCode().equalsIgnoreCase("MO"))) {
+            var code = languageTag.getFirst();
+            code = code.toLowerCase(Locale.ROOT).replace("-", "_");
+            // 台湾、香港、澳门地区有一个独立 ISO 代码，需要手动处理一下保证符合所在地法律法规
+            // 这坨代码已经改成一坨了，有时间得写个好点的 :(
+            if ((code.equals("zh_cn") || code.equals("zh_hk") || code.equals("zh_mo")) && (country.getIsoCode().equals("TW") || country.getIsoCode().equals("HK") || country.getIsoCode().equalsIgnoreCase("MO"))) {
                 countryRegionName = "中国" + countryRegionName;
             }
             countryData.setName(countryRegionName);
