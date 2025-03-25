@@ -15,7 +15,7 @@ LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
 USER 0
 EXPOSE 9898
 ENV TZ=UTC
-ENV JAVA_OPTS="-Dpbh.release=docker -Djava.awt.headless=true -Xmx512M -Xms16M -Xss512k --enable-native-access=ALL-UNNAMED -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
+ENV JAVA_OPTS="-Dpbh.release=docker -Djava.awt.headless=true -Xmx512M -Xms16M -Xss512k --enable-native-access=ALL-UNNAMED -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps"
 WORKDIR /app
 VOLUME /tmp
 COPY --from=build build/target/libraries /app/libraries
