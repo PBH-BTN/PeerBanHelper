@@ -1,7 +1,6 @@
 export default {
   'page.rule.custom-script.disable': '功能在設定中被停用',
-  'page.rule.custom-script.description':
-    '你可以在這裡管理自訂腳本，這些腳本將在封禁的過程中執行。',
+  'page.rule.custom-script.description': '你可以在這裡管理自訂腳本，這些腳本將在封禁的過程中執行。',
   'page.rule.custom-script.add': '新增腳本',
   'page.rule.custom-script.column.id': 'ID',
   'page.rule.custom-script.column.name': '名稱',
