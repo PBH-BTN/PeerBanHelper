@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: 21.x
 
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
           version: 10.0.0
