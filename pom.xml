@@ -279,7 +279,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.5-jre</version>
+            <version>33.4.6-jre</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -467,7 +467,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>11.0.24</version>
+            <version>11.0.25</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
