@@ -102,8 +102,13 @@ public final class Transmission extends AbstractDownloader {
         String version = resp.getArgs().getVersion();
         Semver semver = new Semver(version, Semver.SemverType.LOOSE);
         // must 4.1.0 or higher
-        if (semver.isGreaterThanOrEqualTo("4.1.0")) {
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, "API Version"));
+        if (semver.getMajor() < 4) {
+            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, "Transmission version must higher then (or equals to) 4.1.0"));
+        }
+        if (semver.getMajor() == 4) {
+            if (semver.getMinor() < 1) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_TR_KNOWN_INCOMPATIBILITY, "Transmission version must higher then (or equals to) 4.1.0"));
+            }
         }
         if (!resp.getArgs().getBlocklistEnabled() || !resp.getArgs().getBlocklistUrl().startsWith(blocklistUrl)) {
             RqSessionSet set = RqSessionSet.builder()
