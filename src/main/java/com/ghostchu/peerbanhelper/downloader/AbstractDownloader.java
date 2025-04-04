@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 public abstract class AbstractDownloader implements Downloader {
-    private final AlertManager alertManager;
+    public final AlertManager alertManager;
     protected String name;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private TranslationComponent statusMessage;

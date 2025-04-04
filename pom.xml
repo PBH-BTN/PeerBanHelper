@@ -356,6 +356,7 @@
             <groupId>com.googlecode.aviator</groupId>
             <artifactId>aviator</artifactId>
             <version>5.4.3</version>
+            <scope>compile</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>

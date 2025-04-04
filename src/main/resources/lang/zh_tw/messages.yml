@@ -592,3 +592,18 @@ ABOUT_VIEW_CREDIT: "開發人員與社群貢獻者..."
 LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_TITLE: "啟用事務批次寫入封禁歷史記錄"
 LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_DESCRIPTION: "在記錄封禁歷史記錄時使用事務以批次寫入資料庫以提高性能和減少隨機磁碟 I/O 操作。"
 TITLE_APP_V_CONTAINER: "📦App-V"
+
+ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_TITLE: "下载器 {} IP 封禁列表更新失败"
+ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
+  PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。
+  请检查并确保已正确配置 "设置 -> 基础设置 -> WebUI -> 前缀" 配置项，确保指向 PeerBanHelper WebUI 的地址，并可以被 Transmission 访问和连接（仅通过浏览器访问确认是不够的）。
+  如果此配置不正确，则 Transmission 将无法正确封禁和解除封禁任何 IP 地址。
+  
+  如果需要任何配置帮助，请参阅支持文档或在社区中请求帮助。
+
+DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: |
+  PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。
+  请检查并确保已正确配置 "设置 -> 基础设置 -> WebUI -> 前缀" 配置项，确保指向 PeerBanHelper WebUI 的地址，并可以被 Transmission 访问和连接（仅通过浏览器访问确认是不够的）。
+  如果此配置不正确，则 Transmission 将无法正确封禁和解除封禁任何 IP 地址。
+  
+  如果需要任何配置帮助，请参阅支持文档或在社区中请求帮助。

@@ -73,8 +73,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -618,8 +618,8 @@ public class PeerBanHelperServer implements Reloadable {
                 }
             }
             if (!hideFinishLogs && !getDownloaders().isEmpty()) {
-                long downloadersCount = peers.keySet().size();
-                long torrentsCount = peers.values().stream().mapToLong(e -> e.keySet().size()).sum();
+                long downloadersCount = peers.size();
+                long torrentsCount = peers.values().stream().mapToLong(e -> e.size()).sum();
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
