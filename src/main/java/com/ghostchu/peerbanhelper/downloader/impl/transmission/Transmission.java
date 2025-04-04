@@ -101,6 +101,9 @@ public final class Transmission extends AbstractDownloader {
         RqSessionGet get = new RqSessionGet();
         TypedResponse<RsSessionGet> resp = client.execute(get); // 执行任意 RPC 操作以刷新 session
         String version = resp.getArgs().getVersion();
+        if (version.length() > 5) {
+            version = version.substring(0, 5);
+        }
         Semver semver = new Semver(version, Semver.SemverType.LOOSE);
         // must 4.1.0 or higher
         if (semver.getMajor() < 4) {
