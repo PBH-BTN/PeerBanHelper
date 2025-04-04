@@ -44,11 +44,6 @@ DOWNLOADER_QB_FAILED_SAVE_BANLIST: "无法保存 {} ({}) 的 Banlist！{} - {}\n
 DOWNLOADER_TR_MOTD_WARNING: "[受限] 由于 Transmission 的 RPC-API 限制，PeerId 黑名单功能和 ProgressCheatBlocker 功能的过量下载模块不可用"
 DOWNLOADER_TR_DISCONNECT_PEERS: "[重置] 正在断开 Transmission 上的 {} 个种子连接的对等体，以便应用 IP 屏蔽列表的更改"
 DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP: "设置 Transmission 的 BanList 地址时，返回非成功响应：{}。"
-DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP: |
-  到 Transmission，PBH 没有生效
-  更新 BanList 时，返回非成功响应
-  erBanHelper 的外部交互端口，以便 Transmission 从 PBH 拉取 IP 黑名单
-  的 设置 -> 隐私 -> 屏蔽列表 中自动填写的 URL 是否正确，如果不正确，请在 PeerBanHelper 的 config.yml 中正确配置 server 部分的配置文件，确保 Transmission 能够正确连接到 IP 黑名单提供端
 DOWNLOADER_TR_INVALID_RESPONSE: "[错误] Transmission 返回无效 JSON 响应: {}"
 DOWNLOADER_TR_UPDATED_BLOCKLIST: "[响应] Transmission 屏蔽列表已更新成功，现在包含 {} 条规则"
 DOWNLOADER_TR_KNOWN_INCOMPATIBILITY: "[错误] 您正在使用的 Transmission 版本与 PeerBanHelper 不兼容: {}"
@@ -583,6 +578,13 @@ TITLE_APP_V_CONTAINER: "📦App-V"
 
 ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_TITLE: "下载器 {} IP 封禁列表更新失败"
 ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
+  PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。
+  请检查并确保已正确配置 "设置 -> 基础设置 -> WebUI -> 前缀" 配置项，确保指向 PeerBanHelper WebUI 的地址，并可以被 Transmission 访问和连接（仅通过浏览器访问确认是不够的）。
+  如果此配置不正确，则 Transmission 将无法正确封禁和解除封禁任何 IP 地址。
+  
+  如果需要任何配置帮助，请参阅支持文档或在社区中请求帮助。
+
+DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: |
   PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。
   请检查并确保已正确配置 "设置 -> 基础设置 -> WebUI -> 前缀" 配置项，确保指向 PeerBanHelper WebUI 的地址，并可以被 Transmission 访问和连接（仅通过浏览器访问确认是不够的）。
   如果此配置不正确，则 Transmission 将无法正确封禁和解除封禁任何 IP 地址。

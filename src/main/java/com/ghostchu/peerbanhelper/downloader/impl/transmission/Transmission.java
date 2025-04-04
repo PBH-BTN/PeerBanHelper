@@ -112,16 +112,33 @@ public final class Transmission extends AbstractDownloader {
             }
         }
         if (!resp.getArgs().getBlocklistEnabled() || !resp.getArgs().getBlocklistUrl().startsWith(blocklistUrl)) {
-            RqSessionSet set = RqSessionSet.builder()
-                    .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
-                    .blocklistEnabled(true)
-                    .build();
-            TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
-            if (!sessionSetResp.isSuccess()) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, sessionSetResp.getResult()));
+            if (!setBlockListUrl(blocklistUrl)) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, "Unable to set Transmission blocklist"));
+            }
+            if (!updateBlockList()) {
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED, getName()));
             }
         }
         return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+    }
+
+    private boolean setBlockListUrl(String blocklistUrl) {
+        RqSessionSet set = RqSessionSet.builder()
+                .blocklistUrl(blocklistUrl + "?t=" + System.currentTimeMillis()) // 更改 URL 来确保更改生效
+                .blocklistEnabled(true)
+                .build();
+        TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
+        return sessionSetResp.isSuccess();
+    }
+
+    private boolean updateBlockList() {
+        RqBlockList updateBlockList = new RqBlockList();
+        TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
+        if (!updateBlockListResp.isSuccess()) {
+            setBlockListUrl("http://peerbanhelper-blocklist-update-failed.com/check-peerbanhelper-webui-prefix-settings");
+            return false;
+        }
+        return true;
     }
 
     @Override
