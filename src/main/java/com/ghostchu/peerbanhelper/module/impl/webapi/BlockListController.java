@@ -33,7 +33,6 @@ public final class BlockListController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/blocklist/ip", ctx -> {
-                    System.out.println("request!");
                     StringBuilder builder = new StringBuilder();
                     for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
                         builder.append(pair.getKey().getIp()).append("\n");
