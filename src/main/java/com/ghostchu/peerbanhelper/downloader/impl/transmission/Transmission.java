@@ -117,7 +117,7 @@ public final class Transmission extends AbstractDownloader {
                     .build();
             TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
             if (!sessionSetResp.isSuccess()) {
-                log.error(tlUI(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP), sessionSetResp.getResult());
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP, sessionSetResp.getResult()));
             }
         }
         return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
