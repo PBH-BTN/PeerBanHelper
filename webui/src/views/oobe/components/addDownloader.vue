@@ -20,9 +20,9 @@
           <a-option :value="ClientTypeEnum.BiglyBT">BiglyBT</a-option>
           <a-option :value="ClientTypeEnum.Deluge">Deluge</a-option>
           <a-option :value="ClientTypeEnum.BitComet">BitComet</a-option>
-          <a-tooltip :content="t('page.dashboard.editModal.transmission.discourage')">
-            <a-option :value="ClientTypeEnum.Transmission" disabled>Transmission</a-option>
-          </a-tooltip>
+          <!--          <a-tooltip :content="t('page.dashboard.editModal.transmission.discourage')">-->
+          <a-option :value="ClientTypeEnum.Transmission">Transmission</a-option>
+          <!--          </a-tooltip>-->
         </a-select>
         <template v-if="config.downloaderConfig.config.type === ClientTypeEnum.BiglyBT" #extra>
           <i18n-t keypath="page.dashboard.editModal.biglybt">
