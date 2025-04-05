@@ -34,11 +34,10 @@ PeerBanHelper 主要由以下几个功能模块组成：
 > [!CAUTION]
 > 所有安装在 Docker 中的下载器，必须使用 host 网络驱动程序。PBH 需要下载器能获得 Peer 的真实 IP，不能使用 bridge 桥接模式！
 
-- qBittorrent/qBitorrent，**4.5.0 或更高版本**，不支持 XDown，
+- qBittorrent/qBitorrent，**4.5.0 或更高版本**，不支持 XDown
 - BiglyBT（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-BiglyBT)）
 - Deluge（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Deluge)）
-- Azureus(Vuze)（需要安装[插件](https://github.com/PBH-BTN/PBH-Adapter-Azureus)）
-- Transmission **(不建议使用；3.00-20 或更高版本)**
+- Transmission **(4.1.0-beta2 或更高版本)**
 - BitComet **v2.10 Beta6 [20240928] 或更高版本** (不支持 P2SP LTSeed 长效种子反吸血，因为 BitComet 暂时无法封禁长效连接)
 
 PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P 或者 Tor 连接将主动忽略。
