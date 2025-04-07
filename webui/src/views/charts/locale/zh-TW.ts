@@ -40,8 +40,6 @@ export default {
   'page.charts.options.bannedOnly': '僅顯示封禁資料',
   'page.charts.tooltip.traffic':
     '資料由 PeerBanHelper 自行統計。由於 API 限制，資料可能存在較大誤差，結果僅供參考。',
-  'page.charts.tooltip.2048':
-    '由於圖表對不齊很醜，所以聽從Ghost_chu的建議，放一個2048在這，限時直到新的圖表加入',
   'page.charts.error.title': '圖表載入失敗',
   'page.charts.error.refresh': '重試',
   'page.charts.all': '全部下載器',

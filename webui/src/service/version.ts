@@ -72,7 +72,7 @@ export function obtainFreeTrial(): Promise<CommonResponseWithoutData> {
 export function getManifest(endpoint = useEndpointStore().endpoint): Promise<mainfest> {
   const url = new URL(urlJoin(endpoint, '/api/metadata/manifest'), location.href)
   return (
-    fetch(url, { headers: getCommonHeader(false) })
+    fetch(url, { headers: getCommonHeader() })
       .catch(() => {
         throw new GetManifestError('service.manifest.networkError', false)
       })
