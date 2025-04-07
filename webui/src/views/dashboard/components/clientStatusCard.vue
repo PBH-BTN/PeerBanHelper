@@ -142,7 +142,7 @@ const statusMap: Record<ClientStatusEnum, [string, string]> = {
 const props = withDefaults(
   defineProps<{
     downloader: Downloader
-    disableRemove: boolean
+    disableRemove?: boolean
   }>(),
   { disableRemove: false }
 )
