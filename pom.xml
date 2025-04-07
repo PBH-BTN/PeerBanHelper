@@ -495,7 +495,7 @@
         <dependency>
             <groupId>me.friwi</groupId>
             <artifactId>jcefmaven</artifactId>
-            <version>132.3.1</version>
+            <version>126.2.0</version>
         </dependency>
     </dependencies>
 </project>
