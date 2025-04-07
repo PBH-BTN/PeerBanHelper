@@ -596,3 +596,5 @@ ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
   如果此配置不正确，则 Transmission 将无法正确封禁和解除封禁任何 IP 地址。
   
   如果需要任何配置帮助，请参阅支持文档或在社区中请求帮助。
+
+DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。请跟随文档检查前缀设置

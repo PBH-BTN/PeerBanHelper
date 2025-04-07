@@ -592,9 +592,4 @@ ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
   If this configuration is incorrect, Transmission will not be able to properly block or unblock any IP addresses.
   
   If you need any assistance with the configuration, please refer to the support documentation or request help in the community.
-DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: |
-  PeerBanHelper was unable to update the IP blocklist for {} because Transmission notified us that the blocklist update failed.
-  Please check and ensure that the "Settings -> Basic Settings -> WebUI -> Prefix" configuration item is correctly set to point to the PeerBanHelper WebUI address and that it is accessible and reachable by Transmission (merely confirming access via a browser is insufficient).
-  If this configuration is incorrect, Transmission will not be able to properly block or unblock any IP addresses.
-  
-  If you need any assistance with the configuration, please refer to the support documentation or request help in the community.
+DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: Unable update {}'s blocklist, Transmission returned an error that unable to retrieve blocklist. Check PeerBanHelper's document for troubleshooting.
