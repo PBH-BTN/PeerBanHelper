@@ -47,7 +47,6 @@
     "@eslint/js": "^9.23.0",
     "@rushstack/eslint-patch": "^1.11.0",
     "@tsconfig/node20": "^20.1.5",
-    "@types/eslint__js": "^9.0.0",
     "@types/lodash": "^4.17.16",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.13.13",
