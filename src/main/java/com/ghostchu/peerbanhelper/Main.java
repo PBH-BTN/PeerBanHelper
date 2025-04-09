@@ -10,6 +10,7 @@ import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
 import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
+import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swt.SwtGuiImpl;
@@ -120,7 +121,7 @@ public class Main {
         }
         initGUI(args);
         Thread.ofPlatform().name("Bootstrap").start(() -> {
-            guiManager.taskbarControl().updateProgress(null, Taskbar.State.INDETERMINATE, 0.0f);
+            guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
             pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
             setupProxySettings();
             setupScriptEngine();

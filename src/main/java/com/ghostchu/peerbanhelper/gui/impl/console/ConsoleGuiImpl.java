@@ -2,11 +2,11 @@ package com.ghostchu.peerbanhelper.gui.impl.console;
 
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
+import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.awt.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
@@ -73,12 +73,12 @@ public class ConsoleGuiImpl implements GuiImpl {
     public TaskbarControl taskbarControl() {
         return new TaskbarControl() {
             @Override
-            public void updateProgress(Window window, Taskbar.State state, float progress) {
+            public void updateProgress(Object window, TaskbarState state, float progress) {
 
             }
 
             @Override
-            public void requestUserAttention(Window window, boolean critical) {
+            public void requestUserAttention(Object window, boolean critical) {
 
             }
         };

@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
+import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
@@ -86,9 +87,9 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
         // taskbar
         if (Main.getServer().isGlobalPaused()) {
-            taskbarControl().updateProgress(mainWindow, Taskbar.State.PAUSED, 1.0f);
+            taskbarControl().updateProgress(mainWindow, TaskbarState.PAUSED, 1.0f);
         } else {
-            taskbarControl().updateProgress(mainWindow, Taskbar.State.OFF, -1.0f);
+            taskbarControl().updateProgress(mainWindow, TaskbarState.OFF, -1.0f);
         }
     }
 

@@ -8,8 +8,6 @@ import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
-import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleProgressDialog;
-import com.ghostchu.peerbanhelper.gui.impl.swing.SwingTaskbarControl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -43,7 +41,7 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
     @Getter
-    private SwingTaskbarControl swingTaskbarControl;
+    private SwtTaskbarControl swtTaskbarControl;
     @Getter
     private Display display;
 
@@ -75,6 +73,7 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         Main.getEventBus().register(this);
         OsThemeDetector detector = OsThemeDetector.getDetector();
         swtMainWindow = new SwtMainWindow(this, display);
+        swtTaskbarControl = new SwtTaskbarControl(swtMainWindow.shell, display);
         initLoggerRedirection();
     }
 
@@ -97,14 +96,13 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
-        return new ConsoleProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
-        //return new SwingProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
+        return new SwtProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
     }
 
     @Override
     public TaskbarControl taskbarControl() {
-        if (swingTaskbarControl != null) {
-            return swingTaskbarControl;
+        if (swtTaskbarControl != null) {
+            return swtTaskbarControl;
         }
         return super.taskbarControl();
     }

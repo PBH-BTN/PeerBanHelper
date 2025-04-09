@@ -19,6 +19,7 @@ import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
+import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.invoker.BanListInvoker;
 import com.ghostchu.peerbanhelper.invoker.impl.CommandExec;
 import com.ghostchu.peerbanhelper.invoker.impl.IPFilterInvoker;
@@ -66,7 +67,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -74,7 +74,6 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -200,7 +199,7 @@ public class PeerBanHelperServer implements Reloadable {
         postCompatibilityCheck();
         sendSnapshotAlert();
         runTestCode();
-        Main.getGuiManager().taskbarControl().updateProgress(null, Taskbar.State.OFF, 0.0f);
+        Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
     }
 
     private void postCompatibilityCheck() {
