@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="11.0.2" transformSequenceNumber="11">
-  <directoryPresets config="./disable-checking-updates.txt" />
+  <directoryPresets config="." />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="7.4.5" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="24" javaMaxVersion="24">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
@@ -35,6 +35,7 @@
     </mountPoints>
     <entries>
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
+      <dirEntry mountPoint="24" file="./redistributable" entryMode="subdir" subDirectory="redistributable" />
       <variableEntry mountPoint="24" name="jarPath" />
       <fileEntry mountPoint="250" file="./enable-jcef.txt" />
       <fileEntry mountPoint="265" file="./disable-checking-updates.txt" />
@@ -333,6 +334,27 @@ return true;
           </screen>
           <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true" rollbackBarrierExitCode="0">
             <actions>
+              <action id="268" beanClass="com.install4j.runtime.beans.actions.misc.RunExecutableAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="arguments" type="array" elementType="string" length="2">
+                    <element index="0">/silent</element>
+                    <element index="1">/install</element>
+                  </property>
+                  <property name="executable">
+                    <object class="java.io.File">
+                      <string>redistributable/MicrosoftEdgeWebview2Setup.exe</string>
+                    </object>
+                  </property>
+                  <property name="timeout" type="int" value="180" />
+                  <property name="wait" type="boolean" value="true" />
+                  <property name="workingDirectory">
+                    <object class="java.io.File">
+                      <string>${compiler:env.TEMP}</string>
+                    </object>
+                  </property>
+                </serializedBean>
+                <condition>return Util.isWindows();</condition>
+              </action>
               <action id="17" beanClass="com.install4j.runtime.beans.actions.InstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="quit" errorMessage="${i18n:FileCorrupted}" />
               <action id="18" beanClass="com.install4j.runtime.beans.actions.desktop.CreateProgramGroupAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
