@@ -144,6 +144,7 @@ public class Main {
             setupShutdownHook();
         });
         guiManager.sync();
+
     }
 
     private static void loadFlagsProperties() {
@@ -340,19 +341,24 @@ public class Main {
     }
 
     private static void initGUI(String[] args) {
-        String guiType = "swing";
-        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
-            guiType = "console";
-        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
+        String guiType = mainConfig.getString("gui", "auto");
+        if ("auto".equals(guiType)) guiType = "swing";
+
+        if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
             guiType = "swing";
         } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swt"))) {
             guiType = "swt";
         }
+        if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
+            guiType = "console";
+        }
+
         switch (guiType) {
             case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
-            case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
             case "swt" -> guiManager = new PBHGuiManager(new SwtGuiImpl(args));
+            default -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         }
+
         guiManager.setup();
     }
 

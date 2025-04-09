@@ -93,6 +93,42 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         }
     }
 
+    @Override
+    public String getName() {
+        return "SWING";
+    }
+
+    @Override
+    public boolean supportInteractive() {
+        return true;
+    }
+
+    @Override
+    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+        int msgType = JOptionPane.PLAIN_MESSAGE;
+        if (level == Level.INFO) {
+            msgType = JOptionPane.INFORMATION_MESSAGE;
+        }
+        if (level == Level.WARNING) {
+            msgType = JOptionPane.WARNING_MESSAGE;
+        }
+        if (level == Level.SEVERE) {
+            msgType = JOptionPane.ERROR_MESSAGE;
+        }
+        if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
+            Taskbar.getTaskbar().requestWindowUserAttention(mainWindow);
+        }
+        var finalMsgType = msgType;
+        SwingUtilities.invokeLater(() -> {
+            int result = JOptionPane.showOptionDialog(null, description, title,
+                    JOptionPane.YES_NO_OPTION, finalMsgType, null, null, JOptionPane.NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                yesEvent.run();
+            } else if (result == JOptionPane.NO_OPTION) {
+                noEvent.run();
+            }
+        });
+    }
 
     @Override
     public void setup() {
@@ -103,6 +139,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         OsThemeDetector detector = OsThemeDetector.getDetector();
         detector.registerListener(this::updateTheme);
         updateTheme(detector.isDark());
+        createMainWindow();
     }
 
     private void setupSwingDefaultFonts() {
@@ -283,7 +320,6 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void sync() {
-        mainWindow.sync();
         super.sync();
     }
 
@@ -303,7 +339,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
+    public void createDialog(Level level, String title, String description, Runnable clickEvent) {
         int msgType = JOptionPane.PLAIN_MESSAGE;
         if (level == Level.INFO) {
             msgType = JOptionPane.INFORMATION_MESSAGE;
@@ -318,7 +354,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             Taskbar.getTaskbar().requestWindowUserAttention(mainWindow);
         }
         var finalMsgType = msgType;
-        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, description, title, finalMsgType));
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(null, description, title, finalMsgType);
+            clickEvent.run();
+        });
     }
 
     @Override

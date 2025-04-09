@@ -77,6 +77,45 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         initLoggerRedirection();
     }
 
+    @Override
+    public String getName() {
+        return "SWT";
+    }
+
+    @Override
+    public boolean supportInteractive() {
+        return true;
+    }
+
+    @Override
+    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+        int style = SWT.YES | SWT.NO;
+        if (level == Level.INFO) {
+            style |= SWT.ICON_INFORMATION;
+        }
+        if (level == Level.WARNING) {
+            style |= SWT.ICON_WARNING;
+        }
+        if (level == Level.SEVERE) {
+            style |= SWT.ICON_ERROR;
+        }
+
+        int finalStyle = style;
+        display.asyncExec(() -> {
+            if (swtMainWindow != null && !swtMainWindow.shell.isDisposed()) {
+                swtMainWindow.shell.forceActive();
+            }
+            MessageBox messageBox = new MessageBox(swtMainWindow != null ? swtMainWindow.shell : new Shell(display), finalStyle);
+            messageBox.setText(title);
+            messageBox.setMessage(description);
+            int result = messageBox.open();
+            if (result == SWT.YES) {
+                yesEvent.run();
+            } else if (result == SWT.NO) {
+                noEvent.run();
+            }
+        });
+    }
 
     @Override
     public void onPBHFullyStarted(PeerBanHelperServer server) {
@@ -184,7 +223,7 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
+    public void createDialog(Level level, String title, String description, Runnable clickEvent) {
         int style = SWT.NONE;
         if (level == Level.INFO) {
             style = SWT.ICON_INFORMATION;
@@ -206,6 +245,7 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             messageBox.setText(title);
             messageBox.setMessage(description);
             messageBox.open();
+            clickEvent.run();
         });
     }
 

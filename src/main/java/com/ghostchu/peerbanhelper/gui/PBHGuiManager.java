@@ -18,6 +18,11 @@ public class PBHGuiManager implements GuiManager {
     }
 
     @Override
+    public String getName() {
+        return gui.getName();
+    }
+
+    @Override
     public boolean isGuiAvailable() {
         return gui.isGuiAvailable();
     }
@@ -43,8 +48,18 @@ public class PBHGuiManager implements GuiManager {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
-        gui.createDialog(level, title, description);
+    public boolean supportInteractive() {
+        return gui.supportInteractive();
+    }
+
+    @Override
+    public void createDialog(Level level, String title, String description, Runnable clickEvent) {
+        gui.createDialog(level, title, description, clickEvent);
+    }
+
+    @Override
+    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+        gui.createYesNoDialog(level, title, description, yesEvent, noEvent);
     }
 
     @Override

@@ -341,7 +341,8 @@ public final class SwingMainWindow extends JFrame {
          */
         private void devToolsShow(CefBrowser cefBrowser) {
             if (cefBrowser.getURL().startsWith("devtools://")) {
-                Thread.startVirtualThread(() -> parent.getSwingGUI().createDialog(Level.WARNING, "Cannot open devtools for a devtools page", "You cannot open PeerBanHelper devtools for a PeerBanHelper devtools page. (WHY YOU DO THAT? ARE YOU CRAZY?)"));
+                Thread.startVirtualThread(() -> parent.getSwingGUI().createDialog(Level.WARNING, "Cannot open devtools for a devtools page", "You cannot open PeerBanHelper devtools for a PeerBanHelper devtools page. (WHY YOU DO THAT? ARE YOU CRAZY?)", () -> {
+                }));
                 return;
             }
             if (devToolsDialog_ != null) {
@@ -507,13 +508,16 @@ public final class SwingMainWindow extends JFrame {
             enableJCEF.addActionListener(e -> {
                 try {
                     if (jcefFlagFile.exists()) {
-                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已处于启用状态，无需再次启用.");
+                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已处于启用状态，无需再次启用.", () -> {
+                        });
                     } else {
                         jcefFlagFile.createNewFile();
-                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已启用，请重启 PeerBanHelper 以使其生效.");
+                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已启用，请重启 PeerBanHelper 以使其生效.", () -> {
+                        });
                     }
                 } catch (IOException ex) {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "启用 JCEF", "无法启用 JCEF （写入启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                    Main.getGuiManager().createDialog(Level.SEVERE, "启用 JCEF", "无法启用 JCEF （写入启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    });
                     log.error("启用 JCEF 失败", ex);
                 }
             });
@@ -521,40 +525,50 @@ public final class SwingMainWindow extends JFrame {
                 try {
                     if (jcefFlagFile.exists()) {
                         jcefFlagFile.delete();
-                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已禁用，可关闭 PeerBanHelper 后删除 `jcef` 以释放磁盘空间.");
+                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已禁用，可关闭 PeerBanHelper 后删除 `jcef` 以释放磁盘空间.", () -> {
+                        });
                     } else {
-                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已处于禁用状态，无需再次禁用。");
+                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已处于禁用状态，无需再次禁用。", () -> {
+                        });
                     }
                 } catch (Exception ex) {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用 JCEF", "无法禁用 JCEF（删除启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用 JCEF", "无法禁用 JCEF（删除启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    });
                     log.error("无法禁用 JCEF", ex);
                 }
             });
             enableCheckUpdates.addActionListener(e -> {
                 if (!disableCheckUpdatesFile.exists()) {
-                    Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已处于启用状态，无需再次启用");
+                    Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已处于启用状态，无需再次启用", () -> {
+                    });
                     return;
                 }
                 if (disableCheckUpdatesFile.delete()) {
-                    Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已启用，请重启 PeerBanHelper 以使其生效.");
+                    Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已启用，请重启 PeerBanHelper 以使其生效.", () -> {
+                    });
                 } else {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "启用检查更新（测试版）", "无法启用更新检查（删除禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                    Main.getGuiManager().createDialog(Level.SEVERE, "启用检查更新（测试版）", "无法启用更新检查（删除禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    });
                 }
             });
             disableCheckUpdates.addActionListener(e -> {
                 if (disableCheckUpdatesFile.exists()) {
-                    Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已处于禁用状态，无需再次禁用");
+                    Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已处于禁用状态，无需再次禁用", () -> {
+                    });
                     return;
                 }
                 try {
                     if (disableCheckUpdatesFile.createNewFile()) {
-                        Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已禁用，但已计划的更新仍会在下次启动时安装。");
+                        Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已禁用，但已计划的更新仍会在下次启动时安装。", () -> {
+                        });
                     } else {
-                        Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                        Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                        });
                     }
                 } catch (IOException ex) {
                     log.error("禁用检查更新失败", ex);
-                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    });
                 }
             });
             menu.add(disableJCEF);
@@ -597,7 +611,8 @@ public final class SwingMainWindow extends JFrame {
                 if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
                     String content = Main.getServer().getWebContainer().getToken();
                     copyText(content);
-                    parent.swingGUI.createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)));
+                    parent.swingGUI.createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)), () -> {
+                    });
                 }
             });
             webUIMenu.add(copyWebUIToken);

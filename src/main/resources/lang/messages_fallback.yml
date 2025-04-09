@@ -599,3 +599,19 @@ ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
 
 DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。请跟随文档检查前缀设置
 GUI_TRAY_TITLE: "PeerBanHelper"
+
+CRASH_MANAGER_TITLE: "PeerBanHelper 的上次退出可能是意外关闭"
+CRASH_MANAGER_DESCRIPTION: |
+  PeerBanHelper 的上次退出可能是非正常关闭。
+  这可能是因为程序崩溃、内存不足，或者操作系统强制关闭了程序。
+  频繁的非正常退出可能导致数据和配置文件损坏，请尽量正常退出 PeerBanHelper。
+CRASH_MANAGER_GUI_RELATED_TITLE: "非正常退出故障排除向导 - 检测已知问题 - Windows - Java Platform awt.dll"
+CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
+  在 Windows 平台上，有时 PeerBanHelper 可能会因为以下原因非正常退出：
+  
+  1. 用户有意或无意切换屏幕分辨率或 DPI 设置，或者使用远程桌面连接（RDP）
+  2. 显示驱动程序崩溃时导致的连带崩溃
+  3. 与显示器连接/断开连接时崩溃
+  
+  如果 PeerBanHelper 频繁因为上述问题出现崩溃，建议您启动 SWTUI 以禁用可能存在问题的 awt.dll。
+  您是否希望切换到 SWT UI 界面？

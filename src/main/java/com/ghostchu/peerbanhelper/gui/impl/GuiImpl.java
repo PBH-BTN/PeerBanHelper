@@ -20,11 +20,17 @@ public interface GuiImpl {
 
     void createNotification(Level level, String title, String description);
 
-    void createDialog(Level level, String title, String description);
+    void createDialog(Level level, String title, String description, Runnable clickEvent);
 
     ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel);
 
     TaskbarControl taskbarControl();
 
     boolean isGuiAvailable();
+
+    String getName();
+
+    boolean supportInteractive();
+
+    void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent);
 }

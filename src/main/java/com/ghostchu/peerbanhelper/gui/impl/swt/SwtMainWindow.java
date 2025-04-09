@@ -219,7 +219,8 @@ public class SwtMainWindow {
                 String content = Main.getServer().getWebContainer().getToken();
                 copyText(content);
                 swtGui.createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE),
-                        String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)));
+                        String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)), () -> {
+                        });
             }
         });
     }

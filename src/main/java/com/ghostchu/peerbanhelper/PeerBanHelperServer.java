@@ -139,6 +139,8 @@ public class PeerBanHelperServer implements Reloadable {
     private DNSLookup dnsLookup;
     @Getter
     private boolean globalPaused = false;
+    @Autowired
+    private CrashManager crashManager;
 //    @Autowired
 //    private IPFSBanListShare share;
 
@@ -179,6 +181,7 @@ public class PeerBanHelperServer implements Reloadable {
 
     public void start() throws SQLException {
         log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
+        checkKnownCrashes();
         loadDownloaders();
         registerBanListInvokers();
         registerModules();
@@ -200,6 +203,31 @@ public class PeerBanHelperServer implements Reloadable {
         sendSnapshotAlert();
         runTestCode();
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
+        crashManager.putRunningFlag();
+    }
+
+    private void checkKnownCrashes() {
+        if (!crashManager.isRunningFlagExists()) return;
+        Main.getGuiManager().createDialog(Level.WARNING, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
+            if ("SWING".equals(Main.getGuiManager().getName())) {
+                Main.getGuiManager().createYesNoDialog(Level.INFO,
+                        tlUI(Lang.CRASH_MANAGER_GUI_RELATED_TITLE),
+                        tlUI(Lang.CRASH_MANAGER_GUI_RELATED_DESCRIPTION),
+                        () -> {
+                            Main.getMainConfig().set("gui", "swt");
+                            try {
+                                Main.getMainConfig().save(Main.getMainConfigFile());
+                                System.exit(0);
+                            } catch (IOException e) {
+                                Main.getGuiManager().createDialog(Level.SEVERE, "Unable to save configuration", e.getMessage(), () -> {
+                                });
+                            }
+                        },
+                        () -> {
+                        }
+                );
+            }
+        });
     }
 
     private void postCompatibilityCheck() {

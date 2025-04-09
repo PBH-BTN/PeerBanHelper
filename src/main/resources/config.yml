@@ -1,4 +1,4 @@
-config-version: 29
+config-version: 30
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -6,6 +6,12 @@ config-version: 29
 # zh_cn Chinese Simplified (简体中文)
 # zh_tw Chinese Traditional (繁體中文)
 language: default
+# GUI 实现
+# auto 由 PeerBanHelper 选择最佳 GUI 实现
+# swing 使用 Java Swing GUI 和 Flatlaf 实现，支持全部平台 (推荐)
+# swt 使用 Eclipse Standard Widget Toolkit (SWT) GUI 实现，仅支持 Windows, macOS, Linux 的 x86_64 平台 (在 Swing 存在问题时使用)
+# disable 禁用任何 GUI
+gui: auto
 # PBH Plus 的捐赠密钥，填写后将激活捐赠功能。
 # PeerBanHelper 是一个非营利、开放源代码的免费软件。维护 PeerBanHelper 是一项持续的任务，
 # 我们的团队成员每个月在上面花费大量的时间与恶意Peer进行技术对抗，因此你的支持对我们来说至关重要。

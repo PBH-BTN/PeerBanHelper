@@ -52,7 +52,12 @@ public class ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
+    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+
+    }
+
+    @Override
+    public void createDialog(Level level, String title, String description, Runnable clickEvent) {
         if (level.equals(Level.INFO)) {
             log.info("{}: {}", title, description);
         }
@@ -86,6 +91,16 @@ public class ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public boolean isGuiAvailable() {
+        return false;
+    }
+
+    @Override
+    public String getName() {
+        return "CONSOLE";
+    }
+
+    @Override
+    public boolean supportInteractive() {
         return false;
     }
 
