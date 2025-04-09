@@ -23,9 +23,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.*;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -189,43 +187,37 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createDialog(Level level, String title, String description) {
-//        int msgType = JOptionPane.PLAIN_MESSAGE;
-//        if (level == Level.INFO) {
-//            msgType = JOptionPane.INFORMATION_MESSAGE;
-//        }
-//        if (level == Level.WARNING) {
-//            msgType = JOptionPane.WARNING_MESSAGE;
-//        }
-//        if (level == Level.SEVERE) {
-//            msgType = JOptionPane.ERROR_MESSAGE;
-//        }
-//        if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
-//            Taskbar.getTaskbar().requestWindowUserAttention(swtMainWindow);
-//        }
-//        var finalMsgType = msgType;
-//        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, description, title, finalMsgType));
+        int style = SWT.NONE;
+        if (level == Level.INFO) {
+            style = SWT.ICON_INFORMATION;
+        }
+        if (level == Level.WARNING) {
+            style = SWT.ICON_WARNING;
+        }
+        if (level == Level.SEVERE) {
+            style = SWT.ICON_ERROR;
+        }
+
+        // 请求用户关注
+        int finalStyle = style;
+        display.asyncExec(() -> {
+            if (swtMainWindow != null && !swtMainWindow.shell.isDisposed()) {
+                swtMainWindow.shell.forceActive();
+            }
+            MessageBox messageBox = new MessageBox(swtMainWindow != null ? swtMainWindow.shell : new Shell(display), finalStyle);
+            messageBox.setText(title);
+            messageBox.setMessage(description);
+            messageBox.open();
+        });
     }
 
     @Override
     public void createNotification(Level level, String title, String description) {
-//        var swingTray = swtMainWindow.getTrayMenu().getSwingTrayDialog();
-//        if (swingTray != null) {
-//            var icon = swingTray.getTrayIcon();
-//            if (swingTray.getTrayIcon() != null) {
-//                if (level.equals(Level.WARNING)) {
-//                    icon.displayMessage(title, description, TrayIcon.MessageType.WARNING);
-//                } else if (level.equals(Level.SEVERE)) {
-//                    icon.displayMessage(title, description, TrayIcon.MessageType.ERROR);
-//                } else {
-//                    icon.displayMessage(title, description, TrayIcon.MessageType.INFO);
-//                }
-//                if (System.getProperty("os.name").contains("Windows")) {
-//                    CommonUtil.getScheduler().schedule(this::refreshTrayIcon, 5, TimeUnit.SECONDS);
-//                }
-//                return;
-//            }
-//        }
-        super.createNotification(level, title, description);
+        if (swtMainWindow != null) {
+            swtMainWindow.trayManager.createNotification(level, title, description);
+        } else {
+            super.createNotification(level, title, description);
+        }
     }
 
     public void openWebpage(URI uri) {

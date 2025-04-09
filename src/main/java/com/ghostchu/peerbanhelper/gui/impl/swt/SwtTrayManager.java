@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import java.awt.*;
 import java.net.URI;
 import java.util.List;
+import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -143,14 +144,43 @@ public class SwtTrayManager {
             shell.setVisible(false);
             tabComponents.forEach(TabComponent::windowHide);
             if (!notificationShown && trayItem != null) {
-                ToolTip tooltip = new ToolTip(shell, SWT.BALLOON);
-                tooltip.setText(tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION));
-                tooltip.setMessage(tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
-                trayItem.setToolTip(tooltip);
-                tooltip.setVisible(true);
+                createNotification(Level.INFO,
+                        tlUI(Lang.GUI_TRAY_MESSAGE_CAPTION),
+                        tlUI(Lang.GUI_TRAY_MESSAGE_DESCRIPTION));
                 // 标记通知已经显示过
                 notificationShown = true;
             }
+        });
+    }
+
+    /**
+     * 创建并显示托盘通知
+     *
+     * @param level 日志级别，决定通知图标样式
+     * @param title 通知标题
+     * @param description 通知内容
+     */
+    public void createNotification(Level level, String title, String description) {
+        if (trayItem == null || trayItem.isDisposed() || shell.isDisposed()) {
+            return;
+        }
+        // 根据日志级别设置不同的图标样式
+        int imageIcon = 0;
+        if (level == Level.SEVERE) {
+            imageIcon = SWT.ICON_ERROR;
+        } else if (level == Level.WARNING) {
+            imageIcon = SWT.ICON_WARNING;
+        } else {
+            imageIcon = SWT.ICON_INFORMATION;
+        }
+
+        int finalImageIcon = imageIcon;
+        Display.getDefault().asyncExec(() -> {
+            ToolTip tooltip = new ToolTip(shell, SWT.BALLOON | finalImageIcon);
+            tooltip.setText(title);
+            tooltip.setMessage(description);
+            trayItem.setToolTip(tooltip);
+            tooltip.setVisible(true);
         });
     }
 

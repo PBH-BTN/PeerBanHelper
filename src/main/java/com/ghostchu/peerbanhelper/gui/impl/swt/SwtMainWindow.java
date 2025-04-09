@@ -41,7 +41,7 @@ public class SwtMainWindow {
     Image iconImage; // 用于存储图标资源
 
     // 托盘管理器
-    private SwtTrayManager trayManager;
+    SwtTrayManager trayManager;
 
     public SwtMainWindow(SwtGuiImpl swtGui, Display display) {
         this.shell = new Shell(display);
@@ -139,9 +139,38 @@ public class SwtMainWindow {
         // 添加 WebUI 菜单
         createWebUIMenu(menuBar);
 
+        createDebugMenu(menuBar);
+
         // 添加帮助/关于菜单
         createHelpAboutMenu(menuBar);
     }
+
+    private void createDebugMenu(Menu menuBar) {
+        if (!ExternalSwitch.parseBoolean("pbh.app-v")) {
+            if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
+                MenuItem debugMenuItem = new MenuItem(menuBar, SWT.CASCADE);
+                debugMenuItem.setText("DEBUG");
+
+                Menu debugMenu = new Menu(shell, SWT.DROP_DOWN);
+                debugMenuItem.setMenu(debugMenu);
+
+                MenuItem sendInfoMessage = new MenuItem(debugMenu, SWT.PUSH);
+                sendInfoMessage.setText("[托盘通知] 发送信息托盘消息");
+                sendInfoMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.INFO, "测试（信息）", "测试消息"));
+
+                MenuItem sendWarningMessage = new MenuItem(debugMenu, SWT.PUSH);
+                sendWarningMessage.setText("[托盘通知] 发送警告托盘消息");
+                sendWarningMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.WARNING, "测试（警告）", "测试消息"));
+
+                MenuItem sendErrorMessage = new MenuItem(debugMenu, SWT.PUSH);
+                sendErrorMessage.setText("[托盘通知] 发送错误托盘消息");
+                sendErrorMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.SEVERE, "测试（错误）", "测试消息"));
+
+            }
+        }
+
+    }
+
 
     // 创建程序菜单
     private void createProgramMenu(Menu menuBar) {
@@ -205,9 +234,7 @@ public class SwtMainWindow {
 
         MenuItem viewOnGithubItem = new MenuItem(helpMenu, SWT.PUSH);
         viewOnGithubItem.setText(tlUI(Lang.ABOUT_VIEW_GITHUB));
-        viewOnGithubItem.addListener(SWT.Selection, e -> {
-            swtGui.openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE)));
-        });
+        viewOnGithubItem.addListener(SWT.Selection, e -> swtGui.openWebpage(URI.create(tlUI(Lang.GITHUB_PAGE))));
 
         MenuItem creditMenuItem = new MenuItem(helpMenu, SWT.PUSH);
         creditMenuItem.setText(tlUI(Lang.ABOUT_VIEW_CREDIT));
