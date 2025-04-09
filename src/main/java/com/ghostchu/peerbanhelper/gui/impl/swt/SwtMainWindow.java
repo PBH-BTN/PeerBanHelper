@@ -222,12 +222,8 @@ public class SwtMainWindow {
             future.add(java.util.Calendar.YEAR, 400);
             replaces.put("{lastLogin}", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(future.getTime()));
 
-            // 这里需要创建 SWT 版本的 AboutWindow，或者调用相应的对话框
-            // 暂时使用对话框显示基本信息
-            MessageBox aboutBox = new MessageBox(shell, SWT.ICON_INFORMATION);
-            aboutBox.setText(tlUI(Lang.ABOUT_VIEW_CREDIT));
-            aboutBox.setMessage("PeerBanHelper " + replaces.get("{version}"));
-            aboutBox.open();
+            // 使用SWT版本的AboutWindow
+            new SwtAboutWindow(display, replaces);
         });
     }
 
