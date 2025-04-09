@@ -589,6 +589,16 @@ public final class SwingMainWindow extends JFrame {
                     log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
                 }
             });
+//            JMenuItem switchToSWT = new JMenuItem(tlUI(Lang.GUI_PROGRAM_SWITCH_TO_SWT));
+//            switchToSWT.addActionListener(e -> {
+//                Main.getMainConfig().set("gui", "swt");
+//                try {
+//                    Main.getMainConfig().save(Main.getMainConfigFile());
+//                    System.exit(0);
+//                } catch (IOException ex) {
+//                    log.error("Unable to switch to SWT", ex);
+//                }
+//            });
             if (!ExternalSwitch.parseBoolean("pbh.app-v")) {
                 menu.add(openDataDirectory);
             }

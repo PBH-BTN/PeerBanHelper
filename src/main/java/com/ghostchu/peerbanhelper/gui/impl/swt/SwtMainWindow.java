@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.gui.impl.swt.tabs.LogsTabComponent;
 import com.ghostchu.peerbanhelper.gui.impl.swt.tabs.TabComponent;
 import com.ghostchu.peerbanhelper.gui.impl.swt.tabs.WebUITabComponent;
 import com.ghostchu.peerbanhelper.text.Lang;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -25,6 +26,7 @@ import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
+@Slf4j
 public class SwtMainWindow {
 
     private final SwtGuiImpl swtGui;
@@ -191,10 +193,20 @@ public class SwtMainWindow {
                     System.err.println("Unable to open data directory " + Main.getDataDirectory().getPath() + " in desktop env.");
                 }
             });
-
-            new MenuItem(programMenu, SWT.SEPARATOR);
         }
 
+        MenuItem switchToSwing = new MenuItem(programMenu, SWT.PUSH);
+        switchToSwing.setText(tlUI(Lang.GUI_PROGRAM_SWITCH_TO_AUTO));
+        switchToSwing.addListener(SWT.Selection, e -> {
+            Main.getMainConfig().set("gui", "auto");
+            try {
+                Main.getMainConfig().save(Main.getMainConfigFile());
+                System.exit(0);
+            } catch (IOException ex) {
+                log.error("Unable to switch to SWT", ex);
+            }
+        });
+        new MenuItem(programMenu, SWT.SEPARATOR);
         MenuItem quitItem = new MenuItem(programMenu, SWT.PUSH);
         quitItem.setText(tlUI(Lang.GUI_MENU_QUIT));
         quitItem.addListener(SWT.Selection, e -> System.exit(0));

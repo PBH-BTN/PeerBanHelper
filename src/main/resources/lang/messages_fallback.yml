@@ -615,3 +615,5 @@ CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
   
   如果 PeerBanHelper 频繁因为上述问题出现崩溃，建议您启动 SWTUI 以禁用可能存在问题的 awt.dll。
   您是否希望切换到 SWT UI 界面？
+GUI_PROGRAM_SWITCH_TO_AUTO: "重启并还原默认 UI 行为..."
+GUI_PROGRAM_SWITCH_TO_SWT: "重启并切换到 SWT UI..."
