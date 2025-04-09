@@ -36,14 +36,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public final class MainWindow extends JFrame {
+public final class SwingMainWindow extends JFrame {
     @Getter
     private final SwingGuiImpl swingGUI;
     @Getter
@@ -63,7 +63,7 @@ public final class MainWindow extends JFrame {
     private JScrollPane loggerScrollPane;
 
 
-    public MainWindow(SwingGuiImpl swingGUI) {
+    public SwingMainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
         if (SystemInfo.isMacFullWindowContentSupported)
             getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
@@ -213,14 +213,14 @@ public final class MainWindow extends JFrame {
     }
 
     public static class WebUITab implements AutoCloseable {
-        private final MainWindow parent;
+        private final SwingMainWindow parent;
         private CefApp app;
         private CefClient client;
         private CefBrowser browser;
         private Component awtComponent;
         private JCEFSwingDevTools devToolsDialog_ = null;
 
-        public WebUITab(MainWindow parent) {
+        public WebUITab(SwingMainWindow parent) {
             this.parent = parent;
             Main.getEventBus().register(this);
         }
@@ -366,13 +366,13 @@ public final class MainWindow extends JFrame {
     }
 
     public static class TrayMenu {
-        private final MainWindow parent;
+        private final SwingMainWindow parent;
         private boolean persistFlagTrayMessageSent;
         @Nullable
         @Getter
         private SwingTray swingTrayDialog;
 
-        public TrayMenu(MainWindow parent) {
+        public TrayMenu(SwingMainWindow parent) {
             this.parent = parent;
             setupSystemTray();
         }
@@ -402,7 +402,6 @@ public final class MainWindow extends JFrame {
                 }
             }
         }
-
 
         private void updateTrayMenus() {
             if (swingTrayDialog == null) return;
@@ -453,9 +452,9 @@ public final class MainWindow extends JFrame {
     }
 
     public static class WindowMenuBar {
-        private final MainWindow parent;
+        private final SwingMainWindow parent;
 
-        public WindowMenuBar(MainWindow parent) {
+        public WindowMenuBar(SwingMainWindow parent) {
             this.parent = parent;
             parent.setJMenuBar(setupMenuBar());
         }
@@ -609,9 +608,9 @@ public final class MainWindow extends JFrame {
     }
 
     public static class LogsTab {
-        private final MainWindow parent;
+        private final SwingMainWindow parent;
 
-        public LogsTab(MainWindow parent) {
+        public LogsTab(SwingMainWindow parent) {
             this.parent = parent;
 
             parent.loggerTextList.setModel(new DefaultListModel<>());

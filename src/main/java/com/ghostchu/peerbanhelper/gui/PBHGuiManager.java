@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.gui;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 
-import java.awt.*;
 import java.util.logging.Level;
 
 public class PBHGuiManager implements GuiManager {
@@ -18,15 +17,9 @@ public class PBHGuiManager implements GuiManager {
         gui.setup();
     }
 
-
     @Override
     public boolean isGuiAvailable() {
-        return Desktop.isDesktopSupported();
-    }
-
-    @Override
-    public void createMainWindow() {
-        gui.createMainWindow();
+        return gui.isGuiAvailable();
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
+import com.ghostchu.peerbanhelper.gui.impl.swt.SwtGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.*;
@@ -118,28 +119,29 @@ public class Main {
             }
         }
         initGUI(args);
-        guiManager.createMainWindow();
-        guiManager.taskbarControl().updateProgress(null, Taskbar.State.INDETERMINATE, 0.0f);
-        pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-        setupProxySettings();
-        setupScriptEngine();
-        try {
-            log.info(TextManager.tlUI(Lang.SPRING_CONTEXT_LOADING));
-            applicationContext = new AnnotationConfigApplicationContext();
-            applicationContext.register(AppConfig.class);
-            applicationContext.refresh();
+        Thread.ofPlatform().name("Bootstrap").start(() -> {
+            guiManager.taskbarControl().updateProgress(null, Taskbar.State.INDETERMINATE, 0.0f);
+            pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
+            setupProxySettings();
+            setupScriptEngine();
+            try {
+                log.info(TextManager.tlUI(Lang.SPRING_CONTEXT_LOADING));
+                applicationContext = new AnnotationConfigApplicationContext();
+                applicationContext.register(AppConfig.class);
+                applicationContext.refresh();
 //            registerBean(File.class, mainConfigFile, "mainConfigFile");
 //            registerBean(File.class, profileConfigFile, "profileConfigFile");
 //            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
 //            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
-            server = applicationContext.getBean(PeerBanHelperServer.class);
-            server.start();
-        } catch (Exception e) {
-            log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
-            throw new RuntimeException(e);
-        }
-        guiManager.onPBHFullyStarted(server);
-        setupShutdownHook();
+                server = applicationContext.getBean(PeerBanHelperServer.class);
+                server.start();
+            } catch (Exception e) {
+                log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
+                throw new RuntimeException(e);
+            }
+            guiManager.onPBHFullyStarted(server);
+            setupShutdownHook();
+        });
         guiManager.sync();
     }
 
@@ -342,10 +344,13 @@ public class Main {
             guiType = "console";
         } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swing"))) {
             guiType = "swing";
+        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swt"))) {
+            guiType = "swt";
         }
         switch (guiType) {
             case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
             case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
+            case "swt" -> guiManager = new PBHGuiManager(new SwtGuiImpl(args));
         }
         guiManager.setup();
     }

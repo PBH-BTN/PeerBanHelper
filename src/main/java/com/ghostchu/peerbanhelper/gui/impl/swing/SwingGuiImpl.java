@@ -43,7 +43,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
-    private MainWindow mainWindow;
+    private SwingMainWindow mainWindow;
     @Getter
     private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
     @Getter
@@ -74,7 +74,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     private void updateGuiStuff() {
         StringBuilder builder = new StringBuilder();
-        builder.append(tlUI(Lang.GUI_TITLE_LOADED, Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+        builder.append(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         StringJoiner joiner = new StringJoiner("", " [", "]");
         joiner.setEmptyValue("");
         ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
@@ -203,7 +203,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createMainWindow() {
-        mainWindow = new MainWindow(this);
+        mainWindow = new SwingMainWindow(this);
         swingTaskbarControl = new SwingTaskbarControl(mainWindow);
         initLoggerRedirection();
     }

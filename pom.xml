@@ -19,6 +19,7 @@
         <flatlafVersion>3.5.4</flatlafVersion>
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
+        <swt.version>3.129.0</swt.version>
     </properties>
     <pluginRepositories>
         <pluginRepository>
@@ -251,7 +252,10 @@
             <id>maven-snapshots</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
-
+        <repository>
+            <id>maven-eclipse-repo-fork</id><!-- a repository for swt 4.9 binaries -->
+            <url>https://lislei.github.io/maven-eclipse.github.io/maven</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -496,6 +500,18 @@
             <groupId>me.friwi</groupId>
             <artifactId>jcefmaven</artifactId>
             <version>126.2.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.win32.win32.x86_64 -->
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+            <version>${swt.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.gtk.linux.x86_64 -->
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+            <version>${swt.version}</version>
         </dependency>
     </dependencies>
 </project>

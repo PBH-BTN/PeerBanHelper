@@ -25,4 +25,6 @@ public interface GuiImpl {
     ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel);
 
     TaskbarControl taskbarControl();
+
+    boolean isGuiAvailable();
 }

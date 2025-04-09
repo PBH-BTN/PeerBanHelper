@@ -84,5 +84,10 @@ public class ConsoleGuiImpl implements GuiImpl {
         };
     }
 
+    @Override
+    public boolean isGuiAvailable() {
+        return false;
+    }
+
 
 }
