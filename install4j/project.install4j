@@ -363,7 +363,7 @@ return true;
                   <property name="wait" type="boolean" value="true" />
                   <property name="workingDirectory">
                     <object class="java.io.File">
-                      <string>${compiler:env.TEMP}</string>
+                      <string>.</string>
                     </object>
                   </property>
                 </serializedBean>
