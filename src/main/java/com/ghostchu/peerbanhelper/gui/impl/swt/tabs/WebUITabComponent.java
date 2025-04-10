@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swt.tabs;
 
+import com.ghostchu.peerbanhelper.text.Lang;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.layout.GridData;
@@ -8,6 +9,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 /**
  * WebUI 标签页组件
@@ -40,7 +43,7 @@ public class WebUITabComponent implements TabComponent {
 
     @Override
     public String getTabName() {
-        return "WebUI";
+        return tlUI(Lang.GUI_TABBED_WEBUI);
     }
 
     /**
