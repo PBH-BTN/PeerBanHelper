@@ -188,7 +188,7 @@ GITHUB_PAGE: "https://github.com/PBH-BTN/PeerBanHelper"
 GUI_COPY_TO_CLIPBOARD_TITLE: "复制到剪贴板"
 GUI_COPY_TO_CLIPBOARD_DESCRIPTION: "已成功复制到系统剪贴板: \n{}"
 GUI_TITLE_LOADING: "PeerBanHelper - 正在加载，请稍候..."
-GUI_TITLE_LOADED: "PeerBanHelper - {} ({})"
+GUI_TITLE_LOADED: "PeerBanHelper ({}) - {} ({})"
 WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED: "未找到 JavaFx Web 模块，您正在使用精简构建，WebUI 选项卡未启用"
 WEBVIEW_ENABLED: "已找到 JavaFx Web，WebUI 选项卡已启用"
 STATUS_TEXT_OK: "当前工作正常"
@@ -584,9 +584,20 @@ ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
   
   如果需要任何配置帮助，请参阅支持文档或在社区中请求帮助。
 
-DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: |
-  PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。
-  请检查并确保已正确配置 "设置 -> 基础设置 -> WebUI -> 前缀" 配置项，确保指向 PeerBanHelper WebUI 的地址，并可以被 Transmission 访问和连接（仅通过浏览器访问确认是不够的）。
-  如果此配置不正确，则 Transmission 将无法正确封禁和解除封禁任何 IP 地址。
+DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。请跟随文档检查前缀设置
+GUI_TRAY_TITLE: "PeerBanHelper"
+CRASH_MANAGER_TITLE: "PeerBanHelper 的上次退出可能是意外关闭"
+CRASH_MANAGER_DESCRIPTION: |
+  PeerBanHelper 的上次退出可能是非正常关闭。
+  这可能是因为程序崩溃、内存不足，或者操作系统强制关闭了程序。
+  频繁的非正常退出可能导致数据和配置文件损坏，请尽量正常退出 PeerBanHelper。
+CRASH_MANAGER_GUI_RELATED_TITLE: "非正常退出故障排除向导 - 检测已知问题 - Windows - Java Platform awt.dll"
+CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
+  在 Windows 平台上，有时 PeerBanHelper 可能会因为以下原因非正常退出：
   
-  如果需要任何配置帮助，请参阅支持文档或在社区中请求帮助。
+  1. 用户有意或无意切换屏幕分辨率或 DPI 设置，或者使用远程桌面连接（RDP）
+  2. 显示驱动程序崩溃时导致的连带崩溃
+  3. 与显示器连接/断开连接时崩溃
+  
+  如果 PeerBanHelper 频繁因为上述问题出现崩溃，建议您启动 SWTUI 以禁用可能存在问题的 awt.dll。
+  您是否希望切换到 SWT UI 界面？

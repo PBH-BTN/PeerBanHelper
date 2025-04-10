@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
+import com.ghostchu.peerbanhelper.gui.TaskbarState;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,7 +41,7 @@ public final class SwingProgressDialog implements ProgressDialog {
         topPanel.add(descriptionLabel);
 
         setProgressDisplayIndeterminate(true);
-        Main.getGuiManager().taskbarControl().updateProgress(frame, Taskbar.State.INDETERMINATE, 0.0f);
+        Main.getGuiManager().taskbarControl().updateProgress(frame, TaskbarState.INDETERMINATE, 0.0f);
 
         // 创建按钮
         this.stopButton = new JButton(buttonText);
@@ -72,7 +73,7 @@ public final class SwingProgressDialog implements ProgressDialog {
         this.progress = progress;
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue((int) (progress * 100));  // 更新进度条的值，0 到 100
-            Main.getGuiManager().taskbarControl().updateProgress(frame, Taskbar.State.NORMAL, progress);
+            Main.getGuiManager().taskbarControl().updateProgress(frame, TaskbarState.NORMAL, progress);
         });
     }
 
@@ -85,7 +86,7 @@ public final class SwingProgressDialog implements ProgressDialog {
     @Override
     public void close() {
         SwingUtilities.invokeLater(() -> frame.setVisible(false));
-        Main.getGuiManager().taskbarControl().updateProgress(frame, Taskbar.State.OFF, -1);
+        Main.getGuiManager().taskbarControl().updateProgress(frame, TaskbarState.OFF, -1);
     }
 
     @Override
@@ -131,7 +132,7 @@ public final class SwingProgressDialog implements ProgressDialog {
         SwingUtilities.invokeLater(() -> {
             progressBar.setIndeterminate(indeterminate);
             progressBar.setStringPainted(!indeterminate);
-            Main.getGuiManager().taskbarControl().updateProgress(frame, indeterminate ? Taskbar.State.INDETERMINATE : Taskbar.State.NORMAL, (progress * 100));
+            Main.getGuiManager().taskbarControl().updateProgress(frame, indeterminate ? TaskbarState.INDETERMINATE : TaskbarState.NORMAL, (progress * 100));
         });
     }
 

@@ -36,14 +36,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-public final class MainWindow extends JFrame {
+public final class SwingMainWindow extends JFrame {
     @Getter
     private final SwingGuiImpl swingGUI;
     @Getter
@@ -63,7 +63,7 @@ public final class MainWindow extends JFrame {
     private JScrollPane loggerScrollPane;
 
 
-    public MainWindow(SwingGuiImpl swingGUI) {
+    public SwingMainWindow(SwingGuiImpl swingGUI) {
         this.swingGUI = swingGUI;
         if (SystemInfo.isMacFullWindowContentSupported)
             getRootPane().putClientProperty("apple.awt.transparentTitleBar", true);
@@ -213,14 +213,14 @@ public final class MainWindow extends JFrame {
     }
 
     public static class WebUITab implements AutoCloseable {
-        private final MainWindow parent;
+        private final SwingMainWindow parent;
         private CefApp app;
         private CefClient client;
         private CefBrowser browser;
         private Component awtComponent;
         private JCEFSwingDevTools devToolsDialog_ = null;
 
-        public WebUITab(MainWindow parent) {
+        public WebUITab(SwingMainWindow parent) {
             this.parent = parent;
             Main.getEventBus().register(this);
         }
@@ -341,7 +341,8 @@ public final class MainWindow extends JFrame {
          */
         private void devToolsShow(CefBrowser cefBrowser) {
             if (cefBrowser.getURL().startsWith("devtools://")) {
-                Thread.startVirtualThread(() -> parent.getSwingGUI().createDialog(Level.WARNING, "Cannot open devtools for a devtools page", "You cannot open PeerBanHelper devtools for a PeerBanHelper devtools page. (WHY YOU DO THAT? ARE YOU CRAZY?)"));
+                Thread.startVirtualThread(() -> parent.getSwingGUI().createDialog(Level.WARNING, "Cannot open devtools for a devtools page", "You cannot open PeerBanHelper devtools for a PeerBanHelper devtools page. (WHY YOU DO THAT? ARE YOU CRAZY?)", () -> {
+                }));
                 return;
             }
             if (devToolsDialog_ != null) {
@@ -366,13 +367,13 @@ public final class MainWindow extends JFrame {
     }
 
     public static class TrayMenu {
-        private final MainWindow parent;
+        private final SwingMainWindow parent;
         private boolean persistFlagTrayMessageSent;
         @Nullable
         @Getter
         private SwingTray swingTrayDialog;
 
-        public TrayMenu(MainWindow parent) {
+        public TrayMenu(SwingMainWindow parent) {
             this.parent = parent;
             setupSystemTray();
         }
@@ -402,7 +403,6 @@ public final class MainWindow extends JFrame {
                 }
             }
         }
-
 
         private void updateTrayMenus() {
             if (swingTrayDialog == null) return;
@@ -453,9 +453,9 @@ public final class MainWindow extends JFrame {
     }
 
     public static class WindowMenuBar {
-        private final MainWindow parent;
+        private final SwingMainWindow parent;
 
-        public WindowMenuBar(MainWindow parent) {
+        public WindowMenuBar(SwingMainWindow parent) {
             this.parent = parent;
             parent.setJMenuBar(setupMenuBar());
         }
@@ -508,13 +508,16 @@ public final class MainWindow extends JFrame {
             enableJCEF.addActionListener(e -> {
                 try {
                     if (jcefFlagFile.exists()) {
-                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已处于启用状态，无需再次启用.");
+                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已处于启用状态，无需再次启用.", () -> {
+                        });
                     } else {
                         jcefFlagFile.createNewFile();
-                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已启用，请重启 PeerBanHelper 以使其生效.");
+                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已启用，请重启 PeerBanHelper 以使其生效.", () -> {
+                        });
                     }
                 } catch (IOException ex) {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "启用 JCEF", "无法启用 JCEF （写入启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                    Main.getGuiManager().createDialog(Level.SEVERE, "启用 JCEF", "无法启用 JCEF （写入启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    });
                     log.error("启用 JCEF 失败", ex);
                 }
             });
@@ -522,40 +525,50 @@ public final class MainWindow extends JFrame {
                 try {
                     if (jcefFlagFile.exists()) {
                         jcefFlagFile.delete();
-                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已禁用，可关闭 PeerBanHelper 后删除 `jcef` 以释放磁盘空间.");
+                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已禁用，可关闭 PeerBanHelper 后删除 `jcef` 以释放磁盘空间.", () -> {
+                        });
                     } else {
-                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已处于禁用状态，无需再次禁用。");
+                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已处于禁用状态，无需再次禁用。", () -> {
+                        });
                     }
                 } catch (Exception ex) {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用 JCEF", "无法禁用 JCEF（删除启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用 JCEF", "无法禁用 JCEF（删除启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    });
                     log.error("无法禁用 JCEF", ex);
                 }
             });
             enableCheckUpdates.addActionListener(e -> {
                 if (!disableCheckUpdatesFile.exists()) {
-                    Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已处于启用状态，无需再次启用");
+                    Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已处于启用状态，无需再次启用", () -> {
+                    });
                     return;
                 }
                 if (disableCheckUpdatesFile.delete()) {
-                    Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已启用，请重启 PeerBanHelper 以使其生效.");
+                    Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已启用，请重启 PeerBanHelper 以使其生效.", () -> {
+                    });
                 } else {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "启用检查更新（测试版）", "无法启用更新检查（删除禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                    Main.getGuiManager().createDialog(Level.SEVERE, "启用检查更新（测试版）", "无法启用更新检查（删除禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    });
                 }
             });
             disableCheckUpdates.addActionListener(e -> {
                 if (disableCheckUpdatesFile.exists()) {
-                    Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已处于禁用状态，无需再次禁用");
+                    Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已处于禁用状态，无需再次禁用", () -> {
+                    });
                     return;
                 }
                 try {
                     if (disableCheckUpdatesFile.createNewFile()) {
-                        Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已禁用，但已计划的更新仍会在下次启动时安装。");
+                        Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已禁用，但已计划的更新仍会在下次启动时安装。", () -> {
+                        });
                     } else {
-                        Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                        Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                        });
                     }
                 } catch (IOException ex) {
                     log.error("禁用检查更新失败", ex);
-                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。");
+                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    });
                 }
             });
             menu.add(disableJCEF);
@@ -576,6 +589,16 @@ public final class MainWindow extends JFrame {
                     log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
                 }
             });
+//            JMenuItem switchToSWT = new JMenuItem(tlUI(Lang.GUI_PROGRAM_SWITCH_TO_SWT));
+//            switchToSWT.addActionListener(e -> {
+//                Main.getMainConfig().set("gui", "swt");
+//                try {
+//                    Main.getMainConfig().save(Main.getMainConfigFile());
+//                    System.exit(0);
+//                } catch (IOException ex) {
+//                    log.error("Unable to switch to SWT", ex);
+//                }
+//            });
             if (!ExternalSwitch.parseBoolean("pbh.app-v")) {
                 menu.add(openDataDirectory);
             }
@@ -598,7 +621,8 @@ public final class MainWindow extends JFrame {
                 if (Main.getServer() != null && Main.getServer().getWebContainer() != null) {
                     String content = Main.getServer().getWebContainer().getToken();
                     copyText(content);
-                    parent.swingGUI.createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)));
+                    parent.swingGUI.createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)), () -> {
+                    });
                 }
             });
             webUIMenu.add(copyWebUIToken);
@@ -609,9 +633,9 @@ public final class MainWindow extends JFrame {
     }
 
     public static class LogsTab {
-        private final MainWindow parent;
+        private final SwingMainWindow parent;
 
-        public LogsTab(MainWindow parent) {
+        public LogsTab(SwingMainWindow parent) {
             this.parent = parent;
 
             parent.loggerTextList.setModel(new DefaultListModel<>());

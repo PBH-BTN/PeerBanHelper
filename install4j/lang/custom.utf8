@@ -1,4 +1,5 @@
 launcher.peerbanhelper.gui=PeerBanHelper
+launcher.peerbanhelper.gui.swt=PeerBanHelper (SWT UI)
 launcher.peerbanhelper.silent=PeerBanHelper (静默启动)
 launcher.peerbanhelper.nogui=PeerBanHelper (无GUI, 控制台)
 launcher.peerbanhelper.nogui.lowram=PeerBanHelper (无GUI, 控制台, 小内存模式(使用更多CPU和磁盘IO))

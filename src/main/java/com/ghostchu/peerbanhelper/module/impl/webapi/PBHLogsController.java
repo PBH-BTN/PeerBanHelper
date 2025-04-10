@@ -85,7 +85,12 @@ public final class PBHLogsController extends AbstractFeatureModule {
                     return;
                 }
             }
-            if (!webContainer.isContextAuthorized(ctx.getUpgradeCtx$javalin())) {
+            var authResult = webContainer.isContextAuthorized(ctx.getUpgradeCtx$javalin());
+            if (authResult == JavalinWebContainer.TokenAuthResult.NO_AUTH_TOKEN_PROVIDED) {
+                ctx.closeSession(WsCloseStatus.POLICY_VIOLATION, JsonUtil.standard().toJson(new StdResp(false, tlUI(Lang.WS_LOGS_STREAM_ACCESS_DENIED), null)));
+                return;
+            }
+            if (authResult == JavalinWebContainer.TokenAuthResult.FAILED) {
                 ctx.closeSession(WsCloseStatus.POLICY_VIOLATION, JsonUtil.standard().toJson(new StdResp(false, tlUI(Lang.WS_LOGS_STREAM_ACCESS_DENIED), null)));
                 webContainer.markLoginFailed(userIp(ctx.getUpgradeCtx$javalin()));
                 return;

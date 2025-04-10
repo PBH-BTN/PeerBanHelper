@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.gui;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 
-import java.awt.*;
 import java.util.logging.Level;
 
 public class PBHGuiManager implements GuiManager {
@@ -18,15 +17,14 @@ public class PBHGuiManager implements GuiManager {
         gui.setup();
     }
 
-
     @Override
-    public boolean isGuiAvailable() {
-        return Desktop.isDesktopSupported();
+    public String getName() {
+        return gui.getName();
     }
 
     @Override
-    public void createMainWindow() {
-        gui.createMainWindow();
+    public boolean isGuiAvailable() {
+        return gui.isGuiAvailable();
     }
 
     @Override
@@ -50,8 +48,18 @@ public class PBHGuiManager implements GuiManager {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
-        gui.createDialog(level, title, description);
+    public boolean supportInteractive() {
+        return gui.supportInteractive();
+    }
+
+    @Override
+    public void createDialog(Level level, String title, String description, Runnable clickEvent) {
+        gui.createDialog(level, title, description, clickEvent);
+    }
+
+    @Override
+    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+        gui.createYesNoDialog(level, title, description, yesEvent, noEvent);
     }
 
     @Override

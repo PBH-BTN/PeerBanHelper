@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
+import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
@@ -43,7 +44,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     @Getter
     private final boolean silentStart;
-    private MainWindow mainWindow;
+    private SwingMainWindow mainWindow;
     @Getter
     private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
     @Getter
@@ -74,7 +75,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     private void updateGuiStuff() {
         StringBuilder builder = new StringBuilder();
-        builder.append(tlUI(Lang.GUI_TITLE_LOADED, Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
+        builder.append(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
         StringJoiner joiner = new StringJoiner("", " [", "]");
         joiner.setEmptyValue("");
         ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
@@ -86,12 +87,48 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
         // taskbar
         if (Main.getServer().isGlobalPaused()) {
-            taskbarControl().updateProgress(mainWindow, Taskbar.State.PAUSED, 1.0f);
+            taskbarControl().updateProgress(mainWindow, TaskbarState.PAUSED, 1.0f);
         } else {
-            taskbarControl().updateProgress(mainWindow, Taskbar.State.OFF, -1.0f);
+            taskbarControl().updateProgress(mainWindow, TaskbarState.OFF, -1.0f);
         }
     }
 
+    @Override
+    public String getName() {
+        return "SWING";
+    }
+
+    @Override
+    public boolean supportInteractive() {
+        return true;
+    }
+
+    @Override
+    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+        int msgType = JOptionPane.PLAIN_MESSAGE;
+        if (level == Level.INFO) {
+            msgType = JOptionPane.INFORMATION_MESSAGE;
+        }
+        if (level == Level.WARNING) {
+            msgType = JOptionPane.WARNING_MESSAGE;
+        }
+        if (level == Level.SEVERE) {
+            msgType = JOptionPane.ERROR_MESSAGE;
+        }
+        if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
+            Taskbar.getTaskbar().requestWindowUserAttention(mainWindow);
+        }
+        var finalMsgType = msgType;
+        SwingUtilities.invokeLater(() -> {
+            int result = JOptionPane.showOptionDialog(null, description, title,
+                    JOptionPane.YES_NO_OPTION, finalMsgType, null, null, JOptionPane.NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                yesEvent.run();
+            } else if (result == JOptionPane.NO_OPTION) {
+                noEvent.run();
+            }
+        });
+    }
 
     @Override
     public void setup() {
@@ -102,6 +139,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         OsThemeDetector detector = OsThemeDetector.getDetector();
         detector.registerListener(this::updateTheme);
         updateTheme(detector.isDark());
+        createMainWindow();
     }
 
     private void setupSwingDefaultFonts() {
@@ -203,7 +241,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createMainWindow() {
-        mainWindow = new MainWindow(this);
+        mainWindow = new SwingMainWindow(this);
         swingTaskbarControl = new SwingTaskbarControl(mainWindow);
         initLoggerRedirection();
     }
@@ -282,7 +320,6 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void sync() {
-        mainWindow.sync();
         super.sync();
     }
 
@@ -302,7 +339,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createDialog(Level level, String title, String description) {
+    public void createDialog(Level level, String title, String description, Runnable clickEvent) {
         int msgType = JOptionPane.PLAIN_MESSAGE;
         if (level == Level.INFO) {
             msgType = JOptionPane.INFORMATION_MESSAGE;
@@ -317,7 +354,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             Taskbar.getTaskbar().requestWindowUserAttention(mainWindow);
         }
         var finalMsgType = msgType;
-        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, description, title, finalMsgType));
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(null, description, title, finalMsgType);
+            clickEvent.run();
+        });
     }
 
     @Override

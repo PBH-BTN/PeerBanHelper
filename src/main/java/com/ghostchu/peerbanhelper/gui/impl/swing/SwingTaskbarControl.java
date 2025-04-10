@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
+import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -9,17 +10,17 @@ public final class SwingTaskbarControl implements TaskbarControl {
 
     private final Window parent;
 
-    public SwingTaskbarControl(Window parent) {
-        this.parent = parent;
+    public SwingTaskbarControl(Object parent) {
+        this.parent = (Window) parent;
     }
 
     @Override
-    public void updateProgress(@Nullable Window window, Taskbar.State state, float progress) {
+    public void updateProgress(@Nullable Object window, TaskbarState state, float progress) {
         if (!Taskbar.isTaskbarSupported()) return;
         if (window == null) {
             window = parent;
         }
-        @Nullable Window finalWindow = window;
+        @Nullable Window finalWindow = (Window) window;
         EventQueue.invokeLater(() -> {
             Taskbar taskbar = Taskbar.getTaskbar();
             if (taskbar.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
@@ -28,18 +29,24 @@ public final class SwingTaskbarControl implements TaskbarControl {
                 taskbar.setProgressValue((int) (progress * 100));
             }
             if (taskbar.isSupported(Taskbar.Feature.PROGRESS_STATE_WINDOW)) {
-                taskbar.setWindowProgressState(finalWindow, state);
+                switch (state) {
+                    case INDETERMINATE -> taskbar.setWindowProgressState(finalWindow, Taskbar.State.INDETERMINATE);
+                    case NORMAL -> taskbar.setWindowProgressState(finalWindow, Taskbar.State.NORMAL);
+                    case ERROR -> taskbar.setWindowProgressState(finalWindow, Taskbar.State.ERROR);
+                    case PAUSED -> taskbar.setWindowProgressState(finalWindow, Taskbar.State.PAUSED);
+                    case OFF -> taskbar.setWindowProgressState(finalWindow, Taskbar.State.OFF);
+                }
             }
         });
     }
 
     @Override
-    public void requestUserAttention(@Nullable Window window, boolean critical) {
+    public void requestUserAttention(@Nullable Object window, boolean critical) {
         if (!Taskbar.isTaskbarSupported()) return;
         if (window == null) {
             window = parent;
         }
-        @Nullable Window finalWindow = window;
+        @Nullable Window finalWindow = (Window) window;
         EventQueue.invokeLater(() -> {
             Taskbar taskbar = Taskbar.getTaskbar();
             if (taskbar.isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
