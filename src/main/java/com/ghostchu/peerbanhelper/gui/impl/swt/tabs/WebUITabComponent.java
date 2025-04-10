@@ -78,6 +78,8 @@ public class WebUITabComponent implements TabComponent {
             browser = new Browser(webUIComposite, SWT.NONE);
             browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             browser.setUrl(lastUrl);
+            webUIComposite.layout(true);
+            browser.layout(true);
         }
     }
 

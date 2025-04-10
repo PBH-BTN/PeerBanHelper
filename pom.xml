@@ -513,5 +513,17 @@
             <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
             <version>${swt.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.gtk.linux.aarch64 -->
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.swt.gtk.linux.aarch64</artifactId>
+            <version>${swt.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.gtk.linux.ppc64le -->
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.swt.gtk.linux.ppc64le</artifactId>
+            <version>${swt.version}</version>
+        </dependency>
     </dependencies>
 </project>

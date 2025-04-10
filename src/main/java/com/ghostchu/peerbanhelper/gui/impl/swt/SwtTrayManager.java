@@ -69,9 +69,9 @@ public class SwtTrayManager {
         trayItem.addListener(SWT.Selection, event -> {
             if (!shell.isVisible()) {
                 shell.setVisible(true);
-                tabComponents.forEach(TabComponent::windowShow);
                 shell.setMinimized(false);
                 shell.forceActive();
+                tabComponents.forEach(TabComponent::windowShow);
             } else {
                 shell.setVisible(false);
                 tabComponents.forEach(TabComponent::windowHide);
