@@ -1,4 +1,5 @@
 launcher.peerbanhelper.gui=PeerBanHelper
+launcher.peerbanhelper.gui.swt=PeerBanHelper (SWT UI)
 launcher.peerbanhelper.silent=PeerBanHelper (Silent Launch)
 launcher.peerbanhelper.nogui=PeerBanHelper (No GUI, Console Mode)
 launcher.peerbanhelper.nogui.lowram=PeerBanHelper (No GUI, Console Mode, Low Memory Mode - Higher CPU and Disk IO)
