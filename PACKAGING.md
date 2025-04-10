@@ -87,6 +87,16 @@ Docker），探测可能并不准确，您可以使用开关参数 `pbh.userLoca
 PeerBanHelper 默认情况下启用 GUI（如果探测到桌面环境），但如果你需要禁用 GUI，可以使用 `pbh.nogui=true`
 开关参数，或者在启动命令行末尾传递 `nogui` 参数。
 
+### 强制 Swing UI
+
+PeerBanHelper 默认情况下启用 Swing UI（如果探测到桌面环境）。
+开关参数，或者在启动命令行末尾传递 `swing` 参数。
+
+### 强制 SWT UI
+
+PeerBanHelper 默认情况下启用 Swing UI（如果探测到桌面环境）。但如果您希望强制使用 SWT UI，可以：
+开关参数，或者在启动命令行末尾传递 `swt` 参数。
+
 ### 更改 API Token
 
 注意：默认指定 API Token 将导致用户跳过 OOBE 阶段，这可能会导致不可预测的问题。该操作不受支持
