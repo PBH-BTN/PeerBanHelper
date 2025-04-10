@@ -94,7 +94,7 @@ PeerBanHelper 默认情况下启用 Swing UI（如果探测到桌面环境）。
 
 ### 强制 SWT UI
 
-PeerBanHelper 默认情况下启用 Swing UI（如果探测到桌面环境）。但如果您希望强制使用 SWT UI，可以：
+PeerBanHelper 默认情况下启用 SWT UI（如果探测到桌面环境）。但如果您希望强制使用 SWT UI，可以：
 开关参数，或者在启动命令行末尾传递 `swt` 参数。
 
 ### 更改 API Token
