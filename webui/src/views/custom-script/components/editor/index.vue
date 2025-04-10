@@ -44,7 +44,7 @@ import getSuggestion from './aviatorscript/suggestions'
 const { t } = useI18n()
 
 const { viewOnly = false } = defineProps<{
-  viewOnly: boolean
+  viewOnly?: boolean
 }>()
 const model = defineModel<string | undefined>({ required: true })
 

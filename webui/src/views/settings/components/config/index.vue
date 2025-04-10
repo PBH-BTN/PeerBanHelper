@@ -16,6 +16,7 @@
             <a-radio-group v-model="form.language">
               <a-radio value="en_us">English</a-radio>
               <a-radio value="zh_cn">简体中文</a-radio>
+              <a-radio value="zh_tw">繁體中文</a-radio>
               <a-radio value="default">{{
                 t('page.settings.tab.config.language.default')
               }}</a-radio>

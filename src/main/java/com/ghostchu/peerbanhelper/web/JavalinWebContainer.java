@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.web;
 
+import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
@@ -151,11 +152,14 @@ public final class JavalinWebContainer {
                     if (!allowAttemptLogin(CommonUtil.userIp(ctx))) {
                         throw new IPAddressBannedException();
                     }
-                    if (isContextAuthorized(ctx)) {
+                    TokenAuthResult tokenAuthResult = isContextAuthorized(ctx);
+                    if (tokenAuthResult == TokenAuthResult.SUCCESS) {
                         markLoginSuccess(CommonUtil.userIp(ctx));
                         return;
                     }
-                    markLoginFailed(CommonUtil.userIp(ctx));
+                    if (tokenAuthResult == TokenAuthResult.FAILED) {
+                        markLoginFailed(CommonUtil.userIp(ctx));
+                    }
                     throw new NotLoggedInException();
                 })
                 .options("/*", ctx -> ctx.status(200));
@@ -175,7 +179,8 @@ public final class JavalinWebContainer {
         return true;
     }
 
-    public boolean isContextAuthorized(Context ctx) {
+    @NotNull
+    public TokenAuthResult isContextAuthorized(Context ctx) {
         var tk = "";
         String authToken = ctx.header("Authorization");
         if (authToken != null) {
@@ -185,7 +190,10 @@ public final class JavalinWebContainer {
         } else {
             tk = ctx.queryParam("token");
         }
-        return token.equals(tk);
+        if (StringUtils.isEmpty(tk)) {
+            return TokenAuthResult.NO_AUTH_TOKEN_PROVIDED;
+        }
+        return token.equals(tk) ? TokenAuthResult.SUCCESS : TokenAuthResult.FAILED;
     }
 
     public void start(String host, int port, String token) {
@@ -259,5 +267,11 @@ public final class JavalinWebContainer {
         public int compareTo(@NotNull JavalinWebContainer.AcceptLanguages o) {
             return Float.compare(prefer, o.prefer);
         }
+    }
+
+    public enum TokenAuthResult {
+        NO_AUTH_TOKEN_PROVIDED,
+        SUCCESS,
+        FAILED
     }
 }

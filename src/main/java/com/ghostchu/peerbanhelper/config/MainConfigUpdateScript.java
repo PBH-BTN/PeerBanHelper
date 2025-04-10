@@ -30,6 +30,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 30)
+    public void addGuiSettings() {
+        conf.set("gui", "auto");
+    }
+
     @UpdateScript(version = 28)
     public void updateBtnNetworkAddress() {
         List<String> outdatedBtnAddress = List.of(

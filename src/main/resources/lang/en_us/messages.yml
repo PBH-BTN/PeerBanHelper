@@ -192,7 +192,7 @@ GITHUB_PAGE: "https://github.com/PBH-BTN/PeerBanHelper"
 GUI_COPY_TO_CLIPBOARD_TITLE: "Copy to clipboard"
 GUI_COPY_TO_CLIPBOARD_DESCRIPTION: "Successfully copied to system clipboard: \n{}"
 GUI_TITLE_LOADING: "PeerBanHelper - Loading, please wait..."
-GUI_TITLE_LOADED: "PeerBanHelper - {} ({})"
+GUI_TITLE_LOADED: "PeerBanHelper ({}) - {} ({})"
 WEBVIEW_DISABLED_WEBKIT_NOT_INCLUDED: "JavaFx Web module not found, you are using a lightweight build, WebUI tab not enabled"
 WEBVIEW_ENABLED: "JavaFx Web found, WebUI tab enabled"
 STATUS_TEXT_OK: "Currently working normally"
@@ -592,9 +592,20 @@ ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
   If this configuration is incorrect, Transmission will not be able to properly block or unblock any IP addresses.
   
   If you need any assistance with the configuration, please refer to the support documentation or request help in the community.
-DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: |
-  PeerBanHelper was unable to update the IP blocklist for {} because Transmission notified us that the blocklist update failed.
-  Please check and ensure that the "Settings -> Basic Settings -> WebUI -> Prefix" configuration item is correctly set to point to the PeerBanHelper WebUI address and that it is accessible and reachable by Transmission (merely confirming access via a browser is insufficient).
-  If this configuration is incorrect, Transmission will not be able to properly block or unblock any IP addresses.
+DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: Unable update {}'s blocklist, Transmission returned an error that unable to retrieve blocklist. Check PeerBanHelper's document for troubleshooting.
+GUI_TRAY_TITLE: "PeerBanHelper"
+CRASH_MANAGER_TITLE: "PeerBanHelper's Last Exit May Have Been Unexpected"
+CRASH_MANAGER_DESCRIPTION: |
+  PeerBanHelper's last exit may have been abnormal.
+  This could be due to a program crash, insufficient memory, or the operating system forcibly terminating the program.
+  Frequent abnormal exits may lead to data and configuration file corruption. Please try to exit PeerBanHelper properly whenever possible.
+CRASH_MANAGER_GUI_RELATED_TITLE: "Abnormal Exit Troubleshooting Guide - Detecting Known Issues - Windows - Java Platform awt.dll"
+CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
+  On the Windows platform, PeerBanHelper may sometimes exit abnormally due to the following reasons:
   
-  If you need any assistance with the configuration, please refer to the support documentation or request help in the community.
+  1. User intentionally or unintentionally changing screen resolution or DPI settings, or using a Remote Desktop Connection (RDP)
+  2. Cascading crashes caused by display driver failures
+  3. Crashes when connecting/disconnecting displays
+  
+  If PeerBanHelper frequently crashes due to the above issues, we recommend launching SWTUI to disable the potentially problematic awt.dll.
+  Would you like to switch to the SWT UI interface?
