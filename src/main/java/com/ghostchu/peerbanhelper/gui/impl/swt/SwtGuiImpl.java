@@ -14,7 +14,6 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.google.common.eventbus.Subscribe;
-import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
@@ -71,7 +70,6 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     public void setup() {
         super.setup();
         Main.getEventBus().register(this);
-        OsThemeDetector detector = OsThemeDetector.getDetector();
         swtMainWindow = new SwtMainWindow(this, display);
         swtTaskbarControl = new SwtTaskbarControl(swtMainWindow.shell, display);
         initLoggerRedirection();
