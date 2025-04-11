@@ -136,9 +136,13 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         //FlatIntelliJLaf.setup();
         setupSwingDefaultFonts();
         Main.getEventBus().register(this);
-        OsThemeDetector detector = OsThemeDetector.getDetector();
-        detector.registerListener(this::updateTheme);
-        updateTheme(detector.isDark());
+        try {
+            // 这玩意儿能空指针？
+            OsThemeDetector detector = OsThemeDetector.getDetector();
+            detector.registerListener(this::updateTheme);
+            updateTheme(detector.isDark());
+        } catch (Exception ignored) {
+        }
         createMainWindow();
     }
 
