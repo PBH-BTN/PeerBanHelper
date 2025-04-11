@@ -348,27 +348,7 @@ return true;
           </screen>
           <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true" rollbackBarrierExitCode="0">
             <actions>
-              <action id="268" beanClass="com.install4j.runtime.beans.actions.misc.RunExecutableAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
-                <serializedBean>
-                  <property name="arguments" type="array" elementType="string" length="2">
-                    <element index="0">/silent</element>
-                    <element index="1">/install</element>
-                  </property>
-                  <property name="executable">
-                    <object class="java.io.File">
-                      <string>redistributable/MicrosoftEdgeWebview2Setup.exe</string>
-                    </object>
-                  </property>
-                  <property name="timeout" type="int" value="180" />
-                  <property name="wait" type="boolean" value="true" />
-                  <property name="workingDirectory">
-                    <object class="java.io.File">
-                      <string>.</string>
-                    </object>
-                  </property>
-                </serializedBean>
-                <condition>return Util.isWindows();</condition>
-              </action>
+              <action id="270" beanClass="com.install4j.runtime.beans.actions.UninstallPreviousAction" actionElevationType="none" rollbackBarrierExitCode="0" />
               <action id="17" beanClass="com.install4j.runtime.beans.actions.InstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="quit" errorMessage="${i18n:FileCorrupted}" />
               <action id="18" beanClass="com.install4j.runtime.beans.actions.desktop.CreateProgramGroupAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
@@ -418,6 +398,27 @@ return true;
                 <serializedBean>
                   <property name="itemName" type="string">${compiler:sys.fullName} ${compiler:sys.version}</property>
                 </serializedBean>
+              </action>
+              <action id="268" beanClass="com.install4j.runtime.beans.actions.misc.RunExecutableAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="arguments" type="array" elementType="string" length="2">
+                    <element index="0">/silent</element>
+                    <element index="1">/install</element>
+                  </property>
+                  <property name="executable">
+                    <object class="java.io.File">
+                      <string>redistributable/MicrosoftEdgeWebview2Setup.exe</string>
+                    </object>
+                  </property>
+                  <property name="timeout" type="int" value="180" />
+                  <property name="wait" type="boolean" value="true" />
+                  <property name="workingDirectory">
+                    <object class="java.io.File">
+                      <string>.</string>
+                    </object>
+                  </property>
+                </serializedBean>
+                <condition>return Util.isWindows();</condition>
               </action>
               <action id="76" beanClass="com.install4j.runtime.beans.actions.services.InstallServiceAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
