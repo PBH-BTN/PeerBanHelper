@@ -627,7 +627,6 @@ public class PeerBanHelperServer implements Reloadable {
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
                     getDownloaders().forEach(downloader -> protect.getService().submit(() -> {
-                        var list = BAN_LIST.values().stream().map(meta -> meta.getTorrent().getId()).toList();
                         updateDownloader(downloader, true, null, null, true);
                     }));
                     needReApplyBanList.set(false);
@@ -939,9 +938,7 @@ public class PeerBanHelperServer implements Reloadable {
                     addr = addr.toIPv4();
                 }
                 var addrStr = addr.toNormalizedString();
-                if ((addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal())) {
-                    return true;
-                }
+                return (addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal());
             }
         }
         return false;
