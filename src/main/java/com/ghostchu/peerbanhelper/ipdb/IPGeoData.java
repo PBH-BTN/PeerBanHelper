@@ -21,7 +21,7 @@ public final class IPGeoData {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    public static class CityData {
+    public static final class CityData {
         @Nullable
         private String name;
 
@@ -43,7 +43,7 @@ public final class IPGeoData {
         @AllArgsConstructor
         @NoArgsConstructor
         @Data
-        public static class LocationData {
+        public static final class LocationData {
             @Nullable
             private Double latitude;
             @Nullable
@@ -58,7 +58,7 @@ public final class IPGeoData {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    public static class CountryData {
+    public static final class CountryData {
         @Nullable
         private String name;
         @Nullable
@@ -69,7 +69,7 @@ public final class IPGeoData {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    public static class ASData {
+    public static final class ASData {
         @Nullable
         private Long number;
         @Nullable
@@ -82,7 +82,7 @@ public final class IPGeoData {
         @AllArgsConstructor
         @NoArgsConstructor
         @Data
-        public static class ASNetwork {
+        public static final class ASNetwork {
             @Nullable
             private String ipAddress;
             @Nullable
@@ -93,7 +93,7 @@ public final class IPGeoData {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    public static class NetworkData {
+    public static final class NetworkData {
         @Nullable
         private String isp;
         @Nullable

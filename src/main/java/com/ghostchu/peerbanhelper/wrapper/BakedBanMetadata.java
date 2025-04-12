@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
-import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +13,6 @@ public final class BakedBanMetadata implements Serializable {
     private String downloader;
     private TorrentWrapper torrent;
     private PeerWrapper peer;
-    private IPGeoData geo;
     private String reverseLookup = "N/A";
     private String context;
     private long banAt;
@@ -26,7 +24,6 @@ public final class BakedBanMetadata implements Serializable {
         this.downloader = banMetadata.getDownloader();
         this.torrent = banMetadata.getTorrent();
         this.peer = banMetadata.getPeer();
-        this.geo = banMetadata.getGeo();
         this.reverseLookup = banMetadata.getReverseLookup();
         this.context = banMetadata.getContext();
         this.banAt = banMetadata.getBanAt();

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -127,7 +128,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                 })
                 .filter(b -> search == null || b.getKey().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
-                .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue())))
+                .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
             banResponseList = banResponseList.filter(b -> b.getBanMetadata().getBanAt() < lastBanTime);
@@ -135,11 +136,11 @@ public final class PBHBanController extends AbstractFeatureModule {
         if (limit > 0) {
             banResponseList = banResponseList.limit(limit);
         }
-        banResponseList = banResponseList.peek(meta -> {
-            PeerWrapper peerWrapper = meta.getBanMetadata().getPeer();
+        banResponseList = banResponseList.peek(response -> {
+            PeerWrapper peerWrapper = response.getBanMetadata().getPeer();
             if (peerWrapper != null) {
                 var nullableGeoData = getServer().queryIPDB(peerWrapper.toPeerAddress()).geoData().get();
-                meta.getBanMetadata().setGeo(nullableGeoData);
+                response.setIpGeoData(nullableGeoData);
             }
         });
         return banResponseList;
@@ -195,6 +196,7 @@ public final class PBHBanController extends AbstractFeatureModule {
     static class BanResponse {
         private String address;
         private BakedBanMetadata banMetadata;
+        private IPGeoData ipGeoData;
     }
 
     @AllArgsConstructor
