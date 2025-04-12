@@ -17,10 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -124,7 +121,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             btnBan.setPeer(e.getKey());
             btnBan.setModule(e.getValue().getContext());
             btnBan.setRule(tl(Main.DEF_LOCALE, e.getValue().getDescription()));
-            btnBan.setBanUniqueId(e.getValue().getRandomId().toString());
+            btnBan.setBanUniqueId(UUID.randomUUID().toString());
             list.add(btnBan);
         }
         return list;

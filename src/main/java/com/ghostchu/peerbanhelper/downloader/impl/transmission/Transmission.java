@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.gson.JsonObject;
 import com.vdurmont.semver4j.Semver;
 import cordelia.client.TrClient;
@@ -214,17 +213,6 @@ public final class Transmission extends AbstractDownloader {
         TypedResponse<RsSessionStats> sessionStatsResp = client.execute(sessionStats);
         var stats = sessionStatsResp.getArgs();
         return new DownloaderStatistics(stats.getCumulativeStats().getUploadedBytes(), stats.getCumulativeStats().getDownloadedBytes());
-    }
-
-    @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-
-    }
-
-
-    @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-
     }
 
     @Override

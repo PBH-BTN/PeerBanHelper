@@ -14,7 +14,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Data
-public class BanMetadata extends PeerMetadata implements Comparable<PeerMetadata>, Serializable {
+public class BanMetadata extends PeerMetadata implements Serializable {
     private String context;
     private long banAt;
     private long unbanAt;
