@@ -489,7 +489,17 @@ public class PeerBanHelperServer implements Reloadable {
             Map<Downloader, Map<Torrent, List<Peer>>> peers = collectPeers();
             // 更新 LIVE_PEERS 用于数据展示
             banWaveWatchDog.setLastOperation("Update live peers");
-            executor.submit(() -> updateLivePeers(peers));
+            updateLivePeers(peers);
+            peers.forEach((downloader, entry) -> {
+                banWaveWatchDog.setLastOperation("Notify MonitorFeatureModules");
+                for (FeatureModule module : moduleManager.getModules()) {
+                    if (module instanceof MonitorFeatureModule monitorFeatureModule) {
+                        entry.forEach((torrent, plist) -> {
+                            monitorFeatureModule.onTorrentPeersRetrieved(downloader, torrent, plist, executor);
+                        });
+                    }
+                }
+            });
             // ========== 处理封禁逻辑 ==========
             Map<Downloader, List<BanDetail>> downloaderBanDetailMap = new ConcurrentHashMap<>();
             banWaveWatchDog.setLastOperation("Check Bans");
