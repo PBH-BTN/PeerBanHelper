@@ -99,8 +99,8 @@ public class Main {
     @Getter
     private static long startupAt = System.currentTimeMillis();
     private static String userAgent;
-    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 10;
-    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.0.3";
+    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 11;
+    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.1.0";
 
     public static void main(String[] args) {
         startupArgs = args;
