@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackerPeersDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -85,6 +86,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 public class PeerBanHelperServer implements Reloadable {
+    @Autowired
+    private TrackerPeersDao trackerPeersDao;
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
     private final Map<PeerAddress, BanMetadata> BAN_LIST = new ConcurrentSkipListMap<>();
@@ -252,9 +255,7 @@ public class PeerBanHelperServer implements Reloadable {
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
         // run some junky test code here
-//        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory
-//                .getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-//        root.setLevel(ch.qos.logback.classic.Level.TRACE);
+
     }
 
 

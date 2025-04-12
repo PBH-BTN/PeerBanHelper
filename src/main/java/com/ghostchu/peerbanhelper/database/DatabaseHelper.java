@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.database.table.*;
+import com.ghostchu.peerbanhelper.database.table.tmp.TrackedPeerEntity;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.logger.Level;
@@ -27,18 +28,19 @@ public final class DatabaseHelper {
 
 
     private void createTables() throws SQLException {
-        TableUtils.createTableIfNotExists(database.getDataSource(), MetadataEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), TorrentEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), ModuleEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), RuleEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), HistoryEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class);
-        TableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), MetadataEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TorrentEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), ModuleEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), HistoryEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrackedPeerEntity.class, true);
     }
 
     private void performUpgrade() throws SQLException {
