@@ -508,8 +508,6 @@ public class PeerBanHelperServer implements Reloadable {
             // 重置所有下载器状态为健康，这样后面失败就会对其降级
             banWaveWatchDog.setLastOperation("Reset last status");
             // 声明基本集合
-            // 需要重启的种子列表
-            Map<Downloader, Collection<Torrent>> needRelaunched = new ConcurrentHashMap<>();
             // 执行计划任务
             banWaveWatchDog.setLastOperation("Run scheduled tasks");
             getDownloaders().forEach(Downloader::runScheduleTasks);
