@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedPeersDao;
 import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -58,6 +59,8 @@ public final class BtnNetwork implements Reloadable {
     private PeerBanHelperServer server;
     @Autowired
     private PeerRecordDao peerRecordDao;
+    @Autowired
+    private TrackedPeersDao trackedPeersDao;
     private ModuleMatchCache moduleMatchCache;
     private boolean enabled;
 
@@ -146,6 +149,9 @@ public final class BtnNetwork implements Reloadable {
             }
             if (ability.has("submit_histories") && submit) {
                 abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject()));
+            }
+            if (ability.has("submit_tracked_peers") && submit) {
+                abilities.put(BtnAbilitySubmitTrackedPeers.class, new BtnAbilitySubmitTrackedPeers(this, ability.get("submit_histories").getAsJsonObject(), trackedPeersDao));
             }
 //            if (ability.has("submit_hitrate") && submit) {
 //                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));
