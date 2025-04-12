@@ -4,11 +4,8 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -74,16 +71,6 @@ public abstract class AbstractDownloader implements Downloader {
             lastStatus = DownloaderLastStatus.UNKNOWN;
             statusMessage = null;
         }
-    }
-
-    @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
-
-    }
-
-    @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-
     }
 
     public abstract DownloaderLoginResult login0() throws Exception;

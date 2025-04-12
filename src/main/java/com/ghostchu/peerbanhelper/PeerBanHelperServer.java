@@ -46,7 +46,6 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
@@ -414,8 +413,6 @@ public class PeerBanHelperServer implements Reloadable {
                     downloader.setBanList(BAN_LIST.keySet(), null, null, true);
                 }
             });
-            Collection<TorrentWrapper> relaunch = data.values().stream().map(BanMetadata::getTorrent).toList();
-            getDownloaders().forEach(downloader -> downloader.relaunchTorrentIfNeededByTorrentWrapper(relaunch));
         } catch (Exception e) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST), e);
         }
@@ -577,7 +574,6 @@ public class PeerBanHelperServer implements Reloadable {
 
                     downloaderBanDetailMap.forEach((downloader, details) -> {
                         try {
-                            List<Torrent> relaunch = Collections.synchronizedList(new ArrayList<>());
                             details.forEach(detail -> protect.getService().submit(() -> {
                                 try {
                                     if (detail.result().action() == PeerAction.BAN || detail.result().action() == PeerAction.BAN_FOR_DISCONNECT) {
@@ -589,7 +585,6 @@ public class PeerBanHelperServer implements Reloadable {
                                                 System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                                 detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                         bannedPeers.add(banMetadata);
-                                        relaunch.add(detail.torrent());
                                         banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
                                         if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {
                                             log.info(tlUI(Lang.BAN_PEER,
@@ -607,8 +602,6 @@ public class PeerBanHelperServer implements Reloadable {
                                     log.error(tlUI(Lang.BAN_PEER_EXCEPTION), e);
                                 }
                             }));
-
-                            needRelaunched.put(downloader, relaunch);
                         } catch (Exception e) {
                             log.error(tlUI(Lang.UNABLE_COMPLETE_PEER_BAN_TASK), e);
                         }
@@ -630,24 +623,19 @@ public class PeerBanHelperServer implements Reloadable {
             })) {
                 if (!needReApplyBanList.get()) {
                     getDownloaders().forEach(downloader -> protect.getService().submit(() ->
-                            updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(),
-                                    needRelaunched.getOrDefault(downloader, Collections.emptyList()),
-                                    bannedPeers, unbannedPeers, false)));
+                            updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(), bannedPeers, unbannedPeers, false)));
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
                     getDownloaders().forEach(downloader -> protect.getService().submit(() -> {
-                        List<Torrent> torrents = downloader.getTorrents();
                         var list = BAN_LIST.values().stream().map(meta -> meta.getTorrent().getId()).toList();
-                        torrents.removeIf(torrent -> !list.contains(torrent.getId()));
-                        updateDownloader(downloader, true,
-                                torrents, null, null, true);
+                        updateDownloader(downloader, true, null, null, true);
                     }));
                     needReApplyBanList.set(false);
                 }
             }
             if (!hideFinishLogs && !getDownloaders().isEmpty()) {
                 long downloadersCount = peers.size();
-                long torrentsCount = peers.values().stream().mapToLong(e -> e.size()).sum();
+                long torrentsCount = peers.values().stream().mapToLong(Map::size).sum();
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
                 log.info(tlUI(Lang.BAN_WAVE_CHECK_COMPLETED, downloadersCount, torrentsCount, peersCount, bannedPeers.size(), unbannedPeers.size(), System.currentTimeMillis() - startTimer));
             }
@@ -712,10 +700,9 @@ public class PeerBanHelperServer implements Reloadable {
      *
      * @param downloader     要操作的下载器
      * @param updateBanList  是否需要从 BAN_LIST 常量更新封禁列表到下载器
-     * @param needToRelaunch 传递一个集合，包含需要重启的种子；并非每个下载器都遵守此行为；对于 qbittorrent 等 banlist 可被实时应用的下载器来说，不会重启 Torrent
      */
-    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @NotNull Collection<Torrent> needToRelaunch, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
-        if (!updateBanList && needToRelaunch.isEmpty()) return;
+    public void updateDownloader(@NotNull Downloader downloader, boolean updateBanList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+        if (!updateBanList) return;
         try {
             var loginResult = downloader.login();
             if (!loginResult.success()) {
@@ -728,7 +715,6 @@ public class PeerBanHelperServer implements Reloadable {
                 downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.getMessage());
             }
             downloader.setBanList(BAN_LIST.keySet(), added, removed, applyFullList);
-            downloader.relaunchTorrentIfNeeded(needToRelaunch);
         } catch (Throwable th) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST, downloader.getName(), downloader.getEndpoint()), th);
             downloader.setLastStatus(DownloaderLastStatus.ERROR, new TranslationComponent(Lang.STATUS_TEXT_EXCEPTION, th.getClass().getName() + ": " + th.getMessage()));
@@ -885,29 +871,11 @@ public class PeerBanHelperServer implements Reloadable {
         List<CheckResult> results = new ArrayList<>();
         var node = ignoreAddresses.elementsContaining(peer.getPeerAddress().getAddress());
         if (node != null) {
-            // 检查 Peer 的 Flags，如果不支持 Flags 或者 Flags 同时满足这些条件：
-            // 来自 DHT、PEX、Tracker 的其中一个
-            // 是入站连接
-            // 则认为用户搞砸了 NAT 设置，发出重要提醒
-            if (peer.getFlags() == null
-                    || peer.getFlags().isFromIncoming()
-                    || !peer.getFlags().isOutgoingConnection()
-                    || peer.getFlags().isFromTracker()
-                    || peer.getFlags().isFromDHT()
-                    || peer.getFlags().isFromPEX()) {
-                if (!peer.isHandshaking()) {
-                    var addr = peer.getPeerAddress().getAddress();
-                    if (addr.isIPv4Convertible()) {
-                        addr = addr.toIPv4();
-                    }
-                    var addrStr = addr.toNormalizedString();
-                    if ((addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal())) {
-                        if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
-                            alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
-                                    new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
-                                    new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
-                        }
-                    }
+            if (isPeerHavePossibleBadNatConfig(peer)) {
+                if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
+                    alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
+                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
+                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
                 }
             }
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
@@ -952,6 +920,31 @@ public class PeerBanHelperServer implements Reloadable {
             log.error("Failed to execute modules", e);
             return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("ERROR"), new TranslationComponent("ERROR"));
         }
+    }
+
+    private boolean isPeerHavePossibleBadNatConfig(Peer peer) {
+        // 检查 Peer 的 Flags，如果不支持 Flags 或者 Flags 同时满足这些条件：
+        // 来自 DHT、PEX、Tracker 的其中一个
+        // 是入站连接
+        // 则认为用户搞砸了 NAT 设置，发出重要提醒
+        if (peer.getFlags() == null
+                || peer.getFlags().isFromIncoming()
+                || !peer.getFlags().isOutgoingConnection()
+                || peer.getFlags().isFromTracker()
+                || peer.getFlags().isFromDHT()
+                || peer.getFlags().isFromPEX()) {
+            if (!peer.isHandshaking()) {
+                var addr = peer.getPeerAddress().getAddress();
+                if (addr.isIPv4Convertible()) {
+                    addr = addr.toIPv4();
+                }
+                var addrStr = addr.toNormalizedString();
+                if ((addrStr.endsWith(".1") || addrStr.endsWith(".0")) && (addr.isLocal() || addr.isAnyLocal())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
