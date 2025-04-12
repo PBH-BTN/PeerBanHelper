@@ -5,7 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackerPeersDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedPeersDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
@@ -31,6 +31,7 @@ import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.*;
 import com.ghostchu.peerbanhelper.module.impl.background.BackgroundModule;
+import com.ghostchu.peerbanhelper.module.impl.monitor.PeersLocalTrackModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
@@ -86,7 +87,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 public class PeerBanHelperServer implements Reloadable {
     @Autowired
-    private TrackerPeersDao trackerPeersDao;
+    private TrackedPeersDao trackerPeersDao;
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
     private final Map<PeerAddress, BanMetadata> BAN_LIST = Collections.synchronizedMap(new HashMap<>());
@@ -760,6 +761,7 @@ public class PeerBanHelperServer implements Reloadable {
         moduleManager.register(PBHEasterEggController.class);
         moduleManager.register(PBHUtilitiesController.class);
         moduleManager.register(BackgroundModule.class);
+        moduleManager.register(PeersLocalTrackModule.class);
     }
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {

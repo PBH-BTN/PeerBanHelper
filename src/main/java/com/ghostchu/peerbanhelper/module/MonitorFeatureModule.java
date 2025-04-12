@@ -9,6 +9,5 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public interface MonitorFeatureModule extends FeatureModule {
-    @NotNull
-    CheckResult onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peer, @NotNull ExecutorService ruleExecuteExecutor);
+    void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull ExecutorService ruleExecuteExecutor);
 }
