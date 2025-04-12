@@ -110,10 +110,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
             AtomicLong lastSubmitAt = new AtomicLong(getLastSubmitAtTimestamp());
             List<BtnPeerHistory> btnPeers = generatePing(lastSubmitAt.get());
             while (!btnPeers.isEmpty()) {
-                BtnPeerHistoryPing ping = new BtnPeerHistoryPing(
-                        System.currentTimeMillis(),
-                        btnPeers
-                );
+                BtnPeerHistoryPing ping = new BtnPeerHistoryPing(btnPeers);
                 MutableRequest request = MutableRequest.POST(endpoint
                         , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
                 ).header("Content-Encoding", "gzip");

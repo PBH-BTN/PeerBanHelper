@@ -76,10 +76,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
                 lastReport = System.currentTimeMillis();
                 return;
             }
-            BtnBanPing ping = new BtnBanPing(
-                    System.currentTimeMillis(),
-                    btnPeers
-            );
+            BtnBanPing ping = new BtnBanPing(btnPeers);
             MutableRequest request = MutableRequest.POST(endpoint
                     , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
             ).header("Content-Encoding", "gzip");

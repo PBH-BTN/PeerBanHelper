@@ -11,8 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public final class BtnPeerPing {
-    @SerializedName("populate_time")
-    private long populateTime;
     @SerializedName("peers")
     private List<BtnPeer> peers;
 

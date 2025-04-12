@@ -64,7 +64,7 @@ public final class BtnAbilitySubmitPeers extends AbstractBtnAbility {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_LAST_REPORT_EMPTY));
                 return;
             }
-            BtnPeerPing ping = new BtnPeerPing(System.currentTimeMillis(), btnPeers);
+            BtnPeerPing ping = new BtnPeerPing(btnPeers);
             MutableRequest request = MutableRequest.POST(endpoint, HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))).header("Content-Encoding", "gzip");
             HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString()).thenAccept(r -> {
                 if (r.statusCode() != 200) {
