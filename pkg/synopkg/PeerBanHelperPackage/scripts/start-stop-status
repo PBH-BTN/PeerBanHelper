@@ -3,8 +3,17 @@
 DOCKER_NAME="peerbanhelper"
 DOCKER_INSPECT="/usr/local/bin/docker_inspect"
 
+check_docker_inspect ()
+{
+  PERMISSIONS=$(stat -c "%a" "/var/packages/ContainerManager/target/tool/docker_inspect")
+  if [ "$PERMISSIONS" -ne 4755 ]; then
+    echo -e "<strong style='color:red'>获取容器状态权限出错，请SSH连接群晖执行修复：</strong><br><br>sudo chmod 4755 /usr/local/bin/docker_inspect" | tee -a $SYNOPKG_TEMP_LOGFILE
+  fi
+}
+
 case "$1" in
     start)
+        check_docker_inspect
         # docker start "$DOCKER_NAME"
         ;;
     stop)
