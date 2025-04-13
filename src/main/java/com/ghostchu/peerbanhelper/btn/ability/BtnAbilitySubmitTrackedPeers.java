@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.btn.ability;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ping.BtnTrackedPeer;
 import com.ghostchu.peerbanhelper.btn.ping.BtnTrackedPeerPing;
+import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedPeersDao;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -32,11 +33,12 @@ public final class BtnAbilitySubmitTrackedPeers extends AbstractBtnAbility {
     private final String endpoint;
     private final long randomInitialDelay;
     private final TrackedPeersDao trackedPeersDao;
-    private long lastSubmitId;
     private final Lock lock = new ReentrantLock();
+    private final MetadataDao metadataDao;
 
-    public BtnAbilitySubmitTrackedPeers(BtnNetwork btnNetwork, JsonObject ability, TrackedPeersDao trackedPeersDao) {
+    public BtnAbilitySubmitTrackedPeers(BtnNetwork btnNetwork, JsonObject ability, MetadataDao metadataDao, TrackedPeersDao trackedPeersDao) {
         this.btnNetwork = btnNetwork;
+        this.metadataDao = metadataDao;
         this.trackedPeersDao = trackedPeersDao;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
@@ -65,13 +67,15 @@ public final class BtnAbilitySubmitTrackedPeers extends AbstractBtnAbility {
         btnNetwork.getExecuteService().scheduleWithFixedDelay(this::submit, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
+
     private void submit() {
         if (!lock.tryLock()) {
             return; // this is possible since we can send multiple requests
         }
         try {
             log.info(tlUI(Lang.BTN_SUBMITTING_TRACKED_PEERS));
-            List<BtnTrackedPeer> btnPeers = generatePing(lastSubmitId);
+            long lastSubmitAt = Long.parseLong(metadataDao.getOrDefault("btn_ability_submit_tracked_peers_last_submit_at", String.valueOf(System.currentTimeMillis())));
+            List<BtnTrackedPeer> btnPeers = generatePing(lastSubmitAt);
             while (!btnPeers.isEmpty()) {
                 BtnTrackedPeerPing ping = new BtnTrackedPeerPing(
                         btnPeers
@@ -96,7 +100,18 @@ public final class BtnAbilitySubmitTrackedPeers extends AbstractBtnAbility {
                             return null;
                         })
                         .join();
-                lastSubmitId = btnPeers.getLast().getId();
+                var lastRecordAt = btnPeers.getLast().getLastTimeSeen().getTime();
+                if (lastRecordAt >= lastSubmitAt) {
+                    if (lastRecordAt == lastSubmitAt) {
+                        lastRecordAt++; // avoid inf loop
+                    }
+                    lastSubmitAt = lastRecordAt;
+                    metadataDao.set("btn_ability_submit_tracked_peers_last_submit_at", String.valueOf(lastRecordAt));
+                } else {
+                    lastSubmitAt = System.currentTimeMillis();
+                    metadataDao.set("btn_ability_submit_tracked_peers_last_submit_at", String.valueOf(System.currentTimeMillis()));
+                }
+                btnPeers = generatePing(lastSubmitAt);
             }
 
         } catch (Throwable e) {

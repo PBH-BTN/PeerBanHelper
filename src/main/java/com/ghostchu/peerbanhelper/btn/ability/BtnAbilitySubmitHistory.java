@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeerHistory;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeerHistoryPing;
+import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -23,7 +24,6 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -38,9 +38,11 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final File file;
     private final Lock lock = new ReentrantLock();
+    private final MetadataDao metadataDao;
 
-    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, JsonObject ability) {
+    public BtnAbilitySubmitHistory(BtnNetwork btnNetwork, JsonObject ability, MetadataDao metadataDao) {
         this.btnNetwork = btnNetwork;
+        this.metadataDao = metadataDao;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
@@ -107,8 +109,9 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
         }
         try {
             log.info(tlUI(Lang.BTN_SUBMITTING_HISTORIES));
-            AtomicLong lastSubmitAt = new AtomicLong(getLastSubmitAtTimestamp());
-            List<BtnPeerHistory> btnPeers = generatePing(lastSubmitAt.get());
+            long lastSubmitAt = Long.parseLong(metadataDao.getOrDefault("btn_ability_submit_history_last_submit_at", String.valueOf(System.currentTimeMillis())));
+            ;
+            List<BtnPeerHistory> btnPeers = generatePing(lastSubmitAt);
             while (!btnPeers.isEmpty()) {
                 BtnPeerHistoryPing ping = new BtnPeerHistoryPing(btnPeers);
                 MutableRequest request = MutableRequest.POST(endpoint
@@ -132,17 +135,17 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
                         })
                         .join();
                 var lastRecordAt = btnPeers.getLast().getLastTimeSeen().getTime();
-                if (lastRecordAt >= lastSubmitAt.get()) {
-                    if (lastRecordAt == lastSubmitAt.get()) {
+                if (lastRecordAt >= lastSubmitAt) {
+                    if (lastRecordAt == lastSubmitAt) {
                         lastRecordAt++; // avoid inf loop
                     }
-                    lastSubmitAt.set(lastRecordAt);
-                    writeLastSubmitAtTimestamp(lastRecordAt);
+                    lastSubmitAt = lastRecordAt;
+                    metadataDao.set("btn_ability_submit_tracked_peers_last_submit_at", String.valueOf(lastRecordAt));
                 } else {
-                    lastSubmitAt.set(System.currentTimeMillis());
-                    writeLastSubmitAtTimestamp(System.currentTimeMillis());
+                    lastSubmitAt = System.currentTimeMillis();
+                    metadataDao.set("btn_ability_submit_tracked_peers_last_submit_at", String.valueOf(System.currentTimeMillis()));
                 }
-                btnPeers = generatePing(lastSubmitAt.get());
+                btnPeers = generatePing(lastSubmitAt);
             }
 
         } catch (Throwable e) {
@@ -156,7 +159,7 @@ public final class BtnAbilitySubmitHistory extends AbstractBtnAbility {
 
     @SneakyThrows
     private List<BtnPeerHistory> generatePing(long lastSubmitAt) {
-        Pageable pageable = new Pageable(0, 5000);
+        Pageable pageable = new Pageable(0, 1000);
         return btnNetwork.getPeerRecordDao().getPendingSubmitPeerRecords(pageable,
                         new Timestamp(lastSubmitAt)).getResults().stream()
                 .map(BtnPeerHistory::from).collect(Collectors.toList());

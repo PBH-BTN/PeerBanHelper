@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.btn;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
+import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedPeersDao;
 import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
@@ -62,6 +63,8 @@ public final class BtnNetwork implements Reloadable {
     private PeerRecordDao peerRecordDao;
     @Autowired
     private TrackedPeersDao trackedPeersDao;
+    @Autowired
+    private MetadataDao metadataDao;
     private ModuleMatchCache moduleMatchCache;
     private boolean enabled;
 
@@ -149,10 +152,10 @@ public final class BtnNetwork implements Reloadable {
                 abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
             }
             if (ability.has("submit_histories") && submit) {
-                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject()));
+                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject(), metadataDao));
             }
             if (ability.has("submit_tracked_peers") && submit) {
-                abilities.put(BtnAbilitySubmitTrackedPeers.class, new BtnAbilitySubmitTrackedPeers(this, ability.get("submit_histories").getAsJsonObject(), trackedPeersDao));
+                abilities.put(BtnAbilitySubmitTrackedPeers.class, new BtnAbilitySubmitTrackedPeers(this, ability.get("submit_histories").getAsJsonObject(), metadataDao, trackedPeersDao));
             }
 //            if (ability.has("submit_hitrate") && submit) {
 //                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));
