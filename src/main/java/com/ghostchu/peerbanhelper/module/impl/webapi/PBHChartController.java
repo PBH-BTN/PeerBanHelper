@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -74,12 +75,11 @@ public final class PBHChartController extends AbstractFeatureModule {
 
     private void handleTraffic(Context ctx) throws Exception {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
-
         String downloader = ctx.queryParam("downloader");
         if (downloader == null || downloader.isBlank()) {
-            ctx.json(new StdResp(true, null, trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList()));
+            ctx.json(new StdResp(true, null, fixTimezone(ctx, trafficJournalDao.getAllDownloadersOverallData(timeQueryModel.startAt(), timeQueryModel.endAt()))));
         } else {
-            ctx.json(new StdResp(true, null, trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt()).stream().peek(data -> fixTimezone(ctx, data)).toList()));
+            ctx.json(new StdResp(true, null, fixTimezone(ctx, trafficJournalDao.getSpecificDownloaderOverallData(downloader, timeQueryModel.startAt(), timeQueryModel.endAt()))));
         }
     }
 
@@ -88,16 +88,22 @@ public final class PBHChartController extends AbstractFeatureModule {
         String downloader = ctx.queryParam("downloader");
         var records = trafficJournalDao.getDayOffsetData(downloader,
                 timeQueryModel.startAt(),
-                timeQueryModel.endAt(), d -> fixTimezone(ctx, d));
-        ctx.json(new StdResp(true, null, records));
+                timeQueryModel.endAt());
+        ctx.json(new StdResp(true, null, fixTimezone(ctx, records)));
     }
 
 
-    private void fixTimezone(Context ctx, TrafficJournalDao.TrafficData data) {
+    private TrafficJournalDao.TrafficDataDto fixTimezone(Context ctx, TrafficJournalDao.TrafficDataDto data) {
         Timestamp ts = data.getTimestamp();
         var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
                 .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
         data.setTimestamp(new Timestamp(epochSecond * 1000));
+        return data;
+    }
+
+    private List<TrafficJournalDao.TrafficDataDto> fixTimezone(Context ctx, List<TrafficJournalDao.TrafficDataDto> data) {
+        data.forEach(d -> fixTimezone(ctx, d));
+        return data;
     }
 
     private void handlePeerTrends(Context ctx) throws Exception {
