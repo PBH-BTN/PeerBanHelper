@@ -22,6 +22,8 @@ public class BtnTrackedPeer {
     private String torrentIdentifier;
     @SerializedName("downloader")
     private String downloader;
+    @SerializedName("downloader_progress")
+    private double downloaderProgress;
     @SerializedName("peer_id")
     private String peerId;
     @SerializedName("client_name")
@@ -48,6 +50,7 @@ public class BtnTrackedPeer {
         btnTrackedPeer.setPort(entity.getPort());
         btnTrackedPeer.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(entity.getInfoHash()));
         btnTrackedPeer.setDownloader(entity.getDownloader());
+        btnTrackedPeer.setDownloaderProgress(entity.getDownloaderProgress());
         btnTrackedPeer.setPeerId(entity.getPeerId());
         btnTrackedPeer.setClientName(entity.getClientName());
         btnTrackedPeer.setUploaded(entity.getUploaded());

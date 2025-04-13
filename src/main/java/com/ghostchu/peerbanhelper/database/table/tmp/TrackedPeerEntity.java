@@ -23,6 +23,8 @@ public final class TrackedPeerEntity { // 需要创建为临时表
     private String infoHash;
     @DatabaseField(canBeNull = false, uniqueCombo = true)
     private String downloader;
+    @DatabaseField(canBeNull = false)
+    private double downloaderProgress;
     @DatabaseField
     private String peerId;
     @DatabaseField
