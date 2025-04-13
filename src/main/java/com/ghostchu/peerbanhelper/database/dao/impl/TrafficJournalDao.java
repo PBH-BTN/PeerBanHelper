@@ -40,15 +40,17 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
     }
 
     public TrafficJournalEntity updateData(String downloader, long overallDownloaded, long overallUploaded, long overallDownloadedProtocol, long overallUploadedProtocol) throws SQLException {
+        long timestamp = MiscUtil.getStartOfToday(System.currentTimeMillis());
         TrafficJournalEntity journalEntity = queryBuilder()
                 .where()
                 .eq("downloader", downloader)
                 .and()
-                .eq("timestamp", MiscUtil.getStartOfToday(System.currentTimeMillis()))
+                .eq("timestamp", timestamp)
                 .queryForFirst();
         if (journalEntity == null) {
             journalEntity = new TrafficJournalEntity();
             journalEntity.setDownloader(downloader);
+            journalEntity.setTimestamp(timestamp);
             journalEntity.setDataOverallDownloadedAtStart(overallDownloaded);
             journalEntity.setDataOverallUploadedAtStart(overallUploaded);
             journalEntity.setProtocolOverallDownloadedAtStart(overallDownloadedProtocol);
