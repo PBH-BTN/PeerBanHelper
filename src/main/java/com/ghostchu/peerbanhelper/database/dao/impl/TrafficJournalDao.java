@@ -97,7 +97,9 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                             Long.parseLong(args[3]),
                             Long.parseLong(args[4])
                     )
-            ).map(data -> new TrafficDataDto(data.getTimestamp(), data.getDataOverallUploaded(), data.getDataOverallDownloaded())).toList();
+            ).map(data -> new TrafficDataDto(data.getTimestamp(),
+                    data.getDataOverallUploadedAtStart() - data.getDataOverallUploaded(),
+                    data.getDataOverallDownloadedAtStart() - data.getDataOverallDownloaded())).toList();
         }
     }
 
@@ -116,7 +118,9 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                         e.getDataOverallUploaded(),
                         e.getDataOverallDownloadedAtStart(),
                         e.getDataOverallDownloaded()))
-                .map(data -> new TrafficDataDto(data.getTimestamp(), data.getDataOverallUploaded(), data.getDataOverallDownloaded()))
+                .map(data -> new TrafficDataDto(data.getTimestamp(),
+                        data.getDataOverallUploadedAtStart() - data.getDataOverallUploaded(),
+                        data.getDataOverallDownloadedAtStart() - data.getDataOverallDownloaded()))
                 .toList();
     }
 
