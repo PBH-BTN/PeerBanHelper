@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedPeersDao;
 import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -211,6 +212,8 @@ public final class BtnNetwork implements Reloadable {
                 .defaultHeader("Authentication", "Bearer " + appId + "@" + appSecret)
                 .requestTimeout(Duration.ofMinutes(1))
                 .connectTimeout(Duration.ofSeconds(10))
+                .headersTimeout(Duration.ofSeconds(15))
+                .readTimeout(Duration.ofSeconds(30), CommonUtil.getScheduler())
                 .cookieHandler(cm).build();
     }
 
