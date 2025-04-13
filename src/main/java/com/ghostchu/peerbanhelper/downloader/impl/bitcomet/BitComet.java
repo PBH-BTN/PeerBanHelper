@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -77,8 +78,8 @@ public final class BitComet extends AbstractDownloader {
                 .defaultHeader("User-Agent", "PeerBanHelper BitComet Adapter")
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS));
+                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler());
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }

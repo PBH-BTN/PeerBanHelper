@@ -16,6 +16,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -69,8 +70,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
