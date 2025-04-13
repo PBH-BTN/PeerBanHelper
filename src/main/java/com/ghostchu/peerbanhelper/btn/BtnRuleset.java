@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public final class BtnRule {
+public final class BtnRuleset {
     @SerializedName("version")
     private String version;
     @SerializedName("peer_id")

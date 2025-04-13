@@ -21,7 +21,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Data
 @Slf4j
-public final class BtnRuleParsed {
+public final class BtnRulesetParsed {
     private final ScriptEngine scriptEngine;
     private String version;
     private Map<String, List<Rule>> peerIdRules;
@@ -30,14 +30,14 @@ public final class BtnRuleParsed {
     private Map<String, List<Rule>> portRules;
     private Map<String, CompiledScript> scriptRules;
 
-    public BtnRuleParsed(ScriptEngine scriptEngine, BtnRule btnRule, boolean scriptExecute) {
+    public BtnRulesetParsed(ScriptEngine scriptEngine, BtnRuleset btnRuleset, boolean scriptExecute) {
         this.scriptEngine = scriptEngine;
-        this.version = btnRule.getVersion();
-        this.ipRules = parseIPRule(btnRule.getIpRules());
-        this.portRules = parsePortRule(btnRule.getPortRules());
-        this.peerIdRules = parseRule(btnRule.getPeerIdRules());
-        this.clientNameRules = parseRule(btnRule.getClientNameRules());
-        this.scriptRules = scriptExecute ? compileScripts(btnRule.getScriptRules()) : new HashMap<>();
+        this.version = btnRuleset.getVersion();
+        this.ipRules = parseIPRule(btnRuleset.getIpRules());
+        this.portRules = parsePortRule(btnRuleset.getPortRules());
+        this.peerIdRules = parseRule(btnRuleset.getPeerIdRules());
+        this.clientNameRules = parseRule(btnRuleset.getClientNameRules());
+        this.scriptRules = scriptExecute ? compileScripts(btnRuleset.getScriptRules()) : new HashMap<>();
     }
 
     private Map<String, CompiledScript> compileScripts(Map<String, String> scriptRules) {
