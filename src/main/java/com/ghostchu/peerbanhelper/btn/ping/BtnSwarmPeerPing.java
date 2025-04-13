@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public final class BtnTrackedPeerPing {
+public final class BtnSwarmPeerPing {
     @SerializedName("tracked_peers")
-    private List<BtnTrackedPeer> trackedPeers;
+    private List<BtnSwarm> trackedPeers;
 
 }

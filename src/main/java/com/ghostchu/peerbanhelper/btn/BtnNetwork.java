@@ -154,8 +154,8 @@ public final class BtnNetwork implements Reloadable {
             if (ability.has("submit_histories") && submit) {
                 abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject(), metadataDao));
             }
-            if (ability.has("submit_tracked_peers") && submit) {
-                abilities.put(BtnAbilitySubmitTrackedPeers.class, new BtnAbilitySubmitTrackedPeers(this, ability.get("submit_histories").getAsJsonObject(), metadataDao, trackedPeersDao));
+            if (ability.has("submit_swarm") && submit) {
+                abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedPeersDao));
             }
 //            if (ability.has("submit_hitrate") && submit) {
 //                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));

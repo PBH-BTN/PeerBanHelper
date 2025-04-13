@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BtnTrackedPeer {
+public class BtnSwarm {
     private transient long id;
     @SerializedName("ip")
     private String ip;
@@ -45,24 +45,24 @@ public class BtnTrackedPeer {
     @SerializedName("last_time_seen")
     private Timestamp lastTimeSeen;
 
-    public static BtnTrackedPeer from(TrackedPeerEntity entity) {
-        BtnTrackedPeer btnTrackedPeer = new BtnTrackedPeer();
-        btnTrackedPeer.setId(entity.getId());
-        btnTrackedPeer.setIp(entity.getIp());
-        btnTrackedPeer.setPort(entity.getPort());
-        btnTrackedPeer.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(entity.getInfoHash()));
-        btnTrackedPeer.setDownloader(entity.getDownloader());
-        btnTrackedPeer.setDownloaderProgress(entity.getDownloaderProgress());
-        btnTrackedPeer.setPeerId(entity.getPeerId());
-        btnTrackedPeer.setPeerProgress(entity.getPeerProgress());
-        btnTrackedPeer.setClientName(entity.getClientName());
-        btnTrackedPeer.setUploaded(entity.getUploaded());
-        btnTrackedPeer.setUploadedOffset(entity.getUploadedOffset());
-        btnTrackedPeer.setDownloaded(entity.getDownloaded());
-        btnTrackedPeer.setDownloadedOffset(entity.getDownloadedOffset());
-        btnTrackedPeer.setLastFlags(entity.getLastFlags());
-        btnTrackedPeer.setFirstTimeSeen(entity.getFirstTimeSeen());
-        btnTrackedPeer.setLastTimeSeen(entity.getLastTimeSeen());
-        return btnTrackedPeer;
+    public static BtnSwarm from(TrackedPeerEntity entity) {
+        BtnSwarm btnSwarm = new BtnSwarm();
+        btnSwarm.setId(entity.getId());
+        btnSwarm.setIp(entity.getIp());
+        btnSwarm.setPort(entity.getPort());
+        btnSwarm.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(entity.getInfoHash()));
+        btnSwarm.setDownloader(entity.getDownloader());
+        btnSwarm.setDownloaderProgress(entity.getDownloaderProgress());
+        btnSwarm.setPeerId(entity.getPeerId());
+        btnSwarm.setPeerProgress(entity.getPeerProgress());
+        btnSwarm.setClientName(entity.getClientName());
+        btnSwarm.setUploaded(entity.getUploaded());
+        btnSwarm.setUploadedOffset(entity.getUploadedOffset());
+        btnSwarm.setDownloaded(entity.getDownloaded());
+        btnSwarm.setDownloadedOffset(entity.getDownloadedOffset());
+        btnSwarm.setLastFlags(entity.getLastFlags());
+        btnSwarm.setFirstTimeSeen(entity.getFirstTimeSeen());
+        btnSwarm.setLastTimeSeen(entity.getLastTimeSeen());
+        return btnSwarm;
     }
 }
