@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBan;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
 import com.ghostchu.peerbanhelper.btn.ping.BtnPeer;
-import com.ghostchu.peerbanhelper.module.impl.rule.BtnNetworkOnline;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -113,11 +112,8 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             if (e.getValue().isBanForDisconnect()) {
                 continue;
             }
-            BtnBan btnBan = new BtnBan();
-            btnBan.setBtnBan(e.getValue().getContext().equals(BtnNetworkOnline.class.getName()));
-            btnBan.setPeer(e.getKey());
-            btnBan.setModule(e.getValue().getContext());
-            btnBan.setRule(tl(Main.DEF_LOCALE, e.getValue().getDescription()));
+            BtnBan btnBan = BtnBan.from(e.getValue().getContext(), tl(Main.DEF_LOCALE, e.getValue().getDescription()), e.getValue().getTorrent(), e.getValue().getPeer());
+
             btnBan.setBanUniqueId(UUID.randomUUID().toString());
             list.add(btnBan);
         }
