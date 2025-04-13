@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -89,7 +90,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
                 for (TrackedSwarmEntity entity : it) {
                     trackedSwarmEntities.add(entity);
                     if (trackedSwarmEntities.size() >= 1000) {
-                        setMemCursor(createSubmitRequest(trackedSwarmEntities));
+                        setMemCursor(createSubmitRequest(trackedSwarmEntities).getTime());
                         requests++;
                         size += trackedSwarmEntities.size();
                         trackedSwarmEntities.clear();
@@ -97,7 +98,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
                 }
             }
             if (!trackedSwarmEntities.isEmpty()) {
-                setMemCursor(createSubmitRequest(trackedSwarmEntities));
+                setMemCursor(createSubmitRequest(trackedSwarmEntities).getTime());
                 requests++;
                 size += trackedSwarmEntities.size();
             }
@@ -114,13 +115,13 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
     private CloseableWrappedIterable<TrackedSwarmEntity> createSubmitIterator(long memCursor) throws SQLException {
         return swarmDao.getWrappedIterable(swarmDao
                 .queryBuilder()
-                .where().gt("id", memCursor)
+                .where().gt("lastTimeSeen", memCursor)
                 .queryBuilder()
-                .orderBy("id", true)
+                .orderBy("lastTimeSeen", true)
                 .prepare());
     }
 
-    private long createSubmitRequest(List<TrackedSwarmEntity> swarmEntities) throws RuntimeException {
+    private Timestamp createSubmitRequest(List<TrackedSwarmEntity> swarmEntities) throws RuntimeException {
         BtnSwarmPeerPing ping = new BtnSwarmPeerPing(swarmEntities.stream().map(BtnSwarm::from).toList());
         MutableRequest request = MutableRequest.POST(endpoint, HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8)))
                 .header("Content-Encoding", "gzip");
@@ -130,7 +131,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
             setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body()));
             throw new IllegalStateException(tlUI(new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body())));
         } else {
-            return swarmEntities.getLast().getId();
+            return swarmEntities.getLast().getLastTimeSeen();
         }
     }
 }
