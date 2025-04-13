@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,8 +46,10 @@ public final class BtnBan {
     private double downloaderProgress;
     @SerializedName("peer_flag")
     private String peerFlag;
+    @SerializedName("ban_at")
+    private Timestamp banAt;
 
-    public static BtnBan from(String module, String rule, TorrentWrapper torrent, PeerWrapper peer) {
+    public static BtnBan from(String module, String rule, Timestamp banAt, TorrentWrapper torrent, PeerWrapper peer) {
         BtnBan btnBan = new BtnBan();
         btnBan.setModule(module);
         btnBan.setRule(rule);
@@ -63,6 +67,7 @@ public final class BtnBan {
         btnBan.setPeerProgress(peer.getProgress());
         btnBan.setDownloaderProgress(torrent.getProgress());
         btnBan.setPeerFlag(peer.getFlags() == null ? null : peer.getFlags());
+        btnBan.setBanAt(banAt);
         return btnBan;
     }
 }

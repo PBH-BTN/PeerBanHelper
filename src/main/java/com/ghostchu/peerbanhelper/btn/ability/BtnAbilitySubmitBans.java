@@ -16,7 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -112,9 +116,10 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             if (e.getValue().isBanForDisconnect()) {
                 continue;
             }
-            BtnBan btnBan = BtnBan.from(e.getValue().getContext(), tl(Main.DEF_LOCALE, e.getValue().getDescription()), e.getValue().getTorrent(), e.getValue().getPeer());
-
-            btnBan.setBanUniqueId(UUID.randomUUID().toString());
+            BtnBan btnBan = BtnBan.from(e.getValue().getContext(),
+                    tl(Main.DEF_LOCALE, e.getValue().getDescription()),
+                    new Timestamp(e.getValue().getBanAt()),
+                    e.getValue().getTorrent(), e.getValue().getPeer());
             list.add(btnBan);
         }
         return list;
