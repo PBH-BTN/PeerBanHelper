@@ -70,7 +70,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
 
     @Override
     public String getName() {
-        return "BtnAbilityRules";
+        return "BtnAbilityRuleset";
     }
 
     @Override
