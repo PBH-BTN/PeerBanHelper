@@ -45,7 +45,7 @@ public final class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "10"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "9"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -91,15 +91,6 @@ public final class DatabaseHelper {
                 log.error("Unable to upgrade database schema", err);
             }
             v = 9;
-        }
-        if (v == 9) {
-            try {
-                // add new column: privateTorrent, nullable
-                var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
-                historyDao.executeRaw("ALTER TABLE " + historyDao.getTableName() + " ADD COLUMN peerProgress DOUBLE NOT NULL DEFAULT 1.00");
-            } catch (Exception ignored) {
-            }
-            v = 10;
         }
         version.setValue(String.valueOf(v));
         metadata.update(version);
