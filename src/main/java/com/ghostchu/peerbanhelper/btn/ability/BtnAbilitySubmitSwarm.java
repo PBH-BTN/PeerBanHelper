@@ -90,8 +90,8 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
                                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
                                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                             } else {
-                                log.info(tlUI(Lang.BTN_SUBMITTED_SWARM, ping.getTrackedPeers().size()));
-                                setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, ping.getTrackedPeers().size()));
+                                log.info(tlUI(Lang.BTN_SUBMITTED_SWARM, ping.getSwarms().size()));
+                                setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, ping.getSwarms().size()));
                             }
                         })
                         .exceptionally(e -> {
