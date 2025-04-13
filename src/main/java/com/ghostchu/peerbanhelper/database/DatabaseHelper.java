@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.database.table.*;
-import com.ghostchu.peerbanhelper.database.table.tmp.TrackedPeerEntity;
+import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.logger.Level;
@@ -40,12 +40,12 @@ public final class DatabaseHelper {
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrackedPeerEntity.class, true);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrackedSwarmEntity.class, true);
     }
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "9"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "10"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -91,6 +91,16 @@ public final class DatabaseHelper {
                 log.error("Unable to upgrade database schema", err);
             }
             v = 9;
+        }
+        if (v == 9) {
+            try {
+                // add new column: privateTorrent, nullable
+                var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
+                historyDao.executeRaw("ALTER TABLE " + historyDao.getTableName() + " ADD COLUMN peerProgress DOUBLE NOT NULL DEFAULT 1.00");
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 10;
         }
         version.setValue(String.valueOf(v));
         metadata.update(version);

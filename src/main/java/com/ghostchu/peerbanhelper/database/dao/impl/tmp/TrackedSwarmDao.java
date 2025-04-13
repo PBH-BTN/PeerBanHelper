@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.database.dao.impl.tmp;
 
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
-import com.ghostchu.peerbanhelper.database.table.tmp.TrackedPeerEntity;
+import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 
 @Component
-public final class TrackedPeersDao extends AbstractPBHDao<TrackedPeerEntity, Long> {
-    public TrackedPeersDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), TrackedPeerEntity.class);
+public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Long> {
+    public TrackedSwarmDao(@Autowired Database database) throws SQLException {
+        super(database.getDataSource(), TrackedSwarmEntity.class);
     }
 
-    public Page<TrackedPeerEntity> getPendingSubmitTrackedPeers(Pageable pageable, long idAfterThan) throws SQLException {
+    public Page<TrackedSwarmEntity> getPendingSubmitTrackedPeers(Pageable pageable, long idAfterThan) throws SQLException {
         var queryBuilder = queryBuilder().where()
                 .gt("id", idAfterThan)
                 .queryBuilder()
@@ -24,8 +24,8 @@ public final class TrackedPeersDao extends AbstractPBHDao<TrackedPeerEntity, Lon
         return queryByPaging(queryBuilder, pageable);
     }
 
-    public int upsert(TrackedPeerEntity entity) throws SQLException {
-        TrackedPeerEntity inDatabase = queryBuilder()
+    public int upsert(TrackedSwarmEntity entity) throws SQLException {
+        TrackedSwarmEntity inDatabase = queryBuilder()
                 .where()
                 .eq("ip", entity.getIp())
                 .and()

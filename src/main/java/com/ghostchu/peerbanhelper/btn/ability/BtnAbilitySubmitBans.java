@@ -4,27 +4,26 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBan;
 import com.ghostchu.peerbanhelper.btn.ping.BtnBanPing;
-import com.ghostchu.peerbanhelper.btn.ping.BtnPeer;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
+import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
+import com.j256.ormlite.dao.CloseableWrappedIterable;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
@@ -33,10 +32,13 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private long lastReport = System.currentTimeMillis();
+    private final MetadataDao metadataDao;
+    private final HistoryDao historyDao;
 
-    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability) {
+    public BtnAbilitySubmitBans(BtnNetwork btnNetwork, JsonObject ability, MetadataDao metadataDao, HistoryDao historyDao) {
         this.btnNetwork = btnNetwork;
+        this.metadataDao = metadataDao;
+        this.historyDao = historyDao;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();
@@ -69,61 +71,66 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
         Main.getEventBus().unregister(this);
     }
 
+    private int setMemCursor(long position) {
+        return metadataDao.set("BtnAbilitySubmitBans.memCursor", String.valueOf(position));
+    }
+
+    private long getMemCursor() {
+        return Long.parseLong(metadataDao.getOrDefault("BtnAbilitySubmitBans.memCursor", "0"));
+    }
 
     private void submit() {
         try {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
-            List<BtnBan> btnPeers = generateBans();
-            if (btnPeers.isEmpty()) {
-                setLastStatus(true, new TranslationComponent(Lang.BTN_LAST_REPORT_EMPTY));
-                lastReport = System.currentTimeMillis();
-                return;
+            int size = 0;
+            int requests = 0;
+            List<HistoryEntity> historyEntities = new ArrayList<>(1000);
+            try (var it = createSubmitIterator(getMemCursor())) {
+                for (HistoryEntity entity : it) {
+                    historyEntities.add(entity);
+                    if (historyEntities.size() >= 1000) {
+                        setMemCursor(createSubmitRequest(historyEntities));
+                        size += historyEntities.size();
+                        requests++;
+                        historyEntities.clear();
+                    }
+                }
             }
-            BtnBanPing ping = new BtnBanPing(btnPeers);
-            MutableRequest request = MutableRequest.POST(endpoint
-                    , HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))
-            ).header("Content-Encoding", "gzip");
-            HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString())
-                    .thenAccept(r -> {
-                        if (r.statusCode() < 200 && r.statusCode() >= 400) {
-                            log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
-                        } else {
-                            log.info(tlUI(Lang.BTN_SUBMITTED_BANS, btnPeers.size()));
-                            setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, btnPeers.size()));
-                            lastReport = System.currentTimeMillis();
-                        }
-                    })
-                    .exceptionally(e -> {
-                        log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
-                        setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
-                        return null;
-                    });
+            if (!historyEntities.isEmpty()) {
+                setMemCursor(createSubmitRequest(historyEntities));
+                requests++;
+                size += historyEntities.size();
+            }
+            log.info(tlUI(Lang.BTN_SUBMITTED_BANS, size, requests));
+            setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, size));
+        } catch (IllegalStateException ignored) {
+            // 子请求已处理报错信息
         } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_SUBMITTED_BANS), e);
+            log.error(tlUI(Lang.BTN_UNKNOWN_ERROR), e);
             setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 
-    private List<BtnBan> generateBans() {
-        List<BtnBan> list = new ArrayList<>();
-        Map<BtnPeer, BanMetadata> map = new HashMap<>();
-        btnNetwork.getServer().getBannedPeers().forEach((pa, meta) -> map.put(BtnPeer.from(meta.getTorrent(), meta.getPeer()), meta));
-        for (Map.Entry<BtnPeer, BanMetadata> e : map.entrySet()) {
-            if (e.getValue().getBanAt() <= lastReport) {
-                continue;
-            }
-            if (e.getValue().isBanForDisconnect()) {
-                continue;
-            }
-            BtnBan btnBan = BtnBan.from(e.getValue().getContext(),
-                    tl(Main.DEF_LOCALE, e.getValue().getDescription()),
-                    new Timestamp(e.getValue().getBanAt()),
-                    e.getValue().getTorrent(), e.getValue().getPeer());
-            list.add(btnBan);
-        }
-        return list;
+    private CloseableWrappedIterable<HistoryEntity> createSubmitIterator(long memCursor) throws SQLException {
+        return historyDao.getWrappedIterable(historyDao
+                .queryBuilder()
+                .where().gt("id", memCursor)
+                .queryBuilder()
+                .orderBy("id", true)
+                .prepare());
     }
 
-
+    private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {
+        BtnBanPing ping = new BtnBanPing(historyEntities.stream().map(BtnBan::from).toList());
+        MutableRequest request = MutableRequest.POST(endpoint, HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8)))
+                .header("Content-Encoding", "gzip");
+        HttpResponse<String> resp = HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString()).join();
+        if (resp.statusCode() < 200 && resp.statusCode() >= 400) {
+            log.error(tlUI(Lang.BTN_REQUEST_FAILS, resp.statusCode() + " - " + resp.body()));
+            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body()));
+            throw new IllegalStateException(tlUI(new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body())));
+        } else {
+            return historyEntities.getLast().getId();
+        }
+    }
 }

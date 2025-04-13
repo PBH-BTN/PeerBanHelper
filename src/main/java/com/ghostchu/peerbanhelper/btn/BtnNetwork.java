@@ -3,9 +3,10 @@ package com.ghostchu.peerbanhelper.btn;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedPeersDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -62,11 +63,13 @@ public final class BtnNetwork implements Reloadable {
     @Autowired
     private PeerRecordDao peerRecordDao;
     @Autowired
-    private TrackedPeersDao trackedPeersDao;
+    private TrackedSwarmDao trackedSwarmDao;
     @Autowired
     private MetadataDao metadataDao;
     private ModuleMatchCache moduleMatchCache;
     private boolean enabled;
+    @Autowired
+    private HistoryDao historyDao;
 
     public BtnNetwork(PeerBanHelperServer server, ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache) {
         this.server = server;
@@ -145,21 +148,12 @@ public final class BtnNetwork implements Reloadable {
             abilities.values().forEach(BtnAbility::unload);
             abilities.clear();
             JsonObject ability = json.get("ability").getAsJsonObject();
-            if (ability.has("submit_peers") && submit) {
-                abilities.put(BtnAbilitySubmitPeers.class, new BtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));
-            }
             if (ability.has("submit_bans") && submit) {
-                abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
-            }
-            if (ability.has("submit_histories") && submit) {
-                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject(), metadataDao));
+                abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
             }
             if (ability.has("submit_swarm") && submit) {
-                abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedPeersDao));
+                abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));
             }
-//            if (ability.has("submit_hitrate") && submit) {
-//                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));
-//            }
             if (ability.has("rules")) {
                 abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
             }

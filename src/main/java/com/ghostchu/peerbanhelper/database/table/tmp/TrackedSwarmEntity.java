@@ -11,8 +11,8 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "tmp_tracked_peers")
-public final class TrackedPeerEntity { // 需要创建为临时表
+@DatabaseTable(tableName = "tmp_tracked_swarm")
+public final class TrackedSwarmEntity { // 需要创建为临时表
     @DatabaseField(generatedId = true, index = true)
     private Long id;
     @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)

@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.btn.ping;
 
-import com.ghostchu.peerbanhelper.database.table.tmp.TrackedPeerEntity;
+import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.util.InfoHashUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
@@ -45,7 +45,7 @@ public class BtnSwarm {
     @SerializedName("last_time_seen")
     private Timestamp lastTimeSeen;
 
-    public static BtnSwarm from(TrackedPeerEntity entity) {
+    public static BtnSwarm from(TrackedSwarmEntity entity) {
         BtnSwarm btnSwarm = new BtnSwarm();
         btnSwarm.setId(entity.getId());
         btnSwarm.setIp(entity.getIp());

@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedPeersDao;
-import com.ghostchu.peerbanhelper.database.table.tmp.TrackedPeerEntity;
+import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
+import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
@@ -22,9 +22,9 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @Component
 @IgnoreScan
-public class PeersLocalTrackModule extends AbstractFeatureModule implements MonitorFeatureModule {
+public class SwarmTrackingModule extends AbstractFeatureModule implements MonitorFeatureModule {
     @Autowired
-    private TrackedPeersDao trackedPeersDao;
+    private TrackedSwarmDao trackedSwarmDao;
 
     /**
      * 如果返回 false，则不初始化任何配置文件相关对象
@@ -43,7 +43,7 @@ public class PeersLocalTrackModule extends AbstractFeatureModule implements Moni
      */
     @Override
     public @NotNull String getName() {
-        return "Peers Local Track Module";
+        return "Swarm Tracking Module";
     }
 
     /**
@@ -53,7 +53,7 @@ public class PeersLocalTrackModule extends AbstractFeatureModule implements Moni
      */
     @Override
     public @NotNull String getConfigName() {
-        return "peers-local-track";
+        return "swarm-tracking";
     }
 
     /**
@@ -75,16 +75,18 @@ public class PeersLocalTrackModule extends AbstractFeatureModule implements Moni
     @Override
     public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull ExecutorService ruleExecuteExecutor) {
         try {
-            trackedPeersDao.callBatchTasks(() -> {
+            trackedSwarmDao.callBatchTasks(() -> {
                 for (Peer peer : peers) {
-                    trackedPeersDao.upsert(new TrackedPeerEntity(
+                    trackedSwarmDao.upsert(new TrackedSwarmEntity(
                             null,
                             peer.getPeerAddress().getAddress().toNormalizedString(),
                             peer.getPeerAddress().getPort(),
                             torrent.getHash(),
                             downloader.getName(),
+                            torrent.getProgress(),
                             peer.getPeerId(),
                             peer.getClientName(),
+                            peer.getProgress(),
                             peer.getUploaded(),
                             -1L,
                             peer.getDownloaded(),

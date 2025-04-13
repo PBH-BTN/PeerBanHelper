@@ -1,14 +1,15 @@
 package com.ghostchu.peerbanhelper.btn.ping;
 
+import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.InfoHashUtil;
-import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Data
 @AllArgsConstructor
@@ -34,12 +35,8 @@ public final class BtnBan {
     private long torrentSize;
     @SerializedName("downloaded")
     private long downloaded;
-    @SerializedName("rt_download_speed")
-    private long rtDownloadSpeed;
     @SerializedName("uploaded")
     private long uploaded;
-    @SerializedName("rt_upload_speed")
-    private long rtUploadSpeed;
     @SerializedName("peer_progress")
     private double peerProgress;
     @SerializedName("downloader_progress")
@@ -49,25 +46,23 @@ public final class BtnBan {
     @SerializedName("ban_at")
     private Timestamp banAt;
 
-    public static BtnBan from(String module, String rule, Timestamp banAt, TorrentWrapper torrent, PeerWrapper peer) {
+    public static BtnBan from(HistoryEntity historyEntity) {
         BtnBan btnBan = new BtnBan();
-        btnBan.setModule(module);
-        btnBan.setRule(rule);
-        btnBan.setIpAddress(peer.getAddress().getIp());
-        btnBan.setPeerPort(peer.getAddress().getPort());
-        btnBan.setPeerId(peer.getId());
-        btnBan.setClientName(peer.getClientName());
-        btnBan.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(torrent.getHash()));
-        btnBan.setTorrentIsPrivate(torrent.isPrivateTorrent());
-        btnBan.setTorrentSize(torrent.getSize());
-        btnBan.setDownloaded(peer.getDownloaded());
-        btnBan.setRtDownloadSpeed(peer.getDownloadSpeed());
-        btnBan.setUploaded(peer.getUploaded());
-        btnBan.setRtUploadSpeed(peer.getUploadSpeed());
-        btnBan.setPeerProgress(peer.getProgress());
-        btnBan.setDownloaderProgress(torrent.getProgress());
-        btnBan.setPeerFlag(peer.getFlags() == null ? null : peer.getFlags());
-        btnBan.setBanAt(banAt);
+        btnBan.setModule(historyEntity.getRule().getModule().getName());
+        btnBan.setRule(tlUI(historyEntity.getRule().getRule()));
+        btnBan.setIpAddress(historyEntity.getIp());
+        btnBan.setPeerPort(historyEntity.getPort());
+        btnBan.setPeerId(historyEntity.getPeerId());
+        btnBan.setClientName(historyEntity.getPeerClientName());
+        btnBan.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(historyEntity.getTorrent().getInfoHash()));
+        btnBan.setTorrentIsPrivate(Boolean.TRUE.equals(historyEntity.getTorrent().getPrivateTorrent()));
+        btnBan.setTorrentSize(historyEntity.getTorrent().getSize());
+        btnBan.setDownloaded(historyEntity.getPeerDownloaded());
+        btnBan.setUploaded(historyEntity.getPeerUploaded());
+        btnBan.setPeerProgress(historyEntity.getPeerProgress());
+        btnBan.setDownloaderProgress(historyEntity.getDownloaderProgress());
+        btnBan.setPeerFlag(historyEntity.getFlags() == null ? null : historyEntity.getFlags());
+        btnBan.setBanAt(historyEntity.getBanAt());
         return btnBan;
     }
 }

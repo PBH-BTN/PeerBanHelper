@@ -623,4 +623,7 @@ BTN_ABILITY_SUBMIT_SWARM_DESCRIPTION: |
   “提交种群跟踪数据” 是 “提交历史记录” 和 “提交快照数据” 的继任者。新的 “提交种群跟踪数据” 以一种更加服务器友好的格式追踪、存储和提交 Peers 数据，以减轻 BTN 服务器的数据聚合分析压力。
   该能力允许 BTN 服务器定期接收 PeerBanHelper 所跟踪的下载器上的 Peers 活动和最后一次记录的活动数据快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。同时，这些数据还有助于分析是否存在利用 PeerBanHelper 反吸血功能的漏洞，绕过反吸血机制的在野利用。
 BTN_SUBMITTING_SWARM: "[BTN 网络] 计划任务正在与 BTN 网络同步种群跟踪数据，请稍等……"
-BTN_SUBMITTED_SWARM: "[BTN 网络] 已与 BTN 网络同步 {} 条种群跟踪数据，感谢您对 BTN 网络的支持！"
+BTN_SUBMITTED_SWARM: "[BTN 网络] 已与 BTN 网络同步 {} 条种群跟踪数据 (分为 {} 次请求)，感谢您对 BTN 网络的支持！"
+
+BTN_SUBMITTING_BAN: "[BTN 网络] 计划任务正在提交封禁历史记录信息至 BTN 网络，请稍等……"
+BTN_SUBMITTED_BAN: "[BTN 网络] 已提交 {} 条封禁历史记录信息 (分为 {} 次请求)，感谢您对 BTN 网络的支持！"

@@ -120,6 +120,7 @@ public final class PersistMetrics implements BasicMetrics {
                     metadata.getPeer().getUploaded(),
                     metadata.getPeer().getDownloaded(),
                     metadata.getPeer().getProgress(),
+                    metadata.getTorrent().getProgress(),
                     torrentEntity,
                     rule,
                     metadata.getDescription(),
