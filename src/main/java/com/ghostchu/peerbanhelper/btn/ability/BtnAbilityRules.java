@@ -90,7 +90,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                 btnRule.getPeerIdRules().values().stream().mapToLong(List::size).sum(),
                 btnRule.getClientNameRules().values().stream().mapToLong(List::size).sum(),
                 btnRule.getPortRules().values().stream().mapToLong(List::size).sum(),
-                btnRule.getScriptRules().values().size());
+                btnRule.getScriptRules().size());
     }
 
     @Override
