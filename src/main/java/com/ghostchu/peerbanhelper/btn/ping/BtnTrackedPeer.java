@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.btn.ping;
 
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedPeerEntity;
+import com.ghostchu.peerbanhelper.util.InfoHashUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,8 +18,8 @@ public class BtnTrackedPeer {
     private String ip;
     @SerializedName("port")
     private int port;
-    @SerializedName("info_hash")
-    private String infoHash;
+    @SerializedName("torrent_identifier")
+    private String torrentIdentifier;
     @SerializedName("downloader")
     private String downloader;
     @SerializedName("peer_id")
@@ -45,7 +46,7 @@ public class BtnTrackedPeer {
         btnTrackedPeer.setId(entity.getId());
         btnTrackedPeer.setIp(entity.getIp());
         btnTrackedPeer.setPort(entity.getPort());
-        btnTrackedPeer.setInfoHash(entity.getInfoHash());
+        btnTrackedPeer.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(entity.getInfoHash()));
         btnTrackedPeer.setDownloader(entity.getDownloader());
         btnTrackedPeer.setPeerId(entity.getPeerId());
         btnTrackedPeer.setClientName(entity.getClientName());
