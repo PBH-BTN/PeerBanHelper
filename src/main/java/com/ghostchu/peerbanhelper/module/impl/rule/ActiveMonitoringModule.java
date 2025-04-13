@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.concurrent.*;
@@ -127,12 +126,9 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     private void writeJournal() {
         for (Downloader downloader : getServer().getDownloaders()) {
             try {
-                var entity = trafficJournalDao.getTodayJournal(downloader.getName());
                 if (downloader.login().success()) {
                     var stats = downloader.getStatistics();
-                    entity.setDataOverallUploaded(stats.totalUploaded());
-                    entity.setDataOverallDownloaded(stats.totalDownloaded());
-                    trafficJournalDao.update(entity);
+                    trafficJournalDao.updateData(downloader.getName(), stats.totalDownloaded(), stats.totalUploaded(), 0, 0);
                 }
             } catch (Throwable e) {
                 log.error("Unable to write hourly traffic journal to database", e);
@@ -149,11 +145,8 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         long now = System.currentTimeMillis();
         // Calculating the today traffic
         long startOfToday = MiscUtil.getStartOfToday(now);
-        var data = trafficJournalDao.getDayOffsetData(null, new Timestamp(startOfToday - 86400000), new Timestamp(now), trafficJournalDao::fixTimezone);
-        long totalBytes = 0;
-        for (TrafficJournalDao.TrafficData datum : data) {
-            totalBytes += datum.getDataOverallUploaded();
-        }
+        var data = trafficJournalDao.getTodayData(null);
+        long totalBytes = data.getDataOverallUploaded();
         var dateTimeString = MiscUtil.formatDateTime(now);
         var dateString = MiscUtil.formatDateOnly(now);
         var identifier = "dataTrafficCapping-" + startOfToday;

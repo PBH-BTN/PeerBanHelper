@@ -24,6 +24,7 @@ import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -75,8 +76,8 @@ public final class BiglyBT extends AbstractDownloader {
                 .defaultHeader("Authorization", "Bearer " + config.getToken())
                 .defaultHeader("Content-Type", "application/json")
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .cookieHandler(cm);
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());

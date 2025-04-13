@@ -90,8 +90,8 @@ public final class HTTPUtil {
                 .newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .cookieHandler(cookieManager);
         if (ignoreSSL) {
             builder.sslContext(ignoreSslContext);
