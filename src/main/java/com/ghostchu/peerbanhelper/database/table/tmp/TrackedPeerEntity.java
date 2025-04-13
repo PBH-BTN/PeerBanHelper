@@ -30,6 +30,8 @@ public final class TrackedPeerEntity { // 需要创建为临时表
     @DatabaseField
     private String clientName;
     @DatabaseField(canBeNull = false)
+    private double peerProgress;
+    @DatabaseField(canBeNull = false)
     private long uploaded;
     @DatabaseField(canBeNull = false)
     private long uploadedOffset;

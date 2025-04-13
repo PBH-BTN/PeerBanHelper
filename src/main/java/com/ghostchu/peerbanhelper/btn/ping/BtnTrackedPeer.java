@@ -28,6 +28,8 @@ public class BtnTrackedPeer {
     private String peerId;
     @SerializedName("client_name")
     private String clientName;
+    @SerializedName("peer_progress")
+    private double peerProgress;
     @SerializedName("uploaded")
     private long uploaded;
     @SerializedName("uploaded_offset")
@@ -52,6 +54,7 @@ public class BtnTrackedPeer {
         btnTrackedPeer.setDownloader(entity.getDownloader());
         btnTrackedPeer.setDownloaderProgress(entity.getDownloaderProgress());
         btnTrackedPeer.setPeerId(entity.getPeerId());
+        btnTrackedPeer.setPeerProgress(entity.getPeerProgress());
         btnTrackedPeer.setClientName(entity.getClientName());
         btnTrackedPeer.setUploaded(entity.getUploaded());
         btnTrackedPeer.setUploadedOffset(entity.getUploadedOffset());
