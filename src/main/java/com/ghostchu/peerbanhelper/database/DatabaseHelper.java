@@ -97,8 +97,7 @@ public final class DatabaseHelper {
                 // add new column: privateTorrent, nullable
                 var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
                 historyDao.executeRaw("ALTER TABLE " + historyDao.getTableName() + " ADD COLUMN peerProgress DOUBLE NOT NULL DEFAULT 1.00");
-            } catch (Exception err) {
-                log.error("Unable to upgrade database schema", err);
+            } catch (Exception ignored) {
             }
             v = 10;
         }
