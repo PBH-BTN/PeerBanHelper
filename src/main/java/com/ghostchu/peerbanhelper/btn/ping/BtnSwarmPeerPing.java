@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public final class BtnSwarmPeerPing {
-    @SerializedName("tracked_peers")
-    private List<BtnSwarm> trackedPeers;
+    @SerializedName("swarms")
+    private List<BtnSwarm> swarms;
 
 }
