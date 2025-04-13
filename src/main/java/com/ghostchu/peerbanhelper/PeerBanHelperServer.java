@@ -167,7 +167,6 @@ public class PeerBanHelperServer implements Reloadable {
         reloadConfig();
         loadDownloaders();
         reApplyBanListForDownloaders();
-        loadBanListToMemory();
         registerTimer();
         unbanWhitelistedPeers();
         return Reloadable.super.reloadModule();
