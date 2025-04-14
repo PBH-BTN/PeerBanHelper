@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 
 import java.net.http.HttpClient;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -214,6 +215,67 @@ public final class Transmission extends AbstractDownloader {
         TypedResponse<RsSessionStats> sessionStatsResp = client.execute(sessionStats);
         var stats = sessionStatsResp.getArgs();
         return new DownloaderStatistics(stats.getCumulativeStats().getUploadedBytes(), stats.getCumulativeStats().getDownloadedBytes());
+    }
+
+    /**
+     * 添加标签到指定种子
+     *
+     * @param torrent Torrent
+     * @param tag     标签
+     */
+    @Override
+    public void addTag(Torrent torrent, String tag) {
+
+    }
+
+    /**
+     * 从种子上移除指定的标签
+     *
+     * @param torrent Torrent
+     * @param tag     标签
+     */
+    @Override
+    public void removeTag(Torrent torrent, String tag) {
+
+    }
+
+    /**
+     * 以纯文本方式获取指定 Torrent 上的所有标签
+     *
+     * @param torrent Torrent
+     * @return 标签列表
+     */
+    @Override
+    public List<String> getTags(Torrent torrent) {
+        return Collections.emptyList();
+    }
+
+    /**
+     * 暂停 Torrent
+     *
+     * @param torrent Torrent
+     */
+    @Override
+    public void pauseTorrent(Torrent torrent) {
+        RqTorrentStop start = new RqTorrentStop(List.of(Long.parseLong(torrent.getId())));
+        TypedResponse<RsEmpty> sessionSetResp = client.execute(start);
+        if (!sessionSetResp.isSuccess()) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_STOP_TORRENT, getName(), sessionSetResp.getResult()));
+        }
+    }
+
+    /**
+     * 开始 Torrent
+     *
+     * @param torrent Torrent
+     */
+    @Override
+    public void startTorrent(Torrent torrent) {
+        RqTorrentStart start = new RqTorrentStart(List.of(Long.parseLong(torrent.getId())));
+        TypedResponse<RsEmpty> sessionSetResp = client.execute(start);
+        if (!sessionSetResp.isSuccess()) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_START_TORRENT, getName(), sessionSetResp.getResult()));
+        }
     }
 
     /**
