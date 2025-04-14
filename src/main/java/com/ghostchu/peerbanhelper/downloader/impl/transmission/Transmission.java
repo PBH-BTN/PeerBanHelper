@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -213,6 +214,52 @@ public final class Transmission extends AbstractDownloader {
         TypedResponse<RsSessionStats> sessionStatsResp = client.execute(sessionStats);
         var stats = sessionStatsResp.getArgs();
         return new DownloaderStatistics(stats.getCumulativeStats().getUploadedBytes(), stats.getCumulativeStats().getDownloadedBytes());
+    }
+
+    /**
+     * 获取当前下载器的限速配置
+     *
+     * @return 限速配置，如果不支持或者请求错误，则可能返回 null
+     */
+    @Override
+    public @Nullable DownloaderSpeedLimiter getSpeedLimiter() {
+        RqSessionGet sessionGet = new RqSessionGet(List.of(Fields.DOWNLOAD_LIMIT, Fields.DOWNLOAD_LIMITED, Fields.UPLOAD_LIMIT, Fields.UPLOAD_LIMITED));
+        TypedResponse<RsSessionGet> sessionGetResp = client.execute(sessionGet);
+        if (sessionGetResp.isSuccess()) {
+            RsSessionGet args = sessionGetResp.getArgs();
+            long downloadLimit = args.getSpeedLimitDown() * 1024;
+            long uploadLimit = args.getSpeedLimitUp() * 1024;
+            if (!args.getSpeedLimitDownEnabled()) {
+                downloadLimit = 0;
+            }
+            if (!args.getSpeedLimitUpEnabled()) {
+                uploadLimit = 0;
+            }
+            return new DownloaderSpeedLimiter(uploadLimit, downloadLimit);
+        }
+        log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), sessionGetResp.getResult()));
+        return null;
+    }
+
+    /**
+     * 设置当前下载器的限速配置
+     *
+     * @param speedLimiter 限速配置
+     */
+    @Override
+    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+        RqSessionSet set = RqSessionSet.builder()
+                .altSpeedEnabled(false)
+                .altSpeedTimeEnabled(false)
+                .speedLimitDown((int) (speedLimiter.download() / 1024))
+                .speedLimitUp((int) (speedLimiter.upload() / 1024))
+                .speedLimitUpEnabled(speedLimiter.upload() > 0)
+                .speedLimitDownEnabled(speedLimiter.download() > 0)
+                .build();
+        TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
+        if (!sessionSetResp.isSuccess()) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), sessionSetResp.getResult()));
+        }
     }
 
     @Override
