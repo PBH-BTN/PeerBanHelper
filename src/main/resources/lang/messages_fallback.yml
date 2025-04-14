@@ -627,3 +627,5 @@ BTN_SUBMITTED_SWARM: "[BTN 网络] 已与 BTN 网络同步 {} 条种群跟踪数
 
 BTN_SUBMITTING_BAN: "[BTN 网络] 计划任务正在提交封禁历史记录信息至 BTN 网络，请稍等……"
 BTN_SUBMITTED_BAN: "[BTN 网络] 已提交 {} 条封禁历史记录信息 (分为 {} 次请求)，感谢您对 BTN 网络的支持！"
+DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER: "获取下载器 {} 的速度限制器信息失败: {} - {}"
+DOWNLOADER_FAILED_SET_SPEED_LIMITER: "设置下载器 {} 的速度限制器信息失败: {} - {}"

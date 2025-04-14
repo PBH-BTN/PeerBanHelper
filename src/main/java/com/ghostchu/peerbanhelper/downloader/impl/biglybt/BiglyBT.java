@@ -2,14 +2,13 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
-import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
-import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
+import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.SetSpeedLimiterBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.CurrentSpeedLimiterBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.MetadataCallbackBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerManagerRecord;
@@ -99,6 +98,39 @@ public final class BiglyBT extends AbstractDownloader {
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP);
+    }
+
+    @Override
+    public DownloaderSpeedLimiter getSpeedLimiter() {
+        HttpResponse<String> resp;
+        try {
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/speedlimiter"),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (resp.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), resp.statusCode(), resp.body()));
+        }
+        CurrentSpeedLimiterBean currentSpeedLimit = JsonUtil.getGson().fromJson(resp.body(), CurrentSpeedLimiterBean.class);
+        return new DownloaderSpeedLimiter(currentSpeedLimit.getUpload(), currentSpeedLimit.getDownload());
+    }
+
+    @Override
+    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+        SetSpeedLimiterBean bean = new SetSpeedLimiterBean(speedLimiter.upload(), speedLimiter.download());
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest
+                            .POST(apiEndpoint + "/speedlimiter", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
+                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (request.statusCode() != 200) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, name, request.statusCode(), request.body()));
+                throw new IllegalStateException("Save BiglyBT SpeedLimiter error: statusCode=" + request.statusCode());
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, name, "N/A", e.getMessage()), e);
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
