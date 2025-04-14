@@ -189,8 +189,9 @@ public interface Downloader extends AutoCloseable {
 
     /**
      * 获取当前下载器的限速配置
-     * @return 限速配置
+     * @return 限速配置，如果不支持或者请求错误，则可能返回 null
      */
+    @Nullable
     DownloaderSpeedLimiter getSpeedLimiter();
 
     /**

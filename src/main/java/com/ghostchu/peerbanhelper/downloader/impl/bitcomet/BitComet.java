@@ -1,10 +1,7 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
-import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
-import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
+import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.crypto.BCAESTool;
 import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.resp.*;
 import com.ghostchu.peerbanhelper.peer.Peer;
@@ -318,14 +315,14 @@ public final class BitComet extends AbstractDownloader {
                     }));
         }
         return torrentResponses.stream().map(torrent -> new TorrentImpl(Long.toString(torrent.getTask().getTaskId()),
-                torrent.getTask().getTaskName(),
-                torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
-                torrent.getTaskDetail().getTotalSize(),
-                torrent.getTask().getSelectedDownloadedSize(),
-                torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
-                torrent.getTask().getUploadRate(),
-                torrent.getTask().getDownloadRate(),
-                torrent.getTaskDetail().getTorrentPrivate()
+                        torrent.getTask().getTaskName(),
+                        torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),
+                        torrent.getTaskDetail().getTotalSize(),
+                        torrent.getTask().getSelectedDownloadedSize(),
+                        torrent.getTaskStatus().getDownloadPermillage() / 1000.0d,
+                        torrent.getTask().getUploadRate(),
+                        torrent.getTask().getDownloadRate(),
+                        torrent.getTaskDetail().getTorrentPrivate()
                 ))
                 .filter(torrent -> includePrivate || !torrent.isPrivate())
                 .collect(Collectors.toList());
@@ -490,6 +487,64 @@ public final class BitComet extends AbstractDownloader {
     @Override
     public int getMaxConcurrentPeerRequestSlots() {
         return 4;
+    }
+
+    /**
+     * 获取当前下载器的限速配置
+     *
+     * @return 限速配置
+     */
+    @Override
+    public DownloaderSpeedLimiter getSpeedLimiter() {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            HttpResponse<String> updatePreferencesToConnectionConfig =
+                    httpClient.send(
+                            MutableRequest.POST(apiEndpoint + BCEndpoint.GET_CONNECTION_CONFIG.getEndpoint(),
+                                            HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(map)))
+                                    .header("Authorization", "Bearer " + this.deviceToken),
+                            HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                    );
+            var configResp = JsonUtil.standard().fromJson(updatePreferencesToConnectionConfig.body(), BCConnectionConfigResponse.class);
+            if (!"ok".equalsIgnoreCase(configResp.getErrorCode())) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), configResp.getErrorMessage()));
+            }
+            return new DownloaderSpeedLimiter(configResp.getConnectionConfig().getMaxUploadSpeed(), configResp.getConnectionConfig().getMaxDownloadSpeed());
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), e.getClass().getName() + ": " + e.getMessage()), e);
+            return null;
+        }
+    }
+
+    /**
+     * 设置当前下载器的限速配置
+     *
+     * @param speedLimiter 限速配置
+     */
+    @Override
+    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+        //{"connection_config":{"max_download_speed":25395200,"max_upload_speed":524288,"enable_listen_tcp":true,"listen_port_tcp":27675}}
+        try {
+            Map<String, Object> map = new HashMap<>();
+            Map<String, Long> connectionConfig = new HashMap<>();
+            connectionConfig.put("max_download_speed", speedLimiter.download());
+            connectionConfig.put("max_upload_speed", speedLimiter.upload());
+            map.put("connection_config", connectionConfig);
+
+            HttpResponse<String> updatePreferencesToConnectionConfig =
+                    httpClient.send(
+                            MutableRequest.POST(apiEndpoint + BCEndpoint.SET_CONNECTION_CONFIG.getEndpoint(),
+                                            HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(map)))
+                                    .header("Authorization", "Bearer " + this.deviceToken),
+                            HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                    );
+            var configResp = JsonUtil.standard().fromJson(updatePreferencesToConnectionConfig.body(), BCConfigSetResponse.class);
+            if (!"ok".equalsIgnoreCase(configResp.getErrorCode())) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), configResp.getErrorMessage()));
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), e.getClass().getName() + ": " + e.getMessage()), e);
+        }
     }
 
     @NoArgsConstructor
