@@ -153,4 +153,49 @@ public interface Downloader extends AutoCloseable {
     List<DownloaderFeatureFlag> getFeatureFlags();
 
     int getMaxConcurrentPeerRequestSlots();
+
+    /**
+     * 添加标签到指定种子
+     * @param torrent Torrent
+     * @param tag 标签
+     */
+    void addTag(Torrent torrent, String tag);
+
+    /**
+     * 从种子上移除指定的标签
+     * @param torrent Torrent
+     * @param tag 标签
+     */
+    void removeTag(Torrent torrent, String tag);
+
+    /**
+     * 以纯文本方式获取指定 Torrent 上的所有标签
+     * @param torrent Torrent
+     * @return 标签列表
+     */
+    List<String> getTags(Torrent torrent);
+
+    /**
+     * 暂停 Torrent
+     * @param torrent Torrent
+     */
+    void pauseTorrent(Torrent torrent);
+
+    /**
+     * 开始 Torrent
+     * @param torrent Torrent
+     */
+    void startTorrent(Torrent torrent);
+
+    /**
+     * 获取当前下载器的限速配置
+     * @return 限速配置
+     */
+    DownloaderSpeedLimiter getSpeedLimiter();
+
+    /**
+     * 设置当前下载器的限速配置
+     * @param speedLimiter 限速配置
+     */
+    void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter);
 }
