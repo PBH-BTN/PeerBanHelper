@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.peer.PeerFlag;
-import com.ghostchu.peerbanhelper.peer.PeerMessage;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
 

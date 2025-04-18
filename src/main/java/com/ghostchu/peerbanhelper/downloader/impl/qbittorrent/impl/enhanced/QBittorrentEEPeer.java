@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced;
 
 
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.peer.PeerFlag;
-import com.ghostchu.peerbanhelper.peer.PeerMessage;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
