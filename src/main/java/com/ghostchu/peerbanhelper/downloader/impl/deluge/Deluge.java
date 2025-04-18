@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -217,6 +218,26 @@ public final class Deluge extends AbstractDownloader {
             log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
         }
         return new DownloaderStatistics(0,0);
+    }
+
+    /**
+     * 获取当前下载器的限速配置
+     *
+     * @return 限速配置，如果不支持或者请求错误，则可能返回 null
+     */
+    @Override
+    public @Nullable DownloaderSpeedLimiter getSpeedLimiter() {
+        return null;
+    }
+
+    /**
+     * 设置当前下载器的限速配置
+     *
+     * @param speedLimiter 限速配置
+     */
+    @Override
+    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+
     }
 
     @Override

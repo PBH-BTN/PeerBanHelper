@@ -26,7 +26,6 @@ import com.ghostchu.peerbanhelper.util.WatchDog;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
-import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.time.ExceptedTime;
 import com.ghostchu.peerbanhelper.util.time.TimeoutProtect;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -41,7 +40,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -60,18 +58,16 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 public class DownloaderServer implements Reloadable, AutoCloseable {
-    @Autowired
-    private DownloaderManager downloaderManager;
     @Getter
     private final DualIPv4v6Tries ignoreAddresses = new DualIPv4v6Tries();
     private final Lock banWaveLock = new ReentrantLock();
     private final Map<PeerAddress, BanMetadata> BAN_LIST = Collections.synchronizedMap(new HashMap<>());
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
+    private final DownloaderManager downloaderManager;
+    private final BasicMetrics metrics;
+    private final ModuleManager moduleManager;
     @Getter
     private long banDuration;
-    @Autowired
-    @Qualifier("persistMetrics")
-    private BasicMetrics metrics;
     private Map<PeerAddress, List<PeerMetadata>> LIVE_PEERS = Collections.synchronizedMap(new HashMap<>());
     @Getter
     private boolean hideFinishLogs;
@@ -82,25 +78,28 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private ScheduledExecutorService BAN_WAVE_SERVICE;
     private WatchDog banWaveWatchDog;
-    @Autowired
-    private ModuleManager moduleManager;
-    @Autowired
-    private BanListDao banListDao;
-    @Autowired
-    private DNSLookup dnsLookup;
-    @Autowired
-    private Laboratory laboratory;
+    private final BanListDao banListDao;
+    private final DNSLookup dnsLookup;
+    private final Laboratory laboratory;
     @Getter
     private boolean globalPaused = false;
-    @Autowired
-    private ModuleMatchCache moduleMatchCache;
-    @Autowired
-    private AlertManager alertManager;
-    @Autowired
-    private Database databaseManager;
+    private final AlertManager alertManager;
+    private final Database databaseManager;
 
 
-    public DownloaderServer() {
+    public DownloaderServer(DownloaderManager downloaderManager,
+                            @Qualifier("persistMetrics") BasicMetrics metrics,
+                            ModuleManager moduleManager, BanListDao banListDao,
+                            DNSLookup dnsLookup, Laboratory laboratory,
+                            AlertManager alertManager, Database databaseManager) {
+        this.downloaderManager = downloaderManager;
+        this.metrics = metrics;
+        this.banListDao = banListDao;
+        this.dnsLookup = dnsLookup;
+        this.moduleManager = moduleManager;
+        this.laboratory = laboratory;
+        this.alertManager = alertManager;
+        this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
         loadBanListToMemory();
     }
