@@ -9,12 +9,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
-import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
-import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.BitComet;
-import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrent;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced.QBittorrentEE;
-import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
@@ -51,7 +46,6 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.JsonObject;
 import com.j256.ormlite.misc.TransactionManager;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6Tries;
@@ -60,8 +54,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.pqc.legacy.math.ntru.util.Util;
-import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
-import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +86,8 @@ public class PeerBanHelperServer implements Reloadable {
     @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private final Deque<ScheduledBanListOperation> scheduledBanListOperations = new ConcurrentLinkedDeque<>();
-    private final List<Downloader> downloaders = new CopyOnWriteArrayList<>();
+    @Autowired
+    private DownloaderManager downloaderManager;
     @Getter
     private final DualIPv4v6Tries ignoreAddresses = new DualIPv4v6Tries();
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -165,7 +158,6 @@ public class PeerBanHelperServer implements Reloadable {
     @Override
     public ReloadResult reloadModule() throws Exception {
         reloadConfig();
-        loadDownloaders();
         reApplyBanListForDownloaders();
         registerTimer();
         unbanWhitelistedPeers();
@@ -184,7 +176,6 @@ public class PeerBanHelperServer implements Reloadable {
     public void start() throws SQLException {
         log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
         checkKnownCrashes();
-        loadDownloaders();
         registerBanListInvokers();
         registerModules();
         setupIPDB();
@@ -262,79 +253,6 @@ public class PeerBanHelperServer implements Reloadable {
         }
     }
 
-    public void loadDownloaders() {
-        this.downloaders.clear();
-        ConfigurationSection clientSection = Main.getMainConfig().getConfigurationSection("client");
-        if (clientSection == null) {
-            return;
-        }
-        for (String client : clientSection.getKeys(false)) {
-            ConfigurationSection downloaderSection = clientSection.getConfigurationSection(client);
-            String endpoint = downloaderSection.getString("endpoint");
-            Downloader downloader = createDownloader(client, downloaderSection);
-            registerDownloader(downloader);
-            log.info(tlUI(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), client, endpoint));
-        }
-    }
-
-    public Downloader createDownloader(String client, ConfigurationSection downloaderSection) {
-        if (downloaderSection.getString("name") != null) {
-            downloaderSection.set("name", downloaderSection.getString("name", "").replace(".", "-"));
-        }
-        Downloader downloader = null;
-        switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection, alertManager);
-            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(client, downloaderSection, alertManager);
-            case "transmission" ->
-                    downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection, alertManager);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection, alertManager);
-            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection, alertManager);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, downloaderSection, alertManager);
-            //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
-        }
-        return downloader;
-
-    }
-
-    public Downloader createDownloader(String client, JsonObject downloaderSection) {
-        if (downloaderSection.get("name") != null) {
-            downloaderSection.addProperty("name", downloaderSection.get("name").getAsString().replace(".", "-"));
-        }
-        Downloader downloader = null;
-        switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(client, downloaderSection, alertManager);
-            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(client, downloaderSection, alertManager);
-            case "transmission" ->
-                    downloader = Transmission.loadFromConfig(client, pbhServerAddress, downloaderSection, alertManager);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, downloaderSection, alertManager);
-            case "deluge" -> downloader = Deluge.loadFromConfig(client, downloaderSection, alertManager);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, downloaderSection, alertManager);
-            //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
-        }
-        return downloader;
-
-    }
-
-    public void saveDownloaders() throws IOException {
-        ConfigurationSection clientSection = new MemoryConfiguration();
-        for (Downloader downloader : this.downloaders) {
-            clientSection.set(downloader.getName(), downloader.saveDownloader());
-        }
-        Main.getMainConfig().set("client", clientSection);
-        Main.getMainConfig().save(Main.getMainConfigFile());
-    }
-
-    public boolean registerDownloader(Downloader downloader) {
-        if (this.downloaders.stream().anyMatch(d -> d.getName().equals(downloader.getName()))) {
-            return false;
-        }
-        this.downloaders.add(downloader);
-        return true;
-    }
-
-    public void unregisterDownloader(Downloader downloader) {
-        this.downloaders.remove(downloader);
-    }
 
     private void setupIPDB() {
         try {
@@ -367,13 +285,7 @@ public class PeerBanHelperServer implements Reloadable {
         if (this.ipdb != null) {
             this.ipdb.close();
         }
-        for (Downloader d : this.downloaders) {
-            try {
-                d.close();
-            } catch (Exception e) {
-                log.error(tlUI(Lang.UNABLE_CLOSE_DOWNLOADER, d.getName()), e);
-            }
-        }
+        downloaderManager.close();
         Main.getReloadManager().unregister(this);
         log.info(tlUI(Lang.SHUTDOWN_DONE));
     }
@@ -478,7 +390,7 @@ public class PeerBanHelperServer implements Reloadable {
             // 声明基本集合
             // 执行计划任务
             banWaveWatchDog.setLastOperation("Run scheduled tasks");
-            getDownloaders().forEach(Downloader::runScheduleTasks);
+            downloaderManager.forEach(Downloader::runScheduleTasks);
             // 被解除封禁的对等体列表
             banWaveWatchDog.setLastOperation("Remove expired bans");
             Collection<BanMetadata> unbannedPeers = removeExpiredBans();
@@ -596,17 +508,17 @@ public class PeerBanHelperServer implements Reloadable {
                 log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST));
             })) {
                 if (!needReApplyBanList.get()) {
-                    getDownloaders().forEach(downloader -> protect.getService().submit(() ->
+                    downloaderManager.forEach(downloader -> protect.getService().submit(() ->
                             updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(), bannedPeers, unbannedPeers, false)));
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
-                    getDownloaders().forEach(downloader -> protect.getService().submit(() -> {
+                    downloaderManager.forEach(downloader -> protect.getService().submit(() -> {
                         updateDownloader(downloader, true, null, null, true);
                     }));
                     needReApplyBanList.set(false);
                 }
             }
-            if (!hideFinishLogs && !getDownloaders().isEmpty()) {
+            if (!hideFinishLogs && !downloaderManager.isEmpty()) {
                 long downloadersCount = peers.size();
                 long torrentsCount = peers.values().stream().mapToLong(Map::size).sum();
                 long peersCount = peers.values().stream().flatMap(e -> e.values().stream()).mapToLong(List::size).sum();
@@ -626,7 +538,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     private void reApplyBanListForDownloaders() {
-        getDownloaders().forEach(downloader -> {
+        downloaderManager.forEach(downloader -> {
             if (downloader.login().success()) {
                 downloader.setBanList(BAN_LIST.keySet(), null, null, true);
             }
@@ -766,7 +678,7 @@ public class PeerBanHelperServer implements Reloadable {
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
         Map<Downloader, Map<Torrent, List<Peer>>> peers = Collections.synchronizedMap(new HashMap<>());
         try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
-            getDownloaders().forEach(downloader -> service.submit(() -> {
+            downloaderManager.forEach(downloader -> service.submit(() -> {
                 try {
                     Map<Torrent, List<Peer>> p = collectPeers(downloader);
                     if (p != null) {
@@ -984,7 +896,7 @@ public class PeerBanHelperServer implements Reloadable {
     }
 
     public void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
-        Downloader downloader = getDownloaders().stream().filter(d -> d.getName().equals(banMetadata.getDownloader()))
+        Downloader downloader = downloaderManager.stream().filter(d -> d.getName().equals(banMetadata.getDownloader()))
                 .findFirst().orElseThrow();
         banPeer(BAN_LIST.keySet(), banMetadata, torrent, peer);
         scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(
@@ -1007,9 +919,6 @@ public class PeerBanHelperServer implements Reloadable {
         return "http://localhost:" + Main.getServer().getHttpdPort() + "/?token=" + UrlEncoderDecoder.encodePath(webContainer.getToken());
     }
 
-    public List<Downloader> getDownloaders() {
-        return List.copyOf(downloaders);
-    }
 
     /**
      * 解除一个指定对等体
