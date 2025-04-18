@@ -30,6 +30,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 31)
+    public void removeBanInvoker() {
+        conf.set("banlist-invoker", null);
+    }
+
     @UpdateScript(version = 30)
     public void addGuiSettings() {
         conf.set("gui", "auto");
@@ -64,9 +69,9 @@ public final class MainConfigUpdateScript {
         for (String key : pushNotification.getKeys(false)) {
             var single = pushNotification.getConfigurationSection(key);
             if (single == null) continue;
-            if(single.getBoolean("enabled", false)){
+            if (single.getBoolean("enabled", false)) {
                 pushNotification.set(key, null); // 删除未启用的推送渠道
-            }else {
+            } else {
                 var type = single.getString("type");
                 if ("smtp".equals(type)) {
                     single.set("auth", true);

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
@@ -38,6 +39,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private HistoryDao historyDao;
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public boolean isConfigurable() {
@@ -211,8 +214,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         map.put("checkCounter", metrics.getCheckCounter());
         map.put("peerBanCounter", metrics.getPeerBanCounter());
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
-        map.put("banlistCounter", getServer().getBannedPeers().size());
-        map.put("bannedIpCounter", getServer().getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
+        map.put("banlistCounter", downloaderServer.getBannedPeers().size());
+        map.put("bannedIpCounter", downloaderServer.getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
         ctx.json(new StdResp(true, null, map));
     }
 

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
@@ -44,6 +45,8 @@ public final class PBHBanController extends AbstractFeatureModule {
     private JavalinWebContainer webContainer;
     @Autowired
     private HistoryDao historyDao;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public boolean isConfigurable() {
@@ -73,16 +76,16 @@ public final class PBHBanController extends AbstractFeatureModule {
         List<String> request = Arrays.asList(context.bodyAsClass(String[].class));
         List<PeerAddress> pendingRemovals = new ArrayList<>();
         if (request.contains("*")) {
-            pendingRemovals.addAll(getServer().getBannedPeers().keySet());
-            getServer().getNeedReApplyBanList().set(true);
+            pendingRemovals.addAll(downloaderServer.getBannedPeers().keySet());
+            downloaderServer.getNeedReApplyBanList().set(true);
         } else {
-            for (PeerAddress address : getServer().getBannedPeers().keySet()) {
+            for (PeerAddress address : downloaderServer.getBannedPeers().keySet()) {
                 if (request.contains(address.getIp())) {
                     pendingRemovals.add(address);
                 }
             }
         }
-        pendingRemovals.forEach(pa -> getServer().scheduleUnBanPeer(pa));
+        pendingRemovals.forEach(pa -> downloaderServer.scheduleUnBanPeer(pa));
         context.json(new StdResp(true, null, Map.of("count", pendingRemovals.size())));
     }
 
@@ -119,7 +122,7 @@ public final class PBHBanController extends AbstractFeatureModule {
 
 
     private @NotNull Stream<BanResponse> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
-        var banResponseList = getServer().getBannedPeers()
+        var banResponseList = downloaderServer.getBannedPeers()
                 .entrySet()
                 .stream()
                 .filter(b -> {

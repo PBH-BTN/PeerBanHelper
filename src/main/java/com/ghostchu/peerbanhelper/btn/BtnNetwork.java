@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.btn;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
@@ -59,7 +59,7 @@ public final class BtnNetwork implements Reloadable {
     private String appSecret;
     @Getter
     private HttpClient httpClient;
-    private PeerBanHelperServer server;
+    private DownloaderServer server;
     @Autowired
     private PeerRecordDao peerRecordDao;
     @Autowired
@@ -71,8 +71,8 @@ public final class BtnNetwork implements Reloadable {
     @Autowired
     private HistoryDao historyDao;
 
-    public BtnNetwork(PeerBanHelperServer server, ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache) {
-        this.server = server;
+    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer) {
+        this.server = downloaderServer;
         this.scriptEngine = scriptEngine;
         this.moduleMatchCache = moduleMatchCache;
         Main.getReloadManager().register(this);

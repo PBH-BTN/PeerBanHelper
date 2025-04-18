@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -23,6 +24,8 @@ import java.util.UUID;
 public final class BlockListController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public boolean isConfigurable() {
@@ -34,14 +37,14 @@ public final class BlockListController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/blocklist/ip", ctx -> {
                     StringBuilder builder = new StringBuilder();
-                    for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
+                    for (Map.Entry<PeerAddress, BanMetadata> pair : downloaderServer.getBannedPeers().entrySet()) {
                         builder.append(pair.getKey().getIp()).append("\n");
                     }
                     ctx.result(builder.toString());
                 })
                 .get("/blocklist/p2p-plain-format", ctx -> {
                     StringBuilder builder = new StringBuilder();
-                    for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
+                    for (Map.Entry<PeerAddress, BanMetadata> pair : downloaderServer.getBannedPeers().entrySet()) {
                         String ruleName = UUID.randomUUID().toString().replace("-", "");
                         String start = pair.getKey().getIp();
                         String end = pair.getKey().getIp();
@@ -51,7 +54,7 @@ public final class BlockListController extends AbstractFeatureModule {
                 }, Role.ANYONE)
                 .get("/blocklist/dat-emule", ctx -> {
                     StringBuilder builder = new StringBuilder();
-                    for (Map.Entry<PeerAddress, BanMetadata> pair : getServer().getBannedPeers().entrySet()) {
+                    for (Map.Entry<PeerAddress, BanMetadata> pair : downloaderServer.getBannedPeers().entrySet()) {
                         IPAddress ipAddress = IPAddressUtil.getIPAddress(pair.getKey().getIp());
                         if (ipAddress == null) continue;
                         String fullIp = ipAddress.toFullString();

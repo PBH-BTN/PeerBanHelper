@@ -79,9 +79,4 @@ public class ModuleMatchCache {
     public void invalidateAll() {
         CACHE_POOL.invalidateAll();
     }
-
-    public void close() {
-        Main.getEventBus().unregister(this);
-    }
-
 }

@@ -1,7 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
@@ -50,6 +51,8 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     private DNSLookup dnsLookup;
     @Autowired
     private DownloaderManager downloaderManager;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public boolean isConfigurable() {
@@ -205,7 +208,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
         Downloader downloader = selected.get();
         boolean ptr = Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup");
-        List<PopulatedPeerDTO> peerWrappers = getServer().getLivePeersSnapshot().values()
+        List<PopulatedPeerDTO> peerWrappers = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::parallelStream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
@@ -218,7 +221,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     private PopulatedPeerDTO populatePeerDTO(PeerMetadata p, boolean resolvePTR) {
         PopulatedPeerDTO dto = new PopulatedPeerDTO(p.getPeer(), null, null);
-        PeerBanHelperServer.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
+        PeerBanHelper.IPDBResponse response = getServer().queryIPDB(p.getPeer().toPeerAddress());
         IPGeoData geoData = response.geoData().get();
         if (geoData != null) {
             dto.setGeo(geoData);
@@ -248,7 +251,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
             return;
         }
         Downloader downloader = selected.get();
-        List<TorrentWrapper> torrentWrappers = getServer().getLivePeersSnapshot()
+        List<TorrentWrapper> torrentWrappers = downloaderServer.getLivePeersSnapshot()
                 .values().stream()
                 .flatMap(Collection::stream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
@@ -278,13 +281,13 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
         Downloader downloader = selected.get();
         DownloaderLastStatus lastStatus = downloader.getLastStatus();
-        long activeTorrents = getServer().getLivePeersSnapshot().values()
+        long activeTorrents = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))
                 .map(p -> p.getTorrent().getHash())
                 .distinct().count();
-        long activePeers = getServer().getLivePeersSnapshot().values()
+        long activePeers = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(p -> p.getDownloader().equals(downloader.getName()))

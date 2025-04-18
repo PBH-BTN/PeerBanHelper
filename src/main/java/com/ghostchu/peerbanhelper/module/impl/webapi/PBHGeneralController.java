@@ -1,8 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
@@ -64,7 +65,9 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Autowired
     private ModuleManager moduleManager;
     @Autowired
-    private PeerBanHelperServer peerBanHelperServer;
+    private PeerBanHelper peerBanHelper;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public boolean isConfigurable() {
@@ -110,7 +113,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     private void handleGlobalConfigRead(Context context) {
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("globalPaused", peerBanHelperServer.isGlobalPaused());
+        data.put("globalPaused", downloaderServer.isGlobalPaused());
         context.json(new StdResp(true, null, data));
     }
 
@@ -120,7 +123,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             throw new IllegalArgumentException("Request body cannot be null");
         }
         if (body.globalPaused() != null) {
-            peerBanHelperServer.setGlobalPaused(body.globalPaused());
+            downloaderServer.setGlobalPaused(body.globalPaused());
         }
         context.json(new StdResp(true, "OK!", null));
     }

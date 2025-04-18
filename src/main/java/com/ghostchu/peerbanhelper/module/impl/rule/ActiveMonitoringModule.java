@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -23,6 +24,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
@@ -36,9 +38,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @IgnoreScan
 public final class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable {
-    private final PeerRecordDao peerRecordDao;
+    @Autowired
+    private PeerRecordDao peerRecordDao;
     private final Deque<PeerRecordDao.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
-    private final TrafficJournalDao trafficJournalDao;
+    @Autowired
+    private TrafficJournalDao trafficJournalDao;
     private final BlockingDeque<Runnable> taskWriteQueue = new LinkedBlockingDeque<>();
     private final Cache<PeerRecordDao.BatchHandleTasks, Object> diskWriteCache = CacheBuilder
             .newBuilder()
@@ -46,17 +50,13 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
             .maximumSize(ExternalSwitch.parseInt("pbh.module.activeMonitorModule.diskWriteCache.size", 3500))
             .removalListener(notification -> dataBuffer.offer((PeerRecordDao.BatchHandleTasks) notification.getKey()))
             .build();
-    private final AlertManager alertManager;
+    @Autowired
+    private AlertManager alertManager;
     private long dailyTrafficCapping;
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
-
-    public ActiveMonitoringModule(PeerRecordDao peerRecordDao, TrafficJournalDao trafficJournalDao, AlertManager alertManager) {
-        super();
-        this.peerRecordDao = peerRecordDao;
-        this.trafficJournalDao = trafficJournalDao;
-        this.alertManager = alertManager;
-    }
+    @Autowired
+    private DownloaderManager downloaderManager;
 
     @Override
     public boolean isConfigurable() {
@@ -124,7 +124,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     }
 
     private void writeJournal() {
-        for (Downloader downloader : getServer().getDownloaders()) {
+        for (Downloader downloader : downloaderManager) {
             try {
                 if (downloader.login().success()) {
                     var stats = downloader.getStatistics();

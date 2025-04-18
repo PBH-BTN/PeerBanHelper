@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.torrent.Torrent;
@@ -34,6 +35,8 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
     private JavalinWebContainer webContainer;
     @Autowired
     private AlertDao alertDao;
+    @Autowired
+    private DownloaderManager downloaderManager;
 
     @Override
     public boolean isConfigurable() {
@@ -64,7 +67,7 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
             return;
         }
         AtomicInteger count = new AtomicInteger(0);
-        for (Downloader downloader : getServer().getDownloaders()) {
+        for (Downloader downloader : downloaderManager.getDownloaders()) {
             if (dto.downloaders() != null && !dto.downloaders().isEmpty() && !dto.downloaders().contains(downloader.getName())) {
                 continue;
             }

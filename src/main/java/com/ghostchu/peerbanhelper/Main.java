@@ -73,7 +73,7 @@ public class Main {
     @Getter
     private static File debugDirectory;
     @Getter
-    private static PeerBanHelperServer server;
+    private static PeerBanHelper server;
     @Getter
     private static PBHGuiManager guiManager;
     @Getter
@@ -134,7 +134,7 @@ public class Main {
 //            registerBean(File.class, profileConfigFile, "profileConfigFile");
 //            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
 //            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
-                server = applicationContext.getBean(PeerBanHelperServer.class);
+                server = applicationContext.getBean(PeerBanHelper.class);
                 server.start();
             } catch (Exception e) {
                 log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
@@ -498,7 +498,7 @@ public class Main {
         registerFunctions(JsonUtil.class);
         registerFunctions(Lang.class);
         registerFunctions(StrUtil.class);
-        registerFunctions(PeerBanHelperServer.class);
+        registerFunctions(PeerBanHelper.class);
         registerFunctions(InfoHashUtil.class);
         registerFunctions(CommonUtil.class);
         registerFunctions(ByteUtil.class);
