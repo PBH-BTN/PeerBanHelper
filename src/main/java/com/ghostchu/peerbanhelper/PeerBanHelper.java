@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
-import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
@@ -49,7 +48,11 @@ public class PeerBanHelper implements Reloadable {
     @Autowired
     private TrackedSwarmDao trackerPeersDao;
     @Autowired
+    @Getter
     private DownloaderManager downloaderManager;
+    @Autowired
+    @Getter
+    private DownloaderServer downloaderServer;
     private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
             .expireAfterAccess(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000), TimeUnit.MILLISECONDS)
             .maximumSize(ExternalSwitch.parseInt("pbh.geoIpCache.size", 300))
@@ -70,8 +73,7 @@ public class PeerBanHelper implements Reloadable {
     private AlertManager alertManager;
     @Autowired
     private CrashManager crashManager;
-    @Autowired
-    private DownloaderServer downloaderServer;
+
 
     public PeerBanHelper() {
         reloadConfig();
@@ -100,7 +102,6 @@ public class PeerBanHelper implements Reloadable {
             }
         }
         Main.getReloadManager().register(this);
-        Main.getEventBus().post(new PBHServerStartedEvent(this));
         postCompatibilityCheck();
         sendSnapshotAlert();
         runTestCode();
