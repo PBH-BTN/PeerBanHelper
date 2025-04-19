@@ -11,6 +11,13 @@ import lombok.NoArgsConstructor;
 public final class QBittorrentPreferences {
     @SerializedName("banned_IPs")
     private String bannedIps;
+
     @SerializedName("shadow_ban_enabled")
     private Boolean shadowBanEnabled;
+
+    @SerializedName("up_limit")
+    private Long upLimit;
+
+    @SerializedName("dl_limit")
+    private Long dlLimit;
 }
