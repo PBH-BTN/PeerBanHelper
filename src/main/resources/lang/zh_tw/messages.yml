@@ -41,6 +41,7 @@ DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST: "請求 Torrents 列表失敗 - {} - 
 DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT: "請求 Torrent 的 Peers 列表失敗 - {} - {}"
 DOWNLOADER_QB_API_PREFERENCES_ERR: "qBittorrent 的偏好設定 API 返回了非 200 預期響應 - {} - {}"
 DOWNLOADER_QB_FAILED_SAVE_BANLIST: "無法儲存 {} ({}) 的 Banlist！{} - {}\n{}"
+DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER: "無法儲存 {} ({}) 的限速配置！{} - {}\n{}"
 DOWNLOADER_TR_MOTD_WARNING: "[受限] 由於 Transmission 的 RPC-API 限制，PeerId 黑名單功能和 ProgressCheatBlocker 功能的過量下載模組不可用"
 DOWNLOADER_TR_DISCONNECT_PEERS: "[重設] 正在斷開 Transmission 上的 {} 個種子連接的對等體，以便套用 IP 封鎖列表的更改"
 DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP: "設定 Transmission 的 BanList 地址時，返回非成功響應：{}。"

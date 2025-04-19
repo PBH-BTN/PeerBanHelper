@@ -20,4 +20,10 @@ public final class QBittorrentPreferences {
 
     @SerializedName("dl_limit")
     private Long dlLimit;
+
+    @SerializedName("alt_up_limit")
+    private Long altUpLimit;
+
+    @SerializedName("alt_dl_limit")
+    private Long altDlLimit;
 }

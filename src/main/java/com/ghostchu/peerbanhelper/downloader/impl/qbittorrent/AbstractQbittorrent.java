@@ -11,11 +11,7 @@ import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
 import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentMainData;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPeer;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPreferences;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentTorrent;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentTorrentTrackers;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
@@ -281,7 +277,12 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
         long downloadLimit = speedLimiter.download();
         long uploadLimit = speedLimiter.upload();
-        var requestParam = Map.of("dl_limit", downloadLimit, "up_limit", uploadLimit);
+        var requestParam = Map.of(
+                "up_limit", uploadLimit,
+                "dl_limit", downloadLimit,
+                "alt_up_limit", uploadLimit,
+                "alt_dl_limit", downloadLimit
+        );
         var body = FormBodyPublisher.newBuilder()
                 .query("json", JsonUtil.getGson().toJson(requestParam));
 
@@ -291,11 +292,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             .header("Content-Type", "application/x-www-form-urlencoded")
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }

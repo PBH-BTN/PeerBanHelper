@@ -41,6 +41,7 @@ DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST: "Failed to request torrents list - {}
 DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT: "Failed to request peers list in torrent - {} - {}"
 DOWNLOADER_QB_API_PREFERENCES_ERR: "qBittorrent's preferences API returned non-200 expected response - {} - {}"
 DOWNLOADER_QB_FAILED_SAVE_BANLIST: "Failed to save banlist for {} ({}): {} - {}\n{}"
+DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER: "Failed to save speed-limiter for {} ({}): {} - {}\n{}"
 DOWNLOADER_TR_MOTD_WARNING: "[Restricted] Due to Transmission's RPC-API limitations, the PeerId blacklist function and the excessive download module of ProgressCheatBlocker are unavailable"
 DOWNLOADER_TR_DISCONNECT_PEERS: "[Reset] Disconnecting peers of {} torrents on Transmission to apply IP blocklist changes"
 DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP: "Non-successful response returned when setting Transmission's BanList address: {}."
