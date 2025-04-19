@@ -74,12 +74,12 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
                 .put("/api/downloaders", this::handleDownloaderPut, Role.USER_WRITE)
-                .patch("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPatch(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
+                .patch("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPatch(ctx, ctx.pathParam("downloaderUniqueId")), Role.USER_WRITE)
                 .post("/api/downloaders/test", this::handleDownloaderTest, Role.USER_WRITE)
-                .delete("/api/downloaders/{downloaderName}", ctx -> handleDownloaderDelete(ctx, ctx.pathParam("downloaderName")), Role.USER_WRITE)
-                .get("/api/downloaders/{downloaderName}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderName")), Role.USER_READ)
-                .get("/api/downloaders/{downloaderName}/torrents", ctx -> handleDownloaderTorrents(ctx, ctx.pathParam("downloaderName")), Role.USER_READ)
-                .get("/api/downloaders/{downloaderName}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderName"), ctx.pathParam("torrentId")), Role.USER_READ);
+                .delete("/api/downloaders/{downloaderName}", ctx -> handleDownloaderDelete(ctx, ctx.pathParam("downloaderUniqueId")), Role.USER_WRITE)
+                .get("/api/downloaders/{downloaderName}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderUniqueId")), Role.USER_READ)
+                .get("/api/downloaders/{downloaderName}/torrents", ctx -> handleDownloaderTorrents(ctx, ctx.pathParam("downloaderUniqueId")), Role.USER_READ)
+                .get("/api/downloaders/{downloaderName}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderUniqueId"), ctx.pathParam("torrentId")), Role.USER_READ);
     }
 
     private void handleDownloaderPut(Context ctx) {
@@ -110,12 +110,11 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
-    private void handleDownloaderPatch(Context ctx, String downloaderName) {
+    private void handleDownloaderPatch(Context ctx, String downloaderUniqueId) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
-        String uuid = draftDownloader.get("uuid").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
+        Downloader downloader = downloaderManager.createDownloader(name, downloaderUniqueId, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATE_FAILURE), null));
@@ -123,7 +122,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
         // 可能重命名了？
         downloaderManager.stream()
-                .filter(d -> d.getUniqueId().equals(uuid))
+                .filter(d -> d.getUniqueId().equals(downloaderUniqueId))
                 .forEach(d -> downloaderManager.unregisterDownloader(d));
         if (downloaderManager.registerDownloader(downloader)) {
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATED), null));
@@ -178,8 +177,8 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
-    private void handleDownloaderDelete(Context ctx, String downloaderName) {
-        Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
+    private void handleDownloaderDelete(Context ctx, String downloaderUniqueId) {
+        Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getUniqueId().equals(downloaderUniqueId)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_NOT_EXISTS), null));
@@ -197,8 +196,8 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     }
 
-    private void handlePeersInTorrentOnDownloader(Context ctx, String downloaderName, String torrentId) {
-        Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getName().equals(downloaderName)).findFirst();
+    private void handlePeersInTorrentOnDownloader(Context ctx, String downloaderUniqueId, String torrentId) {
+        Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getUniqueId().equals(downloaderUniqueId)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS), null));
@@ -239,9 +238,9 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         return dto;
     }
 
-    private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderName) {
+    private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderUniqueId) {
         Optional<Downloader> selected = downloaderManager.stream()
-                .filter(d -> d.getName().equals(downloaderName))
+                .filter(d -> d.getUniqueId().equals(downloaderUniqueId))
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
@@ -267,10 +266,10 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, torrentWrappers));
     }
 
-    private void handleDownloaderStatus(@NotNull Context ctx, String downloaderName) {
+    private void handleDownloaderStatus(@NotNull Context ctx, String downloaderUniqueId) {
         String locale = locale(ctx);
         Optional<Downloader> selected = downloaderManager.stream()
-                .filter(d -> d.getName().equals(downloaderName))
+                .filter(d -> d.getUniqueId().equals(downloaderUniqueId))
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
