@@ -93,7 +93,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                     }
                     return peerMetadata.getPeer().getUploadSpeed() > 0;
                 })
-                .forEach(meta -> diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(), meta.getDownloader(), meta.getTorrent(), meta.getPeer()), MiscUtil.EMPTY_OBJECT));
+                .forEach(meta -> diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(), meta.getUniqueId(), meta.getTorrent(), meta.getPeer()), MiscUtil.EMPTY_OBJECT));
     }
 
     @Override
@@ -128,7 +128,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
             try {
                 if (downloader.login().success()) {
                     var stats = downloader.getStatistics();
-                    trafficJournalDao.updateData(downloader.getName(), stats.totalDownloaded(), stats.totalUploaded(), 0, 0);
+                    trafficJournalDao.updateData(downloader.getUniqueId(), stats.totalDownloaded(), stats.totalUploaded(), 0, 0);
                 }
             } catch (Throwable e) {
                 log.error("Unable to write hourly traffic journal to database", e);

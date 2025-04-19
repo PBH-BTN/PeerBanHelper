@@ -13,8 +13,8 @@ import org.jetbrains.annotations.Nullable;
 @Slf4j
 public final class QBittorrent extends AbstractQbittorrent {
 
-    public QBittorrent(String name, QBittorrentConfig config, AlertManager alertManager) {
-        super(name, config, alertManager);
+    public QBittorrent(String name, String uuid, QBittorrentConfig config, AlertManager alertManager) {
+        super(name, uuid, config, alertManager);
     }
 
     @Override
@@ -48,14 +48,14 @@ public final class QBittorrent extends AbstractQbittorrent {
 
     }
 
-    public static QBittorrent loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
+    public static QBittorrent loadFromConfig(String name, String uuid, JsonObject section, AlertManager alertManager) {
         QBittorrentConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentConfigImpl.class);
-        return new QBittorrent(name, config, alertManager);
+        return new QBittorrent(name, uuid, config, alertManager);
     }
 
-    public static QBittorrent loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
-        QBittorrentConfigImpl config = QBittorrentConfigImpl.readFromYaml(section);
-        return new QBittorrent(name, config, alertManager);
+    public static QBittorrent loadFromConfig(String name, String uuid, ConfigurationSection section, AlertManager alertManager) {
+        QBittorrentConfigImpl config = QBittorrentConfigImpl.readFromYaml(section, name);
+        return new QBittorrent(name, uuid, config, alertManager);
     }
 
     @Override

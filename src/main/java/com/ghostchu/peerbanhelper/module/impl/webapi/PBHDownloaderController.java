@@ -85,11 +85,9 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     private void handleDownloaderPut(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
-        if (name.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
-        }
+        String uuid = draftDownloader.get("uuid").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        Downloader downloader = downloaderManager.createDownloader(name, config);
+        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
@@ -101,6 +99,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         } else {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS), null));
+            return;
         }
         try {
             downloaderManager.saveDownloaders();
@@ -114,11 +113,9 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     private void handleDownloaderPatch(Context ctx, String downloaderName) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
         String name = draftDownloader.get("name").getAsString();
-        if (name.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
-        }
+        String uuid = draftDownloader.get("uuid").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        Downloader downloader = downloaderManager.createDownloader(name, config);
+        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATE_FAILURE), null));
@@ -126,7 +123,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
         // 可能重命名了？
         downloaderManager.stream()
-                .filter(d -> d.getName().equals(downloaderName))
+                .filter(d -> d.getUniqueId().equals(uuid))
                 .forEach(d -> downloaderManager.unregisterDownloader(d));
         if (downloaderManager.registerDownloader(downloader)) {
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATED), null));
@@ -155,7 +152,8 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 //            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_NAME_EXISTS));
 //            return;
 //        }
-        Downloader downloader = downloaderManager.createDownloader(name, config);
+        String uuid = draftDownloader.get("uuid").getAsString();
+        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
@@ -211,7 +209,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         List<PopulatedPeerDTO> peerWrappers = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::parallelStream)
-                .filter(p -> p.getDownloader().equals(downloader.getName()))
+                .filter(p -> p.getUniqueId().equals(downloader.getUniqueId()))
                 .filter(p -> p.getTorrent().getId().equals(torrentId))
                 .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
                 .map(dat -> populatePeerDTO(dat, ptr))
@@ -254,7 +252,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         List<TorrentWrapper> torrentWrappers = downloaderServer.getLivePeersSnapshot()
                 .values().stream()
                 .flatMap(Collection::stream)
-                .filter(p -> p.getDownloader().equals(downloader.getName()))
+                .filter(p -> p.getUniqueId().equals(downloader.getUniqueId()))
                 .map(PeerMetadata::getTorrent)
                 .distinct()
                 .sorted((o1, o2) -> {
@@ -284,13 +282,13 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         long activeTorrents = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::stream)
-                .filter(p -> p.getDownloader().equals(downloader.getName()))
+                .filter(p -> p.getUniqueId().equals(downloader.getUniqueId()))
                 .map(p -> p.getTorrent().getHash())
                 .distinct().count();
         long activePeers = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::stream)
-                .filter(p -> p.getDownloader().equals(downloader.getName()))
+                .filter(p -> p.getUniqueId().equals(downloader.getUniqueId()))
                 .count();
 
         JsonObject config = downloader.saveDownloaderJson();
@@ -299,7 +297,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     private void handleDownloaderList(@NotNull Context ctx) {
         List<DownloaderWrapper> downloaders = downloaderManager
-                .stream().map(d -> new DownloaderWrapper(d.getName(), d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))
+                .stream().map(d -> new DownloaderWrapper(d.getUniqueId(), d.getName(), d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))
                 .toList();
         ctx.json(new StdResp(true, null, downloaders));
     }
@@ -310,7 +308,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     }
 
-    record DraftDownloader(String name, JsonObject config) {
+    record DraftDownloader(String uuid, String name, JsonObject config) {
     }
 
     record DownloaderStatus(DownloaderLastStatus lastStatus, String lastStatusMessage,
@@ -319,6 +317,6 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     }
 
-    record DownloaderWrapper(String name, String endpoint, String type, boolean paused) {
+    record DownloaderWrapper(String uuid, String name, String endpoint, String type, boolean paused) {
     }
 }

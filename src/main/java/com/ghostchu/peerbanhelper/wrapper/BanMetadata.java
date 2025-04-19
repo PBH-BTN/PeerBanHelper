@@ -22,9 +22,9 @@ public class BanMetadata extends PeerMetadata implements Serializable {
     private TranslationComponent rule;
     private TranslationComponent description;
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
+    public BanMetadata(String context, String downloaderUniqueId, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
                        TranslationComponent description) {
-        super(downloader, torrent, peer);
+        super(downloaderUniqueId, torrent, peer);
         this.context = context;
         this.banAt = banAt;
         this.unbanAt = unbanAt;

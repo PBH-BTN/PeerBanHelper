@@ -21,7 +21,7 @@ public final class BakedBanMetadata implements Serializable {
     private String description;
 
     public BakedBanMetadata(String locale, BanMetadata banMetadata) {
-        this.downloader = banMetadata.getDownloader();
+        this.downloader = banMetadata.getUniqueId();
         this.torrent = banMetadata.getTorrent();
         this.peer = banMetadata.getPeer();
         this.reverseLookup = banMetadata.getReverseLookup();

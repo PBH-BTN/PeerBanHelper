@@ -82,7 +82,7 @@ public class SwarmTrackingModule extends AbstractFeatureModule implements Monito
                             peer.getPeerAddress().getAddress().toNormalizedString(),
                             peer.getPeerAddress().getPort(),
                             torrent.getHash(),
-                            downloader.getName(),
+                            downloader.getUniqueId(),
                             torrent.getProgress(),
                             peer.getPeerId(),
                             peer.getClientName(),

@@ -61,8 +61,8 @@ public final class BitComet extends AbstractDownloader {
     private Semver serverVersion;
     private String serverName;
 
-    public BitComet(String name, Config config, AlertManager alertManager) {
-        super(name, alertManager);
+    public BitComet(String name, String uuid, Config config, AlertManager alertManager) {
+        super(name, uuid, alertManager);
         BCAESTool.init();
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
@@ -83,14 +83,14 @@ public final class BitComet extends AbstractDownloader {
         this.httpClient = builder.build();
     }
 
-    public static BitComet loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section);
-        return new BitComet(name, config, alertManager);
+    public static BitComet loadFromConfig(String name, String uuid, ConfigurationSection section, AlertManager alertManager) {
+        Config config = Config.readFromYaml(section, name);
+        return new BitComet(name, uuid, config, alertManager);
     }
 
-    public static BitComet loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
+    public static BitComet loadFromConfig(String name, String uuid, JsonObject section, AlertManager alertManager) {
         Config config = JsonUtil.getGson().fromJson(section, Config.class);
-        return new BitComet(name, config, alertManager);
+        return new BitComet(name, uuid, config, alertManager);
     }
 
     private static PeerAddress parseAddress(String address, int port, int listenPort) {
@@ -550,7 +550,7 @@ public final class BitComet extends AbstractDownloader {
     @NoArgsConstructor
     @Data
     public static class Config {
-
+        private String name;
         private String type;
         private String endpoint;
         private String username;
@@ -561,9 +561,10 @@ public final class BitComet extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
-        public static Config readFromYaml(ConfigurationSection section) {
+        public static Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Config config = new Config();
             config.setType("bitcomet");
+            config.setName(section.getString("name", alternativeName));
             config.setEndpoint(section.getString("endpoint"));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
@@ -581,6 +582,7 @@ public final class BitComet extends AbstractDownloader {
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "bitcomet");
+            section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("username", username);
             section.set("password", password);

@@ -258,7 +258,7 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
                                         if (detail.banDuration() > 0) {
                                             actualBanDuration = detail.banDuration();
                                         }
-                                        BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloader.getName(),
+                                        BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloader.getUniqueId(),
                                                 System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                                 detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                         bannedPeers.add(banMetadata);
@@ -368,7 +368,7 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
                                     PeerAddress address = p.getPeerAddress();
                                     List<PeerMetadata> data = livePeers.getOrDefault(address, new ArrayList<>());
                                     PeerMetadata metadata = new PeerMetadata(
-                                            downloader.getName(),
+                                            downloader.getUniqueId(),
                                             torrent, p);
                                     data.add(metadata);
                                     livePeers.put(address, data);
@@ -498,10 +498,10 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
         var node = ignoreAddresses.elementsContaining(peer.getPeerAddress().getAddress());
         if (node != null) {
             if (isPeerHavePossibleBadNatConfig(peer)) {
-                if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getName())) {
-                    alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getName(),
+                if (!alertManager.identifierAlertExistsIncludeRead("downloader-nat-setup-error@" + downloader.getUniqueId())) {
+                    alertManager.publishAlert(true, AlertLevel.ERROR, "downloader-nat-setup-error@" + downloader.getUniqueId(),
                             new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE),
-                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getName(), peer.getPeerAddress().getAddress().toNormalizedString()));
+                            new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getUniqueId(), peer.getPeerAddress().getAddress().toNormalizedString()));
                 }
             }
             return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
@@ -635,7 +635,7 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
     }
 
     public void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
-        Downloader downloader = downloaderManager.stream().filter(d -> d.getName().equals(banMetadata.getDownloader()))
+        Downloader downloader = downloaderManager.stream().filter(d -> d.getUniqueId().equals(banMetadata.getUniqueId()))
                 .findFirst().orElseThrow();
         banPeer(BAN_LIST.keySet(), banMetadata, torrent, peer);
         scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(

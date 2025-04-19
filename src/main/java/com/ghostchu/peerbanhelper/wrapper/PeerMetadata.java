@@ -10,19 +10,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PeerMetadata {
-    private String downloader;
+    private String uniqueId;
     private TorrentWrapper torrent;
     private PeerWrapper peer;
     private String reverseLookup = "N/A";
 
-    public PeerMetadata(String downloader, Torrent torrent, Peer peer) {
-        this.downloader = downloader;
+    public PeerMetadata(String uniqueId, Torrent torrent, Peer peer) {
+        this.uniqueId = uniqueId;
         this.torrent = new com.ghostchu.peerbanhelper.wrapper.TorrentWrapper(torrent);
         this.peer = new com.ghostchu.peerbanhelper.wrapper.PeerWrapper(peer);
     }
 
-    public PeerMetadata(String downloader, TorrentWrapper torrent, PeerWrapper peer) {
-        this.downloader = downloader;
+    public PeerMetadata(String uniqueId, TorrentWrapper torrent, PeerWrapper peer) {
+        this.uniqueId = uniqueId;
         this.torrent = torrent;
         this.peer = peer;
     }

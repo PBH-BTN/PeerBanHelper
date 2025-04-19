@@ -43,8 +43,8 @@ public final class Transmission extends AbstractDownloader {
     private final String blocklistUrl;
     private final Config config;
 
-    public Transmission(String name, String blocklistUrl, Config config, AlertManager alertManager) {
-        super(name, alertManager);
+    public Transmission(String name, String uuid, String blocklistUrl, Config config, AlertManager alertManager) {
+        super(name, uuid, alertManager);
         this.config = config;
         this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
@@ -55,14 +55,14 @@ public final class Transmission extends AbstractDownloader {
         return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
-    public static Transmission loadFromConfig(String name, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section);
-        return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config, alertManager);
+    public static Transmission loadFromConfig(String name, String uuid, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager) {
+        Config config = Config.readFromYaml(section, name);
+        return new Transmission(name, uuid, generateBlocklistUrl(pbhServerAddress), config, alertManager);
     }
 
-    public static Transmission loadFromConfig(String name, String pbhServerAddress, JsonObject section, AlertManager alertManager) {
+    public static Transmission loadFromConfig(String name, String uuid, String pbhServerAddress, JsonObject section, AlertManager alertManager) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
-        return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config, alertManager);
+        return new Transmission(name, uuid, generateBlocklistUrl(pbhServerAddress), config, alertManager);
     }
 
     @Override
@@ -337,7 +337,7 @@ public final class Transmission extends AbstractDownloader {
     @NoArgsConstructor
     @Data
     public static class Config {
-
+        private String name;
         private String type;
         private String endpoint;
         private String username;
@@ -348,9 +348,10 @@ public final class Transmission extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
-        public static Transmission.Config readFromYaml(ConfigurationSection section) {
+        public static Transmission.Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Transmission.Config config = new Transmission.Config();
             config.setType("transmission");
+            config.setName(section.getString("name", alternativeName));
             config.setEndpoint(section.getString("endpoint"));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
@@ -368,6 +369,7 @@ public final class Transmission extends AbstractDownloader {
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "transmission");
+            section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("username", username);
             section.set("password", password);

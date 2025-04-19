@@ -33,8 +33,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class QBittorrentEE extends AbstractQbittorrent {
     private final BanHandler banHandler;
 
-    public QBittorrentEE(String name, QBittorrentEEConfigImpl config, AlertManager alertManager) {
-        super(name, config, alertManager);
+    public QBittorrentEE(String name, String uuid, QBittorrentEEConfigImpl config, AlertManager alertManager) {
+        super(name, uuid, config, alertManager);
         if (config.isUseShadowBan()) {
             this.banHandler = new BanHandlerShadowBan(httpClient, name, apiEndpoint);
         } else {
@@ -55,14 +55,14 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
     }
 
-    public static QBittorrentEE loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
+    public static QBittorrentEE loadFromConfig(String name, String uuid, JsonObject section, AlertManager alertManager) {
         QBittorrentEEConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentEEConfigImpl.class);
-        return new QBittorrentEE(name, config, alertManager);
+        return new QBittorrentEE(name, uuid, config, alertManager);
     }
 
-    public static QBittorrentEE loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
-        QBittorrentEEConfigImpl config = QBittorrentEEConfigImpl.readFromYaml(section);
-        return new QBittorrentEE(name, config, alertManager);
+    public static QBittorrentEE loadFromConfig(String name, String uuid, ConfigurationSection section, AlertManager alertManager) {
+        QBittorrentEEConfigImpl config = QBittorrentEEConfigImpl.readFromYaml(section, name);
+        return new QBittorrentEE(name, uuid, config, alertManager);
     }
 
     public DownloaderLoginResult login0() {

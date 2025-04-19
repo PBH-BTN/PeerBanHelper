@@ -59,8 +59,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected final QBittorrentConfig config;
     protected final Cache<String, TorrentProperties> torrentPropertiesCache;
 
-    public AbstractQbittorrent(String name, QBittorrentConfig config, AlertManager alertManager) {
-        super(name, alertManager);
+    public AbstractQbittorrent(String name, String uuid, QBittorrentConfig config, AlertManager alertManager) {
+        super(name, uuid, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
         CookieManager cm = new CookieManager();

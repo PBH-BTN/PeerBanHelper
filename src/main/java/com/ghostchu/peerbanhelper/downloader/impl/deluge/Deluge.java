@@ -49,21 +49,21 @@ public final class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String name, Config config, AlertManager alertManager) {
-        super(name, alertManager);
+    public Deluge(String name, String uuid, Config config, AlertManager alertManager) {
+        super(name, uuid, alertManager);
         this.name = name;
         this.config = config;
         this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
     }
 
-    public static Deluge loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section);
-        return new Deluge(name, config, alertManager);
+    public static Deluge loadFromConfig(String name, String uuid, ConfigurationSection section, AlertManager alertManager) {
+        Config config = Config.readFromYaml(section, name);
+        return new Deluge(name, uuid, config, alertManager);
     }
 
-    public static Deluge loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
+    public static Deluge loadFromConfig(String name, String uuid, JsonObject section, AlertManager alertManager) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(name, config, alertManager);
+        return new Deluge(name, uuid, config, alertManager);
     }
 
     @Override
@@ -283,7 +283,7 @@ public final class Deluge extends AbstractDownloader {
     @NoArgsConstructor
     @Data
     public static class Config {
-
+        private String name;
         private String type;
         private String endpoint;
         private String password;
@@ -294,9 +294,10 @@ public final class Deluge extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
-        public static Config readFromYaml(ConfigurationSection section) {
+        public static Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Config config = new Config();
             config.setType("deluge");
+            config.setName(section.getString("name", alternativeName));
             config.setEndpoint(section.getString("endpoint", ""));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
@@ -314,6 +315,7 @@ public final class Deluge extends AbstractDownloader {
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "deluge");
+            section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("password", password);
             section.set("rpc-url", rpcUrl);

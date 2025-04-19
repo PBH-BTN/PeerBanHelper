@@ -62,8 +62,8 @@ public final class BiglyBT extends AbstractDownloader {
     private final String connectorPayload;
     private Semver semver = new Semver("0.0.0");
 
-    public BiglyBT(String name, Config config, AlertManager alertManager) {
-        super(name, alertManager);
+    public BiglyBT(String name, String uuid, Config config, AlertManager alertManager) {
+        super(name, uuid, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
@@ -85,14 +85,14 @@ public final class BiglyBT extends AbstractDownloader {
         this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
     }
 
-    public static BiglyBT loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
+    public static BiglyBT loadFromConfig(String name, String uuid, JsonObject section, AlertManager alertManager) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new BiglyBT(name, config, alertManager);
+        return new BiglyBT(name, uuid, config, alertManager);
     }
 
-    public static BiglyBT loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section);
-        return new BiglyBT(name, config, alertManager);
+    public static BiglyBT loadFromConfig(String name, String uuid, ConfigurationSection section, AlertManager alertManager) {
+        Config config = Config.readFromYaml(section, name);
+        return new BiglyBT(name, uuid, config, alertManager);
     }
 
     @Override
@@ -392,7 +392,7 @@ public final class BiglyBT extends AbstractDownloader {
     @NoArgsConstructor
     @Data
     public static class Config {
-
+        private String name;
         private String type;
         private String endpoint;
         private String token;
@@ -402,13 +402,14 @@ public final class BiglyBT extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
-        public static Config readFromYaml(ConfigurationSection section) {
+        public static Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Config config = new Config();
             config.setType("biglybt");
             config.setEndpoint(section.getString("endpoint"));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
             }
+            config.setName(section.getString("name", alternativeName));
             config.setToken(section.getString("token", ""));
             config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
@@ -421,6 +422,7 @@ public final class BiglyBT extends AbstractDownloader {
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "biglybt");
+            section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("token", token);
             section.set("http-version", httpVersion);

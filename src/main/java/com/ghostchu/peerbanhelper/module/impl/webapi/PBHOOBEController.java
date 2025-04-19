@@ -78,7 +78,8 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             throw new IllegalArgumentException("Illegal character (.) in name: " + name);
         }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        Downloader downloader = downloaderManager.createDownloader(name, config);
+        String uuid = draftDownloader.get("uuid").getAsString();
+        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
         if (downloaderManager.registerDownloader(downloader)) {
             ctx.status(HttpStatus.CREATED);
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_CREATED), null));
@@ -112,7 +113,8 @@ public final class PBHOOBEController extends AbstractFeatureModule {
 //            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_NAME_EXISTS));
 //            return;
 //        }
-        Downloader downloader = downloaderManager.createDownloader(name, config);
+        String uuid = draftDownloader.get("uuid").getAsString();
+        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));

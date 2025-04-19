@@ -68,7 +68,7 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
         }
         AtomicInteger count = new AtomicInteger(0);
         for (Downloader downloader : downloaderManager.getDownloaders()) {
-            if (dto.downloaders() != null && !dto.downloaders().isEmpty() && !dto.downloaders().contains(downloader.getName())) {
+            if (dto.downloaders() != null && !dto.downloaders().isEmpty() && !dto.downloaders().contains(downloader.getUniqueId())) {
                 continue;
             }
             if (downloader.login().success()) {

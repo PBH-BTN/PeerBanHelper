@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.config;
 import com.ghostchu.peerbanhelper.Main;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
 import java.io.File;
@@ -28,6 +29,22 @@ public final class MainConfigUpdateScript {
 //            conf.set("server.token", UUID.randomUUID().toString());
 //            log.info(tlUI(Lang.TOO_WEAK_TOKEN));
 //        }
+    }
+
+    @UpdateScript(version = 32)
+    public void assignUniqueIdForDownloader() {
+        var clients = conf.getConfigurationSection("client");
+        if (clients == null) return;
+        var newClients = new MemoryConfiguration();
+        for (String name : clients.getKeys(false)) {
+            String uuid = UUID.randomUUID().toString();
+            ConfigurationSection oldSection = clients.getConfigurationSection(name);
+            if (oldSection == null) continue;
+            oldSection.set("name", name);
+            newClients.set(uuid, oldSection);
+            log.info("[Client UniqueId Assign] {} -> {}", name, uuid);
+        }
+        conf.set("client", newClients);
     }
 
     @UpdateScript(version = 31)
