@@ -17,6 +17,7 @@ import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.google.common.net.HostAndPort;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +80,8 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
         activeMonitoringModule.flush();
-        var ipAddress = IPAddressUtil.getIPAddress(ctx.pathParam("ip"));
+        HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
+        var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
         String ip = ipAddress.toNormalizedString();
         long banCount = historyDao.queryBuilder()
                 .where()

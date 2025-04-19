@@ -92,6 +92,16 @@ public final class DatabaseHelper {
             }
             v = 9;
         }
+        if (v == 9) {
+            try {
+                // add new column: privateTorrent, nullable
+                var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
+                historyDao.executeRaw("ALTER TABLE " + historyDao.getTableName() + " ADD COLUMN downloadProgress DOUBLE NULL");
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 10;
+        }
         version.setValue(String.valueOf(v));
         metadata.update(version);
     }
