@@ -26,6 +26,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import raccoonfink.deluge.DelugeException;
 import raccoonfink.deluge.DelugeServer;
+import raccoonfink.deluge.requests.ConfigRequest;
+import raccoonfink.deluge.responses.ConfigResponse;
 import raccoonfink.deluge.responses.DelugeListMethodsResponse;
 import raccoonfink.deluge.responses.PBHActiveTorrentsResponse;
 import raccoonfink.deluge.responses.PBHStatisticsResponse;
@@ -227,6 +229,15 @@ public final class Deluge extends AbstractDownloader {
      */
     @Override
     public @Nullable DownloaderSpeedLimiter getSpeedLimiter() {
+        try {
+            ConfigResponse resp = this.client.getConfig();
+            var dto = resp.getConfig();
+            long downloadLimit = dto.getMaxDownloadSpeed() * 1024; // Deluge 接口的单位是 KB/s
+            long uploadLimit = dto.getMaxUploadSpeed() * 1024;
+            return new DownloaderSpeedLimiter(uploadLimit, downloadLimit);
+        } catch (DelugeException e) {
+            log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
+        }
         return null;
     }
 
@@ -237,7 +248,17 @@ public final class Deluge extends AbstractDownloader {
      */
     @Override
     public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+        long uploadLimit = speedLimiter.upload() / 1024;
+        long downloadLimit = speedLimiter.download() / 1024;
+        var config = new ConfigRequest();
+        config.setMaxDownloadSpeed(downloadLimit);
+        config.setMaxUploadSpeed(uploadLimit);
 
+        try {
+            this.client.setConfig(config);
+        } catch (DelugeException e) {
+            log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
+        }
     }
 
     @Override
