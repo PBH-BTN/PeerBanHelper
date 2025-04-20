@@ -189,7 +189,7 @@ public final class TextManager implements Reloadable {
             return true;
         }
 
-        log.info("Loading language on demand: {}", locale);
+        log.debug("Loading language on demand: {}", locale);
         boolean loaded = false;
 
         // 尝试加载内置语言
