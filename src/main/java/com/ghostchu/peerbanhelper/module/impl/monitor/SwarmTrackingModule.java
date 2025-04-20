@@ -89,8 +89,10 @@ public class SwarmTrackingModule extends AbstractFeatureModule implements Monito
                             peer.getProgress(),
                             peer.getUploaded(),
                             -1L,
+                            peer.getUploadSpeed(),
                             peer.getDownloaded(),
                             -1L,
+                            peer.getDownloadSpeed(),
                             peer.getFlags() == null ? "" : peer.getFlags().getLtStdString(),
                             new Timestamp(System.currentTimeMillis()),
                             new Timestamp(System.currentTimeMillis())

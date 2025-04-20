@@ -36,9 +36,13 @@ public final class TrackedSwarmEntity { // 需要创建为临时表
     @DatabaseField(canBeNull = false)
     private long uploadedOffset;
     @DatabaseField(canBeNull = false)
+    private long uploadSpeed;
+    @DatabaseField(canBeNull = false)
     private long downloaded;
     @DatabaseField(canBeNull = false)
     private long downloadedOffset;
+    @DatabaseField(canBeNull = false)
+    private long downloadSpeed;
     @DatabaseField
     private String lastFlags;
     @DatabaseField(canBeNull = false)
