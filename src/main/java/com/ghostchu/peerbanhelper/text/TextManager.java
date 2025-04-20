@@ -223,7 +223,7 @@ public final class TextManager implements Reloadable {
     @SneakyThrows
     private Map<String, YamlConfiguration> loadBundled() {
         Map<String, YamlConfiguration> availableLang = new HashMap<>();
-        URL url = Main.class.getClassLoader().getResource("");
+        URL url = Main.class.getClassLoader().getResource("messages_fallback.yml");
         if (url == null) {
             return availableLang;
         }
