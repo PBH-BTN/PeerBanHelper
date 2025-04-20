@@ -34,13 +34,18 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
 
     public DownloaderManager() {
         Main.getReloadManager().register(this);
+        load();
     }
 
     @Override
     public ReloadResult reloadModule() throws Exception {
+        load();
+        return new ReloadResult(ReloadStatus.SUCCESS, "SUCCESS", null);
+    }
+
+    private void load() {
         close();
         loadDownloaders();
-        return new ReloadResult(ReloadStatus.SUCCESS, "SUCCESS", null);
     }
 
     public void loadDownloaders() {

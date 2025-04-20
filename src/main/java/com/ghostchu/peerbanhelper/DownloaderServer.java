@@ -102,10 +102,16 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
         this.databaseManager = databaseManager;
         Main.getReloadManager().register(this);
         loadBanListToMemory();
+        load();
     }
 
     @Override
     public ReloadResult reloadModule() throws Exception {
+        load();
+        return Reloadable.super.reloadModule();
+    }
+
+    private void load() {
         this.banDuration = Main.getProfileConfig().getLong("ban-duration");
         this.hideFinishLogs = Main.getMainConfig().getBoolean("logger.hide-finish-log");
         Main.getProfileConfig().getStringList("ignore-peers-from-addresses").forEach(ip -> {
@@ -113,10 +119,8 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
             ignoreAddresses.add(ignored);
         });
         reApplyBanListForDownloaders();
-        registerTimer();
         unbanWhitelistedPeers();
         registerTimer();
-        return Reloadable.super.reloadModule();
     }
 
 
