@@ -92,7 +92,7 @@ public final class DatabaseHelper {
             }
             v = 9;
         }
-        if (v == 9) {
+        if (v <= 10) {
             try {
                 // add new column: privateTorrent, nullable
                 var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
@@ -100,7 +100,7 @@ public final class DatabaseHelper {
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
             }
-            v = 10;
+            v = 11;
         }
         version.setValue(String.valueOf(v));
         metadata.update(version);
