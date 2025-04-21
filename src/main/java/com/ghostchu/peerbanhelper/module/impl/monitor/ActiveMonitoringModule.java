@@ -1,25 +1,28 @@
-package com.ghostchu.peerbanhelper.module.impl.rule;
+package com.ghostchu.peerbanhelper.module.impl.monitor;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
-import com.ghostchu.peerbanhelper.event.LivePeersUpdatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
+import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.eventbus.Subscribe;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -28,8 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -37,7 +40,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 @IgnoreScan
-public final class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable {
+public final class ActiveMonitoringModule extends AbstractFeatureModule implements Reloadable, MonitorFeatureModule {
     @Autowired
     private PeerRecordDao peerRecordDao;
     private final Deque<PeerRecordDao.BatchHandleTasks> dataBuffer = new ConcurrentLinkedDeque<>();
@@ -73,34 +76,10 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         return "active-monitoring";
     }
 
-    @Subscribe
-    private void onLivePeerSnapshotEvent(LivePeersUpdatedEvent event) {
-        event.getLivePeers().values().stream().flatMap(Collection::stream)
-                .filter(peerMetadata -> {
-                    var clientName = peerMetadata.getPeer().getClientName();
-                    var peerId = peerMetadata.getPeer().getId();
-                    if (clientName != null && !clientName.isBlank()) {
-                        return true;
-                    }
-                    if (peerId != null && !peerId.isBlank()) {
-                        return true;
-                    }
-                    if (peerMetadata.getPeer().getProgress() > 0) {
-                        return true;
-                    }
-                    if (peerMetadata.getPeer().getDownloadSpeed() > 0) {
-                        return true;
-                    }
-                    return peerMetadata.getPeer().getUploadSpeed() > 0;
-                })
-                .forEach(meta -> diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(), meta.getUniqueId(), meta.getTorrent(), meta.getPeer()), MiscUtil.EMPTY_OBJECT));
-    }
-
     @Override
     public void onEnable() {
         reloadConfig();
         this.taskWriteService = new ThreadPoolExecutor(1, 2, 60L, TimeUnit.SECONDS, taskWriteQueue);
-        Main.getEventBus().register(this);
         Main.getReloadManager().register(this);
     }
 
@@ -214,4 +193,22 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         Main.getReloadManager().unregister(this);
     }
 
+    @Override
+    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull ExecutorService ruleExecuteExecutor) {
+        peers.stream().filter(peer -> {
+                    var clientName = peer.getClientName();
+                    var peerId = peer.getPeerId();
+                    if (clientName != null && !clientName.isBlank()) {
+                        return true;
+                    }
+                    if (peerId != null && !peerId.isBlank()) {
+                        return true;
+                    }
+                    return !peer.isHandshaking();
+                })
+                .forEach(peer ->
+                        diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(),
+                                        downloader.getUniqueId(), new TorrentWrapper(torrent), new PeerWrapper(peer)),
+                                MiscUtil.EMPTY_OBJECT));
+    }
 }
