@@ -245,7 +245,9 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             log.error("Unhandled exception during load cached record data", e);
         }
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
-        ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
+        ClientTask clientTask = lastRecordedProgress.stream()
+                .filter(task -> task.getPeerIp().equals(peerIpString) && downloader.getUniqueId().equals(task.getDownloader()))
+                .findFirst().orElse(null);
         if (clientTask == null) {
             clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getUniqueId(), 0L, 0L);
             lastRecordedProgress.add(clientTask);
