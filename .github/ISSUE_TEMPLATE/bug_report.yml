@@ -82,8 +82,8 @@ body:
     attributes:
       label: "下载器版本号 - Downloader Version"
       description: |-
-        Enter the PBH version that display on WebUI footer or GUI window title.  
-        输入您正在使用 PeerBanHelper 的版本号，通常可在窗口标题或者 WebUI 页面的底部找到
+        Enter the **downloader** version (e.g. qBittorrent 4.6.3)。
+        输入**下载器**版本号，例如 qBittorrent 4.6.3
       placeholder: "vX.X.X"
     validations:
       required: true
