@@ -57,7 +57,11 @@ PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P �
 在报告问题前，请先检查 [常见问题列表](https://docs.pbh-btn.com/docs/faq)
 
 ## 需要帮助？
-考虑加入我们的[QQ群](https://qm.qq.com/cgi-bin/qm/qr?k=w5as_wH2G1ReUrClreCYhR69XiNCuP65&jump_from=webapi&authKey=EyjMX7Pwc77XLM51V6FEcR7oXnG8fsUbSFqYZ4PPiEpq32vBglJn/jFvpc3LFDhn)！
+考虑加入我们的 QQ 群！
+
+1 群：932978658（已满）  
+2 群：1011722516（已满）  
+3 群：901081269
 
 ## 声明
 

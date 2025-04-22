@@ -18,10 +18,10 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
 
@@ -29,11 +29,12 @@ import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
 public final class TextManager implements Reloadable {
     public static TextManager INSTANCE_HOLDER = new TextManager();
     public final Set<PostProcessor> postProcessors = new LinkedHashSet<>();
-    // <File <Locale, Section>>
     private final LanguageFilesManager languageFilesManager = new LanguageFilesManager();
     private final Set<String> availableLanguages = new LinkedHashSet<>();
+    private final Set<String> loadedLanguages = ConcurrentHashMap.newKeySet();
     private final File langDirectory;
     private final File overrideDirectory;
+    private final YamlConfiguration fallbackConfig;
 
     public TextManager() {
         this.langDirectory = new File(Main.getDataDirectory(), "lang");
@@ -44,7 +45,8 @@ public final class TextManager implements Reloadable {
         if (!this.overrideDirectory.exists()) {
             this.overrideDirectory.mkdirs();
         }
-        load();
+        this.fallbackConfig = loadBuiltInFallback();
+        initializeBasic();
         Main.getReloadManager().register(this);
     }
 
@@ -55,9 +57,6 @@ public final class TextManager implements Reloadable {
     public static String tlUI(TranslationComponent translationComponent) {
         return tl(DEF_LOCALE, translationComponent);
     }
-//    public static String tlUI(String key, Object... params) {
-//        return tl(DEF_LOCALE, new TranslationComponent(key, INSTANCE_HOLDER.convert(params)));
-//    }
 
     public static String tl(String locale, Lang key, Object... params) {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
@@ -66,6 +65,12 @@ public final class TextManager implements Reloadable {
 
     public static String tl(String locale, TranslationComponent translationComponent) {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
+
+        // 按需加载语言文件
+        if (!INSTANCE_HOLDER.loadedLanguages.contains(locale)) {
+            INSTANCE_HOLDER.loadLanguage(locale);
+        }
+
         YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
         if (yamlConfiguration == null) {
             yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("en_us");
@@ -107,84 +112,136 @@ public final class TextManager implements Reloadable {
                 components[i] = "null";
                 continue;
             }
-            //     Class<?> clazz = data.getClass();
-            // Check
 
             try {
                 if (obj instanceof TranslationComponent translationComponent) {
                     components[i] = tl(locale, translationComponent);
                     continue;
                 }
-//                if (obj instanceof Map map) { // 简单修复 GSON 嵌套反序列化问题
-//                    components[i] = tl(locale, JsonUtil.standard().fromJson(JsonUtil.standard().toJsonTree(map), TranslationComponent.class));
-//                    continue;
-//                }
                 components[i] = obj.toString();
 
             } catch (Exception exception) {
                 log.debug("Failed to process the object: {}", obj);
                 components[i] = String.valueOf(obj); // null safe
             }
-            // undefined
-
         }
         return components;
     }
 
     /**
-     * Loading Crowdin OTA module and i18n system
+     * 初始化基本的语言系统
      */
-    public void load() {
-        log.info("Loading up translations, this may take a while...");
-        //TODO: This will break the message processing system in-game until loading finished, need to fix it.
+    private void initializeBasic() {
+        log.info("Initializing translation system...");
         this.reset();
-        // first, we need load built-in fallback translation.
-        languageFilesManager.deploy("en_us", loadBuiltInFallback());
-        // second, load the bundled language files
-        loadBundled().forEach(languageFilesManager::deploy);
-        // then, load the translations from Crowdin
-        // finally, load override translations
-        Collection<String> pending = getOverrideLocales(languageFilesManager.getDistributions().keySet());
-        log.debug("Pending: {}", Arrays.toString(pending.toArray()));
-        pending.forEach(locale -> {
-            locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
-            File file = getOverrideLocaleFile(locale);
-            if (file.exists()) {
-                YamlConfiguration configuration = new YamlConfiguration();
-                try {
-                    configuration.loadFromString(Files.readString(file.toPath(), StandardCharsets.UTF_8));
-                    languageFilesManager.deploy(locale, configuration);
-                } catch (InvalidConfigurationException | IOException e) {
-                    log.warn("Failed to override translation for {}.", locale, e);
-                }
 
-            } else {
-                log.debug("Override not applied: File {} not exists.", file.getAbsolutePath());
-            }
-        });
+        // 只加载默认语言(en_us)作为回退
+        languageFilesManager.deploy("zh_cn", fallbackConfig);
+        loadedLanguages.add("zh_cn");
 
-        // Remove disabled locales
-        //List<String> enabledLanguagesRegex = .getStringList("enabled-languages");
-        //enabledLanguagesRegex.replaceAll(s -> s.toLowerCase(Locale.ROOT));
-//        Iterator<String> it = pending.iterator();
-//        while (it.hasNext()) {
-//            String locale = it.next();
-//            if (!localeEnabled(locale, enabledLanguagesRegex)) {
-//                this.languageFilesManager.destroy(locale);
-//                it.remove();
-//            }
-//        }
-        if (pending.isEmpty()) {
-            log.warn("Warning! You must enable at least one language! Forcing enable build-in en_us...");
-            pending.add("en_us");
-            this.languageFilesManager.deploy("en_us", loadBuiltInFallback());
-        }
-        this.languageFilesManager.fillMissing( loadBuiltInFallback());
-        // Remember all available languages
-        availableLanguages.addAll(pending);
+        // 扫描并记录可用的语言，但不加载它们
+        scanAvailableLanguages();
 
-        // Register post processor
+        // 注册后处理器
         postProcessors.add(new FillerProcessor());
+
+        log.info("Translation system initialized with {} available languages", availableLanguages.size());
+    }
+
+    /**
+     * 扫描可用的语言列表，但不加载它们
+     */
+    private void scanAvailableLanguages() {
+        // 扫描内置语言
+        try {
+            PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
+            Resource[] resources = resourcePatternResolver.getResources("classpath:lang/**/*.yml");
+            for (Resource res : resources) {
+                String langName = URLUtil.getParentName(res.getURI());
+                availableLanguages.add(langName.toLowerCase(Locale.ROOT));
+            }
+        } catch (IOException e) {
+            log.warn("Failed to scan bundled translations", e);
+        }
+
+        // 扫描覆盖语言
+        File[] files = overrideDirectory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    availableLanguages.add(file.getName().toLowerCase(Locale.ROOT));
+                }
+            }
+        }
+    }
+
+    /**
+     * 按需加载特定语言
+     *
+     * @param locale 要加载的语言代码
+     * @return 是否成功加载
+     */
+    public synchronized boolean loadLanguage(String locale) {
+        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
+
+        // 如果已加载，直接返回
+        if (loadedLanguages.contains(locale)) {
+            return true;
+        }
+
+        log.info("Loading language on demand: {}", locale);
+        boolean loaded = false;
+
+        // 尝试加载内置语言
+        try {
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
+            Resource[] resources = resolver.getResources("classpath:lang/" + locale + "/*.yml");
+            for (Resource res : resources) {
+                try {
+                    YamlConfiguration config = new YamlConfiguration();
+                    config.loadFromString(new String(res.getContentAsByteArray(), StandardCharsets.UTF_8));
+                    languageFilesManager.deploy(locale, config);
+                    loaded = true;
+                } catch (IOException | InvalidConfigurationException e) {
+                    log.warn("Failed to load bundled translation for {}", locale, e);
+                }
+            }
+        } catch (IOException e) {
+            log.debug("No bundled translations found for {}", locale);
+        }
+
+        // 尝试加载覆盖语言
+        File overrideFile = getOverrideLocaleFile(locale);
+        if (overrideFile.exists()) {
+            try {
+                YamlConfiguration config = new YamlConfiguration();
+                config.loadFromString(Files.readString(overrideFile.toPath(), StandardCharsets.UTF_8));
+                languageFilesManager.deploy(locale, config);
+                loaded = true;
+            } catch (InvalidConfigurationException | IOException e) {
+                log.warn("Failed to load override translation for {}", locale, e);
+            }
+        }
+
+        // 如果加载成功，应用回退并添加到已加载集合
+        if (loaded) {
+            YamlConfiguration langConfig = languageFilesManager.getDistribution(locale);
+            if (langConfig != null) {
+                // 确保所有缺失的键都从回退中填充
+                for (String key : fallbackConfig.getKeys(true)) {
+                    if (!fallbackConfig.isConfigurationSection(key) && !langConfig.isSet(key)) {
+                        langConfig.set(key, fallbackConfig.get(key));
+                    }
+                }
+                loadedLanguages.add(locale);
+            }
+        } else if (!"en_us".equals(locale)) {
+            // 如果无法加载请求的语言，使用回退语言
+            log.warn("Failed to load language {}, using fallback", locale);
+            return false;
+        }
+
+        return loaded;
     }
 
     /**
@@ -194,6 +251,7 @@ public final class TextManager implements Reloadable {
         languageFilesManager.reset();
         postProcessors.clear();
         availableLanguages.clear();
+        loadedLanguages.clear();
     }
 
     @NotNull
@@ -214,75 +272,6 @@ public final class TextManager implements Reloadable {
         }
     }
 
-    /**
-     * Loading translations from bundled resources
-     *
-     * @return The bundled translations, empty hash map if nothing can be load.
-     */
-    @NotNull
-    @SneakyThrows
-    private Map<String, YamlConfiguration> loadBundled() {
-        Map<String, YamlConfiguration> availableLang = new HashMap<>();
-        URL url = Main.class.getClassLoader().getResource("");
-        if (url == null) {
-            return availableLang;
-        }
-        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(Main.class.getClassLoader());
-        var res = resourcePatternResolver.getResources("classpath:lang/**/*.yml");
-        for (Resource re : res) {
-            String langName = URLUtil.getParentName(re.getURI());
-            try {
-                YamlConfiguration configuration = new YamlConfiguration();
-                configuration.loadFromString(new String(re.getContentAsByteArray(), StandardCharsets.UTF_8));
-                availableLang.put(langName.toLowerCase(Locale.ROOT), configuration);
-            } catch (IOException | InvalidConfigurationException e) {
-                log.warn("Failed to load bundled translation.", e);
-            }
-        }
-        return availableLang;
-    }
-
-    /**
-     * Generate the override files storage path
-     *
-     * @param pool The language codes you already own.
-     * @return The pool copy with new added language codes.
-     */
-    @SneakyThrows(IOException.class)
-    @NotNull
-    protected Collection<String> getOverrideLocales(@NotNull Collection<String> pool) {
-        // create the pool overrides placeholder directories
-        pool.forEach(single -> {
-            File f = new File(overrideDirectory, single);
-            if (!f.exists()) {
-                f.mkdirs();
-            }
-        });
-        //
-        File[] files = overrideDirectory.listFiles();
-        if (files == null) {
-            return pool;
-        }
-        List<String> newPool = new ArrayList<>(pool);
-        for (File file : files) {
-            if (file.isDirectory()) {
-                // custom language
-                newPool.add(file.getName());
-                // create the paired file
-                File localeFile = new File(file, "messages_fallback.yml");
-                if (!localeFile.exists()) {
-                    localeFile.getParentFile().mkdirs();
-                    localeFile.createNewFile();
-                } else {
-                    if (localeFile.isDirectory()) {
-                        localeFile.delete();
-                    }
-                }
-            }
-        }
-        return newPool;
-    }
-
     @NotNull
     private File getOverrideLocaleFile(@NotNull String locale) {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
@@ -299,40 +288,23 @@ public final class TextManager implements Reloadable {
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        load();
+        reset();
+        initializeBasic();
         return Reloadable.super.reloadModule();
     }
 
     /**
-     * Gets specific locale status
-     *
-     * @param locale The locale
-     * @param regex  The regexes
-     * @return The locale enabled status
-     */
-    public boolean localeEnabled(@NotNull String locale, @NotNull List<String> regex) {
-        return true;
-//        for (String languagesRegex : regex) {
-//            try {
-//                if (Pattern.matches(CommonUtil.createRegexFromGlob(languagesRegex), locale)) {
-//                    return true;
-//                }
-//            } catch (PatternSyntaxException exception) {
-//                Log.debug("Pattern " + languagesRegex + " invalid, skipping...");
-//            }
-//        }
-//        return false;
-    }
-
-    /**
-     * Register the language phrase to QuickShop text manager in runtime.
-     *
-     * @param locale Target locale
-     * @param path   The language key path
-     * @param text   The language text
+     * 注册语言短语
      */
     @SneakyThrows(InvalidConfigurationException.class)
     public void register(@NotNull String locale, @NotNull String path, @NotNull String text) {
+        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
+
+        // 确保语言已加载
+        if (!loadedLanguages.contains(locale)) {
+            loadLanguage(locale);
+        }
+
         YamlConfiguration configuration = languageFilesManager.getDistribution(locale);
         if (configuration == null) {
             configuration = new YamlConfiguration();
@@ -343,13 +315,25 @@ public final class TextManager implements Reloadable {
     }
 
     /**
-     * Return the set of available Languages
-     *
-     * @return the set of available Languages
+     * 返回可用语言列表
      */
     public List<String> getAvailableLanguages() {
         return new ArrayList<>(availableLanguages);
     }
 
+    /**
+     * 获取已加载语言列表
+     */
+    public List<String> getLoadedLanguages() {
+        return new ArrayList<>(loadedLanguages);
+    }
 
+    /**
+     * 强制加载所有可用语言
+     */
+    public void loadAllLanguages() {
+        for (String language : availableLanguages) {
+            loadLanguage(language);
+        }
+    }
 }
