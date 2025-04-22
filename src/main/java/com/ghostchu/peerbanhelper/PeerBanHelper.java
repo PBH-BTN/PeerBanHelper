@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -114,18 +115,21 @@ public class PeerBanHelper implements Reloadable {
         if (!crashManager.isRunningFlagExists()) return;
         Main.getGuiManager().createDialog(Level.WARNING, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
             if ("SWING".equals(Main.getGuiManager().getName())) {
-                Main.getGuiManager().createYesNoDialog(Level.INFO, tlUI(Lang.CRASH_MANAGER_GUI_RELATED_TITLE), tlUI(Lang.CRASH_MANAGER_GUI_RELATED_DESCRIPTION),
-                        () -> {
-                            Main.getMainConfig().set("gui", "swt");
-                            try {
-                                Main.getMainConfig().save(Main.getMainConfigFile());
-                                System.exit(0);
-                            } catch (IOException e) {
-                                Main.getGuiManager().createDialog(Level.SEVERE, "Unable to save configuration", e.getMessage(), () -> {
-                                });
-                            }
-                        }, null
-                );
+                String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+                if (os.startsWith("win")) {
+                    Main.getGuiManager().createYesNoDialog(Level.INFO, tlUI(Lang.CRASH_MANAGER_GUI_RELATED_TITLE), tlUI(Lang.CRASH_MANAGER_GUI_RELATED_DESCRIPTION),
+                            () -> {
+                                Main.getMainConfig().set("gui", "swt");
+                                try {
+                                    Main.getMainConfig().save(Main.getMainConfigFile());
+                                    System.exit(0);
+                                } catch (IOException e) {
+                                    Main.getGuiManager().createDialog(Level.SEVERE, "Unable to save configuration", e.getMessage(), () -> {
+                                    });
+                                }
+                            }, null
+                    );
+                }
             }
         });
     }
