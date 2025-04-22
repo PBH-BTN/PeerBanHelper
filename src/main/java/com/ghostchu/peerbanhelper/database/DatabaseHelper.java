@@ -7,6 +7,7 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.logger.Level;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.support.BaseConnectionSource;
+import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.TableUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -102,6 +103,16 @@ public final class DatabaseHelper {
             }
             v = 10;
         }
+        if (v == 10) {
+            try {
+                database.getDataSource().getReadWriteConnection("peer_records").executeStatement("ALTER TABLE peer_records ADD COLUMN uploadSpeed BIGINT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
+                database.getDataSource().getReadWriteConnection("peer_records").executeStatement("ALTER TABLE peer_records ADD COLUMN downloadSpeed BIGINT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 11;
+        }
+
         version.setValue(String.valueOf(v));
         metadata.update(version);
     }

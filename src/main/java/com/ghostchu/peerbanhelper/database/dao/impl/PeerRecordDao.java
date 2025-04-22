@@ -22,7 +22,7 @@ import java.util.Deque;
 public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
     private final TorrentDao torrentDao;
 
-    public PeerRecordDao(@Autowired Database database, TorrentDao torrentDao) throws SQLException {
+    public PeerRecordDao(@Autowired Database database, @Autowired TorrentDao torrentDao) throws SQLException {
         super(database.getDataSource(), PeerRecordEntity.class);
         this.torrentDao = torrentDao;
     }
@@ -70,6 +70,8 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
                 0,
                 0,
                 0,
+                0,
+                0,
                 peer.getFlags(),
                 new Timestamp(timestamp),
                 new Timestamp(timestamp)
@@ -90,6 +92,8 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
         // 更新 offset，转换为增量数据
         databaseSnapshot.setDownloadedOffset(peer.getDownloaded());
         databaseSnapshot.setUploadedOffset(peer.getUploaded());
+        databaseSnapshot.setDownloadSpeed(peer.getDownloadSpeed());
+        databaseSnapshot.setUploadSpeed(peer.getUploadSpeed());
         databaseSnapshot.setPeerId(currentSnapshot.getPeerId());
         databaseSnapshot.setClientName(currentSnapshot.getClientName());
         databaseSnapshot.setLastFlags(currentSnapshot.getLastFlags());
