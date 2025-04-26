@@ -69,6 +69,7 @@ public final class BitComet extends AbstractDownloader {
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         Methanol.Builder builder = Methanol.newBuilder()
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("Client-Type", "BitComet WebUI")

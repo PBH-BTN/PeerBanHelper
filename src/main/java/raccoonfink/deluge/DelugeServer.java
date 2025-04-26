@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 @Slf4j
 public final class DelugeServer {
@@ -40,6 +41,7 @@ public final class DelugeServer {
         HttpClient.Builder builder = Methanol
                 .newBuilder()
                 .version(httpVersion)
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .defaultHeader("Accept", "application/json")
                 .defaultHeader("Content-Type", "application/json")

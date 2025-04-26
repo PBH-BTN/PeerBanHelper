@@ -66,6 +66,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         Methanol.Builder builder = Methanol
                 .newBuilder()
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
