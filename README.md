@@ -4,6 +4,9 @@
 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
 
 ![page-views](https://raw.githubusercontent.com/PBH-BTN/views-counter/refs/heads/master/svg/754169590/badge.svg)
+
+PeerBanHelper 是一个开放源代码的个人网络防火墙安全软件。通过连接支持的应用程序（如：BitTorrent 客户端软件）的 Web API 接口获取受保护应用的连接信息，识别其中可能包含潜在安全威胁的连接并通知对应的应用程序主动断开其连接。  
+
 ## 功能介绍
 
 PeerBanHelper 主要由以下几个功能模块组成：
@@ -57,7 +60,11 @@ PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P �
 在报告问题前，请先检查 [常见问题列表](https://docs.pbh-btn.com/docs/faq)
 
 ## 需要帮助？
-考虑加入我们的[QQ群](https://qm.qq.com/cgi-bin/qm/qr?k=w5as_wH2G1ReUrClreCYhR69XiNCuP65&jump_from=webapi&authKey=EyjMX7Pwc77XLM51V6FEcR7oXnG8fsUbSFqYZ4PPiEpq32vBglJn/jFvpc3LFDhn)！
+考虑加入我们的 QQ 群！
+
+1 群：932978658（已满）  
+2 群：1011722516（已满）  
+3 群：901081269
 
 ## 声明
 

@@ -73,9 +73,9 @@ public final class TextManager implements Reloadable {
 
         YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
         if (yamlConfiguration == null) {
-            yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("en_us");
+            yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("zh_cn");
             if (yamlConfiguration == null) {
-                log.warn("The locale {} are not supported and fallback locale en_us load failed.", locale);
+                log.warn("The locale {} are not supported and fallback locale zh_cn load failed.", locale);
                 return "Unsupported locale " + locale;
             }
         }
@@ -188,8 +188,6 @@ public final class TextManager implements Reloadable {
         if (loadedLanguages.contains(locale)) {
             return true;
         }
-
-        log.debug("Loading language on demand: {}", locale);
         boolean loaded = false;
 
         // 尝试加载内置语言
@@ -235,9 +233,8 @@ public final class TextManager implements Reloadable {
                 }
                 loadedLanguages.add(locale);
             }
-        } else if (!"en_us".equals(locale)) {
+        } else if (!"zh_cn".equals(locale)) {
             // 如果无法加载请求的语言，使用回退语言
-            log.warn("Failed to load language {}, using fallback", locale);
             return false;
         }
 
@@ -308,7 +305,7 @@ public final class TextManager implements Reloadable {
         YamlConfiguration configuration = languageFilesManager.getDistribution(locale);
         if (configuration == null) {
             configuration = new YamlConfiguration();
-            configuration.loadFromString(languageFilesManager.getDistribution("en_us").saveToString());
+            configuration.loadFromString(languageFilesManager.getDistribution("zh_cn").saveToString());
         }
         configuration.set(path, text);
         languageFilesManager.deploy(locale, configuration);
