@@ -25,6 +25,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.net.InetAddresses;
 import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -265,7 +266,7 @@ public class PeerBanHelper implements Reloadable {
                 } else {
                     return new IPDBResponse(new LazyLoad<>(() -> {
                         try {
-                            return ipdb.query(address.getAddress().toInetAddress());
+                            return ipdb.query(InetAddresses.forString(address.getIp()));
                         } catch (Exception ignored) {
                             return null;
                         }
