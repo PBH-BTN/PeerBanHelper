@@ -508,5 +508,11 @@
             <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
             <version>${swt.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.dromara.mica-mqtt/mica-mqtt-client -->
+        <dependency>
+            <groupId>org.dromara.mica-mqtt</groupId>
+            <artifactId>mica-mqtt-client</artifactId>
+            <version>2.4.4</version>
+        </dependency>
     </dependencies>
 </project>

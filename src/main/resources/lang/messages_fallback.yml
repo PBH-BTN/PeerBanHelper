@@ -631,3 +631,10 @@ DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER: "获取下载器 {} 的速度限制器
 DOWNLOADER_FAILED_SET_SPEED_LIMITER: "设置下载器 {} 的速度限制器信息失败: {} - {}"
 DOWNLOADER_FAILED_START_TORRENT: "启动下载器上的 {} 种子 {} 失败: {} - {}"
 DOWNLOADER_FAILED_STOP_TORRENT: "暂停下载器上的 {} 种子 {} 失败: {} - {}"
+
+BTN_MQTT_CONNECTED: "[BTN 网络] [Live] 已成功连接到服务器"
+BTN_MQTT_RECONNECTED: "[BTN 网络] [Live] 已成功重新连接到服务器"
+BTN_MQTT_DISCONNECTED: "[BTN 网络] [Live] 与服务器的连接已断开: {}"
+
+BTN_MQTT_SERVERSIDE_GREETING: "[BTN 网络] [Live] BTN 服务器为 {} 由 {} 维护。实例版本号: {}, 协议版本支持范围: {}-{}。"
+BTN_MQTT_SERVERSIDE_MESSAGE: "[BTN 网络] [Live] [{}]: {}"
