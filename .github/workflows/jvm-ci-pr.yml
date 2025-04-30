@@ -28,10 +28,3 @@ jobs:
           cache-dependency-path: '**/pom.xml'
       - name: Build with Maven
         run: mvn -B clean package --file pom.xml -P thin-sqlite-packaging
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: maven-dist
-          path: |
-            target/*.jar
-            target/media/*.exe
