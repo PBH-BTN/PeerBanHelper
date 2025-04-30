@@ -5,7 +5,8 @@ name: Java CI (pull_request)
 
 on:
   pull_request:
-    branches: [ "master", "release" ]
+    types:
+      - opened
   workflow_dispatch:
 jobs:
   WebUI:
