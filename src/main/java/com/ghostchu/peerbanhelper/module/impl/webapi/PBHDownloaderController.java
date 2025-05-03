@@ -74,12 +74,12 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         webContainer.javalin()
                 .get("/api/downloaders", this::handleDownloaderList, Role.USER_READ)
                 .put("/api/downloaders", this::handleDownloaderPut, Role.USER_WRITE)
-                .patch("/api/downloaders/{downloaderName}", ctx -> handleDownloaderPatch(ctx, ctx.pathParam("downloaderUniqueId")), Role.USER_WRITE)
+                .patch("/api/downloaders/{downloaderId}", ctx -> handleDownloaderPatch(ctx, ctx.pathParam("downloaderId")), Role.USER_WRITE)
                 .post("/api/downloaders/test", this::handleDownloaderTest, Role.USER_WRITE)
-                .delete("/api/downloaders/{downloaderName}", ctx -> handleDownloaderDelete(ctx, ctx.pathParam("downloaderUniqueId")), Role.USER_WRITE)
-                .get("/api/downloaders/{downloaderName}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderUniqueId")), Role.USER_READ)
-                .get("/api/downloaders/{downloaderName}/torrents", ctx -> handleDownloaderTorrents(ctx, ctx.pathParam("downloaderUniqueId")), Role.USER_READ)
-                .get("/api/downloaders/{downloaderName}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderUniqueId"), ctx.pathParam("torrentId")), Role.USER_READ);
+                .delete("/api/downloaders/{downloaderId}", ctx -> handleDownloaderDelete(ctx, ctx.pathParam("downloaderId")), Role.USER_WRITE)
+                .get("/api/downloaders/{downloaderId}/status", ctx -> handleDownloaderStatus(ctx, ctx.pathParam("downloaderId")), Role.USER_READ)
+                .get("/api/downloaders/{downloaderId}/torrents", ctx -> handleDownloaderTorrents(ctx, ctx.pathParam("downloaderId")), Role.USER_READ)
+                .get("/api/downloaders/{downloaderId}/torrent/{torrentId}/peers", ctx -> handlePeersInTorrentOnDownloader(ctx, ctx.pathParam("downloaderId"), ctx.pathParam("torrentId")), Role.USER_READ);
     }
 
     private void handleDownloaderPut(Context ctx) {
