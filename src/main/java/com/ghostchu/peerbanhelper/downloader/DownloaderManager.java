@@ -16,6 +16,8 @@ import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -121,6 +123,21 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
 
     public List<Downloader> getDownloaders() {
         return List.copyOf(this);
+    }
+
+    @Nullable
+    public Downloader getDownloaderById(String id) {
+        for (Downloader downloader : this) {
+            if (downloader.getId().equals(id)) {
+                return downloader;
+            }
+        }
+        return null;
+    }
+
+    @NotNull
+    public List<Downloader> getDownloaderByName(String name) {
+        return this.stream().filter(d -> d.getName().equals(name)).toList();
     }
 
     @Override
