@@ -25,6 +25,11 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
+    @UpdateScript(version = 26)
+    public void trafficSpeedLimiter(YamlConfiguration bundled) {
+        conf.set("module.active-monitoring.traffic-monitoring.upload-speed", -1);
+        conf.set("module.active-monitoring.traffic-monitoring.download-speed", -1);
+    }
     @UpdateScript(version = 25)
     public void removeIPFS(YamlConfiguration bundled) {
         conf.set("decentralized", null);

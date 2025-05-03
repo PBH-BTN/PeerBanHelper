@@ -638,3 +638,7 @@ BTN_MQTT_DISCONNECTED: "[BTN 网络] [Live] 与服务器的连接已断开: {}"
 
 BTN_MQTT_SERVERSIDE_GREETING: "[BTN 网络] [Live] BTN 服务器为 {} 由 {} 维护。实例版本号: {}, 协议版本支持范围: {}-{}。"
 BTN_MQTT_SERVERSIDE_MESSAGE: "[BTN 网络] [Live] [{}]: {}"
+
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED: "[主动监测] 已还原下载器 {} 的速率限制为开始限制之前的值，新的值：上传={}/s 下载={}/s"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR: "[主动监测] 无法调整下载器 {} 的速率限制，出现了预期外的错误"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_ENABLED: "[主动监测] 由于在指定时间内您已共计上传 {} 数据，速率限制已对下载器 {} 启用。新的值：上传={}/s 下载={}/s"

@@ -6,16 +6,19 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.database.dao.impl.DownloaderTrafficLimiterDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.MsgUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
@@ -60,6 +63,10 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     private long dataRetentionTime;
     @Autowired
     private DownloaderManager downloaderManager;
+    @Autowired
+    private DownloaderTrafficLimiterDao downloaderTrafficLimiterDao;
+    private long uploadSpeedLimit;
+    private long downloadSpeedLimit;
 
     @Override
     public boolean isConfigurable() {
@@ -97,6 +104,8 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
         this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily", -1);
+        this.uploadSpeedLimit = getConfig().getLong("upload-limit");
+        this.downloadSpeedLimit = getConfig().getLong("download-limit");
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::writeJournal, 0, 1, TimeUnit.HOURS);
@@ -130,7 +139,12 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         var dateString = MiscUtil.formatDateOnly(now);
         var identifier = "dataTrafficCapping-" + startOfToday;
         // 一天只发一次
-        if (totalBytes >= dailyTrafficCapping && !alertManager.identifierAlertExistsIncludeRead(identifier)) {
+        cleanDownloaderSpeedLimiters();
+        if (totalBytes < dailyTrafficCapping) {
+            disableDownloaderSpeedLimiters(totalBytes);
+            return;
+        }
+        if (!alertManager.identifierAlertExistsIncludeRead(identifier)) {
             alertManager.publishAlert(true,
                     AlertLevel.WARN,
                     identifier,
@@ -139,6 +153,61 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                             dateTimeString,
                             FileUtils.byteCountToDisplaySize(totalBytes),
                             FileUtils.byteCountToDisplaySize(dailyTrafficCapping)));
+        }
+
+        enableDownloaderSpeedLimiters(totalBytes);
+    }
+
+    private void cleanDownloaderSpeedLimiters() {
+        for (Downloader downloader : downloaderManager.getDownloaders()) {
+            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getUniqueId());
+            if (trafficLimiterData == null) continue; // 没有在库记录
+            if (trafficLimiterData.getOperationTimestamp() < MiscUtil.getStartOfToday(System.currentTimeMillis())) {
+                try {
+                    downloader.setSpeedLimiter(new DownloaderSpeedLimiter(trafficLimiterData.getUploadTraffic(), trafficLimiterData.getDownloadTraffic())); // 还原操作
+                    downloaderTrafficLimiterDao.removeDownloaderTrafficLimiterData(downloader.getUniqueId());
+                    log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED),
+                            downloader.getName(),
+                            MsgUtil.humanReadableByteCountBin(trafficLimiterData.getUploadTraffic()),
+                            MsgUtil.humanReadableByteCountBin(trafficLimiterData.getDownloadTraffic()));
+                } catch (Exception e) {
+                    log.error(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR, downloader.getName(), e));
+                }
+            }
+        }
+    }
+
+    private synchronized void enableDownloaderSpeedLimiters(long totalBytes) {
+        for (Downloader downloader : downloaderManager.getDownloaders()) {
+            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getUniqueId());
+            if (trafficLimiterData != null) {
+                continue;
+            }
+            try {
+                var userSpeedLimiter = downloader.getSpeedLimiter();
+                if (userSpeedLimiter == null) continue;
+                downloader.setSpeedLimiter(new DownloaderSpeedLimiter(uploadSpeedLimit, downloadSpeedLimit));
+                downloaderTrafficLimiterDao.setDownloaderTrafficLimiterData(downloader.getUniqueId(), userSpeedLimiter.download(), userSpeedLimiter.upload(), System.currentTimeMillis());
+            } catch (Exception e) {
+                log.error(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR, downloader.getName(), e));
+            }
+        }
+    }
+
+    private synchronized void disableDownloaderSpeedLimiters(long totalBytes) {
+        for (Downloader downloader : downloaderManager.getDownloaders()) {
+            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getUniqueId());
+            if (trafficLimiterData == null) continue; // 没有在库记录
+            try {
+                downloader.setSpeedLimiter(new DownloaderSpeedLimiter(trafficLimiterData.getUploadTraffic(), trafficLimiterData.getDownloadTraffic())); // 还原操作
+                downloaderTrafficLimiterDao.removeDownloaderTrafficLimiterData(downloader.getUniqueId());
+                log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED),
+                        downloader.getName(),
+                        MsgUtil.humanReadableByteCountBin(trafficLimiterData.getUploadTraffic()),
+                        MsgUtil.humanReadableByteCountBin(trafficLimiterData.getDownloadTraffic()));
+            } catch (Exception e) {
+                log.error(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR, downloader.getName(), e));
+            }
         }
     }
 
