@@ -63,8 +63,8 @@ public final class BiglyBT extends AbstractDownloader {
     private final String connectorPayload;
     private Semver semver = new Semver("0.0.0");
 
-    public BiglyBT(String name, String uuid, Config config, AlertManager alertManager) {
-        super(name, uuid, alertManager);
+    public BiglyBT(String uuid, Config config, AlertManager alertManager) {
+        super(uuid, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
@@ -87,14 +87,19 @@ public final class BiglyBT extends AbstractDownloader {
         this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
     }
 
-    public static BiglyBT loadFromConfig(String name, String uuid, JsonObject section, AlertManager alertManager) {
-        Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new BiglyBT(name, uuid, config, alertManager);
+    @Override
+    public String getName() {
+        return config.getName();
     }
 
-    public static BiglyBT loadFromConfig(String name, String uuid, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section, name);
-        return new BiglyBT(name, uuid, config, alertManager);
+    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager) {
+        Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
+        return new BiglyBT(id, config, alertManager);
+    }
+
+    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager) {
+        Config config = Config.readFromYaml(section, id);
+        return new BiglyBT(id, config, alertManager);
     }
 
     @Override
@@ -126,11 +131,11 @@ public final class BiglyBT extends AbstractDownloader {
                             .POST(apiEndpoint + "/speedlimiter", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, name, request.statusCode(), request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), request.statusCode(), request.body()));
                 throw new IllegalStateException("Save BiglyBT SpeedLimiter error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, name, "N/A", e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), "N/A", e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -359,11 +364,11 @@ public final class BiglyBT extends AbstractDownloader {
                             .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -377,11 +382,11 @@ public final class BiglyBT extends AbstractDownloader {
                             .build()
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }

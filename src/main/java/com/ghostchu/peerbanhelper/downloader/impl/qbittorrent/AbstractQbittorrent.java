@@ -58,8 +58,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected final QBittorrentConfig config;
     protected final Cache<String, TorrentProperties> torrentPropertiesCache;
 
-    public AbstractQbittorrent(String name, String uuid, QBittorrentConfig config, AlertManager alertManager) {
-        super(name, uuid, alertManager);
+    public AbstractQbittorrent(String id, QBittorrentConfig config, AlertManager alertManager) {
+        super(id, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
         CookieManager cm = new CookieManager();
@@ -92,6 +92,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                         TimeUnit.MILLISECONDS
                 )
                 .build();
+    }
+
+    @Override
+    public String getName() {
+        return config.getName();
     }
 
     @Override
@@ -135,11 +140,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             .header("Content-Type", "application/x-www-form-urlencoded")
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save qBittorrent preferences error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -293,11 +298,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             .header("Content-Type", "application/x-www-form-urlencoded")
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -474,11 +479,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                                 .header("Content-Type", "application/x-www-form-urlencoded")
                         , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
                 if (request.statusCode() != 200) {
-                    log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                    log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                     throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
                 }
             } catch (Exception e) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+                log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
                 throw new IllegalStateException(e);
             }
         });
@@ -494,11 +499,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             .header("Content-Type", "application/x-www-form-urlencoded")
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }

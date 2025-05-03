@@ -11,15 +11,13 @@ import java.util.List;
 
 public abstract class AbstractDownloader implements Downloader {
     public final AlertManager alertManager;
-    protected String name;
     protected String id;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private TranslationComponent statusMessage;
     private int failedLoginAttempts = 0;
     private long nextLoginTry = 0L;
 
-    public AbstractDownloader(String name, String id, AlertManager alertManager) {
-        this.name = name;
+    public AbstractDownloader(String id, AlertManager alertManager) {
         this.id = id;
         this.alertManager = alertManager;
     }
@@ -96,11 +94,6 @@ public abstract class AbstractDownloader implements Downloader {
     @Override
     public TranslationComponent getLastStatusMessage() {
         return statusMessage;
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override

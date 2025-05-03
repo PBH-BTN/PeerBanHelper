@@ -57,48 +57,38 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
         for (String uuid : clientSection.getKeys(false)) {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(uuid);
             String endpoint = downloaderSection.getString("endpoint");
-            String name = downloaderSection.getString("name", "Un-named downloader");
-            Downloader downloader = createDownloader(name, uuid, downloaderSection);
+            Downloader downloader = createDownloader(uuid, downloaderSection);
             registerDownloader(downloader);
-            log.info(tlUI(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), name + "(" + uuid + ")", endpoint));
+            log.info(tlUI(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), downloader.getName() + "(" + uuid + ")", endpoint));
         }
     }
 
-    public Downloader createDownloader(String name, String id, ConfigurationSection downloaderSection) {
-        if (downloaderSection.getString("name") != null) {
-            downloaderSection.set("name", downloaderSection.getString("name", "").replace(".", "-"));
-        }
+    public Downloader createDownloader(String id, ConfigurationSection downloaderSection) {
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(name, id, downloaderSection, alertManager);
-            case "qbittorrentee" ->
-                    downloader = QBittorrentEE.loadFromConfig(name, id, downloaderSection, alertManager);
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(id, downloaderSection, alertManager);
+            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(id, downloaderSection, alertManager);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(name, id, Main.getPbhServerAddress(), downloaderSection, alertManager);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(name, id, downloaderSection, alertManager);
-            case "deluge" -> downloader = Deluge.loadFromConfig(name, id, downloaderSection, alertManager);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(name, id, downloaderSection, alertManager);
+                    downloader = Transmission.loadFromConfig(id, Main.getPbhServerAddress(), downloaderSection, alertManager);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(id, downloaderSection, alertManager);
+            case "deluge" -> downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
 
     }
 
-    public Downloader createDownloader(String client, String uuid, JsonObject downloaderSection) {
-        if (downloaderSection.get("name") != null) {
-            downloaderSection.addProperty("name", downloaderSection.get("name").getAsString().replace(".", "-"));
-        }
+    public Downloader createDownloader(String id, JsonObject downloaderSection) {
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" ->
-                    downloader = QBittorrent.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "qbittorrentee" ->
-                    downloader = QBittorrentEE.loadFromConfig(client, uuid, downloaderSection, alertManager);
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(id, downloaderSection, alertManager);
+            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(id, downloaderSection, alertManager);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(client, uuid, Main.getPbhServerAddress(), downloaderSection, alertManager);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "deluge" -> downloader = Deluge.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, uuid, downloaderSection, alertManager);
+                    downloader = Transmission.loadFromConfig(id, Main.getPbhServerAddress(), downloaderSection, alertManager);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(id, downloaderSection, alertManager);
+            case "deluge" -> downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;

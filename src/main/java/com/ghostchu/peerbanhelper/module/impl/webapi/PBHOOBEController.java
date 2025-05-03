@@ -73,13 +73,9 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         conf.set("server.token", token);
         conf.save(Main.getMainConfigFile());
         webContainer.setToken(token);
-        String name = draftDownloader.get("name").getAsString();
-        if (name.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
-        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        String uuid = draftDownloader.get("uuid").getAsString();
-        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
+        String id = draftDownloader.get("id").getAsString();
+        Downloader downloader = downloaderManager.createDownloader(id, config);
         if (downloaderManager.registerDownloader(downloader)) {
             ctx.status(HttpStatus.CREATED);
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_CREATED), null));
@@ -103,18 +99,14 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
             return false;
         }
-        String name = draftDownloader.get("name").getAsString();
-        if (name.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
-        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
 //        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
 //            ctx.status(HttpStatus.CONFLICT);
 //            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_NAME_EXISTS));
 //            return;
 //        }
-        String uuid = draftDownloader.get("uuid").getAsString();
-        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
+        String id = draftDownloader.get("id").getAsString();
+        Downloader downloader = downloaderManager.createDownloader(id, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));

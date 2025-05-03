@@ -84,10 +84,9 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     private void handleDownloaderPut(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
-        String name = draftDownloader.get("name").getAsString();
-        String uuid = draftDownloader.get("uuid").getAsString();
+        String id = draftDownloader.get("id").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
+        Downloader downloader = downloaderManager.createDownloader(id, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
@@ -110,11 +109,10 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
-    private void handleDownloaderPatch(Context ctx, String downloaderUniqueId) {
+    private void handleDownloaderPatch(Context ctx, String downloaderId) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
-        String name = draftDownloader.get("name").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        Downloader downloader = downloaderManager.createDownloader(name, downloaderUniqueId, config);
+        Downloader downloader = downloaderManager.createDownloader(downloaderId, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATE_FAILURE), null));
@@ -122,7 +120,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
         // 可能重命名了？
         downloaderManager.stream()
-                .filter(d -> d.getId().equals(downloaderUniqueId))
+                .filter(d -> d.getId().equals(downloaderId))
                 .forEach(d -> downloaderManager.unregisterDownloader(d));
         if (downloaderManager.registerDownloader(downloader)) {
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_UPDATED), null));
@@ -141,15 +139,14 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     private void handleDownloaderTest(Context ctx) {
         JsonObject draftDownloader = JsonParser.parseString(ctx.body()).getAsJsonObject();
-        String name = draftDownloader.get("name").getAsString();
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
 //        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
 //            ctx.status(HttpStatus.CONFLICT);
 //            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_NAME_EXISTS));
 //            return;
 //        }
-        String uuid = draftDownloader.get("uuid").getAsString();
-        Downloader downloader = downloaderManager.createDownloader(name, uuid, config);
+        String id = draftDownloader.get("id").getAsString();
+        Downloader downloader = downloaderManager.createDownloader(id, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
@@ -174,8 +171,8 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         }
     }
 
-    private void handleDownloaderDelete(Context ctx, String downloaderUniqueId) {
-        Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getId().equals(downloaderUniqueId)).findFirst();
+    private void handleDownloaderDelete(Context ctx, String downloaderId) {
+        Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getId().equals(downloaderId)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_REMOVE_NOT_EXISTS), null));
@@ -193,8 +190,8 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
 
     }
 
-    private void handlePeersInTorrentOnDownloader(Context ctx, String downloaderUniqueId, String torrentId) {
-        Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getId().equals(downloaderUniqueId)).findFirst();
+    private void handlePeersInTorrentOnDownloader(Context ctx, String downloaderId, String torrentId) {
+        Optional<Downloader> selected = downloaderManager.stream().filter(d -> d.getId().equals(downloaderId)).findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_DOWNLOADER_NOT_EXISTS), null));
@@ -235,9 +232,9 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         return dto;
     }
 
-    private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderUniqueId) {
+    private void handleDownloaderTorrents(@NotNull Context ctx, String downloaderId) {
         Optional<Downloader> selected = downloaderManager.stream()
-                .filter(d -> d.getId().equals(downloaderUniqueId))
+                .filter(d -> d.getId().equals(downloaderId))
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);
@@ -263,10 +260,10 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         ctx.json(new StdResp(true, null, torrentWrappers));
     }
 
-    private void handleDownloaderStatus(@NotNull Context ctx, String downloaderUniqueId) {
+    private void handleDownloaderStatus(@NotNull Context ctx, String downloaderId) {
         String locale = locale(ctx);
         Optional<Downloader> selected = downloaderManager.stream()
-                .filter(d -> d.getId().equals(downloaderUniqueId))
+                .filter(d -> d.getId().equals(downloaderId))
                 .findFirst();
         if (selected.isEmpty()) {
             ctx.status(HttpStatus.NOT_FOUND);

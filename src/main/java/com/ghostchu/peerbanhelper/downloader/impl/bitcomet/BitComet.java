@@ -61,8 +61,8 @@ public final class BitComet extends AbstractDownloader {
     private Semver serverVersion;
     private String serverName;
 
-    public BitComet(String name, String uuid, Config config, AlertManager alertManager) {
-        super(name, uuid, alertManager);
+    public BitComet(String id, Config config, AlertManager alertManager) {
+        super(id, alertManager);
         BCAESTool.init();
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
@@ -84,14 +84,19 @@ public final class BitComet extends AbstractDownloader {
         this.httpClient = builder.build();
     }
 
-    public static BitComet loadFromConfig(String name, String uuid, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section, name);
-        return new BitComet(name, uuid, config, alertManager);
+    @Override
+    public String getName() {
+        return config.getName();
     }
 
-    public static BitComet loadFromConfig(String name, String uuid, JsonObject section, AlertManager alertManager) {
+    public static BitComet loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager) {
+        Config config = Config.readFromYaml(section, id);
+        return new BitComet(id, config, alertManager);
+    }
+
+    public static BitComet loadFromConfig(String id, JsonObject section, AlertManager alertManager) {
         Config config = JsonUtil.getGson().fromJson(section, Config.class);
-        return new BitComet(name, uuid, config, alertManager);
+        return new BitComet(id, config, alertManager);
     }
 
     private static PeerAddress parseAddress(String address, int port, int listenPort) {
@@ -451,11 +456,11 @@ public final class BitComet extends AbstractDownloader {
                             .header("Authorization", "Bearer " + this.deviceToken),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR (unban_peers)", request.body()));
+                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR (unban_peers)", request.body()));
                 throw new IllegalStateException("Save BitComet banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -471,11 +476,11 @@ public final class BitComet extends AbstractDownloader {
                             .header("Authorization", "Bearer " + this.deviceToken),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BitComet banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(DOWNLOADER_BC_FAILED_SAVE_BANLIST, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
