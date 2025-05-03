@@ -38,7 +38,7 @@ public interface Downloader extends AutoCloseable {
      */
     String getName();
 
-    String getUniqueId();
+    String getId();
 
     /**
      * 下载器类型

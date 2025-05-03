@@ -246,10 +246,10 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         }
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
         ClientTask clientTask = lastRecordedProgress.stream()
-                .filter(task -> task.getPeerIp().equals(peerIpString) && downloader.getUniqueId().equals(task.getDownloader()))
+                .filter(task -> task.getPeerIp().equals(peerIpString) && downloader.getId().equals(task.getDownloader()))
                 .findFirst().orElse(null);
         if (clientTask == null) {
-            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getUniqueId(), 0L, 0L);
+            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getId(), 0L, 0L);
             lastRecordedProgress.add(clientTask);
         }
         long uploadedIncremental; // 上传增量

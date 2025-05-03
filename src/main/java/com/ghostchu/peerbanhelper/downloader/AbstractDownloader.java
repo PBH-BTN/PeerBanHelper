@@ -12,21 +12,21 @@ import java.util.List;
 public abstract class AbstractDownloader implements Downloader {
     public final AlertManager alertManager;
     protected String name;
-    protected String uuid;
+    protected String id;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private TranslationComponent statusMessage;
     private int failedLoginAttempts = 0;
     private long nextLoginTry = 0L;
 
-    public AbstractDownloader(String name, String uuid, AlertManager alertManager) {
+    public AbstractDownloader(String name, String id, AlertManager alertManager) {
         this.name = name;
-        this.uuid = uuid;
+        this.id = id;
         this.alertManager = alertManager;
     }
 
     @Override
-    public String getUniqueId() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -39,7 +39,7 @@ public abstract class AbstractDownloader implements Downloader {
         if (nextLoginTry >= System.currentTimeMillis()) {
             alertManager.publishAlert(true,
                     AlertLevel.WARN,
-                    "downloader-too-many-failed-attempt-" + getUniqueId(),
+                    "downloader-too-many-failed-attempt-" + getId(),
                     new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_TITLE, getName()),
                     new TranslationComponent(Lang.DOWNLOADER_ALERT_TOO_MANY_FAILED_ATTEMPT_DESCRIPTION, getName(),
                             getLastStatus(),

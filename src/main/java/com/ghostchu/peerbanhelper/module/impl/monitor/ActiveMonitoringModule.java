@@ -116,7 +116,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
             try {
                 if (downloader.login().success()) {
                     var stats = downloader.getStatistics();
-                    trafficJournalDao.updateData(downloader.getUniqueId(), stats.totalDownloaded(), stats.totalUploaded(), 0, 0);
+                    trafficJournalDao.updateData(downloader.getId(), stats.totalDownloaded(), stats.totalUploaded(), 0, 0);
                 }
             } catch (Throwable e) {
                 log.error("Unable to write hourly traffic journal to database", e);
@@ -160,12 +160,12 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
 
     private void cleanDownloaderSpeedLimiters() {
         for (Downloader downloader : downloaderManager.getDownloaders()) {
-            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getUniqueId());
+            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getId());
             if (trafficLimiterData == null) continue; // 没有在库记录
             if (trafficLimiterData.getOperationTimestamp() < MiscUtil.getStartOfToday(System.currentTimeMillis())) {
                 try {
                     downloader.setSpeedLimiter(new DownloaderSpeedLimiter(trafficLimiterData.getUploadTraffic(), trafficLimiterData.getDownloadTraffic())); // 还原操作
-                    downloaderTrafficLimiterDao.removeDownloaderTrafficLimiterData(downloader.getUniqueId());
+                    downloaderTrafficLimiterDao.removeDownloaderTrafficLimiterData(downloader.getId());
                     log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED),
                             downloader.getName(),
                             MsgUtil.humanReadableByteCountBin(trafficLimiterData.getUploadTraffic()),
@@ -179,7 +179,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
 
     private synchronized void enableDownloaderSpeedLimiters(long totalBytes) {
         for (Downloader downloader : downloaderManager.getDownloaders()) {
-            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getUniqueId());
+            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getId());
             if (trafficLimiterData != null) {
                 continue;
             }
@@ -187,7 +187,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                 var userSpeedLimiter = downloader.getSpeedLimiter();
                 if (userSpeedLimiter == null) continue;
                 downloader.setSpeedLimiter(new DownloaderSpeedLimiter(uploadSpeedLimit, downloadSpeedLimit));
-                downloaderTrafficLimiterDao.setDownloaderTrafficLimiterData(downloader.getUniqueId(), userSpeedLimiter.download(), userSpeedLimiter.upload(), System.currentTimeMillis());
+                downloaderTrafficLimiterDao.setDownloaderTrafficLimiterData(downloader.getId(), userSpeedLimiter.download(), userSpeedLimiter.upload(), System.currentTimeMillis());
             } catch (Exception e) {
                 log.error(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR, downloader.getName(), e));
             }
@@ -196,11 +196,11 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
 
     private synchronized void disableDownloaderSpeedLimiters(long totalBytes) {
         for (Downloader downloader : downloaderManager.getDownloaders()) {
-            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getUniqueId());
+            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getId());
             if (trafficLimiterData == null) continue; // 没有在库记录
             try {
                 downloader.setSpeedLimiter(new DownloaderSpeedLimiter(trafficLimiterData.getUploadTraffic(), trafficLimiterData.getDownloadTraffic())); // 还原操作
-                downloaderTrafficLimiterDao.removeDownloaderTrafficLimiterData(downloader.getUniqueId());
+                downloaderTrafficLimiterDao.removeDownloaderTrafficLimiterData(downloader.getId());
                 log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED),
                         downloader.getName(),
                         MsgUtil.humanReadableByteCountBin(trafficLimiterData.getUploadTraffic()),
@@ -277,7 +277,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                 })
                 .forEach(peer ->
                         diskWriteCache.put(new PeerRecordDao.BatchHandleTasks(System.currentTimeMillis(),
-                                        downloader.getUniqueId(), new TorrentWrapper(torrent), new PeerWrapper(peer)),
+                                        downloader.getId(), new TorrentWrapper(torrent), new PeerWrapper(peer)),
                                 MiscUtil.EMPTY_OBJECT));
     }
 }

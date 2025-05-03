@@ -58,27 +58,26 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(uuid);
             String endpoint = downloaderSection.getString("endpoint");
             String name = downloaderSection.getString("name", "Un-named downloader");
-            Downloader downloader = createDownloader(uuid, name, downloaderSection);
+            Downloader downloader = createDownloader(name, uuid, downloaderSection);
             registerDownloader(downloader);
             log.info(tlUI(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), name + "(" + uuid + ")", endpoint));
         }
     }
 
-    public Downloader createDownloader(String client, String uuid, ConfigurationSection downloaderSection) {
+    public Downloader createDownloader(String name, String id, ConfigurationSection downloaderSection) {
         if (downloaderSection.getString("name") != null) {
             downloaderSection.set("name", downloaderSection.getString("name", "").replace(".", "-"));
         }
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" ->
-                    downloader = QBittorrent.loadFromConfig(client, uuid, downloaderSection, alertManager);
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(name, id, downloaderSection, alertManager);
             case "qbittorrentee" ->
-                    downloader = QBittorrentEE.loadFromConfig(client, uuid, downloaderSection, alertManager);
+                    downloader = QBittorrentEE.loadFromConfig(name, id, downloaderSection, alertManager);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(client, uuid, Main.getPbhServerAddress(), downloaderSection, alertManager);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "deluge" -> downloader = Deluge.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, uuid, downloaderSection, alertManager);
+                    downloader = Transmission.loadFromConfig(name, id, Main.getPbhServerAddress(), downloaderSection, alertManager);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(name, id, downloaderSection, alertManager);
+            case "deluge" -> downloader = Deluge.loadFromConfig(name, id, downloaderSection, alertManager);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(name, id, downloaderSection, alertManager);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -109,14 +108,14 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
     public void saveDownloaders() throws IOException {
         ConfigurationSection clientSection = new MemoryConfiguration();
         for (Downloader downloader : this) {
-            clientSection.set(downloader.getUniqueId(), downloader.saveDownloader());
+            clientSection.set(downloader.getId(), downloader.saveDownloader());
         }
         Main.getMainConfig().set("client", clientSection);
         Main.getMainConfig().save(Main.getMainConfigFile());
     }
 
     public boolean registerDownloader(Downloader downloader) {
-        if (this.stream().anyMatch(d -> d.getUniqueId().equals(downloader.getUniqueId()))) {
+        if (this.stream().anyMatch(d -> d.getId().equals(downloader.getId()))) {
             return false;
         }
         this.add(downloader);
