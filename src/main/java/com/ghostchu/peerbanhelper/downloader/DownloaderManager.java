@@ -108,6 +108,9 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
         if (this.stream().anyMatch(d -> d.getId().equals(downloader.getId()))) {
             return false;
         }
+        if (this.stream().anyMatch(d -> d.getName().equals(downloader.getName()))) {
+            return false;
+        }
         this.add(downloader);
         return true;
     }
