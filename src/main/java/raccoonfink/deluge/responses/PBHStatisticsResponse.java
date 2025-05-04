@@ -1,23 +1,23 @@
 package raccoonfink.deluge.responses;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
 @Getter
 public final class PBHStatisticsResponse extends DelugeResponse {
     private StatisticsResponseDTO statistics;
 
-    public PBHStatisticsResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
+    public PBHStatisticsResponse(final Integer httpResponseCode, final JsonNode response) throws DelugeException {
         super(httpResponseCode, response);
-        if (response.isNull("result")) {
+        if (!response.has("result")) {
             return;
         }
-        JSONObject jsonArray = response.getJSONObject("result");
+        JsonNode jsonArray = response.get("result");
         String resultJson = jsonArray.toString();
         this.statistics = JsonUtil.getGson().fromJson(resultJson, StatisticsResponseDTO.class);
     }

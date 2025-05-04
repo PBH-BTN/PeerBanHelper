@@ -1,15 +1,16 @@
 package raccoonfink.deluge;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public final class DelugeEvent {
 
-    public DelugeEvent(final JSONArray data) {
+    public DelugeEvent(final JsonNode data) {
     }
 
-    public JSONObject toJSON() {
-        return new JSONObject();
+    public JsonNode toJSON() {
+        return new ObjectNode(null);
     }
 
 }

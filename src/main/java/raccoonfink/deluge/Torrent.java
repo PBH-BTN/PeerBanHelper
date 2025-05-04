@@ -1,7 +1,9 @@
 package raccoonfink.deluge;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 
 public final class Torrent implements Comparable<Torrent> {
     private final String m_key;
@@ -29,32 +31,32 @@ public final class Torrent implements Comparable<Torrent> {
     private final long m_uploadPayloadRate;
     private final State m_state;
 
-    public Torrent(final String key, final JSONObject data) {
+    public Torrent(final String key, final JsonNode data) {
         m_key = key;
-        m_distributedCopies = data.optDouble("distributed_copies");
-        m_downloadPayloadRate = data.optLong("download_payload_rate");
-        m_eta = data.optLong("eta");
-        m_autoManaged = data.optBoolean("is_auto_managed");
-        m_maxDownloadSpeed = data.optLong("max_download_speed");
-        m_maxUploadSpeed = data.optLong("max_upload_speed");
-        m_name = data.optString("name");
-        m_numPeers = data.optLong("num_peers");
-        m_numSeeds = data.optLong("num_seeds");
-        m_progress = data.optDouble("progress");
-        m_queue = data.optLong("queue");
-        m_ratio = data.optDouble("ratio");
-        m_savePath = data.optString("save_path");
-        m_seedsPeerRatio = data.optDouble("seeds_peer_ratio");
-        m_timeAdded = data.optDouble("time_added");
-        m_totalDone = data.optLong("total_done");
-        m_totalPeers = data.optLong("total_peers");
-        m_totalSeeds = data.optLong("total_seeds");
-        m_totalSize = data.optLong("total_size");
-        m_totalUploaded = data.optLong("total_uploaded");
-        m_trackerHost = data.optString("tracker_host");
-        m_uploadPayloadRate = data.optLong("upload_payload_rate");
+        m_distributedCopies = data.path("distributed_copies").asDouble(0.0);
+        m_downloadPayloadRate = data.path("download_payload_rate").asLong(0L);
+        m_eta = data.path("eta").asLong(0L);
+        m_autoManaged = data.path("is_auto_managed").asBoolean(false);
+        m_maxDownloadSpeed = data.path("max_download_speed").asLong(0L);
+        m_maxUploadSpeed = data.path("max_upload_speed").asLong(0L);
+        m_name = data.path("name").asText("");
+        m_numPeers = data.path("num_peers").asLong(0L);
+        m_numSeeds = data.path("num_seeds").asLong(0L);
+        m_progress = data.path("progress").asDouble(0.0);
+        m_queue = data.path("queue").asLong(0L);
+        m_ratio = data.path("ratio").asDouble(0.0);
+        m_savePath = data.path("save_path").asText("");
+        m_seedsPeerRatio = data.path("seeds_peer_ratio").asDouble(0.0);
+        m_timeAdded = data.path("time_added").asDouble(0.0);
+        m_totalDone = data.path("total_done").asLong(0L);
+        m_totalPeers = data.path("total_peers").asLong(0L);
+        m_totalSeeds = data.path("total_seeds").asLong(0L);
+        m_totalSize = data.path("total_size").asLong(0L);
+        m_totalUploaded = data.path("total_uploaded").asLong(0L);
+        m_trackerHost = data.path("tracker_host").asText("");
+        m_uploadPayloadRate = data.path("upload_payload_rate").asLong(0L);
 
-        final String state = data.optString("state");
+        final String state = data.path("state").asText("");
         if ("Downloading Metadata".equals(state)) {
             m_state = State.Downloading_Metadata;
         } else if ("Checking Resume Data".equals(state)) {
@@ -62,6 +64,7 @@ public final class Torrent implements Comparable<Torrent> {
         } else {
             m_state = State.valueOf(state);
         }
+
     }
 
     public String getKey() {
@@ -164,8 +167,8 @@ public final class Torrent implements Comparable<Torrent> {
         return this.getName().compareTo(torrent.getName());
     }
 
-    public JSONObject toJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
+    public JsonNode toJSON() {
+        ObjectNode ret = JsonUtil.getObjectMapper().createObjectNode();
         ret.put("key", m_key);
         ret.put("distributed_copies", m_distributedCopies);
         ret.put("download_payload_rate", m_downloadPayloadRate);
@@ -189,7 +192,7 @@ public final class Torrent implements Comparable<Torrent> {
         ret.put("total_uploaded", m_totalUploaded);
         ret.put("tracker_host", m_trackerHost);
         ret.put("upload_payload_rate", m_uploadPayloadRate);
-        ret.put("state", m_state);
+        ret.put("state", m_state.name());
         return ret;
     }
 

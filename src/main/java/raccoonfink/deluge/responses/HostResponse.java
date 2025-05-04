@@ -1,8 +1,8 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import raccoonfink.deluge.DelugeException;
 import raccoonfink.deluge.Host;
 
@@ -13,36 +13,44 @@ import java.util.List;
 public final class HostResponse extends DelugeResponse {
     private final List<Host> m_hosts = new ArrayList<Host>();
 
-    public HostResponse(final Integer httpResponseCode, final JSONObject response, final boolean singleResult) throws DelugeException {
+    public HostResponse(final Integer httpResponseCode, final JsonNode response, final boolean singleResult) throws DelugeException {
         super(httpResponseCode, response);
-        try {
-            final JSONArray result = response.getJSONArray("result");
-            if (singleResult) {
-                m_hosts.add(getHost(result));
-            } else {
-                for (int i = 0; i < result.length(); i++) {
-                    final JSONArray host = result.getJSONArray(i);
-                    m_hosts.add(getHost(host));
-                }
-            }
-        } catch (final JSONException e) {
-            throw new DelugeException(e);
+        final JsonNode resultNode = response.get("result");
+        if (resultNode == null || !resultNode.isArray()) {
+            throw new DelugeException("Invalid or missing 'result' array in response");
         }
+        final ArrayNode result = (ArrayNode) resultNode;
+        if (singleResult) {
+            m_hosts.add(getHost(result.get(0)));
+        } else {
+            for (int i = 0; i < result.size(); i++) {
+                // TODO: 不知道 Deluge 的返回是什么样子
+                final JsonNode host = result.get(i);
+                m_hosts.add(getHost(host));
+            }
+        }
+
     }
 
     public List<Host> getHosts() {
         return Collections.unmodifiableList(m_hosts);
     }
 
-    private Host getHost(final JSONArray host) throws JSONException {
-        return new Host(host.getString(0), host.getString(1), host.getInt(2), host.getString(3), host.optString(4));
+    private Host getHost(final JsonNode host) {
+        return new Host(host.get(0).asText(), host.get(1).asText(), host.get(2).asInt(), host.get(3).asText(), host.get(4).asText(""));
     }
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
+    public JsonNode toResponseJSON() {
+        final ObjectNode ret = (ObjectNode) super.toResponseJSON();
+        // 获取名为 "result" 的 ArrayNode，如果不存在则创建一个新的
+        ArrayNode resultArray = (ArrayNode) ret.get("result");
+        if (resultArray == null) {
+            resultArray = ret.putArray("result");
+        }
         for (final Host host : m_hosts) {
-            ret.append("result", host.toJSON());
+            // 使用 ArrayNode 的 add 方法添加 JsonNode
+            resultArray.add(host.toJSON());
         }
         return ret;
     }

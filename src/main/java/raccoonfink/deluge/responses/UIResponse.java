@@ -1,7 +1,9 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import raccoonfink.deluge.DelugeException;
 import raccoonfink.deluge.Statistics;
 import raccoonfink.deluge.Torrent;
@@ -16,29 +18,29 @@ public final class UIResponse extends DelugeResponse {
     private Set<Torrent> m_torrents = new TreeSet<Torrent>();
 
     @SuppressWarnings("rawtypes")
-    public UIResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
+    public UIResponse(final Integer httpResponseCode, final JsonNode response) throws DelugeException {
         super(httpResponseCode, response);
 
-        if (response == null) {
+        if (response.get("result").isNull()) {
             return;
         }
 
         try {
-            final JSONObject result = response.getJSONObject("result");
-            m_connected = result.optBoolean("connected");
+            final JsonNode result = response.get("result");
+            m_connected = result.path("connected").asBoolean(false);
 
-            m_statistics = new Statistics(result.getJSONObject("stats"));
+            m_statistics = new Statistics(result.get("stats"));
 
-            final JSONObject torrents = result.optJSONObject("torrents");
-            if (torrents != null) {
-                final Iterator it = torrents.keys();
+            // 此处以前是 optJSONObject 那么取不到应该是 null
+            final JsonNode torrents = result.get("torrents");
+            if (torrents != null && !torrents.isNull() && torrents.isObject()) {
+                Iterator<String> it = torrents.fieldNames();
                 while (it.hasNext()) {
-                    final String key = (String) it.next();
-                    m_torrents.add(new Torrent(key, torrents.getJSONObject(key)));
-
+                    final String key = it.next();
+                    m_torrents.add(new Torrent(key, torrents.get(key)));
                 }
             }
-        } catch (final JSONException e) {
+        } catch (final IllegalArgumentException | NullPointerException e) {
             throw new DelugeException(e);
         }
     }
@@ -56,14 +58,14 @@ public final class UIResponse extends DelugeResponse {
     }
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
+    public JsonNode toResponseJSON() {
+        final ObjectNode ret = (ObjectNode) super.toResponseJSON();
         ret.put("connected", m_connected);
-        ret.put("statistics", m_statistics.toJSON());
-        final JSONObject torrents = new JSONObject();
-        ret.put("torrents", torrents);
+        ret.set("statistics", m_statistics.toJSON());
+        final ObjectNode torrents = JsonUtil.getObjectMapper().createObjectNode();
+        ret.set("torrents", torrents);
         for (final Torrent torrent : m_torrents) {
-            torrents.put(torrent.getKey(), torrent.toJSON());
+            torrents.set(torrent.getKey(), torrent.toJSON());
         }
         return ret;
     }

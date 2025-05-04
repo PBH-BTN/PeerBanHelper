@@ -1,7 +1,9 @@
 package raccoonfink.deluge;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+
 
 public final class Statistics {
 
@@ -17,18 +19,18 @@ public final class Statistics {
     private final int m_uploadProtocolRate;
     private final int m_uploadRate;
 
-    public Statistics(final JSONObject stats) {
-        m_dhtNodes = stats.optInt("dht_nodes");
-        m_downloadProtocolRate = stats.optInt("download_protocol_rate");
-        m_downloadRate = stats.optInt("download_rate");
-        m_freeSpace = stats.optInt("free_space");
-        m_incomingConnections = stats.optBoolean("has_incoming_connections");
-        m_maxDownload = stats.optDouble("max_download");
-        m_maxNumConnections = stats.optInt("max_num_connections");
-        m_maxUpload = stats.optDouble("max_upload");
-        m_numConnections = stats.optInt("num_connections");
-        m_uploadProtocolRate = stats.optInt("upload_protocol_rate");
-        m_uploadRate = stats.optInt("upload_rate");
+    public Statistics(final JsonNode stats) {
+        m_dhtNodes = stats.path("dht_nodes").asInt(0);
+        m_downloadProtocolRate = stats.path("download_protocol_rate").asInt(0);
+        m_downloadRate = stats.path("download_rate").asInt(0);
+        m_freeSpace = stats.path("free_space").asInt(0);
+        m_incomingConnections = stats.path("has_incoming_connections").asBoolean(false);
+        m_maxDownload = stats.path("max_download").asDouble(0.0);
+        m_maxNumConnections = stats.path("max_num_connections").asInt(0);
+        m_maxUpload = stats.path("max_upload").asDouble(0.0);
+        m_numConnections = stats.path("num_connections").asInt(0);
+        m_uploadProtocolRate = stats.path("upload_protocol_rate").asInt(0);
+        m_uploadRate = stats.path("upload_rate").asInt(0);
     }
 
     public int getDHTNodes() {
@@ -75,8 +77,8 @@ public final class Statistics {
         return m_uploadRate;
     }
 
-    public JSONObject toJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
+    public JsonNode toJSON() {
+        ObjectNode ret = JsonUtil.getObjectMapper().createObjectNode();
         ret.put("dht_nodes", m_dhtNodes);
         ret.put("download_protocol_rate", m_downloadProtocolRate);
         ret.put("download_rate", m_downloadRate);

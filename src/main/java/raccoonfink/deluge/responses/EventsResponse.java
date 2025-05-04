@@ -1,8 +1,8 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import raccoonfink.deluge.DelugeEvent;
 import raccoonfink.deluge.DelugeException;
 
@@ -13,18 +13,19 @@ import java.util.List;
 public final class EventsResponse extends DelugeResponse {
     private final List<DelugeEvent> m_events = new ArrayList<DelugeEvent>();
 
-    public EventsResponse(final Integer httpResponseCode, final JSONObject result) throws DelugeException {
+    public EventsResponse(final Integer httpResponseCode, final JsonNode result) throws DelugeException {
         super(httpResponseCode, result);
 
-        if (!result.isNull("result")) {
-            try {
-                final JSONArray res = result.getJSONArray("result");
-                for (int i = 0; i < res.length(); i++) {
-                    m_events.add(new DelugeEvent(res.getJSONArray(i)));
-                }
-            } catch (final JSONException e) {
-                throw new DelugeException(e);
+        if (!result.get("result").isNull()) {
+//            try {
+            final JsonNode res = result.get("result");
+            for (int i = 0; i < res.size(); i++) {
+                m_events.add(new DelugeEvent(res.get(i)));
             }
+            // TODO: 是否有必要增加一些检查?
+//            } catch (final JSONException e) {
+//                throw new DelugeException(e);
+//            }
         }
     }
 
@@ -33,10 +34,12 @@ public final class EventsResponse extends DelugeResponse {
     }
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
+    public JsonNode toResponseJSON() {
+        final ObjectNode ret = (ObjectNode) super.toResponseJSON();
+        ArrayNode resultArray = ret.putArray("result");
         for (final DelugeEvent ev : m_events) {
-            ret.append("result", ev.toJSON());
+            // 使用 ArrayNode 的 add 方法添加 JsonNode
+            resultArray.add(ev.toJSON());
         }
         return ret;
     }

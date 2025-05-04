@@ -1,9 +1,10 @@
 package raccoonfink.deluge.requests;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 @NoArgsConstructor
 @Data
@@ -13,8 +14,8 @@ public class ConfigRequest {
 
     private Long maxUploadSpeed;
 
-    public JSONObject toRequestJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
+    public JsonNode toRequestJSON() {
+        final ObjectNode ret = JsonUtil.getObjectMapper().createObjectNode();
         if (maxDownloadSpeed != null) {
             ret.put("max_download_speed", maxDownloadSpeed);
         }
