@@ -42,7 +42,8 @@ public final class MainConfigUpdateScript {
             if (oldSection == null) continue;
             oldSection.set("name", name);
             newClients.set(uuid, oldSection);
-            log.info("[Client UniqueId Assign] {} -> {}", name, uuid);
+            log.info("[Downloader Id Re-assign] {} -> {}", name, uuid);
+            ConfigTransfer.downloaderNameToUUID.put(name, uuid);
         }
         conf.set("client", newClients);
     }
