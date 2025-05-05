@@ -136,6 +136,22 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
     }
 
     @NotNull
+    public DownloaderBasicInfo getDownloadInfo(@NotNull Downloader downloader) {
+        return new DownloaderBasicInfo(downloader.getId(), downloader.getName(), downloader.getType());
+    }
+
+    @NotNull
+    public DownloaderBasicInfo getDownloadInfo(@NotNull String id) {
+        Downloader downloader = getDownloaderById(id);
+        if (downloader != null) {
+            return new DownloaderBasicInfo(downloader.getId(), downloader.getName(), downloader.getType());
+        } else {
+            return new DownloaderBasicInfo(id, "Unknown", "Unknown");
+        }
+    }
+
+
+    @NotNull
     public List<Downloader> getDownloaderByName(String name) {
         return this.stream().filter(d -> d.getName().equals(name)).toList();
     }
