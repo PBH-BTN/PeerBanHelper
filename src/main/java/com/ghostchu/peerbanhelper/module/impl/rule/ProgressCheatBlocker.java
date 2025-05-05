@@ -345,11 +345,20 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
                 boolean ban = rewind > rewindMaximumDifference && isUploadingToPeer(peer);
                 if (ban) {
-                    clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
-                    clientTask.setBanDelayWindowEndAt(0L);
-                    progressRecorder.invalidate(client); // 封禁时，移除缓存
+                    if (banPeerIfConditionReached(clientTask)) {
+                        clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
+                        clientTask.setBanDelayWindowEndAt(0L);
+                        progressRecorder.invalidate(client); // 封禁时，移除缓存
+                        return new CheckResult(getClass(), PeerAction.BAN, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
+                                new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
+                                        percent(clientProgress),
+                                        percent(actualProgress),
+                                        percent(lastRecord),
+                                        percent(rewind),
+                                        percent(rewindMaximumDifference)));
+                    }
                 }
-                return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
+                return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
                         new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
                                 percent(clientProgress),
                                 percent(actualProgress),
