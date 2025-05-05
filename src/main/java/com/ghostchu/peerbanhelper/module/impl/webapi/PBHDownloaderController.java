@@ -202,7 +202,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         List<PopulatedPeerDTO> peerWrappers = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::parallelStream)
-                .filter(p -> p.getUniqueId().equals(downloader.getId()))
+                .filter(p -> p.getDownloader().id().equals(downloader.getId()))
                 .filter(p -> p.getTorrent().getId().equals(torrentId))
                 .sorted((o1, o2) -> Long.compare(o2.getPeer().getUploadSpeed(), o1.getPeer().getUploadSpeed()))
                 .map(dat -> populatePeerDTO(dat, ptr))
@@ -245,7 +245,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         List<TorrentWrapper> torrentWrappers = downloaderServer.getLivePeersSnapshot()
                 .values().stream()
                 .flatMap(Collection::stream)
-                .filter(p -> p.getUniqueId().equals(downloader.getId()))
+                .filter(p -> p.getDownloader().id().equals(downloader.getId()))
                 .map(PeerMetadata::getTorrent)
                 .distinct()
                 .sorted((o1, o2) -> {
@@ -275,13 +275,13 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
         long activeTorrents = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::stream)
-                .filter(p -> p.getUniqueId().equals(downloader.getId()))
+                .filter(p -> p.getDownloader().id().equals(downloader.getId()))
                 .map(p -> p.getTorrent().getHash())
                 .distinct().count();
         long activePeers = downloaderServer.getLivePeersSnapshot().values()
                 .stream()
                 .flatMap(Collection::stream)
-                .filter(p -> p.getUniqueId().equals(downloader.getId()))
+                .filter(p -> p.getDownloader().id().equals(downloader.getId()))
                 .count();
 
         JsonObject config = downloader.saveDownloaderJson();

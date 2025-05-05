@@ -262,7 +262,7 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
                                         if (detail.banDuration() > 0) {
                                             actualBanDuration = detail.banDuration();
                                         }
-                                        BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloader.getId(),
+                                        BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloaderManager.getDownloadInfo(downloader.getId()),
                                                 System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                                 detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                         bannedPeers.add(banMetadata);
@@ -372,7 +372,7 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
                                     PeerAddress address = p.getPeerAddress();
                                     List<PeerMetadata> data = livePeers.getOrDefault(address, new ArrayList<>());
                                     PeerMetadata metadata = new PeerMetadata(
-                                            downloader.getId(),
+                                            downloaderManager.getDownloadInfo(downloader),
                                             torrent, p);
                                     data.add(metadata);
                                     livePeers.put(address, data);
@@ -639,7 +639,7 @@ public class DownloaderServer implements Reloadable, AutoCloseable {
     }
 
     public void scheduleBanPeer(@NotNull BanMetadata banMetadata, @NotNull Torrent torrent, @NotNull Peer peer) {
-        Downloader downloader = downloaderManager.stream().filter(d -> d.getId().equals(banMetadata.getUniqueId()))
+        Downloader downloader = downloaderManager.stream().filter(d -> d.getId().equals(banMetadata.getDownloader().id()))
                 .findFirst().orElseThrow();
         banPeer(BAN_LIST.keySet(), banMetadata, torrent, peer);
         scheduledBanListOperations.add(new ScheduledBanListOperation(true, new ScheduledPeerBanning(

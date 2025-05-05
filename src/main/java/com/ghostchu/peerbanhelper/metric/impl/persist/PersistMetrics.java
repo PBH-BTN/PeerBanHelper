@@ -125,7 +125,7 @@ public final class PersistMetrics implements BasicMetrics {
                     rule,
                     metadata.getDescription(),
                     metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString(),
-                    metadata.getUniqueId()
+                    metadata.getDownloader().id()
             ));
         } catch (SQLException e) {
             log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);

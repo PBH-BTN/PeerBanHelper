@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -47,6 +49,8 @@ public final class PBHBanController extends AbstractFeatureModule {
     private HistoryDao historyDao;
     @Autowired
     private DownloaderServer downloaderServer;
+    @Autowired
+    private DownloaderManager downloaderManager;
 
     @Override
     public boolean isConfigurable() {
@@ -102,7 +106,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         persistMetrics.flush();
         Pageable pageable = new Pageable(ctx);
         var queryResult = historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageable);
-        var result = queryResult.getResults().stream().map(r -> new BanLogResponse(locale(ctx), r)).toList();
+        var result = queryResult.getResults().stream().map(r -> new BanLogResponse(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
@@ -171,9 +175,9 @@ public final class PBHBanController extends AbstractFeatureModule {
         private String module;
         private String rule;
         private String description;
-        private String downloader;
+        private DownloaderBasicInfo downloader;
 
-        public BanLogResponse(String locale, HistoryEntity history) {
+        public BanLogResponse(String locale, DownloaderManager downloaderManager, HistoryEntity history) {
             this.banAt = history.getBanAt().getTime();
             this.unbanAt = history.getUnbanAt().getTime();
             this.peerIp = history.getIp();
@@ -189,7 +193,7 @@ public final class PBHBanController extends AbstractFeatureModule {
             this.module = history.getRule().getModule().getName();
             this.rule = tl(locale, history.getRule().getRule());
             this.description = tl(locale, history.getDescription());
-            this.downloader = history.getDownloader();
+            this.downloader = downloaderManager.getDownloadInfo(history.getDownloader());
         }
     }
 
