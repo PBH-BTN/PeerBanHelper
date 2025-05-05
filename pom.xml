@@ -20,7 +20,7 @@
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
         <swt.version>3.129.0</swt.version>
-        <javalin.version>6.5.0</javalin.version>
+        <javalin.version>6.6.0</javalin.version>
         <javalin.openapi.version>6.5.0</javalin.openapi.version>
     </properties>
     <pluginRepositories>
