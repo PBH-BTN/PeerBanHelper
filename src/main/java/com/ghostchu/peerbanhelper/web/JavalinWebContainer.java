@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.web;
 
+import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
@@ -20,6 +21,8 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
+import io.javalin.openapi.plugin.OpenApiPlugin;
+import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
 import lombok.Setter;
@@ -93,7 +96,38 @@ public final class JavalinWebContainer {
                         });
                         c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                     }
-
+                    c.registerPlugin(new OpenApiPlugin(openApiConfig ->
+                            openApiConfig
+                                    .withDocumentationPath("/openapi.json")
+                                    .withRoles(Role.USER_READ)
+                                    .withDefinitionConfiguration((version, openApiDefinition) ->
+                                            // you can add whatever you want to this document using your favourite json api
+                                            openApiDefinition
+                                                    .withInfo(openApiInfo ->
+                                                            openApiInfo
+                                                                    .version(Main.getMeta().getVersion())
+                                                                    .description("Automatically block unwanted, leeches and abnormal BT peers with support for customized and cloud rules.")
+                                                                    .termsOfService("https://github.com/PBH-BTN/terms/blob/master/peerbanhelper-privacy-en-US.md")
+                                                                    .contact("User Support", "https://github.com/PBH-BTN/PeerBanHelper/issues")
+                                                                    .contact("API Support", "https://github.com/PBH-BTN/PeerBanHelper/issues", "ghostchu@qq.com")
+                                                                    .license("GPL-3.0", "https://github.com/PBH-BTN/PeerBanHelper/blob/master/LICENSE", "GPL-3.0")
+                                                    )
+                                                    .withServer(openApiServer ->
+                                                            openApiServer
+                                                                    .description("PeerBanHelper OpenAPI Server")
+                                                                    .url("http://localhost:{port}{basePath}/" + version + "/")
+                                                                    .variable("port", "Server's port", "7890", "7890")
+                                                                    .variable("basePath", "Base path of the server", "/api", "/api")
+                                                    )
+                                                    .withSecurity(openApiSecurity ->
+                                                            openApiSecurity
+                                                                    .withBearerAuth()
+                                                                    .withApiKeyAuth("ApiKeyAuth", "X-Api-Key")
+                                                                    .withCookieAuth("CookieAuth", "JSESSIONID")
+                                                    )
+                                                    .withDefinitionProcessor(BaseJsonNode::toPrettyString)
+                                    )));
+                    c.registerPlugin(new SwaggerPlugin());
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);

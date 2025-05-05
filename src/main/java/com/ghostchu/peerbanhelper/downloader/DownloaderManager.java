@@ -141,9 +141,9 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
     }
 
     @NotNull
-    public DownloaderBasicInfo getDownloadInfo(@NotNull String id) {
+    public DownloaderBasicInfo getDownloadInfo(@Nullable String id) {
         Downloader downloader = getDownloaderById(id);
-        if (downloader != null) {
+        if (downloader != null && id != null) {
             return new DownloaderBasicInfo(downloader.getId(), downloader.getName(), downloader.getType());
         } else {
             return new DownloaderBasicInfo(id, "Unknown", "Unknown");

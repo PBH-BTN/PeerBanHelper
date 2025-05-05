@@ -51,7 +51,7 @@ public final class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "9"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "12"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -139,6 +139,7 @@ public final class DatabaseHelper {
                     var downloaderName = trafficJournalEntity.getDownloader();
                     trafficJournalEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
                 }));
+                TableUtils.clearTable(getDataSource(), BanListEntity.class);
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
             }
