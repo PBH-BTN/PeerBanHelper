@@ -18,9 +18,6 @@ import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import io.javalin.http.Context;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,16 +146,4 @@ public final class PBHBanController extends AbstractFeatureModule {
         });
         return banResponseList;
     }
-
-    public record UnbanRequest(List<String> ips) {
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    static class HistoryEntry {
-        private String address;
-        private long count;
-    }
-
 }

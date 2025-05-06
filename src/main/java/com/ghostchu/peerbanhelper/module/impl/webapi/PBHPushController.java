@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PushWrapperDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.push.PushManager;
@@ -164,8 +165,8 @@ public final class PBHPushController extends AbstractFeatureModule {
     }
 
     private void handlePushProviderList(@NotNull Context ctx) {
-        List<PushWrapper> pushProviders = pushManager.getProviderList()
-                .stream().map(d -> new PushWrapper(d.getName(), d.getConfigType(), d.saveJson()))
+        List<PushWrapperDTO> pushProviders = pushManager.getProviderList()
+                .stream().map(d -> new PushWrapperDTO(d.getName(), d.getConfigType(), d.saveJson()))
                 .toList();
         ctx.json(new StdResp(true, null, pushProviders));
     }
@@ -176,6 +177,4 @@ public final class PBHPushController extends AbstractFeatureModule {
 
     }
 
-    record PushWrapper(String name, String type, JsonObject config) {
-    }
 }

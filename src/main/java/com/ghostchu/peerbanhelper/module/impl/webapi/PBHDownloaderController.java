@@ -7,6 +7,8 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DownloaderStatusDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DownloaderWrapperDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -285,12 +287,12 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
                 .count();
 
         JsonObject config = downloader.saveDownloaderJson();
-        ctx.json(new StdResp(true, null, new DownloaderStatus(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config, downloader.isPaused())));
+        ctx.json(new StdResp(true, null, new DownloaderStatusDTO(lastStatus, tl(locale, downloader.getLastStatusMessage() == null ? new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN) : downloader.getLastStatusMessage()), activeTorrents, activePeers, config, downloader.isPaused())));
     }
 
     private void handleDownloaderList(@NotNull Context ctx) {
-        List<DownloaderWrapper> downloaders = downloaderManager
-                .stream().map(d -> new DownloaderWrapper(d.getId(), d.getName(), d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))
+        List<DownloaderWrapperDTO> downloaders = downloaderManager
+                .stream().map(d -> new DownloaderWrapperDTO(d.getId(), d.getName(), d.getEndpoint(), d.getType().toLowerCase(), d.isPaused()))
                 .toList();
         ctx.json(new StdResp(true, null, downloaders));
     }
@@ -304,12 +306,4 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     record DraftDownloader(String id, String name, JsonObject config) {
     }
 
-    record DownloaderStatus(DownloaderLastStatus lastStatus, String lastStatusMessage,
-                            long activeTorrents,
-                            long activePeers, JsonObject config, boolean paused) {
-
-    }
-
-    record DownloaderWrapper(String id, String name, String endpoint, String type, boolean paused) {
-    }
 }

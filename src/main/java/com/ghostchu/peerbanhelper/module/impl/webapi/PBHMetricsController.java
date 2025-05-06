@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -72,8 +73,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             }
         }
         ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream()
-                .map((e) -> new PBHChartController.SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                .sorted(Comparator.comparingLong(PBHChartController.SimpleLongIntKV::key))
+                .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
+                .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
                 .toList()
         ));
     }

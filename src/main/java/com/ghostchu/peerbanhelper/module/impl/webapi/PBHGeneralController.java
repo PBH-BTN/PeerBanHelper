@@ -7,6 +7,8 @@ import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
@@ -118,7 +120,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     }
 
     private void handleGlobalConfig(Context context) {
-        var body = context.bodyAsClass(GlobalOptionPatch.class);
+        var body = context.bodyAsClass(GlobalOptionPatchBody.class);
         if (body == null) {
             throw new IllegalArgumentException("Request body cannot be null");
         }
@@ -272,7 +274,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private void handleReloading(Context context) {
         Main.setupConfiguration();
         var result = Main.getReloadManager().reload();
-        List<ReloadEntry> entryList = new ArrayList<>();
+        List<ReloadEntryDTO> entryList = new ArrayList<>();
         result.forEach((container, r) -> {
             String entryName;
             if (container.getReloadable() == null) {
@@ -285,7 +287,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                     entryName = reloadable.getClass().getName();
                 }
             }
-            entryList.add(new ReloadEntry(entryName, r.getStatus().name()));
+            entryList.add(new ReloadEntryDTO(entryName, r.getStatus().name()));
         });
         moduleMatchCache.invalidateAll();
 
@@ -492,18 +494,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Override
     public void onDisable() {
 
-    }
-
-    public record GlobalOptionPatch(
-            Boolean globalPaused
-    ) {
-
-    }
-
-    public record ReloadEntry(
-            String reloadable,
-            String reloadResult
-    ) {
     }
 
 }
