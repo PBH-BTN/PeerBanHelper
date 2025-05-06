@@ -52,15 +52,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public final class IPDB implements AutoCloseable {
-    private final File dataFolder;
     private final long updateInterval = 3888000000L; // 45天
-    private final String accountId;
-    private final String licenseKey;
     private final File directory;
     private final File mmdbCityFile;
     private final File mmdbASNFile;
     private final boolean autoUpdate;
-    private final String userAgent;
     private final File mmdbGeoCNFile;
     private final Methanol httpClient;
     @Getter
@@ -71,16 +67,16 @@ public final class IPDB implements AutoCloseable {
     private List<String> languageTag;
 
     public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent) throws IllegalArgumentException, IOException {
-        this.dataFolder = dataFolder;
-        this.accountId = accountId;
-        this.licenseKey = licenseKey;
+//        this.dataFolder = dataFolder;
+//        this.accountId = accountId;
+//        this.licenseKey = licenseKey;
         this.directory = new File(dataFolder, "geoip");
         this.directory.mkdirs();
         this.mmdbCityFile = new File(directory, "GeoIP-City.mmdb");
         this.mmdbASNFile = new File(directory, "GeoIP-ASN.mmdb");
         this.mmdbGeoCNFile = new File(directory, "GeoCN.mmdb");
         this.autoUpdate = autoUpdate;
-        this.userAgent = userAgent;
+//        this.userAgent = userAgent;
         this.httpClient = Methanol
                 .newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
