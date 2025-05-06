@@ -57,7 +57,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class DownloaderServer implements Reloadable, AutoCloseable {
+public final class DownloaderServer implements Reloadable, AutoCloseable {
     @Getter
     private final DualIPv4v6Tries ignoreAddresses = new DualIPv4v6Tries();
     private final Lock banWaveLock = new ReentrantLock();

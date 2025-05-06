@@ -15,7 +15,7 @@ import java.io.File;
 @ComponentScan(value = "com.ghostchu.lib.jni", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
 @Slf4j
 @EnableScheduling
-public class AppConfig {
+public final class AppConfig {
     @Bean
     public BuildMeta buildMeta() {
         return Main.getMeta();

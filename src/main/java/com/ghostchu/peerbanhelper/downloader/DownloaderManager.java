@@ -30,7 +30,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implements AutoCloseable, Reloadable {
+public final class DownloaderManager extends CopyOnWriteArrayList<Downloader> implements AutoCloseable, Reloadable {
     @Autowired
     private AlertManager alertManager;
 

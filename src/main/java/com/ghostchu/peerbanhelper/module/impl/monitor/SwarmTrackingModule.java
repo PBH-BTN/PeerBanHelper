@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @Component
 @IgnoreScan
-public class SwarmTrackingModule extends AbstractFeatureModule implements MonitorFeatureModule {
+public final class SwarmTrackingModule extends AbstractFeatureModule implements MonitorFeatureModule {
     @Autowired
     private TrackedSwarmDao trackedSwarmDao;
 
