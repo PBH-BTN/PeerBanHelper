@@ -8,6 +8,8 @@ import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
@@ -87,7 +89,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                         .eq("torrent_id", new SelectArg(t))
                         .queryBuilder()
                 , pageable);
-        var result = page.getResults().stream().map(r -> new PBHBanController.BanLogResponse(locale(ctx), downloaderManager, r)).toList();
+        var result = page.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, page.getTotal(), result)));
     }
 
@@ -111,7 +113,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                             .queryBuilder()
                     , pageable);
         }
-        List<TorrentInfo> infoList = new ArrayList<>();
+        List<TorrentInfoDTO> infoList = new ArrayList<>();
         for (TorrentEntity result : torrentEntityPage.getResults()) {
             var peerBanCount = historyDao.queryBuilder()
                     .where()
@@ -122,7 +124,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                     .where()
                     .eq("torrent_id", result.getId())
                     .countOf();
-            infoList.add(new TorrentInfo(result.getInfoHash(), result.getName(), result.getSize(), peerBanCount, peerAccessCount));
+            infoList.add(new TorrentInfoDTO(result.getInfoHash(), result.getName(), result.getSize(), peerBanCount, peerAccessCount));
         }
         ctx.json(new StdResp(true, null, new Page<>(pageable, torrentEntityPage.getTotal(), infoList)));
     }
@@ -146,7 +148,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                 .eq("torrent_id", t.getId())
                 .countOf();
 
-        ctx.json(new StdResp(true, null, new TorrentInfo(t.getInfoHash(),
+        ctx.json(new StdResp(true, null, new TorrentInfoDTO(t.getInfoHash(),
                 t.getName(), t.getSize(),
                 peerBanCount, peerAccessCount)));
     }
@@ -172,13 +174,4 @@ public final class PBHTorrentController extends AbstractFeatureModule {
 
     }
 
-    public record TorrentInfo(
-            String infoHash,
-            String name,
-            long size,
-            long peerBanCount,
-            long peerAccessCount
-    ) {
-
-    }
 }

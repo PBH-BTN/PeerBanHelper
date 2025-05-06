@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.WebSocketLogEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -14,8 +15,6 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.eventbus.Subscribe;
 import io.javalin.http.Context;
 import io.javalin.websocket.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +65,7 @@ public final class PBHLogsController extends AbstractFeatureModule {
         synchronized (session) {
             for (WsContext wsContext : session) {
                 wsContext.send(new StdResp(true, null,
-                        new WebSocketLogEntry(
+                        new WebSocketLogEntryDTO(
                                 event.getEntry().time(),
                                 event.getEntry().thread(),
                                 event.getEntry().level().name(),
@@ -119,7 +118,7 @@ public final class PBHLogsController extends AbstractFeatureModule {
         for (LogEntry logEntry : JListAppender.ringDeque) {
             if (logEntry.seq() > offset) {
                 ctx.send(new StdResp(true, null,
-                        new WebSocketLogEntry(
+                        new WebSocketLogEntryDTO(
                                 logEntry.time(),
                                 logEntry.thread(),
                                 logEntry.level().name(),
@@ -145,7 +144,7 @@ public final class PBHLogsController extends AbstractFeatureModule {
 
     private void handleLogs(Context ctx) {
         ctx.status(200);
-        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntry(
+        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntryDTO(
                 e.time(),
                 e.thread(),
                 e.level().name(),
@@ -161,13 +160,4 @@ public final class PBHLogsController extends AbstractFeatureModule {
         Main.getEventBus().unregister(this);
     }
 
-    @AllArgsConstructor
-    @Data
-    private static class WebSocketLogEntry {
-        private long time;
-        private String thread;
-        private String level;
-        private String content;
-        private long offset;
-    }
 }

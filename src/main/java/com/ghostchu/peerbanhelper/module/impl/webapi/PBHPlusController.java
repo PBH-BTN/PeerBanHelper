@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ActiveInfoDTO;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationKeyManager;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -112,22 +113,13 @@ public final class PBHPlusController extends AbstractFeatureModule {
             }
         }
         context.json(new StdResp(true, null,
-                new ActiveInfo(activationManager.isActivated(),
+                new ActiveInfoDTO(activationManager.isActivated(),
                         key,keyData, expiredKeyData
                        )));
     }
 
     @Override
     public void onDisable() {
-
-    }
-
-    public record ActiveInfo(
-            boolean activated,
-            String key,
-            ActivationKeyManager.KeyData keyData,
-            ActivationKeyManager.KeyData inactiveKeyData
-    ) {
 
     }
 

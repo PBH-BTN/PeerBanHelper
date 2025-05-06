@@ -134,10 +134,4 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     public void onDisable() {
 
     }
-
-    record ModuleRecord(
-            String className,
-            PBHDownloaderController.DraftDownloader draftDownloader
-    ) {
-    }
 }
