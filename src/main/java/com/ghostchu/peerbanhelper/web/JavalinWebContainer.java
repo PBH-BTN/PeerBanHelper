@@ -98,8 +98,6 @@ public final class JavalinWebContainer {
                     }
                     c.registerPlugin(new OpenApiPlugin(openApiConfig ->
                             openApiConfig
-                                    .withDocumentationPath("/openapi.json")
-                                    .withRoles(Role.USER_READ)
                                     .withDefinitionConfiguration((version, openApiDefinition) ->
                                             // you can add whatever you want to this document using your favourite json api
                                             openApiDefinition
@@ -122,7 +120,6 @@ public final class JavalinWebContainer {
                                                     .withSecurity(openApiSecurity ->
                                                             openApiSecurity
                                                                     .withBearerAuth()
-                                                                    .withApiKeyAuth("ApiKeyAuth", "X-Api-Key")
                                                                     .withCookieAuth("CookieAuth", "JSESSIONID")
                                                     )
                                                     .withDefinitionProcessor(BaseJsonNode::toPrettyString)
