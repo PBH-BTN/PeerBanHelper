@@ -95,7 +95,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     }
 
 
-    private TrafficJournalDao.TrafficDataDto fixTimezone(Context ctx, TrafficJournalDao.TrafficDataDto data) {
+    private TrafficJournalDao.TrafficDataComputed fixTimezone(Context ctx, TrafficJournalDao.TrafficDataComputed data) {
         Timestamp ts = data.getTimestamp();
         var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
                 .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
@@ -103,7 +103,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         return data;
     }
 
-    private List<TrafficJournalDao.TrafficDataDto> fixTimezone(Context ctx, List<TrafficJournalDao.TrafficDataDto> data) {
+    private List<TrafficJournalDao.TrafficDataComputed> fixTimezone(Context ctx, List<TrafficJournalDao.TrafficDataComputed> data) {
         data.forEach(d -> fixTimezone(ctx, d));
         return data;
     }
