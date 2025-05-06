@@ -12,7 +12,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class BanLogDTO {
+public final class BanLogDTO {
     private long banAt;
     private long unbanAt;
     private String peerIp;

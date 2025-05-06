@@ -5,6 +5,6 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class ExperimentPutBody {
+public final class ExperimentPutBody {
     private String status;
 }

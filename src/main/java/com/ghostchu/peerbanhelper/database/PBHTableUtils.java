@@ -25,7 +25,7 @@ import java.util.*;
  *
  * @author graywatson
  */
-public class PBHTableUtils {
+public final class PBHTableUtils {
 
     private static Logger logger = LoggerFactory.getLogger(PBHTableUtils.class);
     private static final FieldType[] noFieldTypes = new FieldType[0];

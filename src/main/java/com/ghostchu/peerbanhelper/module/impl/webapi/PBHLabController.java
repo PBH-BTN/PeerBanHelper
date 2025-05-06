@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.body.ConfigBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.EnabledConfigBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.ExperimentPutBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ExperimentRecordDTO;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
@@ -62,11 +62,11 @@ public final class PBHLabController extends AbstractFeatureModule {
     }
 
     private void handleConfigGet(Context context) {
-        context.json(new StdResp(true, null, new ConfigBody(laboratory.isEnabled())));
+        context.json(new StdResp(true, null, new EnabledConfigBody(laboratory.isEnabled())));
     }
 
     private void handleConfig(Context context) {
-        var configBody = context.bodyAsClass(ConfigBody.class);
+        var configBody = context.bodyAsClass(EnabledConfigBody.class);
         laboratory.setEnabled(configBody.isEnabled());
         context.json(new StdResp(true, null, configBody.isEnabled()));
     }

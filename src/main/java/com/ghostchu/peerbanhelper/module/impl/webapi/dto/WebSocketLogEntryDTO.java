@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class WebSocketLogEntryDTO {
+public final class WebSocketLogEntryDTO {
     private long time;
     private String thread;
     private String level;

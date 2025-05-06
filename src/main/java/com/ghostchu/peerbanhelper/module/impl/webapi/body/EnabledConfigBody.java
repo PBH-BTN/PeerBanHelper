@@ -5,6 +5,6 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class ConfigBody {
+public final class EnabledConfigBody {
     private boolean enabled;
 }

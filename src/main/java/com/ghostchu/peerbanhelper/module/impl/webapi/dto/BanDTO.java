@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class BanDTO {
+public final class BanDTO {
     private String address;
     private BakedBanMetadata banMetadata;
     private IPGeoData ipGeoData;
