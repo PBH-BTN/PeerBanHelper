@@ -62,7 +62,7 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
             throw new NeedInitException();
         }
 
-        if(!webContainer.allowAttemptLogin(userIp(ctx))){
+        if (!webContainer.allowAttemptLogin(userIp(ctx), ctx.userAgent())) {
             throw new IPAddressBannedException();
         }
 
@@ -75,10 +75,10 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
         if (!webContainer.getToken().equals(loginRequestBody.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
-            webContainer.markLoginFailed(userIp(ctx));
+            webContainer.markLoginFailed(userIp(ctx), ctx.userAgent());
             return;
         }
-        webContainer.markLoginSuccess(userIp(ctx));
+        webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
         ctx.sessionAttribute("authenticated", webContainer.getToken());
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }

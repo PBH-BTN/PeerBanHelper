@@ -644,3 +644,6 @@ MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR: "[主动监测] 无法�
 MODULE_ACTIVE_MONITORING_SPEED_LIMITER_ENABLED: "[主动监测] 由于在指定时间内您已共计上传 {} 数据，速率限制已对下载器 {} 启用。新的值：上传={}/s 下载={}/s"
 
 DATABASE_UPGRADING_RECORDS: "[数据升级] 正在升级 {}，已完成：{}/{}。请不要关闭程序，否则将导致数据损坏！"
+WEBUI_SECURITY_LOGIN_FAILED: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于对方提供了错误的 Token 凭据，因此登录尝试已被阻止。如果这不是预期行为，建议使用防火墙保护 PeerBanHelper 的 WebUI 端口。对方浏览器信息：{}"
+WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于登录失败次数过多，PeerBanHelper 已暂时阻止从此位置登录。"
+WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有用户成功从 {} 登录 PeerBanHelper。浏览器信息：{}"

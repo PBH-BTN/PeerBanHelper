@@ -79,7 +79,7 @@ public final class PBHLogsController extends AbstractFeatureModule {
     private void handleLogsStream(WsConfig wsConfig) {
         wsConfig.onConnect(ctx -> {
             if (ctx.session.getRemoteAddress() instanceof InetSocketAddress inetSocketAddress) {
-                if (!webContainer.allowAttemptLogin(inetSocketAddress.getHostString())) {
+                if (!webContainer.allowAttemptLogin(inetSocketAddress.getHostString(), ctx.getUpgradeCtx$javalin().userAgent())) {
                     ctx.closeSession(WsCloseStatus.TRY_AGAIN_LATER, JsonUtil.standard().toJson(new StdResp(false, "Too many failed retries, IP banned.", null)));
                     return;
                 }
@@ -91,10 +91,10 @@ public final class PBHLogsController extends AbstractFeatureModule {
             }
             if (authResult == JavalinWebContainer.TokenAuthResult.FAILED) {
                 ctx.closeSession(WsCloseStatus.POLICY_VIOLATION, JsonUtil.standard().toJson(new StdResp(false, tlUI(Lang.WS_LOGS_STREAM_ACCESS_DENIED), null)));
-                webContainer.markLoginFailed(userIp(ctx.getUpgradeCtx$javalin()));
+                webContainer.markLoginFailed(userIp(ctx.getUpgradeCtx$javalin()), ctx.getUpgradeCtx$javalin().userAgent());
                 return;
             }
-            webContainer.markLoginSuccess(userIp(ctx.getUpgradeCtx$javalin()));
+            webContainer.markLoginSuccess(userIp(ctx.getUpgradeCtx$javalin()), ctx.getUpgradeCtx$javalin().userAgent());
             ctx.enableAutomaticPings(15, TimeUnit.SECONDS);
             this.session.add(ctx);
             var offset = ctx.queryParam("offset");
