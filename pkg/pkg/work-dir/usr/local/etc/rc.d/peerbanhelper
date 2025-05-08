@@ -9,6 +9,7 @@
 name="peerbanhelper"
 rcvar=peerbanhelper_enable
 
+export JAVA_VERSION=21
 
 : ${peerbanhelper_enable:=NO}
 : ${peerbanhelper_user:="root"}
