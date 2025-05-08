@@ -1,6 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.RuleSubLogsDao;
 import com.ghostchu.peerbanhelper.database.table.RuleSubInfoEntity;
 import com.ghostchu.peerbanhelper.database.table.RuleSubLogEntity;
@@ -9,17 +11,16 @@ import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.module.impl.rule.dto.DataUpdateResultDTO;
+import com.ghostchu.peerbanhelper.module.impl.rule.dto.IPBanResultDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
-import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
@@ -122,32 +123,30 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         if (isHandShaking(peer)) {
             return handshaking();
         }
-        return getCache().readCacheButWritePassOnly(this, peer.getPeerAddress().getIp(), () -> {
-            String ip = peer.getPeerAddress().getIp();
-            List<IPBanResult> results = new ArrayList<>();
-            ipBanMatchers.forEach(rule -> results.add(new IPBanResult(rule.getRuleName(), rule.match(ip))));
-            for (IPBanResult ipBanResult : results) {
-                try {
-                    if (ipBanResult == null) return pass();
-                    boolean match = ipBanResult.matchResult().result() == MatchResultEnum.TRUE;
-                    if (match) {
-                        return new CheckResult(getClass(),
-                                PeerAction.BAN,
-                                banDuration,
-                                new TranslationComponent(ipBanResult.ruleName()),
-                                new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE,
-                                        ipBanResult.ruleName(),
-                                        ip,
-                                        Optional.ofNullable(ipBanResult.matchResult().comment()).orElse(new TranslationComponent(Lang.MODULE_IBL_COMMENT_UNKNOWN))
-                                ));
-                    }
-                } catch (Exception e) {
-                    log.error(tlUI(Lang.IP_BAN_RULE_MATCH_ERROR), e);
-                    return pass();
+        String ip = peer.getPeerAddress().getIp();
+        List<IPBanResultDTO> results = new ArrayList<>();
+        ipBanMatchers.forEach(rule -> results.add(new IPBanResultDTO(rule.getRuleName(), rule.match(ip))));
+        for (IPBanResultDTO ipBanResultDTO : results) {
+            try {
+                if (ipBanResultDTO == null) return pass();
+                boolean match = ipBanResultDTO.matchResult().result() == MatchResultEnum.TRUE;
+                if (match) {
+                    return new CheckResult(getClass(),
+                            PeerAction.BAN,
+                            banDuration,
+                            new TranslationComponent(ipBanResultDTO.ruleName()),
+                            new TranslationComponent(Lang.MODULE_IBL_MATCH_IP_RULE,
+                                    ipBanResultDTO.ruleName(),
+                                    ip,
+                                    Optional.ofNullable(ipBanResultDTO.matchResult().comment()).orElse(new TranslationComponent(Lang.MODULE_IBL_COMMENT_UNKNOWN))
+                            ));
                 }
+            } catch (Exception e) {
+                log.error(tlUI(Lang.IP_BAN_RULE_MATCH_ERROR), e);
+                return pass();
             }
-            return pass();
-        }, true);
+        }
+        return pass();
     }
 
     /**
@@ -206,7 +205,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             File ruleFile = new File(dir, ruleFileName);
             DualIPv4v6AssociativeTries<String> ipAddresses = new DualIPv4v6AssociativeTries<>();
             getResource(url)
-                    .whenComplete((dataUpdateResult, throwable) -> {
+                    .whenComplete((dataUpdateResultDTO, throwable) -> {
                         if (throwable != null) {
                             // 加载远程订阅文件出错,尝试从本地缓存中加载
                             if (ruleFile.exists()) {
@@ -232,20 +231,20 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                         }
                         try {
                             HashCode ruleHash = null;
-                            HashCode tempHash = Hashing.sha256().hashBytes(dataUpdateResult.data());
+                            HashCode tempHash = Hashing.sha256().hashBytes(dataUpdateResultDTO.data());
                             if (ruleFile.exists()) {
                                 ruleHash = Files.asByteSource(ruleFile).hash(Hashing.sha256());
                             }
                             int ent_count = 0;
                             if (!tempHash.equals(ruleHash)) {
                                 // 规则文件不存在或者规则文件与临时文件sha256不一致则需要更新
-                                ent_count = stringToIPList(new String(dataUpdateResult.data(), StandardCharsets.UTF_8), ipAddresses);
+                                ent_count = stringToIPList(new String(dataUpdateResultDTO.data(), StandardCharsets.UTF_8), ipAddresses);
                                 // 更新后重命名临时文件
-                                Files.write(dataUpdateResult.data(), ruleFile);
+                                Files.write(dataUpdateResultDTO.data(), ruleFile);
                             } else {
                                 // 如果一致，但ipBanMatchers没有对应的规则内容，则加载内容
                                 if (ipBanMatchers.stream().noneMatch(ele -> ele.getRuleId().equals(ruleId))) {
-                                    ent_count = stringToIPList(new String(dataUpdateResult.data(), StandardCharsets.UTF_8), ipAddresses);
+                                    ent_count = stringToIPList(new String(dataUpdateResultDTO.data(), StandardCharsets.UTF_8), ipAddresses);
                                 } else {
                                     log.info(tlUI(Lang.IP_BAN_RULE_NO_UPDATE, name));
                                     result.set(new StdResp(true, tl(locale, Lang.IP_BAN_RULE_NO_UPDATE, name), null));
@@ -286,7 +285,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         return result.get();
     }
 
-    private CompletableFuture<DataUpdateResult> getResource(String url) {
+    private CompletableFuture<DataUpdateResultDTO> getResource(String url) {
         return CompletableFuture.supplyAsync(() -> {
             URI uri;
             try {
@@ -297,7 +296,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             if (uri.getScheme().startsWith("http")) {
                 var response = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                         MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString()).join();
-                return new DataUpdateResult(response.statusCode(), null, response.body().getBytes());
+                return new DataUpdateResultDTO(response.statusCode(), null, response.body().getBytes());
             }
             throw new IllegalArgumentException("Invalid URL");
         });
@@ -507,12 +506,6 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         getConfig().set("check-interval", checkInterval);
         saveConfig();
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
-    }
-
-    record IPBanResult(String ruleName, MatchResult matchResult) {
-    }
-
-    record DataUpdateResult(int code, String message, byte[] data) {
     }
 }
 

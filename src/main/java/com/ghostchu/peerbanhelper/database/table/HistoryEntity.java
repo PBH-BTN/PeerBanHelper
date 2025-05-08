@@ -35,6 +35,8 @@ public final class HistoryEntity {
     private Long peerDownloaded;
     @DatabaseField(canBeNull = false)
     private Double peerProgress;
+    @DatabaseField(canBeNull = false)
+    private Double downloaderProgress;
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
     private TorrentEntity torrent;
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)

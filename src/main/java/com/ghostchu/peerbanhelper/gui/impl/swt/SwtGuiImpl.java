@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.gui.impl.swt;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -86,7 +87,7 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+    public void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent, @Nullable Runnable noEvent) {
         int style = SWT.YES | SWT.NO;
         if (level == Level.INFO) {
             style |= SWT.ICON_INFORMATION;
@@ -108,15 +109,15 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             messageBox.setMessage(description);
             int result = messageBox.open();
             if (result == SWT.YES) {
-                yesEvent.run();
+                if (yesEvent != null) yesEvent.run();
             } else if (result == SWT.NO) {
-                noEvent.run();
+                if (noEvent != null) noEvent.run();
             }
         });
     }
 
     @Override
-    public void onPBHFullyStarted(PeerBanHelperServer server) {
+    public void onPBHFullyStarted(PeerBanHelper server) {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateGuiStuff, 0, 1, TimeUnit.SECONDS);
         swtMainWindow.getWebUITabComponent().navigate(Main.getServer().getWebUiUrl());
     }

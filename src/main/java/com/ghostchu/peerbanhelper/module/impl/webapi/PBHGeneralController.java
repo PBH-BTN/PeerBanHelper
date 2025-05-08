@@ -1,11 +1,14 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
@@ -64,7 +67,9 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Autowired
     private ModuleManager moduleManager;
     @Autowired
-    private PeerBanHelperServer peerBanHelperServer;
+    private PeerBanHelper peerBanHelper;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public boolean isConfigurable() {
@@ -110,17 +115,17 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     private void handleGlobalConfigRead(Context context) {
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("globalPaused", peerBanHelperServer.isGlobalPaused());
+        data.put("globalPaused", downloaderServer.isGlobalPaused());
         context.json(new StdResp(true, null, data));
     }
 
     private void handleGlobalConfig(Context context) {
-        var body = context.bodyAsClass(GlobalOptionPatch.class);
+        var body = context.bodyAsClass(GlobalOptionPatchBody.class);
         if (body == null) {
             throw new IllegalArgumentException("Request body cannot be null");
         }
         if (body.globalPaused() != null) {
-            peerBanHelperServer.setGlobalPaused(body.globalPaused());
+            downloaderServer.setGlobalPaused(body.globalPaused());
         }
         context.json(new StdResp(true, "OK!", null));
     }
@@ -269,7 +274,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private void handleReloading(Context context) {
         Main.setupConfiguration();
         var result = Main.getReloadManager().reload();
-        List<ReloadEntry> entryList = new ArrayList<>();
+        List<ReloadEntryDTO> entryList = new ArrayList<>();
         result.forEach((container, r) -> {
             String entryName;
             if (container.getReloadable() == null) {
@@ -282,7 +287,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                     entryName = reloadable.getClass().getName();
                 }
             }
-            entryList.add(new ReloadEntry(entryName, r.getStatus().name()));
+            entryList.add(new ReloadEntryDTO(entryName, r.getStatus().name()));
         });
         moduleMatchCache.invalidateAll();
 
@@ -489,18 +494,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Override
     public void onDisable() {
 
-    }
-
-    public record GlobalOptionPatch(
-            Boolean globalPaused
-    ) {
-
-    }
-
-    public record ReloadEntry(
-            String reloadable,
-            String reloadResult
-    ) {
     }
 
 }

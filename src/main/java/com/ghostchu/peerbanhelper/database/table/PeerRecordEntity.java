@@ -29,10 +29,14 @@ public final class PeerRecordEntity {
     private long uploaded;
     @DatabaseField(canBeNull = false)
     private long uploadedOffset;
+    @DatabaseField(canBeNull = false, defaultValue = "0")
+    private long uploadSpeed;
     @DatabaseField(canBeNull = false)
     private long downloaded;
     @DatabaseField(canBeNull = false)
     private long downloadedOffset;
+    @DatabaseField(canBeNull = false, defaultValue = "0")
+    private long downloadSpeed;
     @DatabaseField
     private String lastFlags;
     @DatabaseField(canBeNull = false)

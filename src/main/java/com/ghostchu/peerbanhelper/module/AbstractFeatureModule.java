@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.module;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -28,7 +28,7 @@ public abstract class AbstractFeatureModule implements FeatureModule {
     private final ReentrantLock lock = new ReentrantLock();
     @Getter
     @Autowired
-    private PeerBanHelperServer server;
+    private PeerBanHelper server;
     @Getter
     private boolean register;
     @Autowired

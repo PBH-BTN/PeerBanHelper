@@ -27,6 +27,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.Executors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -66,7 +67,7 @@ public final class TrClient {
                 .newBuilder()
                 .version(httpVersion)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())

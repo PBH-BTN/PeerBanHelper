@@ -210,10 +210,10 @@ public class SwtTrayManager {
         long bannedIps = 0L;
         var server = Main.getServer();
         if (server != null) {
-            bannedIps = server.getBannedPeers().values().stream()
+            bannedIps = server.getDownloaderServer().getBannedPeers().values().stream()
                     .map(m -> m.getPeer().getAddress().getIp())
                     .distinct().count();
-            bannedPeers = server.getBannedPeers().values().size();
+            bannedPeers = server.getDownloaderServer().getBannedPeers().size();
         }
         if (banStatsItem != null && !banStatsItem.isDisposed()) {
             banStatsItem.setText(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps));
@@ -224,9 +224,10 @@ public class SwtTrayManager {
     private void updateDownloaderStats() {
         long totalDownloaders = 0L;
         long healthDownloaders = 0L;
-        if (Main.getServer() != null) {
-            totalDownloaders = Main.getServer().getDownloaders().size();
-            healthDownloaders = Main.getServer().getDownloaders().stream()
+        var server = Main.getServer();
+        if (server != null) {
+            totalDownloaders = server.getDownloaderManager().getDownloaders().size();
+            healthDownloaders = server.getDownloaderManager().getDownloaders().stream()
                     .filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
         }
         if (downloaderStatsItem != null && !downloaderStatsItem.isDisposed()) {

@@ -3,19 +3,17 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentMainData;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentPeer;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentTorrent;
-import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrentTorrentTrackers;
-import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.torrent.Tracker;
-import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -37,6 +35,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -59,14 +58,15 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected final QBittorrentConfig config;
     protected final Cache<String, TorrentProperties> torrentPropertiesCache;
 
-    public AbstractQbittorrent(String name, QBittorrentConfig config, AlertManager alertManager) {
-        super(name, alertManager);
+    public AbstractQbittorrent(String id, QBittorrentConfig config, AlertManager alertManager) {
+        super(id, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         Methanol.Builder builder = Methanol
                 .newBuilder()
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
@@ -92,6 +92,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                         TimeUnit.MILLISECONDS
                 )
                 .build();
+    }
+
+    @Override
+    public String getName() {
+        return config.getName();
     }
 
     @Override
@@ -135,11 +140,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             .header("Content-Type", "application/x-www-form-urlencoded")
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save qBittorrent preferences error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -246,6 +251,60 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         List<Tracker> trackerList = getTrackers(torrent);
         removeTracker(torrent, trackerList);
         addTracker(torrent, trackers);
+    }
+
+    /**
+     * 获取当前下载器的限速配置
+     *
+     * @return 限速配置，如果不支持或者请求错误，则可能返回 null
+     */
+    @Override
+    public @Nullable DownloaderSpeedLimiter getSpeedLimiter() {
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/preferences")
+                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            QBittorrentPreferences preferences = JsonUtil.getGson()
+                    .fromJson(request.body(), QBittorrentPreferences.class);
+            long downloadLimit = preferences.getDlLimit(); // 单位是 bytes
+            long uploadLimit = preferences.getUpLimit();
+            return new DownloaderSpeedLimiter(uploadLimit, downloadLimit);
+        } catch (IOException | InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * 设置当前下载器的限速配置
+     *
+     * @param speedLimiter 限速配置
+     *                     应该为大于等于 0 的值，单位是 bytes，0 表示不限制
+     */
+    @Override
+    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+        long downloadLimit = speedLimiter.download();
+        long uploadLimit = speedLimiter.upload();
+        var requestParam = Map.of(
+                "up_limit", uploadLimit,
+                "dl_limit", downloadLimit,
+                "alt_up_limit", uploadLimit,
+                "alt_dl_limit", downloadLimit
+        );
+        var body = FormBodyPublisher.newBuilder()
+                .query("json", JsonUtil.getGson().toJson(requestParam));
+
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest
+                            .POST(apiEndpoint + "/app/setPreferences", body.build())
+                            .header("Content-Type", "application/x-www-form-urlencoded")
+                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (request.statusCode() != 200) {
+                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                throw new IllegalStateException("Save qBittorrent shadow banlist error: statusCode=" + request.statusCode());
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            throw new IllegalStateException(e);
+        }
     }
 
     private void addTracker(Torrent torrent, List<Tracker> newAdded) {
@@ -420,11 +479,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                                 .header("Content-Type", "application/x-www-form-urlencoded")
                         , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
                 if (request.statusCode() != 200) {
-                    log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                    log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                     throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
                 }
             } catch (Exception e) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+                log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
                 throw new IllegalStateException(e);
             }
         });
@@ -440,11 +499,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             .header("Content-Type", "application/x-www-form-urlencoded")
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }

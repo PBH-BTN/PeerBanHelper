@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.gui;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 
 import java.util.logging.Level;
@@ -38,7 +38,7 @@ public class PBHGuiManager implements GuiManager {
     }
 
     @Override
-    public void onPBHFullyStarted(PeerBanHelperServer server) {
+    public void onPBHFullyStarted(PeerBanHelper server) {
         gui.onPBHFullyStarted(server);
     }
 

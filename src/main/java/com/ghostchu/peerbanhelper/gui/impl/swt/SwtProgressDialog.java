@@ -11,80 +11,81 @@ import org.eclipse.swt.widgets.*;
 @Slf4j
 public final class SwtProgressDialog implements ProgressDialog {
 
-    private final Shell shell;
+    private Shell shell;
     private final Display display;
-    private final ProgressBar progressBar;
-    private final Label descriptionLabel;
-    private final Label commentLabel;
-    private final Button stopButton;
+    private ProgressBar progressBar;
+    private Label descriptionLabel;
+    private Label commentLabel;
+    private Button stopButton;
     private float progress;
 
     public SwtProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
         // 获取当前显示器
         this.display = Display.getDefault();
+        display.syncExec(() -> {
+            // 创建主窗口
+            this.shell = new Shell(display, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+            this.shell.setText(title);
+            this.shell.setSize(400, 200);
 
-        // 创建主窗口
-        this.shell = new Shell(display, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-        this.shell.setText(title);
-        this.shell.setSize(400, 200);
+            // 设置布局
+            GridLayout layout = new GridLayout(2, false);
+            layout.marginWidth = 10;
+            layout.marginHeight = 10;
+            layout.horizontalSpacing = 10;
+            shell.setLayout(layout);
 
-        // 设置布局
-        GridLayout layout = new GridLayout(2, false);
-        layout.marginWidth = 10;
-        layout.marginHeight = 10;
-        layout.horizontalSpacing = 10;
-        shell.setLayout(layout);
+            // 创建信息图标
+            Label iconLabel = new Label(shell, SWT.NONE);
+            try {
+                Image infoIcon = new Image(display, display.getSystemImage(SWT.ICON_INFORMATION).getImageData());
+                iconLabel.setImage(infoIcon);
+                // 注册销毁事件以释放图像资源
+                shell.addDisposeListener(e -> infoIcon.dispose());
+            } catch (Exception e) {
+                log.warn("Failed to load information icon", e);
+            }
+            GridData iconData = new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
+            iconLabel.setLayoutData(iconData);
 
-        // 创建信息图标
-        Label iconLabel = new Label(shell, SWT.NONE);
-        try {
-            Image infoIcon = new Image(display, display.getSystemImage(SWT.ICON_INFORMATION).getImageData());
-            iconLabel.setImage(infoIcon);
-            // 注册销毁事件以释放图像资源
-            shell.addDisposeListener(e -> infoIcon.dispose());
-        } catch (Exception e) {
-            log.warn("Failed to load information icon", e);
-        }
-        GridData iconData = new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
-        iconLabel.setLayoutData(iconData);
+            // 创建描述文本
+            this.descriptionLabel = new Label(shell, SWT.WRAP);
+            this.descriptionLabel.setText(description);
+            GridData descData = new GridData(SWT.FILL, SWT.FILL, true, true);
+            descData.widthHint = 350;
+            descData.heightHint = 80;
+            descriptionLabel.setLayoutData(descData);
 
-        // 创建描述文本
-        this.descriptionLabel = new Label(shell, SWT.WRAP);
-        this.descriptionLabel.setText(description);
-        GridData descData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        descData.widthHint = 350;
-        descData.heightHint = 80;
-        descriptionLabel.setLayoutData(descData);
+            // 创建注释标签
+            this.commentLabel = new Label(shell, SWT.NONE);
+            GridData commentData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+            commentData.horizontalSpan = 2;
+            commentLabel.setLayoutData(commentData);
 
-        // 创建注释标签
-        this.commentLabel = new Label(shell, SWT.NONE);
-        GridData commentData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-        commentData.horizontalSpan = 2;
-        commentLabel.setLayoutData(commentData);
+            // 创建进度条
+            this.progressBar = new ProgressBar(shell, SWT.SMOOTH);
+            GridData progressData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+            progressData.horizontalSpan = 1;
+            progressBar.setLayoutData(progressData);
 
-        // 创建进度条
-        this.progressBar = new ProgressBar(shell, SWT.SMOOTH);
-        GridData progressData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-        progressData.horizontalSpan = 1;
-        progressBar.setLayoutData(progressData);
+            // 默认设置为不确定模式
+            setProgressDisplayIndeterminate(true);
 
-        // 默认设置为不确定模式
-        setProgressDisplayIndeterminate(true);
+            // 创建按钮
+            this.stopButton = new Button(shell, SWT.PUSH);
+            this.stopButton.setText(buttonText);
+            this.stopButton.setEnabled(allowCancel);
+            GridData buttonData = new GridData(SWT.END, SWT.CENTER, false, false);
+            stopButton.setLayoutData(buttonData);
 
-        // 创建按钮
-        this.stopButton = new Button(shell, SWT.PUSH);
-        this.stopButton.setText(buttonText);
-        this.stopButton.setEnabled(allowCancel);
-        GridData buttonData = new GridData(SWT.END, SWT.CENTER, false, false);
-        stopButton.setLayoutData(buttonData);
+            if (buttonEvent != null) {
+                stopButton.addListener(SWT.Selection, e -> buttonEvent.run());
+            }
 
-        if (buttonEvent != null) {
-            stopButton.addListener(SWT.Selection, e -> buttonEvent.run());
-        }
-
-        // 居中显示
-        shell.pack();
-        centerShell(shell);
+            // 居中显示
+            shell.pack();
+            centerShell(shell);
+        });
     }
 
     private void centerShell(Shell shell) {

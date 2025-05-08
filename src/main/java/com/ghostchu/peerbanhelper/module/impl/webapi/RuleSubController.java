@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SubInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -224,10 +225,10 @@ public final class RuleSubController extends AbstractFeatureModule {
      * @param ruleId 规则ID
      */
     private void save(Context ctx, String ruleId, boolean isAdd) throws SQLException, IOException {
-        SubInfo subInfo = ctx.bodyValidator(SubInfo.class).get();
+        SubInfoDTO subInfoDTO = ctx.bodyValidator(SubInfoDTO.class).get();
         if (isAdd) {
             // 新增时从 body 中获取ruleId
-            ruleId = subInfo.ruleId();
+            ruleId = subInfoDTO.ruleId();
         }
         if (ruleId == null || ruleId.isEmpty()) {
             ctx.status(HttpStatus.BAD_REQUEST);
@@ -247,8 +248,8 @@ public final class RuleSubController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.IP_BAN_RULE_CANT_FIND, ruleId), null));
             return;
         }
-        String ruleName = subInfo.ruleName();
-        String subUrl = subInfo.subUrl();
+        String ruleName = subInfoDTO.ruleName();
+        String subUrl = subInfoDTO.subUrl();
         if (isAdd) {
             if (ruleName == null || subUrl == null || ruleName.isEmpty() || subUrl.isEmpty()) {
                 ctx.status(HttpStatus.BAD_REQUEST);
@@ -311,17 +312,6 @@ public final class RuleSubController extends AbstractFeatureModule {
             data.add(ipBlackRuleList.getRuleSubInfo(s));
         }
         return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_INFO_QUERY_SUCCESS), data);
-    }
-
-    /**
-     * 订阅规则信息
-     *
-     * @param ruleId   规则ID
-     * @param enabled  是否启用
-     * @param ruleName 规则名称
-     * @param subUrl   订阅地址
-     */
-    record SubInfo(String ruleId, boolean enabled, String ruleName, String subUrl) {
     }
 
 }

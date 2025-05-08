@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ModuleRecordDTO;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -52,7 +53,7 @@ public final class PBHMetadataController extends AbstractFeatureModule {
         data.put("version", buildMeta);
         data.put("modules", moduleManager.getModules().stream()
                 .filter(FeatureModule::isModuleEnabled)
-                .map(f -> new ModuleRecord(f.getClass().getName(), f.getConfigName())).toList());
+                .map(f -> new ModuleRecordDTO(f.getClass().getName(), f.getConfigName())).toList());
         data.put("installationId", Main.getMainConfig().getString("installation-id", "not-initialized"));
         ctx.json(new StdResp(true, null, data));
     }
@@ -62,9 +63,4 @@ public final class PBHMetadataController extends AbstractFeatureModule {
 
     }
 
-    record ModuleRecord(
-            String className,
-            String configName
-    ) {
-    }
 }
