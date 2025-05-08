@@ -341,13 +341,21 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 double lastRecord = clientTask.getLastReportProgress();
                 double rewind = lastRecord - peer.getProgress();
                 // isUploadingToPeer 是为了确认下载器再给对方上传数据，因为对方使用 “超级做种” 时汇报的进度可能并不准确
-                boolean ban = rewind > rewindMaximumDifference && isUploadingToPeer(peer);
-                if (ban) {
-                    clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
-                    clientTask.setBanDelayWindowEndAt(0L);
-                    progressRecorder.invalidate(client); // 封禁时，移除缓存
+                if (rewind > rewindMaximumDifference && isUploadingToPeer(peer)) { // 进度回退且在上传
+                    if (banPeerIfConditionReached(clientTask) || peer.getProgress() > 0.0d) { // 满足等待时间或者 Peer 进度大于 0% (Peer 已更新 BIT_FIELD)
+                        clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
+                        clientTask.setBanDelayWindowEndAt(0L);
+                        progressRecorder.invalidate(client); // 封禁时，移除缓存
+                        return new CheckResult(getClass(), PeerAction.BAN, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
+                                new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
+                                        percent(clientProgress),
+                                        percent(actualProgress),
+                                        percent(lastRecord),
+                                        percent(rewind),
+                                        percent(rewindMaximumDifference)));
+                    }
                 }
-                return new CheckResult(getClass(), ban ? PeerAction.BAN : PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
+                return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
                         new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
                                 percent(clientProgress),
                                 percent(actualProgress),
