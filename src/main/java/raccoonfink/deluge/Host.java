@@ -1,7 +1,9 @@
 package raccoonfink.deluge;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 
 public final class Host {
     private final String m_id;
@@ -38,12 +40,15 @@ public final class Host {
         return m_version;
     }
 
-    public JSONObject toJSON() throws JSONException {
-        final JSONObject ret = new JSONObject();
+    public JsonNode toJSON() {
+        final ObjectNode ret = JsonUtil.getObjectMapper().createObjectNode();
         ret.put("id", m_id);
         ret.put("hostname", m_hostname);
-        ret.put("status", m_status);
-        ret.putOpt("version", m_version);
+        ret.put("status", m_status.name());
+        if (m_version != null) {
+            ret.put("version", m_version);
+        }
+
         return ret;
     }
 

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.json;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,11 @@ public final class JsonUtil {
             .registerTypeAdapter(TranslationComponent.class, TranslationComponentTypeAdapter.INSTANCE)
             .disableHtmlEscaping()
             .create();
+    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper();
 
+    public static ObjectMapper getObjectMapper() {
+        return DEFAULT_OBJECT_MAPPER;
+    }
     @NotNull
     @Deprecated
     public static Gson get() {

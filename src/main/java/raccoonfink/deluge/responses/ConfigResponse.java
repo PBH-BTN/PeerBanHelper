@@ -1,11 +1,11 @@
 package raccoonfink.deluge.responses;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
 @Getter
@@ -13,13 +13,13 @@ public class ConfigResponse extends DelugeResponse {
 
     private ConfigRequestDTO config;
 
-    public ConfigResponse(Integer httpResponseCode, JSONObject response) throws DelugeException {
+    public ConfigResponse(Integer httpResponseCode, JsonNode response) throws DelugeException {
         super(httpResponseCode, response);
 
-        if (response.isNull("result")) {
+        if (!response.has("result")) {
             return;
         }
-        JSONObject jsonObject = response.getJSONObject("result");
+        JsonNode jsonObject = response.get("result");
         String resultJson = jsonObject.toString();
         this.config = JsonUtil.getGson().fromJson(resultJson, ConfigRequestDTO.class);
     }

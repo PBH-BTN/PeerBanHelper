@@ -1,22 +1,23 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import raccoonfink.deluge.DelugeException;
 
 public final class ConnectedResponse extends DelugeResponse {
     private final boolean m_connected;
 
-    public ConnectedResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
+    public ConnectedResponse(final Integer httpResponseCode, final JsonNode response) throws DelugeException {
         super(httpResponseCode, response);
-        try {
-            m_connected = response.getBoolean("result");
-        } catch (final JSONException e) {
-            throw new DelugeException(e);
+
+        JsonNode resultNode = response.get("result");
+        if (resultNode == null || !resultNode.isBoolean()) {
+            throw new DelugeException("Invalid 'result' field in JSON: " + response);
         }
+        m_connected = resultNode.asBoolean();
     }
 
-    public ConnectedResponse(final Integer httpResponseCode, final JSONObject response, final boolean isConnected) throws DelugeException {
+    public ConnectedResponse(final Integer httpResponseCode, final JsonNode response, final boolean isConnected) throws DelugeException {
         super(httpResponseCode, response);
         m_connected = isConnected;
     }
@@ -27,8 +28,8 @@ public final class ConnectedResponse extends DelugeResponse {
 
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
+    public JsonNode toResponseJSON() {
+        final ObjectNode ret = (ObjectNode) super.toResponseJSON();
         ret.put("result", isConnected());
         return ret;
     }

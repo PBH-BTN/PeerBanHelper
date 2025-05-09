@@ -1,17 +1,18 @@
 package raccoonfink.deluge.responses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import raccoonfink.deluge.DelugeException;
 
 public final class CheckSessionResponse extends DelugeResponse {
     private final boolean m_sessionActive;
 
-    public CheckSessionResponse(final Integer httpResponseCode, final JSONObject result) throws DelugeException {
+    public CheckSessionResponse(final Integer httpResponseCode, final JsonNode result) throws DelugeException {
         super(httpResponseCode, result);
 
-        if (result != null) {
-            m_sessionActive = result.optBoolean("result");
+        if (result.has("result")) {
+            m_sessionActive = result.get("result").asBoolean();
         } else {
             m_sessionActive = false;
         }
@@ -22,8 +23,8 @@ public final class CheckSessionResponse extends DelugeResponse {
     }
 
     @Override
-    public JSONObject toResponseJSON() throws JSONException {
-        final JSONObject ret = super.toResponseJSON();
+    public JsonNode toResponseJSON() {
+        final ObjectNode ret = (ObjectNode) super.toResponseJSON();
         ret.put("result", isSessionActive());
         return ret;
     }

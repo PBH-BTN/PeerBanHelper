@@ -1,11 +1,11 @@
 package raccoonfink.deluge.responses;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.json.JSONObject;
 import raccoonfink.deluge.DelugeException;
 
 import java.util.List;
@@ -14,12 +14,12 @@ import java.util.List;
 public final class PBHBannedPeersResponse extends DelugeResponse {
     private BannedPeersResponseDTO bannedPeers;
 
-    public PBHBannedPeersResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {
+    public PBHBannedPeersResponse(final Integer httpResponseCode, final JsonNode response) throws DelugeException {
         super(httpResponseCode, response);
-        if (response.isNull("result")) {
+        if (!response.has("result")) {
             return;
         }
-        JSONObject jsonObject = response.getJSONObject("result");
+        JsonNode jsonObject = response.get("result");
         String resultJson = jsonObject.toString();
         this.bannedPeers = JsonUtil.getGson().fromJson(resultJson, BannedPeersResponseDTO.class);
     }
