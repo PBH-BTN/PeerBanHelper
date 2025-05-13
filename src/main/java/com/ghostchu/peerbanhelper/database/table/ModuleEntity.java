@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "modules")
+@DatabaseTable(tableName = "modules", daoClass = ModuleEntity.class)
 public final class ModuleEntity {
     @DatabaseField(generatedId = true)
     private Long id;

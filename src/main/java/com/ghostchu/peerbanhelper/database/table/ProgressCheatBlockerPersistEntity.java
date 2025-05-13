@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "pcb_persist_records")
+@DatabaseTable(tableName = "pcb_persist_records", daoClass = ProgressCheatBlockerPersistEntity.class)
 public final class ProgressCheatBlockerPersistEntity {
     @DatabaseField(generatedId = true)
     private Long id;

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "rules")
+@DatabaseTable(tableName = "rules", daoClass = RuleEntity.class)
 public final class RuleEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

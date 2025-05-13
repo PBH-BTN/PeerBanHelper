@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "banlist")
+@DatabaseTable(tableName = "banlist", daoClass = BanListEntity.class)
 public final class BanListEntity {
     @DatabaseField(id = true, index = true)
     private String address;

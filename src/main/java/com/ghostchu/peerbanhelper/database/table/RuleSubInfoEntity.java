@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "rule_sub_info")
+@DatabaseTable(tableName = "rule_sub_info", daoClass = RuleSubInfoEntity.class)
 public final class RuleSubInfoEntity {
     @DatabaseField(id = true, index = true)
     private String ruleId;

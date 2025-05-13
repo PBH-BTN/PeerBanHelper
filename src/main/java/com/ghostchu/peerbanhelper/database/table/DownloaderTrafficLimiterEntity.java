@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "downloader_traffic_limiter")
+@DatabaseTable(tableName = "downloader_traffic_limiter", daoClass = DownloaderTrafficLimiterEntity.class)
 public final class DownloaderTrafficLimiterEntity {
     @DatabaseField(id = true, index = true, uniqueCombo = true)
     private String downloader;
