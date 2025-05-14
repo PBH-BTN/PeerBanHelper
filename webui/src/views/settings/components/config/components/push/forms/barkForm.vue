@@ -13,5 +13,5 @@
 import { type BarkConfig } from '@/api/model/push'
 
 const model = defineModel<BarkConfig>({ required: true })
-if (model.value.backend_url==="") model.value.backend_url = "https://api.day.app/push"
+if (Object.keys(model.value).length === 0) model.value.backend_url = 'https://api.day.app/push'
 </script>
