@@ -48,7 +48,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
         section.set("type", "bark");
         section.set("backend_url", config.getBackendUrl());
         section.set("device_key", config.getDeviceKey());
-        section.set("group", config.getGroup());
+        section.set("message_group", config.getBarkGroup());
         return section;
     }
 
@@ -59,7 +59,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
     public static BarkPushProvider loadFromYaml(String name, ConfigurationSection section) {
         var backendUrl = section.getString("backend_url", "https://api.day.app/push");
         var sendKey = section.getString("device_key", "");
-        var group = section.getString("group", "");
+        var group = section.getString("message_group", "");
         Config config = new Config(backendUrl, sendKey, group);
         return new BarkPushProvider(name, config);
     }
@@ -70,7 +70,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
         map.put("title", title);
         map.put("body", content);
         map.put("device_key", config.getDeviceKey());
-        map.put("group", config.getGroup());
+        map.put("group", config.getBarkGroup());
         map.put("icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
         HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                 MutableRequest.POST(config.getBackendUrl()
@@ -92,7 +92,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
         @SerializedName("device_key")
         private String deviceKey;
         @SerializedName("bark_group")
-        private String group;
+        private String barkGroup;
     }
 
 }
