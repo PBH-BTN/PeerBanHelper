@@ -48,6 +48,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
         section.set("type", "bark");
         section.set("backend_url", config.getBackendUrl());
         section.set("device_key", config.getDeviceKey());
+        section.set("group", config.getGroup());
         return section;
     }
 
@@ -58,7 +59,8 @@ public final class BarkPushProvider extends AbstractPushProvider {
     public static BarkPushProvider loadFromYaml(String name, ConfigurationSection section) {
         var backendUrl = section.getString("backend_url", "https://api.day.app/push");
         var sendKey = section.getString("device_key", "");
-        Config config = new Config(backendUrl,sendKey);
+        var group = section.getString("group", "");
+        Config config = new Config(backendUrl, sendKey, group);
         return new BarkPushProvider(name, config);
     }
 
@@ -68,6 +70,8 @@ public final class BarkPushProvider extends AbstractPushProvider {
         map.put("title", title);
         map.put("body", content);
         map.put("device_key", config.getDeviceKey());
+        map.put("group", config.getGroup());
+        map.put("icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
         HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                 MutableRequest.POST(config.getBackendUrl()
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
@@ -87,6 +91,8 @@ public final class BarkPushProvider extends AbstractPushProvider {
         private String backendUrl;
         @SerializedName("device_key")
         private String deviceKey;
+        @SerializedName("bark_group")
+        private String group;
     }
 
 }

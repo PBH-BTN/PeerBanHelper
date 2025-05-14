@@ -55,6 +55,7 @@ export interface TelegramConfig {
 export interface BarkConfig {
   backend_url: string
   device_key: string
+  bark_group: string
 }
 
 export type PushConfig = {
