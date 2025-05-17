@@ -1,6 +1,9 @@
 package com.ghostchu.peerbanhelper.bittorrent.peer;
 
-import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.api.bittorrent.peer.PeerFlag;
+import com.ghostchu.peerbanhelper.api.bittorrent.peer.PeerMessage;
+import com.ghostchu.peerbanhelper.api.wrapper.PeerAddress;
 import lombok.Setter;
 
 import java.util.List;

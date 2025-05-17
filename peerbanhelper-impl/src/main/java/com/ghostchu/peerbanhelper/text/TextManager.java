@@ -1,9 +1,11 @@
 package com.ghostchu.peerbanhelper.text;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.text.postprocessor.PostProcessor;
+import com.ghostchu.peerbanhelper.api.text.Lang;
+import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.api.text.postprocessor.PostProcessor;
 import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
-import com.ghostchu.peerbanhelper.util.URLUtil;
+import com.ghostchu.peerbanhelper.common.util.URLUtil;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.SneakyThrows;
