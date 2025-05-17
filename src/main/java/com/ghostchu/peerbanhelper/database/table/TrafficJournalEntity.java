@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "traffic_journal_v3")
+@DatabaseTable(tableName = "traffic_journal_v3", daoClass = TrafficJournalEntity.class)
 public final class TrafficJournalEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

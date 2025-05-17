@@ -51,21 +51,25 @@ public final class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String name, String uuid, Config config, AlertManager alertManager) {
-        super(name, uuid, alertManager);
-        this.name = name;
+    public Deluge(String id, Config config, AlertManager alertManager) {
+        super(id, alertManager);
         this.config = config;
         this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
     }
 
-    public static Deluge loadFromConfig(String name, String uuid, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section, name);
-        return new Deluge(name, uuid, config, alertManager);
+    @Override
+    public String getName() {
+        return config.getName();
     }
 
-    public static Deluge loadFromConfig(String name, String uuid, JsonObject section, AlertManager alertManager) {
+    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager) {
+        Config config = Config.readFromYaml(section, id);
+        return new Deluge(id, config, alertManager);
+    }
+
+    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(name, uuid, config, alertManager);
+        return new Deluge(id, config, alertManager);
     }
 
     @Override

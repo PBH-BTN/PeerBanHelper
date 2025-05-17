@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "torrents")
+@DatabaseTable(tableName = "torrents", daoClass = TorrentEntity.class)
 public final class TorrentEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

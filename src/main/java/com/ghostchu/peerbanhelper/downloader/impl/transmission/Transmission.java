@@ -43,26 +43,31 @@ public final class Transmission extends AbstractDownloader {
     private final String blocklistUrl;
     private final Config config;
 
-    public Transmission(String name, String uuid, String blocklistUrl, Config config, AlertManager alertManager) {
-        super(name, uuid, alertManager);
+    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager) {
+        super(id, alertManager);
         this.config = config;
         this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
 
+    @Override
+    public String getName() {
+        return config.getName();
+    }
+
     private static String generateBlocklistUrl(String pbhServerAddress) {
         return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
-    public static Transmission loadFromConfig(String name, String uuid, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section, name);
-        return new Transmission(name, uuid, generateBlocklistUrl(pbhServerAddress), config, alertManager);
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager) {
+        Config config = Config.readFromYaml(section, id);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager);
     }
 
-    public static Transmission loadFromConfig(String name, String uuid, String pbhServerAddress, JsonObject section, AlertManager alertManager) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
-        return new Transmission(name, uuid, generateBlocklistUrl(pbhServerAddress), config, alertManager);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager);
     }
 
     @Override

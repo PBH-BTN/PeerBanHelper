@@ -1,7 +1,9 @@
 package com.ghostchu.peerbanhelper.database;
 
+import com.ghostchu.peerbanhelper.config.ConfigTransfer;
 import com.ghostchu.peerbanhelper.database.table.*;
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.logger.Level;
@@ -14,6 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
+import java.util.function.Consumer;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
@@ -46,7 +51,7 @@ public final class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "9"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "12"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -112,9 +117,58 @@ public final class DatabaseHelper {
             }
             v = 11;
         }
+        if (v == 11) {
+            try {
+                var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
+                recordBatchUpdate("DownloaderName Converting (BanHistory)", historyDao, (historyEntity -> {
+                    var downloaderName = historyEntity.getDownloader();
+                    historyEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
+                }));
+                var peerRecordDao = DaoManager.createDao(getDataSource(), PeerRecordEntity.class);
+                recordBatchUpdate("DownloaderName Converting (PeerRecord)", peerRecordDao, (peerRecordEntity -> {
+                    var downloaderName = peerRecordEntity.getDownloader();
+                    peerRecordEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
+                }));
+                var progressCheatBlockerPersistDao = DaoManager.createDao(getDataSource(), ProgressCheatBlockerPersistEntity.class);
+                recordBatchUpdate("DownloaderName Converting (ProgressCheatBlockerPersist)", progressCheatBlockerPersistDao, (progressCheatBlockerPersistEntity -> {
+                    var downloaderName = progressCheatBlockerPersistEntity.getDownloader();
+                    progressCheatBlockerPersistEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
+                }));
+                var trafficJournalDao = DaoManager.createDao(getDataSource(), TrafficJournalEntity.class);
+                recordBatchUpdate("DownloaderName Converting (TrafficJournal)", trafficJournalDao, (trafficJournalEntity -> {
+                    var downloaderName = trafficJournalEntity.getDownloader();
+                    trafficJournalEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
+                }));
+                TableUtils.clearTable(getDataSource(), BanListEntity.class);
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 12;
+        }
 
         version.setValue(String.valueOf(v));
         metadata.update(version);
+    }
+
+    private <T> void recordBatchUpdate(String processName, Dao<T, ?> dao, Consumer<T> consumer) throws Exception {
+        long total = dao.countOf();
+
+        dao.callBatchTasks(() -> {
+            long processing = 0;
+            for (T entity : dao.getWrappedIterable()) {
+                try {
+                    processing++;
+                    if (processing % 10 == 0 || processing == total) {
+                        log.info(tlUI(Lang.DATABASE_UPGRADING_RECORDS, processName, processing, total));
+                    }
+                    consumer.accept(entity);
+                    dao.update(entity);
+                } catch (Exception e) {
+                    log.error("Unhandled error", e);
+                }
+            }
+            return null;
+        });
     }
 
     public BaseConnectionSource getDataSource() {

@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "history")
+@DatabaseTable(tableName = "history", daoClass = HistoryEntity.class)
 public final class HistoryEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

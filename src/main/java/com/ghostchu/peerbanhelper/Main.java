@@ -57,7 +57,7 @@ import java.util.Locale;
 import java.util.Properties;
 
 @Slf4j
-public class Main {
+public final class Main {
     @Getter
     private static final EventBus eventBus = new EventBus();
     @Getter

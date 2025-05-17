@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>7.4.14</version>
+    <version>7.4.15</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -20,6 +20,8 @@
         <install4j.home>/opt/install4j</install4j.home>
         <ormlite.version>6.1</ormlite.version>
         <swt.version>3.129.0</swt.version>
+        <javalin.version>6.5.0</javalin.version>
+        <javalin.openapi.version>6.5.0</javalin.openapi.version>
     </properties>
     <pluginRepositories>
         <pluginRepository>
@@ -28,7 +30,6 @@
         </pluginRepository>
     </pluginRepositories>
     <build>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -43,6 +44,11 @@
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>1.18.38</version>
+                        </path>
+                        <path>
+                            <groupId>io.javalin.community.openapi</groupId>
+                            <artifactId>openapi-annotation-processor</artifactId>
+                            <version>${javalin.openapi.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -257,6 +263,10 @@
             <id>maven-eclipse-repo-fork</id><!-- a repository for swt 4.9 binaries -->
             <url>https://lislei.github.io/maven-eclipse.github.io/maven</url>
         </repository>
+        <repository>
+            <id>reposilite-repository</id>
+            <url>https://maven.reposilite.com/snapshots</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -340,19 +350,10 @@
         <dependency>
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
-            <version>4.2.1</version>
+            <version>4.3.0</version>
         </dependency>
-        <dependency>
-            <groupId>io.javalin</groupId>
-            <artifactId>javalin</artifactId>
-            <version>6.5.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jetty-server</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+
+
         <dependency>
             <groupId>com.googlecode.aviator</groupId>
             <artifactId>aviator</artifactId>
@@ -458,12 +459,6 @@
             <artifactId>commons-io</artifactId>
             <version>2.19.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>11.0.25</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -507,6 +502,23 @@
             <groupId>org.dromara.mica-mqtt</groupId>
             <artifactId>mica-mqtt-client</artifactId>
             <version>2.4.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>${javalin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.javalin.community.openapi</groupId>
+            <artifactId>javalin-openapi-plugin</artifactId>
+            <version>${javalin.openapi.version}</version>
+        </dependency>
+        <!-- Swagger plugin -->
+        <dependency>
+            <groupId>io.javalin.community.openapi</groupId>
+            <artifactId>javalin-swagger-plugin</artifactId>
+            <version>${javalin.openapi.version}</version>
         </dependency>
     </dependencies>
 </project>

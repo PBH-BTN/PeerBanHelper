@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "tmp_tracked_swarm")
+@DatabaseTable(tableName = "tmp_tracked_swarm", daoClass = TrackedSwarmEntity.class)
 public final class TrackedSwarmEntity { // 需要创建为临时表
     @DatabaseField(generatedId = true, index = true)
     private Long id;

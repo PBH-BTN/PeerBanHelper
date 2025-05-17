@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "peer_records")
+@DatabaseTable(tableName = "peer_records", daoClass = PeerRecordEntity.class)
 public final class PeerRecordEntity {
     @DatabaseField(generatedId = true)
     private Long id;

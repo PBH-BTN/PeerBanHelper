@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class MainJumpLoader {
+public final class MainJumpLoader {
     public static void main(String[] args) {
         // Do something before real Main class
         if (System.getProperty("os.name").toLowerCase().contains("windows")) {

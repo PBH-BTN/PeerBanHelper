@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "rule_sub_log")
+@DatabaseTable(tableName = "rule_sub_log", daoClass = RuleSubLogEntity.class)
 public final class RuleSubLogEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "script_storage")
+@DatabaseTable(tableName = "script_storage", daoClass = ScriptStorageEntity.class)
 public final class ScriptStorageEntity {
     @DatabaseField(id = true)
     private String key;

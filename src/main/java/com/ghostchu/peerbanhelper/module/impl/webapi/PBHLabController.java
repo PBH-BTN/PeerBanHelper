@@ -1,6 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.EnabledConfigBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.ExperimentPutBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ExperimentRecordDTO;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
@@ -8,8 +11,6 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -61,11 +62,11 @@ public final class PBHLabController extends AbstractFeatureModule {
     }
 
     private void handleConfigGet(Context context) {
-        context.json(new StdResp(true, null, new ConfigBody(laboratory.isEnabled())));
+        context.json(new StdResp(true, null, new EnabledConfigBody(laboratory.isEnabled())));
     }
 
     private void handleConfig(Context context) {
-        var configBody = context.bodyAsClass(ConfigBody.class);
+        var configBody = context.bodyAsClass(EnabledConfigBody.class);
         laboratory.setEnabled(configBody.isEnabled());
         context.json(new StdResp(true, null, configBody.isEnabled()));
     }
@@ -95,9 +96,9 @@ public final class PBHLabController extends AbstractFeatureModule {
     }
 
     private void handleExperiments(@NotNull Context context) {
-        List<ExperimentRecord> availableExperiments = new ArrayList<>();
+        List<ExperimentRecordDTO> availableExperiments = new ArrayList<>();
         for (Experiments value : Experiments.values()) {
-            var record = new ExperimentRecord(
+            var record = new ExperimentRecordDTO(
                     value.getExperiment().id(),
                     laboratory.isExperimentActivated(value.getExperiment()),
                     value.getExperiment().group(),
@@ -118,23 +119,4 @@ public final class PBHLabController extends AbstractFeatureModule {
 
     }
 
-    @AllArgsConstructor
-    @Data
-    static class ExperimentPutBody {
-        private String status;
-    }
-    @AllArgsConstructor
-    @Data
-    static class ConfigBody{
-        private boolean enabled;
-    }
-
-    record ExperimentRecord(
-            String id,
-            boolean activated,
-            List<Integer> targetGroups,
-            String title,
-            String description
-    ) {
-    }
 }

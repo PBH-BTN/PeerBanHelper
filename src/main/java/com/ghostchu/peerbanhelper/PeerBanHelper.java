@@ -47,7 +47,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class PeerBanHelper implements Reloadable {
+public final class PeerBanHelper implements Reloadable {
     @Autowired
     private TrackedSwarmDao trackerPeersDao;
     @Autowired

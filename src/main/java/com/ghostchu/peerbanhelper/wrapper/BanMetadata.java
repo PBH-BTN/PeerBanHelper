@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.wrapper;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,9 +23,9 @@ public class BanMetadata extends PeerMetadata implements Serializable {
     private TranslationComponent rule;
     private TranslationComponent description;
 
-    public BanMetadata(String context, String downloaderUniqueId, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
+    public BanMetadata(String context, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
                        TranslationComponent description) {
-        super(downloaderUniqueId, torrent, peer);
+        super(downloader, torrent, peer);
         this.context = context;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
@@ -33,7 +34,7 @@ public class BanMetadata extends PeerMetadata implements Serializable {
         this.description = description;
     }
 
-    public BanMetadata(String context, String downloader, long banAt, long unbanAt, boolean banForDisconnect, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
+    public BanMetadata(String context, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
                        TranslationComponent description) {
         super(downloader, torrent, peer);
         this.context = context;

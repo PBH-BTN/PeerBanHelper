@@ -15,7 +15,8 @@ import java.util.concurrent.Callable;
 
 public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
     private static final Object transactionLock = new Object();
-    protected AbstractPBHDao(ConnectionSource connectionSource, Class<T> dataClass) throws SQLException {
+
+    public AbstractPBHDao(ConnectionSource connectionSource, Class<T> dataClass) throws SQLException {
         super(connectionSource, dataClass);
     }
 

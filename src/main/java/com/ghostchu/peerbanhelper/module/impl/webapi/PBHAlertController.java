@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.AlertDTO;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
@@ -108,11 +108,6 @@ public final class PBHAlertController extends AbstractFeatureModule {
 
     @Override
     public void onDisable() {
-
-    }
-
-    record AlertDTO(Long id, Timestamp createAt, Timestamp readAt, AlertLevel level, String identifier, String title,
-                    String content) {
 
     }
 }

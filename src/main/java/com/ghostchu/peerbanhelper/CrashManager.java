@@ -8,7 +8,7 @@ import java.io.IOException;
 
 @Slf4j/**/
 @Component
-public class CrashManager {
+public final class CrashManager {
     private final File file;
 
 

@@ -16,6 +16,8 @@ import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +30,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implements AutoCloseable, Reloadable {
+public final class DownloaderManager extends CopyOnWriteArrayList<Downloader> implements AutoCloseable, Reloadable {
     @Autowired
     private AlertManager alertManager;
 
@@ -57,49 +59,38 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
         for (String uuid : clientSection.getKeys(false)) {
             ConfigurationSection downloaderSection = clientSection.getConfigurationSection(uuid);
             String endpoint = downloaderSection.getString("endpoint");
-            String name = downloaderSection.getString("name", "Un-named downloader");
-            Downloader downloader = createDownloader(uuid, name, downloaderSection);
+            Downloader downloader = createDownloader(uuid, downloaderSection);
             registerDownloader(downloader);
-            log.info(tlUI(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), name + "(" + uuid + ")", endpoint));
+            log.info(tlUI(Lang.DISCOVER_NEW_CLIENT, downloader.getType(), downloader.getName() + "(" + uuid + ")", endpoint));
         }
     }
 
-    public Downloader createDownloader(String client, String uuid, ConfigurationSection downloaderSection) {
-        if (downloaderSection.getString("name") != null) {
-            downloaderSection.set("name", downloaderSection.getString("name", "").replace(".", "-"));
-        }
+    public Downloader createDownloader(String id, ConfigurationSection downloaderSection) {
         Downloader downloader = null;
         switch (downloaderSection.getString("type").toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" ->
-                    downloader = QBittorrent.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "qbittorrentee" ->
-                    downloader = QBittorrentEE.loadFromConfig(client, uuid, downloaderSection, alertManager);
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(id, downloaderSection, alertManager);
+            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(id, downloaderSection, alertManager);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(client, uuid, Main.getPbhServerAddress(), downloaderSection, alertManager);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "deluge" -> downloader = Deluge.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, uuid, downloaderSection, alertManager);
+                    downloader = Transmission.loadFromConfig(id, Main.getPbhServerAddress(), downloaderSection, alertManager);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(id, downloaderSection, alertManager);
+            case "deluge" -> downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
 
     }
 
-    public Downloader createDownloader(String client, String uuid, JsonObject downloaderSection) {
-        if (downloaderSection.get("name") != null) {
-            downloaderSection.addProperty("name", downloaderSection.get("name").getAsString().replace(".", "-"));
-        }
+    public Downloader createDownloader(String id, JsonObject downloaderSection) {
         Downloader downloader = null;
         switch (downloaderSection.get("type").getAsString().toLowerCase(Locale.ROOT)) {
-            case "qbittorrent" ->
-                    downloader = QBittorrent.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "qbittorrentee" ->
-                    downloader = QBittorrentEE.loadFromConfig(client, uuid, downloaderSection, alertManager);
+            case "qbittorrent" -> downloader = QBittorrent.loadFromConfig(id, downloaderSection, alertManager);
+            case "qbittorrentee" -> downloader = QBittorrentEE.loadFromConfig(id, downloaderSection, alertManager);
             case "transmission" ->
-                    downloader = Transmission.loadFromConfig(client, uuid, Main.getPbhServerAddress(), downloaderSection, alertManager);
-            case "biglybt" -> downloader = BiglyBT.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "deluge" -> downloader = Deluge.loadFromConfig(client, uuid, downloaderSection, alertManager);
-            case "bitcomet" -> downloader = BitComet.loadFromConfig(client, uuid, downloaderSection, alertManager);
+                    downloader = Transmission.loadFromConfig(id, Main.getPbhServerAddress(), downloaderSection, alertManager);
+            case "biglybt" -> downloader = BiglyBT.loadFromConfig(id, downloaderSection, alertManager);
+            case "deluge" -> downloader = Deluge.loadFromConfig(id, downloaderSection, alertManager);
+            case "bitcomet" -> downloader = BitComet.loadFromConfig(id, downloaderSection, alertManager);
             //case "rtorrent" -> downloader = RTorrent.loadFromConfig(client, downloaderSection);
         }
         return downloader;
@@ -109,14 +100,17 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
     public void saveDownloaders() throws IOException {
         ConfigurationSection clientSection = new MemoryConfiguration();
         for (Downloader downloader : this) {
-            clientSection.set(downloader.getUniqueId(), downloader.saveDownloader());
+            clientSection.set(downloader.getId(), downloader.saveDownloader());
         }
         Main.getMainConfig().set("client", clientSection);
         Main.getMainConfig().save(Main.getMainConfigFile());
     }
 
     public boolean registerDownloader(Downloader downloader) {
-        if (this.stream().anyMatch(d -> d.getUniqueId().equals(downloader.getUniqueId()))) {
+        if (this.stream().anyMatch(d -> d.getId().equals(downloader.getId()))) {
+            return false;
+        }
+        if (this.stream().anyMatch(d -> d.getName().equals(downloader.getName()))) {
             return false;
         }
         this.add(downloader);
@@ -129,6 +123,37 @@ public class DownloaderManager extends CopyOnWriteArrayList<Downloader> implemen
 
     public List<Downloader> getDownloaders() {
         return List.copyOf(this);
+    }
+
+    @Nullable
+    public Downloader getDownloaderById(String id) {
+        for (Downloader downloader : this) {
+            if (downloader.getId().equals(id)) {
+                return downloader;
+            }
+        }
+        return null;
+    }
+
+    @NotNull
+    public DownloaderBasicInfo getDownloadInfo(@NotNull Downloader downloader) {
+        return new DownloaderBasicInfo(downloader.getId(), downloader.getName(), downloader.getType());
+    }
+
+    @NotNull
+    public DownloaderBasicInfo getDownloadInfo(@Nullable String id) {
+        Downloader downloader = getDownloaderById(id);
+        if (downloader != null && id != null) {
+            return new DownloaderBasicInfo(downloader.getId(), downloader.getName(), downloader.getType());
+        } else {
+            return new DownloaderBasicInfo(id, "Unknown", "Unknown");
+        }
+    }
+
+
+    @NotNull
+    public List<Downloader> getDownloaderByName(String name) {
+        return this.stream().filter(d -> d.getName().equals(name)).toList();
     }
 
     @Override

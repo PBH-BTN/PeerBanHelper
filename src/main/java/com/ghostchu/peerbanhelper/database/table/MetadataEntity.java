@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "metadata")
+@DatabaseTable(tableName = "metadata", daoClass = MetadataEntity.class)
 public final class MetadataEntity {
     @DatabaseField(id = true, index = true)
     private String key;

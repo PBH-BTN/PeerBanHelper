@@ -4,6 +4,8 @@ import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleStringIntKVDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
@@ -93,7 +95,7 @@ public final class PBHChartController extends AbstractFeatureModule {
     }
 
 
-    private TrafficJournalDao.TrafficDataDto fixTimezone(Context ctx, TrafficJournalDao.TrafficDataDto data) {
+    private TrafficJournalDao.TrafficDataComputed fixTimezone(Context ctx, TrafficJournalDao.TrafficDataComputed data) {
         Timestamp ts = data.getTimestamp();
         var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
                 .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
@@ -101,7 +103,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         return data;
     }
 
-    private List<TrafficJournalDao.TrafficDataDto> fixTimezone(Context ctx, List<TrafficJournalDao.TrafficDataDto> data) {
+    private List<TrafficJournalDao.TrafficDataComputed> fixTimezone(Context ctx, List<TrafficJournalDao.TrafficDataComputed> data) {
         data.forEach(d -> fixTimezone(ctx, d));
         return data;
     }
@@ -141,12 +143,12 @@ public final class PBHChartController extends AbstractFeatureModule {
         }
         ctx.json(new StdResp(true, null, Map.of(
                 "connectedPeersTrend", connectedPeerTrends.entrySet().stream()
-                        .map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparingLong(SimpleLongIntKV::key))
+                        .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
+                        .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
                         .toList(),
                 "bannedPeersTrend", bannedPeerTrends.entrySet().stream()
-                        .map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparingLong(SimpleLongIntKV::key))
+                        .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
+                        .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
                         .toList()
         )));
     }
@@ -240,16 +242,16 @@ public final class PBHChartController extends AbstractFeatureModule {
             }
         }
         ctx.json(new StdResp(true, null, Map.of(
-                "isp", ispCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "isp", ispCounter.entrySet().stream().map((e) -> new SimpleStringIntKVDTO(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
-                "province", cnProvinceCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "province", cnProvinceCounter.entrySet().stream().map((e) -> new SimpleStringIntKVDTO(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
-                "region", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "region", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKVDTO(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
-                "city", cnCityCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "city", cnCityCounter.entrySet().stream().map((e) -> new SimpleStringIntKVDTO(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList()
         )));
@@ -257,14 +259,6 @@ public final class PBHChartController extends AbstractFeatureModule {
 
     @Override
     public void onDisable() {
-
-    }
-
-    record SimpleStringIntKV(String key, int value) {
-
-    }
-
-    record SimpleLongIntKV(long key, int value) {
 
     }
 

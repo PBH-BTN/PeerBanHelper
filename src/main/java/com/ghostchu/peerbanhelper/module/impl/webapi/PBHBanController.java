@@ -3,11 +3,12 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -17,9 +18,6 @@ import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import io.javalin.http.Context;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +27,6 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Stream;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Slf4j
 @Component
@@ -47,6 +43,8 @@ public final class PBHBanController extends AbstractFeatureModule {
     private HistoryDao historyDao;
     @Autowired
     private DownloaderServer downloaderServer;
+    @Autowired
+    private DownloaderManager downloaderManager;
 
     @Override
     public boolean isConfigurable() {
@@ -102,7 +100,7 @@ public final class PBHBanController extends AbstractFeatureModule {
         persistMetrics.flush();
         Pageable pageable = new Pageable(ctx);
         var queryResult = historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageable);
-        var result = queryResult.getResults().stream().map(r -> new BanLogResponse(locale(ctx), r)).toList();
+        var result = queryResult.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
@@ -121,7 +119,7 @@ public final class PBHBanController extends AbstractFeatureModule {
     }
 
 
-    private @NotNull Stream<BanResponse> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
+    private @NotNull Stream<BanDTO> getBanResponseStream(String locale, long lastBanTime, long limit, boolean ignoreBanForDisconnect, String search) {
         var banResponseList = downloaderServer.getBannedPeers()
                 .entrySet()
                 .stream()
@@ -131,7 +129,7 @@ public final class PBHBanController extends AbstractFeatureModule {
                 })
                 .filter(b -> search == null || b.getKey().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT))
                         || b.getValue().toString().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT)))
-                .map(entry -> new BanResponse(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null))
+                .map(entry -> new BanDTO(entry.getKey().getAddress().toString(), new BakedBanMetadata(locale, entry.getValue()), null))
                 .sorted((o1, o2) -> Long.compare(o2.getBanMetadata().getBanAt(), o1.getBanMetadata().getBanAt()));
         if (lastBanTime > 0) {
             banResponseList = banResponseList.filter(b -> b.getBanMetadata().getBanAt() < lastBanTime);
@@ -148,66 +146,4 @@ public final class PBHBanController extends AbstractFeatureModule {
         });
         return banResponseList;
     }
-
-    public record UnbanRequest(List<String> ips) {
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    static class BanLogResponse {
-        private long banAt;
-        private long unbanAt;
-        private String peerIp;
-        private int peerPort;
-        private String peerId;
-        private String peerClientName;
-        private long peerUploaded;
-        private long peerDownloaded;
-        private double peerProgress;
-        private String torrentInfoHash;
-        private String torrentName;
-        private long torrentSize;
-        private String module;
-        private String rule;
-        private String description;
-        private String downloader;
-
-        public BanLogResponse(String locale, HistoryEntity history) {
-            this.banAt = history.getBanAt().getTime();
-            this.unbanAt = history.getUnbanAt().getTime();
-            this.peerIp = history.getIp();
-            this.peerPort = history.getPort();
-            this.peerId = history.getPeerId();
-            this.peerClientName = history.getPeerClientName();
-            this.peerUploaded = history.getPeerUploaded();
-            this.peerDownloaded = history.getPeerDownloaded();
-            this.peerProgress = history.getPeerProgress();
-            this.torrentInfoHash = history.getTorrent().getInfoHash();
-            this.torrentName = history.getTorrent().getName();
-            this.torrentSize = history.getTorrent().getSize();
-            this.module = history.getRule().getModule().getName();
-            this.rule = tl(locale, history.getRule().getRule());
-            this.description = tl(locale, history.getDescription());
-            this.downloader = history.getDownloader();
-        }
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    static class BanResponse {
-        private String address;
-        private BakedBanMetadata banMetadata;
-        private IPGeoData ipGeoData;
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    static class HistoryEntry {
-        private String address;
-        private long count;
-    }
-
 }
