@@ -12,7 +12,7 @@ import com.ghostchu.peerbanhelper.api.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.api.web.exception.NotLoggedInException;
 import com.ghostchu.peerbanhelper.api.web.exception.RequirePBHPlusLicenseException;
 import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -53,6 +53,13 @@ public final class JavalinWebContainer {
     private final Cache<IPAddress, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
             .build();
+    private final Map<IPAddress, Long> BEARER_LOGIN_SESSION = new LinkedHashMap<>(){
+        private static final int MAX_ENTRIES = 3;
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<IPAddress, Long> eldest) {
+            return size() > MAX_ENTRIES;
+        }
+    };
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
 
     public JavalinWebContainer(ActivationManager activationManager) {
@@ -307,9 +314,13 @@ public final class JavalinWebContainer {
 
     @SneakyThrows
     public void markLoginSuccess(String ip, String userAgent) {
-        var counter = FAIL2BAN.get(getPrefixedIPAddr(ip), () -> new AtomicInteger(0));
+        var ipBlock = getPrefixedIPAddr(ip);
+        var counter = FAIL2BAN.get(ipBlock, () -> new AtomicInteger(0));
         counter.set(0);
-        log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
+        if(!BEARER_LOGIN_SESSION.containsKey(ipBlock)){
+            BEARER_LOGIN_SESSION.put(ipBlock, System.currentTimeMillis());
+            log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
+        }
     }
 
     private Cache<IPAddress, AtomicInteger> fail2Ban() {

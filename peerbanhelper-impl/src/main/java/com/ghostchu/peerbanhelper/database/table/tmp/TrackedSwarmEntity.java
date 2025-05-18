@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table.tmp;
 
+import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "tmp_tracked_swarm", daoClass = TrackedSwarmEntity.class)
+@DatabaseTable(tableName = "tmp_tracked_swarm", daoClass = TrackedSwarmDao.class)
 public final class TrackedSwarmEntity { // 需要创建为临时表
     @DatabaseField(generatedId = true, index = true)
     private Long id;

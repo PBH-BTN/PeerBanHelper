@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
+import com.ghostchu.peerbanhelper.api.util.rule.MatchResult;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;

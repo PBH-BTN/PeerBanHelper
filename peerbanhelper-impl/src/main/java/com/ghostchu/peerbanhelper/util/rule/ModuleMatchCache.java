@@ -1,10 +1,10 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.event.BtnRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.CheckResult;
+import com.ghostchu.peerbanhelper.api.module.CheckResult;
 import com.ghostchu.peerbanhelper.api.module.PeerAction;
 import com.ghostchu.peerbanhelper.api.module.RuleFeatureModule;
 import com.google.common.cache.Cache;

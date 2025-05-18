@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swt;
 
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.gui.impl.swt.tabs.LogsTabComponent;
 import com.ghostchu.peerbanhelper.gui.impl.swt.tabs.TabComponent;

@@ -1,10 +1,9 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
+import com.ghostchu.peerbanhelper.common.util.MiscUtil;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
-import com.ghostchu.peerbanhelper.common.util.MiscUtil;
-import com.ghostchu.peerbanhelper.util.lab.Laboratory;
+import com.j256.ormlite.support.ConnectionSource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,11 +16,9 @@ import java.util.List;
 
 @Component
 public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long> {
-    private final Laboratory laboratory;
 
-    public TrafficJournalDao(@Autowired Database database, @Autowired Laboratory laboratory) throws SQLException {
-        super(database.getDataSource(), TrafficJournalEntity.class);
-        this.laboratory = laboratory;
+    public TrafficJournalDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, TrafficJournalEntity.class);
     }
 
     public TrafficDataComputed getTodayData(String downloader) throws Exception {

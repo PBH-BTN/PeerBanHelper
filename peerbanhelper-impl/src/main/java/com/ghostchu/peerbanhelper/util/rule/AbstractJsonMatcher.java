@@ -3,6 +3,8 @@ package com.ghostchu.peerbanhelper.util.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.api.util.rule.MatchResult;
+import com.ghostchu.peerbanhelper.api.util.rule.MatchResultEnum;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

@@ -5,11 +5,11 @@ import com.ghostchu.peerbanhelper.api.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.api.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReplaceTrackerDTO;
 import com.ghostchu.peerbanhelper.api.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.api.web.Role;
 import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;
@@ -37,7 +37,7 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
     @Autowired
     private AlertDao alertDao;
     @Autowired
-    private DownloaderManager downloaderManager;
+    private DownloaderManagerImpl downloaderManager;
 
     @Override
     public boolean isConfigurable() {

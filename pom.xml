@@ -14,11 +14,6 @@
         <module>peerbanhelper-api</module>
         <module>peerbanhelper-common</module>
         <module>peerbanhelper-impl</module>
-        <module>peerbanhelper-3rdparty</module>
-        <module>peerbanhelper-gui-api</module>
-        <module>peerbanhelper-gui-swing</module>
-        <module>peerbanhelper-gui-swt</module>
-        <module>peerbanhelper-gui-common</module>
     </modules>
 
     <properties>

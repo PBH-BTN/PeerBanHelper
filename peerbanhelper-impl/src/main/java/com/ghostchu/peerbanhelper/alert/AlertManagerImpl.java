@@ -2,12 +2,12 @@ package com.ghostchu.peerbanhelper.alert;
 
 import com.ghostchu.peerbanhelper.api.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.api.alert.AlertManager;
+import com.ghostchu.peerbanhelper.api.util.push.PushManager;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.common.util.CommonUtil;
-import com.ghostchu.peerbanhelper.util.push.PushManager;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

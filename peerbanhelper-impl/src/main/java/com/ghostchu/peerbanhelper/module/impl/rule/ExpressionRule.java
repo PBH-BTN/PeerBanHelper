@@ -1,26 +1,26 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.api.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.api.downloader.Downloader;
-import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.CheckResult;
+import com.ghostchu.peerbanhelper.api.module.CheckResult;
 import com.ghostchu.peerbanhelper.api.module.PeerAction;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.common.util.MiscUtil;
+import com.ghostchu.peerbanhelper.api.util.WebUtil;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.web.Role;
+import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.common.util.SharedObject;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
+import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import com.ghostchu.peerbanhelper.api.web.Role;
-import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.googlecode.aviator.exception.ExpressionSyntaxErrorException;
@@ -175,7 +175,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         if(ip == null){
             throw new IllegalArgumentException("Safe check for IPAddress failed, the IP cannot be null");
         }
-        return (ip.isLocal() || ip.isLoopback()) && !MiscUtil.isUsingReserveProxy(context);
+        return (ip.isLocal() || ip.isLoopback()) && !WebUtil.isUsingReserveProxy(context);
     }
 
     private boolean insideDirectory(File allowRange, File targetFile) {

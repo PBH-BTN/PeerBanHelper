@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.api.wrapper;
 
-import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
-import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
+import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.api.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.api.downloader.DownloaderBasicInfo;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -52,8 +51,8 @@ public class BanMetadata extends PeerMetadata implements Serializable {
                 ", banAt=" + banAt +
                 ", unbanAt=" + unbanAt +
                 ", banForDisconnect=" + banForDisconnect +
-                ", rule=" + tlUI(rule) +
-                ", description=" + tlUI(description) +
+                ", rule=" + rule +
+                ", description=" + description +
                 '}';
     }
 }

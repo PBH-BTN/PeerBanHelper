@@ -2,26 +2,25 @@ package com.ghostchu.peerbanhelper;
 
 import com.ghostchu.peerbanhelper.api.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.api.alert.AlertManager;
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.api.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.api.exchange.ExchangeMap;
+import com.ghostchu.peerbanhelper.api.module.ModuleManager;
+import com.ghostchu.peerbanhelper.api.text.Lang;
+import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.api.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.api.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.common.util.LazyLoad;
+import com.ghostchu.peerbanhelper.common.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
-import com.ghostchu.peerbanhelper.api.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
-import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.module.impl.background.BackgroundModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
-import com.ghostchu.peerbanhelper.api.text.Lang;
-import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.common.util.LazyLoad;
-import com.ghostchu.peerbanhelper.common.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
-import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import com.ghostchu.peerbanhelper.api.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
@@ -31,7 +30,6 @@ import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.pqc.legacy.math.ntru.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,7 +54,7 @@ public final class PeerBanHelper implements Reloadable {
     private DownloaderManager downloaderManager;
     @Autowired
     @Getter
-    private DownloaderServer downloaderServer;
+    private DownloaderServerImpl downloaderServer;
     private final Cache<String, IPDBResponse> geoIpCache = CacheBuilder.newBuilder()
             .expireAfterAccess(ExternalSwitch.parseInt("pbh.geoIpCache.timeout", 300000), TimeUnit.MILLISECONDS)
             .maximumSize(ExternalSwitch.parseInt("pbh.geoIpCache.size", 300))
@@ -97,7 +95,6 @@ public final class PeerBanHelper implements Reloadable {
     public void start() throws SQLException {
         log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
         checkKnownCrashes();
-        registerModules();
         setupIPDB();
         registerHttpServer();
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
@@ -107,10 +104,13 @@ public final class PeerBanHelper implements Reloadable {
         }
         Main.getReloadManager().register(this);
         postCompatibilityCheck();
+        registerModules();
         sendSnapshotAlert();
         runTestCode();
+        downloaderServer.load();
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
         crashManager.putRunningFlag();
+        Main.getGuiManager().onPBHFullyStarted(this);
     }
 
     private void checkKnownCrashes() {
@@ -137,7 +137,7 @@ public final class PeerBanHelper implements Reloadable {
     }
 
     private void postCompatibilityCheck() {
-        if (!Util.is64BitJVM() || ExternalSwitch.parseBoolean("pbh.forceBitnessCheckFail")) {
+        if ( ExternalSwitch.parseBoolean("pbh.forceBitnessCheckFail")) {
             ExchangeMap.UNSUPPORTED_PLATFORM = true;
             ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("unsupported-platform", 10, tlUI(Lang.TITLE_INCOMPATIBLE_PLATFORM)));
             log.warn(tlUI(Lang.INCOMPATIBLE_BITNESS_LOG));
@@ -188,14 +188,17 @@ public final class PeerBanHelper implements Reloadable {
 
     public void shutdown() {
         // place some clean code here
-
         downloaderServer.close();
         this.moduleManager.unregisterAll();
         this.databaseManager.close();
         if (this.ipdb != null) {
             this.ipdb.close();
         }
-        downloaderManager.close();
+        try {
+            downloaderManager.close();
+        } catch (Exception e) {
+            log.warn("Unable to safe shutdown downloader manager", e);
+        }
         Main.getReloadManager().unregister(this);
         log.info(tlUI(Lang.SHUTDOWN_DONE));
     }

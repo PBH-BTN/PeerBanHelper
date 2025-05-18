@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.api.bittorrent.torrent.Torrent;
@@ -9,14 +9,14 @@ import com.ghostchu.peerbanhelper.api.downloader.Downloader;
 import com.ghostchu.peerbanhelper.api.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.api.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.CheckResult;
+import com.ghostchu.peerbanhelper.api.module.CheckResult;
 import com.ghostchu.peerbanhelper.api.module.PeerAction;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.common.util.CommonUtil;
 import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.common.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.api.web.Role;
 import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;

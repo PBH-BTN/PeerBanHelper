@@ -6,8 +6,6 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.api.util.WebUtil;
-import com.ghostchu.peerbanhelper.common.BuildMeta;
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
 import com.ghostchu.peerbanhelper.common.util.*;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
@@ -145,7 +143,6 @@ public final class Main {
                 log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
                 throw new RuntimeException(e);
             }
-            guiManager.onPBHFullyStarted(server);
             setupShutdownHook();
         });
         guiManager.sync();

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table;
 
+import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "peer_records", daoClass = PeerRecordEntity.class)
+@DatabaseTable(tableName = "peer_records", daoClass = PeerRecordDao.class)
 public final class PeerRecordEntity {
     @DatabaseField(generatedId = true)
     private Long id;

@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.api.event;
 
-import com.ghostchu.peerbanhelper.util.logger.LogEntry;
+import com.ghostchu.peerbanhelper.api.util.logger.LogEntry;
 
 public final class NewLogEntryCreatedEvent {
     private final LogEntry entry;

@@ -1,11 +1,12 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.api.DownloaderServer;
 import com.ghostchu.peerbanhelper.api.downloader.Downloader;
 import com.ghostchu.peerbanhelper.api.downloader.DownloaderLastStatus;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.api.util.dns.DNSLookup;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DownloaderStatusDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.DownloaderWrapperDTO;
@@ -13,9 +14,8 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PopulatedPeerDTO;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
-import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -52,7 +52,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
     @Autowired
     private DNSLookup dnsLookup;
     @Autowired
-    private DownloaderManager downloaderManager;
+    private DownloaderManagerImpl downloaderManager;
     @Autowired
     private DownloaderServer downloaderServer;
 

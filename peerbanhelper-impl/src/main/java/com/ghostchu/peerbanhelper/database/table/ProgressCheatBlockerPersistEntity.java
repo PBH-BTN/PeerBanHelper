@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table;
 
+import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "pcb_persist_records", daoClass = ProgressCheatBlockerPersistEntity.class)
+@DatabaseTable(tableName = "pcb_persist_records", daoClass = ProgressCheatBlockerPersistDao.class)
 public final class ProgressCheatBlockerPersistEntity {
     @DatabaseField(generatedId = true)
     private Long id;

@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module;
 
+import com.ghostchu.peerbanhelper.api.module.CheckResult;
 import com.ghostchu.peerbanhelper.api.module.PeerAction;
 import com.ghostchu.peerbanhelper.api.module.RuleFeatureModule;
 import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;

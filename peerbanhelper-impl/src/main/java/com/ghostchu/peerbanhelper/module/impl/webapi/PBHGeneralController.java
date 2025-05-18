@@ -1,25 +1,26 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.DownloaderServer;
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
-import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.api.DownloaderServer;
 import com.ghostchu.peerbanhelper.api.module.FeatureModule;
-import com.ghostchu.peerbanhelper.module.ModuleManager;
-import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.api.util.WebUtil;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.web.Role;
+import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.common.util.MiscUtil;
 import com.ghostchu.peerbanhelper.common.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import com.ghostchu.peerbanhelper.api.web.Role;
-import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.Gson;
@@ -65,7 +66,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Autowired
     private ModuleMatchCache moduleMatchCache;
     @Autowired
-    private ModuleManager moduleManager;
+    private ModuleManagerImpl moduleManager;
     @Autowired
     private PeerBanHelper peerBanHelper;
     @Autowired
@@ -233,7 +234,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         var proxy = Main.getMainConfig().getInt("proxy.setting");
         network.put("internet_access", true); // ?
         network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
-        network.put("reverse_proxy", MiscUtil.isUsingReserveProxy(context));
+        network.put("reverse_proxy", WebUtil.isUsingReserveProxy(context));
         network.put("client_ip", userIp);
         return network;
     }

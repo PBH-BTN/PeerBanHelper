@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.api.wrapper;
 
-import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
-import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
+import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.api.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.api.downloader.DownloaderBasicInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

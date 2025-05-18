@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper;
 
-import com.ghostchu.peerbanhelper.common.BuildMeta;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +15,7 @@ import java.io.File;
 @ComponentScan(value = "com.ghostchu.lib.jni", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
 @Slf4j
 @EnableScheduling
-public final class AppConfig {
+public class AppConfig {
     @Bean
     public BuildMeta buildMeta() {
         return Main.getMeta();

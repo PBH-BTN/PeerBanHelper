@@ -1,10 +1,10 @@
 package com.ghostchu.peerbanhelper.database.dao.impl.tmp;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.j256.ormlite.support.ConnectionSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +12,10 @@ import java.sql.SQLException;
 
 @Component
 public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Long> {
-    public TrackedSwarmDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), TrackedSwarmEntity.class);
+
+
+    public TrackedSwarmDao(@Autowired ConnectionSource source) throws SQLException {
+        super(source, TrackedSwarmEntity.class);
     }
 
     public Page<TrackedSwarmEntity> getPendingSubmitTrackedPeers(Pageable pageable, long idAfterThan) throws SQLException {

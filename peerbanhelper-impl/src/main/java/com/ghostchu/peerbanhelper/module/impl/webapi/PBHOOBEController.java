@@ -2,10 +2,10 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.api.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.api.web.Role;
 import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;
@@ -33,7 +33,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private DownloaderManager downloaderManager;
+    private DownloaderManagerImpl downloaderManager;
 
     @Override
     public boolean isConfigurable() {

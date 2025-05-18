@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.api.alert.AlertManager;
 import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.api.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.api.bittorrent.tracker.Tracker;

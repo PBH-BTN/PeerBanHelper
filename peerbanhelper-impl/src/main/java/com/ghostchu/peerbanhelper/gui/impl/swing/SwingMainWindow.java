@@ -2,13 +2,13 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.downloader.DownloaderLastStatus;
 import com.ghostchu.peerbanhelper.api.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.util.jcef.JCEFAppFactory;
-import com.ghostchu.peerbanhelper.util.logger.LogEntry;
+import com.ghostchu.peerbanhelper.api.util.logger.LogEntry;
 import com.google.common.eventbus.Subscribe;
 import lombok.Cleanup;
 import lombok.Getter;

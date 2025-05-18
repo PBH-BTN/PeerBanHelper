@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.btn;
 
-import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.api.DownloaderServer;
 import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
@@ -71,7 +71,7 @@ public final class BtnNetwork implements Reloadable {
     @Autowired
     private HistoryDao historyDao;
 
-    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer) {
+    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, com.ghostchu.peerbanhelper.api.DownloaderServer downloaderServer) {
         this.server = downloaderServer;
         this.scriptEngine = scriptEngine;
         this.moduleMatchCache = moduleMatchCache;

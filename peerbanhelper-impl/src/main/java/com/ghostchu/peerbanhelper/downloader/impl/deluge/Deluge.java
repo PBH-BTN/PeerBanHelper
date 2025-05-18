@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
-import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.api.alert.AlertManager;
 import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.api.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.api.bittorrent.torrent.Torrent;
@@ -321,7 +321,7 @@ public final class Deluge extends AbstractDownloader {
 
         public static Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Config config = new Config();
-            config.setType("deluge");
+            config.setType("raccoonfink/deluge");
             config.setName(section.getString("name", alternativeName));
             config.setEndpoint(section.getString("endpoint", ""));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
@@ -339,7 +339,7 @@ public final class Deluge extends AbstractDownloader {
 
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
-            section.set("type", "deluge");
+            section.set("type", "raccoonfink/deluge");
             section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("password", password);

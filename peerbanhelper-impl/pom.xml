@@ -20,6 +20,14 @@
     <build>
         <resources>
             <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>assets/</exclude>
+                    <exclude>static/</exclude>
+                </excludes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
                 <directory>src/main/resources/static</directory>
                 <excludes>
                     <exclude>.git/</exclude>
@@ -38,6 +46,14 @@
             <resource>
                 <directory>src/main/resources/native</directory>
                 <targetPath>native</targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/lang</directory>
+                <excludes>
+                    <exclude>.git/</exclude>
+                </excludes>
+                <targetPath>lang</targetPath>
                 <filtering>false</filtering>
             </resource>
         </resources>
@@ -59,11 +75,6 @@
         <dependency>
             <groupId>com.ghostchu.peerbanhelper</groupId>
             <artifactId>peerbanhelper-api</artifactId>
-            <version>7.4.15</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ghostchu.peerbanhelper</groupId>
-            <artifactId>peerbanhelper-3rdparty</artifactId>
             <version>7.4.15</version>
         </dependency>
         <dependency>
@@ -176,6 +187,7 @@
             <artifactId>jcefmaven</artifactId>
             <version>126.2.0</version>
         </dependency>
+
     </dependencies>
 
 </project>

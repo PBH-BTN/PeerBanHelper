@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table;
 
+import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "torrents", daoClass = TorrentEntity.class)
+@DatabaseTable(tableName = "torrents", daoClass = TorrentDao.class)
 public final class TorrentEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

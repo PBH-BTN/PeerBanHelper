@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.DownloaderServer;
+import com.ghostchu.peerbanhelper.api.DownloaderServer;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.api.web.Role;
 import com.ghostchu.peerbanhelper.api.wrapper.BanMetadata;

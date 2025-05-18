@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.common.util;
 
-import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

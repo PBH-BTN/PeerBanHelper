@@ -3,11 +3,11 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.database.table.RuleSubInfoEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
-import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
 import com.ghostchu.peerbanhelper.module.impl.rule.IPBlackRuleList;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SubInfoDTO;
 import com.ghostchu.peerbanhelper.api.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -39,7 +39,7 @@ public final class RuleSubController extends AbstractFeatureModule {
     IPBlackRuleList ipBlackRuleList;
 
     @Autowired
-    private ModuleManager moduleManager;
+    private ModuleManagerImpl moduleManager;
 
     @Override
     public boolean isConfigurable() {

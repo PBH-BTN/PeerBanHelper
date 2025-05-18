@@ -1,18 +1,18 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.api.util.dns.DNSLookup;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerInfoDTO;
 import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.common.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
-import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.api.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.util.paging.Page;
@@ -42,12 +42,12 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final ActiveMonitoringModule activeMonitoringModule;
     private final Laboratory laboratory;
     private final DNSLookup dnsLookup;
-    private final DownloaderManager downloaderManager;
+    private final DownloaderManagerImpl downloaderManager;
 
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
-                             Laboratory laboratory, DNSLookup dnsLookup, DownloaderManager downloaderManager) {
+                             Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;

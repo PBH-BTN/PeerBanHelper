@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.api.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
 
 public interface Rule {
     @NotNull

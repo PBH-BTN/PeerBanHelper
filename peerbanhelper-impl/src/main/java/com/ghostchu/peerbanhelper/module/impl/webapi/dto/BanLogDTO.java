@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.api.downloader.DownloaderBasicInfo;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,7 +30,7 @@ public final class BanLogDTO {
     private String description;
     private DownloaderBasicInfo downloader;
 
-    public BanLogDTO(String locale, DownloaderManager downloaderManager, HistoryEntity history) {
+    public BanLogDTO(String locale, DownloaderManagerImpl downloaderManager, HistoryEntity history) {
         this.banAt = history.getBanAt().getTime();
         this.unbanAt = history.getUnbanAt().getTime();
         this.peerIp = history.getIp();

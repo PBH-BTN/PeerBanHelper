@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.api.event.PBHLookAndFeelNeedReloadEvent;
@@ -17,7 +17,7 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.*;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.common.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
-import com.ghostchu.peerbanhelper.util.logger.LogEntry;
+import com.ghostchu.peerbanhelper.api.util.logger.LogEntry;
 import com.google.common.eventbus.Subscribe;
 import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl;
 
-import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.api.alert.AlertManager;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.AbstractQbittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.QBittorrentConfig;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;

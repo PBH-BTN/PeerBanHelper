@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.database;
 
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.common.util.MiscUtil;
@@ -10,9 +10,11 @@ import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.j256.ormlite.field.DataPersisterManager;
 import com.j256.ormlite.jdbc.JdbcSingleConnectionSource;
 import com.j256.ormlite.jdbc.db.SqliteDatabaseType;
+import com.j256.ormlite.support.ConnectionSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,8 +30,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
-@Component
-public final class Database {
+@Configuration
+public class Database {
     private final File sqliteDb;
     private final File dbMaintenanceFile;
     private final Laboratory laboratory;
@@ -46,6 +48,11 @@ public final class Database {
         this.dbMaintenanceFile = new File(databaseDirectory, "peerbanhelper.db.maintenance");
         registerPersisters();
         setupDatabase(sqliteDb);
+    }
+
+    @Bean
+    public ConnectionSource connectionSource(){
+        return dataSource;
     }
 
     private void registerPersisters() {

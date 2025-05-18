@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi.dto;
 
-import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.api.util.ipdb.IPGeoData;
 
 public record PeerInfoDTO(
         boolean found,

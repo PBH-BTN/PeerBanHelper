@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.monitor;
 
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.api.alert.AlertManager;
@@ -8,9 +8,10 @@ import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.api.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.DownloaderTrafficLimiterDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.ghostchu.peerbanhelper.api.downloader.Downloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.api.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.api.module.MonitorFeatureModule;
@@ -19,7 +20,7 @@ import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.common.util.CommonUtil;
 import com.ghostchu.peerbanhelper.common.util.MiscUtil;
 import com.ghostchu.peerbanhelper.common.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.api.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.api.wrapper.TorrentWrapper;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -62,7 +63,9 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     private ExecutorService taskWriteService;
     private long dataRetentionTime;
     @Autowired
-    private DownloaderManager downloaderManager;
+    private DownloaderManagerImpl downloaderManager;
+    @Autowired
+    private TorrentDao torrentDao;
     @Autowired
     private DownloaderTrafficLimiterDao downloaderTrafficLimiterDao;
     private long uploadSpeedLimit;
@@ -214,7 +217,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     public void flush() {
         try {
             try {
-                peerRecordDao.syncPendingTasks(dataBuffer);
+                peerRecordDao.syncPendingTasks(dataBuffer, torrentDao);
             } catch (SQLException e) {
                 log.warn("Unable sync peers data to database", e);
             }

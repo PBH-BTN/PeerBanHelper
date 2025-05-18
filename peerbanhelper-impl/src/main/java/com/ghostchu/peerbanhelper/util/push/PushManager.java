@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.util.push;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.text.Lang;
+import com.ghostchu.peerbanhelper.api.util.push.PushProvider;
 import com.ghostchu.peerbanhelper.util.push.impl.*;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -20,9 +21,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
+
 @Component
 @Slf4j
-public final class PushManager implements Reloadable {
+public final class PushManager implements Reloadable, com.ghostchu.peerbanhelper.api.util.push.PushManager {
     @Getter
     private final List<PushProvider> providerList = new ArrayList<>();
 
@@ -30,6 +32,7 @@ public final class PushManager implements Reloadable {
         reloadConfig();
     }
 
+    @Override
     public PushProvider createPushProvider(String name, String type, ConfigurationSection section) {
         name = name.replace(".", "-");
         AbstractPushProvider provider = null;
@@ -43,6 +46,7 @@ public final class PushManager implements Reloadable {
         return provider;
     }
 
+    @Override
     public PushProvider createPushProvider(String name, String type, JsonObject jsonObject) {
         AbstractPushProvider provider = null;
         switch (type.toLowerCase(Locale.ROOT)) {
@@ -56,7 +60,7 @@ public final class PushManager implements Reloadable {
     }
 
     private void reloadConfig() {
-        List<com.ghostchu.peerbanhelper.util.push.PushProvider> registered = new ArrayList<>();
+        List<PushProvider> registered = new ArrayList<>();
         var config = Main.getMainConfig().getConfigurationSection("push-notification");
         if(config == null) return;
         config.getKeys(false).forEach(provider -> {
@@ -67,13 +71,16 @@ public final class PushManager implements Reloadable {
         providerList.addAll(registered);
     }
 
+    @Override
     public boolean addPushProvider(PushProvider provider) {
        return providerList.add(provider);
     }
+    @Override
     public boolean removePushProvider(PushProvider provider) {
         return providerList.remove(provider);
     }
 
+    @Override
     public void savePushProviders() throws IOException {
         ConfigurationSection clientSection = new MemoryConfiguration();
         for (var pushProvider : this.providerList) {
@@ -83,6 +90,7 @@ public final class PushManager implements Reloadable {
         Main.getMainConfig().save(Main.getMainConfigFile());
     }
 
+    @Override
     public boolean pushMessage(String title, String description) {
         AtomicBoolean anySuccess = new AtomicBoolean(false);
         providerList.forEach(pushProvider -> {

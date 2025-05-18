@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.api.module;
 
-import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
-import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.api.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.api.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.api.downloader.Downloader;
 import org.jetbrains.annotations.NotNull;
 

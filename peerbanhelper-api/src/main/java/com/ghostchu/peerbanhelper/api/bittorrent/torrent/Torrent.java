@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.api.bittorrent.torrent;
 
+import com.ghostchu.peerbanhelper.common.util.InfoHashUtil;
 import org.jetbrains.annotations.NotNull;
 
 public interface Torrent {
@@ -75,6 +76,8 @@ public interface Torrent {
      * @return 不可逆匿名识别符
      */
     @NotNull
-     String getHashedIdentifier();
+    default String getHashedIdentifier(){
+        return InfoHashUtil.getHashedIdentifier(getHash());
+    }
 
 }

@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.scriptengine;
 
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
-import com.ghostchu.peerbanhelper.module.CheckResult;
+import com.ghostchu.peerbanhelper.api.module.CheckResult;
 import com.ghostchu.peerbanhelper.api.module.PeerAction;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;

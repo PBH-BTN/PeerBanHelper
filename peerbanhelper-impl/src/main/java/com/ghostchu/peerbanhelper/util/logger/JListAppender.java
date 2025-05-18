@@ -3,9 +3,10 @@ package com.ghostchu.peerbanhelper.util.logger;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.event.NewLogEntryCreatedEvent;
+import com.ghostchu.peerbanhelper.api.util.logger.LogEntry;
 import com.google.common.collect.EvictingQueue;
 import org.slf4j.event.Level;
 

@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.api.util;
 import io.javalin.http.Context;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 public final class WebUtil {
 
@@ -20,6 +21,14 @@ public final class WebUtil {
         return new TimeQueryModel(startAt, endAt);
     }
 
+    public static boolean isUsingReserveProxy(Context context) {
+        var list = List.of("X-Real-IP", "X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP");
+        for (String s : list) {
+            if (context.header(s) != null)
+                return true;
+        }
+        return false;
+    }
 
     public static String userIp(Context context) {
         String ip = context.header("CF-Connecting-IP");

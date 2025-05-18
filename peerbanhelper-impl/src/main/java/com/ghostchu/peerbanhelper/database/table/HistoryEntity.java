@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.database.table;
 
 import com.ghostchu.peerbanhelper.database.TranslationComponentPersistener;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "history", daoClass = HistoryEntity.class)
+@DatabaseTable(tableName = "history", daoClass = HistoryDao.class)
 public final class HistoryEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

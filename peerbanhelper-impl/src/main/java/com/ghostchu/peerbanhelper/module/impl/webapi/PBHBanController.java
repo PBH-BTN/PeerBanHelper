@@ -1,20 +1,20 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.DownloaderServer;
+import com.ghostchu.peerbanhelper.api.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.api.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.api.web.Role;
 import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;
-import com.ghostchu.peerbanhelper.api.wrapper.BakedBanMetadata;
+import com.ghostchu.peerbanhelper.wrapper.BakedBanMetadata;
 import com.ghostchu.peerbanhelper.api.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.api.wrapper.PeerWrapper;
 import io.javalin.http.Context;
@@ -44,7 +44,7 @@ public final class PBHBanController extends AbstractFeatureModule {
     @Autowired
     private DownloaderServer downloaderServer;
     @Autowired
-    private DownloaderManager downloaderManager;
+    private DownloaderManagerImpl downloaderManager;
 
     @Override
     public boolean isConfigurable() {

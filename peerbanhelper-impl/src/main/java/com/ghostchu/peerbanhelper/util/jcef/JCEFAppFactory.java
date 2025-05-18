@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.util.jcef;
 
-import com.ghostchu.peerbanhelper.common.ExternalSwitch;
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import lombok.extern.slf4j.Slf4j;
 import me.friwi.jcefmaven.CefAppBuilder;

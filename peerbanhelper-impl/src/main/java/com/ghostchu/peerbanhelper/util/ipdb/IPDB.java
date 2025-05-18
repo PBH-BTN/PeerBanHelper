@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.util.ipdb;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.api.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleProgressDialog;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;

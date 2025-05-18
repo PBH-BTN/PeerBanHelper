@@ -1,9 +1,8 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.DownloaderTrafficLimiterEntity;
-import com.ghostchu.peerbanhelper.util.lab.Laboratory;
+import com.j256.ormlite.support.ConnectionSource;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,8 @@ import java.sql.SQLException;
 @Slf4j
 public final class DownloaderTrafficLimiterDao extends AbstractPBHDao<DownloaderTrafficLimiterEntity, String> {
 
-    public DownloaderTrafficLimiterDao(@Autowired Database database, @Autowired Laboratory laboratory) throws SQLException {
-        super(database.getDataSource(), DownloaderTrafficLimiterEntity.class);
+    public DownloaderTrafficLimiterDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, DownloaderTrafficLimiterEntity.class);
     }
 
     @Nullable

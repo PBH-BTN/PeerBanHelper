@@ -7,7 +7,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ActiveInfoDTO;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationKeyManager;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.api.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.api.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.api.web.Role;
 import com.ghostchu.peerbanhelper.api.web.wrapper.StdResp;

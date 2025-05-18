@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.api.wrapper;
 
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
 import inet.ipaddr.IPAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;

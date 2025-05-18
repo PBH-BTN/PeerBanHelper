@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.MetadataEntity;
+import com.j256.ormlite.support.ConnectionSource;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,8 +12,8 @@ import java.sql.SQLException;
 @Component
 
 public final class MetadataDao extends AbstractPBHDao<MetadataEntity, String> {
-    public MetadataDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), MetadataEntity.class);
+    public MetadataDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, MetadataEntity.class);
     }
 
     public String get(String key) {

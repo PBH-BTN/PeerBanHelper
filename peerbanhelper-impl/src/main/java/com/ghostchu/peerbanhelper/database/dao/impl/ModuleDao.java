@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ModuleEntity;
+import com.j256.ormlite.support.ConnectionSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +11,8 @@ import java.util.List;
 
 @Component
 public final class ModuleDao extends AbstractPBHDao<ModuleEntity, Long> {
-    public ModuleDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), ModuleEntity.class);
+    public ModuleDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, ModuleEntity.class);
         setObjectCache(true);
     }
 

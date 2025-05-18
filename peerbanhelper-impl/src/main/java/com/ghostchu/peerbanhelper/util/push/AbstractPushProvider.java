@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.push;
 
+import com.ghostchu.peerbanhelper.api.util.push.PushProvider;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;

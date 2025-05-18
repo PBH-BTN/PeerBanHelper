@@ -4,8 +4,8 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.api.text.postprocessor.PostProcessor;
-import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.peerbanhelper.common.util.URLUtil;
+import com.ghostchu.peerbanhelper.text.postprocessor.impl.FillerProcessor;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.SneakyThrows;
@@ -25,13 +25,11 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.ghostchu.peerbanhelper.Main.DEF_LOCALE;
-
 @Slf4j
 public final class TextManager implements Reloadable {
     public static TextManager INSTANCE_HOLDER = new TextManager();
     public final Set<PostProcessor> postProcessors = new LinkedHashSet<>();
-    private final LanguageFilesManager languageFilesManager = new LanguageFilesManager();
+    private final LanguageFilesManagerImpl languageFilesManager = new LanguageFilesManagerImpl();
     private final Set<String> availableLanguages = new LinkedHashSet<>();
     private final Set<String> loadedLanguages = ConcurrentHashMap.newKeySet();
     private final File langDirectory;
@@ -50,84 +48,6 @@ public final class TextManager implements Reloadable {
         this.fallbackConfig = loadBuiltInFallback();
         initializeBasic();
         Main.getReloadManager().register(this);
-    }
-
-    public static String tlUI(Lang key, Object... params) {
-        return tl(DEF_LOCALE, new TranslationComponent(key.getKey(), (Object[]) TextManager.convert(DEF_LOCALE, params)));
-    }
-
-    public static String tlUI(TranslationComponent translationComponent) {
-        return tl(DEF_LOCALE, translationComponent);
-    }
-
-    public static String tl(String locale, Lang key, Object... params) {
-        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
-        return tl(locale, new TranslationComponent(key.getKey(), (Object[]) convert(locale, params)));
-    }
-
-    public static String tl(String locale, TranslationComponent translationComponent) {
-        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
-
-        // 按需加载语言文件
-        if (!INSTANCE_HOLDER.loadedLanguages.contains(locale)) {
-            INSTANCE_HOLDER.loadLanguage(locale);
-        }
-
-        YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
-        if (yamlConfiguration == null) {
-            yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("zh_cn");
-            if (yamlConfiguration == null) {
-                log.warn("The locale {} are not supported and fallback locale zh_cn load failed.", locale);
-                return "Unsupported locale " + locale;
-            }
-        }
-        if (translationComponent == null) {
-            return "null";
-        }
-        if (translationComponent.getKey().isBlank()) {
-            return "";
-        }
-        String str = yamlConfiguration.getString(translationComponent.getKey());
-        if (str == null) {
-            str = translationComponent.getKey();
-        }
-        String[] params = convert(locale, translationComponent.getParams());
-        for (PostProcessor postProcessor : INSTANCE_HOLDER.postProcessors) {
-            try {
-                str = postProcessor.process(str, locale, params);
-            } catch (Exception e) {
-                log.warn("Unable to process post processor: key={}, locale={}, params={}", translationComponent.getKey(), locale, translationComponent.getParams());
-            }
-        }
-        return str;
-    }
-
-    @NotNull
-    public static String[] convert(String locale, @Nullable Object... args) {
-        if (args == null || args.length == 0) {
-            return new String[0];
-        }
-        String[] components = new String[args.length];
-        for (int i = 0; i < args.length; i++) {
-            Object obj = args[i];
-            if (obj == null) {
-                components[i] = "null";
-                continue;
-            }
-
-            try {
-                if (obj instanceof TranslationComponent translationComponent) {
-                    components[i] = tl(locale, translationComponent);
-                    continue;
-                }
-                components[i] = obj.toString();
-
-            } catch (Exception exception) {
-                log.debug("Failed to process the object: {}", obj);
-                components[i] = String.valueOf(obj); // null safe
-            }
-        }
-        return components;
     }
 
     /**
@@ -183,6 +103,7 @@ public final class TextManager implements Reloadable {
      * @param locale 要加载的语言代码
      * @return 是否成功加载
      */
+    
     public synchronized boolean loadLanguage(String locale) {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
 
@@ -285,7 +206,7 @@ public final class TextManager implements Reloadable {
         return file;
     }
 
-    @Override
+    
     public ReloadResult reloadModule() throws Exception {
         reset();
         initializeBasic();
@@ -296,6 +217,7 @@ public final class TextManager implements Reloadable {
      * 注册语言短语
      */
     @SneakyThrows(InvalidConfigurationException.class)
+    
     public void register(@NotNull String locale, @NotNull String path, @NotNull String text) {
         locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
 
@@ -316,6 +238,7 @@ public final class TextManager implements Reloadable {
     /**
      * 返回可用语言列表
      */
+    
     public List<String> getAvailableLanguages() {
         return new ArrayList<>(availableLanguages);
     }
@@ -323,6 +246,7 @@ public final class TextManager implements Reloadable {
     /**
      * 获取已加载语言列表
      */
+    
     public List<String> getLoadedLanguages() {
         return new ArrayList<>(loadedLanguages);
     }
@@ -330,9 +254,87 @@ public final class TextManager implements Reloadable {
     /**
      * 强制加载所有可用语言
      */
+    
     public void loadAllLanguages() {
         for (String language : availableLanguages) {
             loadLanguage(language);
         }
+    }
+
+    public static String tlUI(Lang key, Object... params) {
+        return tl(Main.DEF_LOCALE, new TranslationComponent(key.getKey(), (Object[]) TextManager.convert(Main.DEF_LOCALE, params)));
+    }
+
+    public static String tlUI(TranslationComponent translationComponent) {
+        return tl(Main.DEF_LOCALE, translationComponent);
+    }
+
+    public static String tl(String locale, Lang key, Object... params) {
+        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
+        return tl(locale, new TranslationComponent(key.getKey(), (Object[]) convert(locale, params)));
+    }
+
+    public static String tl(String locale, TranslationComponent translationComponent) {
+        locale = locale.toLowerCase(Locale.ROOT).replace("-", "_");
+
+        // 按需加载语言文件
+        if (!INSTANCE_HOLDER.loadedLanguages.contains(locale)) {
+            INSTANCE_HOLDER.loadLanguage(locale);
+        }
+
+        YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
+        if (yamlConfiguration == null) {
+            yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("zh_cn");
+            if (yamlConfiguration == null) {
+                log.warn("The locale {} are not supported and fallback locale zh_cn load failed.", locale);
+                return "Unsupported locale " + locale;
+            }
+        }
+        if (translationComponent == null) {
+            return "null";
+        }
+        if (translationComponent.getKey().isBlank()) {
+            return "";
+        }
+        String str = yamlConfiguration.getString(translationComponent.getKey());
+        if (str == null) {
+            str = translationComponent.getKey();
+        }
+        String[] params = convert(locale, translationComponent.getParams());
+        for (PostProcessor postProcessor : INSTANCE_HOLDER.postProcessors) {
+            try {
+                str = postProcessor.process(str, locale, params);
+            } catch (Exception e) {
+                log.warn("Unable to process post processor: key={}, locale={}, params={}", translationComponent.getKey(), locale, translationComponent.getParams());
+            }
+        }
+        return str;
+    }
+
+    @NotNull
+    static String[] convert(String locale, @Nullable Object... args) {
+        if (args == null || args.length == 0) {
+            return new String[0];
+        }
+        String[] components = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            Object obj = args[i];
+            if (obj == null) {
+                components[i] = "null";
+                continue;
+            }
+
+            try {
+                if (obj instanceof TranslationComponent translationComponent) {
+                    components[i] = tl(locale, translationComponent);
+                    continue;
+                }
+                components[i] = obj.toString();
+            } catch (Exception exception) {
+                log.debug("Failed to process the object: {}", obj);
+                components[i] = String.valueOf(obj); // null safe
+            }
+        }
+        return components;
     }
 }

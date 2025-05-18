@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.common.util;
 
-import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -33,14 +32,7 @@ public final class MiscUtil {
         return sdfTime.format(new Date(timestamp));
     }
 
-    public static boolean isUsingReserveProxy(Context context) {
-        var list = List.of("X-Real-IP", "X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP");
-        for (String s : list) {
-            if (context.header(s) != null)
-                return true;
-        }
-        return false;
-    }
+
 
     public static void gzip(InputStream is, OutputStream os) throws IOException {
         GZIPOutputStream gzipOs = new GZIPOutputStream(os);
