@@ -131,7 +131,7 @@
     <repositories>
         <repository>
             <id>local-repo</id>
-            <url>file:///../m2-local-repo</url>
+            <url>file:///${project.basedir}/../m2-local-repo</url>
         </repository>
         <repository>
             <id>maven-snapshots</id>
