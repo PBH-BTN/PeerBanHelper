@@ -15,7 +15,76 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <flatlafVersion>3.6</flatlafVersion>
+        <swt.version>3.129.0</swt.version>
+
     </properties>
+
+    <profiles>
+        <profile>
+            <id>install4j-ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                        <version>11.0.2</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>../install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <librariesPath>${project.build.directory}/libraries</librariesPath>
+                                        <jarPath>${project.build.directory}/PeerBanHelper.jar</jarPath>
+                                    </variables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>install4j-dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                        <version>11.0.2</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>../install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <librariesPath>${project.build.directory}/libraries</librariesPath>
+                                        <jarPath>${project.build.directory}/PeerBanHelper.jar</jarPath>
+                                    </variables>
+                                    <!--                                    <incremental>true</incremental>-->
+                                    <jvmArguments>-Xmx4G</jvmArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <install4j.home>C:\Program Files\install4j11</install4j.home>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <resources>
@@ -187,7 +256,27 @@
             <artifactId>jcefmaven</artifactId>
             <version>126.2.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-extras</artifactId>
+            <version>3.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.win32.win32.x86_64 -->
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+            <version>${swt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <version>3.6</version>
+        </dependency>
     </dependencies>
 
 </project>

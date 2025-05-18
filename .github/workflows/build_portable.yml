@@ -17,8 +17,8 @@ jobs:
         id: build-portable
         run: |
           mkdir -p pkg/portable/PeerBanHelper
-          mv target/libraries pkg/portable/PeerBanHelper/
-          cp target/PeerBanHelper.jar pkg/portable/PeerBanHelper/
+          mv peerbanhelper-impl/target/libraries pkg/portable/PeerBanHelper/
+          cp peerbanhelper-impl/target/PeerBanHelper.jar pkg/portable/PeerBanHelper/
           (cd pkg/portable && zip -r PeerBanHelper_${{ env.PBH_VERSION }}.zip PeerBanHelper)
           mkdir -p zulu
           wget https://cdn.azul.com/zulu/bin/zulu23.30.13-ca-jre23.0.1-win_x64.zip -O zulu/zulu23.30.13-ca-jre23.0.1-win_x64.zip

@@ -65,14 +65,14 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: installer-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: shallwefootball/s3-upload-action@master
         with:
           aws_key_id: ${{ secrets.S3_ACCESS_KEY }}
           aws_secret_access_key: ${{ secrets.S3_SECRET_KEY }}
           aws_bucket: ${{ secrets.S3_BUCKET }}
           endpoint: ${{ secrets.S3_ENDPOINT }}
-          source_dir: 'target/media'
+          source_dir: 'peerbanhelper-impl/target/media'
           destination_dir: 'updates/latest'
 
   Clear_CloudFlare_Updates:
@@ -101,31 +101,31 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
-          path: target/
+          path: peerbanhelper-impl/target/
       - uses: actions/download-artifact@v4
         with:
           name: installer-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: spk-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: deb-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: portable-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: freebsd-pkg-13.4-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: freebsd-pkg-14.1-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - name: Zip medias for create torrent
         run: tar -zcvf PeerBanHelper_Installers.tar.gz target/media/
       - name: Install mktorrent
@@ -165,7 +165,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["target/media/PeerBanHelper_*", "target/media/peerbanhelper_*", "target/media/peerbanhelper-*", "target/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
+          asset_paths: '["peerbanhelper-impl/target/media/PeerBanHelper_*", "peerbanhelper-impl/target/media/peerbanhelper_*", "peerbanhelper-impl/target/media/peerbanhelper-*", "peerbanhelper-impl/target/media/_____UNSUPPORTED_PeerBanHelper_*", "peerbanhelper.torrent", "PeerBanHelper_Installers.tar.gz"]'
 
   Build_Docker:
     name: Build Docker Image

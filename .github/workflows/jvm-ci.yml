@@ -51,34 +51,34 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: maven-dist
-          path: target/
+          path: peerbanhelper-impl/target/
       - uses: actions/download-artifact@v4
         with:
           name: installer-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: spk-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: deb-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: portable-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: freebsd-pkg-13.4-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       - uses: actions/download-artifact@v4
         with:
           name: freebsd-pkg-14.1-dist
-          path: target/media
+          path: peerbanhelper-impl/target/media
       # create zip ball named PeerBanHelper_installers_${{ github.ref }}.zip with files inside target/media/
       - name: Zip medias for create torrent
-        run: tar -zcvf PeerBanHelper_Installers.tar.gz target/media/
+        run: tar -zcvf PeerBanHelper_Installers.tar.gz peerbanhelper-impl/target/media/
       # prepare mktorrent util
       - name: Install mktorrent
         run: sudo apt-get install -y mktorrent
@@ -116,7 +116,7 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: maven-dist
-        path: target
+        path: peerbanhelper-impl/target
     - name: Set Up QEMU
       uses: docker/setup-qemu-action@v3
     - name: Set Up Buildx

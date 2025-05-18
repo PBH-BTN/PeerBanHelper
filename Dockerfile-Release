@@ -1,7 +1,7 @@
 FROM docker.io/bellsoft/liberica-runtime-container:jre-23-slim-musl
 LABEL maintainer="https://github.com/PBH-BTN/PeerBanHelper"
-COPY target/libraries /app/libraries
-COPY target/PeerBanHelper.jar /app/PeerBanHelper.jar
+COPY peerbanhelper-impl/target/libraries /app/libraries
+COPY peerbanhelper-impl/target/PeerBanHelper.jar /app/PeerBanHelper.jar
 USER 0
 EXPOSE 9898
 ENV TZ=UTC

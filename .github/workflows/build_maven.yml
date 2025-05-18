@@ -25,7 +25,7 @@ jobs:
         with:
           pattern: jni-*
           merge-multiple: true
-          path: src/main/resources/native/windows
+          path: peerbanhelper-impl/src/main/resources/native/windows
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -39,5 +39,5 @@ jobs:
         with:
           name: maven-dist
           path: |
-            target/libraries
-            target/*.jar
+            peerbanhelper-impl/target/libraries
+            peerbanhelper-impl/target/*.jar
