@@ -93,6 +93,7 @@
                 <excludes>
                     <exclude>assets/</exclude>
                     <exclude>static/</exclude>
+                    <exclude>native/</exclude>
                 </excludes>
                 <filtering>true</filtering>
             </resource>
