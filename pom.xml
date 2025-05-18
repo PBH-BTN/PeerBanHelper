@@ -140,11 +140,6 @@
 
 
     <repositories>
-        <!--Transmission-->
-        <repository>
-            <id>local-repo</id>
-            <url>file:///${project.basedir}/m2-local-repo</url>
-        </repository>
         <repository>
             <id>reposilite-repository-releases</id>
             <name>Reposilite Repository</name>

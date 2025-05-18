@@ -19,7 +19,7 @@ jobs:
         name: Download WebUI Files
         with:
           name: webui-dist
-          path: src/main/resources/static
+          path: peerbanhelper-impl/src/main/resources/static
       - uses: actions/download-artifact@v4
         name: Download JNI Library
         with:

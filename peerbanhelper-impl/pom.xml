@@ -129,7 +129,10 @@
     </build>
 
     <repositories>
-
+        <repository>
+            <id>local-repo</id>
+            <url>file:///${project.parent.basedir}/m2-local-repo</url>
+        </repository>
         <repository>
             <id>maven-snapshots</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
