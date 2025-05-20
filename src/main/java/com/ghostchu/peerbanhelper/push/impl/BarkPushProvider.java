@@ -48,7 +48,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
         section.set("type", "bark");
         section.set("backend_url", config.getBackendUrl());
         section.set("device_key", config.getDeviceKey());
-        section.set("message_group", config.getBarkGroup());
+        section.set("message_group", config.getMessageGroup());
         return section;
     }
 
@@ -70,7 +70,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
         map.put("title", title);
         map.put("body", content);
         map.put("device_key", config.getDeviceKey());
-        map.put("group", config.getBarkGroup());
+        map.put("group", config.getMessageGroup());
         map.put("icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
         HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
                 MutableRequest.POST(config.getBackendUrl()
@@ -91,8 +91,8 @@ public final class BarkPushProvider extends AbstractPushProvider {
         private String backendUrl;
         @SerializedName("device_key")
         private String deviceKey;
-        @SerializedName("bark_group")
-        private String barkGroup;
+        @SerializedName("message_group")
+        private String messageGroup;
     }
 
 }

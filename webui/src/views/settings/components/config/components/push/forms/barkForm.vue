@@ -5,8 +5,8 @@
   <a-form-item field="config.device_key" label="Device Key" required>
     <a-input-password v-model="model.device_key" />
   </a-form-item>
-  <a-form-item field="config.bark_group" label="Message Group">
-    <a-input v-model="model.bark_group" />
+  <a-form-item field="config.message_group" label="Message Group">
+    <a-input v-model="model.message_group" />
   </a-form-item>
 </template>
 <script setup lang="ts">
