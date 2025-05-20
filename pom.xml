@@ -22,7 +22,7 @@
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <install4j.home>/opt/install4j</install4j.home>
-        <javalin.version>6.5.0</javalin.version>
+        <javalin.version>6.6.0</javalin.version>
         <javalin.openapi.version>6.6.0</javalin.openapi.version>
     </properties>
     <pluginRepositories>
