@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "Setup webui files.."
 current_wd=$(pwd)
-static_dir="$(dirname $0)/src/main/resources/static"
+static_dir="$(dirname $0)/peerbanhelper-impl/src/main/resources/static"
 
 rm -rf ${static_dir} || echo ""
 cd ${current_wd}/webui
