@@ -196,25 +196,42 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     private List<Torrent> fetchTorrents(boolean onlyActive, boolean includePrivate) {
-        HttpResponse<String> request;
-        try {
-            String url = apiEndpoint + "/torrents/info";
-            if (onlyActive) {
-                url += "?filter=active";
+        List<QBittorrentTorrent> allTorrents = new ArrayList<>();
+        int pageSize = 100; // 每页大小
+        int offset = 0;
+        boolean hasMore = true;
+
+        while (hasMore) {
+            try {
+                String url = apiEndpoint + "/torrents/info";
+                if (onlyActive) {
+                    url += "?filter=active";
+                }
+                url += (url.contains("?") ? "&" : "?") + "limit=" + pageSize + "&offset=" + offset;
+                HttpResponse<String> request = httpClient.send(MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                if (request.statusCode() != 200) {
+                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
+                }
+                List<QBittorrentTorrent> pageTorrents = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrent>>() {}.getType());
+                if (pageTorrents == null || pageTorrents.isEmpty()) {
+                    hasMore = false;
+                } else {
+                    allTorrents.addAll(pageTorrents);
+                    offset += pageSize;
+                    // 如果返回的数量小于页大小，说明已经到达最后一页
+                    if (pageTorrents.size() < pageSize) {
+                        hasMore = false;
+                    }
+                }
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
             }
-            request = httpClient.send(MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
         }
-        if (request.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
-        }
-        List<QBittorrentTorrent> qbTorrent = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrent>>() {
-        }.getType());
 
-        fillTorrentProperties(qbTorrent);
+        fillTorrentProperties(allTorrents);
 
-        return qbTorrent.stream().map(t -> (Torrent) t)
+        return allTorrents.stream()
+                .map(t -> (Torrent) t)
                 .filter(t -> includePrivate || !t.isPrivate())
                 .collect(Collectors.toList());
     }
