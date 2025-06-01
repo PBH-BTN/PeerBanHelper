@@ -4,23 +4,29 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
+import com.ghostchu.peerbanhelper.api.event.PBHShutdownEvent;
+import com.ghostchu.peerbanhelper.api.exchange.ExchangeMap;
+import com.ghostchu.peerbanhelper.api.plugin.Listener;
+import com.ghostchu.peerbanhelper.api.plugin.Plugin;
+import com.ghostchu.peerbanhelper.api.plugin.PluginLoadOrder;
+import com.ghostchu.peerbanhelper.api.plugin.PluginManager;
+import com.ghostchu.peerbanhelper.api.text.Lang;
 import com.ghostchu.peerbanhelper.api.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.api.util.WebUtil;
 import com.ghostchu.peerbanhelper.common.util.*;
+import com.ghostchu.peerbanhelper.common.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
-import com.ghostchu.peerbanhelper.api.event.PBHShutdownEvent;
-import com.ghostchu.peerbanhelper.api.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swt.SwtGuiImpl;
-import com.ghostchu.peerbanhelper.api.text.Lang;
+import com.ghostchu.peerbanhelper.plugin.SimplePluginManager;
+import com.ghostchu.peerbanhelper.plugin.java.JavaPluginLoader;
 import com.ghostchu.peerbanhelper.text.TextManager;
-import com.ghostchu.peerbanhelper.util.*;
-import com.ghostchu.peerbanhelper.common.util.encrypt.RSAUtils;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.simplereloadlib.ReloadManager;
@@ -37,6 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +63,11 @@ import java.lang.management.ManagementFactory;
 import java.math.MathContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public final class Main {
-    @Getter
     private static final EventBus eventBus = new EventBus();
     @Getter
     private static final ReloadManager reloadManager = new ReloadManager();
@@ -72,7 +78,6 @@ public final class Main {
     private static File logsDirectory;
     @Getter
     private static File configDirectory;
-    private static File pluginDirectory;
     @Getter
     private static File debugDirectory;
     @Getter
@@ -104,6 +109,10 @@ public final class Main {
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 11;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.1.0";
+    @Getter
+    private static final Map<Plugin, Set<Listener>> pluginRegisteredEventListeners = new ConcurrentHashMap<>();
+    private static final PluginManager pluginManager = new SimplePluginManager();
+    private static File pluginsDirectory;
 
     public static void main(String[] args) {
         startupArgs = args;
@@ -125,6 +134,9 @@ public final class Main {
         initGUI(args);
         Thread.ofPlatform().name("Bootstrap").start(() -> {
             guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
+            log.info(TextManager.tlUI(Lang.PLUGIN_LOADER_INITIALIZING));
+            loadPlugins();
+            enablePlugins(PluginLoadOrder.STARTUP);
             pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
             setupProxySettings();
             setupScriptEngine();
@@ -139,6 +151,7 @@ public final class Main {
 //            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
                 server = applicationContext.getBean(PeerBanHelper.class);
                 server.start();
+                enablePlugins(PluginLoadOrder.POST);
             } catch (Exception e) {
                 log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
                 throw new RuntimeException(e);
@@ -146,7 +159,6 @@ public final class Main {
             setupShutdownHook();
         });
         guiManager.sync();
-
     }
 
     private static void loadFlagsProperties() {
@@ -254,15 +266,18 @@ public final class Main {
         }
 
         dataDirectory = new File(root);
+        pluginsDirectory = new File(dataDirectory, "plugins");
         logsDirectory = new File(dataDirectory, "logs");
         configDirectory = new File(dataDirectory, "config");
-        pluginDirectory = new File(dataDirectory, "plugins");
         debugDirectory = new File(dataDirectory, "debug");
         if (ExternalSwitch.parse("pbh.configdir") != null) {
             configDirectory = new File(ExternalSwitch.parse("pbh.configdir"));
         }
         if (ExternalSwitch.parse("pbh.logsdir") != null) {
             logsDirectory = new File(ExternalSwitch.parse("pbh.logsdir"));
+        }
+        if (ExternalSwitch.parse("pbh.pluginsdir") != null) {
+            pluginsDirectory = new File(ExternalSwitch.parse("pbh.pluginsdir"));
         }
         // other directories aren't allowed to change by user to keep necessary structure
     }
@@ -406,8 +421,8 @@ public final class Main {
                 throw new IllegalStateException("The path " + configDirectory.getAbsolutePath() + " should be a directory but found a file, auto fix failed.");
             }
         }
-        if (!pluginDirectory.exists()) {
-            pluginDirectory.mkdirs();
+        if (!pluginsDirectory.exists()) {
+            pluginsDirectory.mkdirs();
         }
         if (!debugDirectory.exists()) {
             debugDirectory.mkdirs();
@@ -530,5 +545,47 @@ public final class Main {
         }
     }
 
+    @ApiStatus.Internal
+    @NotNull
+    public static EventBus getEventBus() {
+        return eventBus;
+    }
 
+    @NotNull
+    public static PluginManager getPluginManager() {
+        return pluginManager;
+    }
+
+    @ApiStatus.Internal
+    public static void loadPlugins() {
+        pluginManager.registerInterface(JavaPluginLoader.class);
+        if (pluginsDirectory.exists()) {
+            Plugin[] plugins = pluginManager.loadPlugins(pluginsDirectory);
+            for (Plugin plugin : plugins) {
+                try {
+                    plugin.getLogger().info(TextManager.tlUI(Lang.PLUGIN_LOADER_LOADING_PLUGIN, plugin.getDescription().getFullName()));
+                    plugin.onLoad();
+                } catch (Throwable ex) {
+                    log.error("{} initializing {} (Is it up to date?)", ex.getMessage(), plugin.getDescription().getFullName(), ex);
+                }
+            }
+        } else {
+            pluginsDirectory.mkdir();
+        }
+    }
+
+    @ApiStatus.Internal
+    public static void enablePlugins(PluginLoadOrder type) {
+        Plugin[] plugins = pluginManager.getPlugins();
+        for (Plugin plugin : plugins) {
+            if ((!plugin.isEnabled()) && (plugin.getDescription().getLoad() == type)) {
+                pluginManager.enablePlugin(plugin);
+            }
+        }
+    }
+
+    @ApiStatus.Internal
+    public static void disablePlugins() {
+        pluginManager.disablePlugins();
+    }
 }
