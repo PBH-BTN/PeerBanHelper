@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BtnSwarm {
+    private transient long id;
     @SerializedName("ip")
     private String ip;
     @SerializedName("port")
@@ -46,6 +47,7 @@ public class BtnSwarm {
 
     public static BtnSwarm from(TrackedSwarmEntity entity) {
         BtnSwarm btnSwarm = new BtnSwarm();
+        btnSwarm.setId(entity.getId());
         btnSwarm.setIp(entity.getIp());
         btnSwarm.setPort(entity.getPort());
         btnSwarm.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(entity.getInfoHash()));

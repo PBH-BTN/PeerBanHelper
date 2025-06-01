@@ -647,9 +647,3 @@ DATABASE_UPGRADING_RECORDS: "[数据升级] 正在升级 {}，已完成：{}/{}�
 WEBUI_SECURITY_LOGIN_FAILED: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于对方提供了错误的 Token 凭据，因此登录尝试已被阻止。如果这不是预期行为，建议使用防火墙保护 PeerBanHelper 的 WebUI 端口。对方浏览器信息：{}"
 WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于登录失败次数过多，PeerBanHelper 已暂时阻止从此位置登录。"
 WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有用户成功从 {} 登录 PeerBanHelper。浏览器信息：{}"
-
-PLUGIN_LOADER_INITIALIZING: "[插件加载器] 请等待加载器加载第三方扩展插件……"
-PLUGIN_LOADER_LOADING: "[插件加载器] 正在加载 {} 个第三方扩展插件，这可能需要一点时间……"
-PLUGIN_LOADER_LOADING_PLUGIN: "[插件加载器] 正在加载 {}..."
-PLUGIN_LOADER_LOAD_ON_ORDER: "正在启用 {}..."
-PLUGIN_LOADER_LOAD_ON_ORDER_FAILED: "在启用 {} 插件时出现错误（是否已更新到最新版本？）"
