@@ -83,7 +83,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
-            <version>1.81</version>
+            <version>1.80</version>
         </dependency>
     </dependencies>
 
