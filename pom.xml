@@ -58,7 +58,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.5.0</version>
             </plugin>
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
@@ -181,7 +181,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.12.1</version>
+            <version>5.13.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
