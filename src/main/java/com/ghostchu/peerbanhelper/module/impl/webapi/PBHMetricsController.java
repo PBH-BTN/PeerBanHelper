@@ -1,22 +1,20 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
-import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,6 +36,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private HistoryDao historyDao;
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public boolean isConfigurable() {
@@ -73,8 +73,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
             }
         }
         ctx.json(new StdResp(true, null, bannedPeerTrends.entrySet().stream()
-                .map((e) -> new PBHChartController.SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                .sorted(Comparator.comparingLong(PBHChartController.SimpleLongIntKV::key))
+                .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
+                .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
                 .toList()
         ));
     }
@@ -211,8 +211,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         map.put("checkCounter", metrics.getCheckCounter());
         map.put("peerBanCounter", metrics.getPeerBanCounter());
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
-        map.put("banlistCounter", getServer().getBannedPeers().size());
-        map.put("bannedIpCounter", getServer().getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
+        map.put("banlistCounter", downloaderServer.getBannedPeers().size());
+        map.put("bannedIpCounter", downloaderServer.getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
         ctx.json(new StdResp(true, null, map));
     }
 
@@ -230,23 +230,4 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     public @NotNull String getConfigName() {
         return "webapi-metrics";
     }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    static class BanResponse {
-        private String address;
-        private BanMetadata banMetadata;
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    public static class RuleData {
-        private String type;
-        private long hit;
-        private long query;
-        private String metadata;
-    }
-
 }

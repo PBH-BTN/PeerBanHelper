@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.gui;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 
 import java.util.logging.Level;
 
@@ -15,7 +15,7 @@ public interface GuiManager {
 
     void close();
 
-    void onPBHFullyStarted(PeerBanHelperServer server);
+    void onPBHFullyStarted(PeerBanHelper server);
 
     void createNotification(Level level, String title, String description);
 

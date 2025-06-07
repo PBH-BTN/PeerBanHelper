@@ -4,7 +4,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
@@ -22,6 +22,7 @@ import com.google.common.eventbus.Subscribe;
 import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -86,7 +87,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         });
 
         // taskbar
-        if (Main.getServer().isGlobalPaused()) {
+        if (Main.getServer().getDownloaderServer().isGlobalPaused()) {
             taskbarControl().updateProgress(mainWindow, TaskbarState.PAUSED, 1.0f);
         } else {
             taskbarControl().updateProgress(mainWindow, TaskbarState.OFF, -1.0f);
@@ -104,7 +105,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+    public void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent, @Nullable Runnable noEvent) {
         int msgType = JOptionPane.PLAIN_MESSAGE;
         if (level == Level.INFO) {
             msgType = JOptionPane.INFORMATION_MESSAGE;
@@ -123,9 +124,9 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             int result = JOptionPane.showOptionDialog(null, description, title,
                     JOptionPane.YES_NO_OPTION, finalMsgType, null, null, JOptionPane.NO_OPTION);
             if (result == JOptionPane.YES_OPTION) {
-                yesEvent.run();
+                if (yesEvent != null) yesEvent.run();
             } else if (result == JOptionPane.NO_OPTION) {
-                noEvent.run();
+                if (noEvent != null) noEvent.run();
             }
         });
     }
@@ -159,7 +160,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void onPBHFullyStarted(PeerBanHelperServer server) {
+    public void onPBHFullyStarted(PeerBanHelper server) {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateGuiStuff, 0, 1, TimeUnit.SECONDS);
     }
 

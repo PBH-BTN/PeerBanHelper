@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.database.table;
 
 import com.ghostchu.peerbanhelper.database.TranslationComponentPersistener;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "history")
+@DatabaseTable(tableName = "history", daoClass = HistoryDao.class)
 public final class HistoryEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;
@@ -35,6 +36,8 @@ public final class HistoryEntity {
     private Long peerDownloaded;
     @DatabaseField(canBeNull = false)
     private Double peerProgress;
+    @DatabaseField(canBeNull = false)
+    private Double downloaderProgress;
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
     private TorrentEntity torrent;
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)

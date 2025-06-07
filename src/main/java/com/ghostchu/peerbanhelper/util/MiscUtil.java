@@ -1,15 +1,11 @@
 package com.ghostchu.peerbanhelper.util;
 
-import com.ghostchu.peerbanhelper.Main;
-import io.javalin.http.Context;
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -36,14 +32,7 @@ public final class MiscUtil {
         return sdfTime.format(new Date(timestamp));
     }
 
-    public static boolean isUsingReserveProxy(Context context) {
-        var list = List.of("X-Real-IP", "X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP");
-        for (String s : list) {
-            if (context.header(s) != null)
-                return true;
-        }
-        return false;
-    }
+
 
     public static void gzip(InputStream is, OutputStream os) throws IOException {
         GZIPOutputStream gzipOs = new GZIPOutputStream(os);
@@ -83,28 +72,6 @@ public final class MiscUtil {
             }
         }
         return files;
-    }
-
-    @SneakyThrows
-    public static List<File> readAllResFiles(String path) {
-        List<File> files = new ArrayList<>();
-        var urlEnumeration = Main.class.getClassLoader().getResources(path);
-        while (urlEnumeration.hasMoreElements()) {
-            var url = urlEnumeration.nextElement();
-            var fileDir = new File(new URI(url.toString()));
-            files.addAll(recursiveReadFile(fileDir));
-        }
-        return files;
-    }
-
-    @SneakyThrows
-    public static File readResFile(String path) {
-        var urlEnumeration = Main.class.getClassLoader().getResources(path);
-        if (urlEnumeration.hasMoreElements()) {
-            var url = urlEnumeration.nextElement();
-            return new File(new URI(url.toString()));
-        }
-        return null;
     }
 
     public static ZoneOffset getSystemZoneOffset() {

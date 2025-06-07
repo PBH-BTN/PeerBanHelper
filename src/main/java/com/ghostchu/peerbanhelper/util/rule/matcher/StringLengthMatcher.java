@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public final class StringLengthMatcher extends AbstractJsonMatcher {
-    private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_LENGTH);
     private final int min;
     private final int max;
     private MatchResult hit;

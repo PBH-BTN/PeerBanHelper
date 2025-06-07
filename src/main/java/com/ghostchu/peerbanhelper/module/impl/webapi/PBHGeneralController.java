@@ -2,21 +2,25 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.module.FeatureModule;
-import com.ghostchu.peerbanhelper.module.ModuleManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.WebUtil;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import com.ghostchu.peerbanhelper.web.Role;
-import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.Gson;
@@ -62,9 +66,11 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Autowired
     private ModuleMatchCache moduleMatchCache;
     @Autowired
-    private ModuleManager moduleManager;
+    private ModuleManagerImpl moduleManager;
     @Autowired
-    private PeerBanHelperServer peerBanHelperServer;
+    private PeerBanHelper peerBanHelper;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public boolean isConfigurable() {
@@ -110,17 +116,17 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     private void handleGlobalConfigRead(Context context) {
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("globalPaused", peerBanHelperServer.isGlobalPaused());
+        data.put("globalPaused", downloaderServer.isGlobalPaused());
         context.json(new StdResp(true, null, data));
     }
 
     private void handleGlobalConfig(Context context) {
-        var body = context.bodyAsClass(GlobalOptionPatch.class);
+        var body = context.bodyAsClass(GlobalOptionPatchBody.class);
         if (body == null) {
             throw new IllegalArgumentException("Request body cannot be null");
         }
         if (body.globalPaused() != null) {
-            peerBanHelperServer.setGlobalPaused(body.globalPaused());
+            downloaderServer.setGlobalPaused(body.globalPaused());
         }
         context.json(new StdResp(true, "OK!", null));
     }
@@ -228,7 +234,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         var proxy = Main.getMainConfig().getInt("proxy.setting");
         network.put("internet_access", true); // ?
         network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
-        network.put("reverse_proxy", MiscUtil.isUsingReserveProxy(context));
+        network.put("reverse_proxy", WebUtil.isUsingReserveProxy(context));
         network.put("client_ip", userIp);
         return network;
     }
@@ -269,7 +275,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private void handleReloading(Context context) {
         Main.setupConfiguration();
         var result = Main.getReloadManager().reload();
-        List<ReloadEntry> entryList = new ArrayList<>();
+        List<ReloadEntryDTO> entryList = new ArrayList<>();
         result.forEach((container, r) -> {
             String entryName;
             if (container.getReloadable() == null) {
@@ -282,7 +288,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                     entryName = reloadable.getClass().getName();
                 }
             }
-            entryList.add(new ReloadEntry(entryName, r.getStatus().name()));
+            entryList.add(new ReloadEntryDTO(entryName, r.getStatus().name()));
         });
         moduleMatchCache.invalidateAll();
 
@@ -489,18 +495,6 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     @Override
     public void onDisable() {
 
-    }
-
-    public record GlobalOptionPatch(
-            Boolean globalPaused
-    ) {
-
-    }
-
-    public record ReloadEntry(
-            String reloadable,
-            String reloadResult
-    ) {
     }
 
 }

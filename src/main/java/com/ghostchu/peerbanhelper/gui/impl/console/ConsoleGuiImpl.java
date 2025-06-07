@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
@@ -52,7 +53,7 @@ public class ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+    public void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent, @Nullable Runnable noEvent) {
 
     }
 

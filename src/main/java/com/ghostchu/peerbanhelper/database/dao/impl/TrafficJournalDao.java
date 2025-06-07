@@ -1,10 +1,9 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
-import com.ghostchu.peerbanhelper.lab.Laboratory;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.j256.ormlite.support.ConnectionSource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,25 +16,23 @@ import java.util.List;
 
 @Component
 public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long> {
-    private final Laboratory laboratory;
 
-    public TrafficJournalDao(@Autowired Database database, @Autowired Laboratory laboratory) throws SQLException {
-        super(database.getDataSource(), TrafficJournalEntity.class);
-        this.laboratory = laboratory;
+    public TrafficJournalDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, TrafficJournalEntity.class);
     }
 
-    public TrafficDataDto getTodayData(String downloader) throws Exception {
+    public TrafficDataComputed getTodayData(String downloader) throws Exception {
         Timestamp startOfToday = new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis()));
-        List<TrafficDataDto> results;
+        List<TrafficDataComputed> results;
         if (downloader == null || downloader.isBlank()) {
             results = getAllDownloadersOverallData(startOfToday, startOfToday).stream().toList();
         } else {
             results = getSpecificDownloaderOverallData(downloader, startOfToday, startOfToday).stream().toList();
         }
         if (results.isEmpty()) {
-            return new TrafficDataDto(startOfToday, 0, 0);
+            return new TrafficDataComputed(startOfToday, 0, 0);
         } else {
-            return new TrafficDataDto(startOfToday, results.getFirst().getDataOverallUploaded(), results.getFirst().getDataOverallDownloaded());
+            return new TrafficDataComputed(startOfToday, results.getFirst().getDataOverallUploaded(), results.getFirst().getDataOverallDownloaded());
         }
     }
 
@@ -64,8 +61,8 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         return journalEntity;
     }
 
-    public List<TrafficDataDto> getDayOffsetData(String downloader, Timestamp startAt, Timestamp endAt) throws Exception {
-        List<TrafficDataDto> results;
+    public List<TrafficDataComputed> getDayOffsetData(String downloader, Timestamp startAt, Timestamp endAt) throws Exception {
+        List<TrafficDataComputed> results;
         if (downloader == null || downloader.isBlank()) {
             results = getAllDownloadersOverallData(startAt, endAt).stream().toList();
         } else {
@@ -74,7 +71,7 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         return results;
     }
 
-    public List<TrafficDataDto> getAllDownloadersOverallData(Timestamp start, Timestamp end) throws Exception {
+    public List<TrafficDataComputed> getAllDownloadersOverallData(Timestamp start, Timestamp end) throws Exception {
         try (var results = queryBuilder().selectRaw(
                         "timestamp",
                         "SUM(dataOverallUploadedAtStart) AS totalUploadedAtStart",
@@ -97,13 +94,13 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                             Long.parseLong(args[3]),
                             Long.parseLong(args[4])
                     )
-            ).map(data -> new TrafficDataDto(data.getTimestamp(),
+            ).map(data -> new TrafficDataComputed(data.getTimestamp(),
                     data.getDataOverallUploaded() - data.getDataOverallUploadedAtStart(),
                     data.getDataOverallDownloaded() - data.getDataOverallDownloadedAtStart())).toList();
         }
     }
 
-    public List<TrafficDataDto> getSpecificDownloaderOverallData(String downloadName, Timestamp start, Timestamp end) throws Exception {
+    public List<TrafficDataComputed> getSpecificDownloaderOverallData(String downloadName, Timestamp start, Timestamp end) throws Exception {
         return queryBuilder().orderBy("timestamp", true)
                 .where()
                 .eq("downloader", downloadName)
@@ -118,7 +115,7 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                         e.getDataOverallUploaded(),
                         e.getDataOverallDownloadedAtStart(),
                         e.getDataOverallDownloaded()))
-                .map(data -> new TrafficDataDto(data.getTimestamp(),
+                .map(data -> new TrafficDataComputed(data.getTimestamp(),
                         data.getDataOverallUploaded() - data.getDataOverallUploadedAtStart(),
                         data.getDataOverallDownloaded() - data.getDataOverallDownloadedAtStart()))
                 .toList();
@@ -127,7 +124,7 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class TrafficDataDto {
+    public static class TrafficDataComputed {
         private Timestamp timestamp;
         private long dataOverallUploaded;
         private long dataOverallDownloaded;

@@ -1,14 +1,14 @@
 package com.ghostchu.peerbanhelper.downloader;
 
-import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.google.gson.JsonObject;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -16,10 +16,11 @@ import java.util.List;
 
 public interface Downloader extends AutoCloseable {
 
+    @NotNull
     YamlConfiguration saveDownloader();
-
+    @NotNull
     JsonObject saveDownloaderJson();
-
+    @NotNull
     String getEndpoint();
 
 //    String getWebUIEndpoint();
@@ -37,13 +38,17 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 用户定义名称
      */
+    @NotNull
     String getName();
+    @NotNull
+    String getId();
 
     /**
      * 下载器类型
      *
      * @return 类型
      */
+    @NotNull
     String getType();
 
     /**
@@ -51,6 +56,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 登陆是否成功
      */
+    @NotNull
     DownloaderLoginResult login();
 
     /**
@@ -78,6 +84,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 返回所有活动的 Torrents
      */
+    @NotNull
     List<Torrent> getTorrents();
 
     /**
@@ -85,6 +92,7 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 返回所有的 Torrents
      */
+    @NotNull
     List<Torrent> getAllTorrents();
 
     /**
@@ -93,21 +101,23 @@ public interface Downloader extends AutoCloseable {
      * @param torrent Torrent
      * @return 对等体列表
      */
-    List<Peer> getPeers(Torrent torrent);
+    @NotNull
+    List<Peer> getPeers(@NotNull Torrent torrent);
 
     /**
      * 获取指定 Torrent 的 Tracker 列表
      * @param torrent Torrent
      * @return Tracker 列表
      */
-    List<Tracker> getTrackers(Torrent torrent);
+    @NotNull
+    List<Tracker> getTrackers(@NotNull Torrent torrent);
 
     /**
      * 设置指定 Torrent 的 Tracker 列表
      * @param torrent Torrent
      * @param trackers Tracker 列表
      */
-    void setTrackers(Torrent torrent, List<Tracker> trackers);
+    void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers);
 
     /**
      * 设置并使新的 BanList 生效
@@ -117,29 +127,14 @@ public interface Downloader extends AutoCloseable {
      * @param removed       移除列表
      * @param applyFullList 强制应用全量列表
      */
-    void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
-
-    /**
-     * 如有需要，重启 Torrent 任务
-     * 有些客户端（如 Transmission）需要重启 Torrent 任务才能断开已连接的 Peers 来使屏蔽列表生效
-     *
-     * @param torrents Torrent 任务列表
-     */
-    void relaunchTorrentIfNeeded(Collection<Torrent> torrents);
-
-    /**
-     * 如有需要，重启 Torrent 任务
-     * 有些客户端（如 Transmission）需要重启 Torrent 任务才能断开已连接的 Peers 来使屏蔽列表生效
-     *
-     * @param torrents Torrent 任务列表
-     */
-    void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents);
+    void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList);
 
     /**
      * 获取客户端最后一次请求的状态
      *
      * @return 最后请求状态
      */
+    @NotNull
     DownloaderLastStatus getLastStatus();
 
     /**
@@ -147,13 +142,14 @@ public interface Downloader extends AutoCloseable {
      *
      * @param lastStatus 最后请求状态
      */
-    void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage);
+    void setLastStatus(@NotNull DownloaderLastStatus lastStatus, @NotNull TranslationComponent statusMessage);
 
     /**
      * 获取客户端状态描述说明
      *
      * @return 状态描述说明
      */
+    @NotNull
     TranslationComponent getLastStatusMessage();
 
     /**
@@ -161,13 +157,61 @@ public interface Downloader extends AutoCloseable {
      *
      * @return 统计数据
      */
+    @NotNull
     DownloaderStatistics getStatistics();
 
     /**
      * 获取下载器扩展特性标记
      * @return 扩展特性标记列表
      */
+    @NotNull
     List<DownloaderFeatureFlag> getFeatureFlags();
 
     int getMaxConcurrentPeerRequestSlots();
+
+//    /**
+//     * 添加标签到指定种子
+//     * @param torrent Torrent
+//     * @param tag 标签
+//     */
+//    void addTag(Torrent torrent, String tag);
+//
+//    /**
+//     * 从种子上移除指定的标签
+//     * @param torrent Torrent
+//     * @param tag 标签
+//     */
+//    void removeTag(Torrent torrent, String tag);
+//
+//    /**
+//     * 以纯文本方式获取指定 Torrent 上的所有标签
+//     * @param torrent Torrent
+//     * @return 标签列表
+//     */
+//    List<String> getTags(Torrent torrent);
+//
+//    /**
+//     * 暂停 Torrent
+//     * @param torrent Torrent
+//     */
+//    void pauseTorrent(Torrent torrent);
+//
+//    /**
+//     * 开始 Torrent
+//     * @param torrent Torrent
+//     */
+//    void startTorrent(Torrent torrent);
+
+    /**
+     * 获取当前下载器的限速配置
+     * @return 限速配置，如果不支持或者请求错误，则可能返回 null
+     */
+    @Nullable
+    DownloaderSpeedLimiter getSpeedLimiter();
+
+    /**
+     * 设置当前下载器的限速配置
+     * @param speedLimiter 限速配置
+     */
+    void setSpeedLimiter(@Nullable DownloaderSpeedLimiter speedLimiter);
 }

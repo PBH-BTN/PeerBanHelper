@@ -4,6 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.0-modified</version>
+        <relativePath>spring-boot-starter-parent-3.5.0.modified.pom</relativePath>
+    </parent>
+
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
     <version>7.4.15</version>
@@ -16,37 +23,161 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
-        <flatlafVersion>3.5.4</flatlafVersion>
         <install4j.home>/opt/install4j</install4j.home>
-        <ormlite.version>6.1</ormlite.version>
+        <flatlafVersion>3.6</flatlafVersion>
         <swt.version>3.129.0</swt.version>
+        <ormlite.version>6.1</ormlite.version>
+        <jetty.version>11.0.25</jetty.version> <!-- Override springboot's jetty dependencies version, fix  Caused by: java.lang.NoSuchMethodError: 'java.util.Map org.eclipse.jetty.http.MimeTypes.getInferredEncodings()'-->
+        <jetty.jakarta-api>5.0.2</jetty.jakarta-api>
     </properties>
+
     <pluginRepositories>
         <pluginRepository>
             <id>ej-technologies</id>
             <url>https://maven.ej-technologies.com/repository</url>
         </pluginRepository>
+        <pluginRepository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
     </pluginRepositories>
-    <build>
 
+    <profiles>
+        <profile>
+            <id>install4j-ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                        <version>11.0.4</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>../install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <librariesPath>${project.build.directory}/libraries</librariesPath>
+                                        <jarPath>${project.build.directory}/PeerBanHelper.jar</jarPath>
+                                    </variables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>install4j-dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.install4j</groupId>
+                        <artifactId>install4j-maven</artifactId>
+                        <version>11.0.4</version>
+                        <executions>
+                            <execution>
+                                <id>compile-installers</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <installDir>${install4j.home}</installDir>
+                                    <projectFile>../install4j/project.install4j</projectFile>
+                                    <variables>
+                                        <librariesPath>${project.build.directory}/libraries</librariesPath>
+                                        <jarPath>${project.build.directory}/PeerBanHelper.jar</jarPath>
+                                    </variables>
+                                    <!--                                    <incremental>true</incremental>-->
+                                    <jvmArguments>-Xmx4G</jvmArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <install4j.home>C:\Program Files\install4j11</install4j.home>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>assets/</exclude>
+                    <exclude>static/</exclude>
+                    <exclude>native/</exclude>
+                </excludes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/static</directory>
+                <excludes>
+                    <exclude>.git/</exclude>
+                </excludes>
+                <targetPath>static</targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/assets</directory>
+                <excludes>
+                    <exclude>.git/</exclude>
+                </excludes>
+                <targetPath>assets</targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/native</directory>
+                <targetPath>native</targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/lang</directory>
+                <excludes>
+                    <exclude>.git/</exclude>
+                </excludes>
+                <targetPath>lang</targetPath>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <release>${java.version}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.38</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <!--        <plugin>-->
+            <!--            <groupId>org.springframework.boot</groupId>-->
+            <!--            <artifactId>spring-boot-maven-plugin</artifactId>-->
+            <!--            <configuration>-->
+            <!--                <excludes>-->
+            <!--                    <exclude>-->
+            <!--                        <groupId>org.projectlombok</groupId>-->
+            <!--                        <artifactId>lombok</artifactId>-->
+            <!--                    </exclude>-->
+            <!--                </excludes>-->
+            <!--            </configuration>-->
+            <!--        </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
@@ -128,109 +259,23 @@
                 </configuration>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <excludes>
-                    <exclude>static/**</exclude>
-                    <exclude>assets/**</exclude>
-                    <exclude>native/**</exclude>
-                </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/resources/static</directory>
-                <excludes>
-                    <exclude>.git/</exclude>
-                </excludes>
-                <targetPath>static</targetPath>
-                <filtering>false</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources/assets</directory>
-                <targetPath>assets</targetPath>
-                <filtering>false</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources/native</directory>
-                <targetPath>native</targetPath>
-                <filtering>false</filtering>
-            </resource>
-        </resources>
-    </build>
 
-    <profiles>
-        <profile>
-            <id>install4j-ci</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.install4j</groupId>
-                        <artifactId>install4j-maven</artifactId>
-                        <version>11.0.4</version>
-                        <executions>
-                            <execution>
-                                <id>compile-installers</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>compile</goal>
-                                </goals>
-                                <configuration>
-                                    <installDir>${install4j.home}</installDir>
-                                    <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
-                                    <variables>
-                                        <librariesPath>${project.basedir}/target/libraries</librariesPath>
-                                        <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
-                                    </variables>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>install4j-dev</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.install4j</groupId>
-                        <artifactId>install4j-maven</artifactId>
-                        <version>11.0.4</version>
-                        <executions>
-                            <execution>
-                                <id>compile-installers</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>compile</goal>
-                                </goals>
-                                <configuration>
-                                    <installDir>${install4j.home}</installDir>
-                                    <projectFile>${project.basedir}/install4j/project.install4j</projectFile>
-                                    <variables>
-                                        <librariesPath>${project.basedir}/target/libraries</librariesPath>
-                                        <jarPath>${project.basedir}/target/PeerBanHelper.jar</jarPath>
-                                    </variables>
-                                    <!--                                    <incremental>true</incremental>-->
-                                    <jvmArguments>-Xmx4G</jvmArguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <properties>
-                <install4j.home>C:\Program Files\install4j11</install4j.home>
-            </properties>
-        </profile>
-    </profiles>
+    </build>
 
 
     <repositories>
-        <!--Transmission-->
+
         <repository>
             <id>local-repo</id>
-            <url>file:///${project.basedir}/m2-local-repo</url>
+            <url>file:///${project.basedir}/../m2-local-repo</url>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
         <repository>
             <id>reposilite-repository-releases</id>
@@ -242,133 +287,58 @@
             <url>https://jitpack.io</url>
         </repository>
         <repository>
-            <id>codemc-releases</id>
-            <url>https://repo.codemc.io/repository/maven-releases/</url>
-        </repository>
-        <repository>
-            <id>codemc-snapshots</id>
-            <url>https://repo.codemc.io/repository/maven-snapshots/</url>
+            <id>maven-eclipse-repo-fork</id><!-- a repository for swt 4.9 binaries -->
+            <url>https://lislei.github.io/maven-eclipse.github.io/maven</url>
         </repository>
         <repository>
             <id>maven-snapshots</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>maven-eclipse-repo-fork</id><!-- a repository for swt 4.9 binaries -->
-            <url>https://lislei.github.io/maven-eclipse.github.io/maven</url>
+            <id>reposilite-repository</id>
+            <url>https://maven.reposilite.com/snapshots</url>
         </repository>
     </repositories>
 
+
     <dependencies>
         <dependency>
-            <groupId>org.bspfsystems</groupId>
-            <artifactId>yamlconfiguration</artifactId>
-            <version>3.0.2</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
-            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.ee10/jetty-ee10-bom -->
+        <dependency>
+            <groupId>org.eclipse.jetty.ee10</groupId>
+            <artifactId>jetty-ee10-bom</artifactId>
+            <version>12.0.22</version>
+            <type>pom</type>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.12.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>33.4.6-jre</version>
-        </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>26.0.2</version>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-jdk14 -->
         <dependency>
-            <groupId>com.github.seancfoley</groupId>
-            <artifactId>ipaddress</artifactId>
-            <version>5.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.17</version>
-        </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.xerial</groupId>-->
-        <!--            <artifactId>sqlite-jdbc</artifactId>-->
-        <!--            <version>3.46.1.3</version>-->
-        <!--        </dependency>-->
-        <dependency>
-            <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>
-            <artifactId>sqlite-jdbc-loongarch64</artifactId>
-            <version>3.47.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mizosoft.methanol</groupId>
-            <artifactId>methanol</artifactId>
-            <version>1.8.2</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.18</version>
-        </dependency>
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf</artifactId>
-            <version>${flatlafVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>3.5.4</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.12.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.maxmind.geoip2</groupId>
-            <artifactId>geoip2</artifactId>
-            <version>4.2.1</version>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>semver4j</artifactId>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
             <version>6.5.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jetty-server</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.aviator</groupId>
-            <artifactId>aviator</artifactId>
-            <version>5.4.3</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20250107</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>6.2.5</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
         <dependency>
@@ -383,10 +353,27 @@
             <version>${ormlite.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.ghostchu</groupId>
-            <artifactId>simplereloadlib</artifactId>
-            <version>1.1.2</version>
+            <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>
+            <artifactId>sqlite-jdbc-loongarch64</artifactId>
+            <version>3.47.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.maxmind.geoip2</groupId>
+            <artifactId>geoip2</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.aviator</groupId>
+            <artifactId>aviator</artifactId>
+            <version>5.4.3</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20250517</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
         <dependency>
             <groupId>com.github.Dansoftowner</groupId>
             <artifactId>jSystemThemeDetector</artifactId>
@@ -439,16 +426,6 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.80</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vdurmont</groupId>
-            <artifactId>semver4j</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <!-- DO NOT UPDATE, Keep sync with jSystemThemeDetector -->
@@ -459,33 +436,11 @@
             <artifactId>commonmark</artifactId>
             <version>0.24.0</version>
         </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.18.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>11.0.25</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.tukaani/xz -->
         <dependency>
             <groupId>org.tukaani</groupId>
             <artifactId>xz</artifactId>
             <version>1.10</version>
-        </dependency>
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf-extras</artifactId>
-            <version>3.5.4</version>
         </dependency>
         <dependency>
             <groupId>com.offbynull.portmapper</groupId>
@@ -502,11 +457,84 @@
             <artifactId>jcefmaven</artifactId>
             <version>126.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-extras</artifactId>
+            <version>3.6</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.win32.win32.x86_64 -->
         <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
             <version>${swt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <version>3.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ghostchu</groupId>
+            <artifactId>simplereloadlib</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework</groupId>-->
+        <!--            <artifactId>spring-context</artifactId>-->
+        <!--            <version>6.2.5</version>-->
+        <!--        </dependency>-->
+        <dependency>
+            <groupId>com.github.mizosoft.methanol</groupId>
+            <artifactId>methanol</artifactId>
+            <version>1.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.13.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.4.6-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seancfoley</groupId>
+            <artifactId>ipaddress</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bspfsystems</groupId>
+            <artifactId>yamlconfiguration</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.27.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.80</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk18on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.80</version>
         </dependency>
     </dependencies>
 </project>

@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.database.table;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.database.TranslationComponentPersistener;
+import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -14,7 +15,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "alert")
+@DatabaseTable(tableName = "alert", daoClass = AlertDao.class)
 public final class AlertEntity {
     @DatabaseField(generatedId = true)
     private Long id;

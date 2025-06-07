@@ -428,8 +428,8 @@ public final class SwingMainWindow extends JFrame {
             var totalDownloaders = 0L;
             var healthDownloaders = 0L;
             if (Main.getServer() != null) {
-                totalDownloaders = Main.getServer().getDownloaders().size();
-                healthDownloaders = Main.getServer().getDownloaders().stream().filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
+                totalDownloaders = Main.getServer().getDownloaderManager().getDownloaders().size();
+                healthDownloaders = Main.getServer().getDownloaderManager().getDownloaders().stream().filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
             }
             return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_DOWNLOADER, healthDownloaders, totalDownloaders), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/connection.svg")));
         }
@@ -439,8 +439,8 @@ public final class SwingMainWindow extends JFrame {
             var bannedIps = 0L;
             var server = Main.getServer();
             if (server != null) {
-                bannedIps = Main.getServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
-                bannedPeers = Main.getServer().getBannedPeers().values().size();
+                bannedIps = Main.getServer().getDownloaderServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
+                bannedPeers = Main.getServer().getDownloaderServer().getBannedPeers().values().size();
             }
             return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/banned.svg")));
         }
