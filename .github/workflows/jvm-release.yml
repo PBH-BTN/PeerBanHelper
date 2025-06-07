@@ -72,7 +72,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.S3_SECRET_KEY }}
           aws_bucket: ${{ secrets.S3_BUCKET }}
           endpoint: ${{ secrets.S3_ENDPOINT }}
-          source_dir: 'peerbanhelper-impl/target/media'
+          source_dir: 'target/media'
           destination_dir: 'updates/latest'
 
   Clear_CloudFlare_Updates:

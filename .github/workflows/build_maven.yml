@@ -19,13 +19,13 @@ jobs:
         name: Download WebUI Files
         with:
           name: webui-dist
-          path: peerbanhelper-impl/src/main/resources/static
+          path: src/main/resources/static
       - uses: actions/download-artifact@v4
         name: Download JNI Library
         with:
           pattern: jni-*
           merge-multiple: true
-          path: peerbanhelper-impl/src/main/resources/native/windows
+          path: src/main/resources/native/windows
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -39,5 +39,5 @@ jobs:
         with:
           name: maven-dist
           path: |
-            peerbanhelper-impl/target/libraries
-            peerbanhelper-impl/target/*.jar
+            target/libraries
+            target/*.jar
