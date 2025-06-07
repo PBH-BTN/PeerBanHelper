@@ -7,8 +7,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
-        <relativePath/>
+        <version>3.5.0-modified</version>
+        <relativePath>spring-boot-starter-parent-3.5.0.modified.pom</relativePath>
     </parent>
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
@@ -27,13 +27,22 @@
         <flatlafVersion>3.6</flatlafVersion>
         <swt.version>3.129.0</swt.version>
         <ormlite.version>6.1</ormlite.version>
-        <javalin.version>6.6.0</javalin.version>
+        <jetty.version>11.0.25</jetty.version> <!-- Override springboot's jetty dependencies version, fix  Caused by: java.lang.NoSuchMethodError: 'java.util.Map org.eclipse.jetty.http.MimeTypes.getInferredEncodings()'-->
+        <jetty.jakarta-api>5.0.2</jetty.jakarta-api>
     </properties>
 
     <pluginRepositories>
         <pluginRepository>
             <id>ej-technologies</id>
             <url>https://maven.ej-technologies.com/repository</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </pluginRepository>
     </pluginRepositories>
 
@@ -146,25 +155,9 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <release>${java.version}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -173,6 +166,18 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <!--        <plugin>-->
+            <!--            <groupId>org.springframework.boot</groupId>-->
+            <!--            <artifactId>spring-boot-maven-plugin</artifactId>-->
+            <!--            <configuration>-->
+            <!--                <excludes>-->
+            <!--                    <exclude>-->
+            <!--                        <groupId>org.projectlombok</groupId>-->
+            <!--                        <artifactId>lombok</artifactId>-->
+            <!--                    </exclude>-->
+            <!--                </excludes>-->
+            <!--            </configuration>-->
+            <!--        </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
@@ -254,13 +259,23 @@
                 </configuration>
             </plugin>
         </plugins>
+
     </build>
 
 
     <repositories>
+
         <repository>
             <id>local-repo</id>
             <url>file:///${project.basedir}/../m2-local-repo</url>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
         <repository>
             <id>reposilite-repository-releases</id>
@@ -285,34 +300,11 @@
         </repository>
     </repositories>
 
+
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>26.0.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-jdk14 -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.17</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vdurmont</groupId>
-            <artifactId>semver4j</artifactId>
-            <version>3.1.0</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -320,9 +312,33 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.ee10/jetty-ee10-bom -->
+        <dependency>
+            <groupId>org.eclipse.jetty.ee10</groupId>
+            <artifactId>jetty-ee10-bom</artifactId>
+            <version>12.0.22</version>
+            <type>pom</type>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>26.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>semver4j</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
-            <version>${javalin.version}</version>
+            <version>6.5.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
         <dependency>
@@ -337,20 +353,10 @@
             <version>${ormlite.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.ghostchu.peerbanhelper.external-libs</groupId>
             <artifactId>sqlite-jdbc-loongarch64</artifactId>
             <version>3.47.0.0</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>ch.qos.logback</groupId>-->
-<!--            <artifactId>logback-classic</artifactId>-->
-<!--            <version>1.5.18</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
@@ -477,11 +483,11 @@
             <artifactId>simplereloadlib</artifactId>
             <version>1.1.2</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework</groupId>-->
-<!--            <artifactId>spring-context</artifactId>-->
-<!--            <version>6.2.5</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework</groupId>-->
+        <!--            <artifactId>spring-context</artifactId>-->
+        <!--            <version>6.2.5</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>com.github.mizosoft.methanol</groupId>
             <artifactId>methanol</artifactId>

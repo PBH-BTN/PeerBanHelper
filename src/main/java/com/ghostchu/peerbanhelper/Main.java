@@ -4,20 +4,20 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
-import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
-import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
-import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.*;
-import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.config.MainConfigUpdateScript;
 import com.ghostchu.peerbanhelper.config.PBHConfigUpdater;
 import com.ghostchu.peerbanhelper.config.ProfileUpdateScript;
+import com.ghostchu.peerbanhelper.event.PBHShutdownEvent;
+import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swt.SwtGuiImpl;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
+import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.simplereloadlib.ReloadManager;
@@ -34,14 +34,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.boot.Banner;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import oshi.SystemInfo;
 
@@ -59,7 +55,6 @@ import java.util.Locale;
 import java.util.Properties;
 
 @Slf4j
-@SpringBootApplication
 public class Main {
     @Getter
     private static final EventBus eventBus = new EventBus();
@@ -130,15 +125,17 @@ public class Main {
             setupScriptEngine();
             try {
                 log.info(TextManager.tlUI(Lang.SPRING_CONTEXT_LOADING));
-//                applicationContext = new AnnotationConfigApplicationContext();
-//                applicationContext.register(AppConfig.class);
-//                applicationContext.refresh();
-//            registerBean(File.class, mainConfigFile, "mainConfigFile");
-//            registerBean(File.class, profileConfigFile, "profileConfigFile");
-//            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
-//            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
-                //server = applicationContext.getBean(PeerBanHelper.class);
-                SpringApplication.run(PeerBanHelper.class, args);
+                SpringApplicationBuilder builder = new SpringApplicationBuilder(PeerBanHelper.class);
+                builder.bannerMode(Banner.Mode.OFF);
+                builder.headless(false);
+                if (meta.isSnapshotOrBeta()) {
+                    log.info("Running in snapshot/beta mode, disabling lazy initialization for better debugging.");
+                    builder.lazyInitialization(false);
+                } else {
+                    builder.lazyInitialization(true);
+                }
+                var context = builder.build().run(args);
+                server = context.getBean(PeerBanHelper.class);
                 server.start();
             } catch (Exception e) {
                 log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
@@ -182,7 +179,6 @@ public class Main {
             SizeAndTimeBasedRollingPolicy<?> policy = (SizeAndTimeBasedRollingPolicy<?>) appender.getRollingPolicy();
             policy.setFileNamePattern(logsDirectory.getAbsolutePath() + "/%d{yyyy-MM-dd}-%i.log.gz"); // 更新文件名模式
             policy.start(); // 启动滚动策略
-
             appender.start(); // 启动 appender
         }
 
@@ -440,46 +436,46 @@ public class Main {
         return new String(chars);
     }
 
-    public static <T> void registerBean(Class<T> clazz, @Nullable String beanName) {
-        if (beanName == null) {
-            beanName = decapitalize(clazz.getSimpleName());
-        }
-        if (applicationContext.containsBean(beanName)) {
-            return;
-        } else {
-            String bn = decapitalize(clazz.getSimpleName());
-            if (applicationContext.containsBean(bn)) {
-                return;
-            }
-        }
-        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
-        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-    }
-
-    public static <T> void registerBean(Class<T> clazz, T instance, @Nullable String beanName) {
-        if (beanName == null) {
-            beanName = decapitalize(clazz.getSimpleName());
-        }
-        if (applicationContext.containsBean(beanName)) {
-            return;
-        } else {
-            String bn = decapitalize(clazz.getSimpleName());
-            if (applicationContext.containsBean(bn)) {
-                return;
-            }
-        }
-        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
-        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance);
-        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-    }
-
-    public static void unregisterBean(String beanName) {
-        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-        defaultListableBeanFactory.removeBeanDefinition(beanName);
-    }
+//    public static <T> void registerBean(Class<T> clazz, @Nullable String beanName) {
+//        if (beanName == null) {
+//            beanName = decapitalize(clazz.getSimpleName());
+//        }
+//        if (applicationContext.containsBean(beanName)) {
+//            return;
+//        } else {
+//            String bn = decapitalize(clazz.getSimpleName());
+//            if (applicationContext.containsBean(bn)) {
+//                return;
+//            }
+//        }
+//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
+//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
+//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
+//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
+//    }
+//
+//    public static <T> void registerBean(Class<T> clazz, T instance, @Nullable String beanName) {
+//        if (beanName == null) {
+//            beanName = decapitalize(clazz.getSimpleName());
+//        }
+//        if (applicationContext.containsBean(beanName)) {
+//            return;
+//        } else {
+//            String bn = decapitalize(clazz.getSimpleName());
+//            if (applicationContext.containsBean(bn)) {
+//                return;
+//            }
+//        }
+//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
+//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance);
+//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
+//    }
+//
+//    public static void unregisterBean(String beanName) {
+//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
+//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
+//        defaultListableBeanFactory.removeBeanDefinition(beanName);
+//    }
 
     private static void setupScriptEngine() {
         AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);

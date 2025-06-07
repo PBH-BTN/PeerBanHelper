@@ -1,8 +1,9 @@
 package com.ghostchu.peerbanhelper.module;
 
-import com.ghostchu.peerbanhelper.Main;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import java.util.List;
 @Component
 public final class ModuleManagerImpl implements ModuleManager {
     private final List<FeatureModule> modules = new ArrayList<>();
+    @Autowired
+    private ApplicationContext context;
 
     /**
      * 注册一个功能模块并启用它
@@ -20,8 +23,8 @@ public final class ModuleManagerImpl implements ModuleManager {
      */
     @Override
     public void register(@NotNull Class<? extends FeatureModule> moduleClass) {
-        Main.registerBean(moduleClass, null);
-        FeatureModule module = Main.getApplicationContext().getBean(moduleClass);
+       // Main.registerBean(moduleClass, null);
+        FeatureModule module = context.getBean(moduleClass);
         if (module.isModuleEnabled()) {
             synchronized (modules) {
                 this.modules.add(module);
@@ -37,7 +40,7 @@ public final class ModuleManagerImpl implements ModuleManager {
      */
     @Override
     public void register(@NotNull FeatureModule module, String beanName) {
-        Main.registerBean(module.getClass(), beanName);
+      //  Main.registerBean(module.getClass(), beanName);
         if (module.isModuleEnabled()) {
             synchronized (modules) {
                 this.modules.add(module);
