@@ -189,7 +189,6 @@ public final class IPDB implements AutoCloseable {
 
 
     private IPGeoData.CityData queryCity(InetAddress address) {
-
         try {
             IPGeoData.CityData cityData = new IPGeoData.CityData();
             IPGeoData.CityData.LocationData locationData = new IPGeoData.CityData.LocationData();
@@ -207,7 +206,6 @@ public final class IPDB implements AutoCloseable {
         } catch (Exception e) {
             return null;
         }
-
     }
 
     private IPGeoData.CountryData queryCountry(InetAddress address) {

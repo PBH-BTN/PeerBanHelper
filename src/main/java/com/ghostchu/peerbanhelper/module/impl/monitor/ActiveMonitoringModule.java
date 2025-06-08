@@ -29,7 +29,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -154,8 +153,8 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                     new TranslationComponent(Lang.MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_TITLE, dateString),
                     new TranslationComponent(Lang.MODULE_AMM_TRAFFIC_MONITORING_TRAFFIC_ALERT_DESCRIPTION,
                             dateTimeString,
-                            FileUtils.byteCountToDisplaySize(totalBytes),
-                            FileUtils.byteCountToDisplaySize(dailyTrafficCapping)));
+                            MsgUtil.humanReadableByteCountBin(totalBytes),
+                            MsgUtil.humanReadableByteCountBin(dailyTrafficCapping)));
         }
 
         enableDownloaderSpeedLimiters(totalBytes);
