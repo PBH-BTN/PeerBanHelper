@@ -17,6 +17,7 @@ import com.google.common.eventbus.Subscribe;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.program.Program;
@@ -160,6 +161,10 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             }
         });
 
+        Color errorBackground = new org.eclipse.swt.graphics.Color(255, 204, 187);
+        Color errorForeground = new org.eclipse.swt.graphics.Color(0, 0, 0);
+        Color warnBackground = new org.eclipse.swt.graphics.Color(255, 238, 204);
+        Color warnForeground = new org.eclipse.swt.graphics.Color(0, 0, 0);
 
         // 日志插入线程
         new Thread(() -> {
@@ -171,17 +176,16 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                     if (display.isDisposed()) return;
                     display.asyncExec(() -> {
                         if (logTable.isDisposed()) return;
-
                         TableItem item = new TableItem(logTable, SWT.NONE);
                         item.setText(logEntry.toString());
                         switch (logEntry.level()) {
                             case ERROR -> {
-                                item.setBackground(new org.eclipse.swt.graphics.Color(255, 204, 187));
-                                item.setForeground(new org.eclipse.swt.graphics.Color(0, 0, 0));
+                                item.setBackground(errorBackground);
+                                item.setForeground(errorForeground);
                             }
                             case WARN -> {
-                                item.setBackground(new org.eclipse.swt.graphics.Color(255, 238, 204));
-                                item.setForeground(new org.eclipse.swt.graphics.Color(0, 0, 0));
+                                item.setBackground(warnBackground);
+                                item.setForeground(warnForeground);
                             }
                         }
                         // 限制最大元素数量

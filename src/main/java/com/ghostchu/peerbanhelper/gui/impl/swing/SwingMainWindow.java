@@ -648,6 +648,9 @@ public final class SwingMainWindow extends JFrame {
     }
 
     public static class LogEntryRenderer extends JTextArea implements ListCellRenderer<LogEntry> {
+        private static final Color errorBackground = new Color(255, 204, 187);
+        private static final Color warnBackground = new Color(255, 238, 204);
+
         public LogEntryRenderer() {
             setLineWrap(true);       // 启用自动换行
             setWrapStyleWord(true);  // 换行时按单词
@@ -666,11 +669,11 @@ public final class SwingMainWindow extends JFrame {
                 setForeground(list.getForeground());
                 switch (value.level()) {
                     case ERROR -> {
-                        setBackground(new Color(255, 204, 187));
+                        setBackground(errorBackground);
                         setForeground(Color.BLACK);
                     }
                     case WARN -> {
-                        setBackground(new Color(255, 238, 204));
+                        setBackground(warnBackground);
                         setForeground(Color.BLACK);
                     }
                 }
