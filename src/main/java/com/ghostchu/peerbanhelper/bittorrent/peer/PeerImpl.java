@@ -3,8 +3,6 @@ package com.ghostchu.peerbanhelper.bittorrent.peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.Setter;
 
-import java.util.List;
-
 @Setter
 public final class PeerImpl implements Peer {
     private PeerAddress peerAddress;
@@ -17,10 +15,9 @@ public final class PeerImpl implements Peer {
     private long uploaded;
     private double progress;
     private PeerFlag flags;
-    private List<PeerMessage> supportedMessages;
     private boolean handshaking;
 
-    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, List<PeerMessage> supportedMessages, boolean handshaking) {
+    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, boolean handshaking) {
         this.peerAddress = peerAddress;
         this.rawIp = rawIp;
         this.peerId = peerId;
@@ -31,7 +28,6 @@ public final class PeerImpl implements Peer {
         this.uploaded = uploaded;
         this.progress = progress;
         this.flags = flags;
-        this.supportedMessages = supportedMessages;
         this.handshaking = handshaking;
     }
 
@@ -88,10 +84,5 @@ public final class PeerImpl implements Peer {
     @Override
     public String getRawIp() {
         return rawIp;
-    }
-
-    @Override
-    public List<PeerMessage> getSupportedMessages() {
-        return supportedMessages;
     }
 }
