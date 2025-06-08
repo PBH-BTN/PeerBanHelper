@@ -3,29 +3,54 @@ package com.ghostchu.peerbanhelper.util.push.impl;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
 import com.google.gson.JsonObject;
+import jakarta.mail.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.simplejavamail.api.email.Email;
+import org.simplejavamail.api.email.Recipient;
+import org.simplejavamail.api.mailer.Mailer;
+import org.simplejavamail.api.mailer.config.TransportStrategy;
+import org.simplejavamail.email.EmailBuilder;
+import org.simplejavamail.mailer.MailerBuilder;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 public final class SmtpPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
+    private final Mailer mailer;
 
     public SmtpPushProvider(String name, Config config) {
         this.name = name;
         this.config = config;
+        var encrypt = Encryption.valueOf(config.getEncryption());
+        var mailerBuilder = MailerBuilder
+                .withSMTPServer(config.getHost(), config.getPort(), config.getUsername(), config.getPassword())
+                .withTransportStrategy(TransportStrategy.SMTP_TLS);
+        TransportStrategy strateg = TransportStrategy.SMTP;
+
+        switch (encrypt) {
+            case STARTTLS -> {
+                strateg = TransportStrategy.SMTP_TLS;
+                mailerBuilder.verifyingServerIdentity(false);
+            }
+            case ENFORCE_STARTTLS -> {
+                strateg = TransportStrategy.SMTP_TLS;
+                mailerBuilder.verifyingServerIdentity(true);
+            }
+            case SSLTLS -> {
+                mailerBuilder.verifyingServerIdentity(false);
+                strateg = TransportStrategy.SMTPS;
+            }
+        }
+        mailerBuilder = mailerBuilder.withTransportStrategy(strateg);
+        this.mailer = mailerBuilder.buildMailer();
     }
 
     public static SmtpPushProvider loadFromJson(String name, JsonObject json) {
@@ -70,37 +95,21 @@ public final class SmtpPushProvider extends AbstractPushProvider {
         return section;
     }
 
-    public String sendMail(List<String> email, String subject, String text) throws EmailException {
-        Email mail = new HtmlEmail();
-        mail.setAuthentication(config.getUsername(), config.getPassword());
-        mail.setCharset("UTF-8");
-        mail.setHostName(config.getHost());
-        mail.setSmtpPort(config.getPort());
-        try {
-            switch (Encryption.valueOf(config.getEncryption())) {
-                case STARTTLS -> mail.setStartTLSEnabled(true);
-                case ENFORCE_STARTTLS -> {
-                    mail.setStartTLSEnabled(true);
-                    mail.setStartTLSRequired(true);
-                }
-                case SSLTLS -> mail.setSSLOnConnect(true);
-            }
-        } catch (Exception e) {
-            log.error("Unable to load mail encryption type: {}, it's valid?", config.getEncryption(), e);
+    public String sendMail(List<String> email, String subject, String text) {
+        List<Recipient> recipients = new ArrayList<>();
+        for (String addr : email) {
+            recipients.add(new Recipient(null, addr, Message.RecipientType.TO));
         }
-        mail.setSendPartial(config.isSendPartial());
-        mail.setSubject(subject);
-        mail.setContent(markdown2Html(text), "text/html");
-        mail.setFrom(config.getSender(), config.getSenderName(), "UTF-8");
-        mail.setTo(email.stream().map(str -> {
-            try {
-                return new InternetAddress(str);
-            } catch (AddressException exception) {
-                log.warn("The email address [{}] is invalid", str, exception);
-                return null;
-            }
-        }).filter(Objects::nonNull).toList());
-        return mail.send();
+
+        Email mail = EmailBuilder.startingBlank()
+                .from(config.getSenderName(), config.getSender())
+                .to(recipients)
+                .withSubject(subject)
+                .withHTMLText(text)
+                .buildEmail();
+
+        mailer.sendMail(mail).join();
+        return null;
     }
 
     @Override
@@ -118,7 +127,7 @@ public final class SmtpPushProvider extends AbstractPushProvider {
         try {
             sendMail(config.getReceivers(), title, content);
             return true;
-        } catch (EmailException e) {
+        } catch (Exception e) {
             log.warn("Unable to push message via SMTP", e);
             return false;
         }
