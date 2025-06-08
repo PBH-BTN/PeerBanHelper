@@ -647,3 +647,5 @@ DATABASE_UPGRADING_RECORDS: "[数据升级] 正在升级 {}，已完成：{}/{}�
 WEBUI_SECURITY_LOGIN_FAILED: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于对方提供了错误的 Token 凭据，因此登录尝试已被阻止。如果这不是预期行为，建议使用防火墙保护 PeerBanHelper 的 WebUI 端口。对方浏览器信息：{}"
 WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于登录失败次数过多，PeerBanHelper 已暂时阻止从此位置登录。"
 WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有用户成功从 {} 登录 PeerBanHelper。浏览器信息：{}"
+
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[主动检测] 根据最近的流量统计数据，下载器 {} 的上传速率限制已动态更新为 {} bytes/s"

@@ -69,6 +69,11 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     private DownloaderTrafficLimiterDao downloaderTrafficLimiterDao;
     private long uploadSpeedLimit;
     private long downloadSpeedLimit;
+    private boolean useTrafficCapping;
+    private long maxTrafficAllowedDaily;
+    private long trafficCappingSpeed;
+    private long trafficCappingMaxSpeed;
+    private long trafficCappingMinSpeed;
 
     @Override
     public boolean isConfigurable() {
@@ -89,6 +94,10 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     public void onEnable() {
         reloadConfig();
         this.taskWriteService = new ThreadPoolExecutor(1, 2, 60L, TimeUnit.SECONDS, taskWriteQueue);
+        long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateTrafficStatus, 0, 10, TimeUnit.MINUTES);
         Main.getReloadManager().register(this);
     }
 
@@ -104,16 +113,16 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         }
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
-        long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
         this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily", -1);
         this.uploadSpeedLimit = getConfig().getLong("upload-limit");
         this.downloadSpeedLimit = getConfig().getLong("download-limit");
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::writeJournal, 0, 1, TimeUnit.HOURS);
+        this.useTrafficCapping = getConfig().getBoolean("traffic-capping.enabled");
+        this.maxTrafficAllowedDaily = getConfig().getLong("traffic-capping.daily-max-allowed-upload-traffic");
+        this.trafficCappingMaxSpeed = getConfig().getLong("traffic-capping.max-speed");
+        this.trafficCappingMinSpeed = Math.max(getConfig().getLong("traffic-capping.min-speed"), 131072);
     }
 
-    private void writeJournal() {
+    private void updateTrafficStatus() {
         for (Downloader downloader : downloaderManager) {
             try {
                 if (downloader.login().success()) {
@@ -125,6 +134,28 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
             }
         }
         updateTrafficMonitoringService();
+        updateTrafficCappingService();
+    }
+
+    private void updateTrafficCappingService() {
+        if (!useTrafficCapping) {
+            return;
+        }
+        for (Downloader downloader : downloaderManager) {
+            try {
+                if (downloader.login().success()) {
+                    var speedLimiter = downloader.getSpeedLimiter();
+                    if(speedLimiter == null) continue;
+                    var newLimiter = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(downloader.getId(), speedLimiter, maxTrafficAllowedDaily, trafficCappingMinSpeed, trafficCappingMaxSpeed);
+                    downloader.setSpeedLimiter(newLimiter);
+                    log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), newLimiter.upload()));
+                }else{
+                    log.error("Failed to login downloader {} when updating traffic capping settings, skipping...", downloader.getName());
+                }
+            } catch (Throwable e) {
+                log.error("Unable to update traffic settings followed by sliding window", e);
+            }
+        }
     }
 
     @SneakyThrows
@@ -141,9 +172,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         var dateString = MiscUtil.formatDateOnly(now);
         var identifier = "dataTrafficCapping-" + startOfToday;
         // 一天只发一次
-        cleanDownloaderSpeedLimiters();
         if (totalBytes < dailyTrafficCapping) {
-            disableDownloaderSpeedLimiters(totalBytes);
             return;
         }
         if (!alertManager.identifierAlertExistsIncludeRead(identifier)) {
@@ -156,8 +185,6 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                             MsgUtil.humanReadableByteCountBin(totalBytes),
                             MsgUtil.humanReadableByteCountBin(dailyTrafficCapping)));
         }
-
-        enableDownloaderSpeedLimiters(totalBytes);
     }
 
     private void cleanDownloaderSpeedLimiters() {
@@ -250,7 +277,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     public void onDisable() {
         Main.getEventBus().unregister(this);
         diskWriteCache.invalidateAll();
-        writeJournal();
+        updateTrafficStatus();
         flush();
         taskWriteService.shutdown();
         try {

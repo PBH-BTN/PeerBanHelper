@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
+import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.j256.ormlite.support.ConnectionSource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,33 +42,35 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                 .sum();
 
         // 获取当前速度限制
-        long currentSpeed = currentSetting.upload();
+        long currentSpeedLimit = currentSetting.upload();
+        if (currentSpeedLimit <= 0) {
+            currentSpeedLimit = Long.MAX_VALUE;
+        }
         long newSpeed;
 
         if (totalUploadedBytes >= thresholdBytes) {
             // 应用节流策略 - 当达到或超过阈值时
-            if (currentSpeed <= minSpeedBytesPerSecond) {
+            if (currentSpeedLimit <= minSpeedBytesPerSecond) {
                 newSpeed = minSpeedBytesPerSecond;
             } else {
                 // 计算减少因子 b = l_current / l
                 double b = (double) totalUploadedBytes / thresholdBytes;
-                newSpeed = (long) (currentSpeed / b);
+                newSpeed = (long) (currentSpeedLimit / b);
                 // 确保不低于最小速度
                 newSpeed = Math.max(newSpeed, minSpeedBytesPerSecond);
             }
         } else {
             // 应用解除节流策略 - 当未达到阈值时
-            if (currentSpeed >= maxSpeedBytesPerSecond) {
+            if (currentSpeedLimit >= maxSpeedBytesPerSecond) {
                 newSpeed = maxSpeedBytesPerSecond;
             } else {
                 // 计算增加因子 a = (l - l_current) / w，并转换为每秒字节数
                 double a = (double) (thresholdBytes - totalUploadedBytes) / windowSizeMillis * 1000;
-                newSpeed = (long) (currentSpeed + a);
+                newSpeed = (long) (currentSpeedLimit + a);
                 // 确保不超过最大速度
                 newSpeed = Math.min(newSpeed, maxSpeedBytesPerSecond);
             }
         }
-
         // 创建并返回新的速度限制设置
         return new DownloaderSpeedLimiter(newSpeed, currentSetting.download());
     }
