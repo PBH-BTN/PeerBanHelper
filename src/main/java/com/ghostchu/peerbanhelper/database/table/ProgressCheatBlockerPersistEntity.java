@@ -16,9 +16,9 @@ import java.sql.Timestamp;
 public final class ProgressCheatBlockerPersistEntity {
     @DatabaseField(generatedId = true)
     private Long id;
-    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
+    @DatabaseField(canBeNull = false, uniqueCombo = true, indexName = "pcb_persist_address_torrentid")
     private String address;
-    @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
+    @DatabaseField(canBeNull = false, uniqueCombo = true, indexName = "pcb_persist_address_torrentid")
     private String torrentId;
     @DatabaseField(canBeNull = false)
     private double lastReportProgress;
@@ -32,7 +32,7 @@ public final class ProgressCheatBlockerPersistEntity {
     private int progressDifferenceCounter;
     @DatabaseField(canBeNull = false)
     private Timestamp firstTimeSeen;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private Timestamp lastTimeSeen;
     @DatabaseField(canBeNull = false)
     private String downloader;
