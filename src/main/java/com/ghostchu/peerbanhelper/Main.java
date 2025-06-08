@@ -31,7 +31,6 @@ import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.slf4j.Logger;
@@ -514,12 +513,12 @@ public class Main {
 
     private static void registerFunctions(Class<?> clazz) {
         try {
-            AviatorEvaluator.addInstanceFunctions(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);
+            AviatorEvaluator.addInstanceFunctions(StrUtil.uncapitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
         }
         try {
-            AviatorEvaluator.addStaticFunctions(StringUtils.capitalize(clazz.getSimpleName()), clazz);
+            AviatorEvaluator.addStaticFunctions(StrUtil.capitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
         }

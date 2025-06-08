@@ -36,7 +36,6 @@ import inet.ipaddr.IPAddress;
 import inet.ipaddr.format.util.DualIPv4v6AssociativeTries;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,10 +48,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -325,7 +321,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 var parsedIp = parseRuleLine(ele, sj.toString());
                 if (parsedIp != null) {
                     count.getAndIncrement();
-                    ips.put(parsedIp.getLeft(), parsedIp.getRight());
+                    ips.put(parsedIp.getKey(), parsedIp.getValue());
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
@@ -357,7 +353,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 var parsedIp = parseRuleLine(ele, sj.toString());
                 if (parsedIp != null) {
                     count.getAndIncrement();
-                    ips.put(parsedIp.getLeft(), parsedIp.getRight());
+                    ips.put(parsedIp.getKey(), parsedIp.getValue());
                 }
             } catch (Exception e) {
                 log.error("Unable parse rule: {}", ele, e);
@@ -368,7 +364,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
         return count.get();
     }
 
-    private Pair<IPAddress, @Nullable String> parseRuleLine(String ele, String preReadComment) {
+    private Map.Entry<IPAddress, @Nullable String> parseRuleLine(String ele, String preReadComment) {
         // 检查是否是 DAT/eMule 格式
         // 016.000.000.000 , 016.255.255.255 , 200 , Yet another organization
         // 032.000.000.000 , 032.255.255.255 , 200 , And another
@@ -383,7 +379,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
             String comment = spilted.length > 3 ? spilted[3] : preReadComment;
             if (level >= 128) return null;
             if (start == null || end == null) return null;
-            return Pair.of(start.spanWithRange(end).coverWithPrefixBlock(), comment);
+            return Map.entry(start.spanWithRange(end).coverWithPrefixBlock(), comment);
         } else {
             // ip #end-line-comment
             String ip;
@@ -393,9 +389,9 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 if (ele.contains("#")) {
                     comment = ele.substring(ele.indexOf("#") + 1);
                 }
-                return Pair.of(IPAddressUtil.getIPAddress(ip), Optional.ofNullable(comment).orElse(preReadComment));
+                return Map.entry(IPAddressUtil.getIPAddress(ip), Optional.ofNullable(comment).orElse(preReadComment));
             } else {
-                return Pair.of(IPAddressUtil.getIPAddress(ele), preReadComment);
+                return Map.entry(IPAddressUtil.getIPAddress(ele), preReadComment);
             }
         }
     }

@@ -371,11 +371,6 @@
             <artifactId>xz</artifactId>
             <version>1.10</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.offbynull.portmapper</groupId>-->
-<!--            <artifactId>portmapper</artifactId>-->
-<!--            <version>2.0.6</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>dnsjava</groupId>
             <artifactId>dnsjava</artifactId>
@@ -437,16 +432,16 @@
             <artifactId>yamlconfiguration</artifactId>
             <version>3.0.2</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
-        </dependency>
         <dependency>
             <groupId>org.simplejavamail</groupId>
             <artifactId>simple-java-mail</artifactId>
             <version>8.12.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.17.0</version>
         </dependency>
     </dependencies>
 </project>

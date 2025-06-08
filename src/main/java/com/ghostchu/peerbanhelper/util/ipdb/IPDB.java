@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.tukaani.xz.XZInputStream;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -341,7 +341,7 @@ public final class IPDB implements AutoCloseable {
                         if (mirror.supportXzip()) {
                             try {
                                 File tmp = File.createTempFile(databaseName, ".tmp");
-                                try (XZCompressorInputStream gzipInputStream = new XZCompressorInputStream(new FileInputStream(r.body().toFile()));
+                                try (XZInputStream gzipInputStream = new XZInputStream(new FileInputStream(r.body().toFile()));
                                      FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
                                     byte[] buffer = new byte[1024];
                                     int len;
