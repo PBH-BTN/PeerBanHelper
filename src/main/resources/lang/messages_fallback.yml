@@ -648,4 +648,4 @@ WEBUI_SECURITY_LOGIN_FAILED: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper
 WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于登录失败次数过多，PeerBanHelper 已暂时阻止从此位置登录。"
 WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有用户成功从 {} 登录 PeerBanHelper。浏览器信息：{}"
 
-MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[主动检测] 根据最近的流量统计数据，下载器 {} 的上传速率限制已动态更新为 {} bytes/s。使用的计算公式信息：{}"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[主动检测] 根据最近的流量统计数据，下载器 {} 的上传速率限制已动态更新为 {} bytes/s"
