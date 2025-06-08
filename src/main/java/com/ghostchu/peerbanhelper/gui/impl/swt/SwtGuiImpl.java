@@ -186,15 +186,14 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                         item.setForeground(warnForeground);
                     }
                 }
-                // 限制最大元素数量
-                while (logTable.getItemCount() > maxSize) {
-                    logTable.remove(0);
-                }
-
                 // 如果启用了自动滚动，滚动到底部
                 if (autoScroll.get()) {
                     logTable.setTopIndex(logTable.getItemCount() - 1);
                 }
+            }
+            // 限制最大元素数量
+            while (logTable.getItemCount() > maxSize) {
+                logTable.remove(0);
             }
         }), 0, 10, TimeUnit.MILLISECONDS);
     }

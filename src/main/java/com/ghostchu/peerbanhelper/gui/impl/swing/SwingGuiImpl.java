@@ -299,19 +299,19 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
         JListAppender.allowWriteLogEntryDeque.set(true);
         CommonUtil.getScheduler().scheduleWithFixedDelay(()-> SwingUtilities.invokeLater(() -> {
+            DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
             while (!JListAppender.logEntryDeque.isEmpty()){
                 var logEntry = JListAppender.logEntryDeque.poll();
                 if (logEntry == null) return;
-                DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
                 model.addElement(logEntry);
-                // 限制最大元素数量为 500
-                while (model.size() > maxSize) {
-                    model.removeElementAt(0);
-                }
                 // 如果用户在底部，则自动滚动
                 if (autoScroll.get()) {
                     logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
                 }
+            }
+            // 限制最大元素数量为 500
+            while (model.size() > maxSize) {
+                model.removeElementAt(0);
             }
         }), 0, 10, TimeUnit.MILLISECONDS);
     }
