@@ -8,7 +8,6 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
@@ -57,7 +56,8 @@ public class SwtAboutWindow {
         initializeUI();
         String content = "Missing no";
         try {
-            @Cleanup var is = Main.class.getResourceAsStream("/assets/credit.txt");
+            @Cleanup
+            var is = Main.class.getResourceAsStream("/assets/credit.txt");
             if (is != null) {
                 content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
             }
@@ -96,14 +96,8 @@ public class SwtAboutWindow {
         textPane.setForeground(fgColor);
         textPane.setBackground(bgColor);
 
-        // 设置字体
-        FontData[] fontData = display.getSystemFont().getFontData();
-        for (FontData fd : fontData) {
-            fd.setName("Consolas");
-            fd.setHeight(11);
-            fd.setStyle(SWT.NORMAL);
-        }
-        Font customFont = new Font(display, fontData);
+        // 设置字体 - 与 Swing 版本保持一致使用 Consolas 14号字体
+        Font customFont = SwtGuiImpl.createSwingCompatibleFont(display, "Consolas", SWT.NORMAL, 10);
         textPane.setFont(customFont);
 
         // 设置关闭事件
@@ -162,8 +156,7 @@ public class SwtAboutWindow {
         if (m.find()) {
             contentItems.add(new ColorCommand(
                     m.group(1),
-                    m.group(2)
-            ));
+                    m.group(2)));
         }
     }
 
@@ -172,7 +165,8 @@ public class SwtAboutWindow {
         display.timerExec(delay, new Runnable() {
             @Override
             public void run() {
-                if (shell.isDisposed()) return;
+                if (shell.isDisposed())
+                    return;
 
                 processContent();
 
@@ -186,7 +180,8 @@ public class SwtAboutWindow {
         display.timerExec(500, new Runnable() {
             @Override
             public void run() {
-                if (shell.isDisposed()) return;
+                if (shell.isDisposed())
+                    return;
 
                 if (!cursorLock.get()) {
                     try {
@@ -355,8 +350,7 @@ public class SwtAboutWindow {
         Display display = new Display();
         new SwtAboutWindow(display, Map.of(
                 "{version}", "1.0.0",
-                "{username}", System.getProperty("user.name")
-        ));
+                "{username}", System.getProperty("user.name")));
 
         while (!display.isDisposed()) {
             if (!display.readAndDispatch()) {

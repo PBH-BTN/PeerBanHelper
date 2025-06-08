@@ -128,6 +128,13 @@ public class SwtMainWindow {
         if (iconImage != null && !iconImage.isDisposed()) {
             iconImage.dispose();
         }
+
+        // 清理 Tab 组件资源
+        for (TabComponent component : tabComponents) {
+            if (component instanceof LogsTabComponent) {
+                ((LogsTabComponent) component).dispose();
+            }
+        }
     }
 
     // 创建菜单栏
@@ -149,7 +156,8 @@ public class SwtMainWindow {
 
     private void createDebugMenu(Menu menuBar) {
         if (!ExternalSwitch.parseBoolean("pbh.app-v")) {
-            if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
+            if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta()
+                    || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
                 MenuItem debugMenuItem = new MenuItem(menuBar, SWT.CASCADE);
                 debugMenuItem.setText("DEBUG");
 
@@ -158,21 +166,23 @@ public class SwtMainWindow {
 
                 MenuItem sendInfoMessage = new MenuItem(debugMenu, SWT.PUSH);
                 sendInfoMessage.setText("[托盘通知] 发送信息托盘消息");
-                sendInfoMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.INFO, "测试（信息）", "测试消息"));
+                sendInfoMessage.addListener(SWT.Selection,
+                        e -> swtGui.createNotification(Level.INFO, "测试（信息）", "测试消息"));
 
                 MenuItem sendWarningMessage = new MenuItem(debugMenu, SWT.PUSH);
                 sendWarningMessage.setText("[托盘通知] 发送警告托盘消息");
-                sendWarningMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.WARNING, "测试（警告）", "测试消息"));
+                sendWarningMessage.addListener(SWT.Selection,
+                        e -> swtGui.createNotification(Level.WARNING, "测试（警告）", "测试消息"));
 
                 MenuItem sendErrorMessage = new MenuItem(debugMenu, SWT.PUSH);
                 sendErrorMessage.setText("[托盘通知] 发送错误托盘消息");
-                sendErrorMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.SEVERE, "测试（错误）", "测试消息"));
+                sendErrorMessage.addListener(SWT.Selection,
+                        e -> swtGui.createNotification(Level.SEVERE, "测试（错误）", "测试消息"));
 
             }
         }
 
     }
-
 
     // 创建程序菜单
     private void createProgramMenu(Menu menuBar) {
@@ -190,7 +200,8 @@ public class SwtMainWindow {
                 try {
                     Desktop.getDesktop().open(Main.getDataDirectory());
                 } catch (IOException ex) {
-                    System.err.println("Unable to open data directory " + Main.getDataDirectory().getPath() + " in desktop env.");
+                    System.err.println(
+                            "Unable to open data directory " + Main.getDataDirectory().getPath() + " in desktop env.");
                 }
             });
         }

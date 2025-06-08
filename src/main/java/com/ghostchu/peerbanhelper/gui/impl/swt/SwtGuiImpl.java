@@ -19,6 +19,8 @@ import com.google.common.eventbus.Subscribe;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
@@ -74,9 +76,44 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     public void setup() {
         super.setup();
         Main.getEventBus().register(this);
+        setupSwtDefaultFonts();
         swtMainWindow = new SwtMainWindow(this, display);
         swtTaskbarControl = new SwtTaskbarControl(swtMainWindow.shell, display);
         initLoggerRedirection();
+    }
+
+    /**
+     * 设置 SWT 默认字体
+     * 与 Swing 实现保持一致的字体大小
+     */
+    private void setupSwtDefaultFonts() {
+        // 在这里可以设置全局字体默认值
+        // SWT 不像 Swing 有 UIManager，但可以为各个组件单独设置
+    }
+
+    /**
+     * 创建与 Swing 实现一致的字体
+     * 
+     * @param display  当前显示
+     * @param fontName 字体名称
+     * @param style    字体样式
+     * @param size     字体大小
+     * @return SWT 字体对象
+     */
+    public static Font createSwingCompatibleFont(Display display, String fontName, int style, int size) {
+        FontData[] fontData = display.getSystemFont().getFontData();
+        for (FontData fd : fontData) {
+            if (fontName != null) {
+                fd.setName(fontName);
+            }
+            if (style != -1) {
+                fd.setStyle(style);
+            }
+            if (size != -1) {
+                fd.setHeight(size);
+            }
+        }
+        return new Font(display, fontData);
     }
 
     @Override
