@@ -28,7 +28,6 @@ import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -296,30 +295,24 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             autoScroll.set(current + extent == max);
         });
 
-        // 日志插入线程
-        new Thread(() -> {
-            JListAppender.allowWriteLogEntryDeque.set(true);
-            while (true) {
-                try {
-                    var logEntry = JListAppender.logEntryDeque.poll(1, TimeUnit.HOURS);
-                    if (logEntry == null) continue;
-                    SwingUtilities.invokeAndWait(() -> {
-                        DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
-                        model.addElement(logEntry);
-                        // 限制最大元素数量为 500
-                        while (model.size() > ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300)) {
-                            model.removeElementAt(0);
-                        }
-                        // 如果用户在底部，则自动滚动
-                        if (autoScroll.get()) {
-                            logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
-                        }
-                    });
-                } catch (InterruptedException | InvocationTargetException e) {
-                    log.warn("Failed to update log list", e);
+
+        JListAppender.allowWriteLogEntryDeque.set(true);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(()-> SwingUtilities.invokeLater(() -> {
+            while (!JListAppender.logEntryDeque.isEmpty()){
+                var logEntry = JListAppender.logEntryDeque.poll();
+                if (logEntry == null) return;
+                DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
+                model.addElement(logEntry);
+                // 限制最大元素数量为 500
+                while (model.size() > ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300)) {
+                    model.removeElementAt(0);
+                }
+                // 如果用户在底部，则自动滚动
+                if (autoScroll.get()) {
+                    logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
                 }
             }
-        }).start();
+        }), 0, 10, TimeUnit.MILLISECONDS);
     }
 
 

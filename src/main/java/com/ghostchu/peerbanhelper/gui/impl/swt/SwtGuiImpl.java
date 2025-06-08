@@ -166,50 +166,42 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         Color warnBackground = new org.eclipse.swt.graphics.Color(255, 238, 204);
         Color warnForeground = new org.eclipse.swt.graphics.Color(0, 0, 0);
 
-        // 日志插入线程
-        new Thread(() -> {
-            JListAppender.allowWriteLogEntryDeque.set(true);
-            while (true) {
+        JListAppender.allowWriteLogEntryDeque.set(true);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(() -> display.asyncExec(() -> {
+            while (!JListAppender.logEntryDeque.isEmpty()) {
+                if (logTable.isDisposed()) return;
+                var logEntry = JListAppender.logEntryDeque.poll();
+                if (logEntry == null) return;
+                TableItem item = new TableItem(logTable, SWT.NONE);
+                item.setText(logEntry.toString());
+                switch (logEntry.level()) {
+                    case ERROR -> {
+                        item.setBackground(errorBackground);
+                        item.setForeground(errorForeground);
+                    }
+                    case WARN -> {
+                        item.setBackground(warnBackground);
+                        item.setForeground(warnForeground);
+                    }
+                }
+                // 限制最大元素数量
+                int maxSize = 300;
                 try {
-                    var logEntry = JListAppender.logEntryDeque.poll(1, TimeUnit.HOURS);
-                    if (logEntry == null) continue;
-                    if (display.isDisposed()) return;
-                    display.asyncExec(() -> {
-                        if (logTable.isDisposed()) return;
-                        TableItem item = new TableItem(logTable, SWT.NONE);
-                        item.setText(logEntry.toString());
-                        switch (logEntry.level()) {
-                            case ERROR -> {
-                                item.setBackground(errorBackground);
-                                item.setForeground(errorForeground);
-                            }
-                            case WARN -> {
-                                item.setBackground(warnBackground);
-                                item.setForeground(warnForeground);
-                            }
-                        }
-                        // 限制最大元素数量
-                        int maxSize = 300;
-                        try {
-                            maxSize = Integer.parseInt(System.getProperty("pbh.gui.logs.maxSize", "300"));
-                        } catch (NumberFormatException e) {
-                            log.warn("Invalid pbh.gui.logs.maxSize value", e);
-                        }
+                    maxSize = Integer.parseInt(System.getProperty("pbh.gui.logs.maxSize", "300"));
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid pbh.gui.logs.maxSize value", e);
+                }
 
-                        while (logTable.getItemCount() > maxSize) {
-                            logTable.remove(0);
-                        }
+                while (logTable.getItemCount() > maxSize) {
+                    logTable.remove(0);
+                }
 
-                        // 如果启用了自动滚动，滚动到底部
-                        if (autoScroll.get()) {
-                            logTable.setTopIndex(logTable.getItemCount() - 1);
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    log.warn("Failed to update log table", e);
+                // 如果启用了自动滚动，滚动到底部
+                if (autoScroll.get()) {
+                    logTable.setTopIndex(logTable.getItemCount() - 1);
                 }
             }
-        }).start();
+        }), 0, 10, TimeUnit.MILLISECONDS);
     }
 
 
