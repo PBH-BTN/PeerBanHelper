@@ -146,11 +146,10 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                 if (downloader.login().success()) {
                     var speedLimiter = downloader.getSpeedLimiter();
                     if(speedLimiter == null) continue;
-                    var newLimiter = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(downloader.getId(), speedLimiter, maxTrafficAllowedDaily, trafficCappingMinSpeed, trafficCappingMaxSpeed);
+                    var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(downloader.getId(), speedLimiter, maxTrafficAllowedDaily, trafficCappingMinSpeed, trafficCappingMaxSpeed);
+                    DownloaderSpeedLimiter  newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
-                    log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), newLimiter.upload()));
-                }else{
-                    log.error("Failed to login downloader {} when updating traffic capping settings, skipping...", downloader.getName());
+                    log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), newLimiter.upload(), calculatedData));
                 }
             } catch (Throwable e) {
                 log.error("Unable to update traffic settings followed by sliding window", e);

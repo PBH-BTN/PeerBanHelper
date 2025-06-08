@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,25 +25,33 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
     }
 
     @NotNull
-    public DownloaderSpeedLimiter tweakSpeedLimiterBySlidingWindow(@NotNull String downloader, @NotNull DownloaderSpeedLimiter currentSetting, long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) throws SQLException {
+        public SlidingWindowDynamicSpeedLimiter tweakSpeedLimiterBySlidingWindow(@Nullable String downloader, @NotNull DownloaderSpeedLimiter currentSetting, long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) throws Exception {
+        SlidingWindowDynamicSpeedLimiter slidingWindowDynamicSpeedLimiter = new SlidingWindowDynamicSpeedLimiter();
+        slidingWindowDynamicSpeedLimiter.setThreshold(thresholdBytes);
+        slidingWindowDynamicSpeedLimiter.setMaxSpeed(maxSpeedBytesPerSecond);
+        slidingWindowDynamicSpeedLimiter.setMinSpeed(minSpeedBytesPerSecond);
         // 假设滑动窗口为24小时
         long windowSizeMillis = 24 * 60 * 60 * 1000; // 24小时(毫秒)
+        slidingWindowDynamicSpeedLimiter.setWindowSizeMillis(windowSizeMillis);
         long currentTime = System.currentTimeMillis();
         long windowStartTime = currentTime - windowSizeMillis;
+        slidingWindowDynamicSpeedLimiter.setWindowStartTime(windowStartTime);
 
         Timestamp startTimestamp = new Timestamp(windowStartTime);
         Timestamp endTimestamp = new Timestamp(currentTime);
 
         // 获取窗口内的流量数据
-        List<TrafficDataComputed> trafficData = getSpecificDownloaderOverallData(downloader, startTimestamp, endTimestamp);
+        List<TrafficDataComputed> trafficData = downloader == null ?  getAllDownloadersOverallData(startTimestamp, endTimestamp):  getSpecificDownloaderOverallData(downloader, startTimestamp, endTimestamp);
 
         // 计算窗口内的总上传流量
         long totalUploadedBytes = trafficData.stream()
                 .mapToLong(TrafficDataComputed::getDataOverallUploaded)
                 .sum();
+        slidingWindowDynamicSpeedLimiter.setUploadedInWindow(totalUploadedBytes);
 
         // 获取当前速度限制
         long currentSpeedLimit = currentSetting.upload();
+        slidingWindowDynamicSpeedLimiter.setOldSpeedLimit(currentSpeedLimit);
         if (currentSpeedLimit <= 0) {
             currentSpeedLimit = Long.MAX_VALUE;
         }
@@ -52,12 +61,14 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
             // 应用节流策略 - 当达到或超过阈值时
             if (currentSpeedLimit <= minSpeedBytesPerSecond) {
                 newSpeed = minSpeedBytesPerSecond;
+                slidingWindowDynamicSpeedLimiter.setReachedMinimumSpeed(true);
             } else {
                 // 计算减少因子 b = l_current / l
                 double b = (double) totalUploadedBytes / thresholdBytes;
                 newSpeed = (long) (currentSpeedLimit / b);
                 // 确保不低于最小速度
                 newSpeed = Math.max(newSpeed, minSpeedBytesPerSecond);
+                slidingWindowDynamicSpeedLimiter.setDecreaseFactor(b);
             }
         } else {
             // 应用解除节流策略 - 当未达到阈值时
@@ -69,10 +80,13 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                 newSpeed = (long) (currentSpeedLimit + a);
                 // 确保不超过最大速度
                 newSpeed = Math.min(newSpeed, maxSpeedBytesPerSecond);
+                slidingWindowDynamicSpeedLimiter.setIncreaseFactor(a);
             }
         }
+        slidingWindowDynamicSpeedLimiter.setNewSpeedLimit(newSpeed);
+
         // 创建并返回新的速度限制设置
-        return new DownloaderSpeedLimiter(newSpeed, currentSetting.download());
+        return slidingWindowDynamicSpeedLimiter;
     }
 
     public TrafficDataComputed getTodayData(String downloader) throws Exception {
@@ -195,6 +209,24 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         private long dataOverallUploaded;
         private long dataOverallDownloadedAtStart;
         private long dataOverallDownloaded;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SlidingWindowDynamicSpeedLimiter {
+        private Long windowSizeMillis;
+        private Long windowStartTime;
+        private Long uploadedInWindow;
+        private Long oldSpeedLimit;
+        private Long newSpeedLimit;
+        private Long threshold;
+        private Long minSpeed;
+        private Long maxSpeed;
+        private Double increaseFactor;
+        private Double decreaseFactor;
+        private Boolean reachedMaximumSpeed;
+        private Boolean reachedMinimumSpeed;
     }
 
 }
