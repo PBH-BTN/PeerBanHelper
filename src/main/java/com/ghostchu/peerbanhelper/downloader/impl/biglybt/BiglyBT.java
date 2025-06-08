@@ -329,6 +329,9 @@ public final class BiglyBT extends AbstractDownloader {
             if (peer.getIp() == null || peer.getIp().isBlank()) {
                 continue;
             }
+            if(peer.getIp().startsWith("/")){
+                peer.setIp(peer.getIp().substring(1));
+            }
             var supportedMessages = new ArrayList<PeerMessage>();
             if (peer.getPeerSupportedMessages() != null) {
                 supportedMessages.addAll(peer.getPeerSupportedMessages().stream().map(str -> {
