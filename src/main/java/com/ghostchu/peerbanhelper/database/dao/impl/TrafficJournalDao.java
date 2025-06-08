@@ -23,11 +23,12 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
 
     public TrafficDataComputed getTodayData(String downloader) throws Exception {
         Timestamp startOfToday = new Timestamp(MiscUtil.getStartOfToday(System.currentTimeMillis()));
+        Timestamp endOfToday = new Timestamp(MiscUtil.getEndOfToday(System.currentTimeMillis()));
         List<TrafficDataComputed> results;
         if (downloader == null || downloader.isBlank()) {
-            results = getAllDownloadersOverallData(startOfToday, startOfToday).stream().toList();
+            results = getAllDownloadersOverallData(startOfToday, endOfToday).stream().toList();
         } else {
-            results = getSpecificDownloaderOverallData(downloader, startOfToday, startOfToday).stream().toList();
+            results = getSpecificDownloaderOverallData(downloader, startOfToday, endOfToday).stream().toList();
         }
         if (results.isEmpty()) {
             return new TrafficDataComputed(startOfToday, 0, 0);
@@ -37,7 +38,7 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
     }
 
     public TrafficJournalEntity updateData(String downloader, long overallDownloaded, long overallUploaded, long overallDownloadedProtocol, long overallUploadedProtocol) throws SQLException {
-        long timestamp = MiscUtil.getStartOfToday(System.currentTimeMillis());
+        long timestamp = MiscUtil.getStartOfHour(System.currentTimeMillis());
         TrafficJournalEntity journalEntity = queryBuilder()
                 .where()
                 .eq("downloader", downloader)

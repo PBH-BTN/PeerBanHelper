@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
@@ -84,6 +81,28 @@ public final class MiscUtil {
         ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
         LocalDate parse = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
         return parse.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
+    }
+
+    public static long getEndOfToday(long time) {
+        ZoneId systemZone = ZoneId.systemDefault();
+        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.now());
+        // 转换为该时区的 LocalDateTime
+        LocalDateTime dateTime = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDateTime();
+        // 获取当天的结束
+        LocalDateTime dayEnd = dateTime.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        // 转换回时间戳
+        return dayEnd.toInstant(currentOffsetForMyZone).toEpochMilli();
+    }
+
+    public static long getStartOfHour(long time) {
+        ZoneId systemZone = ZoneId.systemDefault();
+        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.now());
+        // 转换为该时区的 LocalDateTime
+        LocalDateTime dateTime = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDateTime();
+        // 获取当前小时的开始（分钟和秒置为0）
+        LocalDateTime hourStart = dateTime.withMinute(0).withSecond(0).withNano(0);
+        // 转换回时间戳
+        return hourStart.toInstant(currentOffsetForMyZone).toEpochMilli();
     }
 
     public static boolean is64BitJVM() {
