@@ -295,6 +295,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             autoScroll.set(current + extent == max);
         });
 
+        var maxSize = ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300);
 
         JListAppender.allowWriteLogEntryDeque.set(true);
         CommonUtil.getScheduler().scheduleWithFixedDelay(()-> SwingUtilities.invokeLater(() -> {

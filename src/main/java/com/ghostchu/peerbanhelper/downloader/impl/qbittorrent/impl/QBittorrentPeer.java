@@ -3,15 +3,11 @@ package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl;
 
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
-import com.ghostchu.peerbanhelper.bittorrent.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
 import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collections;
-import java.util.List;
 
 @Setter
 @ToString
@@ -97,11 +93,6 @@ public final class QBittorrentPeer implements Peer {
     @Override
     public boolean isHandshaking() {
         return upSpeed <= 0 && dlSpeed <= 0;
-    }
-
-    @Override
-    public List<PeerMessage> getSupportedMessages() {
-        return Collections.emptyList();
     }
 
     @Override
