@@ -66,6 +66,8 @@ public final class BtnNetwork implements Reloadable {
     private TrackedSwarmDao trackedSwarmDao;
     @Autowired
     private MetadataDao metadataDao;
+    @Autowired
+    private HTTPUtil httpUtil;
     private ModuleMatchCache moduleMatchCache;
     private boolean enabled;
     @Autowired
@@ -122,7 +124,7 @@ public final class BtnNetwork implements Reloadable {
         String response = "<Not Provided>";
         int statusCode = 0;
         try {
-            HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
+            HttpResponse<String> resp = httpUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body(), 600));
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, resp.statusCode(), resp.body());

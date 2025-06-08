@@ -21,10 +21,12 @@ public final class BarkPushProvider extends AbstractPushProvider {
 
     private final Config config;
     private final String name;
+    private final HTTPUtil httpUtil;
 
-    public BarkPushProvider(String name, Config config) {
+    public BarkPushProvider(String name, Config config, HTTPUtil httpUtil) {
         this.name = name;
         this.config = config;
+        this.httpUtil = httpUtil;
     }
 
     @Override
@@ -52,16 +54,16 @@ public final class BarkPushProvider extends AbstractPushProvider {
         return section;
     }
 
-    public static BarkPushProvider loadFromJson(String name, JsonObject json) {
-        return new BarkPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class));
+    public static BarkPushProvider loadFromJson(String name, JsonObject json, HTTPUtil httpUtil) {
+        return new BarkPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class), httpUtil);
     }
 
-    public static BarkPushProvider loadFromYaml(String name, ConfigurationSection section) {
+    public static BarkPushProvider loadFromYaml(String name, ConfigurationSection section, HTTPUtil httpUtil) {
         var backendUrl = section.getString("backend_url", "https://api.day.app/push");
         var sendKey = section.getString("device_key", "");
         var group = section.getString("message_group", "");
         Config config = new Config(backendUrl, sendKey, group);
-        return new BarkPushProvider(name, config);
+        return new BarkPushProvider(name, config, httpUtil);
     }
 
     @Override
@@ -72,7 +74,7 @@ public final class BarkPushProvider extends AbstractPushProvider {
         map.put("device_key", config.getDeviceKey());
         map.put("group", config.getMessageGroup());
         map.put("icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
-        HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
+        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
                 MutableRequest.POST(config.getBackendUrl()
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
                         .header("Content-Type", "application/json")

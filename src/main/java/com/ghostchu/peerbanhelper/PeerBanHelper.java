@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
@@ -75,6 +76,8 @@ public class PeerBanHelper implements Reloadable {
     private AlertManager alertManager;
     @Autowired
     private CrashManager crashManager;
+    @Autowired
+    private HTTPUtil httpUtil;
 
 
     public PeerBanHelper() throws SQLException {
@@ -180,7 +183,7 @@ public class PeerBanHelper implements Reloadable {
             String databaseASN = Main.getMainConfig().getString("ip-database.database-asn", "");
             boolean autoUpdate = Main.getMainConfig().getBoolean("ip-database.auto-update");
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
-                    databaseCity, databaseASN, autoUpdate, Main.getUserAgent());
+                    databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), httpUtil);
         } catch (Exception e) {
             log.info(tlUI(Lang.IPDB_INVALID, e));
         }

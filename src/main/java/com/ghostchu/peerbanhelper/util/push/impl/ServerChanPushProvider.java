@@ -22,10 +22,12 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
 
     private final Config config;
     private final String name;
+    private final HTTPUtil httpUtil;
 
-    public ServerChanPushProvider(String name, Config config) {
+    public ServerChanPushProvider(String name, Config config, HTTPUtil httpUtil) {
         this.name = name;
         this.config = config;
+        this.httpUtil = httpUtil;
     }
 
     @Override
@@ -53,11 +55,11 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
         return section;
     }
 
-    public static ServerChanPushProvider loadFromJson(String name, JsonObject json) {
-        return new ServerChanPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class));
+    public static ServerChanPushProvider loadFromJson(String name, JsonObject json, HTTPUtil httpUtil) {
+        return new ServerChanPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class), httpUtil);
     }
 
-    public static ServerChanPushProvider loadFromYaml(String name, ConfigurationSection section) {
+    public static ServerChanPushProvider loadFromYaml(String name, ConfigurationSection section, HTTPUtil httpUtil) {
         var sendKey = section.getString("sendkey", "");
         var channel = section.getString("channel", "");
         var openid = section.getString("openid", "");
@@ -68,7 +70,7 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
             openid = null;
         }
         Config config = new Config(sendKey, channel, openid);
-        return new ServerChanPushProvider(name, config);
+        return new ServerChanPushProvider(name, config, httpUtil);
     }
 
     @Override
@@ -83,7 +85,7 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
         if (config.getOpenId() != null) {
             map.put("openid", config.getOpenId());
         }
-        HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
+        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
                 MutableRequest.POST("https://sctapi.ftqq.com/" + config.getSendKey() + ".send"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
                         .header("Content-Type", "application/json")

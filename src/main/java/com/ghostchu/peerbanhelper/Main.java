@@ -65,6 +65,7 @@ public class Main {
     private static File logsDirectory;
     @Getter
     private static File configDirectory;
+    @Getter
     private static File pluginDirectory;
     @Getter
     private static File debugDirectory;

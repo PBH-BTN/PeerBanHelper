@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
@@ -122,9 +121,9 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
 
     private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {
         BtnBanPing ping = new BtnBanPing(historyEntities.stream().map(BtnBan::from).toList());
-        MutableRequest request = MutableRequest.POST(endpoint, HTTPUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8)))
+        MutableRequest request = MutableRequest.POST(endpoint,  btnNetwork.getHttpUtil().gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8)))
                 .header("Content-Encoding", "gzip");
-        HttpResponse<String> resp = HTTPUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString()).join();
+        HttpResponse<String> resp =  btnNetwork.getHttpUtil().nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString()).join();
         if (resp.statusCode() < 200 && resp.statusCode() >= 400) {
             log.error(tlUI(Lang.BTN_REQUEST_FAILS, resp.statusCode() + " - " + resp.body()));
             setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body()));

@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.util.push;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.push.impl.*;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -10,6 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -26,6 +28,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class PushManagerImpl implements Reloadable, PushManager {
     @Getter
     private final List<PushProvider> providerList = new ArrayList<>();
+    @Autowired
+    private HTTPUtil httpUtil;
 
     public PushManagerImpl() {
         reloadConfig();
@@ -36,11 +40,11 @@ public final class PushManagerImpl implements Reloadable, PushManager {
         name = name.replace(".", "-");
         AbstractPushProvider provider = null;
         switch (type.toLowerCase(Locale.ROOT)) {
-            case "pushplus" -> provider = PushPlusPushProvider.loadFromYaml(name, section);
-            case "serverchan" -> provider = ServerChanPushProvider.loadFromYaml(name, section);
+            case "pushplus" -> provider = PushPlusPushProvider.loadFromYaml(name, section, httpUtil);
+            case "serverchan" -> provider = ServerChanPushProvider.loadFromYaml(name, section, httpUtil);
             case "smtp" -> provider = SmtpPushProvider.loadFromYaml(name, section);
-            case "telegram" -> provider = TelegramPushProvider.loadFromYaml(name, section);
-            case "bark" -> provider = BarkPushProvider.loadFromYaml(name, section);
+            case "telegram" -> provider = TelegramPushProvider.loadFromYaml(name, section, httpUtil);
+            case "bark" -> provider = BarkPushProvider.loadFromYaml(name, section, httpUtil);
         }
         return provider;
     }
@@ -49,11 +53,11 @@ public final class PushManagerImpl implements Reloadable, PushManager {
     public PushProvider createPushProvider(String name, String type, JsonObject jsonObject) {
         AbstractPushProvider provider = null;
         switch (type.toLowerCase(Locale.ROOT)) {
-            case "pushplus" -> provider = PushPlusPushProvider.loadFromJson(name, jsonObject);
-            case "serverchan" -> provider = ServerChanPushProvider.loadFromJson(name, jsonObject);
+            case "pushplus" -> provider = PushPlusPushProvider.loadFromJson(name, jsonObject, httpUtil);
+            case "serverchan" -> provider = ServerChanPushProvider.loadFromJson(name, jsonObject, httpUtil);
             case "smtp" -> provider = SmtpPushProvider.loadFromJson(name, jsonObject);
-            case "telegram" -> provider = TelegramPushProvider.loadFromJson(name, jsonObject);
-            case "bark" -> provider = BarkPushProvider.loadFromJson(name, jsonObject);
+            case "telegram" -> provider = TelegramPushProvider.loadFromJson(name, jsonObject, httpUtil);
+            case "bark" -> provider = BarkPushProvider.loadFromJson(name, jsonObject, httpUtil);
         }
         return provider;
     }

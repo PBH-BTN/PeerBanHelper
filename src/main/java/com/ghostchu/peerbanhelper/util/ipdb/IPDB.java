@@ -59,6 +59,7 @@ public final class IPDB implements AutoCloseable {
     private final boolean autoUpdate;
     private final File mmdbGeoCNFile;
     private final Methanol httpClient;
+    private final HTTPUtil httpUtil;
     @Getter
     private DatabaseReader mmdbCity;
     @Getter
@@ -66,7 +67,7 @@ public final class IPDB implements AutoCloseable {
     private Reader geoCN;
     private List<String> languageTag;
 
-    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent) throws IllegalArgumentException, IOException {
+    public IPDB(File dataFolder, String accountId, String licenseKey, String databaseCity, String databaseASN, boolean autoUpdate, String userAgent, HTTPUtil httpUtil) throws IllegalArgumentException, IOException {
 //        this.dataFolder = dataFolder;
 //        this.accountId = accountId;
 //        this.licenseKey = licenseKey;
@@ -76,6 +77,7 @@ public final class IPDB implements AutoCloseable {
         this.mmdbASNFile = new File(directory, "GeoIP-ASN.mmdb");
         this.mmdbGeoCNFile = new File(directory, "GeoCN.mmdb");
         this.autoUpdate = autoUpdate;
+        this.httpUtil =httpUtil;
 //        this.userAgent = userAgent;
         this.httpClient = Methanol
                 .newBuilder()
@@ -326,7 +328,7 @@ public final class IPDB implements AutoCloseable {
         progressDialog.setComment(mirror.getIPDBUrl());
         var bodyHandler = tracker.tracking(HttpResponse.BodyHandlers.ofFile(path), item -> {
             if (!(progressDialog instanceof ConsoleProgressDialog)) {
-                HTTPUtil.onProgress(item);
+                httpUtil.onProgress(item);
             }
             progressDialog.setProgressDisplayIndeterminate(!item.determinate());
             if (item.determinate()) {
@@ -335,7 +337,7 @@ public final class IPDB implements AutoCloseable {
                 progressDialog.updateProgress(0);
             }
         });
-        return HTTPUtil.retryableSend(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), bodyHandler)
+        return httpUtil.retryableSend(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), bodyHandler)
                 .thenAccept(r -> {
                     if (r.statusCode() == 200) {
                         if (mirror.supportXzip()) {

@@ -22,10 +22,12 @@ public final class TelegramPushProvider extends AbstractPushProvider {
 
     private final Config config;
     private final String name;
+    private final HTTPUtil httpUtil;
 
-    public TelegramPushProvider(String name, Config config) {
+    public TelegramPushProvider(String name, Config config, HTTPUtil httpUtil) {
         this.name = name;
         this.config = config;
+        this.httpUtil = httpUtil;
     }
 
     @Override
@@ -38,15 +40,15 @@ public final class TelegramPushProvider extends AbstractPushProvider {
         return "telegram";
     }
 
-    public static TelegramPushProvider loadFromJson(String name, JsonObject json) {
-        return new TelegramPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class));
+    public static TelegramPushProvider loadFromJson(String name, JsonObject json, HTTPUtil httpUtil) {
+        return new TelegramPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class), httpUtil);
     }
 
-    public static TelegramPushProvider loadFromYaml(String name, ConfigurationSection section) {
+    public static TelegramPushProvider loadFromYaml(String name, ConfigurationSection section, HTTPUtil httpUtil) {
         var token = section.getString("token", "");
         var chatid = section.getString("chatid", "");
         Config config = new Config(token, chatid);
-        return new TelegramPushProvider(name, config);
+        return new TelegramPushProvider(name, config, httpUtil);
     }
 
     @Override
@@ -72,7 +74,7 @@ public final class TelegramPushProvider extends AbstractPushProvider {
         map.put("text", markdown);
         map.put("photo", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
         map.put("parse_mode", "Markdown");
-        HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
+        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
                 MutableRequest.POST("https://api.telegram.org/bot" + config.getToken() + "/sendPhoto"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
                         .header("Content-Type", "application/json")

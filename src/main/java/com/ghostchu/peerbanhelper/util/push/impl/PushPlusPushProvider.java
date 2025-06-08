@@ -24,10 +24,12 @@ import java.util.Map;
 public final class PushPlusPushProvider extends AbstractPushProvider {
     private final Config config;
     private final String name;
+    private final HTTPUtil httpUtil;
 
-    public PushPlusPushProvider(String name, Config config) {
+    public PushPlusPushProvider(String name, Config config, HTTPUtil httpUtil) {
         this.name = name;
         this.config = config;
+        this.httpUtil = httpUtil;
     }
 
     @Override
@@ -45,11 +47,11 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
         return section;
     }
 
-    public static PushPlusPushProvider loadFromJson(String name, JsonObject json) {
-        return new PushPlusPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class));
+    public static PushPlusPushProvider loadFromJson(String name, JsonObject json, HTTPUtil httpUtil) {
+        return new PushPlusPushProvider(name, JsonUtil.getGson().fromJson(json, Config.class), httpUtil);
     }
 
-    public static PushPlusPushProvider loadFromYaml(String name, ConfigurationSection section) {
+    public static PushPlusPushProvider loadFromYaml(String name, ConfigurationSection section, HTTPUtil httpUtil) {
         var token = section.getString("token", "");
         var topic = section.getString("topic", "");
         var channel = section.getString("channel", "");
@@ -60,7 +62,7 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
             channel = null;
         }
         Config config = new Config(token, topic, channel);
-        return new PushPlusPushProvider(name, config);
+        return new PushPlusPushProvider(name, config, httpUtil);
 
     }
 
@@ -88,7 +90,7 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
             put("content", content);
             put("template", "markdown");
         }};
-        HttpResponse<String> resp = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
+        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
                 MutableRequest.POST("https://www.pushplus.plus/send"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(args)))
                         .header("Content-Type", "application/json")

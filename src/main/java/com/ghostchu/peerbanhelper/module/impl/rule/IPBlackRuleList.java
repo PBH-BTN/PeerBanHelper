@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -72,6 +73,8 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
     private List<IPMatcher> ipBanMatchers;
     private long checkInterval = 86400000; // 默认24小时检查一次
     private long banDuration;
+    @Autowired
+    private HTTPUtil httpUtil;
 
     public IPBlackRuleList(RuleSubLogsDao ruleSubLogsDao, ModuleMatchCache moduleMatchCache) {
         super();
@@ -290,7 +293,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 throw new RuntimeException(e);
             }
             if (uri.getScheme().startsWith("http")) {
-                var response = HTTPUtil.retryableSend(HTTPUtil.getHttpClient(false, null),
+                var response = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
                         MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString()).join();
                 return new DataUpdateResultDTO(response.statusCode(), null, response.body().getBytes());
             }
