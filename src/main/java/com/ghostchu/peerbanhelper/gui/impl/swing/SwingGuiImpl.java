@@ -304,7 +304,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
                 model.addElement(logEntry);
                 // 限制最大元素数量为 500
-                while (model.size() > ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300)) {
+                while (model.size() > maxSize) {
                     model.removeElementAt(0);
                 }
                 // 如果用户在底部，则自动滚动

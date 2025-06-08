@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swt;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
@@ -167,6 +168,7 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         Color warnForeground = new org.eclipse.swt.graphics.Color(0, 0, 0);
 
         JListAppender.allowWriteLogEntryDeque.set(true);
+        var maxSize = ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300);
         CommonUtil.getScheduler().scheduleWithFixedDelay(() -> display.asyncExec(() -> {
             while (!JListAppender.logEntryDeque.isEmpty()) {
                 if (logTable.isDisposed()) return;
@@ -185,13 +187,6 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                     }
                 }
                 // 限制最大元素数量
-                int maxSize = 300;
-                try {
-                    maxSize = Integer.parseInt(System.getProperty("pbh.gui.logs.maxSize", "300"));
-                } catch (NumberFormatException e) {
-                    log.warn("Invalid pbh.gui.logs.maxSize value", e);
-                }
-
                 while (logTable.getItemCount() > maxSize) {
                     logTable.remove(0);
                 }
