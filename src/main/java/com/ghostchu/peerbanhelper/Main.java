@@ -48,7 +48,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.math.MathContext;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
@@ -308,17 +307,16 @@ public class Main {
 
     private static BuildMeta buildMeta() {
         var meta = new BuildMeta();
-        try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
+        try (InputStream stream = Main.class.getResourceAsStream("/git.properties")) {
             if (stream == null) {
-                log.error("Error: Unable to load build metadata from JAR/build-info.yml: Bundled resources not exists");
+                log.error("Error: Unable to load build metadata from JAR/git.properties: Bundled resources not exists");
             } else {
-                String str = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-                YamlConfiguration configuration = new YamlConfiguration();
-                configuration.loadFromString(str);
-                meta.loadBuildMeta(configuration);
+                Properties properties = new Properties();
+                properties.load(stream);
+                meta.loadBuildMeta(properties);
             }
-        } catch (IOException | InvalidConfigurationException e) {
-            log.error("Error: Unable to load build metadata from JAR/build-info.yml", e);
+        } catch (IOException e) {
+            log.error("Error: Unable to load build metadata from <JAR>/git.properties", e);
         }
         return meta;
     }

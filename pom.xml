@@ -28,7 +28,6 @@
         <swt.version>3.129.0</swt.version>
         <ormlite.version>6.1</ormlite.version>
         <jetty.version>11.0.25</jetty.version> <!-- Override springboot's jetty dependencies version, fix  Caused by: java.lang.NoSuchMethodError: 'java.util.Map org.eclipse.jetty.http.MimeTypes.getInferredEncodings()'-->
-        <jetty.jakarta-api>5.0.2</jetty.jakarta-api>
     </properties>
 
     <pluginRepositories>
@@ -113,6 +112,89 @@
     </profiles>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.4.1</version>
+            </plugin>
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>9.0.2</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                    <commitIdGenerationMode>full</commitIdGenerationMode>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.8.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/libraries</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <finalName>PeerBanHelper</finalName>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>libraries/</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -153,118 +235,10 @@
                 <filtering>false</filtering>
             </resource>
         </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <!--        <plugin>-->
-            <!--            <groupId>org.springframework.boot</groupId>-->
-            <!--            <artifactId>spring-boot-maven-plugin</artifactId>-->
-            <!--            <configuration>-->
-            <!--                <excludes>-->
-            <!--                    <exclude>-->
-            <!--                        <groupId>org.projectlombok</groupId>-->
-            <!--                        <artifactId>lombok</artifactId>-->
-            <!--                    </exclude>-->
-            <!--                </excludes>-->
-            <!--            </configuration>-->
-            <!--        </plugin>-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.4.1</version>
-            </plugin>
-            <plugin>
-                <groupId>io.github.git-commit-id</groupId>
-                <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>9.0.1</version>
-                <executions>
-                    <execution>
-                        <id>get-the-git-infos</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <useNativeGit>false</useNativeGit>
-                    <offline>true</offline>
-                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <verbose>false</verbose>
-                    <dateFormat>yyyy-MM-dd HH:mm:ss Z</dateFormat>
-                    <prefix>git</prefix>
-                    <format>json</format>
-                    <gitDescribe>
-                        <skip>false</skip>
-                        <always>false</always>
-                        <dirty>-dirty</dirty>
-                    </gitDescribe>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.8.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/libraries</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-                    <finalName>PeerBanHelper</finalName>
-                    <!--                    <outputDirectory>${project.basedir}/target</outputDirectory>-->
-                    <archive>
-                        <manifest>
-                            <mainClass>com.ghostchu.peerbanhelper.MainJumpLoader</mainClass>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>libraries/</classpathPrefix>
-                        </manifest>
-                        <!--                        <manifestEntries>-->
-                        <!--                            <Class-Path>libraries/</Class-Path>-->
-                        <!--                        </manifestEntries>-->
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
-
     </build>
 
 
     <repositories>
-
         <repository>
             <id>local-repo</id>
             <url>file:///${project.basedir}/../m2-local-repo</url>
@@ -315,13 +289,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.ee10/jetty-ee10-bom -->
-        <dependency>
-            <groupId>org.eclipse.jetty.ee10</groupId>
-            <artifactId>jetty-ee10-bom</artifactId>
-            <version>12.0.22</version>
-            <type>pom</type>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
@@ -483,11 +450,6 @@
             <artifactId>simplereloadlib</artifactId>
             <version>1.1.2</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework</groupId>-->
-        <!--            <artifactId>spring-context</artifactId>-->
-        <!--            <version>6.2.5</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>com.github.mizosoft.methanol</groupId>
             <artifactId>methanol</artifactId>
