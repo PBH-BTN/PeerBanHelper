@@ -148,7 +148,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             Map<PeerAddress, BanMetadata> data = banListDao.readBanList();
             this.BAN_LIST.putAll(data);
             log.info(tlUI(Lang.LOAD_BANLIST_FROM_FILE, data.size()));
-            reApplyBanListForDownloaders();
+            Thread.startVirtualThread(this::reApplyBanListForDownloaders);
         } catch (Exception e) {
             log.error(tlUI(Lang.ERR_UPDATE_BAN_LIST), e);
         }

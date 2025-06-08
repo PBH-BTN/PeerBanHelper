@@ -83,12 +83,11 @@ public final class BtnNetwork implements Reloadable {
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        reloadConfig();
-        log.info("BtnNetwork reloaded");
+        Thread.startVirtualThread(this::reloadConfig);
         return Reloadable.super.reloadModule();
     }
 
-    public void reloadConfig() {
+    public synchronized void reloadConfig() {
         this.enabled = Main.getMainConfig().getBoolean("btn.enabled");
         this.configUrl = Main.getMainConfig().getString("btn.config-url");
         this.submit = Main.getMainConfig().getBoolean("btn.submit");
@@ -101,6 +100,7 @@ public final class BtnNetwork implements Reloadable {
         setupHttpClient();
         resetScheduler();
         checkIfNeedRetryConfig();
+        log.info("BtnNetwork reloaded");
     }
 
     private void resetAbilities() {
