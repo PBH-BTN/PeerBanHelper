@@ -97,7 +97,7 @@ public class SwtMainWindow {
 
         // 为每个组件创建 Tab
         for (TabComponent component : tabComponents) {
-            component.createTab(tabFolder);
+            component.createTab(display, tabFolder);
         }
     }
 

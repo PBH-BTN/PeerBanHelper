@@ -21,7 +21,7 @@ public class WebUITabComponent implements TabComponent {
     private Composite webUIComposite;
 
     @Override
-    public TabItem createTab(TabFolder tabFolder) {
+    public TabItem createTab(Display display, TabFolder tabFolder) {
         TabItem webUITab = new TabItem(tabFolder, SWT.NONE);
         webUITab.setText(getTabName());
 

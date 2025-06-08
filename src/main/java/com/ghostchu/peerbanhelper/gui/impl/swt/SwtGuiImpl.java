@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swt.tabs.LogsTabComponent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
@@ -18,11 +19,12 @@ import com.google.common.eventbus.Subscribe;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Shell;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -68,7 +70,6 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         });
     }
 
-
     @Override
     public void setup() {
         super.setup();
@@ -89,7 +90,8 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent, @Nullable Runnable noEvent) {
+    public void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent,
+            @Nullable Runnable noEvent) {
         int style = SWT.YES | SWT.NO;
         if (level == Level.INFO) {
             style |= SWT.ICON_INFORMATION;
@@ -106,14 +108,17 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             if (swtMainWindow != null && !swtMainWindow.shell.isDisposed()) {
                 swtMainWindow.shell.forceActive();
             }
-            MessageBox messageBox = new MessageBox(swtMainWindow != null ? swtMainWindow.shell : new Shell(display), finalStyle);
+            MessageBox messageBox = new MessageBox(swtMainWindow != null ? swtMainWindow.shell : new Shell(display),
+                    finalStyle);
             messageBox.setText(title);
             messageBox.setMessage(description);
             int result = messageBox.open();
             if (result == SWT.YES) {
-                if (yesEvent != null) yesEvent.run();
+                if (yesEvent != null)
+                    yesEvent.run();
             } else if (result == SWT.NO) {
-                if (noEvent != null) noEvent.run();
+                if (noEvent != null)
+                    noEvent.run();
             }
         });
     }
@@ -135,7 +140,8 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel) {
+    public ProgressDialog createProgressDialog(String title, String description, String buttonText,
+            Runnable buttonEvent, boolean allowCancel) {
         return new SwtProgressDialog(title, description, buttonText, buttonEvent, allowCancel);
     }
 
@@ -147,64 +153,45 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         return super.taskbarControl();
     }
 
-
     private void initLoggerRedirection() {
-        Table logTable = swtMainWindow.getLogsTabComponent().getTable();
+        LogsTabComponent logsTabComponent = swtMainWindow.getLogsTabComponent();
         AtomicBoolean autoScroll = new AtomicBoolean(true);
 
-        // 监听表格的滚动事件
-        logTable.addListener(SWT.MouseVerticalWheel, event -> {
-            TableItem[] items = logTable.getItems();
-            if (items.length > 0) {
-                Rectangle rect = items[items.length - 1].getBounds();
-                Rectangle area = logTable.getClientArea();
-                autoScroll.set((rect.y + rect.height) <= (area.y + area.height));
-            }
+        // 监听Grid的滚动事件
+        logsTabComponent.getVerticalBar().addListener(SWT.Selection, event -> {
+            ScrollBar scrollBar = (ScrollBar) event.widget;
+            autoScroll.set(scrollBar.getSelection() + scrollBar.getThumb() >= scrollBar.getMaximum());
         });
-
-        Color errorBackground = new org.eclipse.swt.graphics.Color(255, 204, 187);
-        Color errorForeground = new org.eclipse.swt.graphics.Color(0, 0, 0);
-        Color warnBackground = new org.eclipse.swt.graphics.Color(255, 238, 204);
-        Color warnForeground = new org.eclipse.swt.graphics.Color(0, 0, 0);
 
         JListAppender.allowWriteLogEntryDeque.set(true);
         var maxSize = ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300);
         CommonUtil.getScheduler().scheduleWithFixedDelay(() -> display.asyncExec(() -> {
             while (!JListAppender.logEntryDeque.isEmpty()) {
-                if (logTable.isDisposed()) return;
+                if (logsTabComponent.getGrid().isDisposed())
+                    return;
                 var logEntry = JListAppender.logEntryDeque.poll();
-                if (logEntry == null) return;
-                TableItem item = new TableItem(logTable, SWT.NONE);
-                item.setText(logEntry.toString());
-                switch (logEntry.level()) {
-                    case ERROR -> {
-                        item.setBackground(errorBackground);
-                        item.setForeground(errorForeground);
-                    }
-                    case WARN -> {
-                        item.setBackground(warnBackground);
-                        item.setForeground(warnForeground);
-                    }
-                }
+                if (logEntry == null)
+                    return;
+
+                // 添加日志条目到Grid
+                logsTabComponent.addLogEntry(logEntry.toString(), logEntry.level());
+
                 // 如果启用了自动滚动，滚动到底部
                 if (autoScroll.get()) {
-                    logTable.setTopIndex(logTable.getItemCount() - 1);
+                    logsTabComponent.scrollToBottom();
                 }
             }
+
             // 限制最大元素数量
-            while (logTable.getItemCount() > maxSize) {
-                logTable.remove(0);
-            }
+            logsTabComponent.limitLogEntries(maxSize);
         }), 0, 10, TimeUnit.MILLISECONDS);
     }
-
 
     @Override
     public void sync() {
         swtMainWindow.sync();
         super.sync();
     }
-
 
     @Override
     public void close() {
@@ -230,7 +217,8 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             if (swtMainWindow != null && !swtMainWindow.shell.isDisposed()) {
                 swtMainWindow.shell.forceActive();
             }
-            MessageBox messageBox = new MessageBox(swtMainWindow != null ? swtMainWindow.shell : new Shell(display), finalStyle);
+            MessageBox messageBox = new MessageBox(swtMainWindow != null ? swtMainWindow.shell : new Shell(display),
+                    finalStyle);
             messageBox.setText(title);
             messageBox.setMessage(description);
             messageBox.open();

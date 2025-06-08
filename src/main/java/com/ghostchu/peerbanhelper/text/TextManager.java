@@ -65,7 +65,7 @@ public final class TextManager implements Reloadable {
         // 注册后处理器
         postProcessors.add(new FillerProcessor());
 
-        log.info("Translation system initialized with {} available languages", availableLanguages.size());
+        log.info("Translation system initialized with {} available languages: {}", availableLanguages.size(), availableLanguages);
     }
 
     /**

@@ -52,6 +52,8 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
 
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
+
 @Slf4j
 public class Main {
     @Getter
@@ -123,7 +125,8 @@ public class Main {
             setupProxySettings();
             setupScriptEngine();
             try {
-                log.info(TextManager.tlUI(Lang.SPRING_CONTEXT_LOADING));
+                log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
+                log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion(), Main.getMeta().getAbbrev(), Main.getMeta().getCompileTime()));
                 SpringApplicationBuilder builder = new SpringApplicationBuilder(PeerBanHelper.class);
                 builder.bannerMode(Banner.Mode.OFF);
                 builder.headless(false);
@@ -137,7 +140,7 @@ public class Main {
                 server = context.getBean(PeerBanHelper.class);
                 server.start();
             } catch (Exception e) {
-                log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
+                log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
                 throw new RuntimeException(e);
             }
             setupShutdownHook();

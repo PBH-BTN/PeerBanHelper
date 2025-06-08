@@ -97,7 +97,6 @@ public class PeerBanHelper implements Reloadable {
 
 
     public void start() throws SQLException {
-        log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion()));
         checkKnownCrashes();
         setupIPDB();
         registerHttpServer();

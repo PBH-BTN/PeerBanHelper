@@ -470,5 +470,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.nebula.widgets.nattable/org.eclipse.nebula.widgets.nattable.core -->
+        <dependency>
+            <groupId>org.eclipse.nebula.widgets</groupId>
+            <artifactId>org.eclipse.nebula.widgets.grid</artifactId>
+            <version>1.1.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/org.eclipse.nebula.widgets.grid_1.1.1.202402011804.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
