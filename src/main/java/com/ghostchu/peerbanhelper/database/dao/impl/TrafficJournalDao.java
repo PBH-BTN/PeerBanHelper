@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TrafficJournalEntity;
@@ -7,6 +8,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,56 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
 
     public TrafficJournalDao(@Autowired ConnectionSource database) throws SQLException {
         super(database, TrafficJournalEntity.class);
+    }
+
+    @NotNull
+    public DownloaderSpeedLimiter tweakSpeedLimiterBySlidingWindow(@NotNull String downloader, @NotNull DownloaderSpeedLimiter currentSetting, long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) throws SQLException {
+        // 假设滑动窗口为24小时
+        long windowSizeMillis = 24 * 60 * 60 * 1000; // 24小时(毫秒)
+        long currentTime = System.currentTimeMillis();
+        long windowStartTime = currentTime - windowSizeMillis;
+
+        Timestamp startTimestamp = new Timestamp(windowStartTime);
+        Timestamp endTimestamp = new Timestamp(currentTime);
+
+        // 获取窗口内的流量数据
+        List<TrafficDataComputed> trafficData = getSpecificDownloaderOverallData(downloader, startTimestamp, endTimestamp);
+
+        // 计算窗口内的总上传流量
+        long totalUploadedBytes = trafficData.stream()
+                .mapToLong(TrafficDataComputed::getDataOverallUploaded)
+                .sum();
+
+        // 获取当前速度限制
+        long currentSpeed = currentSetting.upload();
+        long newSpeed;
+
+        if (totalUploadedBytes >= thresholdBytes) {
+            // 应用节流策略 - 当达到或超过阈值时
+            if (currentSpeed <= minSpeedBytesPerSecond) {
+                newSpeed = minSpeedBytesPerSecond;
+            } else {
+                // 计算减少因子 b = l_current / l
+                double b = (double) totalUploadedBytes / thresholdBytes;
+                newSpeed = (long) (currentSpeed / b);
+                // 确保不低于最小速度
+                newSpeed = Math.max(newSpeed, minSpeedBytesPerSecond);
+            }
+        } else {
+            // 应用解除节流策略 - 当未达到阈值时
+            if (currentSpeed >= maxSpeedBytesPerSecond) {
+                newSpeed = maxSpeedBytesPerSecond;
+            } else {
+                // 计算增加因子 a = (l - l_current) / w，并转换为每秒字节数
+                double a = (double) (thresholdBytes - totalUploadedBytes) / windowSizeMillis * 1000;
+                newSpeed = (long) (currentSpeed + a);
+                // 确保不超过最大速度
+                newSpeed = Math.min(newSpeed, maxSpeedBytesPerSecond);
+            }
+        }
+
+        // 创建并返回新的速度限制设置
+        return new DownloaderSpeedLimiter(newSpeed, currentSetting.download());
     }
 
     public TrafficDataComputed getTodayData(String downloader) throws Exception {
@@ -101,7 +153,7 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         }
     }
 
-    public List<TrafficDataComputed> getSpecificDownloaderOverallData(String downloadName, Timestamp start, Timestamp end) throws Exception {
+    public List<TrafficDataComputed> getSpecificDownloaderOverallData(String downloadName, Timestamp start, Timestamp end) throws SQLException {
         return queryBuilder().orderBy("timestamp", true)
                 .where()
                 .eq("downloader", downloadName)
