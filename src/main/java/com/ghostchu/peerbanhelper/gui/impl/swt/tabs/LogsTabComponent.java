@@ -92,7 +92,7 @@ public class LogsTabComponent implements TabComponent {
         if (grid == null || grid.isDisposed()) return;
         
         GridItem item = new GridItem(grid, SWT.NONE);
-        item.setText(0, message);
+        item.setText(0, message.replace("\t", "    "));
 
         switch (level){
             case WARN -> {
