@@ -63,7 +63,7 @@
                                 </goals>
                                 <configuration>
                                     <installDir>${install4j.home}</installDir>
-                                    <projectFile>../install4j/project.install4j</projectFile>
+                                    <projectFile>install4j/project.install4j</projectFile>
                                     <variables>
                                         <librariesPath>${project.build.directory}/libraries</librariesPath>
                                         <jarPath>${project.build.directory}/PeerBanHelper.jar</jarPath>
@@ -92,7 +92,7 @@
                                 </goals>
                                 <configuration>
                                     <installDir>${install4j.home}</installDir>
-                                    <projectFile>../install4j/project.install4j</projectFile>
+                                    <projectFile>install4j/project.install4j</projectFile>
                                     <variables>
                                         <librariesPath>${project.build.directory}/libraries</librariesPath>
                                         <jarPath>${project.build.directory}/PeerBanHelper.jar</jarPath>
