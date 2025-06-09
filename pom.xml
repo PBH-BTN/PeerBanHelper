@@ -379,7 +379,7 @@
         <dependency>
             <groupId>me.friwi</groupId>
             <artifactId>jcefmaven</artifactId>
-            <version>126.2.0</version>
+            <version>135.0.20</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
