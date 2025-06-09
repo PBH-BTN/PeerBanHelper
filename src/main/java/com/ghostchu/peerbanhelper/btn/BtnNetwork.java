@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.btn;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.DownloaderServer;
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.ability.*;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
@@ -21,7 +21,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.CookieManager;
@@ -59,24 +58,25 @@ public final class BtnNetwork implements Reloadable {
     private String appSecret;
     @Getter
     private HttpClient httpClient;
-    private DownloaderServer server;
-    @Autowired
-    private PeerRecordDao peerRecordDao;
-    @Autowired
-    private TrackedSwarmDao trackedSwarmDao;
-    @Autowired
-    private MetadataDao metadataDao;
-    private HTTPUtil httpUtil;
-    private ModuleMatchCache moduleMatchCache;
+    private final DownloaderServer server;
+    private final PeerRecordDao peerRecordDao;
+    private final TrackedSwarmDao trackedSwarmDao;
+    private final MetadataDao metadataDao;
+    private final HistoryDao historyDao;
+    private final HTTPUtil httpUtil;
+    private final ModuleMatchCache moduleMatchCache;
     private boolean enabled;
-    @Autowired
-    private HistoryDao historyDao;
 
-    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil) {
+    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
+                      MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao) {
         this.server = downloaderServer;
         this.scriptEngine = scriptEngine;
         this.moduleMatchCache = moduleMatchCache;
         this.httpUtil = httpUtil;
+        this.metadataDao = metadataDao;
+        this.historyDao = historyDao;
+        this.peerRecordDao = peerRecordDao;
+        this.trackedSwarmDao = trackedSwarmDao;
         Main.getReloadManager().register(this);
         reloadConfig();
     }
