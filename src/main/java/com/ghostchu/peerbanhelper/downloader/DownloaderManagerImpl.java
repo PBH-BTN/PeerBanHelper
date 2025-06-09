@@ -2,13 +2,13 @@ package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.BiglyBT;
 import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.BitComet;
 import com.ghostchu.peerbanhelper.downloader.impl.deluge.Deluge;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.QBittorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl.enhanced.QBittorrentEE;
 import com.ghostchu.peerbanhelper.downloader.impl.transmission.Transmission;
+import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -18,7 +18,6 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,10 +30,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Slf4j
 @Component
 public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader> implements Reloadable, DownloaderManager {
-    @Autowired
-    private AlertManager alertManager;
 
-    public DownloaderManagerImpl() {
+    private final AlertManager alertManager;
+
+    public DownloaderManagerImpl(AlertManager alertManager) {
+        this.alertManager = alertManager;
         Main.getReloadManager().register(this);
         load();
     }

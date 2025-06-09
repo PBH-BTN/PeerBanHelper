@@ -649,3 +649,5 @@ WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN: "[WebUI] 有人正尝试从 {} 登录 Peer
 WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有用户成功从 {} 登录 PeerBanHelper。浏览器信息：{}"
 
 MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[主动检测] 根据最近的流量统计数据，下载器 {} 的上传速率限制已动态更新为 {} bytes/s"
+GUI_COPY_TO_CLIPBOARD: "复制到剪贴板"
+GUI_CLEAR_LOGS: "清除日志"
