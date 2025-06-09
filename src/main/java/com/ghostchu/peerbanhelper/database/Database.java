@@ -38,7 +38,7 @@ public class Database {
     private JdbcSingleConnectionSource dataSource;
     private DatabaseHelper helper;
 
-    public Database(Laboratory laboratory) throws SQLException, ClassNotFoundException {
+    public Database(Laboratory laboratory) throws SQLException {
         this.laboratory = laboratory;
         File databaseDirectory = new File(Main.getDataDirectory(), "persist");
         if (!databaseDirectory.exists()) {

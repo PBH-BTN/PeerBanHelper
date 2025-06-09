@@ -3,8 +3,6 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.rule.MatchResult;
-import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.btn.BtnExceptionRuleParsed;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
@@ -141,7 +139,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Override
-    public ReloadResult reloadModule() throws Exception {
+    public ReloadResult reloadModule() {
         boolean actualLoaded = btnNetwork != null;
         boolean configLoaded = Main.getMainConfig().getBoolean("btn.enabled");
         if (actualLoaded != configLoaded) {

@@ -27,7 +27,7 @@ public class SwtTrayManager {
     // 托盘相关的成员变量
     private TrayItem trayItem;
     private boolean notificationShown = false; // 跟踪通知是否已经显示过
-    private Image iconImage; // 用于存储图标资源
+    private final Image iconImage; // 用于存储图标资源
 
     // 托盘菜单相关成员变量
     private Menu trayMenu;
@@ -114,9 +114,7 @@ public class SwtTrayManager {
         // WebUI 菜单项
         MenuItem webUIItem = new MenuItem(trayMenu, SWT.PUSH);
         webUIItem.setText(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
-        webUIItem.addListener(SWT.Selection, event -> {
-            openWebUI();
-        });
+        webUIItem.addListener(SWT.Selection, event -> openWebUI());
 
         // 分隔线
         new MenuItem(trayMenu, SWT.SEPARATOR);

@@ -77,7 +77,7 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) throws IOException, InterruptedException {
+    public boolean push(String title, String content) {
         Map<String, Object> args = new HashMap<>() {{
             put("token", config.getToken());
             if (config.getTopic() != null) {

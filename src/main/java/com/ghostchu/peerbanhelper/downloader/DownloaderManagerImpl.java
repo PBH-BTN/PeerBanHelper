@@ -40,7 +40,7 @@ public final class DownloaderManagerImpl extends CopyOnWriteArrayList<Downloader
     }
 
     @Override
-    public ReloadResult reloadModule() throws Exception {
+    public ReloadResult reloadModule() {
         load();
         return new ReloadResult(ReloadStatus.SUCCESS, "SUCCESS", null);
     }

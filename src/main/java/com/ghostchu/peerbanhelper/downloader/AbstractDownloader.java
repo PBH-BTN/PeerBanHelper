@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class AbstractDownloader implements Downloader {
     public final AlertManager alertManager;
-    protected String id;
+    protected final String id;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
     private TranslationComponent statusMessage;
     private int failedLoginAttempts = 0;
@@ -53,7 +53,7 @@ public abstract class AbstractDownloader implements Downloader {
                 failedLoginAttempts = 0;
                 return result;
             }
-            if (result.getStatus() == DownloaderLoginResult.Status.INCORRECT_CREDENTIAL)
+            if (result.status() == DownloaderLoginResult.Status.INCORRECT_CREDENTIAL)
                 failedLoginAttempts++;
             return result;
         } catch (Throwable e) {

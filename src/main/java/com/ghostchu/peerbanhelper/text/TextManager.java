@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public final class TextManager implements Reloadable {
-    public static TextManager INSTANCE_HOLDER = new TextManager();
+    public static final TextManager INSTANCE_HOLDER = new TextManager();
     public final Set<PostProcessor> postProcessors = new LinkedHashSet<>();
     private final LanguageFilesManagerImpl languageFilesManager = new LanguageFilesManagerImpl();
     private final Set<String> availableLanguages = new LinkedHashSet<>();

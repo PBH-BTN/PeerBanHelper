@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 public class SwtAboutWindow {
     private static final Logger log = LoggerFactory.getLogger(SwtAboutWindow.class);
     private Shell shell;
-    private Display display;
+    private final Display display;
     private final Map<String, String> replaces;
     private StyledText textPane;
     private List<Object> contentItems;
@@ -44,7 +44,7 @@ public class SwtAboutWindow {
     private String currentString = "";
     private int charIndex = 0;
     private boolean processingString = false;
-    private AtomicBoolean cursorLock = new AtomicBoolean(false);
+    private final AtomicBoolean cursorLock = new AtomicBoolean(false);
 
     private final MIDIPlayer midiPlayer = new MIDIPlayer(
             Main.class.getResourceAsStream("/assets/midi/ABOUT-MiSide-MusicMenu.mid"),
@@ -262,11 +262,9 @@ public class SwtAboutWindow {
 
     private void processCommand(Object item) {
         try {
-            if (item instanceof SpeedCommand) {
-                SpeedCommand cmd = (SpeedCommand) item;
+            if (item instanceof SpeedCommand cmd) {
                 delay = cmd.speed;
-            } else if (item instanceof ColorCommand) {
-                ColorCommand cmd = (ColorCommand) item;
+            } else if (item instanceof ColorCommand cmd) {
 
                 // 释放旧颜色资源
                 if (fgColor != null && !fgColor.isDisposed()) {
@@ -323,21 +321,10 @@ public class SwtAboutWindow {
     }
 
     // 命令类定义
-    private static class SpeedCommand {
-        final int speed;
-
-        SpeedCommand(int speed) {
-            this.speed = speed;
-        }
+        private record SpeedCommand(int speed) {
     }
 
-    private static class ColorCommand {
-        final String fg, bg;
-
-        ColorCommand(String fg, String bg) {
-            this.fg = fg;
-            this.bg = bg;
-        }
+    private record ColorCommand(String fg, String bg) {
     }
 
     private static class ClearCommand {

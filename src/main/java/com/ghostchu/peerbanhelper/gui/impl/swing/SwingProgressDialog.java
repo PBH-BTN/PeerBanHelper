@@ -96,16 +96,12 @@ public final class SwingProgressDialog implements ProgressDialog {
 
     @Override
     public void setDescription(String description) {
-        SwingUtilities.invokeLater(() -> {
-            descriptionLabel.setText(description);
-        });
+        SwingUtilities.invokeLater(() -> descriptionLabel.setText(description));
     }
 
     @Override
     public void setButtonText(String buttonText) {
-        SwingUtilities.invokeLater(() -> {
-            stopButton.setText(buttonText);
-        });
+        SwingUtilities.invokeLater(() -> stopButton.setText(buttonText));
     }
 
     @Override
@@ -122,9 +118,7 @@ public final class SwingProgressDialog implements ProgressDialog {
 
     @Override
     public void setAllowCancel(boolean allowCancel) {
-        SwingUtilities.invokeLater(() -> {
-            stopButton.setEnabled(allowCancel);
-        });
+        SwingUtilities.invokeLater(() -> stopButton.setEnabled(allowCancel));
     }
 
     @Override
@@ -138,8 +132,6 @@ public final class SwingProgressDialog implements ProgressDialog {
 
     @Override
     public void setComment(String comment) {
-        SwingUtilities.invokeLater(() -> {
-            commentLabel.setText(comment);
-        });
+        SwingUtilities.invokeLater(() -> commentLabel.setText(comment));
     }
 }

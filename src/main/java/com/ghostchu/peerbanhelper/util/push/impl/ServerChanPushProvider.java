@@ -74,7 +74,7 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) throws Exception {
+    public boolean push(String title, String content) {
         Map<String, Object> map = new HashMap<>();
         map.put("title", title);
         map.put("desp", content);

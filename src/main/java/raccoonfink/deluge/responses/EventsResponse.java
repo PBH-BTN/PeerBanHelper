@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class EventsResponse extends DelugeResponse {
-    private final List<DelugeEvent> m_events = new ArrayList<DelugeEvent>();
+    private final List<DelugeEvent> m_events = new ArrayList<>();
 
     public EventsResponse(final Integer httpResponseCode, final JSONObject result) throws DelugeException {
         super(httpResponseCode, result);

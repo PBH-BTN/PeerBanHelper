@@ -260,9 +260,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
             trackerMap.computeIfAbsent(qbTorrentTracker.getTier(), k -> new ArrayList<>()).add(qbTorrentTracker.getUrl());
         }
         List<Tracker> trackers = new ArrayList<>();
-        trackerMap.forEach((k, v) -> {
-            trackers.add(new TrackerImpl(v));
-        });
+        trackerMap.forEach((k, v) -> trackers.add(new TrackerImpl(v)));
         return trackers;
     }
 
@@ -529,7 +527,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
     }
 

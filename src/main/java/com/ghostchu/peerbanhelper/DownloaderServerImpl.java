@@ -26,7 +26,6 @@ import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.BanListDao;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
-import com.ghostchu.peerbanhelper.module.ModuleManagerImpl;
 import com.ghostchu.peerbanhelper.util.WatchDog;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
@@ -201,18 +200,14 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 banWaveWatchDog.setLastOperation("Notify MonitorFeatureModules");
                 for (FeatureModule module : moduleManager.getModules()) {
                     if (module instanceof MonitorFeatureModule monitorFeatureModule) {
-                        entry.forEach((torrent, plist) -> {
-                            monitorFeatureModule.onTorrentPeersRetrieved(downloader, torrent, plist, executor);
-                        });
+                        entry.forEach((torrent, plist) -> monitorFeatureModule.onTorrentPeersRetrieved(downloader, torrent, plist, executor));
                     }
                 }
             });
             // ========== 处理封禁逻辑 ==========
             Map<Downloader, List<BanDetail>> downloaderBanDetailMap = new ConcurrentHashMap<>();
             banWaveWatchDog.setLastOperation("Check Bans");
-            try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> {
-                log.error(tlUI(Lang.TIMING_CHECK_BANS));
-            })) {
+            try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.CHECK_BANS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_CHECK_BANS)))) {
                 peers.keySet().forEach(downloader -> protect.getService().submit(() -> {
                     try {
                         downloaderBanDetailMap.put(downloader, checkBans(peers.get(downloader), downloader));
@@ -247,9 +242,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
             // 添加被封禁的 Peers 到封禁列表中
             banWaveWatchDog.setLastOperation("Add banned peers into banlist");
-            try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> {
-                log.error(tlUI(Lang.TIMING_ADD_BANS));
-            })) {
+            try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.ADD_BAN_ENTRY.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_ADD_BANS)))) {
                 Callable<Object> callable = () -> {
                     var banlistClone = BAN_LIST.keySet();
                     downloaderBanDetailMap.forEach((downloader, details) -> {
@@ -298,17 +291,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             }
             banWaveWatchDog.setLastOperation("Apply banlist");
             // 如果需要，则应用更改封禁列表到下载器
-            try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> {
-                log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST));
-            })) {
+            try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.APPLY_BANLIST.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_APPLY_BAN_LIST)))) {
                 if (!needReApplyBanList.get()) {
                     downloaderManager.forEach(downloader -> protect.getService().submit(() ->
                             updateDownloader(downloader, !bannedPeers.isEmpty() || !unbannedPeers.isEmpty(), bannedPeers, unbannedPeers, false)));
                 } else {
                     log.info(tlUI(Lang.APPLYING_FULL_BANLIST_TO_DOWNLOADER));
-                    downloaderManager.forEach(downloader -> protect.getService().submit(() -> {
-                        updateDownloader(downloader, true, null, null, true);
-                    }));
+                    downloaderManager.forEach(downloader -> protect.getService().submit(() -> updateDownloader(downloader, true, null, null, true)));
                     needReApplyBanList.set(false);
                 }
             }
@@ -394,13 +383,13 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         try {
             var loginResult = downloader.login();
             if (!loginResult.success()) {
-                if (loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED) {
-                    log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
-                    downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
+                if (loginResult.status() != DownloaderLoginResult.Status.PAUSED) {
+                    log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.message())));
+                    downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.message());
                 }
                 return;
             } else {
-                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.getMessage());
+                downloader.setLastStatus(DownloaderLastStatus.HEALTHY, loginResult.message());
             }
             downloader.setBanList(BAN_LIST.keySet(), added, removed, applyFullList);
         } catch (Throwable th) {
@@ -454,20 +443,18 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         Map<Torrent, List<Peer>> peers = Collections.synchronizedMap(new HashMap<>());
         var loginResult = downloader.login();
         if (!loginResult.success()) {
-            if (loginResult.getStatus() != DownloaderLoginResult.Status.PAUSED) {
-                log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.getMessage())));
-                downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.getMessage());
-                if (loginResult.getStatus() == DownloaderLoginResult.Status.MISSING_COMPONENTS || loginResult.getStatus() == DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS) {
-                    downloader.setLastStatus(DownloaderLastStatus.NEED_TAKE_ACTION, loginResult.getMessage());
+            if (loginResult.status() != DownloaderLoginResult.Status.PAUSED) {
+                log.error(tlUI(Lang.ERR_CLIENT_LOGIN_FAILURE_SKIP, downloader.getName(), downloader.getEndpoint(), tlUI(loginResult.message())));
+                downloader.setLastStatus(DownloaderLastStatus.ERROR, loginResult.message());
+                if (loginResult.status() == DownloaderLoginResult.Status.MISSING_COMPONENTS || loginResult.status() == DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS) {
+                    downloader.setLastStatus(DownloaderLastStatus.NEED_TAKE_ACTION, loginResult.message());
                 }
             }
             return null;
         }
         List<Torrent> torrents = downloader.getTorrents();
         Semaphore parallelReqRestrict = new Semaphore(downloader.getMaxConcurrentPeerRequestSlots());
-        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.COLLECT_PEERS.getTimeout(), (t) -> {
-            log.error(tlUI(Lang.TIMING_COLLECT_PEERS));
-        })) {
+        try (TimeoutProtect protect = new TimeoutProtect(ExceptedTime.COLLECT_PEERS.getTimeout(), (t) -> log.error(tlUI(Lang.TIMING_COLLECT_PEERS)))) {
             torrents.forEach(torrent -> protect.getService().submit(() -> {
                 try {
                     parallelReqRestrict.acquire();

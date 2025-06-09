@@ -54,9 +54,7 @@ public final class TimeoutProtect implements AutoCloseable {
 
     public void printUnfinishedTasks() {
         if (this.unfinishedTasks != null) {
-            this.unfinishedTasks.forEach(r -> {
-                log.warn(tlUI(Lang.TIMING_UNFINISHED_TASK, r));
-            });
+            this.unfinishedTasks.forEach(r -> log.warn(tlUI(Lang.TIMING_UNFINISHED_TASK, r)));
         }
     }
 

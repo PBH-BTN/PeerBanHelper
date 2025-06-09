@@ -160,7 +160,7 @@ public final class PBHDownloaderController extends AbstractFeatureModule {
                 if (testResult.success()) {
                     ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));
                 } else {
-                    ctx.json(new StdResp(false, tl(locale(ctx), testResult.getMessage()), null));
+                    ctx.json(new StdResp(false, tl(locale(ctx), testResult.message()), null));
                 }
                 downloader.close();
             } else {

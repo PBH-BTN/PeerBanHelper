@@ -80,7 +80,7 @@ public class PeerBanHelper implements Reloadable {
     private HTTPUtil httpUtil;
 
 
-    public PeerBanHelper() throws SQLException {
+    public PeerBanHelper() {
         reloadConfig();
 
     }
@@ -96,7 +96,7 @@ public class PeerBanHelper implements Reloadable {
     }
 
 
-    public void start() throws SQLException {
+    public void start() {
         checkKnownCrashes();
         setupIPDB();
         registerHttpServer();

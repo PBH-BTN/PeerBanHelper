@@ -66,7 +66,7 @@ public final class TelegramPushProvider extends AbstractPushProvider {
     }
 
     @Override
-    public boolean push(String title, String content) throws Exception {
+    public boolean push(String title, String content) {
         String markdown = "*" + title + "*\n" + content;
         Map<String, Object> map = new HashMap<>();
         map.put("chat_id", config.getChatId());

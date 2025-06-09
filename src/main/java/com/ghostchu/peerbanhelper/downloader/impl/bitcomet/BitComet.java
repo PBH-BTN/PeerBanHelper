@@ -53,8 +53,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class BitComet extends AbstractDownloader {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(BitComet.class);
     private static final UUID clientId = UUID.nameUUIDFromBytes("PeerBanHelper".getBytes(StandardCharsets.UTF_8));
-    protected final String apiEndpoint;
-    protected final HttpClient httpClient;
+    private final String apiEndpoint;
+    private final HttpClient httpClient;
     private final Config config;
     private String deviceToken;
     private String serverId;
@@ -436,7 +436,7 @@ public final class BitComet extends AbstractDownloader {
         operateBanListLegacy("merge", joiner.toString());
     }
 
-    protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
+    private void setBanListFull(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
         operateBanListLegacy("replace", joiner.toString());
@@ -486,7 +486,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
     }
 

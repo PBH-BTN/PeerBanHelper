@@ -8,6 +8,6 @@ public interface PushProvider {
     String getConfigType();
     JsonObject saveJson();
     ConfigurationSection saveYaml();
-    boolean push(String title, String content) throws Exception;
+    boolean push(String title, String content);
 
 }

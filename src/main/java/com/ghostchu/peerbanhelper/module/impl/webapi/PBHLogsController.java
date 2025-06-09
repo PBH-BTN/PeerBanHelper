@@ -66,11 +66,11 @@ public final class PBHLogsController extends AbstractFeatureModule {
             for (WsContext wsContext : session) {
                 wsContext.send(new StdResp(true, null,
                         new WebSocketLogEntryDTO(
-                                event.getEntry().time(),
-                                event.getEntry().thread(),
-                                event.getEntry().level().name(),
-                                event.getEntry().content(),
-                                event.getEntry().seq()
+                                event.entry().time(),
+                                event.entry().thread(),
+                                event.entry().level().name(),
+                                event.entry().content(),
+                                event.entry().seq()
                         )));
             }
         }

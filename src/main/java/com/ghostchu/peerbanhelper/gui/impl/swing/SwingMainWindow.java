@@ -440,7 +440,7 @@ public final class SwingMainWindow extends JFrame {
             var server = Main.getServer();
             if (server != null) {
                 bannedIps = Main.getServer().getDownloaderServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
-                bannedPeers = Main.getServer().getDownloaderServer().getBannedPeers().values().size();
+                bannedPeers = Main.getServer().getDownloaderServer().getBannedPeers().size();
             }
             return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/banned.svg")));
         }
@@ -612,9 +612,7 @@ public final class SwingMainWindow extends JFrame {
         private JMenu generateWebUIMenu() {
             JMenu webUIMenu = new JMenu(tlUI(Lang.GUI_MENU_WEBUI));
             JMenuItem openWebUIMenuItem = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
-            openWebUIMenuItem.addActionListener(e -> {
-                parent.openWebUI();
-            });
+            openWebUIMenuItem.addActionListener(e -> parent.openWebUI());
             webUIMenu.add(openWebUIMenuItem);
             JMenuItem copyWebUIToken = new JMenuItem(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
             copyWebUIToken.addActionListener(e -> {

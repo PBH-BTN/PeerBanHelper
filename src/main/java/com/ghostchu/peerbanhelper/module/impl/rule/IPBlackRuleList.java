@@ -342,7 +342,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
      * @param ips      ip列表
      * @return 加载的行数
      */
-    private int stringToIPList(String data, DualIPv4v6AssociativeTries<String> ips) throws IOException {
+    private int stringToIPList(String data, DualIPv4v6AssociativeTries<String> ips) {
         AtomicInteger count = new AtomicInteger();
         StringJoiner sj = new StringJoiner("\n");
         for (String ele : data.split("\n")) {

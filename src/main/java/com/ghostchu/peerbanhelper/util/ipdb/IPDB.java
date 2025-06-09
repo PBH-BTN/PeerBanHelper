@@ -452,7 +452,7 @@ public final class IPDB implements AutoCloseable {
 
         @SneakyThrows
         @Override
-        public DecodedValue get(CacheKey cacheKey, Loader loader) throws IOException {
+        public DecodedValue get(CacheKey cacheKey, Loader loader) {
             return cache.get(cacheKey, () -> loader.load(cacheKey));
         }
     }

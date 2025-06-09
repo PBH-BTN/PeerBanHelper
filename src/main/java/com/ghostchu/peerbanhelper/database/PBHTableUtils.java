@@ -27,7 +27,7 @@ import java.util.*;
  */
 public final class PBHTableUtils {
 
-    private static Logger logger = LoggerFactory.getLogger(PBHTableUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(PBHTableUtils.class);
     private static final FieldType[] noFieldTypes = new FieldType[0];
 
     /**
@@ -522,11 +522,7 @@ public final class PBHTableUtils {
                 continue;
             }
 
-            List<String> columnList = indexMap.get(indexName);
-            if (columnList == null) {
-                columnList = new ArrayList<>();
-                indexMap.put(indexName, columnList);
-            }
+            List<String> columnList = indexMap.computeIfAbsent(indexName, k -> new ArrayList<>());
             columnList.add(fieldType.getColumnName());
         }
 

@@ -30,12 +30,12 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class SwtMainWindow {
 
     private final SwtGuiImpl swtGui;
-    Display display;
-    Shell shell;
+    final Display display;
+    final Shell shell;
     TabFolder tabFolder;
 
     // Tab 组件
-    private List<TabComponent> tabComponents = new ArrayList<>();
+    private final List<TabComponent> tabComponents = new ArrayList<>();
     private LogsTabComponent logsTabComponent;
     private WebUITabComponent webUITabComponent;
 
@@ -43,7 +43,7 @@ public class SwtMainWindow {
     Image iconImage; // 用于存储图标资源
 
     // 托盘管理器
-    SwtTrayManager trayManager;
+    final SwtTrayManager trayManager;
 
     public SwtMainWindow(SwtGuiImpl swtGui, Display display) {
         this.shell = new Shell(display);
