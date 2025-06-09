@@ -16,12 +16,14 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.google.common.eventbus.Subscribe;
+import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.internal.DPIUtil;
+import org.eclipse.swt.internal.win32.OS;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
@@ -70,6 +72,7 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 swtMainWindow.shell.setText(builder.append(joiner).toString());
             }
         });
+
     }
 
     @Override
@@ -77,9 +80,20 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         super.setup();
         Main.getEventBus().register(this);
         setupSwtDefaultFonts();
+        try {
+            // 这玩意儿能空指针？
+            OsThemeDetector detector = OsThemeDetector.getDetector();
+            detector.registerListener(this::updateTheme);
+            updateTheme(detector.isDark());
+        } catch (Exception ignored) {
+        }
         swtMainWindow = new SwtMainWindow(this, display);
         swtTaskbarControl = new SwtTaskbarControl(swtMainWindow.shell, display);
         initLoggerRedirection();
+    }
+
+    private void updateTheme(Boolean aBoolean) {
+        OS.setTheme(aBoolean);
     }
 
     /**
