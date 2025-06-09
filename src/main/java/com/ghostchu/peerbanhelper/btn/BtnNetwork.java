@@ -66,17 +66,17 @@ public final class BtnNetwork implements Reloadable {
     private TrackedSwarmDao trackedSwarmDao;
     @Autowired
     private MetadataDao metadataDao;
-    @Autowired
     private HTTPUtil httpUtil;
     private ModuleMatchCache moduleMatchCache;
     private boolean enabled;
     @Autowired
     private HistoryDao historyDao;
 
-    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer) {
+    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil) {
         this.server = downloaderServer;
         this.scriptEngine = scriptEngine;
         this.moduleMatchCache = moduleMatchCache;
+        this.httpUtil = httpUtil;
         Main.getReloadManager().register(this);
         reloadConfig();
     }
