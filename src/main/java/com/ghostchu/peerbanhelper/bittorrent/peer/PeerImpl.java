@@ -3,11 +3,13 @@ package com.ghostchu.peerbanhelper.bittorrent.peer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.Setter;
 
+import java.nio.charset.StandardCharsets;
+
 @Setter
 public final class PeerImpl implements Peer {
     private PeerAddress peerAddress;
     private String rawIp;
-    private String peerId;
+    private byte[] peerId;
     private String clientName;
     private long downloadSpeed;
     private long downloaded;
@@ -17,7 +19,7 @@ public final class PeerImpl implements Peer {
     private PeerFlag flags;
     private boolean handshaking;
 
-    public PeerImpl(PeerAddress peerAddress, String rawIp, String peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, boolean handshaking) {
+    public PeerImpl(PeerAddress peerAddress, String rawIp, byte[] peerId, String clientName, long downloadSpeed, long downloaded, long uploadSpeed, long uploaded, double progress, PeerFlag flags, boolean handshaking) {
         this.peerAddress = peerAddress;
         this.rawIp = rawIp;
         this.peerId = peerId;
@@ -38,7 +40,7 @@ public final class PeerImpl implements Peer {
 
     @Override
     public String getPeerId() {
-        return peerId;
+        return new String(peerId, StandardCharsets.ISO_8859_1);
     }
 
     @Override

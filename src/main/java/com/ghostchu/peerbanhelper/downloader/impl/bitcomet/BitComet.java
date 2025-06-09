@@ -404,7 +404,7 @@ public final class BitComet extends AbstractDownloader {
             }
             return stream.map(peer -> new PeerImpl(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort()),
                     peer.getIp(),
-                    new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1),
+                    ByteUtil.hexToByteArray(peer.getPeerId()),
                     peer.getClientType(),
                     peer.getDlRate(),
                     peer.getDlSize() != null ? peer.getDlSize() : -1, // 兼容 2.10

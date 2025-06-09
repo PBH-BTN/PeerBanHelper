@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
-import com.ghostchu.peerbanhelper.bittorrent.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
@@ -52,7 +51,10 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -324,25 +326,12 @@ public final class BiglyBT extends AbstractDownloader {
         PeerManagerRecord peerManagerRecord = JsonUtil.getGson().fromJson(resp.body(), PeerManagerRecord.class);
         List<Peer> peersList = new ArrayList<>();
         for (PeerRecord peer : peerManagerRecord.getPeers()) {
-            var peerId = new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1);
-            if (peerId.length() > 8) {
-                peerId = peerId.substring(0, 8);
-            }
+            var peerId = ByteUtil.hexToByteArray(peer.getPeerId());
             if (peer.getIp() == null || peer.getIp().isBlank()) {
                 continue;
             }
             if(peer.getIp().startsWith("/")){
                 peer.setIp(peer.getIp().substring(1));
-            }
-            var supportedMessages = new ArrayList<PeerMessage>();
-            if (peer.getPeerSupportedMessages() != null) {
-                supportedMessages.addAll(peer.getPeerSupportedMessages().stream().map(str -> {
-                    try {
-                        return PeerMessage.valueOf(str.toUpperCase(Locale.ROOT).replace("-", "_"));
-                    } catch (IllegalArgumentException e) {
-                        return null;
-                    }
-                }).filter(Objects::nonNull).toList());
             }
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
