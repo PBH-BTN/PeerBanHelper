@@ -485,7 +485,7 @@
         <dependency>
             <groupId>io.qtjambi</groupId>
             <artifactId>qtjambi-webview</artifactId>
-            <version>6.8.3</version>
+            <version>6.9.1</version>
         </dependency>
         <!-- QtJambi WebEngine 依赖暂时注释掉，因为不可用 -->
         <!--
