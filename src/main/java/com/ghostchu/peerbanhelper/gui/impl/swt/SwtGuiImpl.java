@@ -23,7 +23,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.internal.DPIUtil;
-import org.eclipse.swt.internal.win32.OS;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
@@ -93,7 +92,7 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     private void updateTheme(Boolean aBoolean) {
-        OS.setTheme(aBoolean);
+       // OS.setTheme(aBoolean);
     }
 
     /**
