@@ -221,10 +221,8 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                     return;
                 var logEntry = JListAppender.logEntryDeque.poll();
                 if (logEntry == null)
-                    return;
-
-                // 添加日志条目到Grid
-                logsTabComponent.addLogEntry(logEntry.toString(), logEntry.level());
+                    return;                // 添加日志条目到Grid
+                logsTabComponent.addLogEntry(logEntry.content(), logEntry.level());
 
                 // 如果启用了自动滚动，滚动到底部
                 if (autoScroll.get()) {

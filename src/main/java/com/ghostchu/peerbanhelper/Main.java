@@ -338,9 +338,7 @@ public class Main {
         shutdownThread.setDaemon(false);
         shutdownThread.setName("ShutdownThread");
         Runtime.getRuntime().addShutdownHook(shutdownThread);
-    }
-
-    private static void initGUI(String[] args) {
+    }    private static void initGUI(String[] args) {
         String guiType = mainConfig.getString("gui", "auto");
         if ("auto".equals(guiType)) guiType = "swing";
 
@@ -348,6 +346,8 @@ public class Main {
             guiType = "swing";
         } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swt"))) {
             guiType = "swt";
+        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("qt"))) {
+            guiType = "qt";
         }
         if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
             guiType = "console";
@@ -356,6 +356,7 @@ public class Main {
         switch (guiType) {
             case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
             case "swt" -> guiManager = new PBHGuiManager(new SwtGuiImpl(args));
+            case "qt" -> guiManager = new PBHGuiManager(new com.ghostchu.peerbanhelper.gui.impl.qt.QtGuiImpl(args));
             default -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         }
 
