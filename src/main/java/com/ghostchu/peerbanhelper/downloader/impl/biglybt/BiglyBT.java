@@ -2,13 +2,13 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
+import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
@@ -29,6 +29,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -41,6 +42,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Reader;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.URI;
@@ -221,7 +223,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     private List<Torrent> fetchTorrents(List<Object> filtersUrlEncoded, boolean includePrivate) {
-        HttpResponse<String> request;
+        HttpResponse<Reader> request;
         try {
             StringBuilder urlBuilder = new StringBuilder(apiEndpoint + "/downloads");
             if (!filtersUrlEncoded.isEmpty()) {
@@ -229,7 +231,7 @@ public final class BiglyBT extends AbstractDownloader {
                 urlBuilder.append(String.join("&filter=", filtersUrlEncoded.stream().map(Object::toString).toArray(String[]::new)));
             }
             request = httpClient.send(MutableRequest.GET(urlBuilder.toString()),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -306,10 +308,10 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<String> resp;
+        HttpResponse<Reader> resp;
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/download/" + torrent.getId() + "/peers"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

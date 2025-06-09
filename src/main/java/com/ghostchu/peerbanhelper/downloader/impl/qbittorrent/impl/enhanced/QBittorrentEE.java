@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.FormBodyPublisher;
+import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -100,10 +102,10 @@ public final class QBittorrentEE extends AbstractQbittorrent {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<String> resp;
+        HttpResponse<Reader> resp;
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId()),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -111,7 +113,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
 
-        JsonObject object = JsonParser.parseString(resp.body()).getAsJsonObject();
+        JsonObject object = JsonParser.parseReader(resp.body()).getAsJsonObject();
         JsonObject peers = object.getAsJsonObject("peers");
         List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {

@@ -1,13 +1,13 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.TorrentImpl;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
+import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.crypto.BCAESTool;
 import com.ghostchu.peerbanhelper.downloader.impl.bitcomet.resp.*;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -19,6 +19,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.net.HostAndPort;
 import com.google.gson.JsonObject;
@@ -32,8 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.http.HttpClient;
@@ -218,12 +218,12 @@ public final class BitComet extends AbstractDownloader {
     }
 
     private boolean queryNeedReConfigureIpFilter() throws IOException, InterruptedException {
-        HttpResponse<String> query =
+        HttpResponse<Reader> query =
                 httpClient.send(
                         MutableRequest.POST(apiEndpoint + BCEndpoint.GET_IP_FILTER_CONFIG.getEndpoint(),
                                         HttpRequest.BodyPublishers.ofString("{}"))
                                 .header("Authorization", "Bearer " + this.deviceToken),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                        MoreBodyHandlers.ofReader()
                 );
         if (query.statusCode() != 200) {
             throw new IllegalStateException("Not a excepted statusCode while query the IPFilter status");
@@ -283,13 +283,13 @@ public final class BitComet extends AbstractDownloader {
 
 
     public List<Torrent> fetchTorrents(Map<String, String> requirements, boolean includePrivate) {
-        HttpResponse<String> request;
+        HttpResponse<Reader> request;
         try {
             request = httpClient.send(
                     MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_LIST.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
                             .header("Authorization", "Bearer " + this.deviceToken)
-                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    , MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -307,10 +307,10 @@ public final class BitComet extends AbstractDownloader {
                             semaphore.acquire();
                             Map<String, String> taskIds = new HashMap<>();
                             taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
-                            HttpResponse<String> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
+                            HttpResponse<Reader> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
                                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
                                             .header("Authorization", "Bearer " + this.deviceToken),
-                                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                                    MoreBodyHandlers.ofReader());
                             var torrentResp = JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
                             torrentResponses.add(torrentResp);
                         } catch (IOException | InterruptedException e) {
@@ -336,7 +336,7 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public List<Tracker> getTrackers(Torrent torrent) {
-        HttpResponse<InputStream> resp;
+        HttpResponse<Reader> resp;
         try {
             Map<String, Object> requirements = new HashMap<>();
             requirements.put("task_id", torrent.getId());
@@ -344,15 +344,15 @@ public final class BitComet extends AbstractDownloader {
             resp = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_TRACKERS.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
                             .header("Authorization", "Bearer " + this.deviceToken),
-                    HttpResponse.BodyHandlers.ofInputStream());
+                    MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
         if (resp.statusCode() != 200) {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
-        try (InputStreamReader reader = new InputStreamReader(resp.body())) {
-            var trackers = JsonUtil.standard().fromJson(reader, BCTaskTrackersResponse.class);
+        try{
+            var trackers = JsonUtil.standard().fromJson(resp.body(), BCTaskTrackersResponse.class);
             return trackers.getTrackers().stream()
                     .filter(t -> t.getName().startsWith("http") || t.getName().startsWith("udp") || t.getName().startsWith("ws"))
                     .map(t -> (Tracker) new TrackerImpl(t.getName())).toList();
@@ -373,7 +373,7 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<InputStream> resp;
+        HttpResponse<Reader> resp;
         try {
             Map<String, Object> requirements = new HashMap<>();
             requirements.put("groups", List.of("peers_connected")); // 2.11 Beta 3 可以限制获取哪一类 Peers，注意下面仍需要检查，因为旧版本不支持
@@ -382,15 +382,15 @@ public final class BitComet extends AbstractDownloader {
             resp = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_PEERS.getEndpoint(),
                                     HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(requirements)))
                             .header("Authorization", "Bearer " + this.deviceToken),
-                    HttpResponse.BodyHandlers.ofInputStream());
+                    MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
         if (resp.statusCode() != 200) {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BC_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
-        try (InputStreamReader reader = new InputStreamReader(resp.body())) {
-            var peers = JsonUtil.standard().fromJson(reader, BCTaskPeersResponse.class);
+        try  {
+            var peers = JsonUtil.standard().fromJson(resp.body(), BCTaskPeersResponse.class);
             if (peers.getPeers() == null) {
                 return Collections.emptyList();
             }

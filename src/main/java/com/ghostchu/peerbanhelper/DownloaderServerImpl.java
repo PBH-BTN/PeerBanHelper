@@ -251,8 +251,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 log.error(tlUI(Lang.TIMING_ADD_BANS));
             })) {
                 Callable<Object> callable = () -> {
-                    var banlistClone = List.copyOf(BAN_LIST.keySet());
-
+                    var banlistClone = BAN_LIST.keySet();
                     downloaderBanDetailMap.forEach((downloader, details) -> {
                         try {
                             details.forEach(detail -> protect.getService().submit(() -> {

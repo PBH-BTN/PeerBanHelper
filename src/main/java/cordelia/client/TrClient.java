@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,11 +21,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
@@ -89,24 +90,22 @@ public final class TrClient {
     }
 
     public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req, Long tag) {
-        String jsonBuffer = null;
         try {
-            HttpResponse<String> resp = httpClient.send(
+            HttpResponse<Reader> resp = httpClient.send(
                     MutableRequest.POST(url, HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(req.toReq(tag))))
                             .header("Content-Type", "application/json")
                             .header(Session.SESSION_ID, session(false).id())
-                    , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                    , MoreBodyHandlers.ofReader()
             );
             if (resp.statusCode() == 409) {
                 session(true); // force renew
                 throw new IllegalStateException("Session invalid, re-created, please try again.");
             }
-            jsonBuffer = resp.body();
             RawResponse raw = om.fromJson(resp.body(), RawResponse.class);
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
         } catch (JsonSyntaxException jsonSyntaxException) {
-            log.error(tlUI(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException));
+            log.error(tlUI(Lang.DOWNLOADER_TR_INVALID_RESPONSE, "<?>", jsonSyntaxException));
             throw new IllegalStateException(jsonSyntaxException);
         } catch (IOException | InterruptedException e) {
             log.debug("Request Transmission JsonRPC failure", e);

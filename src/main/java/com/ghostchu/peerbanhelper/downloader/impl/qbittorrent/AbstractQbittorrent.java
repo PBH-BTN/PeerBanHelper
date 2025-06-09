@@ -21,6 +21,7 @@ import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.FormBodyPublisher;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -208,11 +210,12 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     url += "?filter=active";
                 }
                 url += (url.contains("?") ? "&" : "?") + "limit=" + pageSize + "&offset=" + offset;
-                HttpResponse<String> request = httpClient.send(MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                HttpResponse<Reader> request = httpClient.send(MutableRequest.GET(url), MoreBodyHandlers.ofReader());
                 if (request.statusCode() != 200) {
                     throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST, request.statusCode(), request.body()));
                 }
-                List<QBittorrentTorrent> pageTorrents = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrent>>() {}.getType());
+                List<QBittorrentTorrent> pageTorrents = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<QBittorrentTorrent>>() {
+                }.getType());
                 if (pageTorrents == null || pageTorrents.isEmpty()) {
                     hasMore = false;
                 } else {
@@ -238,9 +241,9 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     @Override
     public List<Tracker> getTrackers(Torrent torrent) {
-        HttpResponse<String> request;
+        HttpResponse<Reader> request;
         try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/torrents/trackers?hash=" + torrent.getId()), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/torrents/trackers?hash=" + torrent.getId()), MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -278,8 +281,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     @Override
     public @Nullable DownloaderSpeedLimiter getSpeedLimiter() {
         try {
-            HttpResponse<String> request = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/preferences")
-                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            HttpResponse<Reader> request = httpClient.send(MutableRequest.GET(apiEndpoint + "/app/preferences")
+                    , MoreBodyHandlers.ofReader());
             QBittorrentPreferences preferences = JsonUtil.getGson()
                     .fromJson(request.body(), QBittorrentPreferences.class);
             long downloadLimit = preferences.getDlLimit(); // 单位是 bytes
@@ -405,9 +408,9 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         try {
             return torrentPropertiesCache.get(torrent.getHash(), () -> {
                 log.debug("torrent properties cache miss, query from properties api, hash: {}", torrent.getHash());
-                HttpResponse<String> res = httpClient.send(
+                HttpResponse<Reader> res = httpClient.send(
                         MutableRequest.GET(apiEndpoint + "/torrents/properties?hash=" + torrent.getHash()),
-                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                        MoreBodyHandlers.ofReader()
                 );
                 if (res.statusCode() == 200) {
                     var newDetail = JsonUtil.getGson().fromJson(res.body(), QBittorrentTorrent.class);
@@ -423,9 +426,9 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     @Override
     public DownloaderStatistics getStatistics() {
-        HttpResponse<String> request;
+        HttpResponse<Reader> request;
         try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/maindata"), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/maindata"),MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -438,18 +441,17 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<String> resp;
+        HttpResponse<Reader> resp;
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId()),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
         if (resp.statusCode() != 200) {
             throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
         }
-
-        JsonObject object = JsonParser.parseString(resp.body()).getAsJsonObject();
+        JsonObject object = JsonParser.parseReader(resp.body()).getAsJsonObject();
         JsonObject peers = object.getAsJsonObject("peers");
         List<Peer> peersList = new ArrayList<>();
         for (String s : peers.keySet()) {
