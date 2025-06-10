@@ -18,7 +18,6 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -35,9 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,10 +46,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-@SpringBootApplication
-@ComponentScan(value = "com.ghostchu.peerbanhelper", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
-@ComponentScan(value = "com.ghostchu.lib.jni", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
-@EnableScheduling
+@Component
 public class PeerBanHelper implements Reloadable {
     @Autowired
     private TrackedSwarmDao trackerPeersDao;

@@ -4,13 +4,6 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0-modified</version>
-        <relativePath>spring-boot-starter-parent-3.5.0.modified.pom</relativePath>
-    </parent>
-
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
     <version>7.4.15</version>
@@ -27,9 +20,6 @@
         <flatlafVersion>3.6</flatlafVersion>
         <swt.version>3.129.0</swt.version>
         <ormlite.version>6.1</ormlite.version>
-        <jetty.version>11.0.25</jetty.version> <!-- Override springboot's jetty dependencies version,
-        fix  Caused by: java.lang.NoSuchMethodError: 'java.util.Map
-        org.eclipse.jetty.http.MimeTypes.getInferredEncodings()'-->
     </properties>
 
     <pluginRepositories>
@@ -119,10 +109,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <release>${java.version}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                            <version>1.18.38</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -277,28 +271,18 @@
         </repository>
     </repositories>
 
-
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>snakeyaml</artifactId>
-                    <groupId>org.yaml</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>6.2.7</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <version>1.18.38</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
@@ -384,11 +368,6 @@
             <artifactId>dnsjava</artifactId>
             <version>3.6.3</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>me.friwi</groupId>-->
-<!--            <artifactId>jcefmaven</artifactId>-->
-<!--            <version>126.2.0</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
@@ -488,39 +467,10 @@
             <artifactId>grid</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.qtjambi/qtjambi -->
-<!--        <dependency>-->
-<!--            <groupId>io.qtjambi</groupId>-->
-<!--            <artifactId>qtjambi</artifactId>-->
-<!--            <version>6.8.3</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.qtjambi</groupId>-->
-<!--            <artifactId>qtjambi-native-windows-x64</artifactId>-->
-<!--            <version>6.8.3</version>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/io.qtjambi/qtjambi-quick &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>io.qtjambi</groupId>-->
-<!--            <artifactId>qtjambi-quick</artifactId>-->
-<!--            <version>6.8.3</version>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/io.qtjambi/qtjambi-quickwidgets &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>io.qtjambi</groupId>-->
-<!--            <artifactId>qtjambi-quickwidgets</artifactId>-->
-<!--            <version>6.8.3</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.qtjambi</groupId>-->
-<!--            <artifactId>qtjambi-quickcontrols</artifactId>-->
-<!--            <version>6.8.3</version>-->
-<!--        </dependency>-->
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.commons</groupId>-->
-<!--            <artifactId>commons-compress</artifactId>-->
-<!--            <version>1.27.1</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.18</version>
+        </dependency>
     </dependencies>
 </project>

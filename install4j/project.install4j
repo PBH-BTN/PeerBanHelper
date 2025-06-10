@@ -89,25 +89,19 @@
   <files keepModificationTimes="true">
     <filesets>
       <fileset name="disable-checking-updates" id="263" />
-      <fileset name="qt6-windows-x64" id="271" />
     </filesets>
     <roots>
       <root id="264" fileset="263" />
-      <root id="272" fileset="271" />
     </roots>
     <mountPoints>
       <mountPoint id="24" />
       <mountPoint id="265" root="264" />
-      <mountPoint id="273" root="272" location="natives" />
-      <mountPoint id="274" root="272" location="natives/qt6" />
-      <mountPoint id="275" root="272" location="natives/qt6/windows-x64" />
     </mountPoints>
     <entries>
       <dirEntry mountPoint="24" file="${compiler:librariesPath}" entryMode="subdir" subDirectory="libraries" />
       <dirEntry mountPoint="24" file="./redistributable" entryMode="subdir" subDirectory="redistributable" />
       <variableEntry mountPoint="24" name="jarPath" />
       <fileEntry mountPoint="265" file="./disable-checking-updates.txt" />
-      <dirEntry mountPoint="275" file="../native/qt6/windows-x64" subDirectory="windows-x64" />
     </entries>
     <components>
       <component name="${i18n:components.peerbanhelper}" id="245" customizedId="peerbanhelper" changeable="false">
@@ -124,12 +118,6 @@
         <dependencies>
           <component id="245" />
         </dependencies>
-      </component>
-      <component name="${i18n:components.qt6}" id="280">
-        <description>${i18n:components.qt6.description}</description>
-        <include>
-          <entry filesetId="271" />
-        </include>
       </component>
     </components>
   </files>
@@ -150,20 +138,6 @@
     </launcher>
     <launcher name="PeerBanHelper (SWT UI)" id="269" menuName="${i18n:launcher.peerbanhelper.gui.swt}" swtApp="true" checkUpdater="true">
       <executable name="PeerBanHelper-GUI-SWT" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
-        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
-      </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatform}" arguments="swt">
-        <classPath>
-          <scanDirectory location="libraries" failOnError="false" />
-          <archive location="PeerBanHelper.jar" failOnError="false" />
-        </classPath>
-      </java>
-      <iconImageFiles>
-        <file path="./icon.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="PeerBanHelper (Qt6 UI)" id="276" menuName="${i18n:launcher.peerbanhelper.gui.swt}" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-GUI-QT6" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
       <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatform}" arguments="swt">

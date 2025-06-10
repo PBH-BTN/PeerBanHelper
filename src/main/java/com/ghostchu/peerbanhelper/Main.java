@@ -36,8 +36,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.Banner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import oshi.SystemInfo;
 
@@ -128,19 +126,10 @@ public class Main {
             setupScriptEngine();
             try {
                 log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
-                log.info(tlUI(Lang.MOTD, Main.getMeta().getVersion(), Main.getMeta().getAbbrev(), Main.getMeta().getCompileTime()));
-                SpringApplicationBuilder builder = new SpringApplicationBuilder(PeerBanHelper.class);
-                builder.bannerMode(Banner.Mode.OFF);
-                builder.headless(false);
-                if (meta.isSnapshotOrBeta()) {
-                    log.info("Running in snapshot/beta mode, disabling lazy initialization for better debugging.");
-                    builder.lazyInitialization(false);
-                } else {
-                    builder.lazyInitialization(true);
-                }
-                var context = builder.build().run(args);
-                pluginManager = context.getBean(PluginManager.class);
-                server = context.getBean(PeerBanHelper.class);
+                applicationContext = new AnnotationConfigApplicationContext();
+                applicationContext.register(AppConfig.class);
+                applicationContext.refresh();
+                server = applicationContext.getBean(PeerBanHelper.class);
                 server.start();
             } catch (Exception e) {
                 log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
