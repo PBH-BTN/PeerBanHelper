@@ -71,4 +71,9 @@ public class PBHGuiManager implements GuiManager {
     public TaskbarControl taskbarControl() {
         return gui.taskbarControl();
     }
+
+    @Override
+    public void openUrlInBrowser(String url) {
+        gui.openUrlInBrowser(url);
+    }
 }

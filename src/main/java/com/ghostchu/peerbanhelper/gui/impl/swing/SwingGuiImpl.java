@@ -131,6 +131,11 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
+    public void openUrlInBrowser(String url) {
+        openWebpage(URI.create(url));
+    }
+
+    @Override
     public void setup() {
         super.setup();
         //FlatIntelliJLaf.setup();

@@ -33,4 +33,6 @@ public interface GuiImpl {
     boolean supportInteractive();
 
     void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent, @Nullable Runnable noEvent);
+
+    void openUrlInBrowser(String url);
 }

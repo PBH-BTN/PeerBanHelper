@@ -60,6 +60,11 @@ public class ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
+    public void openUrlInBrowser(String url) {
+
+    }
+
+    @Override
     public void createDialog(Level level, String title, String description, Runnable clickEvent) {
         if (level.equals(Level.INFO)) {
             log.info("{}: {}", title, description);

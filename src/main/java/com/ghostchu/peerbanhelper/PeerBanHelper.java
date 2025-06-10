@@ -34,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -102,8 +101,9 @@ public class PeerBanHelper implements Reloadable {
         registerHttpServer();
         if (webContainer.getToken() == null || webContainer.getToken().isBlank()) {
             for (int i = 0; i < 50; i++) {
-                log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://localhost:" + webContainer.javalin().port()));
+                log.error(tlUI(Lang.PBH_OOBE_REQUIRED, "http://127.0.0.1:" + webContainer.javalin().port()));
             }
+            Main.getGuiManager().openUrlInBrowser("http://127.0.0.1:" + webContainer.javalin().port());
         }
         Main.getReloadManager().register(this);
         postCompatibilityCheck();

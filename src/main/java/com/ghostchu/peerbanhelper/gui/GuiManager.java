@@ -28,4 +28,6 @@ public interface GuiManager {
     ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel);
 
     TaskbarControl taskbarControl();
+
+    void openUrlInBrowser(String url);
 }

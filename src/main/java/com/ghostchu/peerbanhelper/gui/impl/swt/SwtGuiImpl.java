@@ -174,6 +174,11 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
+    public void openUrlInBrowser(String url) {
+        openWebpage(URI.create(url));
+    }
+
+    @Override
     public void onPBHFullyStarted(PeerBanHelper server) {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateGuiStuff, 0, 1, TimeUnit.SECONDS);
         swtMainWindow.getWebUITabComponent().navigate(Main.getServer().getWebUiUrl());
