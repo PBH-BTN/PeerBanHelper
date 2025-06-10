@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.gui;
 
 import com.ghostchu.peerbanhelper.PeerBanHelper;
+import org.slf4j.event.Level;
 
-import java.util.logging.Level;
 
 public interface GuiManager {
     void setup();

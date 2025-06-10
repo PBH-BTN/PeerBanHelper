@@ -33,6 +33,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
@@ -100,6 +101,7 @@ public class Main {
     private static String userAgent;
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 11;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.1.0";
+    private static PluginManager pluginManager;
 
     public static void main(String[] args) {
         startupArgs = args;
@@ -137,6 +139,7 @@ public class Main {
                     builder.lazyInitialization(true);
                 }
                 var context = builder.build().run(args);
+                pluginManager = context.getBean(PluginManager.class);
                 server = context.getBean(PeerBanHelper.class);
                 server.start();
             } catch (Exception e) {

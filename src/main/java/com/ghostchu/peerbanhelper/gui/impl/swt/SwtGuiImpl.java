@@ -29,13 +29,13 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.event.Level;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -141,15 +141,15 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent,
-            @Nullable Runnable noEvent) {
+                                  @Nullable Runnable noEvent) {
         int style = SWT.YES | SWT.NO;
         if (level == Level.INFO) {
             style |= SWT.ICON_INFORMATION;
         }
-        if (level == Level.WARNING) {
+        if (level == Level.WARN) {
             style |= SWT.ICON_WARNING;
         }
-        if (level == Level.SEVERE) {
+        if (level == Level.ERROR) {
             style |= SWT.ICON_ERROR;
         }
 
@@ -252,10 +252,10 @@ public final class SwtGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (level == Level.INFO) {
             style = SWT.ICON_INFORMATION;
         }
-        if (level == Level.WARNING) {
+        if (level == Level.WARN) {
             style = SWT.ICON_WARNING;
         }
-        if (level == Level.SEVERE) {
+        if (level == Level.ERROR) {
             style = SWT.ICON_ERROR;
         }
 

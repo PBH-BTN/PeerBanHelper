@@ -18,6 +18,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
 import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
+import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -32,21 +33,25 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @SpringBootApplication
+@ComponentScan(value = "com.ghostchu.peerbanhelper", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
+@ComponentScan(value = "com.ghostchu.lib.jni", excludeFilters = @ComponentScan.Filter(IgnoreScan.class))
+@EnableScheduling
 public class PeerBanHelper implements Reloadable {
     @Autowired
     private TrackedSwarmDao trackerPeersDao;
@@ -118,7 +123,7 @@ public class PeerBanHelper implements Reloadable {
 
     private void checkKnownCrashes() {
         if (!crashManager.isRunningFlagExists()) return;
-        Main.getGuiManager().createDialog(Level.WARNING, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
+        Main.getGuiManager().createDialog(Level.WARN, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
             if ("SWING".equals(Main.getGuiManager().getName())) {
                 String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
                 if (os.startsWith("win")) {
@@ -129,7 +134,7 @@ public class PeerBanHelper implements Reloadable {
                                     Main.getMainConfig().save(Main.getMainConfigFile());
                                     System.exit(0);
                                 } catch (IOException e) {
-                                    Main.getGuiManager().createDialog(Level.SEVERE, "Unable to save configuration", e.getMessage(), () -> {
+                                    Main.getGuiManager().createDialog(Level.ERROR, "Unable to save configuration", e.getMessage(), () -> {
                                     });
                                 }
                             }, null

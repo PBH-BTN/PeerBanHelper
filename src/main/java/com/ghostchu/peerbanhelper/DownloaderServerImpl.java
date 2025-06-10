@@ -51,7 +51,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 

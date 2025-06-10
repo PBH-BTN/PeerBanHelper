@@ -651,3 +651,7 @@ WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有用户成功从 {} 登录 PeerBanHe
 MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[主动检测] 根据最近的流量统计数据，下载器 {} 的上传速率限制已动态更新为 {} bytes/s"
 GUI_COPY_TO_CLIPBOARD: "复制到剪贴板"
 GUI_CLEAR_LOGS: "清除日志"
+
+GUI_QT6_WAITING_EXTRACTING: "[Qt6GuiManager] 请等待 Qt6 动态链接库解压缩，这可能需要一些时间……"
+GUI_QT6_WAITING_INIT: "[Qt6GuiManager] 请等待 Qt6 核心初始化，这可能需要一些时间…… 准备就绪后窗口将立刻加载并打开。"
+GUI_QT6_NATIVES_MISSING: "[Qt6GuiManager] 因文件缺失无法加载 Qt6 UI 框架，请重新运行安装程序，并在可选安装组件处勾选 “[可选] Qt6” 组件；或者使用 Swing UI 启动。"

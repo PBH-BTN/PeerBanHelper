@@ -23,6 +23,7 @@ import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.event.Level;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -35,7 +36,6 @@ import java.util.Locale;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -109,10 +109,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (level == Level.INFO) {
             msgType = JOptionPane.INFORMATION_MESSAGE;
         }
-        if (level == Level.WARNING) {
+        if (level == Level.WARN) {
             msgType = JOptionPane.WARNING_MESSAGE;
         }
-        if (level == Level.SEVERE) {
+        if (level == Level.ERROR) {
             msgType = JOptionPane.ERROR_MESSAGE;
         }
         if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
@@ -343,10 +343,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (level == Level.INFO) {
             msgType = JOptionPane.INFORMATION_MESSAGE;
         }
-        if (level == Level.WARNING) {
+        if (level == Level.WARN) {
             msgType = JOptionPane.WARNING_MESSAGE;
         }
-        if (level == Level.SEVERE) {
+        if (level == Level.ERROR) {
             msgType = JOptionPane.ERROR_MESSAGE;
         }
         if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
@@ -365,9 +365,9 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (swingTray != null) {
             var icon = swingTray.getTrayIcon();
             if (swingTray.getTrayIcon() != null) {
-                if (level.equals(Level.WARNING)) {
+                if (level.equals(Level.WARN)) {
                     icon.displayMessage(title, description, TrayIcon.MessageType.WARNING);
-                } else if (level.equals(Level.SEVERE)) {
+                } else if (level.equals(Level.ERROR)) {
                     icon.displayMessage(title, description, TrayIcon.MessageType.ERROR);
                 } else {
                     icon.displayMessage(title, description, TrayIcon.MessageType.INFO);

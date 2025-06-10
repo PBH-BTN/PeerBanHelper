@@ -11,11 +11,11 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.slf4j.event.Level;
 
 import java.awt.*;
 import java.net.URI;
 import java.util.List;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -164,9 +164,9 @@ public class SwtTrayManager {
         }
         // 根据日志级别设置不同的图标样式
         int imageIcon = 0;
-        if (level == Level.SEVERE) {
+        if (level == Level.ERROR) {
             imageIcon = SWT.ICON_ERROR;
-        } else if (level == Level.WARNING) {
+        } else if (level == Level.WARN) {
             imageIcon = SWT.ICON_WARNING;
         } else {
             imageIcon = SWT.ICON_INFORMATION;

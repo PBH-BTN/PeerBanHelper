@@ -13,6 +13,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.slf4j.event.Level;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -22,7 +23,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -172,12 +172,12 @@ public class SwtMainWindow {
                 MenuItem sendWarningMessage = new MenuItem(debugMenu, SWT.PUSH);
                 sendWarningMessage.setText("[托盘通知] 发送警告托盘消息");
                 sendWarningMessage.addListener(SWT.Selection,
-                        e -> swtGui.createNotification(Level.WARNING, "测试（警告）", "测试消息"));
+                        e -> swtGui.createNotification(Level.WARN, "测试（警告）", "测试消息"));
 
                 MenuItem sendErrorMessage = new MenuItem(debugMenu, SWT.PUSH);
                 sendErrorMessage.setText("[托盘通知] 发送错误托盘消息");
                 sendErrorMessage.addListener(SWT.Selection,
-                        e -> swtGui.createNotification(Level.SEVERE, "测试（错误）", "测试消息"));
+                        e -> swtGui.createNotification(Level.ERROR, "测试（错误）", "测试消息"));
 
             }
         }

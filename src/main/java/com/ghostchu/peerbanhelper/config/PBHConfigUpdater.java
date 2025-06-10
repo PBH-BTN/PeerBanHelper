@@ -35,7 +35,8 @@ public final class PBHConfigUpdater {
     }
 
     public void update(@NotNull Object configUpdateScript) {
-        log.info("Checking configuration...");
+        log.info("Checking if configuration {} needs any upgrade...", configUpdateScript.getClass().getName());
+        boolean anyUpgradeExecuted = false;
         int selectedVersion = yaml.getInt(CONFIG_VERSION_KEY, -1);
         String oldContent = yaml.saveToString();
         for (Method method : getUpdateScripts(configUpdateScript)) {
@@ -61,6 +62,8 @@ public final class PBHConfigUpdater {
                     }
                 } catch (Exception e) {
                     log.info("Error while executing upgrade script: method={}, target_ver={}", method.getName(), updateScript.version(), e);
+                }finally {
+                    anyUpgradeExecuted = true;
                 }
                 yaml.set(CONFIG_VERSION_KEY, updateScript.version());
                 log.info("Configuration successfully updated");
@@ -68,15 +71,17 @@ public final class PBHConfigUpdater {
                 log.error("Error while updating configuration, method={}, target_ver={}", method.getName(), method.getAnnotation(UpdateScript.class).version(), throwable);
             }
         }
-        log.info("Saving configuration changes...");
-        try {
-            migrateComments(yaml, bundle);
-            String newContent = yaml.saveToString();
-            if (!newContent.equals(oldContent)) {
-                yaml.save(file);
+        if(anyUpgradeExecuted) {
+            log.info("Saving configuration changes for {}...", configUpdateScript.getClass().getName());
+            try {
+                migrateComments(yaml, bundle);
+                String newContent = yaml.saveToString();
+                if (!newContent.equals(oldContent)) {
+                    yaml.save(file);
+                }
+            } catch (IOException e) {
+                log.error("Failed to save configuration!", e);
             }
-        } catch (IOException e) {
-            log.error("Failed to save configuration!", e);
         }
     }
 

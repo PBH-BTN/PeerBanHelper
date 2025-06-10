@@ -4,8 +4,7 @@ import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.logging.Level;
+import org.slf4j.event.Level;
 
 public interface GuiImpl {
     void setup();

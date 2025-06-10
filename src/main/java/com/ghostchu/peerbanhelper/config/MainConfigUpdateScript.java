@@ -31,6 +31,14 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 33)
+    public void cleanupDownloadedJCEFComponents(){
+        File jcefDirectory = new File(Main.getDataDirectory(), "jcef");
+        if(jcefDirectory.exists()){
+            jcefDirectory.delete();
+        }
+    }
+
     @UpdateScript(version = 32)
     public void assignUniqueIdForDownloader() {
         var clients = conf.getConfigurationSection("client");
