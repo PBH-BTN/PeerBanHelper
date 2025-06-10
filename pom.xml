@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -27,7 +27,9 @@
         <flatlafVersion>3.6</flatlafVersion>
         <swt.version>3.129.0</swt.version>
         <ormlite.version>6.1</ormlite.version>
-        <jetty.version>11.0.25</jetty.version> <!-- Override springboot's jetty dependencies version, fix  Caused by: java.lang.NoSuchMethodError: 'java.util.Map org.eclipse.jetty.http.MimeTypes.getInferredEncodings()'-->
+        <jetty.version>11.0.25</jetty.version> <!-- Override springboot's jetty dependencies version,
+        fix  Caused by: java.lang.NoSuchMethodError: 'java.util.Map
+        org.eclipse.jetty.http.MimeTypes.getInferredEncodings()'-->
     </properties>
 
     <pluginRepositories>
@@ -376,17 +378,18 @@
             <artifactId>dnsjava</artifactId>
             <version>3.6.3</version>
         </dependency>
-        <dependency>
-            <groupId>me.friwi</groupId>
-            <artifactId>jcefmaven</artifactId>
-            <version>126.2.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>me.friwi</groupId>-->
+<!--            <artifactId>jcefmaven</artifactId>-->
+<!--            <version>126.2.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
             <version>3.6</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.win32.win32.x86_64 -->
+        <!--
+        https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.win32.win32.x86_64 -->
         <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
@@ -468,6 +471,10 @@
                     <artifactId>slf4j-reload4j</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>commons-lang</artifactId>
+                    <groupId>commons-lang</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -476,24 +483,38 @@
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.qtjambi/qtjambi -->
-        <dependency>
-            <groupId>io.qtjambi</groupId>
-            <artifactId>qtjambi</artifactId>
-            <version>6.8.3</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/io.qtjambi/qtjambi-webview -->
-        <dependency>
-            <groupId>io.qtjambi</groupId>
-            <artifactId>qtjambi-webview</artifactId>
-            <version>6.8.3</version>
-        </dependency>
-        <!-- QtJambi WebEngine 依赖暂时注释掉，因为不可用 -->
-        <!--
-        <dependency>
-            <groupId>io.qtjambi</groupId>
-            <artifactId>qtjambi-webenginecore-native-windows-x64</artifactId>
-            <version>6.8.4</version>
-        </dependency>
-        -->
+<!--        <dependency>-->
+<!--            <groupId>io.qtjambi</groupId>-->
+<!--            <artifactId>qtjambi</artifactId>-->
+<!--            <version>6.8.3</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>io.qtjambi</groupId>-->
+<!--            <artifactId>qtjambi-native-windows-x64</artifactId>-->
+<!--            <version>6.8.3</version>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/io.qtjambi/qtjambi-quick &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>io.qtjambi</groupId>-->
+<!--            <artifactId>qtjambi-quick</artifactId>-->
+<!--            <version>6.8.3</version>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/io.qtjambi/qtjambi-quickwidgets &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>io.qtjambi</groupId>-->
+<!--            <artifactId>qtjambi-quickwidgets</artifactId>-->
+<!--            <version>6.8.3</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>io.qtjambi</groupId>-->
+<!--            <artifactId>qtjambi-quickcontrols</artifactId>-->
+<!--            <version>6.8.3</version>-->
+<!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.commons</groupId>-->
+<!--            <artifactId>commons-compress</artifactId>-->
+<!--            <version>1.27.1</version>-->
+<!--        </dependency>-->
     </dependencies>
 </project>
