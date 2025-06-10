@@ -18,7 +18,7 @@
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <install4j.home>/opt/install4j</install4j.home>
         <flatlafVersion>3.6</flatlafVersion>
-        <swt.version>3.129.0</swt.version>
+        <swt.version>3.130.0</swt.version>
         <ormlite.version>6.1</ormlite.version>
     </properties>
 
