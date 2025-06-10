@@ -151,7 +151,7 @@ public class PeerBanHelper implements Reloadable {
             log.warn(tlUI(Lang.INCOMPATIBLE_BITNESS_LOG));
             if (!alertManager.identifierAlertExistsIncludeRead("incomaptible-bitness")) {
                 alertManager.publishAlert(false, AlertLevel.WARN, "incomaptible-bitness", new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_TITLE), new TranslationComponent(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
-                Main.getGuiManager().createNotification(Level.WARNING, tlUI(Lang.INCOMPATIBLE_BITNESS_TITLE), tlUI(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
+                Main.getGuiManager().createNotification(Level.WARN, tlUI(Lang.INCOMPATIBLE_BITNESS_TITLE), tlUI(Lang.INCOMPATIBLE_BITNESS_DESCRIPTION));
             }
         }
         if (ExternalSwitch.parseBoolean("pbh.app-v")) {

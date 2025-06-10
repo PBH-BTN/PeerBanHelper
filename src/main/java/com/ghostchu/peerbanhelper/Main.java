@@ -359,7 +359,7 @@ public class Main {
         switch (guiType) {
             case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
             case "swt" -> guiManager = new PBHGuiManager(new SwtGuiImpl(args));
-            case "qt" -> guiManager = new PBHGuiManager(new com.ghostchu.peerbanhelper.gui.impl.qt.QtGuiImpl(args));
+            //case "qt" -> guiManager = new PBHGuiManager(new com.ghostchu.peerbanhelper.gui.impl.qt.QtGuiImpl(args));
             default -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         }
 
