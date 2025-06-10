@@ -54,7 +54,6 @@ PeerBanHelper.jar
 install4j/output
 install4j/project.install4j~
 
-m2-local-repo
 *.log
 disable-checking-updates.txt
 enable-jcef.txt
