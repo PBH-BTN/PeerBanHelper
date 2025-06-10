@@ -46,7 +46,7 @@ public class ConsoleGuiImpl implements GuiImpl {
         if (level.equals(Level.INFO)) {
             log.info("{}: {}", title, description);
         }
-        if (level.equals(Level.WARN) {
+        if (level.equals(Level.WARN)) {
             log.warn("{}: {}", title, description);
         }
         if (level.equals(Level.ERROR)) {
