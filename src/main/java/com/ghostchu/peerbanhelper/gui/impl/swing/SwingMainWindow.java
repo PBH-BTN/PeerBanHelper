@@ -331,28 +331,9 @@ public final class SwingMainWindow extends JFrame {
 
         private Component generateDebugMenu() {
             JMenu menu = new JMenu("-DEBUG-");
-            JMenuItem disableJCEF = new JMenuItem("禁用 JCEF", new FlatSVGIcon(Main.class.getResource("/assets/icon/common/uac_shield.svg")));
-            JMenuItem enableJCEF = new JMenuItem("启用 JCEF", new FlatSVGIcon(Main.class.getResource("/assets/icon/common/uac_shield.svg")));
             JMenuItem disableCheckUpdates = new JMenuItem("禁用检查更新", new FlatSVGIcon(Main.class.getResource("/assets/icon/common/uac_shield.svg")));
             JMenuItem enableCheckUpdates = new JMenuItem("启用检查更新", new FlatSVGIcon(Main.class.getResource("/assets/icon/common/uac_shield.svg")));
-            var jcefFlagFile = new File("enable-jcef.txt");
             var disableCheckUpdatesFile = new File("disable-checking-updates.txt");
-            enableJCEF.addActionListener(e -> {
-                try {
-                    if (jcefFlagFile.exists()) {
-                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已处于启用状态，无需再次启用.", () -> {
-                        });
-                    } else {
-                        jcefFlagFile.createNewFile();
-                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已启用，请重启 PeerBanHelper 以使其生效.", () -> {
-                        });
-                    }
-                } catch (IOException ex) {
-                    Main.getGuiManager().createDialog(Level.ERROR, "启用 JCEF", "无法启用 JCEF （写入启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
-                    });
-                    log.error("启用 JCEF 失败", ex);
-                }
-            });
             enableCheckUpdates.addActionListener(e -> {
                 if (!disableCheckUpdatesFile.exists()) {
                     Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已处于启用状态，无需再次启用", () -> {
@@ -387,8 +368,6 @@ public final class SwingMainWindow extends JFrame {
                     });
                 }
             });
-            menu.add(disableJCEF);
-            menu.add(enableJCEF);
             menu.addSeparator();
             menu.add(disableCheckUpdates);
             menu.add(enableCheckUpdates);
@@ -432,8 +411,6 @@ public final class SwingMainWindow extends JFrame {
             webUIMenu.add(copyWebUIToken);
             return webUIMenu;
         }
-
-
     }
 
     public static class LogsTab {
