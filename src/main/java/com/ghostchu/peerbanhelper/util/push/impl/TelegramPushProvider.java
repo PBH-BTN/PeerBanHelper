@@ -74,7 +74,7 @@ public final class TelegramPushProvider extends AbstractPushProvider {
         map.put("text", markdown);
         map.put("photo", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
         map.put("parse_mode", "Markdown");
-        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
+        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false),
                 MutableRequest.POST("https://api.telegram.org/bot" + config.getToken() + "/sendPhoto"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
                         .header("Content-Type", "application/json")

@@ -48,7 +48,7 @@ public final class HTTPUtil {
             .timePassedThreshold(Duration.of(3, ChronoUnit.SECONDS))
             .build();
     @Autowired(required = false)
-    private ProxySelector selector;
+    private ProxySelector proxySelector;
 
     static {
         TrustManager trustManager = new X509ExtendedTrustManager() {
@@ -94,16 +94,18 @@ public final class HTTPUtil {
 
     }
 
-    public HttpClient getHttpClient(boolean ignoreSSL, ProxySelector proxySelector) {
-        Methanol.Builder builder = Methanol
-                .newBuilder()
-                .followRedirects(HttpClient.Redirect.ALWAYS)
+    public Methanol.Builder newBuilder() {
+        return Methanol.newBuilder()
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
-                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .proxy(proxySelector)
                 .cookieHandler(cookieManager);
+    }
+
+    public HttpClient getHttpClient(boolean ignoreSSL) {
+        var builder = newBuilder();
         if (ignoreSSL) {
             builder.sslContext(ignoreSslContext);
         }

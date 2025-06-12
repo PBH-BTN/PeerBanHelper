@@ -293,7 +293,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 throw new RuntimeException(e);
             }
             if (uri.getScheme().startsWith("http")) {
-                var response = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
+                var response = httpUtil.retryableSend(httpUtil.getHttpClient(false),
                         MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString()).join();
                 return new DataUpdateResultDTO(response.statusCode(), null, response.body().getBytes());
             }

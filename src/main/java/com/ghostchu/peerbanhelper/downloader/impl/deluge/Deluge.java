@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.github.mizosoft.methanol.Methanol;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import lombok.Data;
@@ -51,10 +52,10 @@ public final class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String id, Config config, AlertManager alertManager) {
+    public Deluge(String id, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
         super(id, alertManager);
         this.config = config;
-        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
+        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), httpBuilder, HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
     }
 
     @Override
@@ -62,14 +63,14 @@ public final class Deluge extends AbstractDownloader {
         return config.getName();
     }
 
-    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager) {
+    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Config config = Config.readFromYaml(section, id);
-        return new Deluge(id, config, alertManager);
+        return new Deluge(id, config, alertManager, httpBuilder);
     }
 
-    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager) {
+    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(id, config, alertManager);
+        return new Deluge(id, config, alertManager, httpBuilder);
     }
 
     @Override

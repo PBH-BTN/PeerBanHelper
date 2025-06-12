@@ -12,6 +12,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.FormBodyPublisher;
+import com.github.mizosoft.methanol.Methanol;
 import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
@@ -34,8 +35,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class QBittorrentEE extends AbstractQbittorrent {
     private final BanHandler banHandler;
 
-    public QBittorrentEE(String id, QBittorrentEEConfigImpl config, AlertManager alertManager) {
-        super(id, config, alertManager);
+    public QBittorrentEE(String id, QBittorrentEEConfigImpl config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+        super(id, config, alertManager, httpBuilder);
         if (config.isUseShadowBan()) {
             this.banHandler = new BanHandlerShadowBan(httpClient, config.getName(), apiEndpoint);
         } else {
@@ -61,14 +62,14 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         return config.getName();
     }
 
-    public static QBittorrentEE loadFromConfig(String id, JsonObject section, AlertManager alertManager) {
+    public static QBittorrentEE loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         QBittorrentEEConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentEEConfigImpl.class);
-        return new QBittorrentEE(id, config, alertManager);
+        return new QBittorrentEE(id, config, alertManager, httpBuilder);
     }
 
-    public static QBittorrentEE loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager) {
+    public static QBittorrentEE loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         QBittorrentEEConfigImpl config = QBittorrentEEConfigImpl.readFromYaml(section, id);
-        return new QBittorrentEE(id, config, alertManager);
+        return new QBittorrentEE(id, config, alertManager, httpBuilder);
     }
 
     public DownloaderLoginResult login0() {

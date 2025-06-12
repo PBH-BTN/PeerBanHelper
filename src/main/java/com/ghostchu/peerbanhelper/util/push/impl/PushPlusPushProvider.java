@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -90,7 +89,7 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
             put("content", content);
             put("template", "markdown");
         }};
-        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
+        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false),
                 MutableRequest.POST("https://www.pushplus.plus/send"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(args)))
                         .header("Content-Type", "application/json")

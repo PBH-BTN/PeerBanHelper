@@ -61,22 +61,19 @@ public final class BitComet extends AbstractDownloader {
     private Semver serverVersion;
     private String serverName;
 
-    public BitComet(String id, Config config, AlertManager alertManager) {
+    public BitComet(String id, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
         super(id, alertManager);
         BCAESTool.init();
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        Methanol.Builder builder = Methanol.newBuilder()
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
+        Methanol.Builder builder = httpBuilder
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("Client-Type", "BitComet WebUI")
                 .defaultHeader("User-Agent", "PeerBanHelper BitComet Adapter")
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler());
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
@@ -89,14 +86,14 @@ public final class BitComet extends AbstractDownloader {
         return config.getName();
     }
 
-    public static BitComet loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager) {
+    public static BitComet loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Config config = Config.readFromYaml(section, id);
-        return new BitComet(id, config, alertManager);
+        return new BitComet(id, config, alertManager, httpBuilder);
     }
 
-    public static BitComet loadFromConfig(String id, JsonObject section, AlertManager alertManager) {
+    public static BitComet loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Config config = JsonUtil.getGson().fromJson(section, Config.class);
-        return new BitComet(id, config, alertManager);
+        return new BitComet(id, config, alertManager, httpBuilder);
     }
 
     private static PeerAddress parseAddress(String address, int port, int listenPort) {

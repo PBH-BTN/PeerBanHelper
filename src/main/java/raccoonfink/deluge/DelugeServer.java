@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 @Slf4j
 public final class DelugeServer {
@@ -31,22 +30,16 @@ public final class DelugeServer {
     private final CookieManager m_cookieManager = new CookieManager();
     private int m_counter = 0;
 
-    public DelugeServer(final String url, final String password, boolean verifySSL, HttpClient.Version httpVersion, String baUser, String baPassword) {
+    public DelugeServer(final String url, final String password, boolean verifySSL, Methanol.Builder httpBuilder, HttpClient.Version httpVersion, String baUser, String baPassword) {
         m_url = url;
         m_password = password;
         m_cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
         HttpURLConnection.setFollowRedirects(true);
-
-        HttpClient.Builder builder = Methanol
-                .newBuilder()
+        Methanol.Builder builder = httpBuilder
                 .version(httpVersion)
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
-                .followRedirects(HttpClient.Redirect.ALWAYS)
                 .defaultHeader("Accept", "application/json")
                 .defaultHeader("Content-Type", "application/json")
-                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .authenticator(new Authenticator() {
                     @Override

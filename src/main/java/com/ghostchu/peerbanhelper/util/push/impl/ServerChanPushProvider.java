@@ -85,7 +85,7 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
         if (config.getOpenId() != null) {
             map.put("openid", config.getOpenId());
         }
-        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false, null),
+        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false),
                 MutableRequest.POST("https://sctapi.ftqq.com/" + config.getSendKey() + ".send"
                                 , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
                         .header("Content-Type", "application/json")

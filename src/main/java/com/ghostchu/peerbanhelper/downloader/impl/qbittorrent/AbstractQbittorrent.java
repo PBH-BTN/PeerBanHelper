@@ -60,18 +60,14 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected final QBittorrentConfig config;
     protected final Cache<String, TorrentProperties> torrentPropertiesCache;
 
-    public AbstractQbittorrent(String id, QBittorrentConfig config, AlertManager alertManager) {
+    public AbstractQbittorrent(String id, QBittorrentConfig config, AlertManager alertManager, Methanol.Builder httpBuilder) {
         super(id, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        Methanol.Builder builder = Methanol
-                .newBuilder()
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
+        Methanol.Builder builder = httpBuilder
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .authenticator(new Authenticator() {

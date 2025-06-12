@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.github.mizosoft.methanol.Methanol;
 import com.google.gson.JsonObject;
 import com.vdurmont.semver4j.Semver;
 import cordelia.client.TrClient;
@@ -43,10 +44,10 @@ public final class Transmission extends AbstractDownloader {
     private final String blocklistUrl;
     private final Config config;
 
-    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager) {
+    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
         super(id, alertManager);
         this.config = config;
-        this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
+        this.client = new TrClient(httpBuilder, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
@@ -60,14 +61,14 @@ public final class Transmission extends AbstractDownloader {
         return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
-    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Config config = Config.readFromYaml(section, id);
-        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpBuilder);
     }
 
-    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
-        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpBuilder);
     }
 
     @Override

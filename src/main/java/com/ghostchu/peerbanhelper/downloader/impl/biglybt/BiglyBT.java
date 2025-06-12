@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -67,19 +66,16 @@ public final class BiglyBT extends AbstractDownloader {
     private final String connectorPayload;
     private Semver semver = new Semver("0.0.0");
 
-    public BiglyBT(String uuid, Config config, AlertManager alertManager) {
+    public BiglyBT(String uuid, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
         super(uuid, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        Methanol.Builder builder = Methanol
-                .newBuilder()
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
+        Methanol.Builder builder = httpBuilder
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .defaultHeader("Authorization", "Bearer " + config.getToken())
-                .defaultHeader("Content-Type", "application/json")
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(10, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
@@ -96,14 +92,14 @@ public final class BiglyBT extends AbstractDownloader {
         return config.getName();
     }
 
-    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager) {
+    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new BiglyBT(id, config, alertManager);
+        return new BiglyBT(id, config, alertManager, httpBuilder);
     }
 
-    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager) {
+    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Config config = Config.readFromYaml(section, id);
-        return new BiglyBT(id, config, alertManager);
+        return new BiglyBT(id, config, alertManager, httpBuilder);
     }
 
     @Override
