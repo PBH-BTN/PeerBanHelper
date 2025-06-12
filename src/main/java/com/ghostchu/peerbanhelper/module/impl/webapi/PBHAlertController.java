@@ -4,7 +4,6 @@ import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.AlertDTO;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -21,7 +20,6 @@ import java.sql.Timestamp;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
-@IgnoreScan
 public final class PBHAlertController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;

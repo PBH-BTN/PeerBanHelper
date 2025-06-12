@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import io.javalin.http.ContentType;
 import io.javalin.http.Context;
@@ -17,7 +16,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Component
-@IgnoreScan
 public final class PBHEasterEggController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final List<String> urls = new ArrayList<>();

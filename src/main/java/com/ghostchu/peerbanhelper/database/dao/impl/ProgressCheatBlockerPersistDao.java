@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ProgressCheatBlockerPersistEntity;
 import com.ghostchu.peerbanhelper.module.impl.rule.ProgressCheatBlocker;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.support.ConnectionSource;
 import inet.ipaddr.IPAddress;

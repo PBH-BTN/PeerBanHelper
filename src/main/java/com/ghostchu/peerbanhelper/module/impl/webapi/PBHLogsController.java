@@ -5,7 +5,6 @@ import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.WebSocketLogEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
@@ -30,7 +29,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-@IgnoreScan
 public final class PBHLogsController extends AbstractFeatureModule {
     private final List<WsContext> session = Collections.synchronizedList(new ArrayList<>());
     @Autowired

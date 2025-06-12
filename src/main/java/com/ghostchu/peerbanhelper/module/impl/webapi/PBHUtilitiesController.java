@@ -9,7 +9,6 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReplaceTrackerDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -29,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
-@IgnoreScan
 public final class PBHUtilitiesController extends AbstractFeatureModule {
     private static final Logger log = LoggerFactory.getLogger(PBHUtilitiesController.class);
     @Autowired
