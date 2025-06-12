@@ -95,13 +95,16 @@ public final class HTTPUtil {
     }
 
     public Methanol.Builder newBuilder() {
-        return Methanol.newBuilder()
+        var builder = Methanol.newBuilder()
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
-                .proxy(proxySelector)
                 .cookieHandler(cookieManager);
+        if(proxySelector != null){
+            builder.proxy(proxySelector);
+        }
+        return builder;
     }
 
     public HttpClient getHttpClient(boolean ignoreSSL) {
