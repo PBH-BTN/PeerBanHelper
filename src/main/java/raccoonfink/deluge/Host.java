@@ -47,7 +47,7 @@ public final class Host {
         return ret;
     }
 
-    public static enum Status {
+    public enum Status {
         Offline,
         Online,
         Connected

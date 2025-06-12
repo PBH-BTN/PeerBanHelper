@@ -3,7 +3,6 @@ package com.ghostchu.peerbanhelper.btn.ability;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -53,7 +52,7 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
     }
 
     private void checkIfReconfigure() {
-        HttpResponse<String> resp = HTTPUtil.retryableSend(btnNetwork.getHttpClient(), MutableRequest.GET(btnNetwork.getConfigUrl()), HttpResponse.BodyHandlers.ofString()).join();
+        HttpResponse<String> resp =  btnNetwork.getHttpUtil().retryableSend(btnNetwork.getHttpClient(), MutableRequest.GET(btnNetwork.getConfigUrl()), HttpResponse.BodyHandlers.ofString()).join();
         if (resp.statusCode() != 200) {
             setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body()));
             log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.statusCode() + " - " + resp.body()));

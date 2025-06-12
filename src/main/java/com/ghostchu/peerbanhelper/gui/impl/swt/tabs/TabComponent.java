@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.gui.impl.swt.tabs;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
@@ -9,10 +10,12 @@ import org.eclipse.swt.widgets.TabItem;
 public interface TabComponent {
     /**
      * 创建 Tab 组件
+     *
+     * @param display
      * @param tabFolder 父级 TabFolder
      * @return 创建的 TabItem
      */
-    TabItem createTab(TabFolder tabFolder);
+    TabItem createTab(Display display, TabFolder tabFolder);
 
     /**
      * 刷新 Tab 组件

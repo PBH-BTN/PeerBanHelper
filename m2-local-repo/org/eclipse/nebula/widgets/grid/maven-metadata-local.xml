@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.eclipse.nebula.widgets</groupId>
+  <artifactId>grid</artifactId>
+  <versioning>
+    <release>1.1.1</release>
+    <versions>
+      <version>1.1.1</version>
+      <version>1.1.0-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20250608192920</lastUpdated>
+  </versioning>
+</metadata>

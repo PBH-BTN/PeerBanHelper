@@ -1,13 +1,9 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.peer.PeerFlag;
-import com.ghostchu.peerbanhelper.peer.PeerMessage;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
-
-import java.util.Collections;
-import java.util.List;
 
 public final class TRPeer implements Peer {
 
@@ -69,11 +65,6 @@ public final class TRPeer implements Peer {
     @Override
     public boolean isHandshaking() {
         return getDownloadSpeed() <= 0 && getUploadSpeed() <= 0;
-    }
-
-    @Override
-    public List<PeerMessage> getSupportedMessages() {
-        return Collections.emptyList();
     }
 
     @Override

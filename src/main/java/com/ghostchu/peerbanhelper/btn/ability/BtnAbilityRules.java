@@ -2,16 +2,15 @@ package com.ghostchu.peerbanhelper.btn.ability;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
-import com.ghostchu.peerbanhelper.btn.BtnRule;
-import com.ghostchu.peerbanhelper.btn.BtnRuleParsed;
+import com.ghostchu.peerbanhelper.btn.BtnRuleset;
+import com.ghostchu.peerbanhelper.btn.BtnRulesetParsed;
 import com.ghostchu.peerbanhelper.event.BtnRuleUpdateEvent;
-import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -40,7 +39,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
     private final ScriptEngine scriptEngine;
     private final boolean scriptExecute;
     @Getter
-    private BtnRuleParsed btnRule;
+    private BtnRulesetParsed btnRule;
 
 
     public BtnAbilityRules(BtnNetwork btnNetwork, ScriptEngine scriptEngine, JsonObject ability, boolean scriptExecute) {
@@ -61,8 +60,8 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
             btnCacheFile.createNewFile();
         } else {
             try {
-                BtnRule btnRule = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRule.class);
-                this.btnRule = new BtnRuleParsed(scriptEngine, btnRule, scriptExecute);
+                BtnRuleset btnRuleset = JsonUtil.getGson().fromJson(Files.readString(btnCacheFile.toPath()), BtnRuleset.class);
+                this.btnRule = new BtnRulesetParsed(scriptEngine, btnRuleset, scriptExecute);
             } catch (Throwable ignored) {
             }
         }
@@ -70,7 +69,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
 
     @Override
     public String getName() {
-        return "BtnAbilityRules";
+        return "BtnAbilityRuleset";
     }
 
     @Override
@@ -90,7 +89,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                 btnRule.getPeerIdRules().values().stream().mapToLong(List::size).sum(),
                 btnRule.getClientNameRules().values().stream().mapToLong(List::size).sum(),
                 btnRule.getPortRules().values().stream().mapToLong(List::size).sum(),
-                btnRule.getScriptRules().values().size());
+                btnRule.getScriptRules().size());
     }
 
     @Override
@@ -112,7 +111,7 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
         } else {
             version = btnRule.getVersion();
         }
-        HTTPUtil.retryableSend(
+        btnNetwork.getHttpUtil().retryableSend(
                         btnNetwork.getHttpClient(),
                         MutableRequest.GET(URLUtil.appendUrl(endpoint, Map.of("rev", version))),
                         HttpResponse.BodyHandlers.ofString())
@@ -126,8 +125,8 @@ public final class BtnAbilityRules extends AbstractBtnAbility {
                         setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
                     } else {
                         try {
-                            BtnRule btr = JsonUtil.getGson().fromJson(r.body(), BtnRule.class);
-                            this.btnRule = new BtnRuleParsed(scriptEngine, btr, scriptExecute);
+                            BtnRuleset btr = JsonUtil.getGson().fromJson(r.body(), BtnRuleset.class);
+                            this.btnRule = new BtnRulesetParsed(scriptEngine, btr, scriptExecute);
                             Main.getEventBus().post(new BtnRuleUpdateEvent());
                             try {
                                 Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);

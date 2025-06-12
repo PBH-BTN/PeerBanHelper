@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.database.table;
 
 import com.ghostchu.peerbanhelper.database.TranslationComponentPersistener;
+import com.ghostchu.peerbanhelper.database.dao.impl.RuleDao;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "rules")
+@DatabaseTable(tableName = "rules", daoClass = RuleDao.class)
 public final class RuleEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

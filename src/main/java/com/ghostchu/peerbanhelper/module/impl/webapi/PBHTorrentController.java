@@ -6,9 +6,11 @@ import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.paging.Page;
 import com.ghostchu.peerbanhelper.util.paging.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -27,19 +29,20 @@ import java.util.List;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
-@IgnoreScan
 @Slf4j
 public final class PBHTorrentController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final TorrentDao torrentDao;
     private final PeerRecordDao peerRecordDao;
     private final HistoryDao historyDao;
+    private final DownloaderManagerImpl downloaderManager;
 
-    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao) {
+    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, DownloaderManagerImpl downloaderManager) {
         this.javalinWebContainer = javalinWebContainer;
         this.torrentDao = torrentDao;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
+        this.downloaderManager = downloaderManager;
     }
 
     @Override
@@ -84,7 +87,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                         .eq("torrent_id", new SelectArg(t))
                         .queryBuilder()
                 , pageable);
-        var result = page.getResults().stream().map(r -> new PBHBanController.BanLogResponse(locale(ctx), r)).toList();
+        var result = page.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, page.getTotal(), result)));
     }
 
@@ -108,7 +111,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                             .queryBuilder()
                     , pageable);
         }
-        List<TorrentInfo> infoList = new ArrayList<>();
+        List<TorrentInfoDTO> infoList = new ArrayList<>();
         for (TorrentEntity result : torrentEntityPage.getResults()) {
             var peerBanCount = historyDao.queryBuilder()
                     .where()
@@ -119,7 +122,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                     .where()
                     .eq("torrent_id", result.getId())
                     .countOf();
-            infoList.add(new TorrentInfo(result.getInfoHash(), result.getName(), result.getSize(), peerBanCount, peerAccessCount));
+            infoList.add(new TorrentInfoDTO(result.getInfoHash(), result.getName(), result.getSize(), peerBanCount, peerAccessCount));
         }
         ctx.json(new StdResp(true, null, new Page<>(pageable, torrentEntityPage.getTotal(), infoList)));
     }
@@ -143,7 +146,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
                 .eq("torrent_id", t.getId())
                 .countOf();
 
-        ctx.json(new StdResp(true, null, new TorrentInfo(t.getInfoHash(),
+        ctx.json(new StdResp(true, null, new TorrentInfoDTO(t.getInfoHash(),
                 t.getName(), t.getSize(),
                 peerBanCount, peerAccessCount)));
     }
@@ -169,13 +172,4 @@ public final class PBHTorrentController extends AbstractFeatureModule {
 
     }
 
-    public record TorrentInfo(
-            String infoHash,
-            String name,
-            long size,
-            long peerBanCount,
-            long peerAccessCount
-    ) {
-
-    }
 }

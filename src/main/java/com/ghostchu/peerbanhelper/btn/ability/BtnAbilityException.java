@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.event.BtnExceptionRuleUpdateEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.URLUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
@@ -101,7 +100,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
         } else {
             version = btnExceptionRule.getVersion();
         }
-        HTTPUtil.retryableSend(
+        btnNetwork.getHttpUtil().retryableSend(
                         btnNetwork.getHttpClient(),
                         MutableRequest.GET(URLUtil.appendUrl(endpoint, Map.of("rev", version))),
                         HttpResponse.BodyHandlers.ofString())

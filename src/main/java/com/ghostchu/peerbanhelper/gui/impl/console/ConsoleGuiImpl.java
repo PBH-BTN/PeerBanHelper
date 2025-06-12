@@ -4,11 +4,13 @@ import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
+import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.event.Level;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
 
 @Slf4j
 public class ConsoleGuiImpl implements GuiImpl {
@@ -24,7 +26,8 @@ public class ConsoleGuiImpl implements GuiImpl {
 
     @Override
     public void createMainWindow() {
-
+        JListAppender.allowWriteLogEntryDeque.set(false);
+        JListAppender.logEntryDeque.clear();
     }
 
     @SneakyThrows
@@ -43,16 +46,21 @@ public class ConsoleGuiImpl implements GuiImpl {
         if (level.equals(Level.INFO)) {
             log.info("{}: {}", title, description);
         }
-        if (level.equals(Level.WARNING)) {
+        if (level.equals(Level.WARN)) {
             log.warn("{}: {}", title, description);
         }
-        if (level.equals(Level.SEVERE)) {
+        if (level.equals(Level.ERROR)) {
             log.error("{}: {}", title, description);
         }
     }
 
     @Override
-    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+    public void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent, @Nullable Runnable noEvent) {
+
+    }
+
+    @Override
+    public void openUrlInBrowser(String url) {
 
     }
 
@@ -61,10 +69,10 @@ public class ConsoleGuiImpl implements GuiImpl {
         if (level.equals(Level.INFO)) {
             log.info("{}: {}", title, description);
         }
-        if (level.equals(Level.WARNING)) {
+        if (level.equals(Level.WARN)) {
             log.warn("{}: {}", title, description);
         }
-        if (level.equals(Level.SEVERE)) {
+        if (level.equals(Level.ERROR)) {
             log.error("{}: {}", title, description);
         }
     }

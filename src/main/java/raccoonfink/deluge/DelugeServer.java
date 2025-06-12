@@ -7,6 +7,7 @@ import com.github.mizosoft.methanol.MutableRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
+import raccoonfink.deluge.requests.ConfigRequest;
 import raccoonfink.deluge.responses.*;
 
 import java.io.IOException;
@@ -29,21 +30,16 @@ public final class DelugeServer {
     private final CookieManager m_cookieManager = new CookieManager();
     private int m_counter = 0;
 
-    public DelugeServer(final String url, final String password, boolean verifySSL, HttpClient.Version httpVersion, String baUser, String baPassword) {
+    public DelugeServer(final String url, final String password, boolean verifySSL, Methanol.Builder httpBuilder, HttpClient.Version httpVersion, String baUser, String baPassword) {
         m_url = url;
         m_password = password;
         m_cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
         HttpURLConnection.setFollowRedirects(true);
-
-        HttpClient.Builder builder = Methanol
-                .newBuilder()
+        Methanol.Builder builder = httpBuilder
                 .version(httpVersion)
-                .followRedirects(HttpClient.Redirect.ALWAYS)
                 .defaultHeader("Accept", "application/json")
                 .defaultHeader("Content-Type", "application/json")
-                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .readTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .authenticator(new Authenticator() {
                     @Override
@@ -224,6 +220,16 @@ public final class DelugeServer {
     public EventsResponse getEvents() throws DelugeException {
         final DelugeResponse response = makeRequest(new DelugeRequest("web.get_events"));
         return new EventsResponse(response.getResponseCode(), response.getResponseData());
+    }
+
+    public ConfigResponse getConfig() throws DelugeException {
+        final DelugeResponse response = makeRequest(new DelugeRequest("core.get_config"));
+        return new ConfigResponse(response.getResponseCode(), response.getResponseData());
+    }
+
+    public boolean setConfig(ConfigRequest configRequest) throws DelugeException {
+        final DelugeResponse response = makeRequest(new DelugeRequest("core.set_config", configRequest.toRequestJSON()));
+        return !determineResponseError(response);
     }
 
     public PBHActiveTorrentsResponse getActiveTorrents() throws DelugeException {

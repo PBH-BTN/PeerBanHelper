@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class JListAppender extends AppenderBase<ILoggingEvent> {
 
     public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200));
-    public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(false);
+    public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(true);
     public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100));
     private static final AtomicInteger seq = new AtomicInteger(0);
     private PatternLayout layout;

@@ -1,20 +1,13 @@
 package com.ghostchu.peerbanhelper.util;
 
-import com.ghostchu.peerbanhelper.Main;
-import io.javalin.http.Context;
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
@@ -36,14 +29,7 @@ public final class MiscUtil {
         return sdfTime.format(new Date(timestamp));
     }
 
-    public static boolean isUsingReserveProxy(Context context) {
-        var list = List.of("X-Real-IP", "X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP");
-        for (String s : list) {
-            if (context.header(s) != null)
-                return true;
-        }
-        return false;
-    }
+
 
     public static void gzip(InputStream is, OutputStream os) throws IOException {
         GZIPOutputStream gzipOs = new GZIPOutputStream(os);
@@ -85,28 +71,6 @@ public final class MiscUtil {
         return files;
     }
 
-    @SneakyThrows
-    public static List<File> readAllResFiles(String path) {
-        List<File> files = new ArrayList<>();
-        var urlEnumeration = Main.class.getClassLoader().getResources(path);
-        while (urlEnumeration.hasMoreElements()) {
-            var url = urlEnumeration.nextElement();
-            var fileDir = new File(new URI(url.toString()));
-            files.addAll(recursiveReadFile(fileDir));
-        }
-        return files;
-    }
-
-    @SneakyThrows
-    public static File readResFile(String path) {
-        var urlEnumeration = Main.class.getClassLoader().getResources(path);
-        if (urlEnumeration.hasMoreElements()) {
-            var url = urlEnumeration.nextElement();
-            return new File(new URI(url.toString()));
-        }
-        return null;
-    }
-
     public static ZoneOffset getSystemZoneOffset() {
         return ZoneId.systemDefault().getRules().getOffset(Instant.now());
     }
@@ -117,6 +81,28 @@ public final class MiscUtil {
         ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
         LocalDate parse = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDate();
         return parse.atStartOfDay().toInstant(currentOffsetForMyZone).toEpochMilli();
+    }
+
+    public static long getEndOfToday(long time) {
+        ZoneId systemZone = ZoneId.systemDefault();
+        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.now());
+        // 转换为该时区的 LocalDateTime
+        LocalDateTime dateTime = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDateTime();
+        // 获取当天的结束
+        LocalDateTime dayEnd = dateTime.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        // 转换回时间戳
+        return dayEnd.toInstant(currentOffsetForMyZone).toEpochMilli();
+    }
+
+    public static long getStartOfHour(long time) {
+        ZoneId systemZone = ZoneId.systemDefault();
+        ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(Instant.now());
+        // 转换为该时区的 LocalDateTime
+        LocalDateTime dateTime = Instant.ofEpochMilli(time).atZone(systemZone).toLocalDateTime();
+        // 获取当前小时的开始（分钟和秒置为0）
+        LocalDateTime hourStart = dateTime.withMinute(0).withSecond(0).withNano(0);
+        // 转换回时间戳
+        return hourStart.toInstant(currentOffsetForMyZone).toEpochMilli();
     }
 
     public static boolean is64BitJVM() {

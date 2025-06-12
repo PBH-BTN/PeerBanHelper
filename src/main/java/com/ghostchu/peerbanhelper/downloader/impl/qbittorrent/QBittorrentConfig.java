@@ -8,6 +8,8 @@ public interface QBittorrentConfig {
 
     String getType();
 
+    String getName();
+
     String getEndpoint();
 
     String getUsername();

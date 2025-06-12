@@ -1,42 +1,31 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
-import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.downloader.DownloaderBasicInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PeerMetadata implements Comparable<PeerMetadata> {
-    private String downloader;
-    private UUID randomId;
+public class PeerMetadata {
+    private DownloaderBasicInfo downloader;
     private TorrentWrapper torrent;
     private PeerWrapper peer;
-    private IPGeoData geo;
     private String reverseLookup = "N/A";
 
-    public PeerMetadata(String downloader, Torrent torrent, Peer peer) {
-        this.randomId = UUID.randomUUID();
+    public PeerMetadata(DownloaderBasicInfo downloader, Torrent torrent, Peer peer) {
         this.downloader = downloader;
-        this.torrent = new com.ghostchu.peerbanhelper.wrapper.TorrentWrapper(torrent);
-        this.peer = new com.ghostchu.peerbanhelper.wrapper.PeerWrapper(peer);
+        this.torrent = new TorrentWrapper(torrent);
+        this.peer = new PeerWrapper(peer);
     }
 
-    public PeerMetadata(String downloader, TorrentWrapper torrent, PeerWrapper peer) {
-        this.randomId = UUID.randomUUID();
+    public PeerMetadata(DownloaderBasicInfo downloader, TorrentWrapper torrent, PeerWrapper peer) {
         this.downloader = downloader;
         this.torrent = torrent;
         this.peer = peer;
     }
 
-
-    @Override
-    public int compareTo(PeerMetadata o) {
-        return this.randomId.compareTo(o.randomId);
-    }
 }
