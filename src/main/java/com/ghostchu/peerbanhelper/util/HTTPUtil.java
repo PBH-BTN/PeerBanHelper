@@ -7,6 +7,7 @@ import com.github.mizosoft.methanol.WritableBodyPublisher;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;
@@ -46,6 +47,8 @@ public final class HTTPUtil {
             .bytesTransferredThreshold(60 * 1024) // 60 kB
             .timePassedThreshold(Duration.of(3, ChronoUnit.SECONDS))
             .build();
+    @Autowired(required = false)
+    private ProxySelector selector;
 
     static {
         TrustManager trustManager = new X509ExtendedTrustManager() {
@@ -99,6 +102,7 @@ public final class HTTPUtil {
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .proxy(proxySelector)
                 .cookieHandler(cookieManager);
         if (ignoreSSL) {
             builder.sslContext(ignoreSslContext);
