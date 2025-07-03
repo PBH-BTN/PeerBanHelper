@@ -16,16 +16,18 @@ import java.io.Serializable;
 @Data
 public class BanMetadata extends PeerMetadata implements Serializable {
     private String context;
+    private String randomId;
     private long banAt;
     private long unbanAt;
     private boolean banForDisconnect;
     private TranslationComponent rule;
     private TranslationComponent description;
 
-    public BanMetadata(String context, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
+    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
                        TranslationComponent description) {
         super(downloader, torrent, peer);
         this.context = context;
+        this.randomId = randomId;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
         this.banForDisconnect = banForDisconnect;
@@ -33,10 +35,11 @@ public class BanMetadata extends PeerMetadata implements Serializable {
         this.description = description;
     }
 
-    public BanMetadata(String context, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
+    public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
                        TranslationComponent description) {
         super(downloader, torrent, peer);
         this.context = context;
+        this.randomId = randomId;
         this.banAt = banAt;
         this.unbanAt = unbanAt;
         this.banForDisconnect = banForDisconnect;

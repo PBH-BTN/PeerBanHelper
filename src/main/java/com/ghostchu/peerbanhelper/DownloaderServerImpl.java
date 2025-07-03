@@ -254,7 +254,9 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                         if (detail.banDuration() > 0) {
                                             actualBanDuration = detail.banDuration();
                                         }
-                                        BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(), downloaderManager.getDownloadInfo(downloader.getId()),
+                                        BanMetadata banMetadata = new BanMetadata(detail.result().moduleContext().getName(),
+                                                UUID.randomUUID().toString().replace("-", "")
+                                                , downloaderManager.getDownloadInfo(downloader.getId()),
                                                 System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
                                                 detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
                                         bannedPeers.add(banMetadata);
