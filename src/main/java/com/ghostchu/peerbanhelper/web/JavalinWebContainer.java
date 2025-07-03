@@ -49,8 +49,9 @@ public final class JavalinWebContainer {
     private final Cache<IPAddress, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
             .build();
-    private final Map<IPAddress, Long> BEARER_LOGIN_SESSION = new LinkedHashMap<>(){
+    private final Map<IPAddress, Long> BEARER_LOGIN_SESSION = new LinkedHashMap<>() {
         private static final int MAX_ENTRIES = 3;
+
         @Override
         protected boolean removeEldestEntry(Map.Entry<IPAddress, Long> eldest) {
             return size() > MAX_ENTRIES;
@@ -167,7 +168,9 @@ public final class JavalinWebContainer {
                     if (tokenAuthResult == TokenAuthResult.FAILED) {
                         markLoginFailed(WebUtil.userIp(ctx), ctx.userAgent());
                     }
-                    throw new NotLoggedInException();
+                    if (ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)) {
+                        throw new NotLoggedInException();
+                    }
                 })
                 .options("/*", ctx -> ctx.status(200));
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
@@ -282,7 +285,7 @@ public final class JavalinWebContainer {
         var ipBlock = getPrefixedIPAddr(ip);
         var counter = FAIL2BAN.get(ipBlock, () -> new AtomicInteger(0));
         counter.set(0);
-        if(!BEARER_LOGIN_SESSION.containsKey(ipBlock)){
+        if (!BEARER_LOGIN_SESSION.containsKey(ipBlock)) {
             BEARER_LOGIN_SESSION.put(ipBlock, System.currentTimeMillis());
             log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
         }

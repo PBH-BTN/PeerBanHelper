@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.body.LoginRequestBody;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -62,6 +63,13 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
 
         if (!webContainer.allowAttemptLogin(userIp(ctx), ctx.userAgent())) {
             throw new IPAddressBannedException();
+        }
+
+        if(!ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)){
+            webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
+            ctx.sessionAttribute("authenticated", webContainer.getToken());
+            ctx.json(new StdResp(true, "DEBUG: Skipping WebUI login", null));
+            return;
         }
 
         LoginRequestBody loginRequestBody = ctx.bodyAsClass(LoginRequestBody.class);
