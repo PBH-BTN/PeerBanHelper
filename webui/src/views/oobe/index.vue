@@ -63,7 +63,7 @@ const initConfig = ref<InitConfig>({
   acceptPrivacy: false,
   token: '',
   downloaderConfig: {
-    name: '',
+    id: '',
     config: {
       basicAuth: {},
       verifySsl: true,
