@@ -25,7 +25,11 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
     }
 
     @NotNull
-        public SlidingWindowDynamicSpeedLimiter tweakSpeedLimiterBySlidingWindow(@Nullable String downloader, @NotNull DownloaderSpeedLimiter currentSetting, long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) throws Exception {
+        public SlidingWindowDynamicSpeedLimiter tweakSpeedLimiterBySlidingWindow(@Nullable String downloader, @NotNull DownloaderSpeedLimiter currentSetting,
+                                                                                 long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) throws Exception {
+        if(maxSpeedBytesPerSecond < 0){
+            maxSpeedBytesPerSecond = Integer.MAX_VALUE;
+        }
         SlidingWindowDynamicSpeedLimiter slidingWindowDynamicSpeedLimiter = new SlidingWindowDynamicSpeedLimiter();
         slidingWindowDynamicSpeedLimiter.setThreshold(thresholdBytes);
         slidingWindowDynamicSpeedLimiter.setMaxSpeed(maxSpeedBytesPerSecond);
