@@ -423,10 +423,10 @@ module:
       max-allowed-upload-traffic: 25000000000
       # 调整上传速率时，最大允许的下载速率，单位：bytes
       # The maximum allowed download rate when adjusting upload rate, Unit: bytes
-      max-speed: 13107200
+      max-speed: 0
       # 调整上传速率时，最小允许的下载速率，单位：bytes
       # The minimum allowed download rate when adjusting upload rate, Unit: bytes
-      min-speed: 262144
+      min-speed: 0
   # PTR （反向解析记录） 封禁
   # 此模块将强制对 Peer IP 进行 PTR 查询，并试图解析其 IP 地址绑定的主机名。如果 IP 地址绑定了一个主机名且主机名匹配下列规则，则执行操作
   # PTR (Reverse DNS) Blocker
