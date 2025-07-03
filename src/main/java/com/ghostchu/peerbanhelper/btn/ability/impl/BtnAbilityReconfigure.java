@@ -1,6 +1,7 @@
-package com.ghostchu.peerbanhelper.btn.ability;
+package com.ghostchu.peerbanhelper.btn.ability.impl;
 
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
+import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.github.mizosoft.methanol.MutableRequest;

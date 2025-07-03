@@ -1,7 +1,8 @@
-package com.ghostchu.peerbanhelper.btn.ability;
+package com.ghostchu.peerbanhelper.btn.ability.impl;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.btn.BtnNetwork;
+import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.btn.ping.BtnSwarm;
 import com.ghostchu.peerbanhelper.btn.ping.BtnSwarmPeerPing;
 import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;

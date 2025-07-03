@@ -2,7 +2,11 @@ package com.ghostchu.peerbanhelper.btn;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.btn.ability.*;
+import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
+import com.ghostchu.peerbanhelper.btn.ability.impl.*;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitHistory;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
@@ -146,17 +150,30 @@ public final class BtnNetwork implements Reloadable {
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, max_protocol_version);
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
+            boolean useLegacyAbilities = min_protocol_version <= 10;
             resetScheduler();
             abilities.values().forEach(BtnAbility::unload);
             abilities.clear();
             JsonObject ability = json.get("ability").getAsJsonObject();
-            if (ability.has("submit_bans") && submit) {
-                abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
+            if (useLegacyAbilities) {
+                if (ability.has("submit_peers") && submit) {
+                    abilities.put(LegacyBtnAbilitySubmitPeers.class, new LegacyBtnAbilitySubmitPeers(this, httpUtil, ability.get("submit_peers").getAsJsonObject()));
+                }
+                if (ability.has("submit_bans") && submit) {
+                    abilities.put(LegacyBtnAbilitySubmitBans.class, new LegacyBtnAbilitySubmitBans(this, httpUtil, ability.get("submit_bans").getAsJsonObject()));
+                }
+                if (ability.has("submit_histories") && submit) {
+                    abilities.put(LegacyBtnAbilitySubmitHistory.class, new LegacyBtnAbilitySubmitHistory(this, httpUtil, ability.get("submit_histories").getAsJsonObject()));
+                }
+            } else {
+                if (ability.has("submit_bans") && submit) {
+                    abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
+                }
+                if (ability.has("submit_swarm") && submit) {
+                    abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));
+                }
             }
-            if (ability.has("submit_swarm") && submit) {
-                abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));
-            }
-            if (ability.has("ruleset")) {
+            if (ability.has("rules")) {
                 abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("ruleset").getAsJsonObject(), scriptExecute));
             }
             if (ability.has("reconfigure")) {
@@ -175,7 +192,7 @@ public final class BtnNetwork implements Reloadable {
             configSuccess.set(true);
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
         } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode+" - "+response, 600), e);
+            log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600), e);
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
             configSuccess.set(false);
         }
