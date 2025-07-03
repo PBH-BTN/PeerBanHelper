@@ -67,11 +67,11 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     private DownloaderTrafficLimiterDao downloaderTrafficLimiterDao;
     private long uploadSpeedLimit;
     private long downloadSpeedLimit;
-    private boolean useTrafficCapping;
-    private long maxTrafficAllowedDaily;
+    private boolean useTrafficSlidingCapping;
+    private long maxTrafficAllowedInWindowPeriod;
     private long trafficCappingSpeed;
-    private long trafficCappingMaxSpeed;
-    private long trafficCappingMinSpeed;
+    private long trafficSlidingCappingMaxSpeed;
+    private long trafficSlidingCappingMinSpeed;
 
     @Override
     public boolean isConfigurable() {
@@ -114,10 +114,10 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily", -1);
         this.uploadSpeedLimit = getConfig().getLong("upload-limit");
         this.downloadSpeedLimit = getConfig().getLong("download-limit");
-        this.useTrafficCapping = getConfig().getBoolean("traffic-capping.enabled");
-        this.maxTrafficAllowedDaily = getConfig().getLong("traffic-capping.daily-max-allowed-upload-traffic");
-        this.trafficCappingMaxSpeed = getConfig().getLong("traffic-capping.max-speed");
-        this.trafficCappingMinSpeed = Math.max(getConfig().getLong("traffic-capping.min-speed"), 131072);
+        this.useTrafficSlidingCapping = getConfig().getBoolean("traffic-sliding-capping.enabled");
+        this.maxTrafficAllowedInWindowPeriod = getConfig().getLong("traffic-sliding-capping.max-allowed-upload-traffic");
+        this.trafficSlidingCappingMaxSpeed = getConfig().getLong("traffic-sliding-capping.max-speed");
+        this.trafficSlidingCappingMinSpeed = Math.max(getConfig().getLong("traffic-sliding-capping.min-speed"), 131072);
     }
 
     private void updateTrafficStatus() {
@@ -136,7 +136,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     }
 
     private void updateTrafficCappingService() {
-        if (!useTrafficCapping) {
+        if (!useTrafficSlidingCapping) {
             return;
         }
         for (Downloader downloader : downloaderManager) {
@@ -144,7 +144,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                 if (downloader.login().success()) {
                     var speedLimiter = downloader.getSpeedLimiter();
                     if(speedLimiter == null) continue;
-                    var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedDaily, trafficCappingMinSpeed, trafficCappingMaxSpeed);
+                    var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
                     DownloaderSpeedLimiter  newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
                     log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), newLimiter.upload(), calculatedData));
@@ -203,7 +203,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         }
     }
 
-    private synchronized void enableDownloaderSpeedLimiters(long totalBytes) {
+    private synchronized void enableDownloaderSpeedLimiters() {
         for (Downloader downloader : downloaderManager.getDownloaders()) {
             var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getId());
             if (trafficLimiterData != null) {
@@ -220,7 +220,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         }
     }
 
-    private synchronized void disableDownloaderSpeedLimiters(long totalBytes) {
+    private synchronized void disableDownloaderSpeedLimiters() {
         for (Downloader downloader : downloaderManager.getDownloaders()) {
             var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getId());
             if (trafficLimiterData == null) continue; // 没有在库记录

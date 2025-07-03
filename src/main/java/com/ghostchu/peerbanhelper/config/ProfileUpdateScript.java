@@ -25,13 +25,20 @@ public final class ProfileUpdateScript {
         this.conf = conf;
     }
 
-    @UpdateScript(version = 26)
+    @UpdateScript(version = 27)
     public void trafficSpeedLimiter(YamlConfiguration bundled) {
-        conf.set("module.active-monitoring.traffic-capping.enabled", false);
-        conf.set("module.active-monitoring.traffic-capping.daily-max-allowed-upload-traffic", 25000000000L);
-        conf.set("module.active-monitoring.traffic-capping.max-speed", 13107200);
-        conf.set("module.active-monitoring.traffic-capping.min-speed", 262144);
+        conf.set("module.active-monitoring.traffic-sliding-capping.enabled", false);
+        conf.set("module.active-monitoring.traffic-sliding-capping.daily-max-allowed-upload-traffic", 25000000000L);
+        conf.set("module.active-monitoring.traffic-sliding-capping.max-speed", 13107200);
+        conf.set("module.active-monitoring.traffic-sliding-capping.min-speed", 262144);
     }
+//    @UpdateScript(version = 26)
+//    public void trafficSpeedLimiter(YamlConfiguration bundled) {
+//        conf.set("module.active-monitoring.traffic-capping.enabled", false);
+//        conf.set("module.active-monitoring.traffic-capping.daily-max-allowed-upload-traffic", 25000000000L);
+//        conf.set("module.active-monitoring.traffic-capping.max-speed", 13107200);
+//        conf.set("module.active-monitoring.traffic-capping.min-speed", 262144);
+//    }
     @UpdateScript(version = 25)
     public void removeIPFS(YamlConfiguration bundled) {
         conf.set("decentralized", null);

@@ -412,12 +412,19 @@ module:
       # 每日阈值 - 设置为 -1 以禁用，单位：bytes
       # Daily threshold, set to -1 to disable, Unit: bytes
       daily: -1
-      # 达到阈值后设置上传速度限制，单位：bytes
-      # Set upload speed limit after reaching the threshold, Unit: bytes
-      upload-limit: -1
-        # 达到阈值后设置下载速度限制，单位：bytes
-      # Set download speed limit after reaching the threshold, Unit: bytes
-      download-limit: -1
+    # 流量滑动窗口限制 - Traffic Capping by Sliding Window
+    traffic-sliding-capping:
+      # 是否启用 - Enable?
+      enabled: false
+      # 滑动窗口区域内，最多允许上传的流量，单位：bytes
+      # The maximum allowed upload traffic in sliding window, Unit: bytes
+      max-allowed-upload-traffic: 25000000000
+      # 调整上传速率时，最大允许的下载速率，单位：bytes
+      # The maximum allowed download rate when adjusting upload rate, Unit: bytes
+      max-speed: 13107200
+      # 调整上传速率时，最小允许的下载速率，单位：bytes
+      # The minimum allowed download rate when adjusting upload rate, Unit: bytes
+      min-speed: 262144
   # PTR （反向解析记录） 封禁
   # 此模块将强制对 Peer IP 进行 PTR 查询，并试图解析其 IP 地址绑定的主机名。如果 IP 地址绑定了一个主机名且主机名匹配下列规则，则执行操作
   # PTR (Reverse DNS) Blocker
