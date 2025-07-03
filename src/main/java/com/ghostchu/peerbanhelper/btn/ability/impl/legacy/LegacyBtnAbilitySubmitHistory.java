@@ -85,7 +85,7 @@ public final class LegacyBtnAbilitySubmitHistory extends AbstractBtnAbility {
 
     @Override
     public String getName() {
-        return "BtnAbilitySubmitHistory";
+        return "BtnAbilitySubmitHistory (Legacy)";
     }
 
     @Override

@@ -415,6 +415,8 @@ module:
     # 流量滑动窗口限制 - Traffic Capping by Sliding Window
     traffic-sliding-capping:
       # 是否启用 - Enable?
+      # 启用此功能后，将接管所有下载器的上传速率控制设置项
+      # If enabled, this module will take over all upload rate control settings in downloader
       enabled: false
       # 滑动窗口区域内，最多允许上传的流量，单位：bytes
       # The maximum allowed upload traffic in sliding window, Unit: bytes

@@ -48,7 +48,7 @@ public final class LegacyBtnAbilitySubmitBans extends AbstractBtnAbility {
 
     @Override
     public String getName() {
-        return "BtnAbilitySubmitBans";
+        return "BtnAbilitySubmitBans (Legacy)";
     }
 
     @Override

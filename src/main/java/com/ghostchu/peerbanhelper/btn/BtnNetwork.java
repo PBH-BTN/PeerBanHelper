@@ -174,7 +174,7 @@ public final class BtnNetwork implements Reloadable {
                 }
             }
             if (ability.has("rules")) {
-                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("ruleset").getAsJsonObject(), scriptExecute));
+                abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
             }
             if (ability.has("reconfigure")) {
                 abilities.put(BtnAbilityReconfigure.class, new BtnAbilityReconfigure(this, ability.get("reconfigure").getAsJsonObject()));

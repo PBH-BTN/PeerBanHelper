@@ -40,7 +40,7 @@ public final class LegacyBtnAbilitySubmitPeers extends AbstractBtnAbility {
 
     @Override
     public String getName() {
-        return "BtnAbilitySubmitPeers";
+        return "BtnAbilitySubmitPeers (Legacy)";
     }
 
     @Override
