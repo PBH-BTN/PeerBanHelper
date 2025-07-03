@@ -61,8 +61,6 @@ public class SwtMainWindow {
 
         // 创建菜单栏
         createMenuBar();
-
-        shell.setVisible(!swtGui.isSilentStart());
         // 设置 Shell 的网格布局
         shell.setLayout(new org.eclipse.swt.layout.GridLayout(1, false));
         createComponents();
@@ -73,6 +71,7 @@ public class SwtMainWindow {
         shell.layout(true, true);
         shell.open();
         tabComponents.forEach(TabComponent::windowShow);
+        shell.setVisible(!swtGui.isSilentStart());
     }
 
     // 加载图标资源
