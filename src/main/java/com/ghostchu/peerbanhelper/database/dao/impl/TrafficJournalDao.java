@@ -53,9 +53,6 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         // 获取当前速度限制
         long currentSpeedLimit = currentSetting.upload();
         slidingWindowDynamicSpeedLimiter.setOldSpeedLimit(currentSpeedLimit);
-        if (currentSpeedLimit <= 0) {
-            currentSpeedLimit = Long.MAX_VALUE;
-        }
         long newSpeed;
 
         if (totalUploadedBytes >= thresholdBytes) {
@@ -86,6 +83,9 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         }
         slidingWindowDynamicSpeedLimiter.setNewSpeedLimit(newSpeed);
 
+        if (slidingWindowDynamicSpeedLimiter.getNewSpeedLimit() < 1) { // 0 = 无限制
+            slidingWindowDynamicSpeedLimiter.setNewSpeedLimit(1L);
+        }
         // 创建并返回新的速度限制设置
         return slidingWindowDynamicSpeedLimiter;
     }
