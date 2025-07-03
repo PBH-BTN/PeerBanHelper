@@ -295,8 +295,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
      */
     @Override
     public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
-        long downloadLimit = speedLimiter.download();
-        long uploadLimit = speedLimiter.upload();
+        long downloadLimit = speedLimiter.isDownloadUnlimited() ?  0 : speedLimiter.download();
+        long uploadLimit = speedLimiter.isUploadUnlimited() ?  0 : speedLimiter.upload();
         var requestParam = Map.of(
                 "up_limit", uploadLimit,
                 "dl_limit", downloadLimit,

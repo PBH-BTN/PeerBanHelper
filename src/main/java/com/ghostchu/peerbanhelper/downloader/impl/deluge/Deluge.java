@@ -224,7 +224,7 @@ public final class Deluge extends AbstractDownloader {
         } catch (DelugeException e) {
             log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
         }
-        return new DownloaderStatistics(0,0);
+        return new DownloaderStatistics(0, 0);
     }
 
     /**
@@ -253,8 +253,8 @@ public final class Deluge extends AbstractDownloader {
      */
     @Override
     public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
-        long uploadLimit = speedLimiter.upload() / 1024;
-        long downloadLimit = speedLimiter.download() / 1024;
+        long uploadLimit = speedLimiter.isUploadUnlimited() ? 0 : speedLimiter.upload() / 1024;
+        long downloadLimit = speedLimiter.isDownloadUnlimited() ? 0 : speedLimiter.download() / 1024;
         var config = new ConfigRequest();
         config.setMaxDownloadSpeed(downloadLimit);
         config.setMaxUploadSpeed(uploadLimit);

@@ -318,10 +318,10 @@ public final class Transmission extends AbstractDownloader {
         RqSessionSet set = RqSessionSet.builder()
                 .altSpeedEnabled(false)
                 .altSpeedTimeEnabled(false)
-                .speedLimitDown((int) (speedLimiter.download() / 1024))
-                .speedLimitUp((int) (speedLimiter.upload() / 1024))
-                .speedLimitUpEnabled(speedLimiter.upload() > 0)
-                .speedLimitDownEnabled(speedLimiter.download() > 0)
+                .speedLimitDown(speedLimiter.isDownloadUnlimited() ? 102400000 : (int) (speedLimiter.download() / 1024))
+                .speedLimitUp(speedLimiter.isUploadUnlimited() ? 102400000 : (int) (speedLimiter.upload() / 1024))
+                .speedLimitUpEnabled(!speedLimiter.isUploadUnlimited())
+                .speedLimitDownEnabled(!speedLimiter.isDownloadUnlimited())
                 .build();
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
         if (!sessionSetResp.isSuccess()) {

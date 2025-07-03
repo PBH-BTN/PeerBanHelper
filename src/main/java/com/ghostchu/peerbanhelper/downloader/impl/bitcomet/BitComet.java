@@ -530,8 +530,8 @@ public final class BitComet extends AbstractDownloader {
         try {
             Map<String, Object> map = new HashMap<>();
             Map<String, Long> connectionConfig = new HashMap<>();
-            connectionConfig.put("max_download_speed", speedLimiter.download());
-            connectionConfig.put("max_upload_speed", speedLimiter.upload());
+            connectionConfig.put("max_download_speed", speedLimiter.isDownloadUnlimited() ? 0 : speedLimiter.download());
+            connectionConfig.put("max_upload_speed", speedLimiter.isUploadUnlimited()  ? 0 : speedLimiter.upload());
             map.put("connection_config", connectionConfig);
 
             HttpResponse<String> updatePreferencesToConnectionConfig =

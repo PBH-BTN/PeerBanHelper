@@ -25,11 +25,8 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
     }
 
     @NotNull
-        public SlidingWindowDynamicSpeedLimiter tweakSpeedLimiterBySlidingWindow(@Nullable String downloader, @NotNull DownloaderSpeedLimiter currentSetting,
-                                                                                 long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) throws Exception {
-        if(maxSpeedBytesPerSecond < 0){
-            maxSpeedBytesPerSecond = Integer.MAX_VALUE;
-        }
+    public SlidingWindowDynamicSpeedLimiter tweakSpeedLimiterBySlidingWindow(@Nullable String downloader, @NotNull DownloaderSpeedLimiter currentSetting,
+                                                                             long thresholdBytes, long minSpeedBytesPerSecond, long maxSpeedBytesPerSecond) throws Exception {
         SlidingWindowDynamicSpeedLimiter slidingWindowDynamicSpeedLimiter = new SlidingWindowDynamicSpeedLimiter();
         slidingWindowDynamicSpeedLimiter.setThreshold(thresholdBytes);
         slidingWindowDynamicSpeedLimiter.setMaxSpeed(maxSpeedBytesPerSecond);
@@ -45,7 +42,7 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         Timestamp endTimestamp = new Timestamp(currentTime);
 
         // 获取窗口内的流量数据
-        List<TrafficDataComputed> trafficData = downloader == null ?  getAllDownloadersOverallData(startTimestamp, endTimestamp):  getSpecificDownloaderOverallData(downloader, startTimestamp, endTimestamp);
+        List<TrafficDataComputed> trafficData = downloader == null ? getAllDownloadersOverallData(startTimestamp, endTimestamp) : getSpecificDownloaderOverallData(downloader, startTimestamp, endTimestamp);
 
         // 计算窗口内的总上传流量
         long totalUploadedBytes = trafficData.stream()
@@ -76,7 +73,7 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
             }
         } else {
             // 应用解除节流策略 - 当未达到阈值时
-            if (currentSpeedLimit >= maxSpeedBytesPerSecond) {
+            if ((currentSpeedLimit >= maxSpeedBytesPerSecond) && maxSpeedBytesPerSecond > 0) {
                 newSpeed = maxSpeedBytesPerSecond;
             } else {
                 // 计算增加因子 a = (l - l_current) / w，并转换为每秒字节数
