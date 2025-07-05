@@ -11,6 +11,7 @@ import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -81,11 +83,11 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         Pageable pageable = new Pageable(ctx);
         var t = torrent.get();
         Page<HistoryEntity> page = historyDao.queryByPaging(
-                historyDao.queryBuilder()
-                        .orderBy("banAt", false)
-                        .where()
-                        .eq("torrent_id", new SelectArg(t))
-                        .queryBuilder()
+                new Orderable(Map.of("banAt", false), ctx).apply(
+                        historyDao.queryBuilder()
+                                .where()
+                                .eq("torrent_id", new SelectArg(t))
+                                .queryBuilder())
                 , pageable);
         var result = page.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, page.getTotal(), result)));
@@ -97,18 +99,16 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         Page<TorrentEntity> torrentEntityPage;
         if (ctx.queryParam("keyword") == null) {
             torrentEntityPage = torrentDao.queryByPaging(
-                    torrentDao.queryBuilder()
-                            .orderBy("id", false),
+                    new Orderable(Map.of("id", false), ctx).apply(torrentDao.queryBuilder()),
                     pageable);
         } else {
             torrentEntityPage = torrentDao.queryByPaging(
-                    torrentDao.queryBuilder()
-                            .orderBy("id", false)
+                    new Orderable(Map.of("id", false), ctx).apply(torrentDao.queryBuilder()
                             .where()
                             .like("name", new SelectArg("%" + ctx.queryParam("keyword") + "%"))
                             .or()
                             .like("infoHash", new SelectArg("%" + ctx.queryParam("keyword") + "%"))
-                            .queryBuilder()
+                            .queryBuilder())
                     , pageable);
         }
         List<TorrentInfoDTO> infoList = new ArrayList<>();
@@ -138,7 +138,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         var t = torrent.get();
         var peerBanCount = historyDao.queryBuilder()
                 .where()
-                .eq("torrent_id",t.getId())
+                .eq("torrent_id", t.getId())
                 .countOf();
         var peerAccessCount = peerRecordDao.queryBuilder()
                 .orderBy("lastTimeSeen", false)
@@ -160,7 +160,7 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         }
         Pageable pageable = new Pageable(ctx);
         var t = torrent.get();
-        var queryBuilder = peerRecordDao.queryBuilder().orderBy("lastTimeSeen", false);
+        var queryBuilder = new Orderable(Map.of("lastTimeSeen", false), ctx).apply(peerRecordDao.queryBuilder());
         var queryWhere = queryBuilder.where().eq("torrent_id", t);
         queryBuilder.setWhere(queryWhere);
         Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);

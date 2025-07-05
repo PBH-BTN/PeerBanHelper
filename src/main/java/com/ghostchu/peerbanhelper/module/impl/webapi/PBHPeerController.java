@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.util.lab.Experiments;
 import com.ghostchu.peerbanhelper.util.lab.Laboratory;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Page;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -161,8 +163,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleBanHistory(Context ctx) throws SQLException {
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
-        var builder = historyDao.queryBuilder()
-                .orderBy("banAt", false);
+        var builder = new Orderable(Map.of("banAt", false), ctx).apply(historyDao.queryBuilder());
         var where = builder
                 .where()
                 .eq("ip", new SelectArg(ip));
@@ -176,8 +177,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         activeMonitoringModule.flush();
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
-        var builder = peerRecordDao.queryBuilder()
-                .orderBy("lastTimeSeen", false);
+        var builder = new Orderable(Map.of("lastTimeSeen", false), ctx).apply(peerRecordDao.queryBuilder());
         var where = builder
                 .where()
                 .eq("address", new SelectArg(ip));
