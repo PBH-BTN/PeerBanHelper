@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.util.paging;
+package com.ghostchu.peerbanhelper.util.query;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

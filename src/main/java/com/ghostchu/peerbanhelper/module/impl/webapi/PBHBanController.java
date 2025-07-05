@@ -8,8 +8,9 @@ import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
-import com.ghostchu.peerbanhelper.util.paging.Page;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -98,7 +99,8 @@ public final class PBHBanController extends AbstractFeatureModule {
         }
         persistMetrics.flush();
         Pageable pageable = new Pageable(ctx);
-        var queryResult = historyDao.queryByPaging(historyDao.queryBuilder().orderBy("banAt", false), pageable);
+        Orderable orderable = new Orderable(Map.of("banAt", false), ctx);
+        var queryResult = historyDao.queryByPaging(orderable.apply(historyDao.queryBuilder()), pageable);
         var result = queryResult.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
