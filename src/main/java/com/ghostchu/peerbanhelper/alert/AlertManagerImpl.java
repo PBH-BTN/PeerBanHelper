@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.alert;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
@@ -8,6 +9,7 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.push.PushManagerImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
@@ -112,6 +114,12 @@ public final class AlertManagerImpl implements AlertManager {
                     log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT_VIA_PROVIDERS));
                 }
             }
+            Level slf4jLevel = switch (level){
+                case ERROR, FATAL ->  Level.ERROR;
+                case WARN -> Level.WARN;
+                default ->  Level.INFO;
+            };
+            Main.getGuiManager().createNotification(slf4jLevel, tlUI(title), tlUI(content));
         } catch (Exception e) {
             log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT), e);
         }
