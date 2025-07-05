@@ -34,9 +34,6 @@
           </i18n-t>
         </template>
       </a-form-item>
-      <a-form-item field="name" :label="t('page.dashboard.editModal.label.name')" required>
-        <a-input v-model="config.downloaderConfig.name" allow-clear />
-      </a-form-item>
       <component
         :is="formMap[config.downloaderConfig.config.type] as any"
         v-model="config.downloaderConfig.config"
@@ -56,6 +53,7 @@ import { TestDownloaderConfig } from '@/service/init'
 import { Message } from '@arco-design/web-vue'
 import { defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { v1 as uuid } from 'uuid'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
 const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
@@ -81,7 +79,7 @@ const handleTest = async () => {
   config.value.downloaderConfig.config.endpoint.replace(/\/$/, '')
   try {
     const testResult = await TestDownloaderConfig({
-      name: config.value.downloaderConfig.name,
+      id: uuid(),
       config: config.value.downloaderConfig.config
     })
     if (!testResult.success) throw new Error(testResult.message)

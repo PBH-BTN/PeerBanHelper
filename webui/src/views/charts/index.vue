@@ -23,7 +23,7 @@
       </a-popover>
     </template>
     <a-tab-pane v-for="(downloader, i) of tabList" :key="i" :title="downloader.title">
-      <chartGrid :downloader="downloader.name" :show-charts="showCharts" />
+      <chartGrid :downloader="downloader.id" :show-charts="showCharts" />
     </a-tab-pane>
   </a-tabs>
 </template>
@@ -46,11 +46,11 @@ watch(showCharts, () => {
 })
 const tabList = computed(() => [
   {
-    name: 'all',
+    id: 'all',
     title: t('page.charts.all')
   },
   ...(downloaderList.value?.data.map((i) => ({
-    name: i.name,
+    id: i.id,
     title: i.name
   })) ?? [])
 ])

@@ -135,6 +135,12 @@ export interface ActiveMonitoring {
   traffic_monitoring: {
     daily: number
   }
+  traffic_sliding_capping: {
+    enabled: boolean
+    daily_max_allowed_upload_traffic: number
+    max_speed: number
+    min_speed: number
+  }
 }
 
 export interface PtrBlacklist {

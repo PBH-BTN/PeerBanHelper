@@ -94,12 +94,12 @@ const downloader = ref('')
 const tid = ref('')
 const tname = ref('')
 defineExpose({
-  showModal: (downloaderName: string, torrentId: string, torrentName: string) => {
-    downloader.value = downloaderName
+  showModal: (downloaderId: string, torrentId: string, torrentName: string) => {
+    downloader.value = downloaderId
     tid.value = torrentId
     tname.value = torrentName
     visible.value = true
-    run(downloaderName, torrentId)
+    run(downloaderId, torrentId)
   }
 })
 const handleOk = () => {

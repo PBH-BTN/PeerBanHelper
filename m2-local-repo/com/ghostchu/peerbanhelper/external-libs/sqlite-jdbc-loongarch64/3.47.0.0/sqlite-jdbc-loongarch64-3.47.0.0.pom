@@ -354,9 +354,7 @@
                             <verbose>true</verbose>
                             <buildArgs>
                                 <!-- required to allow junit-pioneer to compile with strict image heap enabled -->
-                                <arg>
-                                    --initialize-at-build-time=org.junitpioneer.jupiter.issue.IssueExtensionExecutionListener
-                                </arg>
+                                <arg>--initialize-at-build-time=org.junitpioneer.jupiter.issue.IssueExtensionExecutionListener</arg>
                             </buildArgs>
                         </configuration>
                     </plugin>

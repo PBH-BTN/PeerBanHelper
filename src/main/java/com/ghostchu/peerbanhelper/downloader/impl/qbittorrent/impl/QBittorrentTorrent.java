@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.qbittorrent.impl;
 
-import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;

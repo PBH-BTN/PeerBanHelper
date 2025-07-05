@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.support.ConnectionSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +13,8 @@ import java.util.Optional;
 
 @Component
 public final class TorrentDao extends AbstractPBHDao<TorrentEntity, Long> {
-    public TorrentDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), TorrentEntity.class);
+    public TorrentDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, TorrentEntity.class);
         setObjectCache(true);
     }
 

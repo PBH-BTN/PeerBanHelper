@@ -1,18 +1,17 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.lab.Experiments;
-import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
+import com.ghostchu.peerbanhelper.util.lab.Experiments;
+import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
@@ -36,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Component
-@IgnoreScan
 public final class PTRBlacklist extends AbstractRuleFeatureModule implements Reloadable {
     private List<Rule> ptrRules;
     @Autowired

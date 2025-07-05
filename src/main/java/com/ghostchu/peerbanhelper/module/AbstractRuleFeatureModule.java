@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.module;
 
-import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import lombok.Getter;

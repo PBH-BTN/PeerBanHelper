@@ -11,11 +11,11 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.slf4j.event.Level;
 
 import java.awt.*;
 import java.net.URI;
 import java.util.List;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -27,7 +27,7 @@ public class SwtTrayManager {
     // 托盘相关的成员变量
     private TrayItem trayItem;
     private boolean notificationShown = false; // 跟踪通知是否已经显示过
-    private Image iconImage; // 用于存储图标资源
+    private final Image iconImage; // 用于存储图标资源
 
     // 托盘菜单相关成员变量
     private Menu trayMenu;
@@ -114,9 +114,7 @@ public class SwtTrayManager {
         // WebUI 菜单项
         MenuItem webUIItem = new MenuItem(trayMenu, SWT.PUSH);
         webUIItem.setText(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
-        webUIItem.addListener(SWT.Selection, event -> {
-            openWebUI();
-        });
+        webUIItem.addListener(SWT.Selection, event -> openWebUI());
 
         // 分隔线
         new MenuItem(trayMenu, SWT.SEPARATOR);
@@ -166,9 +164,9 @@ public class SwtTrayManager {
         }
         // 根据日志级别设置不同的图标样式
         int imageIcon = 0;
-        if (level == Level.SEVERE) {
+        if (level == Level.ERROR) {
             imageIcon = SWT.ICON_ERROR;
-        } else if (level == Level.WARNING) {
+        } else if (level == Level.WARN) {
             imageIcon = SWT.ICON_WARNING;
         } else {
             imageIcon = SWT.ICON_INFORMATION;
@@ -210,10 +208,10 @@ public class SwtTrayManager {
         long bannedIps = 0L;
         var server = Main.getServer();
         if (server != null) {
-            bannedIps = server.getBannedPeers().values().stream()
+            bannedIps = server.getDownloaderServer().getBannedPeers().values().stream()
                     .map(m -> m.getPeer().getAddress().getIp())
                     .distinct().count();
-            bannedPeers = server.getBannedPeers().values().size();
+            bannedPeers = server.getDownloaderServer().getBannedPeers().size();
         }
         if (banStatsItem != null && !banStatsItem.isDisposed()) {
             banStatsItem.setText(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps));
@@ -224,9 +222,10 @@ public class SwtTrayManager {
     private void updateDownloaderStats() {
         long totalDownloaders = 0L;
         long healthDownloaders = 0L;
-        if (Main.getServer() != null) {
-            totalDownloaders = Main.getServer().getDownloaders().size();
-            healthDownloaders = Main.getServer().getDownloaders().stream()
+        var server = Main.getServer();
+        if (server != null) {
+            totalDownloaders = server.getDownloaderManager().getDownloaders().size();
+            healthDownloaders = server.getDownloaderManager().getDownloaders().stream()
                     .filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
         }
         if (downloaderStatsItem != null && !downloaderStatsItem.isDisposed()) {

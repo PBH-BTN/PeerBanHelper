@@ -13,7 +13,7 @@ import java.util.TreeSet;
 public final class UIResponse extends DelugeResponse {
     private boolean m_connected = false;
     private Statistics m_statistics;
-    private Set<Torrent> m_torrents = new TreeSet<Torrent>();
+    private final Set<Torrent> m_torrents = new TreeSet<>();
 
     @SuppressWarnings("rawtypes")
     public UIResponse(final Integer httpResponseCode, final JSONObject response) throws DelugeException {

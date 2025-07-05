@@ -8,6 +8,7 @@ export default {
   'page.banlog.banlogTable.column.peerId': 'Peer ID',
   'page.banlog.banlogTable.column.trafficSnapshot': 'Traffic Snapshot',
   'page.banlog.banlogTable.column.torrentName': 'Torrent Name',
+  'page.banlog.banlogTable.column.torrentName.tooltip': 'Downloader: {downloader}, Hash: {hash}',
   'page.banlog.banlogTable.column.torrentSize': 'Size',
   'page.banlog.banlogTable.column.description': 'Description',
   'page.banlog.radio.viewMode': 'View Mode',

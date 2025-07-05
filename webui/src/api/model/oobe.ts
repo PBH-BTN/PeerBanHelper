@@ -1,7 +1,7 @@
 import type { downloaderConfig } from './downloader'
 
 interface initDownloaderConfig {
-  name: string
+  id: string
   config: downloaderConfig
 }
 export interface InitConfig {

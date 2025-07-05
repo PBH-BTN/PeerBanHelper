@@ -13,6 +13,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.slf4j.event.Level;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -22,7 +23,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -30,12 +30,12 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public class SwtMainWindow {
 
     private final SwtGuiImpl swtGui;
-    Display display;
-    Shell shell;
+    final Display display;
+    final Shell shell;
     TabFolder tabFolder;
 
     // Tab 组件
-    private List<TabComponent> tabComponents = new ArrayList<>();
+    private final List<TabComponent> tabComponents = new ArrayList<>();
     private LogsTabComponent logsTabComponent;
     private WebUITabComponent webUITabComponent;
 
@@ -43,7 +43,7 @@ public class SwtMainWindow {
     Image iconImage; // 用于存储图标资源
 
     // 托盘管理器
-    SwtTrayManager trayManager;
+    final SwtTrayManager trayManager;
 
     public SwtMainWindow(SwtGuiImpl swtGui, Display display) {
         this.shell = new Shell(display);
@@ -96,7 +96,7 @@ public class SwtMainWindow {
 
         // 为每个组件创建 Tab
         for (TabComponent component : tabComponents) {
-            component.createTab(tabFolder);
+            component.createTab(display, tabFolder);
         }
     }
 
@@ -127,6 +127,13 @@ public class SwtMainWindow {
         if (iconImage != null && !iconImage.isDisposed()) {
             iconImage.dispose();
         }
+
+        // 清理 Tab 组件资源
+        for (TabComponent component : tabComponents) {
+            if (component instanceof LogsTabComponent) {
+                ((LogsTabComponent) component).dispose();
+            }
+        }
     }
 
     // 创建菜单栏
@@ -148,7 +155,8 @@ public class SwtMainWindow {
 
     private void createDebugMenu(Menu menuBar) {
         if (!ExternalSwitch.parseBoolean("pbh.app-v")) {
-            if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
+            if (ExternalSwitch.parseBoolean("pbh.gui.debug-tools", Main.getMeta().isSnapshotOrBeta()
+                    || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
                 MenuItem debugMenuItem = new MenuItem(menuBar, SWT.CASCADE);
                 debugMenuItem.setText("DEBUG");
 
@@ -157,21 +165,23 @@ public class SwtMainWindow {
 
                 MenuItem sendInfoMessage = new MenuItem(debugMenu, SWT.PUSH);
                 sendInfoMessage.setText("[托盘通知] 发送信息托盘消息");
-                sendInfoMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.INFO, "测试（信息）", "测试消息"));
+                sendInfoMessage.addListener(SWT.Selection,
+                        e -> swtGui.createNotification(Level.INFO, "测试（信息）", "测试消息"));
 
                 MenuItem sendWarningMessage = new MenuItem(debugMenu, SWT.PUSH);
                 sendWarningMessage.setText("[托盘通知] 发送警告托盘消息");
-                sendWarningMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.WARNING, "测试（警告）", "测试消息"));
+                sendWarningMessage.addListener(SWT.Selection,
+                        e -> swtGui.createNotification(Level.WARN, "测试（警告）", "测试消息"));
 
                 MenuItem sendErrorMessage = new MenuItem(debugMenu, SWT.PUSH);
                 sendErrorMessage.setText("[托盘通知] 发送错误托盘消息");
-                sendErrorMessage.addListener(SWT.Selection, e -> swtGui.createNotification(Level.SEVERE, "测试（错误）", "测试消息"));
+                sendErrorMessage.addListener(SWT.Selection,
+                        e -> swtGui.createNotification(Level.ERROR, "测试（错误）", "测试消息"));
 
             }
         }
 
     }
-
 
     // 创建程序菜单
     private void createProgramMenu(Menu menuBar) {
@@ -189,7 +199,8 @@ public class SwtMainWindow {
                 try {
                     Desktop.getDesktop().open(Main.getDataDirectory());
                 } catch (IOException ex) {
-                    System.err.println("Unable to open data directory " + Main.getDataDirectory().getPath() + " in desktop env.");
+                    System.err.println(
+                            "Unable to open data directory " + Main.getDataDirectory().getPath() + " in desktop env.");
                 }
             });
         }

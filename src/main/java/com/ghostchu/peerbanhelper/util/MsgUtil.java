@@ -1,6 +1,5 @@
 package com.ghostchu.peerbanhelper.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +17,7 @@ public final class MsgUtil {
 
     public static String escapeSql(String sql){
         if(sql == null) return null;
-        return StringUtils.replace(sql, "'", "''");
+        return sql.replace("'", "''");
     }
 
     public static String humanReadableByteCountBin(long bytes) {

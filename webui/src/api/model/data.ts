@@ -1,4 +1,5 @@
 import type { IPGeoData } from './banlist'
+import type { DownloaderBasicInfo } from './downloader'
 export interface TorrentInfo {
   id: number
   infoHash: string
@@ -28,7 +29,7 @@ export interface AccessHistory {
   /**
    * 下载器名称
    */
-  downloader: string
+  downloader: DownloaderBasicInfo
   /**
    * 首次发现于
    */

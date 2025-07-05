@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table;
 
+import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "traffic_journal_v3")
+@DatabaseTable(tableName = "traffic_journal_v3", daoClass = TrafficJournalDao.class)
 public final class TrafficJournalEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

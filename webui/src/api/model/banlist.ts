@@ -1,3 +1,5 @@
+import type { DownloaderBasicInfo } from './downloader'
+
 export interface BanList {
   address: string
   banMetadata: BanMetadata
@@ -5,6 +7,7 @@ export interface BanList {
 
 export interface BanMetadata {
   context: string
+  downloader: DownloaderBasicInfo
   randomId: string
   banAt: number
   unbanAt: number

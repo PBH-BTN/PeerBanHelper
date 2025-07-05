@@ -2,6 +2,8 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.ProgressCheatBlockerPersistDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
@@ -9,14 +11,11 @@ import com.ghostchu.peerbanhelper.event.PeerUnbanEvent;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -47,7 +46,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-@IgnoreScan
 public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implements Reloadable {
     private final Deque<ClientTaskRecord> pendingPersistQueue = new ConcurrentLinkedDeque<>();
     private final Cache<Client, List<ClientTask>> progressRecorder = CacheBuilder.newBuilder()
@@ -245,9 +243,11 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             log.error("Unhandled exception during load cached record data", e);
         }
         if (lastRecordedProgress == null) lastRecordedProgress = new CopyOnWriteArrayList<>();
-        ClientTask clientTask = lastRecordedProgress.stream().filter(task -> task.getPeerIp().equals(peerIpString)).findFirst().orElse(null);
+        ClientTask clientTask = lastRecordedProgress.stream()
+                .filter(task -> task.getPeerIp().equals(peerIpString) && downloader.getId().equals(task.getDownloader()))
+                .findFirst().orElse(null);
         if (clientTask == null) {
-            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getName(), 0L, 0L);
+            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getId(), 0L, 0L);
             lastRecordedProgress.add(clientTask);
         }
         long uploadedIncremental; // 上传增量

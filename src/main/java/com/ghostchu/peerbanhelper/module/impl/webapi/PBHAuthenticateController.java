@@ -1,8 +1,9 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.LoginRequestBody;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
@@ -10,9 +11,6 @@ import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
-@IgnoreScan
 public final class PBHAuthenticateController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
@@ -64,23 +61,30 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
             throw new NeedInitException();
         }
 
-        if(!webContainer.allowAttemptLogin(userIp(ctx))){
+        if (!webContainer.allowAttemptLogin(userIp(ctx), ctx.userAgent())) {
             throw new IPAddressBannedException();
         }
 
-        LoginRequest loginRequest = ctx.bodyAsClass(LoginRequest.class);
-        if(loginRequest == null){
+        if(!ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)){
+            webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
+            ctx.sessionAttribute("authenticated", webContainer.getToken());
+            ctx.json(new StdResp(true, "DEBUG: Skipping WebUI login", null));
+            return;
+        }
+
+        LoginRequestBody loginRequestBody = ctx.bodyAsClass(LoginRequestBody.class);
+        if (loginRequestBody == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
             return;
         }
-        if ( !webContainer.getToken().equals(loginRequest.getToken())) {
+        if (!webContainer.getToken().equals(loginRequestBody.getToken())) {
             ctx.status(HttpStatus.UNAUTHORIZED);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.WEBAPI_AUTH_INVALID_TOKEN), null));
-            webContainer.markLoginFailed(userIp(ctx));
+            webContainer.markLoginFailed(userIp(ctx), ctx.userAgent());
             return;
         }
-        webContainer.markLoginSuccess(userIp(ctx));
+        webContainer.markLoginSuccess(userIp(ctx), ctx.userAgent());
         ctx.sessionAttribute("authenticated", webContainer.getToken());
         ctx.json(new StdResp(true, tl(locale(ctx), Lang.WEBAPI_AUTH_OK), null));
     }
@@ -91,10 +95,4 @@ public final class PBHAuthenticateController extends AbstractFeatureModule {
 
     }
 
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    static class LoginRequest {
-        private String token;
-    }
 }

@@ -120,11 +120,12 @@ public final class PersistMetrics implements BasicMetrics {
                     metadata.getPeer().getUploaded(),
                     metadata.getPeer().getDownloaded(),
                     metadata.getPeer().getProgress(),
+                    metadata.getTorrent().getProgress(),
                     torrentEntity,
                     rule,
                     metadata.getDescription(),
-                    metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags().toString(),
-                    metadata.getDownloader()
+                    metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags(),
+                    metadata.getDownloader().id()
             ));
         } catch (SQLException e) {
             log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);

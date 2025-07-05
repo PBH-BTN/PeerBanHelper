@@ -1,12 +1,11 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.database.dao.impl.AlertDao;
 import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.paging.Page;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.AlertDTO;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -21,7 +20,6 @@ import java.sql.Timestamp;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
-@IgnoreScan
 public final class PBHAlertController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
@@ -108,11 +106,6 @@ public final class PBHAlertController extends AbstractFeatureModule {
 
     @Override
     public void onDisable() {
-
-    }
-
-    record AlertDTO(Long id, Timestamp createAt, Timestamp readAt, AlertLevel level, String identifier, String title,
-                    String content) {
 
     }
 }

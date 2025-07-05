@@ -2,7 +2,6 @@ package com.ghostchu.peerbanhelper.module.impl.background;
 
 import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-@IgnoreScan
 public final class BackgroundModule extends AbstractFeatureModule implements Reloadable {
     private final TorrentDao torrentDao;
     private ScheduledExecutorService pool;

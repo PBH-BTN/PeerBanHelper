@@ -15,8 +15,6 @@ public final class DelugeListMethodsResponse extends DelugeResponse {
     public DelugeListMethodsResponse(Integer httpResponseCode, JSONObject response) throws DelugeException {
         super(httpResponseCode, response);
         JSONArray jsonArray = response.getJSONArray("result");
-        jsonArray.forEach(object -> {
-            delugeSupportedMethods.add((String) object);
-        });
+        jsonArray.forEach(object -> delugeSupportedMethods.add((String) object));
     }
 }

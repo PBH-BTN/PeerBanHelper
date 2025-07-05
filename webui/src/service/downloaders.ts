@@ -11,11 +11,11 @@ import { useEndpointStore } from '@/stores/endpoint'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
 
-export async function getClientStatus(name: string): Promise<CommonResponse<ClientStatus>> {
+export async function getClientStatus(id: string): Promise<CommonResponse<ClientStatus>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
   const url = new URL(
-    urlJoin(endpointStore.endpoint, `api/downloaders/${encodeURIComponent(name)}/status`),
+    urlJoin(endpointStore.endpoint, `api/downloaders/${encodeURIComponent(id)}/status`),
     location.href
   )
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
@@ -121,7 +121,7 @@ export async function DeleteDownloader(name: string): Promise<CommonResponseWith
 }
 
 export async function getPeer(
-  downloader: string,
+  downloaderId: string,
   torrentId: string
 ): Promise<CommonResponse<PeerInfo[]>> {
   const endpointStore = useEndpointStore()
@@ -129,7 +129,7 @@ export async function getPeer(
   const url = new URL(
     urlJoin(
       endpointStore.endpoint,
-      `/api/downloaders/${encodeURIComponent(downloader)}/torrent/${torrentId}/peers`
+      `/api/downloaders/${encodeURIComponent(downloaderId)}/torrent/${torrentId}/peers`
     ),
     location.href
   )

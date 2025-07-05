@@ -15,3 +15,5 @@ components.jcef=[Optional] JCEF
 components.jcef.description=Optional JCEF (Java Chromium Embedded Framework) for WebUI console tab support in GUI mode. If disabled, the WebUI console tab will be hidden and users must access WebUI via system browser. (Will be downloaded at launch when enabled)
 components.disable-checking-updates=[Optional] Disable Auto-Update
 components.disable-checking-updates.description=Disables install4j's update checks and auto-upgrade. Manual updates via installer will be required for new versions. Note: PBH-BTN only provides technical support and API services for the latest 3 versions. Outdated versions may lose access to APIs, BTN network, or rule subscriptions (especially when rule formats change).
+components.qt6=[Optional] Qt6
+components.qt6.description=Qt6 UI Framework, Allows you using Qt6 on Windows x64 platform to resolve some random crashes when use Swing UI.

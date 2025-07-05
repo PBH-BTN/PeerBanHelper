@@ -26,16 +26,27 @@ export enum ClientTypeEnum {
 }
 
 export interface Downloader {
+  id: string
   name: string
   endpoint: string
   type: ClientStatusEnum
+  paused: boolean
+}
+
+export interface DownloaderBasicInfo {
+  id: string
+  name: string
+  type: ClientTypeEnum
 }
 
 export interface Torrent {
   id: string
   size: number
+  completedSize: number
   name: string
   hash: string
+  privateTorrent: boolean
+  progress: number
   rtDownloadSpeed: number
   rtUploadSpeed: number
 }
@@ -186,6 +197,12 @@ interface TorrentWrapper {
    * 种子大小（bytes）
    */
   size?: number
+
+  completedSize?: number
+
+  privateTorrent?: boolean
+
+  progress?: number
 }
 
 export type downloaderConfig =
@@ -197,6 +214,7 @@ export type downloaderConfig =
 
 export interface qBittorrentConfig {
   type: ClientTypeEnum.qBittorrent
+  name: string
   endpoint: string
   username: string
   password: string
@@ -210,6 +228,7 @@ export interface qBittorrentConfig {
 
 export interface qBittorrentEEConfig {
   type: ClientTypeEnum.qBittorrentEE
+  name: string
   endpoint: string
   username: string
   password: string
@@ -229,6 +248,7 @@ interface BasicAuth {
 
 export interface transmissionConfig {
   type: ClientTypeEnum.Transmission
+  name: string
   endpoint: string
   username: string
   password: string
@@ -241,6 +261,7 @@ export interface transmissionConfig {
 
 export interface biglybtConfig {
   type: ClientTypeEnum.BiglyBT
+  name: string
   endpoint: string
   token: string
   httpVersion: string
@@ -251,6 +272,7 @@ export interface biglybtConfig {
 
 export interface delugeConfig {
   type: ClientTypeEnum.Deluge
+  name: string
   endpoint: string
   password: string
   httpVersion: string
@@ -263,6 +285,7 @@ export interface delugeConfig {
 
 export interface bitCometConfig {
   type: ClientTypeEnum.BitComet
+  name: string
   endpoint: string
   username: string
   password: string
@@ -274,6 +297,6 @@ export interface bitCometConfig {
 }
 
 export interface CreateDownloadRequest {
-  name: string
+  id: string
   config: downloaderConfig
 }

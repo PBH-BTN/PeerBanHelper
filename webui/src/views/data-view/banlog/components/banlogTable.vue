@@ -65,6 +65,18 @@
         </a-tooltip>
       </p>
     </template>
+    <template #torrentName="{ record }">
+      <a-tooltip
+        :content="
+          t('page.banlog.banlogTable.column.torrentName.tooltip', {
+            downloader: record.downloader?.name,
+            hash: record.torrentInfoHash
+          })
+        "
+      >
+        <p>{{ record.torrentName }}</p>
+      </a-tooltip>
+    </template>
     <template #torrentSize="{ record }">
       <a-tooltip :content="`Hash: ${record.torrentInfoHash}`">
         <p>{{ formatFileSize(record.torrentSize) }}</p>
@@ -146,6 +158,7 @@ const columns = [
   {
     title: () => t('page.banlog.banlogTable.column.torrentName'),
     dataIndex: 'torrentName',
+    slotName: 'torrentName',
     ellipsis: true,
     tooltip: true
   },

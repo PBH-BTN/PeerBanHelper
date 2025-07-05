@@ -237,12 +237,10 @@ public class AboutWindow {
 
     private void processCommand(Object item) {
         try {
-            if (item instanceof SpeedCommand) {
-                SpeedCommand cmd = (SpeedCommand) item;
+            if (item instanceof SpeedCommand cmd) {
                 delay = cmd.speed;
                 printTimer.setDelay(delay);
-            } else if (item instanceof ColorCommand) {
-                ColorCommand cmd = (ColorCommand) item;
+            } else if (item instanceof ColorCommand cmd) {
                 fgColor = cmd.fg;
                 bgColor = cmd.bg;
                 textPane.setForeground(fgColor);
@@ -275,21 +273,10 @@ public class AboutWindow {
     }
 
     // 命令类定义
-    private static class SpeedCommand {
-        final int speed;
-
-        SpeedCommand(int speed) {
-            this.speed = speed;
-        }
+        private record SpeedCommand(int speed) {
     }
 
-    private static class ColorCommand {
-        final Color fg, bg;
-
-        ColorCommand(Color fg, Color bg) {
-            this.fg = fg;
-            this.bg = bg;
-        }
+    private record ColorCommand(Color fg, Color bg) {
     }
 
     private static class ClearCommand {
@@ -300,11 +287,9 @@ public class AboutWindow {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new AboutWindow(Map.of(
-                    "{version}", "1.0.0",
-                    "{username}", System.getProperty("user.name")
-            ));
-        });
+        SwingUtilities.invokeLater(() -> new AboutWindow(Map.of(
+                "{version}", "1.0.0",
+                "{username}", System.getProperty("user.name")
+        )));
     }
 }

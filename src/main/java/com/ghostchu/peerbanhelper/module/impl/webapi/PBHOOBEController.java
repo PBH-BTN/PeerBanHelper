@@ -2,9 +2,9 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -27,10 +27,11 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
  */
 @Component
 @Slf4j
-@IgnoreScan
 public final class PBHOOBEController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
+    @Autowired
+    private DownloaderManagerImpl downloaderManager;
 
     @Override
     public boolean isConfigurable() {
@@ -70,13 +71,10 @@ public final class PBHOOBEController extends AbstractFeatureModule {
         conf.set("server.token", token);
         conf.save(Main.getMainConfigFile());
         webContainer.setToken(token);
-        String name = draftDownloader.get("name").getAsString();
-        if (name.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
-        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
-        Downloader downloader = getServer().createDownloader(name, config);
-        if (getServer().registerDownloader(downloader)) {
+        String id = draftDownloader.get("id").getAsString();
+        Downloader downloader = downloaderManager.createDownloader(id, config);
+        if (downloaderManager.registerDownloader(downloader)) {
             ctx.status(HttpStatus.CREATED);
             ctx.json(new StdResp(true, tl(locale(ctx), Lang.DOWNLOADER_API_CREATED), null));
         } else {
@@ -84,7 +82,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_CREATION_FAILED_ALREADY_EXISTS), null));
         }
         try {
-            getServer().saveDownloaders();
+            downloaderManager.saveDownloaders();
         } catch (IOException e) {
             log.error("Internal server error, unable to create downloader due an I/O exception", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -99,17 +97,14 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.OOBE_DISALLOW_REINIT), null));
             return false;
         }
-        String name = draftDownloader.get("name").getAsString();
-        if (name.contains(".")) {
-            throw new IllegalArgumentException("Illegal character (.) in name: " + name);
-        }
         JsonObject config = draftDownloader.get("config").getAsJsonObject();
 //        if (getServer().getDownloaders().stream().anyMatch(d -> d.getName().equals(name))) {
 //            ctx.status(HttpStatus.CONFLICT);
 //            ctx.json(Map.of("message", Lang.DOWNLOADER_API_TEST_NAME_EXISTS));
 //            return;
 //        }
-        Downloader downloader = getServer().createDownloader(name, config);
+        String id = draftDownloader.get("id").getAsString();
+        Downloader downloader = downloaderManager.createDownloader(id, config);
         if (downloader == null) {
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(new StdResp(false, tl(locale(ctx), Lang.DOWNLOADER_API_ADD_FAILURE), null));
@@ -120,7 +115,7 @@ public final class PBHOOBEController extends AbstractFeatureModule {
             if (testResult.success()) {
                 ctx.json(new StdResp(testResult.success(), tl(locale(ctx), Lang.DOWNLOADER_API_TEST_OK), null));
             } else {
-                ctx.json(new StdResp(false, tl(locale(ctx), testResult.getMessage()), null));
+                ctx.json(new StdResp(false, tl(locale(ctx), testResult.message()), null));
             }
             downloader.close();
             return true;
@@ -136,11 +131,5 @@ public final class PBHOOBEController extends AbstractFeatureModule {
     @Override
     public void onDisable() {
 
-    }
-
-    record ModuleRecord(
-            String className,
-            PBHDownloaderController.DraftDownloader draftDownloader
-    ) {
     }
 }

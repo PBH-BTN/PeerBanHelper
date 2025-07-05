@@ -11,9 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public final class BtnBanPing {
-    @SerializedName("populate_time")
-    private long populateTime;
     @SerializedName("bans")
     private List<BtnBan> bans;
-
 }

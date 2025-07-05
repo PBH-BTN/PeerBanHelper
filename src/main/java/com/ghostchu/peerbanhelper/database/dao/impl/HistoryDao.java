@@ -1,13 +1,13 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.paging.Page;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.support.ConnectionSource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,8 +25,8 @@ import java.util.regex.Pattern;
 public final class HistoryDao extends AbstractPBHDao<HistoryEntity, Long> {
     private final Pattern sqlSafePattern;
 
-    public HistoryDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), HistoryEntity.class);
+    public HistoryDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, HistoryEntity.class);
         this.sqlSafePattern = Pattern.compile("^[A-Za-z0-9]+$");
     }
 

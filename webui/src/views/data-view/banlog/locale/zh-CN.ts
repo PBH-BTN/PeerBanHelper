@@ -8,6 +8,7 @@ export default {
   'page.banlog.banlogTable.column.peerId': 'Peer ID',
   'page.banlog.banlogTable.column.trafficSnapshot': '流量快照',
   'page.banlog.banlogTable.column.torrentName': '种子名',
+  'page.banlog.banlogTable.column.torrentName.tooltip': '下载器: {downloader}, Hash: {hash}',
   'page.banlog.banlogTable.column.torrentSize': '大小',
   'page.banlog.banlogTable.column.description': '描述',
   'page.banlog.radio.viewMode': '视图模式',

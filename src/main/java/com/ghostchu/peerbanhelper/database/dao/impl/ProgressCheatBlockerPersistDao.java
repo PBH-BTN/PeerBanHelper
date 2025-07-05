@@ -1,11 +1,11 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ProgressCheatBlockerPersistEntity;
 import com.ghostchu.peerbanhelper.module.impl.rule.ProgressCheatBlocker;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.support.ConnectionSource;
 import inet.ipaddr.IPAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public final class ProgressCheatBlockerPersistDao extends AbstractPBHDao<ProgressCheatBlockerPersistEntity, Long> {
-    public ProgressCheatBlockerPersistDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), ProgressCheatBlockerPersistEntity.class);
+    public ProgressCheatBlockerPersistDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, ProgressCheatBlockerPersistEntity.class);
     }
 
     public List<ProgressCheatBlocker.ClientTask> fetchFromDatabase(ProgressCheatBlocker.Client client, Timestamp after) throws SQLException {

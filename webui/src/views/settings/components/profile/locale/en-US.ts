@@ -139,7 +139,16 @@ export default {
     'Set the traffic alert threshold, when the threshold is exceeded, an alert message will be sent to remind you to check the status of the downloader.',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
     'Daily traffic alert threshold',
-
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable':
+    'Enable traffic limit',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic':
+    'Daily maximum allowed upload traffic',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed':
+    'Minimum speed',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.warning':
+    'If minimum speed is set, the above daily maximum allowed upload traffic may not be obeyed',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed':
+    'Maximum speed',
   'page.settings.tab.profile.module.ptrBlackList.title': 'DNS Reserve Lookup blocker',
   'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': 'Use global ban duration',
   'page.settings.tab.profile.module.ptrBlackList.reserveName': 'Banned name',

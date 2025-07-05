@@ -6,9 +6,7 @@
           class="edit-btn"
           shape="circle"
           type="text"
-          @click="
-            () => emits('edit-click', { name: downloader.name, config: client?.data?.config!! })
-          "
+          @click="() => emits('edit-click', { id: downloader.id, config: client?.data?.config!! })"
         >
           <template #icon>
             <icon-edit />
@@ -152,7 +150,7 @@ const emits = defineEmits<{
   (
     e: 'edit-click',
     downloader: {
-      name: string
+      id: string
       config: downloaderConfig
     }
   ): void
@@ -167,16 +165,16 @@ const getStatusSafe = (status: ClientStatus | undefined): string[] =>
 const { data: client } = useRequest(
   getClientStatus,
   {
-    cacheKey: () => `${endpointState.endpoint}-clientStatus-${downloader.value.name}`,
-    defaultParams: [downloader.value.name],
-    refreshDeps: [() => downloader.value.name]
+    cacheKey: () => `${endpointState.endpoint}-clientStatus-${downloader.value.id}`,
+    defaultParams: [downloader.value.id],
+    refreshDeps: [() => downloader.value.id]
   },
   [useAutoUpdatePlugin]
 )
 
 const handleDelete = async () => {
   try {
-    const result = await DeleteDownloader(downloader.value.name)
+    const result = await DeleteDownloader(downloader.value.id)
     if (!result.success) {
       throw new Error(result.message)
     } else {

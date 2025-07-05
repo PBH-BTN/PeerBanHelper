@@ -1,7 +1,5 @@
 package com.ghostchu.peerbanhelper.util.rule;
 
-import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
