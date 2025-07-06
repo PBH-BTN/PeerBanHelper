@@ -80,8 +80,8 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     private void handleDetails(@NotNull Context context) {
         Pageable pageable = new Pageable(context);
         try {
-            var page = trackedSwarmDao.queryByPaging(new Orderable(Map.of(), context).apply(trackedSwarmDao.queryBuilder()), pageable);
-
+            var page = trackedSwarmDao.queryByPaging(new Orderable(Map.of(), context)
+                    .apply(trackedSwarmDao.queryBuilder()), pageable);
             context.json(new StdResp(true, null, page));
         } catch (SQLException e) {
             log.error("Unable to retrieve tracked swarm data", e);
