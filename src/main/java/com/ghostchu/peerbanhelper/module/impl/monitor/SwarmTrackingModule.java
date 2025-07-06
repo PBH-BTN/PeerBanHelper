@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.database.table.tmp.TrackedSwarmEntity;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.MonitorFeatureModule;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
@@ -79,7 +80,8 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     private void handleDetails(@NotNull Context context) {
         Pageable pageable = new Pageable(context);
         try {
-            var page = trackedSwarmDao.queryByPaging(pageable);
+            var page = trackedSwarmDao.queryByPaging(new Orderable(Map.of(), context).apply(trackedSwarmDao.queryBuilder()), pageable);
+
             context.json(new StdResp(true, null, page));
         } catch (SQLException e) {
             log.error("Unable to retrieve tracked swarm data", e);
