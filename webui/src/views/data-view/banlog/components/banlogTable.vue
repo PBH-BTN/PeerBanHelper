@@ -159,6 +159,11 @@ const columns = [
   {
     title: () => t('page.banlog.banlogTable.column.trafficSnapshot'),
     slotName: 'peerStatus',
+    dataIndex: 'peerUploaded',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
     width: 150
   },
   {
@@ -190,7 +195,7 @@ const sorterChange = (dataIndex: string, direction: string) => {
   run({
     page: current.value,
     pageSize: pageSize.value,
-    sorter: `${dataIndex}|${direction === 'ascend' ? 'asc' : 'desc'}`
+    sorter: `${dataIndex}|${direction}`
   })
 }
 </script>

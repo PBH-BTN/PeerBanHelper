@@ -201,7 +201,7 @@ const sorterChange = (dataIndex: string, direction: string) => {
   run({
     page: current.value,
     pageSize: pageSize.value,
-    sorter: `${dataIndex}|${direction === 'ascend' ? 'asc' : 'desc'}`
+    sorter: `${dataIndex}|${direction}`
   })
 }
 const endpointStore = useEndpointStore()
