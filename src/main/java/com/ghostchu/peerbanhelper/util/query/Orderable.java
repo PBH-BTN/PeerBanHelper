@@ -46,7 +46,7 @@ public class Orderable extends LinkedHashMap<String, Boolean> {
             String[] spilt = orderBy.split("\\|");
             if (spilt.length == 0) continue;
             String dtoName = spilt[0];
-            boolean asc = spilt.length < 2 || !spilt[1].equalsIgnoreCase("desc");
+            boolean asc = spilt.length < 2 || (!spilt[1].equalsIgnoreCase("desc") && !spilt[1].equalsIgnoreCase("descend"));
             put(dualDirectionMapping.inverse().getOrDefault(dtoName, dtoName), asc); // so we put the databaseName in orders
         }
         return this;
