@@ -29,6 +29,7 @@
         size="medium"
         class="banlog-table"
         @page-change="changeCurrent"
+        @sorter-change="sorterChange"
         @page-size-change="changePageSize"
       >
         <template #address="{ record }">
@@ -134,10 +135,12 @@ const { t, d } = useI18n()
 const endpointState = useEndpointStore()
 
 const visible = ref(false)
+const currentInfoHash = ref('')
 const name = ref('')
 defineExpose({
   showModal: (infoHash: string, torrentName: string) => {
     name.value = torrentName
+    currentInfoHash.value = infoHash
     runAsync({ page: 1, pageSize: 10, infoHash })
     visible.value = true
   }
@@ -177,7 +180,12 @@ const columns = [
   },
   {
     title: () => t('page.torrentList.accessHistory.column.traffic'),
-    slotName: 'traffic'
+    slotName: 'traffic',
+    dataIndex: 'uploaded',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    }
   },
   {
     title: () =>
@@ -203,6 +211,22 @@ const parseFlags = (flags: string) =>
   flags
     .split(' ')
     .map((flag) => flag + ' - ' + t('page.dashboard.peerList.column.flags.' + flag.trim()))
+
+const sorterChange = (dataIndex: string, direction: string) => {
+  if (!direction)
+    runAsync({
+      page: current.value,
+      pageSize: pageSize.value,
+      infoHash: currentInfoHash.value
+    })
+  else
+    runAsync({
+      page: current.value,
+      pageSize: pageSize.value,
+      infoHash: currentInfoHash.value,
+      sorter: `${dataIndex}|${direction}`
+    })
+}
 </script>
 <style scoped>
 .red {

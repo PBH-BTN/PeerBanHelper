@@ -36,6 +36,7 @@ export async function GetTorrentAccessHistoryList(params: {
   infoHash: string
   page: number
   pageSize?: number
+  sorter?: string
 }): Promise<CommonResponseWithPage<AccessHistory[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -48,6 +49,9 @@ export async function GetTorrentAccessHistoryList(params: {
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))
   }
+  if (params.sorter) {
+    url.searchParams.set('orderBy', params.sorter)
+  }
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
     endpointStore.assertResponseLogin(res)
@@ -59,6 +63,7 @@ export async function GetTorrentBanHistoryList(params: {
   infoHash: string
   page: number
   pageSize?: number
+  sorter?: string
 }): Promise<CommonResponseWithPage<BanLog[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -70,6 +75,9 @@ export async function GetTorrentBanHistoryList(params: {
   url.searchParams.set('page', String(params.page))
   if (params.pageSize) {
     url.searchParams.set('pageSize', String(params.pageSize))
+  }
+  if (params.sorter) {
+    url.searchParams.set('orderBy', params.sorter)
   }
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {
