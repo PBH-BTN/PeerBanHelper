@@ -368,7 +368,6 @@ public final class SwingMainWindow extends JFrame {
                     });
                 }
             });
-            menu.addSeparator();
             menu.add(disableCheckUpdates);
             menu.add(enableCheckUpdates);
             return menu;

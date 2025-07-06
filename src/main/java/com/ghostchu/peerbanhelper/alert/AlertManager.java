@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.alert;
 
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface AlertManager {
 
@@ -34,4 +35,9 @@ public interface AlertManager {
      */
     void publishAlert(boolean push, @NotNull AlertLevel level, @NotNull String identifier, @NotNull TranslationComponent title, @NotNull TranslationComponent content);
 
+    /**
+     * 获取当前所有未读警报中最高等级的警报等级
+     * @return 当前所有未读警报中最高等级的警报等级，如果没有未读警报则返回 null
+     */
+     @Nullable AlertLevel getHighestUnreadAlertLevel();
 }

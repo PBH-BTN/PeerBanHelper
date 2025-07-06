@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.push.PushManagerImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,6 @@ public final class AlertManagerImpl implements AlertManager {
         this.alertDao = alertDao;
         this.pushManager = pushManager;
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, 1, TimeUnit.DAYS);
-
     }
 
     private void cleanup() {
@@ -124,6 +124,26 @@ public final class AlertManagerImpl implements AlertManager {
             log.error(tlUI(Lang.UNABLE_TO_PUSH_ALERT), e);
         }
 
+    }
+
+    @Override
+    public @Nullable AlertLevel getHighestUnreadAlertLevel() {
+        AlertLevel alertLevel = null;
+        try {
+            var unreadAlerts = alertDao.getUnreadAlertsUnPaged();
+            for (AlertEntity unreadAlert : unreadAlerts) {
+              if(alertLevel == null) {
+                  alertLevel = unreadAlert.getLevel();
+                  continue;
+              }
+              if(unreadAlert.getLevel().ordinal() > alertLevel.ordinal()) {
+                  alertLevel = unreadAlert.getLevel();
+              }
+            }
+        } catch (SQLException ignored) {
+
+        }
+        return alertLevel;
     }
 
 }

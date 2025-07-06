@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
@@ -13,7 +14,10 @@ import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.*;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.UnsupportedPlatformTheme;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
@@ -49,6 +53,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
     @Getter
     private SwingTaskbarControl swingTaskbarControl;
+
+    private final Icon icon = new FlatSVGIcon(Main.class.getResource("/assets/icon/common/alert.svg"));
 
     public SwingGuiImpl(String[] args) {
         super(args);
@@ -92,6 +98,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             taskbarControl().updateProgress(mainWindow, TaskbarState.OFF, -1.0f);
         }
     }
+
 
     @Override
     public String getName() {
@@ -183,10 +190,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (ExternalSwitch.parseBoolean("pbh.gui.pbhplus-theme", false) && ExchangeMap.PBH_PLUS_ACTIVATED) {
             pbhFlatLafTheme = new PBHPlusTheme();
         }
-        // Snapshot?
-        if (ExternalSwitch.parseBoolean("pbh.gui.insider-theme", true) && Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
-            pbhFlatLafTheme = new SnapshotTheme();
-        }
+//        // Snapshot?
+//        if (ExternalSwitch.parseBoolean("pbh.gui.insider-theme", true) && Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+//            pbhFlatLafTheme = new SnapshotTheme();
+//        }
         // Unsupported platform?
         if (ExchangeMap.UNSUPPORTED_PLATFORM && ExternalSwitch.parseBoolean("pbh.gui.useIncompatiblePlatformTheme", false)) {
             pbhFlatLafTheme = new UnsupportedPlatformTheme();
@@ -303,9 +310,9 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         var maxSize = ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300);
 
         JListAppender.allowWriteLogEntryDeque.set(true);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(()-> SwingUtilities.invokeLater(() -> {
+        CommonUtil.getScheduler().scheduleWithFixedDelay(() -> SwingUtilities.invokeLater(() -> {
             DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
-            while (!JListAppender.logEntryDeque.isEmpty()){
+            while (!JListAppender.logEntryDeque.isEmpty()) {
                 var logEntry = JListAppender.logEntryDeque.poll();
                 if (logEntry == null) return;
                 model.addElement(logEntry);
