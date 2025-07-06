@@ -83,7 +83,8 @@ public class Database {
             try (var stmt = rawConnection.createStatement()) {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
                 stmt.executeUpdate("PRAGMA journal_mode = WAL");
-                stmt.executeUpdate("PRAGMA mmap_size = 50331648");
+                stmt.executeUpdate("PRAGMA mmap_size = 0");
+                stmt.executeUpdate("PRAGMA soft_heap_limit = 16777216");
                 stmt.executeUpdate("PRAGMA OPTIMIZE");
                 try {
                     if (System.currentTimeMillis() - getLastMaintenanceTime() >= Duration.ofDays(Main.getMainConfig().getInt("persist.vacuum-interval-days")).toMillis()) {

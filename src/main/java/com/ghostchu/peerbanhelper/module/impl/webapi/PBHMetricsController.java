@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
@@ -14,17 +15,20 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+@Slf4j
 @Component
 public final class PBHMetricsController extends AbstractFeatureModule {
     @Autowired
@@ -36,6 +40,8 @@ public final class PBHMetricsController extends AbstractFeatureModule {
     private JavalinWebContainer webContainer;
     @Autowired
     private DownloaderServer downloaderServer;
+    @Autowired
+    private TrackedSwarmDao trackedSwarmDao;
 
     @Override
     public boolean isConfigurable() {
@@ -211,6 +217,20 @@ public final class PBHMetricsController extends AbstractFeatureModule {
         map.put("peerUnbanCounter", metrics.getPeerUnbanCounter());
         map.put("banlistCounter", downloaderServer.getBannedPeers().size());
         map.put("bannedIpCounter", downloaderServer.getBannedPeers().keySet().stream().map(PeerAddress::getIp).distinct().count());
+        map.put("wastedTraffic", metrics.getWastedTraffic());
+        //map.put("savedTraffic", metrics.getSavedTraffic());
+        try {
+            long trackedPeers = trackedSwarmDao.countOf();
+            map.put("trackedSwarmCount", trackedPeers);
+            if(trackedPeers > 0) {
+                map.put("peersBlockRate", (double) metrics.getPeerBanCounter() / trackedPeers);
+            }else{
+                map.put("peersBlockRate", 0.0d);
+            }
+        } catch (SQLException e) {
+            map.put("peersBlockRate", 0.0d);
+            log.error("Unable to query tracked swarm count", e);
+        }
         ctx.json(new StdResp(true, null, map));
     }
 

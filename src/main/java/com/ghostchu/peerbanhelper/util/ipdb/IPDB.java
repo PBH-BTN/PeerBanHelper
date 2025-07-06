@@ -81,6 +81,7 @@ public final class IPDB implements AutoCloseable {
 //        this.userAgent = userAgent;
         this.httpClient = Methanol
                 .newBuilder()
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(userAgent)

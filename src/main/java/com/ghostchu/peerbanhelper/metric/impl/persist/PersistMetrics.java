@@ -82,6 +82,16 @@ public final class PersistMetrics implements BasicMetrics {
     }
 
     @Override
+    public long getSavedTraffic() {
+        return inMemory.getSavedTraffic();
+    }
+
+    @Override
+    public long getWastedTraffic() {
+        return inMemory.getWastedTraffic();
+    }
+
+    @Override
     public void recordCheck() {
         inMemory.recordCheck();
     }

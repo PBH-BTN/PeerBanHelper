@@ -81,7 +81,6 @@ public class PeerBanHelper implements Reloadable {
 
     public PeerBanHelper() {
         reloadConfig();
-
     }
 
     private void reloadConfig() {

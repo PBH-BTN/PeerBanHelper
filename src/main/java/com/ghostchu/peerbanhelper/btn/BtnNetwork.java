@@ -218,6 +218,7 @@ public final class BtnNetwork implements Reloadable {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         this.httpClient = Methanol
                 .newBuilder()
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(Main.getUserAgent())
                 .defaultHeader("Content-Type", "application/json")

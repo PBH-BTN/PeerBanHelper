@@ -11,6 +11,10 @@ public interface BasicMetrics {
 
     long getPeerUnbanCounter();
 
+    long getSavedTraffic();
+
+    long getWastedTraffic();
+
     void recordCheck();
 
     void recordPeerBan(@NotNull PeerAddress address, @NotNull BanMetadata metadata);
