@@ -192,11 +192,17 @@ const columns = [
 ]
 const list = computed(() => data.value?.data.results)
 const sorterChange = (dataIndex: string, direction: string) => {
-  run({
-    page: current.value,
-    pageSize: pageSize.value,
-    sorter: `${dataIndex}|${direction}`
-  })
+  if (!direction)
+    run({
+      page: current.value,
+      pageSize: pageSize.value
+    })
+  else
+    run({
+      page: current.value,
+      pageSize: pageSize.value,
+      sorter: `${dataIndex}|${direction}`
+    })
 }
 </script>
 
