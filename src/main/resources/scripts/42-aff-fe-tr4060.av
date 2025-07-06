@@ -1,4 +1,9 @@
-```
+## @NAME 拦截 Transmission 4.0.6 (IPV6 42:aff:fe) 多拨伪装吸血
+## @AUTHOR PBH-BTN Community
+## @CACHEABLE true
+## @VERSION 1.0
+## @THREADSAFE true
+
 if(isBlank(peer.clientName)) {
     return false; ## 下载器必须提供 ClientName
 }
@@ -15,4 +20,3 @@ if(string.contains(strIp, "42:aff:fe")){
 }
 
 return false;
-```
