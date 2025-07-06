@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.config;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.configuration.MemoryConfiguration;
@@ -34,26 +35,17 @@ public final class MainConfigUpdateScript {
     @UpdateScript(version = 34)
     public void cleanupUnusedFiles(){
         File decentralized = new File(Main.getDataDirectory(), "decentralized");
-        if(decentralized.exists()){
-            decentralized.delete();
-        }
+        CommonUtil.deleteFileOrDirectory(decentralized);
         File ipfs = new File(Main.getDataDirectory(), "ipfs");
-        if(ipfs.exists()){
-            ipfs.delete();
-        }
-
+        CommonUtil.deleteFileOrDirectory(ipfs);
         File p2p = new File(Main.getDataDirectory(), "p2p");
-        if(p2p.exists()){
-            p2p.delete();
-        }
+        CommonUtil.deleteFileOrDirectory(p2p);
     }
 
     @UpdateScript(version = 33)
     public void cleanupDownloadedJCEFComponents(){
         File jcefDirectory = new File(Main.getDataDirectory(), "jcef");
-        if(jcefDirectory.exists()){
-            jcefDirectory.delete();
-        }
+        CommonUtil.deleteFileOrDirectory(jcefDirectory);
     }
 
     @UpdateScript(version = 32)
