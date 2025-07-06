@@ -452,8 +452,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()),
                         StructuredData.create()
                         .add("type", "ip")
-                        .add("category", category)
-                        .add("rule", matchResult.metadata()));
+                        .add("category", category));
             }
         }
         return null;
