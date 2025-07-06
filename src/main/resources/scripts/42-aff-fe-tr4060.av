@@ -1,4 +1,4 @@
-## @NAME 拦截 Transmission 4.0.6 (IPV6 42:aff:fe) 多拨伪装吸血
+## @NAME IPV6 42:aff:fe Transmission 4.0.6 刷流
 ## @AUTHOR PBH-BTN Community
 ## @CACHEABLE true
 ## @VERSION 1.0
@@ -16,7 +16,7 @@ if(!string.contains(peer.clientName, 'Transmission 4.0.6')){
 }
 
 if(string.contains(strIp, "42:aff:fe")){
-    return "Transmission 4.0.6 (IPV6 2408:822e:xxxx:xxxx:42:aff:fexx:50b) 多拨伪装吸血";
+    return "Transmission 4.0.6 (IPV6 42:aff:fe) 多拨伪装吸血";
 }
 
 return false;
