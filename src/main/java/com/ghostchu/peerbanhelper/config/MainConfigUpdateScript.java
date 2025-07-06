@@ -31,6 +31,23 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 34)
+    public void cleanupUnusedFiles(){
+        File decentralized = new File(Main.getDataDirectory(), "decentralized");
+        if(decentralized.exists()){
+            decentralized.delete();
+        }
+        File ipfs = new File(Main.getDataDirectory(), "ipfs");
+        if(ipfs.exists()){
+            ipfs.delete();
+        }
+
+        File p2p = new File(Main.getDataDirectory(), "p2p");
+        if(p2p.exists()){
+            p2p.delete();
+        }
+    }
+
     @UpdateScript(version = 33)
     public void cleanupDownloadedJCEFComponents(){
         File jcefDirectory = new File(Main.getDataDirectory(), "jcef");
