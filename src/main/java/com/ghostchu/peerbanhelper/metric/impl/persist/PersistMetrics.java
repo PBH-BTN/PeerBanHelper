@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.metric.impl.inmemory.InMemoryMetrics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
+import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.extern.slf4j.Slf4j;
@@ -135,7 +136,8 @@ public final class PersistMetrics implements BasicMetrics {
                     rule,
                     metadata.getDescription(),
                     metadata.getPeer().getFlags() == null ? null : metadata.getPeer().getFlags(),
-                    metadata.getDownloader().id()
+                    metadata.getDownloader().id(),
+                    metadata.getStructuredData() == null ? null : JsonUtil.standard().toJson(metadata.getStructuredData())
             ));
         } catch (SQLException e) {
             log.error(tlUI(Lang.DATABASE_SAVE_BUFFER_FAILED), e);

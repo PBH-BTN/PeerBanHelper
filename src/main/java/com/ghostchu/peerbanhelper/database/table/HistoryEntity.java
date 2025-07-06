@@ -48,4 +48,6 @@ public final class HistoryEntity {
     private String flags;
     @DatabaseField(canBeNull = false)
     private String downloader;
+    @DatabaseField(canBeNull = false, defaultValue = "{}")
+    private String structuredData;
 }

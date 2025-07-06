@@ -51,7 +51,7 @@ public final class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "12"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "13"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -145,7 +145,14 @@ public final class DatabaseHelper {
             }
             v = 12;
         }
-
+        if (v == 12) {
+            try {
+                database.getDataSource().getReadWriteConnection("history").executeStatement("ALTER TABLE history ADD COLUMN structuredData TEXT NOT NULL DEFAULT '{}'", DatabaseConnection.DEFAULT_RESULT_FLAGS);
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 13;
+        }
         version.setValue(String.valueOf(v));
         metadata.update(version);
     }

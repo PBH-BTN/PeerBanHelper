@@ -259,7 +259,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                                                 UUID.randomUUID().toString().replace("-", "")
                                                 , downloaderManager.getDownloadInfo(downloader.getId()),
                                                 System.currentTimeMillis(), System.currentTimeMillis() + actualBanDuration, detail.result().action() == PeerAction.BAN_FOR_DISCONNECT,
-                                                detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason());
+                                                detail.torrent(), detail.peer(), detail.result().rule(), detail.result().reason(), detail.result().structuredData());
                                         bannedPeers.add(banMetadata);
                                         banPeer(banlistClone, banMetadata, detail.torrent(), detail.peer());
                                         if (detail.result().action() != PeerAction.BAN_FOR_DISCONNECT) {

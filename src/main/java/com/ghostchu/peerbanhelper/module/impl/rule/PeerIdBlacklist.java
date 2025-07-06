@@ -97,7 +97,7 @@ public final class PeerIdBlacklist extends AbstractRuleFeatureModule implements 
         RuleMatchResult matchResult = RuleParser.matchRule(bannedPeers, peer.getPeerId());
         if (matchResult.hit()) {
             return new CheckResult(getClass(), PeerAction.BAN, banDuration, matchResult.rule().matcherName(), new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME, matchResult.comment()),
-                    StructuredData.create().add("matchResult",matchResult));
+                    StructuredData.create().add("rule",matchResult.rule().metadata()));
         }
         return pass();
         //}, true);

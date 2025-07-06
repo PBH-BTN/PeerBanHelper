@@ -22,9 +22,10 @@ public class BanMetadata extends PeerMetadata implements Serializable {
     private boolean banForDisconnect;
     private TranslationComponent rule;
     private TranslationComponent description;
+    private StructuredData<String, Object> structuredData;
 
     public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, Torrent torrent, Peer peer, TranslationComponent rule,
-                       TranslationComponent description) {
+                       TranslationComponent description, StructuredData<String, Object> structuredData) {
         super(downloader, torrent, peer);
         this.context = context;
         this.randomId = randomId;
@@ -33,10 +34,11 @@ public class BanMetadata extends PeerMetadata implements Serializable {
         this.banForDisconnect = banForDisconnect;
         this.rule = rule;
         this.description = description;
+        this.structuredData = structuredData;
     }
 
     public BanMetadata(String context, String randomId, DownloaderBasicInfo downloader, long banAt, long unbanAt, boolean banForDisconnect, TorrentWrapper torrent, PeerWrapper peer, TranslationComponent rule,
-                       TranslationComponent description) {
+                       TranslationComponent description, StructuredData<String, Object> structuredData) {
         super(downloader, torrent, peer);
         this.context = context;
         this.randomId = randomId;
@@ -45,6 +47,7 @@ public class BanMetadata extends PeerMetadata implements Serializable {
         this.banForDisconnect = banForDisconnect;
         this.rule = rule;
         this.description = description;
+        this.structuredData = structuredData;
     }
 
     @Override

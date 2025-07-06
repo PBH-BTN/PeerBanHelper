@@ -100,7 +100,7 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
                     matchResult.rule().matcherName(),
                     new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME,
                             matchResult.comment()),
-                    StructuredData.create().add("rule", matchResult.rule()));
+                    StructuredData.create().add("rule", matchResult.rule().metadata()));
         }
         return pass();
         //}, true);

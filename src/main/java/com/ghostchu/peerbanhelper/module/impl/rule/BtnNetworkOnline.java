@@ -342,7 +342,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "port")
                                 .add("category", category)
-                                .add("rule",matchResult.rule().matcherName()));
+                                .add("rule",matchResult.rule().metadata()));
             }
         }
         return null;
@@ -358,7 +358,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "portException")
                                 .add("category", category)
-                                .add("rule",matchResult.rule().matcherName()));
+                                .add("rule",matchResult.rule().metadata()));
             }
         }
         return null;
@@ -376,7 +376,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "clientName")
                                 .add("category", category)
-                                .add("rule", matchResult.rule()));
+                                .add("rule", matchResult.rule().metadata()));
             }
         }
         return null;
@@ -394,7 +394,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "clientNameException")
                                 .add("category", category)
-                                .add("rule", matchResult.rule()));
+                                .add("rule", matchResult.rule().metadata()));
             }
         }
         return null;
@@ -412,7 +412,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "peerId")
                                 .add("category", category)
-                                .add("rule", matchResult.rule()));
+                                .add("rule", matchResult.rule().metadata()));
             }
         }
         return null;
@@ -430,7 +430,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "peerIdException")
                                 .add("category", category)
-                                .add("rule", matchResult.rule()));
+                                .add("rule", matchResult.rule().metadata()));
             }
         }
         return null;
@@ -453,7 +453,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                         .add("type", "ip")
                         .add("category", category)
-                        .add("rule", matchResult));
+                        .add("rule", matchResult.metadata()));
             }
         }
         return null;
@@ -475,7 +475,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "ipException")
                                 .add("category", category)
-                                .add("rule", matchResult.rule()));
+                                .add("rule", matchResult.rule().metadata()));
             }
         }
         return null;
