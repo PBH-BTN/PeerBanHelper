@@ -138,7 +138,7 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                     ip,
                                     Optional.ofNullable(ipBanResultDTO.matchResult().comment()).orElse(new TranslationComponent(Lang.MODULE_IBL_COMMENT_UNKNOWN))
                             ),
-                            StructuredData.create().add("ruleName", ipBanResultDTO.ruleName()).add("matchResult", ipBanResultDTO.matchResult()));
+                            StructuredData.create().add("ruleName", ipBanResultDTO.ruleName()));
                 }
             } catch (Exception e) {
                 log.error(tlUI(Lang.IP_BAN_RULE_MATCH_ERROR), e);
