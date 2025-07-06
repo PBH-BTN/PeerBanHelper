@@ -105,7 +105,7 @@ public final class ScriptEngine {
                 }
             }
             AviatorEvaluator.getInstance().validate(scriptContent);
-            Expression expression = AviatorEvaluator.getInstance().compile(scriptContent, false);
+            Expression expression = AviatorEvaluator.getInstance().compile(scriptContent, true);
             return new CompiledScript(
                     file,
                     name,
