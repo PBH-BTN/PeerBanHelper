@@ -114,6 +114,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
         try {
             trackedSwarmDao.callBatchTasks(() -> {
                 for (Peer peer : peers) {
+                    if(peer.isHandshaking()) continue;
                     trackedSwarmDao.upsert(new TrackedSwarmEntity(
                             null,
                             peer.getPeerAddress().getAddress().toNormalizedString(),

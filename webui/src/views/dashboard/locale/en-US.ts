@@ -22,7 +22,11 @@ export default {
   'page.dashboard.statics.unbanPeer': 'Unban Peers',
   'page.dashboard.statics.currentBan': 'Currently banned Peers',
   'page.dashboard.statics.currentBanIps': 'Currently banned IP(s)',
+  'page.dashboard.statics.peerBlockRate': 'Peer Block Rate',
+  'page.dashboard.statics.trackingPeers': 'Tracked Peer Sessions',
   'page.dashboard.statics.number': '',
+  'page.dashboard.statics.percentage': '%',
+
   'page.dashboard.torrentList.title': 'Active Torrents',
   'page.dashboard.torrentList.column.name': 'Name',
   'page.dashboard.torrentList.column.size': 'Size',
