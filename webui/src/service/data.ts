@@ -9,6 +9,7 @@ export async function GetTorrentInfoList(params: {
   page: number
   pageSize?: number
   keyword?: string
+  sorter?: string
 }): Promise<CommonResponseWithPage<TorrentInfo[]>> {
   const endpointStore = useEndpointStore()
   await endpointStore.serverAvailable
@@ -20,6 +21,9 @@ export async function GetTorrentInfoList(params: {
   }
   if (params.keyword) {
     url.searchParams.set('keyword', params.keyword)
+  }
+  if (params.sorter) {
+    url.searchParams.set('orderBy', params.sorter)
   }
 
   return fetch(url, { headers: getCommonHeader() }).then((res) => {

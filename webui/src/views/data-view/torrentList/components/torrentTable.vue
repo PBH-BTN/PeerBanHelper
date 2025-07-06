@@ -29,6 +29,7 @@
       class="banlog-table"
       @page-change="changeCurrent"
       @page-size-change="changePageSize"
+      @sorter-change="sorterChange"
     >
       <template #size="{ record }">
         {{ formatFileSize(record.size) }}
@@ -177,6 +178,11 @@ const columns = [
   },
   {
     title: () => t('page.torrentList.column.count'),
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
+    dataIndex: 'peerBanCount',
     slotName: 'count'
   },
   {
@@ -191,7 +197,13 @@ const banHistoryModal = ref<InstanceType<typeof BanHistoryModal>>()
 const handleSearch = debounce((value: string) => {
   run({ page: current.value, pageSize: pageSize.value, keyword: value })
 }, 300)
-
+const sorterChange = (dataIndex: string, direction: string) => {
+  run({
+    page: current.value,
+    pageSize: pageSize.value,
+    sorter: `${dataIndex}|${direction === 'ascend' ? 'asc' : 'desc'}`
+  })
+}
 const endpointStore = useEndpointStore()
 const plusStatus = computed(() => endpointStore.plusStatus)
 </script>
