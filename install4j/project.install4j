@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="11.0.4" transformSequenceNumber="11">
   <directoryPresets config="../native/qt6" />
-  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="7.4.5" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="23">
+  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="8.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="23">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
@@ -132,6 +132,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
+      <vmOptionsFile mode="content" overwriteMode="2">
+        <content>-include-options ${LOCALAPPDATA}\PeerBanHelper\java.vmoptions</content>
+      </vmOptionsFile>
       <iconImageFiles>
         <file path="./icon.png" />
       </iconImageFiles>
@@ -146,6 +149,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
+      <vmOptionsFile mode="content" overwriteMode="2">
+        <content>-include-options ${LOCALAPPDATA}\PeerBanHelper\java.vmoptions</content>
+      </vmOptionsFile>
       <iconImageFiles>
         <file path="./icon.png" />
       </iconImageFiles>
@@ -160,6 +166,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
+      <vmOptionsFile mode="content" overwriteMode="2">
+        <content>-include-options ${LOCALAPPDATA}\PeerBanHelper\java.vmoptions</content>
+      </vmOptionsFile>
       <iconImageFiles>
         <file path="./icon.png" />
       </iconImageFiles>
@@ -174,20 +183,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
-      <iconImageFiles>
-        <file path="./icon.png" />
-      </iconImageFiles>
-    </launcher>
-    <launcher name="PeerBanHelper Service" id="70" excludeFromMenu="true" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-Service" iconSet="true" executableDir="." redirectStderr="false" stderrFile="~/PeerBanHelper/error.log" stdoutFile="~/PeerBanHelper/output.log" executableMode="service" singleInstance="true" checkConsoleParameter="true">
-        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
-      </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatformNoGUI}" arguments="nogui">
-        <classPath>
-          <scanDirectory location="libraries" failOnError="false" />
-          <archive location="PeerBanHelper.jar" failOnError="false" />
-        </classPath>
-      </java>
+      <vmOptionsFile mode="content" overwriteMode="2">
+        <content>-include-options ${LOCALAPPDATA}\PeerBanHelper\java.vmoptions</content>
+      </vmOptionsFile>
       <iconImageFiles>
         <file path="./icon.png" />
       </iconImageFiles>
@@ -216,6 +214,9 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
       </java>
+      <vmOptionsFile mode="content" overwriteMode="2">
+        <content>-include-options ${LOCALAPPDATA}\PeerBanHelper\java.vmoptions</content>
+      </vmOptionsFile>
       <iconImageFiles>
         <file path="./icon.png" />
       </iconImageFiles>
@@ -363,6 +364,38 @@ return console.askOkCancel(message, true);
                   <property name="variableName" type="string">registerSystemService</property>
                 </serializedBean>
               </formComponent>
+              <group id="273" beanClass="com.install4j.runtime.beans.groups.HorizontalFormComponentGroup">
+                <beans>
+                  <formComponent id="283" beanClass="com.install4j.runtime.beans.formcomponents.LabelComponent">
+                    <serializedBean>
+                      <property name="labelText" type="string">${i18n:runatlogin.label}</property>
+                    </serializedBean>
+                  </formComponent>
+                  <formComponent id="278" beanClass="com.install4j.runtime.beans.formcomponents.SingleRadiobuttonComponent">
+                    <serializedBean>
+                      <property name="initiallySelected" type="boolean" value="true" />
+                      <property name="radioButtonLabel" type="string">${i18n:runatlogin.option.no}</property>
+                      <property name="variableName" type="string">runAtLogin</property>
+                      <property name="variableValue" type="string">no</property>
+                    </serializedBean>
+                  </formComponent>
+                  <formComponent id="279" beanClass="com.install4j.runtime.beans.formcomponents.SingleRadiobuttonComponent">
+                    <serializedBean>
+                      <property name="radioButtonLabel" type="string">${i18n:runatlogin.option.yes}</property>
+                      <property name="variableName" type="string">runAtLogin</property>
+                      <property name="variableValue" type="string">yes</property>
+                    </serializedBean>
+                    <visibilityScript>return false;</visibilityScript>
+                  </formComponent>
+                  <formComponent id="280" beanClass="com.install4j.runtime.beans.formcomponents.SingleRadiobuttonComponent">
+                    <serializedBean>
+                      <property name="radioButtonLabel" type="string">${i18n:runatlogin.option.silent}</property>
+                      <property name="variableName" type="string">runAtLogin</property>
+                      <property name="variableValue" type="string">silent</property>
+                    </serializedBean>
+                  </formComponent>
+                </beans>
+              </group>
             </formComponents>
           </screen>
           <screen name="Show install as system service note" id="83" beanClass="com.install4j.runtime.beans.screens.DefaultInfoScreen" rollbackBarrierExitCode="0">
@@ -446,52 +479,88 @@ return true;
                   </property>
                   <property name="name" type="string">PeerBanHelper</property>
                 </serializedBean>
-                <condition>context.getBooleanVariable("startupWhenLoggedIn")</condition>
+                <condition>return "silent".equals(context.getVariable("runAtLogin"));</condition>
               </action>
               <action id="19" beanClass="com.install4j.runtime.beans.actions.desktop.RegisterAddRemoveAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
                   <property name="itemName" type="string">${compiler:sys.fullName} ${compiler:sys.version}</property>
                 </serializedBean>
               </action>
-              <action id="268" beanClass="com.install4j.runtime.beans.actions.misc.RunExecutableAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
-                <serializedBean>
-                  <property name="arguments" type="array" elementType="string" length="2">
-                    <element index="0">/silent</element>
-                    <element index="1">/install</element>
-                  </property>
-                  <property name="executable">
-                    <object class="java.io.File">
-                      <string>redistributable/MicrosoftEdgeWebview2Setup.exe</string>
-                    </object>
-                  </property>
-                  <property name="timeout" type="int" value="180" />
-                  <property name="wait" type="boolean" value="true" />
-                  <property name="workingDirectory">
-                    <object class="java.io.File">
-                      <string>.</string>
-                    </object>
-                  </property>
-                </serializedBean>
-                <condition>return Util.isWindows();</condition>
-              </action>
-              <action id="76" beanClass="com.install4j.runtime.beans.actions.services.InstallServiceAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
-                <serializedBean>
-                  <property name="delayedAutoStart" type="boolean" value="true" />
-                  <property name="launcherId" type="string">70</property>
-                  <property name="macosIdentifier" type="string">com.ghostchu.peerbanhelper.PBHService</property>
-                  <property name="maxRestarts" type="int" value="5" />
-                  <property name="restartOnFailure" type="boolean" value="true" />
-                  <property name="windowsPriority" type="enum" class="com.install4j.runtime.beans.actions.services.WindowsPriority" value="BELOW_NORMAL_PRIORITY_CLASS" />
-                </serializedBean>
-                <condition>context.getBooleanVariable("registerSystemService")</condition>
-              </action>
-              <action id="77" beanClass="com.install4j.runtime.beans.actions.services.StartServiceAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
-                <serializedBean>
-                  <property name="autostartOnly" type="boolean" value="true" />
-                  <property name="launcherId" type="string">70</property>
-                </serializedBean>
-                <condition>context.getBooleanVariable("registerSystemService")</condition>
-              </action>
+              <group name="Install Microsoft Edge Webview2 on Windows" id="287" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
+                <beans>
+                  <action id="288" beanClass="com.install4j.runtime.beans.actions.registry.ReadRegistryValueAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="defaultValue" type="string">0.0.0.0</property>
+                      <property name="keyName" type="string">SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients</property>
+                      <property name="registryRoot" type="enum" class="com.install4j.api.windows.RegistryRoot" value="HKEY_LOCAL_MACHINE" />
+                      <property name="useDefault" type="boolean" value="true" />
+                      <property name="valueName" type="string">{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}</property>
+                      <property name="variableName" type="string">webview2LocalMachine</property>
+                    </serializedBean>
+                  </action>
+                  <action id="289" beanClass="com.install4j.runtime.beans.actions.registry.ReadRegistryValueAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="defaultValue" type="string">0.0.0.0</property>
+                      <property name="keyName" type="string">Software\Microsoft\EdgeUpdate\Clients</property>
+                      <property name="registryRoot" type="enum" class="com.install4j.api.windows.RegistryRoot" value="HKEY_CURRENT_USER" />
+                      <property name="useDefault" type="boolean" value="true" />
+                      <property name="valueName" type="string">{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}</property>
+                      <property name="variableName" type="string">webview2CurrentUser</property>
+                    </serializedBean>
+                  </action>
+                  <action id="284" beanClass="com.install4j.runtime.beans.actions.control.SetMessageAction" actionElevationType="none" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="statusMessage" type="string">${i18n:installing.edgewebview2}</property>
+                      <property name="useStatus" type="boolean" value="true" />
+                    </serializedBean>
+                  </action>
+                  <action id="285" beanClass="com.install4j.runtime.beans.actions.control.SetProgressAction" actionElevationType="none" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="progressChangeType" type="enum" class="com.install4j.runtime.beans.actions.control.ProgressChangeType" value="SET_INDETERMINATE" />
+                    </serializedBean>
+                  </action>
+                  <action id="268" beanClass="com.install4j.runtime.beans.actions.misc.RunExecutableAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="arguments" type="array" elementType="string" length="2">
+                        <element index="0">/silent</element>
+                        <element index="1">/install</element>
+                      </property>
+                      <property name="executable">
+                        <object class="java.io.File">
+                          <string>redistributable/MicrosoftEdgeWebview2Setup.exe</string>
+                        </object>
+                      </property>
+                      <property name="logArguments" type="boolean" value="true" />
+                      <property name="timeout" type="int" value="180" />
+                      <property name="wait" type="boolean" value="true" />
+                      <property name="workingDirectory">
+                        <object class="java.io.File">
+                          <string>.</string>
+                        </object>
+                      </property>
+                    </serializedBean>
+                    <condition>if(!Util.isWindows()){
+    return false;
+}
+
+Object currentUser = context.getVariable("webview2CurrentUser");
+Object localMachine = context.getVariable("webview2LocalMachine");
+boolean foundValidWebView2 = false;
+if(currentUser != null &amp;&amp; !"null".equals(currentUser) &amp;&amp; !"NULL".equals(currentUser) &amp;&amp; !"0.0.0.0".equals(currentUser)){
+    foundValidWebView2 = true;
+}
+if(localMachine != null &amp;&amp; !"null".equals(localMachine) &amp;&amp; !"NULL".equals(localMachine) &amp;&amp; !"0.0.0.0".equals(localMachine)){
+    foundValidWebView2 = true;
+}
+return foundValidWebView2;</condition>
+                  </action>
+                  <action id="286" beanClass="com.install4j.runtime.beans.actions.control.SetProgressAction" actionElevationType="none" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="progressChangeType" type="enum" class="com.install4j.runtime.beans.actions.control.ProgressChangeType" value="SET_DETERMINATE" />
+                    </serializedBean>
+                  </action>
+                </beans>
+              </group>
             </actions>
             <formComponents>
               <formComponent id="16" beanClass="com.install4j.runtime.beans.formcomponents.ProgressComponent">
@@ -568,11 +637,6 @@ return console.askYesNo(message, true);
           </screen>
           <screen id="27" beanClass="com.install4j.runtime.beans.screens.UninstallationScreen" rollbackBarrierExitCode="0">
             <actions>
-              <action id="246" beanClass="com.install4j.runtime.beans.actions.services.StopServiceAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
-                <serializedBean>
-                  <property name="launcherId" type="string">70</property>
-                </serializedBean>
-              </action>
               <action id="29" beanClass="com.install4j.runtime.beans.actions.UninstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" />
               <action id="247" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
@@ -606,7 +670,7 @@ return console.askYesNo(message, true);
           </screen>
         </screens>
       </application>
-      <application name="Background update downloader" id="147" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupAsync" launchSchedule="always">
+      <application name="Background update downloader" id="147" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupAsync" launchSchedule="always" allLaunchers="false">
         <serializedBean>
           <property name="customIconImageFiles">
             <add>
@@ -640,6 +704,13 @@ return console.askYesNo(message, true);
           <property name="vmParameters" type="string">-Dapple.awt.UIElement=true</property>
           <property name="windowTitle" type="string">${compiler:sys.fullName}</property>
         </serializedBean>
+        <launcherIds>
+          <launcher id="26" />
+          <launcher id="269" />
+          <launcher id="66" />
+          <launcher id="28" />
+          <launcher id="267" />
+        </launcherIds>
         <startup>
           <screen id="148" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
