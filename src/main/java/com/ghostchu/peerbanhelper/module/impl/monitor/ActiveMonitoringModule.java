@@ -95,7 +95,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         long dataCleanupInterval = getConfig().getLong("data-cleanup-interval", -1);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::cleanup, 0, dataCleanupInterval, TimeUnit.MILLISECONDS);
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::flush, 20, 20, TimeUnit.SECONDS);
-        CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateTrafficStatus, 0, 10, TimeUnit.MINUTES);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateTrafficStatus, 0, 1, TimeUnit.MINUTES);
         Main.getReloadManager().register(this);
     }
 
