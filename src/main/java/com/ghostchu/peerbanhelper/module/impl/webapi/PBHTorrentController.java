@@ -1,8 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.*;
 import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
@@ -17,6 +15,7 @@ import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -38,13 +37,17 @@ public final class PBHTorrentController extends AbstractFeatureModule {
     private final PeerRecordDao peerRecordDao;
     private final HistoryDao historyDao;
     private final DownloaderManagerImpl downloaderManager;
+    private final RuleDao ruleDao;
+    private final ModuleDao moduleDao;
 
-    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, DownloaderManagerImpl downloaderManager) {
+    public PBHTorrentController(JavalinWebContainer javalinWebContainer, TorrentDao torrentDao, PeerRecordDao peerRecordDao, HistoryDao historyDao, DownloaderManagerImpl downloaderManager, RuleDao ruleDao, ModuleDao moduleDao) {
         this.javalinWebContainer = javalinWebContainer;
         this.torrentDao = torrentDao;
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
         this.downloaderManager = downloaderManager;
+        this.ruleDao = ruleDao;
+        this.moduleDao = moduleDao;
     }
 
     @Override
@@ -83,11 +86,22 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         Pageable pageable = new Pageable(ctx);
         var t = torrent.get();
         Page<HistoryEntity> page = historyDao.queryByPaging(
-                new Orderable(Map.of("banAt", false), ctx).apply(
+                new Orderable(Map.of("banAt", false), ctx)
+                        .addMapping("torrent.name", "torrentName")
+                        .addMapping("torrent.infoHash", "torrentInfoHash")
+                        .addMapping("torrent.size", "torrentSize")
+                        .addMapping("module.name", "module")
+                        .addMapping("rule.rule", "rule")
+                        .apply(
                         historyDao.queryBuilder()
                                 .where()
                                 .eq("torrent_id", new SelectArg(t))
-                                .queryBuilder())
+                                .queryBuilder()
+                                .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                                .join(ruleDao.queryBuilder().setAlias("rule")
+                                                .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                                        , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                        )
                 , pageable);
         var result = page.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, page.getTotal(), result)));
@@ -160,7 +174,8 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         }
         Pageable pageable = new Pageable(ctx);
         var t = torrent.get();
-        var queryBuilder = new Orderable(Map.of("lastTimeSeen", false), ctx).apply(peerRecordDao.queryBuilder());
+        var queryBuilder = new Orderable(Map.of("lastTimeSeen", false), ctx)
+                .apply(peerRecordDao.queryBuilder().join(torrentDao.queryBuilder(), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
         var queryWhere = queryBuilder.where().eq("torrent_id", t);
         queryBuilder.setWhere(queryWhere);
         Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);

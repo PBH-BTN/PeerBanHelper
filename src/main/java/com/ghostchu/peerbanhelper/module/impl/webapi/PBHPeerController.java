@@ -1,7 +1,6 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.*;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
@@ -21,6 +20,7 @@ import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.net.HostAndPort;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -43,11 +43,14 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final Laboratory laboratory;
     private final DNSLookup dnsLookup;
     private final DownloaderManagerImpl downloaderManager;
+    private final TorrentDao torrentDao;
+    private final RuleDao ruleDao;
+    private final ModuleDao moduleDao;
 
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
-                             Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager) {
+                             Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager, TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
@@ -56,6 +59,9 @@ public final class PBHPeerController extends AbstractFeatureModule {
         this.laboratory = laboratory;
         this.dnsLookup = dnsLookup;
         this.downloaderManager = downloaderManager;
+        this.torrentDao = torrentDao;
+        this.ruleDao = ruleDao;
+        this.moduleDao = moduleDao;
     }
 
     @Override
@@ -163,7 +169,16 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleBanHistory(Context ctx) throws SQLException {
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
-        var builder = new Orderable(Map.of("banAt", false), ctx).apply(historyDao.queryBuilder());
+        var builder = new Orderable(Map.of("banAt", false), ctx)
+                .addMapping("torrent.name", "torrentName")
+                .addMapping("torrent.infoHash", "torrentInfoHash")
+                .addMapping("torrent.size", "torrentSize")
+                .addMapping("module.name", "module")
+                .addMapping("rule.rule", "rule")
+                .apply(historyDao.queryBuilder()  .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                        .join(ruleDao.queryBuilder().setAlias("rule")
+                                        .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                                , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
         var where = builder
                 .where()
                 .eq("ip", new SelectArg(ip));
