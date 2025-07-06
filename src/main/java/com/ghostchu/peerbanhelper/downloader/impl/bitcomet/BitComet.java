@@ -75,7 +75,7 @@ public final class BitComet extends AbstractDownloader {
                 .defaultHeader("Client-Type", "BitComet WebUI")
                 .defaultHeader("User-Agent", "PeerBanHelper BitComet Adapter")
                 .followRedirects(HttpClient.Redirect.ALWAYS)
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler());
+                .headersTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler());
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
         }

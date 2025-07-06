@@ -70,7 +70,6 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .headersTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
