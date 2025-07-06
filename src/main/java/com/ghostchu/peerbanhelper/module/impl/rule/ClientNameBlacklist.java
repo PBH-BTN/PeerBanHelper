@@ -15,6 +15,7 @@ import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
@@ -98,7 +99,8 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
             return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                     matchResult.rule().matcherName(),
                     new TranslationComponent(Lang.MODULE_CNB_MATCH_CLIENT_NAME,
-                            matchResult.comment()));
+                            matchResult.comment()),
+                    StructuredData.create().add("rule", matchResult.rule()));
         }
         return pass();
         //}, true);

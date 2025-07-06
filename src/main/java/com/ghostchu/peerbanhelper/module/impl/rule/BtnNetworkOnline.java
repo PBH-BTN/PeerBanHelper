@@ -24,6 +24,7 @@ import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
@@ -50,7 +51,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 
 public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements Reloadable {
-    private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.GENERAL_NA), new TranslationComponent("BtnManager not initialized"));
+    private final CheckResult BTN_MANAGER_NOT_INITIALIZED = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent(Lang.GENERAL_NA), new TranslationComponent("BtnManager not initialized"), StructuredData.create().add("status", "btn_manager_not_initialized"));
     private long banDuration;
     @Autowired
     private JavalinWebContainer javalinWebContainer;
@@ -337,7 +338,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
-                        new TranslationComponent(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule().matcherName()));
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule().matcherName()),
+                        StructuredData.create()
+                                .add("type", "port")
+                                .add("category", category)
+                                .add("rule",matchResult.rule().matcherName()));
             }
         }
         return null;
@@ -349,7 +354,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
-                        new TranslationComponent(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule().matcherName()));
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "Port", category, matchResult.rule().matcherName()),
+                        StructuredData.create()
+                                .add("type", "portException")
+                                .add("category", category)
+                                .add("rule",matchResult.rule().matcherName()));
             }
         }
         return null;
@@ -363,7 +372,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
-                        new TranslationComponent(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule().matcherName()));
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule().matcherName()),
+                        StructuredData.create()
+                                .add("type", "clientName")
+                                .add("category", category)
+                                .add("rule", matchResult.rule()));
             }
         }
         return null;
@@ -377,7 +390,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
-                        new TranslationComponent(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule().matcherName()));
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "ClientName", category, matchResult.rule().matcherName()),
+                        StructuredData.create()
+                                .add("type", "clientNameException")
+                                .add("category", category)
+                                .add("rule", matchResult.rule()));
             }
         }
         return null;
@@ -391,7 +408,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
-                        new TranslationComponent(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule().matcherName()));
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule().matcherName()),
+                        StructuredData.create()
+                                .add("type", "peerId")
+                                .add("category", category)
+                                .add("rule", matchResult.rule()));
             }
         }
         return null;
@@ -405,7 +426,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherName()),
-                        new TranslationComponent(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule().matcherName()));
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "PeerId", category, matchResult.rule().matcherName()),
+                        StructuredData.create()
+                                .add("type", "peerIdException")
+                                .add("category", category)
+                                .add("rule", matchResult.rule()));
             }
         }
         return null;
@@ -424,7 +449,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             if (matchResult.result() == MatchResultEnum.TRUE) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, category),
-                        new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()),
+                        StructuredData.create()
+                        .add("type", "ip")
+                        .add("category", category)
+                        .add("rule", matchResult));
             }
         }
         return null;
@@ -442,7 +471,11 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             if (matchResult.hit()) {
                 return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, matchResult.rule().matcherIdentifier()),
-                        new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()));
+                        new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()),
+                        StructuredData.create()
+                                .add("type", "ipException")
+                                .add("category", category)
+                                .add("rule", matchResult.rule()));
             }
         }
         return null;

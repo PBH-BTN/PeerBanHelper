@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
@@ -170,7 +171,9 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                 huntingList.put(torrentSubnetStr, currentTimestamp);
                 // 返回当前IP即可，其他IP会在下一周期被封禁
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MDB_MULTI_DIALING_DETECTED),
-                        new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_DETECTED, peerSubnet.toString(), peerIpStr));
+                        new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_DETECTED, peerSubnet.toString(), peerIpStr),
+                        StructuredData.create().add("subnetPeersSize", subnetPeers.size())
+                                .add("subnet", torrentSubnetStr));
             }
 
             if (keepHunting) {
@@ -182,7 +185,9 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                             // 落库
                             huntingList.put(torrentSubnetStr, currentTimestamp);
                             return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MDB_MULTI_HUNTING),
-                                    new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED, peerSubnet.toString(), peerIpStr));
+                                    new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED, peerSubnet.toString(), peerIpStr),
+                                    StructuredData.create().add("subnetPeersSize", subnetPeers.size())
+                                            .add("subnet", torrentSubnetStr));
                         } else {
                             huntingList.invalidate(torrentSubnetStr);
                         }

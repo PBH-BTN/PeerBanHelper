@@ -28,6 +28,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -49,14 +50,7 @@ public final class JavalinWebContainer {
     private final Cache<IPAddress, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
             .build();
-    private final Map<IPAddress, Long> BEARER_LOGIN_SESSION = new LinkedHashMap<>() {
-        private static final int MAX_ENTRIES = 3;
-
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<IPAddress, Long> eldest) {
-            return size() > MAX_ENTRIES;
-        }
-    };
+    private final Cache<IPAddress, Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
 
     public JavalinWebContainer(ActivationManager activationManager) {
@@ -261,7 +255,7 @@ public final class JavalinWebContainer {
     }
 
     @SneakyThrows
-    public void markLoginFailed(String ip, String userAgent) {
+    public synchronized void markLoginFailed(String ip, String userAgent) {
         var counter = FAIL2BAN.get(getPrefixedIPAddr(ip), () -> new AtomicInteger(0));
         counter.incrementAndGet();
         log.warn(tlUI(Lang.WEBUI_SECURITY_LOGIN_FAILED, ip, userAgent));
@@ -281,13 +275,16 @@ public final class JavalinWebContainer {
     }
 
     @SneakyThrows
-    public void markLoginSuccess(String ip, String userAgent) {
+    public synchronized void markLoginSuccess(String ip, String userAgent) {
         var ipBlock = getPrefixedIPAddr(ip);
         var counter = FAIL2BAN.get(ipBlock, () -> new AtomicInteger(0));
         counter.set(0);
-        if (!BEARER_LOGIN_SESSION.containsKey(ipBlock)) {
-            BEARER_LOGIN_SESSION.put(ipBlock, System.currentTimeMillis());
+        if (LOGIN_SESSION_TIMETABLE.getIfPresent(ipBlock) == null) {
+            LOGIN_SESSION_TIMETABLE.put(ipBlock, System.currentTimeMillis());
             log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
+            Main.getGuiManager().createNotification(Level.INFO,
+                    tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
+                    tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
         }
     }
 

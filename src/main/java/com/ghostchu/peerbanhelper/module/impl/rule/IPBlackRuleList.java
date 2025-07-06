@@ -24,6 +24,7 @@ import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.rule.matcher.IPMatcher;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.github.mizosoft.methanol.MutableRequest;
@@ -136,7 +137,8 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                                     ipBanResultDTO.ruleName(),
                                     ip,
                                     Optional.ofNullable(ipBanResultDTO.matchResult().comment()).orElse(new TranslationComponent(Lang.MODULE_IBL_COMMENT_UNKNOWN))
-                            ));
+                            ),
+                            StructuredData.create().add("ruleName", ipBanResultDTO.ruleName()).add("matchResult", ipBanResultDTO.matchResult()));
                 }
             } catch (Exception e) {
                 log.error(tlUI(Lang.IP_BAN_RULE_MATCH_ERROR), e);

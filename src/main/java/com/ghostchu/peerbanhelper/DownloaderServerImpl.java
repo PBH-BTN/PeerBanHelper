@@ -31,6 +31,7 @@ import com.ghostchu.peerbanhelper.util.time.TimeoutProtect;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.peerbanhelper.wrapper.PeerMetadata;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.j256.ormlite.misc.TransactionManager;
@@ -72,7 +73,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     @Getter
     private boolean hideFinishLogs;
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
-    private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"));
+    private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"), StructuredData.create());
     private final ExecutorService executor = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors()));
     @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
@@ -496,7 +497,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                             new TranslationComponent(Lang.DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION, downloader.getId(), peer.getPeerAddress().getAddress().toNormalizedString()));
                 }
             }
-            return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"));
+            return new CheckResult(getClass(), PeerAction.SKIP, 0, new TranslationComponent("general-rule-ignored-address"), new TranslationComponent("general-reason-skip-ignored-peers"), StructuredData.create().add("type", "ignoredAddresses"));
         }
         try {
             for (FeatureModule registeredModule : moduleManager.getModules()) {
@@ -536,7 +537,12 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             return result;
         } catch (Exception e) {
             log.error("Failed to execute modules", e);
-            return new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("ERROR"), new TranslationComponent("ERROR"));
+            return new CheckResult(getClass(), PeerAction.NO_ACTION, 0,
+                    new TranslationComponent("ERROR"),
+                    new TranslationComponent("ERROR"),
+                    StructuredData.create().add("message", e.getMessage())
+                            .add("class", e.getClass().getName())
+                            .add("stackTrace", e.getStackTrace()));
         }
     }
 
@@ -637,7 +643,8 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                         peer,
                         new CheckResult(getClass(), PeerAction.BAN, banDuration,
                                 new TranslationComponent(Lang.USER_MANUALLY_BAN_RULE),
-                                new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON))
+                                new TranslationComponent(Lang.USER_MANUALLY_BAN_REASON),
+                                StructuredData.create().add("type", "manually"))
                         , banDuration)
         )));
     }

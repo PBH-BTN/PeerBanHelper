@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 @Slf4j
 public final class ScriptEngine {
-    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"));
+    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"), StructuredData.create().add("status", "pass"));
 
     @Nullable
     public CheckResult handleResult(CompiledScript script, long banDuration, Object returns) {
@@ -28,7 +29,8 @@ public final class ScriptEngine {
             if (status) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
-                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), "true"));
+                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), "true"),
+                        StructuredData.create().add("script", script.name()));
             }
             return null;
         }
@@ -39,11 +41,11 @@ public final class ScriptEngine {
             } else if (i == 1) {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
-                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), String.valueOf(number)));
+                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), String.valueOf(number)), StructuredData.create().add("script", script.name()));
             } else if (i == 2) {
                 return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
-                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), String.valueOf(number)));
+                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), String.valueOf(number)), StructuredData.create().add("script", script.name()));
             } else {
                 log.error(tlUI(Lang.RULE_ENGINE_INVALID_RETURNS, script));
                 return null;
@@ -52,7 +54,7 @@ public final class ScriptEngine {
         if (returns instanceof PeerAction action) {
             return new CheckResult(getClass(), action, banDuration,
                     new TranslationComponent(Lang.USER_SCRIPT_RULE),
-                    new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), action.name()));
+                    new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), action.name()), StructuredData.create().add("script", script.name()));
         }
         if (returns instanceof String string) {
             if (string.isBlank()) {
@@ -60,11 +62,11 @@ public final class ScriptEngine {
             } else if (string.startsWith("@")) {
                 return new CheckResult(getClass(), PeerAction.SKIP, banDuration,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
-                        new TranslationComponent(string.substring(1)));
+                        new TranslationComponent(string.substring(1)), StructuredData.create().add("script", script.name()));
             } else {
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration,
                         new TranslationComponent(Lang.USER_SCRIPT_RULE),
-                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), string));
+                        new TranslationComponent(Lang.USER_SCRIPT_RUN_RESULT, script.name(), string), StructuredData.create().add("script", script.name()));
             }
         }
         if (returns instanceof CheckResult checkResult) {

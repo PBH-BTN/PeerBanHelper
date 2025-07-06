@@ -18,6 +18,7 @@ import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import io.javalin.http.Context;
@@ -122,7 +123,8 @@ public final class PTRBlacklist extends AbstractRuleFeatureModule implements Rel
                 RuleMatchResult matchResult = RuleParser.matchRule(ptrRules, ptr.get());
                 if (matchResult.hit()) {
                     return new CheckResult(getClass(), PeerAction.BAN, banDuration, matchResult.rule().matcherName(),
-                            new TranslationComponent(Lang.MODULE_PTR_MATCH_PTR_RULE, matchResult.rule().matcherName()));
+                            new TranslationComponent(Lang.MODULE_PTR_MATCH_PTR_RULE, matchResult.rule().matcherName()),
+                            StructuredData.create().add("rule", matchResult.rule()));
                 }
             }
             return pass();
