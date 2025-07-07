@@ -12,7 +12,7 @@
           >
             <template #suffix>
               <a-typography-text
-                >&nbsp;{{ t('page.dashboard.statics.times') }}
+                >{{ t('page.dashboard.statics.times') }}
               </a-typography-text></template
             >
           </a-statistic>
@@ -26,7 +26,7 @@
             show-group-separator
           >
             <template #suffix
-              ><a-typography-text>&nbsp;{{ t('page.dashboard.statics.times') }} </a-typography-text>
+              ><a-typography-text>{{ t('page.dashboard.statics.times') }} </a-typography-text>
             </template>
           </a-statistic>
         </a-grid-item>
@@ -39,7 +39,7 @@
             show-group-separator
           >
             <template #suffix>
-              <a-typography-text>&nbsp;{{ t('page.dashboard.statics.times') }} </a-typography-text>
+              <a-typography-text>{{ t('page.dashboard.statics.times') }} </a-typography-text>
             </template>
           </a-statistic>
         </a-grid-item>
@@ -52,7 +52,7 @@
             show-group-separator
           >
             <template #suffix>
-              <a-typography-text>&nbsp;{{ t('page.dashboard.statics.number') }} </a-typography-text>
+              <a-typography-text>{{ t('page.dashboard.statics.number') }} </a-typography-text>
             </template>
           </a-statistic>
         </a-grid-item>
@@ -66,9 +66,7 @@
             show-group-separator
           >
             <template #suffix>
-              <a-typography-text
-                >&nbsp;{{ t('page.dashboard.statics.percentage') }}
-              </a-typography-text>
+              <a-typography-text>{{ t('page.dashboard.statics.percentage') }} </a-typography-text>
             </template>
           </a-statistic>
         </a-grid-item>
@@ -81,7 +79,7 @@
             show-group-separator
           >
             <template #suffix>
-              <a-typography-text>&nbsp;{{ t('page.dashboard.statics.number') }} </a-typography-text>
+              <a-typography-text>{{ t('page.dashboard.statics.number') }} </a-typography-text>
             </template>
           </a-statistic>
         </a-grid-item>
@@ -90,14 +88,14 @@
   </a-space>
 </template>
 <script setup lang="ts">
-import { useRequest } from 'vue-request'
+import type { Statistic } from '@/api/model/statistic'
+import { getStatistic } from '@/service/downloaders'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
-import { getStatistic } from '@/service/downloaders'
-import type { Statistic } from '@/api/model/statistic'
+import { isEqual } from 'lodash'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { isEqual } from 'lodash'
+import { useRequest } from 'vue-request'
 const { t } = useI18n()
 const endpointStore = useEndpointStore()
 const previous = ref<Statistic>({
