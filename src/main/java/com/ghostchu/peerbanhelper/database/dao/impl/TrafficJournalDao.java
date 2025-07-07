@@ -8,6 +8,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
+@Slf4j
 @Component
 public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity, Long> {
 
@@ -42,7 +44,9 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
         Timestamp endTimestamp = new Timestamp(currentTime);
 
         // 获取窗口内的流量数据
-        List<TrafficDataComputed> trafficData = downloader == null ? getAllDownloadersOverallData(startTimestamp, endTimestamp) : getSpecificDownloaderOverallData(downloader, startTimestamp, endTimestamp);
+        List<TrafficDataComputed> trafficData = downloader == null
+                ? getAllDownloadersOverallData(startTimestamp, endTimestamp)
+                : getSpecificDownloaderOverallData(downloader, startTimestamp, endTimestamp);
 
         // 计算窗口内的总上传流量
         long totalUploadedBytes = trafficData.stream()
@@ -62,10 +66,8 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                 slidingWindowDynamicSpeedLimiter.setReachedMinimumSpeed(true);
             } else {
                 // 计算减少因子 b = l_current / l
-                double b = (double) totalUploadedBytes / thresholdBytes;
-                newSpeed = (long) (currentSpeedLimit / b);
-                // 确保不低于最小速度
-                newSpeed = Math.max(newSpeed, minSpeedBytesPerSecond);
+                double b = thresholdBytes > 0 ? (double) totalUploadedBytes / thresholdBytes : 1.0;
+                newSpeed = Math.max(minSpeedBytesPerSecond, (long) (currentSpeedLimit / b));
                 slidingWindowDynamicSpeedLimiter.setDecreaseFactor(b);
             }
         } else {
@@ -75,17 +77,12 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
             } else {
                 // 计算增加因子 a = (l - l_current) / w，并转换为每秒字节数
                 double a = (double) (thresholdBytes - totalUploadedBytes) / windowSizeMillis * 1000;
-                newSpeed = (long) (currentSpeedLimit + a);
-                // 确保不超过最大速度
-                newSpeed = Math.min(newSpeed, maxSpeedBytesPerSecond);
+                newSpeed = Math.min(maxSpeedBytesPerSecond, Math.addExact(currentSpeedLimit, (long) a));
                 slidingWindowDynamicSpeedLimiter.setIncreaseFactor(a);
             }
         }
         slidingWindowDynamicSpeedLimiter.setNewSpeedLimit(newSpeed);
 
-        if (slidingWindowDynamicSpeedLimiter.getNewSpeedLimit() < 1) { // 0 = 无限制
-            slidingWindowDynamicSpeedLimiter.setNewSpeedLimit(1L);
-        }
         // 创建并返回新的速度限制设置
         return slidingWindowDynamicSpeedLimiter;
     }

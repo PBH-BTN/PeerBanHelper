@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
-import com.ghostchu.peerbanhelper.database.dao.impl.DownloaderTrafficLimiterDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TorrentDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
@@ -63,13 +62,8 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     private DownloaderManagerImpl downloaderManager;
     @Autowired
     private TorrentDao torrentDao;
-    @Autowired
-    private DownloaderTrafficLimiterDao downloaderTrafficLimiterDao;
-    private long uploadSpeedLimit;
-    private long downloadSpeedLimit;
     private boolean useTrafficSlidingCapping;
     private long maxTrafficAllowedInWindowPeriod;
-    private long trafficCappingSpeed;
     private long trafficSlidingCappingMaxSpeed;
     private long trafficSlidingCappingMinSpeed;
 
@@ -112,8 +106,6 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily", -1);
-        this.uploadSpeedLimit = getConfig().getLong("upload-limit");
-        this.downloadSpeedLimit = getConfig().getLong("download-limit");
         this.useTrafficSlidingCapping = getConfig().getBoolean("traffic-sliding-capping.enabled");
         this.maxTrafficAllowedInWindowPeriod = getConfig().getLong("traffic-sliding-capping.max-allowed-upload-traffic");
         this.trafficSlidingCappingMaxSpeed = getConfig().getLong("traffic-sliding-capping.max-speed");
@@ -145,6 +137,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                     var speedLimiter = downloader.getSpeedLimiter();
                     if(speedLimiter == null) continue;
                     var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
+
                     DownloaderSpeedLimiter  newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
                     log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), MsgUtil.humanReadableByteCountBin(newLimiter.upload())+"/s", MsgUtil.humanReadableByteCountSI(newLimiter.upload())+"/s", calculatedData));
@@ -181,59 +174,6 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                             dateTimeString,
                             MsgUtil.humanReadableByteCountBin(totalBytes),
                             MsgUtil.humanReadableByteCountBin(dailyTrafficCapping)));
-        }
-    }
-
-    private void cleanDownloaderSpeedLimiters() {
-        for (Downloader downloader : downloaderManager.getDownloaders()) {
-            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getId());
-            if (trafficLimiterData == null) continue; // 没有在库记录
-            if (trafficLimiterData.getOperationTimestamp() < MiscUtil.getStartOfToday(System.currentTimeMillis())) {
-                try {
-                    downloader.setSpeedLimiter(new DownloaderSpeedLimiter(trafficLimiterData.getUploadTraffic(), trafficLimiterData.getDownloadTraffic())); // 还原操作
-                    downloaderTrafficLimiterDao.removeDownloaderTrafficLimiterData(downloader.getId());
-                    log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED),
-                            downloader.getName(),
-                            MsgUtil.humanReadableByteCountBin(trafficLimiterData.getUploadTraffic()),
-                            MsgUtil.humanReadableByteCountBin(trafficLimiterData.getDownloadTraffic()));
-                } catch (Exception e) {
-                    log.error(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR, downloader.getName(), e));
-                }
-            }
-        }
-    }
-
-    private synchronized void enableDownloaderSpeedLimiters() {
-        for (Downloader downloader : downloaderManager.getDownloaders()) {
-            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getId());
-            if (trafficLimiterData != null) {
-                continue;
-            }
-            try {
-                var userSpeedLimiter = downloader.getSpeedLimiter();
-                if (userSpeedLimiter == null) continue;
-                downloader.setSpeedLimiter(new DownloaderSpeedLimiter(uploadSpeedLimit, downloadSpeedLimit));
-                downloaderTrafficLimiterDao.setDownloaderTrafficLimiterData(downloader.getId(), userSpeedLimiter.download(), userSpeedLimiter.upload(), System.currentTimeMillis());
-            } catch (Exception e) {
-                log.error(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR, downloader.getName(), e));
-            }
-        }
-    }
-
-    private synchronized void disableDownloaderSpeedLimiters() {
-        for (Downloader downloader : downloaderManager.getDownloaders()) {
-            var trafficLimiterData = downloaderTrafficLimiterDao.getDownloaderTrafficLimiterData(downloader.getId());
-            if (trafficLimiterData == null) continue; // 没有在库记录
-            try {
-                downloader.setSpeedLimiter(new DownloaderSpeedLimiter(trafficLimiterData.getUploadTraffic(), trafficLimiterData.getDownloadTraffic())); // 还原操作
-                downloaderTrafficLimiterDao.removeDownloaderTrafficLimiterData(downloader.getId());
-                log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED),
-                        downloader.getName(),
-                        MsgUtil.humanReadableByteCountBin(trafficLimiterData.getUploadTraffic()),
-                        MsgUtil.humanReadableByteCountBin(trafficLimiterData.getDownloadTraffic()));
-            } catch (Exception e) {
-                log.error(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR, downloader.getName(), e));
-            }
         }
     }
 

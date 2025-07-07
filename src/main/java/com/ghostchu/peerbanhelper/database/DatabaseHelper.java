@@ -46,7 +46,6 @@ public final class DatabaseHelper {
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), AlertEntity.class, false);
-        PBHTableUtils.createTableIfNotExists(database.getDataSource(), DownloaderTrafficLimiterEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrackedSwarmEntity.class, true);
     }
 
