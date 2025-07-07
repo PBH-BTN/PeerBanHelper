@@ -99,7 +99,7 @@ public final class HTTPUtil {
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .headersTimeout(Duration.of(25, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .cookieHandler(cookieManager);
         if(proxySelector != null){
             builder.proxy(proxySelector);

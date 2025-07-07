@@ -22,7 +22,6 @@ import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.Statis
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
@@ -78,7 +77,7 @@ public final class BiglyBT extends AbstractDownloader {
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .defaultHeader("Authorization", "Bearer " + config.getToken())
-                .headersTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .cookieHandler(cm);
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());

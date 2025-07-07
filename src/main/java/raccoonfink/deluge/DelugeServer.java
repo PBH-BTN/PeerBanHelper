@@ -42,7 +42,7 @@ public final class DelugeServer {
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .defaultHeader("Accept", "application/json")
                 .defaultHeader("Content-Type", "application/json")
-                .headersTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {

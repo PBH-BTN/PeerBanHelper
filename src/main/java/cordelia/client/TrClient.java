@@ -1,7 +1,6 @@
 package cordelia.client;
 
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.Methanol;
@@ -67,7 +66,7 @@ public final class TrClient {
         Methanol.Builder builder = httpBuilder
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(httpVersion)
-                .headersTimeout(Duration.of(39, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
