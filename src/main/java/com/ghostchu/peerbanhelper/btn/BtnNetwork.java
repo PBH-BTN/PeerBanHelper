@@ -82,7 +82,7 @@ public final class BtnNetwork implements Reloadable {
         this.peerRecordDao = peerRecordDao;
         this.trackedSwarmDao = trackedSwarmDao;
         Main.getReloadManager().register(this);
-        reloadConfig();
+        Thread.startVirtualThread(this::reloadConfig);
     }
 
     @Override

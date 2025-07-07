@@ -100,8 +100,10 @@ public class Main {
     public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 11;
     public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.1.0";
     private static PluginManager pluginManager;
+    private static long bootSince;
 
     public static void main(String[] args) {
+        bootSince = System.currentTimeMillis();
         startupArgs = args;
         setupReloading();
         setupConfDirectory(args);
@@ -131,6 +133,7 @@ public class Main {
                 applicationContext.refresh();
                 server = applicationContext.getBean(PeerBanHelper.class);
                 server.start();
+                log.info("Boot sequence finished in {} ms", System.currentTimeMillis() - bootSince);
             } catch (Exception e) {
                 log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
                 throw new RuntimeException(e);
