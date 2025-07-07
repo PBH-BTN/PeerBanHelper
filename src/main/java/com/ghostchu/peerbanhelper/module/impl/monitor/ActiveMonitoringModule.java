@@ -107,9 +107,9 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily", -1);
         this.useTrafficSlidingCapping = getConfig().getBoolean("traffic-sliding-capping.enabled");
-        this.maxTrafficAllowedInWindowPeriod = getConfig().getLong("traffic-sliding-capping.max-allowed-upload-traffic");
+        this.maxTrafficAllowedInWindowPeriod = getConfig().getLong("traffic-sliding-capping.daily-max-allowed-upload-traffic");
         this.trafficSlidingCappingMaxSpeed = getConfig().getLong("traffic-sliding-capping.max-speed");
-        this.trafficSlidingCappingMinSpeed = Math.max(getConfig().getLong("traffic-sliding-capping.min-speed"), 131072);
+        this.trafficSlidingCappingMinSpeed = getConfig().getLong("traffic-sliding-capping.min-speed");
     }
 
     private void updateTrafficStatus() {
@@ -137,7 +137,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                     var speedLimiter = downloader.getSpeedLimiter();
                     if(speedLimiter == null) continue;
                     var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
-
+                    log.info(calculatedData.toString());
                     DownloaderSpeedLimiter  newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
                     log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), MsgUtil.humanReadableByteCountBin(newLimiter.upload())+"/s", MsgUtil.humanReadableByteCountSI(newLimiter.upload())+"/s", calculatedData));
