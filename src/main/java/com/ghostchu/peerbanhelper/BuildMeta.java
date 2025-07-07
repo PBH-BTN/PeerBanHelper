@@ -10,7 +10,7 @@ import java.util.Properties;
 @NoArgsConstructor
 @AllArgsConstructor
 public final class BuildMeta {
-    private String version = "0.0.0";
+    private String version = "999.999.999-undefined";
     private String os = "Unknown";
     private String branch = "Unknown";
     private String commit = "Unknown";
