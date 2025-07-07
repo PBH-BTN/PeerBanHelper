@@ -659,3 +659,14 @@ GUI_QT6_WAITING_EXTRACTING: "[Qt6GuiManager] 请等待 Qt6 动态链接库解压
 GUI_QT6_WAITING_INIT: "[Qt6GuiManager] 请等待 Qt6 核心初始化，这可能需要一些时间…… 准备就绪后窗口将立刻加载并打开。"
 GUI_QT6_NATIVES_MISSING: "[Qt6GuiManager] 因文件缺失无法加载 Qt6 UI 框架，请重新运行安装程序，并在可选安装组件处勾选 “[可选] Qt6” 组件；或者使用 Swing UI 启动。"
 
+CRASH_MANAGER_CRASH_RECOVERY_ALERT_TITLE: "PeerBanHelper 已从崩溃中自动恢复"
+CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
+  PeerBanHelper 在上次运行中遇到了致命错误并崩溃，但已成功从崩溃中自动恢复。  
+  该问题通常是由于 Java Virtual Machine 内部错误所导致的，如果此错误频繁发生，请向开发者报告并附带下面的技术信息：
+  
+  **崩溃 PID:** {}  
+  **恢复重新启动时间:** {}  
+  **JVM 崩溃日志转储文件位置:** {}  
+  *在反馈问题时，请一同上传崩溃日志转储文件。*
+  
+  对此带来的不便，我们深表歉意。

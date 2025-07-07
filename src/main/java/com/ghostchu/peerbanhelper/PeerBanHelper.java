@@ -116,6 +116,7 @@ public class PeerBanHelper implements Reloadable {
     }
 
     private void checkKnownCrashes() {
+        crashManager.checkCrashRecovery();
         if (!crashManager.isRunningFlagExists()) return;
         Main.getGuiManager().createDialog(Level.WARN, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
             if ("SWING".equals(Main.getGuiManager().getName())) {
