@@ -137,7 +137,6 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
                     var speedLimiter = downloader.getSpeedLimiter();
                     if(speedLimiter == null) continue;
                     var calculatedData = trafficJournalDao.tweakSpeedLimiterBySlidingWindow(null, speedLimiter, maxTrafficAllowedInWindowPeriod, trafficSlidingCappingMinSpeed, trafficSlidingCappingMaxSpeed);
-                    log.info(calculatedData.toString());
                     DownloaderSpeedLimiter  newLimiter = new DownloaderSpeedLimiter(calculatedData.getNewSpeedLimit(), speedLimiter.download());
                     downloader.setSpeedLimiter(newLimiter);
                     log.info(tlUI(Lang.MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED, downloader.getName(), MsgUtil.humanReadableByteCountBin(newLimiter.upload())+"/s", MsgUtil.humanReadableByteCountSI(newLimiter.upload())+"/s", calculatedData));
