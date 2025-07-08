@@ -26,10 +26,7 @@ import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,13 +80,51 @@ public final class PBHChartController extends AbstractFeatureModule {
         }
     }
 
+//    private void handleTrafficClassic(Context ctx) throws Exception {
+//        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+//        String downloader = ctx.queryParam("downloader");
+//        var records = trafficJournalDao.getDayOffsetData(downloader,
+//                timeQueryModel.startAt(),
+//                timeQueryModel.endAt());
+//        ctx.json(new StdResp(true, null, fixTimezone(ctx, records)));
+//    }
+
     private void handleTrafficClassic(Context ctx) throws Exception {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
         var records = trafficJournalDao.getDayOffsetData(downloader,
                 timeQueryModel.startAt(),
                 timeQueryModel.endAt());
-        ctx.json(new StdResp(true, null, fixTimezone(ctx, records)));
+
+        // 将相同天的记录合并
+        Map<Long, TrafficJournalDao.TrafficDataComputed> mergedData = new java.util.HashMap<>();
+
+        for (TrafficJournalDao.TrafficDataComputed record : records) {
+            // 获取当天的开始时间戳
+            Timestamp ts = record.getTimestamp();
+            long dayStart = MiscUtil.getStartOfToday(ts.getTime());
+
+            // 合并相同日期的数据
+            mergedData.compute(dayStart, (key, existing) -> {
+                if (existing == null) {
+                    return new TrafficJournalDao.TrafficDataComputed(
+                            new Timestamp(key),
+                            record.getDataOverallUploaded(),
+                            record.getDataOverallDownloaded()
+                    );
+                } else {
+                    existing.setDataOverallUploaded(existing.getDataOverallUploaded() + record.getDataOverallUploaded());
+                    existing.setDataOverallDownloaded(existing.getDataOverallDownloaded() + record.getDataOverallDownloaded());
+                    return existing;
+                }
+            });
+        }
+
+        // 转换回列表并排序
+        List<TrafficJournalDao.TrafficDataComputed> mergedRecords = new ArrayList<>(mergedData.values());
+        mergedRecords.sort(Comparator.comparing(data -> data.getTimestamp().getTime()));
+
+        ctx.json(new StdResp(true, null, mergedRecords));
     }
 
 
