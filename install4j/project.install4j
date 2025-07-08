@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="11.0.4" transformSequenceNumber="11">
   <directoryPresets config="../native/qt6" />
-  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="8.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="23">
+  <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="8.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="25">
     <languages languageSelectionInPrincipalLanguage="true">
       <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
