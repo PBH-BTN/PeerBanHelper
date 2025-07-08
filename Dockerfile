@@ -3,7 +3,7 @@ COPY webui /webui
 WORKDIR /webui
 RUN corepack enable pnpm && CI=1 pnpm i && pnpm run build
 
-FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.9-eclipse-temurin-21-alpine AS build
+FROM --platform=$BUILDPLATFORM docker.io/maven:3.9.10-eclipse-temurin-21-alpine AS build
 COPY . /build
 WORKDIR /build
 COPY --from=build_web webui/dist src/main/resources/static
