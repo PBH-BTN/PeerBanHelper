@@ -609,3 +609,52 @@ CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
   
   If PeerBanHelper frequently crashes due to the above issues, we recommend launching SWTUI to disable the potentially problematic awt.dll.
   Would you like to switch to the SWT UI interface?
+GUI_PROGRAM_SWITCH_TO_AUTO: "Restart and restore default UI behavior..."
+GUI_PROGRAM_SWITCH_TO_SWT: "Restart and switch to SWT UI..."
+
+BTN_ABILITY_SUBMIT_SWARM: "Submit Swarm Tracking Data"
+BTN_ABILITY_SUBMIT_SWARM_DESCRIPTION: |
+  "Submit Swarm Tracking Data" is the successor to "Submit History Records" and "Submit Snapshot Data". The new "Submit Swarm Tracking Data" tracks, stores, and submits Peers data in a more server-friendly format to reduce the data aggregation and analysis burden on BTN servers.
+  This capability allows BTN servers to periodically receive Peers activity and the latest recorded activity snapshot data from downloaders tracked by PeerBanHelper. This data helps BTN servers analyze malicious behavior on the network and dynamically generate anti-leeching rules to block such activities. Additionally, the data aids in identifying potential exploits that bypass PeerBanHelper's anti-leeching mechanisms by leveraging vulnerabilities in its functionality.
+BTN_SUBMITTING_SWARM: "[BTN Network] Scheduled task is synchronizing swarm tracking data with the BTN network. Please wait..."
+BTN_SUBMITTED_SWARM: "[BTN Network] Successfully synchronized {} swarm tracking records (split into {} requests) with the BTN network. Thank you for your support!"
+
+BTN_SUBMITTING_BAN: "[BTN Network] Scheduled task is submitting ban history records to the BTN network. Please wait..."
+BTN_SUBMITTED_BAN: "[BTN Network] Successfully submitted {} ban history records (split into {} requests). Thank you for your support!"
+DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER: "Failed to retrieve speed limiter information for downloader {}: {} - {}"
+DOWNLOADER_FAILED_SET_SPEED_LIMITER: "Failed to set speed limiter information for downloader {}: {} - {}"
+DOWNLOADER_FAILED_START_TORRENT: "Failed to start torrent {} on downloader {}: {} - {}"
+DOWNLOADER_FAILED_STOP_TORRENT: "Failed to pause torrent {} on downloader {}: {} - {}"
+
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED: "[Active Monitoring] Restored speed limits for downloader {} to their pre-restriction values. New values: Upload={}/s Download={}/s"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR: "[Active Monitoring] Unable to adjust speed limits for downloader {} due to an unexpected error"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_ENABLED: "[Active Monitoring] Speed limits have been enabled for downloader {} due to {} of data uploaded within the specified time. New values: Upload={}/s Download={}/s"
+
+DATABASE_UPGRADING_RECORDS: "[Database Upgrade] Upgrading {}. Progress: {}/{}. Do not close the program to avoid data corruption!"
+WEBUI_SECURITY_LOGIN_FAILED: "[WebUI] Login attempt from {} was blocked due to invalid Token credentials. Browser info: {}. If unexpected, consider firewall protection for WebUI ports."
+WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN: "[WebUI] Login attempts from {} have been temporarily blocked due to excessive failures."
+WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] Successful login from {}. Browser info: {}"
+
+WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE: "Successful Login to PeerBanHelper WebUI"
+WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION: "User from IP {} has logged into PeerBanHelper WebUI. Browser info: {}"
+
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[Active Monitoring] Based on recent traffic, upload rate limit for downloader {} has been dynamically updated to {} ({})"
+GUI_COPY_TO_CLIPBOARD: "Copy to Clipboard"
+GUI_CLEAR_LOGS: "Clear Logs"
+
+GUI_QT6_WAITING_EXTRACTING: "[Qt6GuiManager] Extracting Qt6 dynamic libraries. This may take a while..."
+GUI_QT6_WAITING_INIT: "[Qt6GuiManager] Initializing Qt6 core. Window will load once ready..."
+GUI_QT6_NATIVES_MISSING: "[Qt6GuiManager] Qt6 UI framework cannot load due to missing files. Re-run installer and select '[Optional] Qt6' component, or use Swing UI."
+
+CRASH_MANAGER_CRASH_RECOVERY_ALERT_TITLE: "PeerBanHelper has recovered from a crash"
+CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
+  PeerBanHelper encountered a fatal error and crashed during the last session but has successfully recovered.  
+  This issue is typically caused by Java Virtual Machine internal errors. If frequent, please report to developers with the following technical details:
+  
+  **Crash PID:** {}  
+  **Recovery Time:** {}  
+  **JVM Crash Dump Location:** {}  
+  *Please include the crash dump file when reporting.*
+  
+  We apologize for any inconvenience caused.
+BOOT_TIME: "PeerBanHelper started in {}ms"

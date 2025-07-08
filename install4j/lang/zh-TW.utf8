@@ -5,16 +5,32 @@ launcher.peerbanhelper.nogui=PeerBanHelper (無GUI, 控制台)
 launcher.peerbanhelper.nogui.lowram=PeerBanHelper (無GUI, 控制台, 小記憶體模式(使用更多CPU和磁碟IO))
 launcher.peerbanhelper.service=PeerBanHelper (服務)
 launcher.peerbanhelper.updater=PeerBanHelper 檢查更新
-checkbox.followsystemstartup=登入時自動啟動到系統系統匣
+
+checkbox.followsystemstartup=登入時自動啟動到系統托盤
 peerbanhelper.description=PeerBanHelper
-checkbox.registersystemservice=註冊為系統服務(除非你知道這是做什麼的，否則不要勾選)
-systemservice.note=將 PeerBanHelper 安裝為系統服務時，Windows 系統下設定檔將被儲存在 C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper 位置，存取此位置需要您擁有管理員權限。\nPeerBanHelper 將在系統啟動時自動啟動。
+
+checkbox.registersystemservice=輸入服務註冊代碼並將其註冊為系統服務
+checkbox.registersystemservice.help=<html>[進階用戶功能]註冊為系統服務將會帶來許多副作用，只有在查閱文檔或請求技術支援之後，才能獲得服務註冊代碼，並以系統服務方式安裝PeerBanHelper。
+如果您對當前所在平台的系統服務運行方式並不了解，請不要勾選該複選框，並以常規方式安裝。</html>
+checkbox.registersystemservice.error=服務註冊代碼不正確，請取消勾選「註冊為系統服務」複選框
+
+systemservice.note=將 PeerBanHelper 安裝為系統服務時，Windows 系統下配置檔案將被儲存在 C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper 位置，訪問此位置需要您擁有管理員權限。\nPeerBanHelper 將在系統啟動時自動啟動。
+
 components.peerbanhelper=PeerBanHelper
-components.peerbanhelper.description=PeerBanHelper 的核心主程式，包含了主程式碼和必要的執行文件
+components.peerbanhelper.description=PeerBanHelper 的核心主程式，包含了主程式代碼和必要的運行檔案
+
 components.jcef=[可選] JCEF
-components.jcef.description=可選的 JCEF (Java 嵌入式 Chromium 框架)，用以支援 PeerBanHelper GUI 模式下的 WebUI 控制台分頁功能，停用後將隱藏 WebUI 控制台分頁，使用者將需要透過系統瀏覽器存取 WebUI。（勾選後將在 PeerBanHelper 啟動時下載）
-components.disable-checking-updates=[可選] 停用自動更新
-components.disable-checking-updates.description=停用 install4j 的 PeerBanHelper 更新檢查和自動升級程式。停用後在新版本發布時您需要手動下載安裝包執行更新操作。PBH-BTN 僅提供最近 3 個版本的 PeerBanHelper 技術支援和 API 服務。過期的 PeerBanHelper 版本可能無法存取 API、BTN 網路或者是訂閱的規則（特別是規則格式發生變動時）。
+components.jcef.description=可選的 JCEF (Java 嵌入式 Chromium 框架)，用以支援 PeerBanHelper GUI 模式下的 WebUI 控制台標籤頁功能，禁用後將隱藏 WebUI 控制台標籤頁，用戶將需要通過系統瀏覽器訪問 WebUI。（勾選後將在 PeerBanHelper 啟動時下載）
+
+components.disable-checking-updates=[可選] 禁用自動更新
+components.disable-checking-updates.description=禁用 install4j 的 PeerBanHelper 更新檢查和自動升級程式。禁用後在新版本發佈時您需要手動下載安裝包執行更新操作。PBH-BTN 僅提供最近 3 個版本的 PeerBanHelper 技術支援和 API 服務。過期的 PeerBanHelper 版本可能無法訪問 API、BTN 網路或者是訂閱的規則（特別是規則格式發生變動時）。
+
 components.qt6=[可選] Qt6
-components.qt6.description=Qt6 UI 框架，允许您在 Windows x64 平台上使用 Qt6 作为 UI 替代，以解决 Swing/SWT 中的崩溃问题
-installing.edgewebview2=正在安装 Microsoft Edge WebView 2...
+components.qt6.description=Qt6 UI 框架，允許您在 Windows x64 平台上使用 Qt6 作為 UI 替代，以解決 Swing/SWT 中的崩潰問題
+
+runatlogin.label=開機自動啟動
+runatlogin.option.no=不啟動
+runatlogin.option.yes=顯式視窗啟動
+runatlogin.option.silent=靜默啟動到系統托盤
+
+installing.edgewebview2=正在安裝 Microsoft Edge WebView 2...
