@@ -133,7 +133,7 @@ public class Main {
                 applicationContext.refresh();
                 server = applicationContext.getBean(PeerBanHelper.class);
                 server.start();
-                log.info("Boot sequence finished in {} ms", System.currentTimeMillis() - bootSince);
+                log.info(tlUI(Lang.BOOT_TIME, System.currentTimeMillis() - bootSince));
             } catch (Exception e) {
                 log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
                 throw new RuntimeException(e);
