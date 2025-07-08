@@ -11,10 +11,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.body.GlobalOptionPatchBody;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
-import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.WebUtil;
+import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
@@ -47,8 +44,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -104,22 +99,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     private void handleTriggerCrash(@NotNull Context context) {
         context.json(new StdResp(true, "Unsafe putAddress called, triggering crash...", null));
-        try {
-            Class.forName("sun.misc.Unsafe").getDeclaredMethod("putAddress", Long.class, Long.class)
-                    .invoke(getUnsafeInstance(), 0L,0L);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Object getUnsafeInstance() {
-        try {
-            Field f = Class.forName("sun.misc.Unsafe").getDeclaredField("theUnsafe");
-            f.setAccessible(true);
-            return f.get(null);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get Unsafe instance", e);
-        }
+        new CrashMaker().crash();
     }
 
     private void handleDumpStackTrace(Context context) {

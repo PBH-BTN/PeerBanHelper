@@ -75,8 +75,8 @@ goto finish
 :finish
 echo.
 echo Attempting restart PeerBanHelper...
-if exist "%~dp0\%GUI_EXE_NAME%" (
-    start "" "%~dp0\%GUI_EXE_NAME%" "%GUI_PARAM%"
+if exist "%cd%\%GUI_EXE_NAME%" (
+    start "" "%cd%\%GUI_EXE_NAME%" "%GUI_PARAM%"
 ) else (
     echo Not found %GUI_EXE_NAME% in work directory: %cd%
 )
