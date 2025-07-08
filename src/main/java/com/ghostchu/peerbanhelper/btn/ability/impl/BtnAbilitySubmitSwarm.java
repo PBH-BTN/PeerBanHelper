@@ -85,11 +85,11 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_SWARM));
             int size = 0;
             int requests = 0;
-            List<TrackedSwarmEntity> trackedSwarmEntities = new ArrayList<>(1000);
+            List<TrackedSwarmEntity> trackedSwarmEntities = new ArrayList<>(500);
             try (var it = createSubmitIterator(getMemCursor())) {
                 for (TrackedSwarmEntity entity : it) {
                     trackedSwarmEntities.add(entity);
-                    if (trackedSwarmEntities.size() >= 1000) {
+                    if (trackedSwarmEntities.size() >= 500) {
                         setMemCursor(createSubmitRequest(trackedSwarmEntities).getTime());
                         requests++;
                         size += trackedSwarmEntities.size();
