@@ -603,8 +603,7 @@ GUI_TRAY_TITLE: "PeerBanHelper"
 CRASH_MANAGER_TITLE: "PeerBanHelper 的上次退出可能是意外关闭"
 CRASH_MANAGER_DESCRIPTION: |
   PeerBanHelper 的上次退出可能是非正常关闭。
-  这可能是因为程序崩溃、内存不足，或者操作系统强制关闭了程序。
-  频繁的非正常退出可能导致数据和配置文件损坏，请尽量正常退出 PeerBanHelper。
+  请登录 WebUI 查看 “警报” 以获取更多信息。
 CRASH_MANAGER_GUI_RELATED_TITLE: "非正常退出故障排除向导 - 检测已知问题 - Windows - Java Platform awt.dll"
 CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
   在 Windows 平台上，有时 PeerBanHelper 可能会因为以下原因非正常退出：
@@ -631,13 +630,6 @@ DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER: "获取下载器 {} 的速度限制器
 DOWNLOADER_FAILED_SET_SPEED_LIMITER: "设置下载器 {} 的速度限制器信息失败: {} - {}"
 DOWNLOADER_FAILED_START_TORRENT: "启动下载器上的 {} 种子 {} 失败: {} - {}"
 DOWNLOADER_FAILED_STOP_TORRENT: "暂停下载器上的 {} 种子 {} 失败: {} - {}"
-
-BTN_MQTT_CONNECTED: "[BTN 网络] [Live] 已成功连接到服务器"
-BTN_MQTT_RECONNECTED: "[BTN 网络] [Live] 已成功重新连接到服务器"
-BTN_MQTT_DISCONNECTED: "[BTN 网络] [Live] 与服务器的连接已断开: {}"
-
-BTN_MQTT_SERVERSIDE_GREETING: "[BTN 网络] [Live] BTN 服务器为 {} 由 {} 维护。实例版本号: {}, 协议版本支持范围: {}-{}。"
-BTN_MQTT_SERVERSIDE_MESSAGE: "[BTN 网络] [Live] [{}]: {}"
 
 MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED: "[主动监测] 已还原下载器 {} 的速率限制为开始限制之前的值，新的值：上传={}/s 下载={}/s"
 MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR: "[主动监测] 无法调整下载器 {} 的速率限制，出现了预期外的错误"

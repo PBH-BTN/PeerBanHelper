@@ -595,11 +595,10 @@ ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
   If you need any assistance with the configuration, please refer to the support documentation or request help in the community.
 DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: Unable update {}'s blocklist, Transmission returned an error that unable to retrieve blocklist. Check PeerBanHelper's document for troubleshooting.
 GUI_TRAY_TITLE: "PeerBanHelper"
-CRASH_MANAGER_TITLE: "PeerBanHelper's Last Exit May Have Been Unexpected"
+CRASH_MANAGER_TITLE: "PeerBanHelper's last exit is unexpected"
 CRASH_MANAGER_DESCRIPTION: |
-  PeerBanHelper's last exit may have been abnormal.
-  This could be due to a program crash, insufficient memory, or the operating system forcibly terminating the program.
-  Frequent abnormal exits may lead to data and configuration file corruption. Please try to exit PeerBanHelper properly whenever possible.
+  PeerBanHelper's last exit is unexpected.
+  Please login to WebUI and check "Alerts" for more details.
 CRASH_MANAGER_GUI_RELATED_TITLE: "Abnormal Exit Troubleshooting Guide - Detecting Known Issues - Windows - Java Platform awt.dll"
 CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
   On the Windows platform, PeerBanHelper may sometimes exit abnormally due to the following reasons:
