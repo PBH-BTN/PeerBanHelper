@@ -62,6 +62,7 @@
             :title="t('page.dashboard.statics.peerBlockRate')"
             :value="formatPercentage(current?.peersBlockRate)"
             :value-from="formatPercentage(previous.peersBlockRate)"
+            :precision="2"
             animation
             show-group-separator
           >
