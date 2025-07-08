@@ -15,7 +15,6 @@ import java.util.Locale;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public final class StringContainsMatcher extends AbstractJsonMatcher {
-    private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_CONTAINS);
     private final String rule;
     private MatchResult hit;
     private MatchResult miss;

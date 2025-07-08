@@ -1,19 +1,19 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.common.cache.Cache;
@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-@IgnoreScan
 public final class MultiDialingBlocker extends AbstractRuleFeatureModule implements Reloadable {
     // 计算缓存容量
     private static final int TORRENT_PEER_MAX_NUM = 1024;
@@ -172,7 +171,9 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                 huntingList.put(torrentSubnetStr, currentTimestamp);
                 // 返回当前IP即可，其他IP会在下一周期被封禁
                 return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MDB_MULTI_DIALING_DETECTED),
-                        new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_DETECTED, peerSubnet.toString(), peerIpStr));
+                        new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_DETECTED, peerSubnet.toString(), peerIpStr),
+                        StructuredData.create().add("subnetPeersSize", subnetPeers.size())
+                                .add("subnet", torrentSubnetStr));
             }
 
             if (keepHunting) {
@@ -184,7 +185,9 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
                             // 落库
                             huntingList.put(torrentSubnetStr, currentTimestamp);
                             return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.MDB_MULTI_HUNTING),
-                                    new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED, peerSubnet.toString(), peerIpStr));
+                                    new TranslationComponent(Lang.MODULE_MDB_MULTI_DIALING_HUNTING_TRIGGERED, peerSubnet.toString(), peerIpStr),
+                                    StructuredData.create().add("subnetPeersSize", subnetPeers.size())
+                                            .add("subnet", torrentSubnetStr));
                         } else {
                             huntingList.invalidate(torrentSubnetStr);
                         }

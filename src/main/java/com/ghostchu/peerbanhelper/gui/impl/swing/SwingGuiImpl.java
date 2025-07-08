@@ -2,9 +2,10 @@ package com.ghostchu.peerbanhelper.gui.impl.swing;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
@@ -13,7 +14,10 @@ import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
-import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.*;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
+import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.UnsupportedPlatformTheme;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
@@ -22,12 +26,13 @@ import com.google.common.eventbus.Subscribe;
 import com.jthemedetecor.OsThemeDetector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.event.Level;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -35,7 +40,6 @@ import java.util.Locale;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -49,6 +53,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     private PBHFlatLafTheme pbhFlatLafTheme = new StandardLafTheme();
     @Getter
     private SwingTaskbarControl swingTaskbarControl;
+
+    private final Icon icon = new FlatSVGIcon(Main.class.getResource("/assets/icon/common/alert.svg"));
 
     public SwingGuiImpl(String[] args) {
         super(args);
@@ -86,12 +92,13 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         });
 
         // taskbar
-        if (Main.getServer().isGlobalPaused()) {
+        if (Main.getServer().getDownloaderServer().isGlobalPaused()) {
             taskbarControl().updateProgress(mainWindow, TaskbarState.PAUSED, 1.0f);
         } else {
             taskbarControl().updateProgress(mainWindow, TaskbarState.OFF, -1.0f);
         }
     }
+
 
     @Override
     public String getName() {
@@ -104,15 +111,15 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent) {
+    public void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent, @Nullable Runnable noEvent) {
         int msgType = JOptionPane.PLAIN_MESSAGE;
         if (level == Level.INFO) {
             msgType = JOptionPane.INFORMATION_MESSAGE;
         }
-        if (level == Level.WARNING) {
+        if (level == Level.WARN) {
             msgType = JOptionPane.WARNING_MESSAGE;
         }
-        if (level == Level.SEVERE) {
+        if (level == Level.ERROR) {
             msgType = JOptionPane.ERROR_MESSAGE;
         }
         if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
@@ -123,11 +130,16 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             int result = JOptionPane.showOptionDialog(null, description, title,
                     JOptionPane.YES_NO_OPTION, finalMsgType, null, null, JOptionPane.NO_OPTION);
             if (result == JOptionPane.YES_OPTION) {
-                yesEvent.run();
+                if (yesEvent != null) yesEvent.run();
             } else if (result == JOptionPane.NO_OPTION) {
-                noEvent.run();
+                if (noEvent != null) noEvent.run();
             }
         });
+    }
+
+    @Override
+    public void openUrlInBrowser(String url) {
+        openWebpage(URI.create(url));
     }
 
     @Override
@@ -159,7 +171,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     @Override
-    public void onPBHFullyStarted(PeerBanHelperServer server) {
+    public void onPBHFullyStarted(PeerBanHelper server) {
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::updateGuiStuff, 0, 1, TimeUnit.SECONDS);
     }
 
@@ -178,10 +190,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (ExternalSwitch.parseBoolean("pbh.gui.pbhplus-theme", false) && ExchangeMap.PBH_PLUS_ACTIVATED) {
             pbhFlatLafTheme = new PBHPlusTheme();
         }
-        // Snapshot?
-        if (ExternalSwitch.parseBoolean("pbh.gui.insider-theme", true) && Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
-            pbhFlatLafTheme = new SnapshotTheme();
-        }
+//        // Snapshot?
+//        if (ExternalSwitch.parseBoolean("pbh.gui.insider-theme", true) && Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release"))) {
+//            pbhFlatLafTheme = new SnapshotTheme();
+//        }
         // Unsupported platform?
         if (ExchangeMap.UNSUPPORTED_PLATFORM && ExternalSwitch.parseBoolean("pbh.gui.useIncompatiblePlatformTheme", false)) {
             pbhFlatLafTheme = new UnsupportedPlatformTheme();
@@ -295,30 +307,25 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
             autoScroll.set(current + extent == max);
         });
 
-        // 日志插入线程
-        new Thread(() -> {
-            JListAppender.allowWriteLogEntryDeque.set(true);
-            while (true) {
-                try {
-                    var logEntry = JListAppender.logEntryDeque.poll(1, TimeUnit.HOURS);
-                    if (logEntry == null) continue;
-                    SwingUtilities.invokeAndWait(() -> {
-                        DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
-                        model.addElement(logEntry);
-                        // 限制最大元素数量为 500
-                        while (model.size() > ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300)) {
-                            model.removeElementAt(0);
-                        }
-                        // 如果用户在底部，则自动滚动
-                        if (autoScroll.get()) {
-                            logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
-                        }
-                    });
-                } catch (InterruptedException | InvocationTargetException e) {
-                    log.warn("Failed to update log list", e);
+        var maxSize = ExternalSwitch.parseInt("pbh.gui.logs.maxSize", 300);
+
+        JListAppender.allowWriteLogEntryDeque.set(true);
+        CommonUtil.getScheduler().scheduleWithFixedDelay(() -> SwingUtilities.invokeLater(() -> {
+            DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
+            while (!JListAppender.logEntryDeque.isEmpty()) {
+                var logEntry = JListAppender.logEntryDeque.poll();
+                if (logEntry == null) return;
+                model.addElement(logEntry);
+                // 如果用户在底部，则自动滚动
+                if (autoScroll.get()) {
+                    logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
                 }
             }
-        }).start();
+            // 限制最大元素数量为 500
+            while (model.size() > maxSize) {
+                model.removeElementAt(0);
+            }
+        }), 0, 10, TimeUnit.MILLISECONDS);
     }
 
 
@@ -348,10 +355,10 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (level == Level.INFO) {
             msgType = JOptionPane.INFORMATION_MESSAGE;
         }
-        if (level == Level.WARNING) {
+        if (level == Level.WARN) {
             msgType = JOptionPane.WARNING_MESSAGE;
         }
-        if (level == Level.SEVERE) {
+        if (level == Level.ERROR) {
             msgType = JOptionPane.ERROR_MESSAGE;
         }
         if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION_WINDOW)) {
@@ -370,9 +377,9 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         if (swingTray != null) {
             var icon = swingTray.getTrayIcon();
             if (swingTray.getTrayIcon() != null) {
-                if (level.equals(Level.WARNING)) {
+                if (level.equals(Level.WARN)) {
                     icon.displayMessage(title, description, TrayIcon.MessageType.WARNING);
-                } else if (level.equals(Level.SEVERE)) {
+                } else if (level.equals(Level.ERROR)) {
                     icon.displayMessage(title, description, TrayIcon.MessageType.ERROR);
                 } else {
                     icon.displayMessage(title, description, TrayIcon.MessageType.INFO);

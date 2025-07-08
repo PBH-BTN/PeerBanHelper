@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.database.dao;
 
-import com.ghostchu.peerbanhelper.util.paging.Page;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 
 public class AbstractPBHDao<T, ID> extends BaseDaoImpl<T, ID> {
     private static final Object transactionLock = new Object();
+
     protected AbstractPBHDao(ConnectionSource connectionSource, Class<T> dataClass) throws SQLException {
         super(connectionSource, dataClass);
     }

@@ -3,8 +3,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.WebSocketLogEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
@@ -14,8 +14,6 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.eventbus.Subscribe;
 import io.javalin.http.Context;
 import io.javalin.websocket.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +29,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Component
 @Slf4j
-@IgnoreScan
 public final class PBHLogsController extends AbstractFeatureModule {
     private final List<WsContext> session = Collections.synchronizedList(new ArrayList<>());
     @Autowired
@@ -66,12 +63,12 @@ public final class PBHLogsController extends AbstractFeatureModule {
         synchronized (session) {
             for (WsContext wsContext : session) {
                 wsContext.send(new StdResp(true, null,
-                        new WebSocketLogEntry(
-                                event.getEntry().time(),
-                                event.getEntry().thread(),
-                                event.getEntry().level().name(),
-                                event.getEntry().content(),
-                                event.getEntry().seq()
+                        new WebSocketLogEntryDTO(
+                                event.entry().time(),
+                                event.entry().thread(),
+                                event.entry().level().name(),
+                                event.entry().content(),
+                                event.entry().seq()
                         )));
             }
         }
@@ -80,7 +77,7 @@ public final class PBHLogsController extends AbstractFeatureModule {
     private void handleLogsStream(WsConfig wsConfig) {
         wsConfig.onConnect(ctx -> {
             if (ctx.session.getRemoteAddress() instanceof InetSocketAddress inetSocketAddress) {
-                if (!webContainer.allowAttemptLogin(inetSocketAddress.getHostString())) {
+                if (!webContainer.allowAttemptLogin(inetSocketAddress.getHostString(), ctx.getUpgradeCtx$javalin().userAgent())) {
                     ctx.closeSession(WsCloseStatus.TRY_AGAIN_LATER, JsonUtil.standard().toJson(new StdResp(false, "Too many failed retries, IP banned.", null)));
                     return;
                 }
@@ -92,10 +89,10 @@ public final class PBHLogsController extends AbstractFeatureModule {
             }
             if (authResult == JavalinWebContainer.TokenAuthResult.FAILED) {
                 ctx.closeSession(WsCloseStatus.POLICY_VIOLATION, JsonUtil.standard().toJson(new StdResp(false, tlUI(Lang.WS_LOGS_STREAM_ACCESS_DENIED), null)));
-                webContainer.markLoginFailed(userIp(ctx.getUpgradeCtx$javalin()));
+                webContainer.markLoginFailed(userIp(ctx.getUpgradeCtx$javalin()), ctx.getUpgradeCtx$javalin().userAgent());
                 return;
             }
-            webContainer.markLoginSuccess(userIp(ctx.getUpgradeCtx$javalin()));
+            webContainer.markLoginSuccess(userIp(ctx.getUpgradeCtx$javalin()), ctx.getUpgradeCtx$javalin().userAgent());
             ctx.enableAutomaticPings(15, TimeUnit.SECONDS);
             this.session.add(ctx);
             var offset = ctx.queryParam("offset");
@@ -119,7 +116,7 @@ public final class PBHLogsController extends AbstractFeatureModule {
         for (LogEntry logEntry : JListAppender.ringDeque) {
             if (logEntry.seq() > offset) {
                 ctx.send(new StdResp(true, null,
-                        new WebSocketLogEntry(
+                        new WebSocketLogEntryDTO(
                                 logEntry.time(),
                                 logEntry.thread(),
                                 logEntry.level().name(),
@@ -145,7 +142,7 @@ public final class PBHLogsController extends AbstractFeatureModule {
 
     private void handleLogs(Context ctx) {
         ctx.status(200);
-        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntry(
+        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntryDTO(
                 e.time(),
                 e.thread(),
                 e.level().name(),
@@ -161,13 +158,4 @@ public final class PBHLogsController extends AbstractFeatureModule {
         Main.getEventBus().unregister(this);
     }
 
-    @AllArgsConstructor
-    @Data
-    private static class WebSocketLogEntry {
-        private long time;
-        private String thread;
-        private String level;
-        private String content;
-        private long offset;
-    }
 }

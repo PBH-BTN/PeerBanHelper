@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table;
 
+import com.ghostchu.peerbanhelper.database.dao.impl.RuleSubInfoDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "rule_sub_info")
+@DatabaseTable(tableName = "rule_sub_info", daoClass = RuleSubInfoDao.class)
 public final class RuleSubInfoEntity {
     @DatabaseField(id = true, index = true)
     private String ruleId;

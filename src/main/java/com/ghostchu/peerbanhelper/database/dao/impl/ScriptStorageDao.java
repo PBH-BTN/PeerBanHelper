@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.ScriptStorageEntity;
 import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.support.ConnectionSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public final class ScriptStorageDao extends AbstractPBHDao<ScriptStorageEntity, String> {
-    public ScriptStorageDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), ScriptStorageEntity.class);
+    public ScriptStorageDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, ScriptStorageEntity.class);
     }
 
     public void put(String key, String value) {

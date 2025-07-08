@@ -1,18 +1,11 @@
 package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 
-@Data
-@AllArgsConstructor
-public final class DownloaderLoginResult {
-    @Getter
-    private final Status status;
-    private final TranslationComponent message;
 
-
+public record DownloaderLoginResult(@Getter com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult.Status status,
+                                    TranslationComponent message) {
     public boolean success() {
         return status == Status.SUCCESS;
     }
@@ -25,5 +18,13 @@ public final class DownloaderLoginResult {
         NETWORK_ERROR,
         EXCEPTION,
         REQUIRE_TAKE_ACTIONS,
+    }
+
+    @Override
+    public String toString() {
+        return "DownloaderLoginResult{" +
+                "status=" + status +
+                ", message=" + message +
+                '}';
     }
 }

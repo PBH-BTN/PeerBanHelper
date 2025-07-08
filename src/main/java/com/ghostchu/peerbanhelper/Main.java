@@ -19,7 +19,7 @@ import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.encrypt.RSAUtils;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.simplereloadlib.ReloadManager;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
@@ -31,15 +31,11 @@ import com.googlecode.aviator.runtime.JavaMethodReflectionFunctionMissing;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.bspfsystems.yamlconfiguration.configuration.InvalidConfigurationException;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
-import org.jetbrains.annotations.Nullable;
+import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import oshi.SystemInfo;
 
@@ -50,11 +46,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.math.MathContext;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public class Main {
@@ -69,11 +66,12 @@ public class Main {
     private static File logsDirectory;
     @Getter
     private static File configDirectory;
+    @Getter
     private static File pluginDirectory;
     @Getter
     private static File debugDirectory;
     @Getter
-    private static PeerBanHelperServer server;
+    private static PeerBanHelper server;
     @Getter
     private static PBHGuiManager guiManager;
     @Getter
@@ -99,10 +97,13 @@ public class Main {
     @Getter
     private static long startupAt = System.currentTimeMillis();
     private static String userAgent;
-    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 10;
-    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.0.3";
+    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 11;
+    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.1.0";
+    private static PluginManager pluginManager;
+    private static long bootSince;
 
     public static void main(String[] args) {
+        bootSince = System.currentTimeMillis();
         startupArgs = args;
         setupReloading();
         setupConfDirectory(args);
@@ -126,21 +127,17 @@ public class Main {
             setupProxySettings();
             setupScriptEngine();
             try {
-                log.info(TextManager.tlUI(Lang.SPRING_CONTEXT_LOADING));
+                log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
                 applicationContext = new AnnotationConfigApplicationContext();
                 applicationContext.register(AppConfig.class);
                 applicationContext.refresh();
-//            registerBean(File.class, mainConfigFile, "mainConfigFile");
-//            registerBean(File.class, profileConfigFile, "profileConfigFile");
-//            registerBean(YamlConfiguration.class, mainConfig, "mainConfig");
-//            registerBean(YamlConfiguration.class, profileConfig, "profileConfig");
-                server = applicationContext.getBean(PeerBanHelperServer.class);
+                server = applicationContext.getBean(PeerBanHelper.class);
                 server.start();
+                log.info(tlUI(Lang.BOOT_TIME, System.currentTimeMillis() - bootSince));
             } catch (Exception e) {
-                log.error(TextManager.tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
+                log.error(tlUI(Lang.PBH_STARTUP_FATAL_ERROR), e);
                 throw new RuntimeException(e);
             }
-            guiManager.onPBHFullyStarted(server);
             setupShutdownHook();
         });
         guiManager.sync();
@@ -179,7 +176,6 @@ public class Main {
             SizeAndTimeBasedRollingPolicy<?> policy = (SizeAndTimeBasedRollingPolicy<?>) appender.getRollingPolicy();
             policy.setFileNamePattern(logsDirectory.getAbsolutePath() + "/%d{yyyy-MM-dd}-%i.log.gz"); // 更新文件名模式
             policy.start(); // 启动滚动策略
-
             appender.start(); // 启动 appender
         }
 
@@ -309,17 +305,16 @@ public class Main {
 
     private static BuildMeta buildMeta() {
         var meta = new BuildMeta();
-        try (InputStream stream = Main.class.getResourceAsStream("/build-info.yml")) {
+        try (InputStream stream = Main.class.getResourceAsStream("/git.properties")) {
             if (stream == null) {
-                log.error("Error: Unable to load build metadata from JAR/build-info.yml: Bundled resources not exists");
+                log.error("Error: Unable to load build metadata from JAR/git.properties: Bundled resources not exists");
             } else {
-                String str = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-                YamlConfiguration configuration = new YamlConfiguration();
-                configuration.loadFromString(str);
-                meta.loadBuildMeta(configuration);
+                Properties properties = new Properties();
+                properties.load(stream);
+                meta.loadBuildMeta(properties);
             }
-        } catch (IOException | InvalidConfigurationException e) {
-            log.error("Error: Unable to load build metadata from JAR/build-info.yml", e);
+        } catch (IOException e) {
+            log.error("Error: Unable to load build metadata from <JAR>/git.properties", e);
         }
         return meta;
     }
@@ -338,9 +333,7 @@ public class Main {
         shutdownThread.setDaemon(false);
         shutdownThread.setName("ShutdownThread");
         Runtime.getRuntime().addShutdownHook(shutdownThread);
-    }
-
-    private static void initGUI(String[] args) {
+    }    private static void initGUI(String[] args) {
         String guiType = mainConfig.getString("gui", "auto");
         if ("auto".equals(guiType)) guiType = "swing";
 
@@ -348,6 +341,8 @@ public class Main {
             guiType = "swing";
         } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("swt"))) {
             guiType = "swt";
+        } else if (Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("qt"))) {
+            guiType = "qt";
         }
         if (!Desktop.isDesktopSupported() || ExternalSwitch.parse("pbh.nogui") != null || Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("nogui"))) {
             guiType = "console";
@@ -356,6 +351,7 @@ public class Main {
         switch (guiType) {
             case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
             case "swt" -> guiManager = new PBHGuiManager(new SwtGuiImpl(args));
+            //case "qt" -> guiManager = new PBHGuiManager(new com.ghostchu.peerbanhelper.gui.impl.qt.QtGuiImpl(args));
             default -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
         }
 
@@ -432,51 +428,51 @@ public class Main {
                 Character.isUpperCase(name.charAt(0))) {
             return name;
         }
-        char chars[] = name.toCharArray();
+        char[] chars = name.toCharArray();
         chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
     }
 
-    public static <T> void registerBean(Class<T> clazz, @Nullable String beanName) {
-        if (beanName == null) {
-            beanName = decapitalize(clazz.getSimpleName());
-        }
-        if (applicationContext.containsBean(beanName)) {
-            return;
-        } else {
-            String bn = decapitalize(clazz.getSimpleName());
-            if (applicationContext.containsBean(bn)) {
-                return;
-            }
-        }
-        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
-        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-    }
-
-    public static <T> void registerBean(Class<T> clazz, T instance, @Nullable String beanName) {
-        if (beanName == null) {
-            beanName = decapitalize(clazz.getSimpleName());
-        }
-        if (applicationContext.containsBean(beanName)) {
-            return;
-        } else {
-            String bn = decapitalize(clazz.getSimpleName());
-            if (applicationContext.containsBean(bn)) {
-                return;
-            }
-        }
-        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
-        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance);
-        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
-    }
-
-    public static void unregisterBean(String beanName) {
-        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
-        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
-        defaultListableBeanFactory.removeBeanDefinition(beanName);
-    }
+//    public static <T> void registerBean(Class<T> clazz, @Nullable String beanName) {
+//        if (beanName == null) {
+//            beanName = decapitalize(clazz.getSimpleName());
+//        }
+//        if (applicationContext.containsBean(beanName)) {
+//            return;
+//        } else {
+//            String bn = decapitalize(clazz.getSimpleName());
+//            if (applicationContext.containsBean(bn)) {
+//                return;
+//            }
+//        }
+//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
+//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
+//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
+//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
+//    }
+//
+//    public static <T> void registerBean(Class<T> clazz, T instance, @Nullable String beanName) {
+//        if (beanName == null) {
+//            beanName = decapitalize(clazz.getSimpleName());
+//        }
+//        if (applicationContext.containsBean(beanName)) {
+//            return;
+//        } else {
+//            String bn = decapitalize(clazz.getSimpleName());
+//            if (applicationContext.containsBean(bn)) {
+//                return;
+//            }
+//        }
+//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
+//        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance);
+//        defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getRawBeanDefinition());
+//    }
+//
+//    public static void unregisterBean(String beanName) {
+//        ConfigurableApplicationContext configurableApplicationContext = applicationContext;
+//        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext.getBeanFactory();
+//        defaultListableBeanFactory.removeBeanDefinition(beanName);
+//    }
 
     private static void setupScriptEngine() {
         AviatorEvaluator.getInstance().setCachedExpressionByDefault(true);
@@ -498,7 +494,7 @@ public class Main {
         registerFunctions(JsonUtil.class);
         registerFunctions(Lang.class);
         registerFunctions(StrUtil.class);
-        registerFunctions(PeerBanHelperServer.class);
+        registerFunctions(PeerBanHelper.class);
         registerFunctions(InfoHashUtil.class);
         registerFunctions(CommonUtil.class);
         registerFunctions(ByteUtil.class);
@@ -517,12 +513,12 @@ public class Main {
 
     private static void registerFunctions(Class<?> clazz) {
         try {
-            AviatorEvaluator.addInstanceFunctions(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);
+            AviatorEvaluator.addInstanceFunctions(StrUtil.uncapitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register instance functions: {}", clazz.getName(), e);
         }
         try {
-            AviatorEvaluator.addStaticFunctions(StringUtils.capitalize(clazz.getSimpleName()), clazz);
+            AviatorEvaluator.addStaticFunctions(StrUtil.capitalize(clazz.getSimpleName()), clazz);
         } catch (IllegalAccessException | NoSuchMethodException e) {
             log.error("Internal error: failed on register static functions: {}", clazz.getName(), e);
         }

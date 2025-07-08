@@ -7,15 +7,12 @@ import com.ghostchu.peerbanhelper.util.rule.MatchResult;
 import com.ghostchu.peerbanhelper.util.rule.MatchResultEnum;
 import com.google.gson.JsonObject;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
 public final class StringStartsWithMatcher extends AbstractJsonMatcher {
-    private static final TranslationComponent nameComponent = new TranslationComponent(Lang.RULE_MATCHER_STRING_STARTS_WITH);
     private final String rule;
     private MatchResult hit;
     private MatchResult miss;

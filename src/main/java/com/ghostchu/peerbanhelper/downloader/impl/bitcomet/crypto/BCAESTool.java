@@ -1,7 +1,5 @@
 package com.ghostchu.peerbanhelper.downloader.impl.bitcomet.crypto;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;
@@ -10,14 +8,13 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.Base64;
 
 public final class BCAESTool {
 
     public static void init() {
         //Security.addProvider((Provider) Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider").getDeclaredConstructor().newInstance());
-        Security.addProvider(new BouncyCastleProvider());
+        //Security.addProvider(new BouncyCastleProvider());
     }
 
     public static String credential(String json, String cid) throws Exception {
@@ -31,7 +28,7 @@ public final class BCAESTool {
         byte[] n = PBKDF2(cid.getBytes(StandardCharsets.UTF_8), t, 10000, 32, "SHA1");
         byte[] i = PBKDF2(cid.getBytes(StandardCharsets.UTF_8), r, 10000, 32, "SHA1");
 
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         SecretKeySpec keySpec = new SecretKeySpec(n, "AES");
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
         byte[] s = cipher.doFinal(json.getBytes(StandardCharsets.UTF_8));

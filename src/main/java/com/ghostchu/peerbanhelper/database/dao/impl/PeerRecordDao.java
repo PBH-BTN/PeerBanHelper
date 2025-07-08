@@ -1,14 +1,14 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
-import com.ghostchu.peerbanhelper.util.paging.Page;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.wrapper.PeerWrapper;
 import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
 import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.support.ConnectionSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,19 +20,17 @@ import java.util.Deque;
 @Component
 @Slf4j
 public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> {
-    private final TorrentDao torrentDao;
 
-    public PeerRecordDao(@Autowired Database database, TorrentDao torrentDao) throws SQLException {
-        super(database.getDataSource(), PeerRecordEntity.class);
-        this.torrentDao = torrentDao;
+    public PeerRecordDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, PeerRecordEntity.class);
     }
 
-    public void syncPendingTasks(Deque<BatchHandleTasks> tasks) throws SQLException {
+    public void syncPendingTasks(Deque<BatchHandleTasks> tasks, TorrentDao torrentDao) throws SQLException {
         callBatchTasks(() -> {
             while (!tasks.isEmpty()) {
                 var t = tasks.pop();
                 try {
-                    writeToDatabase(t.timestamp, t.downloader, t.torrent, t.peer);
+                    writeToDatabase(torrentDao, t.timestamp, t.downloader, t.torrent, t.peer);
                 } catch (SQLException e) {
                     log.error("Unable save peer record to database, please report to developer: {}, {}, {}, {}", t.timestamp, t.downloader, t.torrent, t.peer);
                 }
@@ -41,17 +39,9 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
         });
     }
 
-    public Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, Timestamp afterThan) throws SQLException {
-        var queryBuilder = queryBuilder().where()
-                .gt("lastTimeSeen", afterThan)
-                .or()
-                .isNull("lastTimeSeen")
-                .queryBuilder()
-                .orderBy("lastTimeSeen", true);
-        return queryByPaging(queryBuilder, pageable);
-    }
 
-    private int writeToDatabase(long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
+
+    private int writeToDatabase(TorrentDao torrentDao, long timestamp, String downloader, TorrentWrapper torrent, PeerWrapper peer) throws SQLException {
         TorrentEntity torrentEntity = torrentDao.createIfNotExists(new TorrentEntity(
                 null,
                 torrent.getHash(),
@@ -66,6 +56,8 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
                 downloader,
                 peer.getId().length() > 8 ? peer.getId().substring(0, 8) : peer.getId(),
                 peer.getClientName(),
+                0,
+                0,
                 0,
                 0,
                 0,
@@ -90,11 +82,23 @@ public final class PeerRecordDao extends AbstractPBHDao<PeerRecordEntity, Long> 
         // 更新 offset，转换为增量数据
         databaseSnapshot.setDownloadedOffset(peer.getDownloaded());
         databaseSnapshot.setUploadedOffset(peer.getUploaded());
+        databaseSnapshot.setDownloadSpeed(peer.getDownloadSpeed());
+        databaseSnapshot.setUploadSpeed(peer.getUploadSpeed());
         databaseSnapshot.setPeerId(currentSnapshot.getPeerId());
         databaseSnapshot.setClientName(currentSnapshot.getClientName());
         databaseSnapshot.setLastFlags(currentSnapshot.getLastFlags());
         databaseSnapshot.setLastTimeSeen(currentSnapshot.getLastTimeSeen());
         return update(databaseSnapshot);
+    }
+
+    public Page<PeerRecordEntity> getPendingSubmitPeerRecords(Pageable pageable, Timestamp afterThan) throws SQLException {
+        var queryBuilder = queryBuilder().where()
+                .gt("lastTimeSeen", afterThan)
+                .or()
+                .isNull("lastTimeSeen")
+                .queryBuilder()
+                .orderBy("lastTimeSeen", true);
+        return queryByPaging(queryBuilder, pageable);
     }
 
     @Override

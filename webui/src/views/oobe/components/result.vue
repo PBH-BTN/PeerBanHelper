@@ -41,7 +41,7 @@ const init = () => {
   InitPBH({
     token: config.value.token,
     downloader: {
-      name: config.value.downloaderConfig.name,
+      id: config.value.downloaderConfig.id,
       config: config.value.downloaderConfig.config
     }
   })

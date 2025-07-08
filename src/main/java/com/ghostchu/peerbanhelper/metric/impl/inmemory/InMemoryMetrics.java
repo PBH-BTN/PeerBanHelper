@@ -11,6 +11,8 @@ public final class InMemoryMetrics implements BasicMetrics {
     private long checks = 0;
     private long bans = 0;
     private long unbans = 0;
+    private long wastedTraffic = 0;
+    private long savedTraffic = 0;
 
     @Override
     public long getCheckCounter() {
@@ -28,21 +30,33 @@ public final class InMemoryMetrics implements BasicMetrics {
     }
 
     @Override
+    public long getSavedTraffic() {
+        return savedTraffic;
+    }
+
+    @Override
+    public long getWastedTraffic() {
+        return wastedTraffic;
+    }
+
+    @Override
     public void recordCheck() {
         checks++;
     }
 
     @Override
-    public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
-        if(metadata.isBanForDisconnect()){
+    public synchronized void recordPeerBan(PeerAddress address, BanMetadata metadata) {
+        if (metadata.isBanForDisconnect()) {
             return;
         }
         bans++;
+        savedTraffic += Math.max(0, metadata.getTorrent().getSize() - metadata.getPeer().getUploaded());
+        wastedTraffic += metadata.getPeer().getUploaded();
     }
 
     @Override
-    public void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
-        if(metadata.isBanForDisconnect()){
+    public synchronized void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
+        if (metadata.isBanForDisconnect()) {
             return;
         }
         unbans++;

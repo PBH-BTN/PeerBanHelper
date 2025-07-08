@@ -1,4 +1,4 @@
-config-version: 23
+config-version: 26
 # Check interval (Timeunit: ms)
 # 检查频率（单位：毫秒）
 check-interval: 5000
@@ -309,7 +309,7 @@ module:
     # 规则列表 - Rule lists
     # 在 AviatorScript 执行时，PBH 会注入以下环境变量，您可以自由使用它们：
     # You can feel free use them in AviatorScript files
-    # peer - 一个 com.ghostchu.peerbanhelper.peer.Peer 对象，您可以使用这个对象下面的任何属性，这些是您可能用到的：
+    # peer - 一个 com.ghostchu.peerbanhelper.bittorrent.peer.Peer 对象，您可以使用这个对象下面的任何属性，这些是您可能用到的：
     # peer - an com.ghotchu.peerbanhelper.peer.Peer instance, you can access any property under this object, these is you might will used
     # peer.peerAddress.ip - 字符串型 IP 地址 - IP address in String
     # peer.peerAddress.port - 整型端口号 - Port in int
@@ -412,6 +412,21 @@ module:
       # 每日阈值 - 设置为 -1 以禁用，单位：bytes
       # Daily threshold, set to -1 to disable, Unit: bytes
       daily: -1
+    # 流量滑动窗口限制 - Traffic Capping by Sliding Window
+    traffic-sliding-capping:
+      # 是否启用 - Enable?
+      # 启用此功能后，将接管所有下载器的上传速率控制设置项
+      # If enabled, this module will take over all upload rate control settings in downloader
+      enabled: false
+      # 滑动窗口区域内，最多允许上传的流量，单位：bytes
+      # The maximum allowed upload traffic in sliding window, Unit: bytes
+      max-allowed-upload-traffic: 25000000000
+      # 调整上传速率时，最大允许的下载速率，单位：bytes
+      # The maximum allowed download rate when adjusting upload rate, Unit: bytes
+      max-speed: 0
+      # 调整上传速率时，最小允许的下载速率，单位：bytes
+      # The minimum allowed download rate when adjusting upload rate, Unit: bytes
+      min-speed: 0
   # PTR （反向解析记录） 封禁
   # 此模块将强制对 Peer IP 进行 PTR 查询，并试图解析其 IP 地址绑定的主机名。如果 IP 地址绑定了一个主机名且主机名匹配下列规则，则执行操作
   # PTR (Reverse DNS) Blocker
@@ -442,3 +457,5 @@ module:
     # 规则从上到下执行
     ptr-rules:
       - '{"method":"EQUALS","content":"example.com"}'
+  peers-local-track:
+    enabled: true

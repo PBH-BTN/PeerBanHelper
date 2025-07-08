@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.database.table;
 
+import com.ghostchu.peerbanhelper.database.dao.impl.RuleSubLogsDao;
 import com.ghostchu.peerbanhelper.module.IPBanRuleUpdateType;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@DatabaseTable(tableName = "rule_sub_log")
+@DatabaseTable(tableName = "rule_sub_log", daoClass = RuleSubLogsDao.class)
 public final class RuleSubLogEntity {
     @DatabaseField(generatedId = true, index = true)
     private Long id;

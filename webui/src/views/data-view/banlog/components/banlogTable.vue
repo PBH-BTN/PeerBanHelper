@@ -15,6 +15,7 @@
     column-resizable
     size="medium"
     class="banlog-table"
+    @sorter-change="sorterChange"
     @page-change="changeCurrent"
     @page-size-change="changePageSize"
   >
@@ -65,6 +66,18 @@
         </a-tooltip>
       </p>
     </template>
+    <template #torrentName="{ record }">
+      <a-tooltip
+        :content="
+          t('page.banlog.banlogTable.column.torrentName.tooltip', {
+            downloader: record.downloader?.name,
+            hash: record.torrentInfoHash
+          })
+        "
+      >
+        <p>{{ record.torrentName }}</p>
+      </a-tooltip>
+    </template>
     <template #torrentSize="{ record }">
       <a-tooltip :content="`Hash: ${record.torrentInfoHash}`">
         <p>{{ formatFileSize(record.torrentSize) }}</p>
@@ -78,14 +91,14 @@ import { getBanlogs } from '@/service/banLogs'
 import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
-import { computed, ref, watch } from 'vue'
 import { formatIPAddressPort } from '@/utils/string'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 const forceLoading = ref(true)
 const endpointState = useEndpointStore()
 const { t, d } = useI18n()
-const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh } =
+const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh, run } =
   usePagination(
     getBanlogs,
     {
@@ -126,6 +139,11 @@ const columns = [
       '/' +
       t('page.banlog.banlogTable.column.unbanTime'),
     slotName: 'banAt',
+    dataIndex: 'banAt',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
     width: 210
   },
   {
@@ -141,17 +159,28 @@ const columns = [
   {
     title: () => t('page.banlog.banlogTable.column.trafficSnapshot'),
     slotName: 'peerStatus',
+    dataIndex: 'peerUploaded',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
     width: 150
   },
   {
     title: () => t('page.banlog.banlogTable.column.torrentName'),
     dataIndex: 'torrentName',
+    slotName: 'torrentName',
     ellipsis: true,
     tooltip: true
   },
   {
     title: () => t('page.banlog.banlogTable.column.torrentSize'),
     slotName: 'torrentSize',
+    dataIndex: 'torrentSize',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
     width: 120
   },
   {
@@ -162,6 +191,19 @@ const columns = [
   }
 ]
 const list = computed(() => data.value?.data.results)
+const sorterChange = (dataIndex: string, direction: string) => {
+  if (!direction)
+    run({
+      page: current.value,
+      pageSize: pageSize.value
+    })
+  else
+    run({
+      page: current.value,
+      pageSize: pageSize.value,
+      sorter: `${dataIndex}|${direction}`
+    })
+}
 </script>
 
 <style scoped>

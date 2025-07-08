@@ -19,11 +19,11 @@ public final class EmptyKeyRelaxedTrustSSLContext extends SSLContextSpi {
         KeyManager[] keyManager = null;
         TrustManager[] trustManagers = {
                 new X509TrustManager() {
-                    public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+                    public void checkClientTrusted(final X509Certificate[] chain, final String authType) {
                         // Perform no checks
                     }
 
-                    public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+                    public void checkServerTrusted(final X509Certificate[] chain, final String authType) {
                         // Perform no checks
                     }
 
@@ -69,7 +69,7 @@ public final class EmptyKeyRelaxedTrustSSLContext extends SSLContextSpi {
     }
 
     @Override
-    protected void engineInit(KeyManager[] km, TrustManager[] tm, SecureRandom arg2) throws KeyManagementException {
+    protected void engineInit(KeyManager[] km, TrustManager[] tm, SecureRandom arg2) {
         // Don't do anything, we've already initialized everything in the constructor
     }
 }

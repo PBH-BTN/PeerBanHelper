@@ -126,7 +126,16 @@ export default {
     '設定流量告警閾值，當超出閾值後將發送告警資訊提醒您檢查下載器狀態',
   'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.daily.value':
     '每日流量告警閾值',
-
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.enable':
+    '開啟流量限制',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.daily_max_allowed_upload_traffic':
+    '每日最大允許上傳流量',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed':
+    '最小速度',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.min_speed.warning':
+    '如果設定了最小速度，上述每日最大允許上傳流量可能不會被遵守',
+  'page.settings.tab.profile.module.activeMonitor.trafficMonitoring.traffic_capping.max_speed':
+    '最大速度',
   'page.settings.tab.profile.module.ptrBlackList.title': 'DNS 反向解析封禁',
   'page.settings.tab.profile.module.ptrBlackList.useGlobalBanTime': '使用全域封禁時間',
   'page.settings.tab.profile.module.ptrBlackList.reserveName': '封禁域名',

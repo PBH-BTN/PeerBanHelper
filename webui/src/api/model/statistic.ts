@@ -6,6 +6,9 @@ export interface Statistic {
   checkCounter: number
   banlistCounter: number
   bannedIpCounter: number
+  wastedTraffic: number
+  trackedSwarmCount: number
+  peersBlockRate: number
 }
 
 export interface AnalysisField {

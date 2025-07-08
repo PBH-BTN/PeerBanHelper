@@ -27,6 +27,7 @@
         column-resizable
         size="medium"
         @page-change="changeCurrent"
+        @sorter-change="sorterChange"
         @page-size-change="changePageSize"
       >
         <template #banAt="{ record }">
@@ -89,9 +90,9 @@ import queryIpLink from '@/components/queryIpLink.vue'
 import { GetTorrentBanHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
+import { formatIPAddressPort } from '@/utils/string'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { formatIPAddressPort } from '@/utils/string'
 
 import { usePagination } from 'vue-request'
 
@@ -99,9 +100,12 @@ const endpointState = useEndpointStore()
 const { t, d } = useI18n()
 const visible = ref(false)
 const name = ref('')
+const currentInfoHash = ref('')
+
 defineExpose({
   showModal: (infoHash: string, torrentName: string) => {
     name.value = torrentName
+    currentInfoHash.value = infoHash
     runAsync({ page: 1, pageSize: 10, infoHash })
     visible.value = true
   }
@@ -141,6 +145,11 @@ const columns = [
   {
     title: () => t('page.banlog.banlogTable.column.trafficSnapshot'),
     slotName: 'peerStatus',
+    dataIndex: 'peerUploaded',
+    sortable: {
+      sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
+      sorter: true
+    },
     width: 150
   },
   {
@@ -150,6 +159,21 @@ const columns = [
     tooltip: true
   }
 ]
+const sorterChange = (dataIndex: string, direction: string) => {
+  if (!direction)
+    runAsync({
+      page: current.value,
+      pageSize: pageSize.value,
+      infoHash: currentInfoHash.value
+    })
+  else
+    runAsync({
+      page: current.value,
+      pageSize: pageSize.value,
+      infoHash: currentInfoHash.value,
+      sorter: `${dataIndex}|${direction}`
+    })
+}
 const list = computed(() => data.value?.data.results)
 </script>
 

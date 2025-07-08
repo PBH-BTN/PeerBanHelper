@@ -2,10 +2,11 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.body.LicensePutRequestBody;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ActiveInfoDTO;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationKeyManager;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
-@IgnoreScan
 public final class PBHPlusController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
@@ -77,7 +77,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
     }
 
     private void handleLicensePut(Context ctx) throws IOException {
-        var licenseReq = ctx.bodyAsClass(LicensePutRequest.class);
+        var licenseReq = ctx.bodyAsClass(LicensePutRequestBody.class);
         Main.getMainConfig().set("pbh-plus-key", licenseReq.key());
         Main.getMainConfig().save(Main.getMainConfigFile());
         activationManager.load();
@@ -112,7 +112,7 @@ public final class PBHPlusController extends AbstractFeatureModule {
             }
         }
         context.json(new StdResp(true, null,
-                new ActiveInfo(activationManager.isActivated(),
+                new ActiveInfoDTO(activationManager.isActivated(),
                         key,keyData, expiredKeyData
                        )));
     }
@@ -122,16 +122,4 @@ public final class PBHPlusController extends AbstractFeatureModule {
 
     }
 
-    public record ActiveInfo(
-            boolean activated,
-            String key,
-            ActivationKeyManager.KeyData keyData,
-            ActivationKeyManager.KeyData inactiveKeyData
-    ) {
-
-    }
-
-    public record LicensePutRequest(String key) {
-
-    }
 }

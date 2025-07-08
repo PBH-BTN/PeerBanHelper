@@ -191,7 +191,6 @@ const banHistoryModal = ref<InstanceType<typeof BanHistoryModal>>()
 const handleSearch = debounce((value: string) => {
   run({ page: current.value, pageSize: pageSize.value, keyword: value })
 }, 300)
-
 const endpointStore = useEndpointStore()
 const plusStatus = computed(() => endpointStore.plusStatus)
 </script>

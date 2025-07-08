@@ -3,13 +3,14 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.TrafficJournalDao;
-import com.ghostchu.peerbanhelper.ipdb.IPDB;
-import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleLongIntKVDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.SimpleStringIntKVDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.WebUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
+import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -25,10 +26,7 @@ import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,7 +36,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
 @Slf4j
-@IgnoreScan
 public final class PBHChartController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
@@ -83,17 +80,55 @@ public final class PBHChartController extends AbstractFeatureModule {
         }
     }
 
+//    private void handleTrafficClassic(Context ctx) throws Exception {
+//        var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
+//        String downloader = ctx.queryParam("downloader");
+//        var records = trafficJournalDao.getDayOffsetData(downloader,
+//                timeQueryModel.startAt(),
+//                timeQueryModel.endAt());
+//        ctx.json(new StdResp(true, null, fixTimezone(ctx, records)));
+//    }
+
     private void handleTrafficClassic(Context ctx) throws Exception {
         var timeQueryModel = WebUtil.parseTimeQueryModel(ctx);
         String downloader = ctx.queryParam("downloader");
         var records = trafficJournalDao.getDayOffsetData(downloader,
                 timeQueryModel.startAt(),
                 timeQueryModel.endAt());
-        ctx.json(new StdResp(true, null, fixTimezone(ctx, records)));
+
+        // 将相同天的记录合并
+        Map<Long, TrafficJournalDao.TrafficDataComputed> mergedData = new java.util.HashMap<>();
+
+        for (TrafficJournalDao.TrafficDataComputed record : records) {
+            // 获取当天的开始时间戳
+            Timestamp ts = record.getTimestamp();
+            long dayStart = MiscUtil.getStartOfToday(ts.getTime());
+
+            // 合并相同日期的数据
+            mergedData.compute(dayStart, (key, existing) -> {
+                if (existing == null) {
+                    return new TrafficJournalDao.TrafficDataComputed(
+                            new Timestamp(key),
+                            record.getDataOverallUploaded(),
+                            record.getDataOverallDownloaded()
+                    );
+                } else {
+                    existing.setDataOverallUploaded(existing.getDataOverallUploaded() + record.getDataOverallUploaded());
+                    existing.setDataOverallDownloaded(existing.getDataOverallDownloaded() + record.getDataOverallDownloaded());
+                    return existing;
+                }
+            });
+        }
+
+        // 转换回列表并排序
+        List<TrafficJournalDao.TrafficDataComputed> mergedRecords = new ArrayList<>(mergedData.values());
+        mergedRecords.sort(Comparator.comparing(data -> data.getTimestamp().getTime()));
+
+        ctx.json(new StdResp(true, null, mergedRecords));
     }
 
 
-    private TrafficJournalDao.TrafficDataDto fixTimezone(Context ctx, TrafficJournalDao.TrafficDataDto data) {
+    private TrafficJournalDao.TrafficDataComputed fixTimezone(Context ctx, TrafficJournalDao.TrafficDataComputed data) {
         Timestamp ts = data.getTimestamp();
         var epochSecond = ts.toLocalDateTime().atZone(timezone(ctx).toZoneId().getRules().getOffset(Instant.now()))
                 .truncatedTo(ChronoUnit.DAYS).toEpochSecond();
@@ -101,7 +136,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         return data;
     }
 
-    private List<TrafficJournalDao.TrafficDataDto> fixTimezone(Context ctx, List<TrafficJournalDao.TrafficDataDto> data) {
+    private List<TrafficJournalDao.TrafficDataComputed> fixTimezone(Context ctx, List<TrafficJournalDao.TrafficDataComputed> data) {
         data.forEach(d -> fixTimezone(ctx, d));
         return data;
     }
@@ -141,12 +176,12 @@ public final class PBHChartController extends AbstractFeatureModule {
         }
         ctx.json(new StdResp(true, null, Map.of(
                 "connectedPeersTrend", connectedPeerTrends.entrySet().stream()
-                        .map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparingLong(SimpleLongIntKV::key))
+                        .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
+                        .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
                         .toList(),
                 "bannedPeersTrend", bannedPeerTrends.entrySet().stream()
-                        .map((e) -> new SimpleLongIntKV(e.getKey(), e.getValue().intValue()))
-                        .sorted(Comparator.comparingLong(SimpleLongIntKV::key))
+                        .map((e) -> new SimpleLongIntKVDTO(e.getKey(), e.getValue().intValue()))
+                        .sorted(Comparator.comparingLong(SimpleLongIntKVDTO::key))
                         .toList()
         )));
     }
@@ -240,16 +275,16 @@ public final class PBHChartController extends AbstractFeatureModule {
             }
         }
         ctx.json(new StdResp(true, null, Map.of(
-                "isp", ispCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "isp", ispCounter.entrySet().stream().map((e) -> new SimpleStringIntKVDTO(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
-                "province", cnProvinceCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "province", cnProvinceCounter.entrySet().stream().map((e) -> new SimpleStringIntKVDTO(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
-                "region", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "region", countryOrRegionCounter.entrySet().stream().map((e) -> new SimpleStringIntKVDTO(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList(),
-                "city", cnCityCounter.entrySet().stream().map((e) -> new SimpleStringIntKV(e.getKey(), e.getValue().intValue()))
+                "city", cnCityCounter.entrySet().stream().map((e) -> new SimpleStringIntKVDTO(e.getKey(), e.getValue().intValue()))
                         .sorted((o1, o2) -> Integer.compare(o2.value(), o1.value()))
                         .toList()
         )));
@@ -257,14 +292,6 @@ public final class PBHChartController extends AbstractFeatureModule {
 
     @Override
     public void onDisable() {
-
-    }
-
-    record SimpleStringIntKV(String key, int value) {
-
-    }
-
-    record SimpleLongIntKV(long key, int value) {
 
     }
 

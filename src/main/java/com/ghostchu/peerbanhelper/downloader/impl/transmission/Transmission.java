@@ -2,18 +2,19 @@ package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
 import com.ghostchu.peerbanhelper.alert.AlertLevel;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
-import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.ghostchu.peerbanhelper.wrapper.TorrentWrapper;
+import com.github.mizosoft.methanol.Methanol;
 import com.google.gson.JsonObject;
 import com.vdurmont.semver4j.Semver;
 import cordelia.client.TrClient;
@@ -43,26 +44,31 @@ public final class Transmission extends AbstractDownloader {
     private final String blocklistUrl;
     private final Config config;
 
-    public Transmission(String name, String blocklistUrl, Config config, AlertManager alertManager) {
-        super(name, alertManager);
+    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+        super(id, alertManager);
         this.config = config;
-        this.client = new TrClient(config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
+        this.client = new TrClient(httpBuilder, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
+    }
+
+    @Override
+    public String getName() {
+        return config.getName();
     }
 
     private static String generateBlocklistUrl(String pbhServerAddress) {
         return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
-    public static Transmission loadFromConfig(String name, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section);
-        return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config, alertManager);
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+        Config config = Config.readFromYaml(section, id);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpBuilder);
     }
 
-    public static Transmission loadFromConfig(String name, String pbhServerAddress, JsonObject section, AlertManager alertManager) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
-        return new Transmission(name, generateBlocklistUrl(pbhServerAddress), config, alertManager);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpBuilder);
     }
 
     @Override
@@ -216,15 +222,111 @@ public final class Transmission extends AbstractDownloader {
         return new DownloaderStatistics(stats.getCumulativeStats().getUploadedBytes(), stats.getCumulativeStats().getDownloadedBytes());
     }
 
-    @Override
-    public void relaunchTorrentIfNeeded(Collection<Torrent> torrents) {
+//    /**
+//     * 添加标签到指定种子
+//     *
+//     * @param torrent Torrent
+//     * @param tag     标签
+//     */
+//    @Override
+//    public void addTag(Torrent torrent, String tag) {
+//
+//    }
+//
+//    /**
+//     * 从种子上移除指定的标签
+//     *
+//     * @param torrent Torrent
+//     * @param tag     标签
+//     */
+//    @Override
+//    public void removeTag(Torrent torrent, String tag) {
+//
+//    }
+//
+//    /**
+//     * 以纯文本方式获取指定 Torrent 上的所有标签
+//     *
+//     * @param torrent Torrent
+//     * @return 标签列表
+//     */
+//    @Override
+//    public List<String> getTags(Torrent torrent) {
+//        return Collections.emptyList();
+//    }
+//
+//    /**
+//     * 暂停 Torrent
+//     *
+//     * @param torrent Torrent
+//     */
+//    @Override
+//    public void pauseTorrent(Torrent torrent) {
+//        RqTorrentStop start = new RqTorrentStop(List.of(Long.parseLong(torrent.getId())));
+//        TypedResponse<RsEmpty> sessionSetResp = client.execute(start);
+//        if (!sessionSetResp.isSuccess()) {
+//            log.error(tlUI(Lang.DOWNLOADER_FAILED_STOP_TORRENT, getName(), sessionSetResp.getResult()));
+//        }
+//    }
+//
+//    /**
+//     * 开始 Torrent
+//     *
+//     * @param torrent Torrent
+//     */
+//    @Override
+//    public void startTorrent(Torrent torrent) {
+//        RqTorrentStart start = new RqTorrentStart(List.of(Long.parseLong(torrent.getId())));
+//        TypedResponse<RsEmpty> sessionSetResp = client.execute(start);
+//        if (!sessionSetResp.isSuccess()) {
+//            log.error(tlUI(Lang.DOWNLOADER_FAILED_START_TORRENT, getName(), sessionSetResp.getResult()));
+//        }
+//    }
 
+    /**
+     * 获取当前下载器的限速配置
+     *
+     * @return 限速配置，如果不支持或者请求错误，则可能返回 null
+     */
+    @Override
+    public @Nullable DownloaderSpeedLimiter getSpeedLimiter() {
+        RqSessionGet sessionGet = new RqSessionGet(List.of(Fields.DOWNLOAD_LIMIT, Fields.DOWNLOAD_LIMITED, Fields.UPLOAD_LIMIT, Fields.UPLOAD_LIMITED));
+        TypedResponse<RsSessionGet> sessionGetResp = client.execute(sessionGet);
+        if (sessionGetResp.isSuccess()) {
+            RsSessionGet args = sessionGetResp.getArgs();
+            long downloadLimit = args.getSpeedLimitDown() * 1024;
+            long uploadLimit = args.getSpeedLimitUp() * 1024;
+            if (!args.getSpeedLimitDownEnabled()) {
+                downloadLimit = 0;
+            }
+            if (!args.getSpeedLimitUpEnabled()) {
+                uploadLimit = 0;
+            }
+            return new DownloaderSpeedLimiter(uploadLimit, downloadLimit);
+        }
+        log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), sessionGetResp.getResult()));
+        return null;
     }
 
-
+    /**
+     * 设置当前下载器的限速配置
+     *
+     * @param speedLimiter 限速配置
+     */
     @Override
-    public void relaunchTorrentIfNeededByTorrentWrapper(Collection<TorrentWrapper> torrents) {
-
+    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+        RqSessionSet set = RqSessionSet.builder()
+                .altSpeedEnabled(false)
+                .altSpeedTimeEnabled(false)
+                .speedLimitDown(speedLimiter.isDownloadUnlimited() ? (int) (Math.max(1024L, speedLimiter.download()) / 1024) : (int) (speedLimiter.download() / 1024))
+                .speedLimitUp(speedLimiter.isUploadUnlimited() ? (int) (Math.max(1024L, speedLimiter.upload()) / 1024) : (int) (speedLimiter.upload() / 1024))
+                .speedLimitUpEnabled(!speedLimiter.isUploadUnlimited())
+                .speedLimitDownEnabled(!speedLimiter.isDownloadUnlimited())
+                .build();
+        TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
+        if (!sessionSetResp.isSuccess()) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), sessionSetResp.getResult()));
+        }
     }
 
     @Override
@@ -241,7 +343,7 @@ public final class Transmission extends AbstractDownloader {
     @NoArgsConstructor
     @Data
     public static class Config {
-
+        private String name;
         private String type;
         private String endpoint;
         private String username;
@@ -252,9 +354,10 @@ public final class Transmission extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
-        public static Transmission.Config readFromYaml(ConfigurationSection section) {
+        public static Transmission.Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Transmission.Config config = new Transmission.Config();
             config.setType("transmission");
+            config.setName(section.getString("name", alternativeName));
             config.setEndpoint(section.getString("endpoint"));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
@@ -272,6 +375,7 @@ public final class Transmission extends AbstractDownloader {
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "transmission");
+            section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("username", username);
             section.set("password", password);

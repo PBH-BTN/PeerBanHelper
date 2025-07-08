@@ -16,9 +16,9 @@ public class DelugeResponse {
         try {
             m_id = response.getInt("id");
         } catch (JSONException e) {
-            throw new DelugeException("Invalid 'id' field in JSON: " + response.toString(), e);
+            throw new DelugeException("Invalid 'id' field in JSON: " + response, e);
         }
-        m_responseCode = httpResponseCode.intValue();
+        m_responseCode = httpResponseCode;
         m_result = response;
     }
 

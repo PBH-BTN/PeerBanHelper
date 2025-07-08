@@ -2,17 +2,19 @@ package com.ghostchu.peerbanhelper.database;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.lab.Experiments;
-import com.ghostchu.peerbanhelper.lab.Laboratory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import com.ghostchu.peerbanhelper.util.lab.Experiments;
+import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.j256.ormlite.field.DataPersisterManager;
 import com.j256.ormlite.jdbc.JdbcSingleConnectionSource;
 import com.j256.ormlite.jdbc.db.SqliteDatabaseType;
+import com.j256.ormlite.support.ConnectionSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,15 +30,15 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
-@Component
-public final class Database {
+@Configuration
+public class Database {
     private final File sqliteDb;
     private final File dbMaintenanceFile;
     private final Laboratory laboratory;
     private JdbcSingleConnectionSource dataSource;
     private DatabaseHelper helper;
 
-    public Database(Laboratory laboratory) throws SQLException, ClassNotFoundException {
+    public Database(Laboratory laboratory) throws SQLException {
         this.laboratory = laboratory;
         File databaseDirectory = new File(Main.getDataDirectory(), "persist");
         if (!databaseDirectory.exists()) {
@@ -46,6 +48,11 @@ public final class Database {
         this.dbMaintenanceFile = new File(databaseDirectory, "peerbanhelper.db.maintenance");
         registerPersisters();
         setupDatabase(sqliteDb);
+    }
+
+    @Bean
+    public ConnectionSource connectionSource(){
+        return dataSource;
     }
 
     private void registerPersisters() {
@@ -76,7 +83,8 @@ public final class Database {
             try (var stmt = rawConnection.createStatement()) {
                 stmt.executeUpdate("PRAGMA synchronous = NORMAL");
                 stmt.executeUpdate("PRAGMA journal_mode = WAL");
-                stmt.executeUpdate("PRAGMA mmap_size = 50331648");
+                stmt.executeUpdate("PRAGMA mmap_size = 0");
+                stmt.executeUpdate("PRAGMA soft_heap_limit = 16777216");
                 stmt.executeUpdate("PRAGMA OPTIMIZE");
                 try {
                     if (System.currentTimeMillis() - getLastMaintenanceTime() >= Duration.ofDays(Main.getMainConfig().getInt("persist.vacuum-interval-days")).toMillis()) {

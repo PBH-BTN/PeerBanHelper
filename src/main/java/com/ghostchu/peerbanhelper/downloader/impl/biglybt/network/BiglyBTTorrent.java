@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.downloader.impl.biglybt.network;
 
-import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import lombok.Setter;
 
 import java.util.List;
