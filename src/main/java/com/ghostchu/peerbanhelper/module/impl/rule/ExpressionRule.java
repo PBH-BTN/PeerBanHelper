@@ -41,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,6 +60,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
     private final ScriptStorageDao scriptStorageDao;
     private long banDuration;
+    private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
     public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngine scriptEngine, ScriptStorageDao scriptStorageDao) {
         super();
@@ -222,28 +224,27 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
 
     @SneakyThrows
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         AtomicReference<CheckResult> checkResult = new AtomicReference<>(pass());
-        try (ExecutorService exec = Executors.newWorkStealingPool()) {
-            for (var compiledScript : scripts) {
-                exec.submit(() -> {
-                    CheckResult expressionRun = runExpression(compiledScript, torrent, peer, downloader, ruleExecuteExecutor);
-                    if (expressionRun.action() == PeerAction.SKIP) {
-                        checkResult.set(expressionRun); // 提前退出
-                        return;
-                    }
-                    if (expressionRun.action() == PeerAction.BAN) {
-                        if (checkResult.get().action() != PeerAction.SKIP) {
-                            checkResult.set(expressionRun);
-                        }
-                    }
-                });
+
+        for (CompletableFuture<Void> future : scripts.stream().map(compiledScript -> CompletableFuture.runAsync(() -> {
+            CheckResult expressionRun = runExpression(compiledScript, torrent, peer, downloader);
+            if (expressionRun.action() == PeerAction.SKIP) {
+                checkResult.set(expressionRun); // 提前退出
+                return;
             }
+            if (expressionRun.action() == PeerAction.BAN) {
+                if (checkResult.get().action() != PeerAction.SKIP) {
+                    checkResult.set(expressionRun);
+                }
+            }
+        }, parallelService)).toList()) {
+            future.join();
         }
         return checkResult.get();
     }
 
-    public CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         return getCache().readCacheButWritePassOnly(this, script.expression().hashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {

@@ -228,7 +228,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull ExecutorService ruleExecuteExecutor) {
+    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
         peers.stream().filter(peer -> {
                     var clientName = peer.getClientName();
                     var peerId = peer.getPeerId();

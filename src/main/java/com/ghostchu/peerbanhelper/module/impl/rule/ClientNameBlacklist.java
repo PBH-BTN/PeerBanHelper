@@ -89,7 +89,7 @@ public final class ClientNameBlacklist extends AbstractRuleFeatureModule impleme
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         if (isHandShaking(peer) && (peer.getClientName() == null || peer.getClientName().isBlank())) {
             return handshaking();
         }

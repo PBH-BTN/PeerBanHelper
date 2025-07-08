@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 @Component
 
@@ -89,7 +88,7 @@ public final class PeerIdBlacklist extends AbstractRuleFeatureModule implements 
 
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         if (isHandShaking(peer) && (peer.getPeerId() == null || peer.getPeerId().isBlank())) {
             return handshaking();
         }

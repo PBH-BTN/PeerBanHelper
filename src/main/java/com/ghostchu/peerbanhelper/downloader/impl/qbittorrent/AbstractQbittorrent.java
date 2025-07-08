@@ -44,10 +44,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -58,6 +55,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected final HttpClient httpClient;
     protected final QBittorrentConfig config;
     protected final Cache<String, TorrentProperties> torrentPropertiesCache;
+    protected final ExecutorService parallelService = Executors.newWorkStealingPool();
 
     public AbstractQbittorrent(String id, QBittorrentConfig config, AlertManager alertManager, Methanol.Builder httpBuilder) {
         super(id, alertManager);
@@ -294,8 +292,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
      */
     @Override
     public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
-        long downloadLimit = speedLimiter.isDownloadUnlimited() ?  0 : speedLimiter.download();
-        long uploadLimit = speedLimiter.isUploadUnlimited() ?  0 : speedLimiter.upload();
+        long downloadLimit = speedLimiter.isDownloadUnlimited() ? 0 : speedLimiter.download();
+        long uploadLimit = speedLimiter.isUploadUnlimited() ? 0 : speedLimiter.upload();
         var requestParam = Map.of(
                 "up_limit", uploadLimit,
                 "dl_limit", downloadLimit,
@@ -358,42 +356,39 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     protected void fillTorrentProperties(List<QBittorrentTorrent> qbTorrent) {
         Semaphore torrentPropertiesLimit = new Semaphore(5);
-        try (ExecutorService service = Executors.newWorkStealingPool()) {
-            qbTorrent.stream()
-                    .filter(torrent -> (config.isIgnorePrivate() && torrent.getPrivateTorrent() == null)
-                            || torrent.getPieceSize() <= 0 || torrent.getPiecesHave() <= 0)
-                    .forEach(detail -> service.submit(() -> {
-                        try {
-                            torrentPropertiesLimit.acquire();
-                            TorrentProperties properties = getTorrentProperties(detail);
-                            if (properties == null) {
-                                log.warn("Failed to retrieve properties for torrent: {}", detail.getHash());
-                                return;
-                            }
-                            if (detail.getCompleted() != properties.completed) {
-                                // completed value changed, invalidate cache and fetch again.
-                                torrentPropertiesCache.invalidate(detail.getHash());
-                                properties = getTorrentProperties(detail);
-                                if (properties == null) {
-                                    log.warn("Failed to retrieve properties after cache invalidation for torrent: {}", detail.getHash());
-                                    return;
-                                }
-                            }
-                            if (config.isIgnorePrivate() && detail.getPrivateTorrent() == null) {
-                                log.debug("Field is_private is not present, querying from properties API, hash: {}", detail.getHash());
-                                detail.setPrivateTorrent(properties.isPrivate);
-                            }
-                            if (detail.getPieceSize() <= 0 || detail.getPiecesHave() <= 0) {
-                                log.debug("Field piece_size or pieces_have is not present, querying from properties API, hash: {}", detail.getHash());
-                                detail.setPieceSize(properties.pieceSize);
-                                detail.setPiecesHave(properties.piecesHave);
-                            }
-                        } catch (Exception e) {
-                            log.debug("Failed to load properties cache", e);
-                        } finally {
-                            torrentPropertiesLimit.release();
-                        }
-                    }));
+        for (CompletableFuture<Void> future : qbTorrent.stream().map(detail -> CompletableFuture.runAsync(() -> {
+            try {
+                torrentPropertiesLimit.acquire();
+                TorrentProperties properties = getTorrentProperties(detail);
+                if (properties == null) {
+                    log.warn("Failed to retrieve properties for torrent: {}", detail.getHash());
+                    return;
+                }
+                if (detail.getCompleted() != properties.completed) {
+                    // completed value changed, invalidate cache and fetch again.
+                    torrentPropertiesCache.invalidate(detail.getHash());
+                    properties = getTorrentProperties(detail);
+                    if (properties == null) {
+                        log.warn("Failed to retrieve properties after cache invalidation for torrent: {}", detail.getHash());
+                        return;
+                    }
+                }
+                if (config.isIgnorePrivate() && detail.getPrivateTorrent() == null) {
+                    log.debug("Field is_private is not present, querying from properties API, hash: {}", detail.getHash());
+                    detail.setPrivateTorrent(properties.isPrivate);
+                }
+                if (detail.getPieceSize() <= 0 || detail.getPiecesHave() <= 0) {
+                    log.debug("Field piece_size or pieces_have is not present, querying from properties API, hash: {}", detail.getHash());
+                    detail.setPieceSize(properties.pieceSize);
+                    detail.setPiecesHave(properties.piecesHave);
+                }
+            } catch (Exception e) {
+                log.debug("Failed to load properties cache", e);
+            } finally {
+                torrentPropertiesLimit.release();
+            }
+        }, parallelService)).toList()) {
+            future.join();
         }
     }
 
@@ -421,7 +416,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     public DownloaderStatistics getStatistics() {
         HttpResponse<Reader> request;
         try {
-            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/maindata"),MoreBodyHandlers.ofReader());
+            request = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/maindata"), MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

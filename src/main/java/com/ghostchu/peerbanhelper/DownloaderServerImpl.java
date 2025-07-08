@@ -74,7 +74,6 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private boolean hideFinishLogs;
     private static final long BANLIST_SAVE_INTERVAL = 60 * 60 * 1000;
     private final CheckResult NO_MATCHES_CHECK_RESULT = new CheckResult(getClass(), PeerAction.NO_ACTION, 0, new TranslationComponent("No Matches"), new TranslationComponent("No Matches"), StructuredData.create());
-    private final ExecutorService executor = Executors.newWorkStealingPool(Math.max(4, Runtime.getRuntime().availableProcessors()));
     @Getter
     private final AtomicBoolean needReApplyBanList = new AtomicBoolean();
     private ScheduledExecutorService BAN_WAVE_SERVICE;
@@ -86,6 +85,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private boolean globalPaused = false;
     private final AlertManager alertManager;
     private final Database databaseManager;
+    protected final ExecutorService parallelService = Executors.newWorkStealingPool();
 
 
     public DownloaderServerImpl(DownloaderManagerImpl downloaderManager,
@@ -197,11 +197,12 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
             // 更新 LIVE_PEERS 用于数据展示
             banWaveWatchDog.setLastOperation("Update live peers");
             updateLivePeers(peers);
+
             peers.forEach((downloader, entry) -> {
                 banWaveWatchDog.setLastOperation("Notify MonitorFeatureModules");
                 for (FeatureModule module : moduleManager.getModules()) {
                     if (module instanceof MonitorFeatureModule monitorFeatureModule) {
-                        entry.forEach((torrent, plist) -> monitorFeatureModule.onTorrentPeersRetrieved(downloader, torrent, plist, executor));
+                        entry.forEach((torrent, plist) -> monitorFeatureModule.onTorrentPeersRetrieved(downloader, torrent, plist));
                     }
                 }
             });
@@ -426,17 +427,17 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
         Map<Downloader, Map<Torrent, List<Peer>>> peers = Collections.synchronizedMap(new HashMap<>());
-        try (var service = Executors.newWorkStealingPool()) {
-            downloaderManager.forEach(downloader -> service.submit(() -> {
-                try {
-                    Map<Torrent, List<Peer>> p = collectPeers(downloader);
-                    if (p != null) {
-                        peers.put(downloader, p);
-                    }
-                } catch (Exception e) {
-                    log.error(tlUI(Lang.DOWNLOADER_UNHANDLED_EXCEPTION), e);
+        for (CompletableFuture<Void> future : downloaderManager.stream().map(downloader -> CompletableFuture.runAsync(() -> {
+            try {
+                Map<Torrent, List<Peer>> p = collectPeers(downloader);
+                if (p != null) {
+                    peers.put(downloader, p);
                 }
-            }));
+            } catch (Exception e) {
+                log.error(tlUI(Lang.DOWNLOADER_UNHANDLED_EXCEPTION), e);
+            }
+        }, parallelService)).toList()) {
+            future.join();
         }
         return peers;
     }
@@ -507,11 +508,11 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
                 try {
                     CheckResult checkResult;
                     if (module.isThreadSafe()) {
-                        checkResult = module.shouldBanPeer(torrent, peer, downloader, executor);
+                        checkResult = module.shouldBanPeer(torrent, peer, downloader);
                     } else {
                         registeredModule.getThreadLock().lock();
                         try {
-                            checkResult = module.shouldBanPeer(torrent, peer, downloader, executor);
+                            checkResult = module.shouldBanPeer(torrent, peer, downloader);
                         } finally {
                             registeredModule.getThreadLock().unlock();
                         }
@@ -612,7 +613,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         metrics.recordPeerBan(peer.getPeerAddress(), banMetadata);
         banMetadata.setReverseLookup("N/A");
         if (Main.getMainConfig().getBoolean("lookup.dns-reverse-lookup")) {
-            executor.submit(() -> {
+            Thread.ofVirtual().start(() -> {
                 if (laboratory.isExperimentActivated(Experiments.DNSJAVA.getExperiment())) {
                     dnsLookup.ptr(peer.getPeerAddress().getAddress().toReverseDNSLookupString()).thenAccept(hostName -> {
                         if (hostName.isPresent()) {
