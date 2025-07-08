@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
-import sun.misc.Unsafe;
 
 import javax.management.MBeanServer;
 import java.io.File;
@@ -49,6 +48,7 @@ import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -104,14 +104,19 @@ public final class PBHGeneralController extends AbstractFeatureModule {
 
     private void handleTriggerCrash(@NotNull Context context) {
         context.json(new StdResp(true, "Unsafe putAddress called, triggering crash...", null));
-        getUnsafeInstance().putAddress(0, 0);
+        try {
+            Class.forName("sun.misc.Unsafe").getDeclaredMethod("putAddress", Long.class, Long.class)
+                    .invoke(getUnsafeInstance(), 0L,0L);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static Unsafe getUnsafeInstance() {
+    public static Object getUnsafeInstance() {
         try {
-            Field f = Unsafe.class.getDeclaredField("theUnsafe");
+            Field f = Class.forName("sun.misc.Unsafe").getDeclaredField("theUnsafe");
             f.setAccessible(true);
-            return (Unsafe) f.get(null);
+            return f.get(null);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get Unsafe instance", e);
         }
