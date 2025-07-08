@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
+import sun.misc.Unsafe;
 
 import javax.management.MBeanServer;
 import java.io.File;
@@ -47,6 +48,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -93,10 +95,26 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .get("/api/general/stacktrace", this::handleDumpStackTrace, Role.USER_READ)
                 .get("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
                 .post("/api/general/reload", this::handleReloading, Role.USER_WRITE)
+                .post("/api/general/triggerCrash", this::handleTriggerCrash, Role.USER_WRITE)
                 .get("/api/general/global", this::handleGlobalConfigRead, Role.USER_READ)
                 .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_WRITE)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleTriggerCrash(@NotNull Context context) {
+        context.json(new StdResp(true, "Unsafe putAddress called, triggering crash...", null));
+        getUnsafeInstance().putAddress(0, 0);
+    }
+
+    public static Unsafe getUnsafeInstance() {
+        try {
+            Field f = Unsafe.class.getDeclaredField("theUnsafe");
+            f.setAccessible(true);
+            return (Unsafe) f.get(null);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get Unsafe instance", e);
+        }
     }
 
     private void handleDumpStackTrace(Context context) {
