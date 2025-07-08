@@ -45,6 +45,8 @@ public final class BtnBan {
     private String peerFlag;
     @SerializedName("ban_at")
     private Timestamp banAt;
+    @SerializedName("structured_data")
+    private String structuredData;
 
     public static BtnBan from(HistoryEntity historyEntity) {
         BtnBan btnBan = new BtnBan();
@@ -63,6 +65,7 @@ public final class BtnBan {
         btnBan.setDownloaderProgress(historyEntity.getDownloaderProgress());
         btnBan.setPeerFlag(historyEntity.getFlags() == null ? null : historyEntity.getFlags());
         btnBan.setBanAt(historyEntity.getBanAt());
+        btnBan.setStructuredData(historyEntity.getStructuredData());
         return btnBan;
     }
 }
