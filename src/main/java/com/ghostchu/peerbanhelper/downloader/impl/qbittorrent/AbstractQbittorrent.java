@@ -358,7 +358,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     protected void fillTorrentProperties(List<QBittorrentTorrent> qbTorrent) {
         Semaphore torrentPropertiesLimit = new Semaphore(5);
-        try (ExecutorService service = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService service = Executors.newWorkStealingPool()) {
             qbTorrent.stream()
                     .filter(torrent -> (config.isIgnorePrivate() && torrent.getPrivateTorrent() == null)
                             || torrent.getPieceSize() <= 0 || torrent.getPiecesHave() <= 0)

@@ -297,7 +297,7 @@ public final class BitComet extends AbstractDownloader {
 
         Semaphore semaphore = new Semaphore(4);
         List<BCTaskTorrentResponse> torrentResponses = Collections.synchronizedList(new ArrayList<>(response.getTasks().size()));
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (var executor = Executors.newWorkStealingPool()) {
             response.getTasks().stream().filter(t -> t.getType().equals("BT"))
                     .forEach(torrent -> executor.submit(() -> {
                         try {

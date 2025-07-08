@@ -426,7 +426,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
 
     public Map<Downloader, Map<Torrent, List<Peer>>> collectPeers() {
         Map<Downloader, Map<Torrent, List<Peer>>> peers = Collections.synchronizedMap(new HashMap<>());
-        try (var service = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (var service = Executors.newWorkStealingPool()) {
             downloaderManager.forEach(downloader -> service.submit(() -> {
                 try {
                     Map<Torrent, List<Peer>> p = collectPeers(downloader);

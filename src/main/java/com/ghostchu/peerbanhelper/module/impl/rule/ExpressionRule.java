@@ -224,7 +224,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     @Override
     public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
         AtomicReference<CheckResult> checkResult = new AtomicReference<>(pass());
-        try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService exec = Executors.newWorkStealingPool()) {
             for (var compiledScript : scripts) {
                 exec.submit(() -> {
                     CheckResult expressionRun = runExpression(compiledScript, torrent, peer, downloader, ruleExecuteExecutor);
@@ -297,7 +297,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         initScripts();
         log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
         long start = System.currentTimeMillis();
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (var executor = Executors.newWorkStealingPool()) {
             File scriptDir = new File(Main.getDataDirectory(), "scripts");
             File[] scripts = scriptDir.listFiles();
             if (scripts != null) {

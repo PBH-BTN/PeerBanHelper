@@ -220,7 +220,7 @@ public final class PBHChartController extends AbstractFeatureModule {
         }
         try (var itBanned = queryBanned.iterator();
              var itConnected = queryConnected.iterator()) {
-            try (ExecutorService service = Executors.newVirtualThreadPerTaskExecutor()) {
+            try (ExecutorService service = Executors.newWorkStealingPool()) {
                 var ipIterator = new Iterator<String>() {
                     @Override
                     public boolean hasNext() {

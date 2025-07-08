@@ -196,7 +196,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         }
 
         List<Future<CheckResult>> futures = new ArrayList<>();
-        try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService exec = Executors.newWorkStealingPool()) {
             for (var kvPair : rule.getScriptRules().entrySet()) {
                 futures.add(exec.submit(() -> runExpression(kvPair.getValue(), torrent, peer, downloader, ruleExecuteExecutor)));
             }
