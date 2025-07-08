@@ -606,7 +606,21 @@ DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: PeerBanHelper 无法更新 {} �
 GUI_TRAY_TITLE: "PeerBanHelper"
 CRASH_MANAGER_TITLE: "PeerBanHelper 的上次退出可能是意外关闭"
 CRASH_MANAGER_DESCRIPTION: |
-  PeerBanHelper 的上次GUI_PROGRAM_SWITCH_TO_AUTO: "重啟並還原預設 UI 行為..."
+  PeerBanHelper 的上次退出可能是非正常关闭。
+  这可能是因为程序崩溃、内存不足，或者操作系统强制关闭了程序。
+  频繁的非正常退出可能导致数据和配置文件损坏，请尽量正常退出 PeerBanHelper。
+CRASH_MANAGER_GUI_RELATED_TITLE: "非正常退出故障排除向导 - 检测已知问题 - Windows - Java Platform awt.dll"
+CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
+  在 Windows 平台上，有时 PeerBanHelper 可能会因为以下原因非正常退出：
+  
+  1. 用户有意或无意切换屏幕分辨率或 DPI 设置，或者使用远程桌面连接（RDP）
+  2. 显示驱动程序崩溃时导致的连带崩溃
+  3. 与显示器连接/断开连接时崩溃
+  
+  如果 PeerBanHelper 频繁因为上述问题出现崩溃，建议您启动 SWTUI 以禁用可能存在问题的 awt.dll。
+  您是否希望切换到 SWT UI 界面？
+
+GUI_PROGRAM_SWITCH_TO_AUTO: "重啟並還原預設 UI 行為..."
 GUI_PROGRAM_SWITCH_TO_SWT: "重啟並切換到 SWT UI..."
 
 BTN_ABILITY_SUBMIT_SWARM: "提交種群追蹤數據"
@@ -654,17 +668,4 @@ CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
   *在反饋問題時，請一同上傳崩潰日誌轉儲文件。*
   
   對此帶來的不便，我們深表歉意。
-BOOT_TIME: "PeerBanHelper 啟動完成，用時 {}ms"退出可能是非正常关闭。
-  这可能是因为程序崩溃、内存不足，或者操作系统强制关闭了程序。
-  频繁的非正常退出可能导致数据和配置文件损坏，请尽量正常退出 PeerBanHelper。
-CRASH_MANAGER_GUI_RELATED_TITLE: "非正常退出故障排除向导 - 检测已知问题 - Windows - Java Platform awt.dll"
-CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
-  在 Windows 平台上，有时 PeerBanHelper 可能会因为以下原因非正常退出：
-  
-  1. 用户有意或无意切换屏幕分辨率或 DPI 设置，或者使用远程桌面连接（RDP）
-  2. 显示驱动程序崩溃时导致的连带崩溃
-  3. 与显示器连接/断开连接时崩溃
-  
-  如果 PeerBanHelper 频繁因为上述问题出现崩溃，建议您启动 SWTUI 以禁用可能存在问题的 awt.dll。
-  您是否希望切换到 SWT UI 界面？
-
+BOOT_TIME: "PeerBanHelper 啟動完成，用時 {}ms"
