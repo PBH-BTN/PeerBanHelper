@@ -363,7 +363,7 @@ public final class IPDB implements AutoCloseable {
                             return;
                         }
                     } else {
-                        throw new IllegalStateException("Not a valid response");
+                        throw new IllegalStateException("Not a valid response: "+r.statusCode());
                     }
                     if (!mirrorList.isEmpty()) { // 非 200 状态码 或者 gzip 解压出错
                         log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
