@@ -33,7 +33,7 @@ importers:
         version: 7.0.0
       '@vueuse/core':
         specifier: ^13.2.0
-        version: 13.2.0(vue@3.5.14(typescript@5.8.3))
+        version: 13.5.0(vue@3.5.14(typescript@5.8.3))
       antlr4:
         specifier: ^4.13.2
         version: 4.13.2
@@ -1035,16 +1035,16 @@ packages:
       vue:
         optional: true
 
-  '@vueuse/core@13.2.0':
-    resolution: {integrity: sha512-n5TZoIAxbWAQ3PqdVPDzLgIRQOujFfMlatdI+f7ditSmoEeNpPBvp7h2zamzikCmrhFIePAwdEQB6ENccHr7Rg==}
+  '@vueuse/core@13.5.0':
+    resolution: {integrity: sha512-wV7z0eUpifKmvmN78UBZX8T7lMW53Nrk6JP5+6hbzrB9+cJ3jr//hUlhl9TZO/03bUkMK6gGkQpqOPWoabr72g==}
     peerDependencies:
       vue: ^3.5.0
 
-  '@vueuse/metadata@13.2.0':
-    resolution: {integrity: sha512-kPpzuQCU0+D8DZCzK0iPpIcXI+6ufWSgwnjJ6//GNpEn+SHViaCtR+XurzORChSgvpHO9YC8gGM97Y1kB+UabA==}
+  '@vueuse/metadata@13.5.0':
+    resolution: {integrity: sha512-euhItU3b0SqXxSy8u1XHxUCdQ8M++bsRs+TYhOLDU/OykS7KvJnyIFfep0XM5WjIFry9uAPlVSjmVHiqeshmkw==}
 
-  '@vueuse/shared@13.2.0':
-    resolution: {integrity: sha512-vx9ZPDF5HcU9up3Jgt3G62dMUfZEdk6tLyBAHYAG4F4n73vpaA7J5hdncDI/lS9Vm7GA/FPlbOmh9TrDZROTpg==}
+  '@vueuse/shared@13.5.0':
+    resolution: {integrity: sha512-K7GrQIxJ/ANtucxIXbQlUHdB0TPA8c+q5i+zbrjxuhJCnJ9GtBg75sBSnvmLSxHKPg2Yo8w62PWksl9kwH0Q8g==}
     peerDependencies:
       vue: ^3.5.0
 
@@ -3528,16 +3528,16 @@ snapshots:
       typescript: 5.8.3
       vue: 3.5.14(typescript@5.8.3)
 
-  '@vueuse/core@13.2.0(vue@3.5.14(typescript@5.8.3))':
+  '@vueuse/core@13.5.0(vue@3.5.14(typescript@5.8.3))':
     dependencies:
       '@types/web-bluetooth': 0.0.21
-      '@vueuse/metadata': 13.2.0
-      '@vueuse/shared': 13.2.0(vue@3.5.14(typescript@5.8.3))
+      '@vueuse/metadata': 13.5.0
+      '@vueuse/shared': 13.5.0(vue@3.5.14(typescript@5.8.3))
       vue: 3.5.14(typescript@5.8.3)
 
-  '@vueuse/metadata@13.2.0': {}
+  '@vueuse/metadata@13.5.0': {}
 
-  '@vueuse/shared@13.2.0(vue@3.5.14(typescript@5.8.3))':
+  '@vueuse/shared@13.5.0(vue@3.5.14(typescript@5.8.3))':
     dependencies:
       vue: 3.5.14(typescript@5.8.3)
 
