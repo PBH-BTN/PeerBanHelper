@@ -77,7 +77,7 @@ public class WebUITabComponent implements TabComponent {
         if (browser == null || browser.isDisposed()) {
             browser = new Browser(webUIComposite, SWT.NONE);
             browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            navigate("about:blank");
+            navigate(lastUrl);
             webUIComposite.layout(true);
             browser.layout(true);
         }
