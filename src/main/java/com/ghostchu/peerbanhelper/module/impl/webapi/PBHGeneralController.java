@@ -198,7 +198,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         Map<String, Object> pbh = new LinkedHashMap<>();
         pbh.put("version", Main.getMeta().getVersion());
         pbh.put("commit_id", Main.getMeta().getCommit());
-        pbh.put("compile_time", compile_time);
+        pbh.put("compile_time", compile_time / 1000);
         pbh.put("release", release);
         pbh.put("uptime", (System.currentTimeMillis() - Main.getStartupAt()) / 1000);
         pbh.put("data_dir", Main.getDataDirectory().getAbsolutePath());
