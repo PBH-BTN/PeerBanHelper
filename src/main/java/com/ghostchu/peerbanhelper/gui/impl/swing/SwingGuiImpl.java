@@ -316,14 +316,13 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
                 var logEntry = JListAppender.logEntryDeque.poll();
                 if (logEntry == null) return;
                 model.addElement(logEntry);
-                // 如果用户在底部，则自动滚动
-                if (autoScroll.get()) {
-                    logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
-                }
             }
             // 限制最大元素数量为 500
             while (model.size() > maxSize) {
                 model.removeElementAt(0);
+            }
+            if (autoScroll.get()) {
+                logList.ensureIndexIsVisible(model.getSize() - 1); // 自动滚动到最底部
             }
         }), 0, 10, TimeUnit.MILLISECONDS);
     }
