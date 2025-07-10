@@ -25,12 +25,15 @@ export default defineConfig({
     }),
     nodePolyfills({ include: ['path'] }),
     ...(isAnalyze ? [analyzer()] : []),
-    ...(isProduction ? [removeConsole()] : [])
+    // ...(isProduction ? [removeConsole()] : [])
   ],
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
     __APP_HASH__: JSON.stringify(
-      (await exec('git rev-parse HEAD').catch(() => null))?.stdout.toString() ??
+      (await exec('git rev-parse HEAD').catch((error) => {
+        console.error('Failed to get git hash:', error);
+        return null;
+      }))?.stdout.toString() ??
         process.env.GIT_HASH
     )
   },
