@@ -103,7 +103,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
         if (this.taskWriteService != null) {
             this.taskWriteService.shutdown();
         }
-        this.taskWriteService = Executors.newVirtualThreadPerTaskExecutor();
+        this.taskWriteService = Executors.newSingleThreadExecutor();
         this.dataRetentionTime = getConfig().getLong("data-retention-time", -1);
         this.dailyTrafficCapping = getConfig().getLong("traffic-monitoring.daily", -1);
         this.useTrafficSlidingCapping = getConfig().getBoolean("traffic-sliding-capping.enabled");
@@ -228,7 +228,7 @@ public final class ActiveMonitoringModule extends AbstractFeatureModule implemen
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull ExecutorService ruleExecuteExecutor) {
+    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
         peers.stream().filter(peer -> {
                     var clientName = peer.getClientName();
                     var peerId = peer.getPeerId();

@@ -6,7 +6,7 @@
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>8.0.0-Beta1</version>
+    <version>8.0.0-beta3</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -471,6 +471,11 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.5.18</version>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>completable-futures</artifactId>
+            <version>0.3.1</version>
         </dependency>
     </dependencies>
 </project>

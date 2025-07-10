@@ -96,7 +96,7 @@ public final class HTTPUtil {
 
     public Methanol.Builder newBuilder() {
         var builder = Methanol.newBuilder()
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
+                .executor(executor)
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
                 .headersTimeout(Duration.of(25, ChronoUnit.SECONDS), CommonUtil.getScheduler())

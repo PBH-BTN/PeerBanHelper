@@ -84,11 +84,11 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
             log.info(tlUI(Lang.BTN_SUBMITTING_BANS));
             int size = 0;
             int requests = 0;
-            List<HistoryEntity> historyEntities = new ArrayList<>(1000);
+            List<HistoryEntity> historyEntities = new ArrayList<>(500);
             try (var it = createSubmitIterator(getMemCursor())) {
                 for (HistoryEntity entity : it) {
                     historyEntities.add(entity);
-                    if (historyEntities.size() >= 1000) {
+                    if (historyEntities.size() >= 500) {
                         setMemCursor(createSubmitRequest(historyEntities));
                         size += historyEntities.size();
                         requests++;

@@ -71,7 +71,7 @@ public final class PBHUtilitiesController extends AbstractFeatureModule {
                 continue;
             }
             if (downloader.login().success()) {
-                try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                try (var executor = Executors.newWorkStealingPool()) {
                     for (Torrent torrent : downloader.getAllTorrents()) {
                         executor.submit(() -> {
                             try {

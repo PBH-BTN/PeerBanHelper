@@ -51,7 +51,7 @@ public final class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "13"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "16"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -117,7 +117,15 @@ public final class DatabaseHelper {
             }
             v = 11;
         }
-        if (v == 11) {
+        if (v <= 14) {
+            try {
+                database.getDataSource().getReadWriteConnection("history").executeStatement("ALTER TABLE history ADD COLUMN structuredData TEXT NOT NULL DEFAULT '{}'", DatabaseConnection.DEFAULT_RESULT_FLAGS);
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 15;
+        }
+        if (v == 15) {
             try {
                 var historyDao = DaoManager.createDao(getDataSource(), HistoryEntity.class);
                 recordBatchUpdate("DownloaderName Converting (BanHistory)", historyDao, (historyEntity -> {
@@ -143,16 +151,9 @@ public final class DatabaseHelper {
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
             }
-            v = 12;
+            v = 16;
         }
-        if (v == 12) {
-            try {
-                database.getDataSource().getReadWriteConnection("history").executeStatement("ALTER TABLE history ADD COLUMN structuredData TEXT NOT NULL DEFAULT '{}'", DatabaseConnection.DEFAULT_RESULT_FLAGS);
-            } catch (Exception err) {
-                log.error("Unable to upgrade database schema", err);
-            }
-            v = 13;
-        }
+
         version.setValue(String.valueOf(v));
         metadata.update(version);
     }

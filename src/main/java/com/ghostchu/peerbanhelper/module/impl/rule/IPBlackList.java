@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -310,7 +309,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         if (isHandShaking(peer)) {
             return handshaking();
         }
@@ -328,7 +327,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
                 }
             }
             try {
-                CheckResult ipdbResult = checkIPDB(torrent, peer, ruleExecuteExecutor);
+                CheckResult ipdbResult = checkIPDB(torrent, peer);
                 if (ipdbResult.action() != PeerAction.NO_ACTION) {
                     return ipdbResult;
                 }
@@ -339,7 +338,7 @@ public final class IPBlackList extends AbstractRuleFeatureModule implements Relo
         }, true);
     }
 
-    private CheckResult checkIPDB(Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkIPDB(Torrent torrent, Peer peer) {
         if (regions.isEmpty() && asns.isEmpty()) {
             return pass();
         }

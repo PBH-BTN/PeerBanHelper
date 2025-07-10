@@ -75,7 +75,7 @@
         <file path="./icon.png" />
       </iconImageFiles>
     </launcher>
-    <launcher name="PeerBanHelper GUI Silent" id="66" menuName="${i18n:launcher.peerbanhelper.silent}" checkUpdater="true">
+    <launcher name="PeerBanHelper GUI Silent" id="66" excludeFromMenu="true" checkUpdater="true">
       <executable name="PeerBanHelper-GUI-Silent" iconSet="true" executableDir="." redirectStdout="true" executableMode="gui" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>
@@ -132,7 +132,7 @@
         <file path="./updater.png" />
       </iconImageFiles>
     </launcher>
-    <launcher name="PeerBanHelper NoGUI LowRAM" id="267" menuName="${i18n:launcher.peerbanhelper.nogui.lowram}" swtApp="true" checkUpdater="true">
+    <launcher name="PeerBanHelper NoGUI LowRAM" id="267" excludeFromMenu="true" swtApp="true" checkUpdater="true">
       <executable name="PeerBanHelper-NoGUI-LowRAM" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
       </executable>

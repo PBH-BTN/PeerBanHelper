@@ -36,7 +36,7 @@ public final class TimeoutProtect implements AutoCloseable {
 
     public TimeoutProtect(long timeRestrict, Consumer<TimeoutProtect> timeoutCallback) {
         this.timeRestrict = timeRestrict;
-        this.service = Executors.newVirtualThreadPerTaskExecutor();
+        this.service = Executors.newSingleThreadExecutor();
         this.timeoutCallback = timeoutCallback;
     }
 

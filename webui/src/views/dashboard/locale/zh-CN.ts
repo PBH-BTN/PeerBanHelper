@@ -25,7 +25,7 @@ export default {
   'page.dashboard.statics.unbanPeer': '解除封禁',
   'page.dashboard.statics.currentBan': '当前处于封禁状态Peer',
   'page.dashboard.statics.currentBanIps': '正处于封禁的IP数量',
-  'page.dashboard.statics.peerBlockRate': 'Peer 封禁率',
+  'page.dashboard.statics.peerBlockRate': '恶意:正常 连接比例',
   'page.dashboard.statics.trackingPeers': 'Peer 会话跟踪数量',
   'page.dashboard.statics.number': '个',
   'page.dashboard.statics.percentage': '%',

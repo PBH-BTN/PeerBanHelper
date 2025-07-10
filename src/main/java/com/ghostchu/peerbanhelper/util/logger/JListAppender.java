@@ -1,12 +1,14 @@
 package com.ghostchu.peerbanhelper.util.logger;
 
 import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.NewLogEntryCreatedEvent;
 import com.google.common.collect.EvictingQueue;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.event.Level;
 
 import java.util.concurrent.LinkedBlockingDeque;
@@ -20,8 +22,10 @@ public final class JListAppender extends AppenderBase<ILoggingEvent> {
     public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100));
     private static final AtomicInteger seq = new AtomicInteger(0);
     private PatternLayout layout;
+    private static final ThrowableProxyConverter converter = new ThrowableProxyConverter();
 
     public JListAppender() {
+        converter.start();
     }
 
     public static AtomicInteger getSeq() {
@@ -63,7 +67,7 @@ public final class JListAppender extends AppenderBase<ILoggingEvent> {
                 eventObject.getTimeStamp(),
                 eventObject.getThreadName(),
                 slf4jLevel,
-                eventObject.getFormattedMessage().trim(),
+                formattedMessage.startsWith("[") ? StringUtils.substringAfter(formattedMessage.trim(), ": ") : formattedMessage.trim(),
                 seq.incrementAndGet());
         ringDeque.add(rawLog);
         Main.getEventBus().post(new NewLogEntryCreatedEvent(rawLog));

@@ -22,6 +22,7 @@ import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.common.net.HostAndPort;
 import com.google.gson.JsonObject;
+import com.spotify.futures.CompletableFutures;
 import com.vdurmont.semver4j.Semver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,6 +43,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
@@ -59,6 +62,7 @@ public final class BitComet extends AbstractDownloader {
     private String serverId;
     private Semver serverVersion;
     private String serverName;
+    protected final ExecutorService parallelService = Executors.newWorkStealingPool();
 
     public BitComet(String id, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
         super(id, alertManager);
@@ -296,27 +300,25 @@ public final class BitComet extends AbstractDownloader {
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
 
         Semaphore semaphore = new Semaphore(4);
-        List<BCTaskTorrentResponse> torrentResponses = Collections.synchronizedList(new ArrayList<>(response.getTasks().size()));
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            response.getTasks().stream().filter(t -> t.getType().equals("BT"))
-                    .forEach(torrent -> executor.submit(() -> {
-                        try {
-                            semaphore.acquire();
-                            Map<String, String> taskIds = new HashMap<>();
-                            taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
-                            HttpResponse<Reader> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
-                                                    HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
-                                            .header("Authorization", "Bearer " + this.deviceToken),
-                                    MoreBodyHandlers.ofReader());
-                            var torrentResp = JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
-                            torrentResponses.add(torrentResp);
-                        } catch (IOException | InterruptedException e) {
-                            log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY), e);
-                        } finally {
-                            semaphore.release();
-                        }
-                    }));
-        }
+        List<BCTaskTorrentResponse> torrentResponses = CompletableFutures.allAsList(response.getTasks().stream()
+                .filter(t -> t.getType().equals("BT"))
+                .map(torrent-> CompletableFuture.supplyAsync(()->{
+                    try {
+                        semaphore.acquire();
+                        Map<String, String> taskIds = new HashMap<>();
+                        taskIds.put("task_id", String.valueOf(torrent.getTaskId()));
+                        HttpResponse<Reader> fetch = httpClient.send(MutableRequest.POST(apiEndpoint + BCEndpoint.GET_TASK_SUMMARY.getEndpoint(),
+                                                HttpRequest.BodyPublishers.ofString(JsonUtil.standard().toJson(taskIds)))
+                                        .header("Authorization", "Bearer " + this.deviceToken),
+                                MoreBodyHandlers.ofReader());
+                        return JsonUtil.standard().fromJson(fetch.body(), BCTaskTorrentResponse.class);
+                    } catch (IOException | InterruptedException e) {
+                        log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY), e);
+                        return null;
+                    } finally {
+                        semaphore.release();
+                    }
+                }, parallelService)).toList()).join();
         return torrentResponses.stream().map(torrent -> new TorrentImpl(Long.toString(torrent.getTask().getTaskId()),
                         torrent.getTask().getTaskName(),
                         torrent.getTaskDetail().getInfohash() != null ? torrent.getTaskDetail().getInfohash() : torrent.getTaskDetail().getInfohashV2(),

@@ -23,7 +23,7 @@ export default {
   'page.dashboard.statics.currentBan': 'Currently banned Peers',
   'page.dashboard.statics.currentBanIps': 'Currently banned IP(s)',
   'page.dashboard.statics.peerBlockRate': 'Peer Block Rate',
-  'page.dashboard.statics.trackingPeers': 'Tracked Peer Sessions',
+  'page.dashboard.statics.trackingPeers': 'Malice:Normal Connection Ratio',
   'page.dashboard.statics.number': '',
   'page.dashboard.statics.percentage': '%',
 

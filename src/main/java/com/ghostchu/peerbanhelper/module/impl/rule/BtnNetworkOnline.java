@@ -38,10 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
@@ -62,6 +59,8 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     @Autowired
     private ScriptStorageDao scriptStorageDao;
     private boolean allowScript;
+
+    private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
 
     @Override
@@ -163,22 +162,22 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         if (btnNetwork == null) {
             return BTN_MANAGER_NOT_INITIALIZED;
         }
         // TODO: 需要重构
-        var checkExceptionResult = checkShouldSkip(torrent, peer, downloader, ruleExecuteExecutor);
+        var checkExceptionResult = checkShouldSkip(torrent, peer, downloader);
         if (checkExceptionResult.action() == PeerAction.SKIP) {
             return checkExceptionResult;
         }
-        if(allowScript) {
-            var scriptResult = checkScript(torrent, peer, downloader, ruleExecuteExecutor);
+        if (allowScript) {
+            var scriptResult = checkScript(torrent, peer, downloader, parallelService);
             if (scriptResult.action() != PeerAction.NO_ACTION) {
                 return scriptResult;
             }
         }
-        return checkShouldBan(torrent, peer, downloader, ruleExecuteExecutor);
+        return checkShouldBan(torrent, peer, downloader);
     }
 
     private @NotNull CheckResult checkScript(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
@@ -195,31 +194,26 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
             return handshaking();
         }
 
-        List<Future<CheckResult>> futures = new ArrayList<>();
-        try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
-            for (var kvPair : rule.getScriptRules().entrySet()) {
-                futures.add(exec.submit(() -> runExpression(kvPair.getValue(), torrent, peer, downloader, ruleExecuteExecutor)));
-            }
+        List<CompletableFuture<CheckResult>> futures = new ArrayList<>();
+
+        for (var kvPair : rule.getScriptRules().entrySet()) {
+            futures.add(CompletableFuture.supplyAsync(() -> runExpression(kvPair.getValue(), torrent, peer, downloader), ruleExecuteExecutor));
         }
 
         CheckResult finalResult = pass();
-        for (Future<CheckResult> future : futures) {
-            try {
-                CheckResult result = future.get();
-                if (result.action() == PeerAction.SKIP) {
-                    return result; // Early exit on SKIP action
-                } else if (result.action() == PeerAction.BAN) {
-                    finalResult = result;
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Error executing script, skipping", e);
+        for (CompletableFuture<CheckResult> future : futures) {
+            CheckResult result = future.join();
+            if (result.action() == PeerAction.SKIP) {
+                return result; // Early exit on SKIP action
+            } else if (result.action() == PeerAction.BAN) {
+                finalResult = result;
             }
         }
 
         return finalResult;
     }
 
-    public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         return getCache().readCacheButWritePassOnly(this, script.hashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
@@ -257,7 +251,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         }, script.cacheable());
     }
 
-    private @NotNull CheckResult checkShouldSkip(Torrent torrent, Peer peer, Downloader downloader, ExecutorService ruleExecuteExecutor) {
+    private @NotNull CheckResult checkShouldSkip(Torrent torrent, Peer peer, Downloader downloader) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityException.class);
         if (abilityObject == null) {
             return pass();
@@ -273,16 +267,16 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return getCache().readCacheButWritePassOnly(this, "btn-exception-peer-" + peer.getCacheKey(), () -> {
             CheckResult r = null;
             if (rule.getPeerIdRules() != null) {
-                r = NullUtil.anyNotNull(r, checkPeerIdRuleException(rule, torrent, peer, ruleExecuteExecutor));
+                r = NullUtil.anyNotNull(r, checkPeerIdRuleException(rule, torrent, peer));
             }
             if (rule.getClientNameRules() != null) {
-                r = NullUtil.anyNotNull(r, checkClientNameRuleException(rule, torrent, peer, ruleExecuteExecutor));
+                r = NullUtil.anyNotNull(r, checkClientNameRuleException(rule, torrent, peer));
             }
             if (rule.getIpRules() != null) {
-                r = NullUtil.anyNotNull(r, checkIpRuleException(rule, torrent, peer, ruleExecuteExecutor));
+                r = NullUtil.anyNotNull(r, checkIpRuleException(rule, torrent, peer));
             }
             if (rule.getPortRules() != null) {
-                r = NullUtil.anyNotNull(r, checkPortRuleException(rule, torrent, peer, ruleExecuteExecutor));
+                r = NullUtil.anyNotNull(r, checkPortRuleException(rule, torrent, peer));
             }
             if (r == null) {
                 return pass();
@@ -291,7 +285,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         }, true);
     }
 
-    private @NotNull CheckResult checkShouldBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    private @NotNull CheckResult checkShouldBan(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         var abilityObject = btnNetwork.getAbilities().get(BtnAbilityRules.class);
         if (abilityObject == null) {
             return pass();
@@ -307,16 +301,16 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         return getCache().readCacheButWritePassOnly(this, "btn-ban-peer-" + peer.getCacheKey(), () -> {
             List<CheckResult> results = new ArrayList<>();
             if (rule.getPeerIdRules() != null) {
-                results.add(checkPeerIdRule(rule, torrent, peer, ruleExecuteExecutor));
+                results.add(checkPeerIdRule(rule, torrent, peer));
             }
             if (rule.getClientNameRules() != null) {
-                results.add(checkClientNameRule(rule, torrent, peer, ruleExecuteExecutor));
+                results.add(checkClientNameRule(rule, torrent, peer));
             }
             if (rule.getIpRules() != null) {
-                results.add(checkIpRule(rule, torrent, peer, ruleExecuteExecutor));
+                results.add(checkIpRule(rule, torrent, peer));
             }
             if (rule.getPortRules() != null) {
-                results.add(checkPortRule(rule, torrent, peer, ruleExecuteExecutor));
+                results.add(checkPortRule(rule, torrent, peer));
             }
 
             CheckResult finalResult = pass();
@@ -332,7 +326,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
         }, true);
     }
 
-    private CheckResult checkPortRule(BtnRulesetParsed rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkPortRule(BtnRulesetParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getPortRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getPortRules().get(category), Integer.toString(peer.getPeerAddress().getPort()));
             if (matchResult.hit()) {
@@ -342,13 +336,13 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "port")
                                 .add("category", category)
-                                .add("rule",matchResult.rule().metadata()));
+                                .add("rule", matchResult.rule().metadata()));
             }
         }
         return null;
     }
 
-    private CheckResult checkPortRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkPortRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getPortRules().keySet()) {
             RuleMatchResult matchResult = RuleParser.matchRule(rule.getPortRules().get(category), Integer.toString(peer.getPeerAddress().getPort()));
             if (matchResult.hit()) {
@@ -358,14 +352,14 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         StructuredData.create()
                                 .add("type", "portException")
                                 .add("category", category)
-                                .add("rule",matchResult.rule().metadata()));
+                                .add("rule", matchResult.rule().metadata()));
             }
         }
         return null;
     }
 
     @Nullable
-    private CheckResult checkClientNameRule(BtnRulesetParsed rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkClientNameRule(BtnRulesetParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getClientNameRules().keySet()) {
             List<Rule> rules = rule.getClientNameRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
@@ -383,7 +377,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkClientNameRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkClientNameRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getClientNameRules().keySet()) {
             List<Rule> rules = rule.getClientNameRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getClientName());
@@ -401,7 +395,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkPeerIdRule(BtnRulesetParsed rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkPeerIdRule(BtnRulesetParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getPeerIdRules().keySet()) {
             List<Rule> rules = rule.getPeerIdRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getPeerId());
@@ -419,7 +413,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkPeerIdRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer, ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkPeerIdRuleException(BtnExceptionRuleParsed rule, Torrent torrent, Peer peer) {
         for (String category : rule.getPeerIdRules().keySet()) {
             List<Rule> rules = rule.getPeerIdRules().get(category);
             RuleMatchResult matchResult = RuleParser.matchRule(rules, peer.getPeerId());
@@ -437,7 +431,7 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
     }
 
     @Nullable
-    private CheckResult checkIpRule(BtnRulesetParsed rule, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkIpRule(BtnRulesetParsed rule, @NotNull Torrent torrent, @NotNull Peer peer) {
         IPAddress pa = peer.getPeerAddress().getAddress();
         if (pa == null) return null;
         if (pa.isIPv4Convertible()) {
@@ -451,15 +445,15 @@ public final class BtnNetworkOnline extends AbstractRuleFeatureModule implements
                         new TranslationComponent(Lang.BTN_BTN_RULE, category, category),
                         new TranslationComponent(Lang.MODULE_BTN_BAN, "IP", category, pa.toString()),
                         StructuredData.create()
-                        .add("type", "ip")
-                        .add("category", category));
+                                .add("type", "ip")
+                                .add("category", category));
             }
         }
         return null;
     }
 
     @Nullable
-    private CheckResult checkIpRuleException(BtnExceptionRuleParsed rule, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull ExecutorService ruleExecuteExecutor) {
+    private CheckResult checkIpRuleException(BtnExceptionRuleParsed rule, @NotNull Torrent torrent, @NotNull Peer peer) {
         IPAddress pa = peer.getPeerAddress().getAddress();
         if (pa == null) return null;
         if (pa.isIPv4Convertible()) {

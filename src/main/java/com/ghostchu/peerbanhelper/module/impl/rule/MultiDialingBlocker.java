@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -141,7 +140,7 @@ public final class MultiDialingBlocker extends AbstractRuleFeatureModule impleme
 
     @Override
     public @NotNull CheckResult shouldBanPeer(
-            @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+            @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         if (isHandShaking(peer)) {
             return handshaking();
         }

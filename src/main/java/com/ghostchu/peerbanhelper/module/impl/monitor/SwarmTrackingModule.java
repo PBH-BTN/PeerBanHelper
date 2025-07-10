@@ -24,7 +24,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
@@ -110,7 +109,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
     }
 
     @Override
-    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers, @NotNull ExecutorService ruleExecuteExecutor) {
+    public void onTorrentPeersRetrieved(@NotNull Downloader downloader, @NotNull Torrent torrent, @NotNull List<Peer> peers) {
         try {
             trackedSwarmDao.callBatchTasks(() -> {
                 for (Peer peer : peers) {
