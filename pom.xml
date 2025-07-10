@@ -475,7 +475,7 @@
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>completable-futures</artifactId>
-            <version>0.3.1</version>
+            <version>0.3.6</version>
         </dependency>
     </dependencies>
 </project>
