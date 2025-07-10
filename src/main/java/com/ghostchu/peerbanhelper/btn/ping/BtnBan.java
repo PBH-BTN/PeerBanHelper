@@ -21,7 +21,7 @@ public final class BtnBan {
     private String rule;
     @SerializedName("ip_address")
     private String ipAddress;
-    @SerializedName("peer_port")
+    @SerializedName("port")
     private int peerPort;
     @SerializedName("peer_id")
     private String peerId;
@@ -37,7 +37,7 @@ public final class BtnBan {
     private long downloaded;
     @SerializedName("uploaded")
     private long uploaded;
-    @SerializedName("peer_progress")
+    @SerializedName("progress")
     private double peerProgress;
     @SerializedName("downloader_progress")
     private double downloaderProgress;
