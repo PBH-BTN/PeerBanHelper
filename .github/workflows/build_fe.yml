@@ -39,10 +39,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Repair git environment variables
+        run: export GIT_HASH=$GITHUB_SHA
       - name: Build
-        run: |
-          export GIT_HASH=$GITHUB_SHA
-          pnpm run build
+        run: pnpm run build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
