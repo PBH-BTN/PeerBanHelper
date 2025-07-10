@@ -53,31 +53,40 @@
     >
       <template #item="{ item, index }">
         <a-list-item :key="index">
-          <a-space
-            style="display: flex; justify-content: space-between"
-            fill
-            class="log-line-container"
-          >
-            <a-space class="log-line">
-              <a-tag class="level-tag" :color="getColorByLogLevel(item.level)">{{
-                item.level
-              }}</a-tag>
-              <a-tag>{{ d(item.time, 'log') }}</a-tag>
-              <a-tag v-if="showThreadName" :color="getThreadColor(item.thread)">
-                {{ item.thread }}
-              </a-tag>
-              <a-typography-text
-                :ellipsis="{
-                  rows: 1,
-                  showTooltip: true
-                }"
-                >{{ item.content }}</a-typography-text
-              >
-            </a-space>
-            <div class="hover-display-btn">
-              <copier :text="item.content" />
-            </div>
-          </a-space>
+          <a-row class="log-line-container" justify="end" :wrap="false">
+            <a-col flex="auto">
+              <a-row class="log-line" :wrap="false" justify="start" :gutter="10">
+                <a-col flex="24px">
+                  <a-tag class="level-tag" :color="getColorByLogLevel(item.level)">{{
+                    item.level
+                  }}</a-tag>
+                </a-col>
+                <a-col flex="120px">
+                  <a-tag>{{ d(item.time, 'log') }}</a-tag></a-col
+                >
+                <a-col v-if="showThreadName" flex="1">
+                  <a-tag :color="getThreadColor(item.thread)">
+                    {{ item.thread }}
+                  </a-tag>
+                </a-col>
+                <a-col :flex="showThreadName ? 8 : 9">
+                  <a-typography-text
+                    style="flex: 1; width: 100%"
+                    :ellipsis="{
+                      rows: 1,
+                      showTooltip: true
+                    }"
+                    >{{ item.content }}</a-typography-text
+                  >
+                </a-col>
+              </a-row>
+            </a-col>
+            <a-col flex="20px">
+              <div class="hover-display-btn">
+                <copier :text="item.content" />
+              </div>
+            </a-col>
+          </a-row>
         </a-list-item>
       </template>
     </a-list>
@@ -209,16 +218,6 @@ const showThreadName = ref(true)
 </style>
 
 <style lang="less">
-.log-line {
-  .arco-space-item {
-    display: flex;
-    align-items: center;
-    .arco-typography {
-      max-width: 50rem;
-      margin-bottom: 0;
-    }
-  }
-}
 .hover-display-btn {
   transition: opacity 0.15s ease-in-out;
   opacity: 0;
