@@ -24,3 +24,5 @@ app.use(i18n)
 app.use(router)
 
 app.mount('#app')
+
+console.log('WebUI App Hash:' + __APP_HASH__)

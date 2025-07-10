@@ -39,6 +39,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Whats wrong with git
+        run: git version
+
       - name: Build
         run: pnpm run build
 
