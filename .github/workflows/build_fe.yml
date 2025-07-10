@@ -39,9 +39,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Whats wrong with git
-        run: git version
-
+      - name: Repair git environment variables
+        run: export GIT_HASH=$GITHUB_SHA
       - name: Build
         run: pnpm run build
 
