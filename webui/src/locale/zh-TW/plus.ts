@@ -8,6 +8,7 @@ export default {
   'plus.type': '類型',
   'plus.type.local': '本機',
   'plus.type.afdian': '愛發電',
+  'plus.type.mbd': '麵包多',
   'plus.licenseTo': '授權給',
   'plus.startAt': '開始時間',
   'plus.expireAt': '過期時間',
