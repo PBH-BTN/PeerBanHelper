@@ -22,6 +22,18 @@
         <ormlite.version>6.1</ormlite.version>
     </properties>
 
+    <scm>
+        <connection>scm:git:git@github.com:PBH-BTN/PeerBanHelper.git</connection>
+        <developerConnection>scm:git:git@github.com:PBH-BTN/PeerBanHelper.git</developerConnection>
+        <tag>master</tag>
+        <url>https://github.com/PBH-BTN/PeerBanHelper</url>
+    </scm>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/PBH-BTN/PeerBanHelper</url>
+    </issueManagement>
+
     <pluginRepositories>
         <pluginRepository>
             <id>ej-technologies</id>
