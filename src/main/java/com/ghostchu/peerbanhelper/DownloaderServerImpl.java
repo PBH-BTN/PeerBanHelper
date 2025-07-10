@@ -85,7 +85,7 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
     private boolean globalPaused = false;
     private final AlertManager alertManager;
     private final Database databaseManager;
-    protected final ExecutorService parallelService = Executors.newWorkStealingPool();
+    private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
 
     public DownloaderServerImpl(DownloaderManagerImpl downloaderManager,
