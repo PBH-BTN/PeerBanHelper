@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
   ws.close()
 })
 
-const showThreadName = ref(true)
+const showThreadName = ref(false)
 </script>
 
 <style scoped>
