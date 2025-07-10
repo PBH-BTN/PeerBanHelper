@@ -8,6 +8,7 @@ export default {
   'plus.type': '类型',
   'plus.type.local': '本地',
   'plus.type.afdian': '爱发电',
+  'plus.type.mbd': '面包多',
   'plus.licenseTo': '授权给',
   'plus.startAt': '开始时间',
   'plus.expireAt': '过期时间',
