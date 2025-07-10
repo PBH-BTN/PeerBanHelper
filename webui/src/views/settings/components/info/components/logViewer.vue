@@ -62,22 +62,22 @@
                   }}</a-tag>
                 </a-col>
                 <a-col flex="120px">
-                  <a-tag>{{ d(item.time, 'log') }}</a-tag></a-col
-                >
+                  <a-tag>{{ d(item.time, 'log') }}</a-tag>
+                </a-col>
                 <a-col v-if="showThreadName" flex="1">
                   <a-tag :color="getThreadColor(item.thread)">
                     {{ item.thread }}
                   </a-tag>
                 </a-col>
-                <a-col :flex="showThreadName ? 8 : 9">
+                <a-col :flex="showThreadName ? 8 : 9" claass="log-line">
                   <a-typography-text
                     style="flex: 1; width: 100%"
                     :ellipsis="{
                       rows: 1,
                       showTooltip: true
                     }"
-                    >{{ item.content }}</a-typography-text
-                  >
+                    >{{ item.content }}
+                  </a-typography-text>
                 </a-col>
               </a-row>
             </a-col>
@@ -218,6 +218,12 @@ const showThreadName = ref(false)
 </style>
 
 <style lang="less">
+.log-line {
+  .arco-typography {
+    max-width: 50rem;
+    margin-bottom: 0;
+  }
+}
 .hover-display-btn {
   transition: opacity 0.15s ease-in-out;
   opacity: 0;
