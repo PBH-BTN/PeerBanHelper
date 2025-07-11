@@ -3,7 +3,7 @@
   <directoryPresets config="../native/qt6" />
   <application name="PeerBanHelper" applicationId="7121-2388-2769-9582" mediaDir="./output" compression="9" lzmaCompression="true" shortName="PeerBanHelper" publisher="PBH-BTN Community" publisherWeb="https://github.com/PBH-BTN" version="8.0.0" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" convertSpacesToUnderscores="false" macVolumeId="6106cfe6eb875954" javaMinVersion="23" javaMaxVersion="25">
     <languages languageSelectionInPrincipalLanguage="true">
-      <principalLanguage id="zh_CN" customLocalizationFile="./lang/custom.utf8" />
+      <principalLanguage id="en" customLocalizationFile="./lang/custom.utf8" />
       <additionalLanguages>
         <language id="en" customLocalizationFile="./lang/en-US.utf8" />
         <language id="zh_TW" customLocalizationFile="./lang/zh-TW.utf8" />
