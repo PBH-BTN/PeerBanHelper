@@ -66,6 +66,7 @@ public final class TrClient {
         Methanol.Builder builder = httpBuilder
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(httpVersion)
+                .connectTimeout(Duration.of(10,ChronoUnit.SECONDS))
                 .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override

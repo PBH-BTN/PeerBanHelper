@@ -63,6 +63,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         Methanol.Builder builder = httpBuilder
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
+                .connectTimeout(Duration.of(10,ChronoUnit.SECONDS))
                 .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override
