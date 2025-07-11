@@ -300,7 +300,7 @@ public final class BitComet extends AbstractDownloader {
         }
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
 
-        Semaphore semaphore = new Semaphore(4);
+        Semaphore semaphore = new Semaphore(3);
         List<BCTaskTorrentResponse> torrentResponses = CompletableFutures.allAsList(response.getTasks().stream()
                 .filter(t -> t.getType().equals("BT"))
                 .map(torrent-> CompletableFuture.supplyAsync(()->{
