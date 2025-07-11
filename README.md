@@ -62,9 +62,7 @@ PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P �
 ## 需要帮助？
 考虑加入我们的 QQ 群！
 
-1 群：932978658（已满）  
-2 群：1011722516（已满）  
-3 群：901081269
+1 群：932978658
 
 ## 声明
 
@@ -94,6 +92,13 @@ PeerBanHelper 使用 [JProfiler all-in one Java profiler](https://www.ej-technol
 
 [![JProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_large.png)](https://www.ej-technologies.com/jprofiler)
 
+### 纯真 CZ88.NET 社区版 IP 库
+
+纯真(CZ88.NET)自2005年起一直为广大社区用户提供社区版IP地址库，只要获得纯真的授权就能免费使用，并不断获取后续更新的版本。如果有需要免费版IP库的朋友可以前往纯真的官网进行申请。
+
+纯真除了免费的社区版IP库外，还提供数据更加准确、服务更加周全的商业版IP地址查询数据。纯真围绕IP地址，基于 网络空间拓扑测绘 + 移动位置大数据 方案，对IP地址定位、IP网络风险、IP使用场景、IP网络类型、秒拨侦测、VPN侦测、代理侦测、爬虫侦测、真人度等均有近20年丰富的数据沉淀。
+
+
 ## Credit
 
 ### Backend
@@ -116,6 +121,12 @@ PeerBanHelper 使用 [JProfiler all-in one Java profiler](https://www.ej-technol
 - [commonmark](https://github.com/commonmark/commonmark-java)
 - [oshi](https://github.com/oshi/oshi)
 - [semver4j](https://github.com/vdurmont/semver4j)
+- [commonmark](https://github.com/commonmark/commonmark-java)
+- [dnsjava](https://github.com/dnsjava/dnsjava)
+- [SWT](https://eclipse.dev/eclipse/swt/)
+- [simple-java-mail](https://www.simplejavamail.org/)
+- [PF4J](https://pf4j.org/)
+- [completable-futures](https://github.com/spotify/completable-futures)
 
 ### WebUI
 

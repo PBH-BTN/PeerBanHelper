@@ -13,6 +13,7 @@ import java.util.Objects;
 @Data
 public final class QBittorrentEEConfigImpl implements QBittorrentConfig {
     private String type;
+    private String name;
     private String endpoint;
     private String username;
     private String password;
@@ -24,9 +25,10 @@ public final class QBittorrentEEConfigImpl implements QBittorrentConfig {
     private boolean ignorePrivate;
     private boolean paused;
 
-    public static QBittorrentEEConfigImpl readFromYaml(ConfigurationSection section) {
+    public static QBittorrentEEConfigImpl readFromYaml(ConfigurationSection section, String alternativeName) {
         QBittorrentEEConfigImpl config = new QBittorrentEEConfigImpl();
         config.setType("qbittorrentee");
+        config.setName(section.getString("name", alternativeName));
         config.setEndpoint(section.getString("endpoint"));
         if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
             config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
@@ -50,6 +52,7 @@ public final class QBittorrentEEConfigImpl implements QBittorrentConfig {
     public YamlConfiguration saveToYaml() {
         YamlConfiguration section = new YamlConfiguration();
         section.set("type", "qbittorrentee");
+        section.set("name", name);
         section.set("endpoint", endpoint);
         section.set("username", username);
         section.set("password", password);

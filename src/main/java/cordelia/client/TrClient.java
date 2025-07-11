@@ -1,10 +1,10 @@
 package cordelia.client;
 
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,13 +20,14 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.Executors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -58,18 +59,14 @@ public final class TrClient {
             .create();
     private final HttpClient httpClient;
 
-    public TrClient(String url, String user, String password, boolean verifySSL, HttpClient.Version httpVersion) {
+    public TrClient(Methanol.Builder httpBuilder, String url, String user, String password, boolean verifySSL, HttpClient.Version httpVersion) {
         this.url = url;
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        HttpClient.Builder builder = Methanol
-                .newBuilder()
+        Methanol.Builder builder = httpBuilder
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(httpVersion)
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                
-                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS), CommonUtil.getScheduler())
-                .readTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator(new Authenticator() {
                     @Override
                     public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
@@ -88,24 +85,22 @@ public final class TrClient {
     }
 
     public <E extends RqArguments, S extends RsArguments> TypedResponse<S> execute(E req, Long tag) {
-        String jsonBuffer = null;
         try {
-            HttpResponse<String> resp = httpClient.send(
+            HttpResponse<Reader> resp = httpClient.send(
                     MutableRequest.POST(url, HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(req.toReq(tag))))
                             .header("Content-Type", "application/json")
                             .header(Session.SESSION_ID, session(false).id())
-                    , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                    , MoreBodyHandlers.ofReader()
             );
             if (resp.statusCode() == 409) {
                 session(true); // force renew
                 throw new IllegalStateException("Session invalid, re-created, please try again.");
             }
-            jsonBuffer = resp.body();
             RawResponse raw = om.fromJson(resp.body(), RawResponse.class);
             String json = om.toJson(raw.getArguments());
             return new TypedResponse<>(raw.getTag(), raw.getResult(), om.fromJson(json, req.answerClass()));
         } catch (JsonSyntaxException jsonSyntaxException) {
-            log.error(tlUI(Lang.DOWNLOADER_TR_INVALID_RESPONSE, jsonBuffer, jsonSyntaxException));
+            log.error(tlUI(Lang.DOWNLOADER_TR_INVALID_RESPONSE, "<?>", jsonSyntaxException));
             throw new IllegalStateException(jsonSyntaxException);
         } catch (IOException | InterruptedException e) {
             log.debug("Request Transmission JsonRPC failure", e);

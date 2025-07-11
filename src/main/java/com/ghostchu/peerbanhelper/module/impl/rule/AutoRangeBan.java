@@ -1,22 +1,23 @@
 package com.ghostchu.peerbanhelper.module.impl.rule;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.peer.Peer;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import inet.ipaddr.IPAddress;
@@ -27,19 +28,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
-@IgnoreScan
 public final class AutoRangeBan extends AbstractRuleFeatureModule implements Reloadable {
     @Autowired
-    private PeerBanHelperServer peerBanHelperServer;
+    private PeerBanHelper peerBanHelper;
     private int ipv4Prefix;
     private int ipv6Prefix;
     @Autowired
     private JavalinWebContainer webContainer;
     private long banDuration;
+    @Autowired
+    private DownloaderServer downloaderServer;
 
     @Override
     public @NotNull String getName() {
@@ -92,18 +93,18 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
     }
 
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         if (isHandShaking(peer)) {
             return pass();
         }
-        if (getServer().getBannedPeersDirect().containsKey(peer.getPeerAddress())) {
+        if (downloaderServer.getBannedPeersDirect().containsKey(peer.getPeerAddress())) {
             return pass();
         }
         IPAddress peerAddress = peer.getPeerAddress().getAddress().withoutPrefixLength();
         if (peerAddress.isIPv4Convertible()) {
             peerAddress = peerAddress.toIPv4();
         }
-        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : getServer().getBannedPeersDirect().entrySet()) {
+        for (Map.Entry<PeerAddress, BanMetadata> bannedPeerEntry : downloaderServer.getBannedPeersDirect().entrySet()) {
             if (bannedPeerEntry.getValue().isBanForDisconnect()) {
                 continue;
             }
@@ -125,7 +126,8 @@ public final class AutoRangeBan extends AbstractRuleFeatureModule implements Rel
                 bannedAddress = IPAddressUtil.toPrefixBlock(bannedAddress, ipv6Prefix);
             }
             if (bannedAddress.contains(peerAddress)) {
-                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), bannedAddress.toString(), addressType));
+                return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(addressType), new TranslationComponent(Lang.ARB_BANNED, peerAddress.toString(), bannedPeer.getAddress().toString(), bannedAddress.toString(), addressType),
+                        StructuredData.create().add("relatedBannedAddress", bannedAddress.toNormalizedString()));
             }
         }
         return pass();

@@ -35,14 +35,14 @@
           </i18n-t>
         </template>
       </a-form-item>
-      <a-form-item
-        field="name"
-        :label="t('page.dashboard.editModal.label.name')"
-        required
-        :rules="[{ match: /^[^.\t\n/]+$/ }]"
-      >
-        <a-input v-model="form.name" allow-clear />
-      </a-form-item>
+      <!--      <a-form-item-->
+      <!--        field="name"-->
+      <!--        :label="t('page.dashboard.editModal.label.name')"-->
+      <!--        required-->
+      <!--        :rules="[{ match: /^[^.\t\n/]+$/ }]"-->
+      <!--      >-->
+      <!--        <a-input v-model="form.name" allow-clear />-->
+      <!--      </a-form-item>-->
       <a-form-item
         field="config.paused"
         :label="t('page.dashboard.editModal.label.paused')"
@@ -60,6 +60,7 @@ import { CreateDownloader, TestDownloaderConfig, UpdateDownloader } from '@/serv
 import { type Form, Message } from '@arco-design/web-vue'
 import { type Component, defineAsyncComponent, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { v1 as uuid } from 'uuid'
 
 const qbittorrentForm = defineAsyncComponent(() => import('@/components/forms/qbittorrent.vue'))
 const qbittorrentEEForm = defineAsyncComponent(() => import('@/components/forms/qbittorrentee.vue'))
@@ -82,7 +83,7 @@ const formMap: Record<ClientTypeEnum, Component> = {
 }
 
 const form = reactive({
-  name: '',
+  id: uuid(),
   config: {
     basicAuth: {},
     verifySsl: true,
@@ -90,16 +91,14 @@ const form = reactive({
     incrementBan: true
   } as downloaderConfig
 })
-const oldName = ref('')
 defineExpose({
-  showModal: (isNewItem: boolean, currentConfig?: { name: string; config: downloaderConfig }) => {
+  showModal: (isNewItem: boolean, currentConfig?: { id: string; config: downloaderConfig }) => {
     newItem.value = isNewItem
     if (!isNewItem && currentConfig) {
-      form.name = currentConfig.name
-      oldName.value = currentConfig.name
       form.config = currentConfig.config
+      form.id = currentConfig.id
     } else {
-      form.name = ''
+      form.id = uuid()
       form.config = {
         basicAuth: {},
         verifySsl: true,
@@ -127,7 +126,7 @@ const handleBeforeOk = async () => {
     if (!testResult.success) throw new Error(testResult.message)
     const result = newItem.value
       ? await CreateDownloader(form)
-      : await UpdateDownloader(oldName.value, form)
+      : await UpdateDownloader(form.id, form)
     if (result.success) {
       Message.success({ content: result.message, resetOnHover: true })
       emits('changed')

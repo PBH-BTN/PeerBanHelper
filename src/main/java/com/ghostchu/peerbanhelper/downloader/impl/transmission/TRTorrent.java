@@ -1,9 +1,9 @@
 package com.ghostchu.peerbanhelper.downloader.impl.transmission;
 
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.torrent.Tracker;
-import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
 import cordelia.rpc.types.Torrents;
 import org.jetbrains.annotations.NotNull;
 

@@ -3,26 +3,31 @@ package com.ghostchu.peerbanhelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+
+import java.util.Properties;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public final class BuildMeta {
-    private String version = "0.0.0";
+    private String version = "999.999.999-undefined";
     private String os = "Unknown";
     private String branch = "Unknown";
     private String commit = "Unknown";
     private String abbrev = "Unknown";
     private String compileTime = "Unknown";
+    private String compileHost;
+    private String compileUser;
 
-    public void loadBuildMeta(YamlConfiguration configuration) {
-        this.version = ExternalSwitch.parse("pbh.buildmeta.maven.version", configuration.getString("maven.version"));
-        this.branch = ExternalSwitch.parse("pbh.buildmeta.git.branch", configuration.getString("git.branch"));
-        this.commit = configuration.getString("git.commit.id.commit-id");
-        this.abbrev = configuration.getString("git.commit.id.abbrev");
+    public void loadBuildMeta(Properties configuration) {
+        this.version = ExternalSwitch.parse("pbh.buildmeta.maven.version", configuration.getProperty("git.build.version"));
+        this.branch = ExternalSwitch.parse("pbh.buildmeta.git.branch", configuration.getProperty("git.branch"));
+        this.commit = configuration.getProperty("git.commit.id.full");
+        this.abbrev = configuration.getProperty("git.commit.id.abbrev");
         this.os = System.getProperty("os.name");
-        this.compileTime = configuration.getString("git.build.time", "Unknown");
+        this.compileTime = configuration.getProperty("git.build.time", "Unknown");
+        this.compileHost = configuration.getProperty("git.build.host", "Unknown");
+        this.compileUser = configuration.getProperty("git.build.user.name", "Unknown");
     }
 
     public boolean isSnapshotOrBeta() {

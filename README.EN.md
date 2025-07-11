@@ -56,7 +56,8 @@ See [PeerBanHelper Documentation](https://docs.pbh-btn.com/docs/category/%E5%AE%
 Before reporting issues, check [FAQ](https://docs.pbh-btn.com/docs/faq)
 
 ## Need Help?
-Join our [QQ Group](https://qm.qq.com/cgi-bin/qm/qr?k=w5as_wH2G1ReUrClreCYhR69XiNCuP65&jump_from=webapi&authKey=EyjMX7Pwc77XLM51V6FEcR7oXnG8fsUbSFqYZ4PPiEpq32vBglJn/jFvpc3LFDhn)!
+
+Join our [QQ Group](https://qm.qq.com/cgi-bin/qm/qr?k=w5as_wH2G1ReUrClreCYhR69XiNCuP65&jump_from=webapi&authKey=EyjMX7Pwc77XLM51V6FEcR7oXnG8fsUbSFqYZ4PPiEpq32vBglJn/jFvpc3LFDhn) or [Telegram Group](https://t.me/+_t3Nt5GZ6bJmYjBl)!
 
 ## Disclaimer
 
@@ -108,6 +109,12 @@ PeerBanHelper uses [JProfiler all-in one Java profiler](https://www.ej-technolog
 - [commonmark](https://github.com/commonmark/commonmark-java)
 - [oshi](https://github.com/oshi/oshi)
 - [semver4j](https://github.com/vdurmont/semver4j)
+- [commonmark](https://github.com/commonmark/commonmark-java)
+- [dnsjava](https://github.com/dnsjava/dnsjava)
+- [SWT](https://eclipse.dev/eclipse/swt/)
+- [simple-java-mail](https://www.simplejavamail.org/)
+- [PF4J](https://pf4j.org/)
+- [completable-futures](https://github.com/spotify/completable-futures)
 
 ### WebUI
 

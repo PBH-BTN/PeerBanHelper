@@ -1,19 +1,21 @@
 package com.ghostchu.peerbanhelper.downloader.impl.deluge;
 
 import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
+import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.torrent.Tracker;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import com.github.mizosoft.methanol.Methanol;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import lombok.Data;
@@ -25,6 +27,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import raccoonfink.deluge.DelugeException;
 import raccoonfink.deluge.DelugeServer;
+import raccoonfink.deluge.requests.ConfigRequest;
+import raccoonfink.deluge.responses.ConfigResponse;
 import raccoonfink.deluge.responses.DelugeListMethodsResponse;
 import raccoonfink.deluge.responses.PBHActiveTorrentsResponse;
 import raccoonfink.deluge.responses.PBHStatisticsResponse;
@@ -48,21 +52,25 @@ public final class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String name, Config config, AlertManager alertManager) {
-        super(name, alertManager);
-        this.name = name;
+    public Deluge(String id, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+        super(id, alertManager);
         this.config = config;
-        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
+        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), httpBuilder, HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
     }
 
-    public static Deluge loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section);
-        return new Deluge(name, config, alertManager);
+    @Override
+    public String getName() {
+        return config.getName();
     }
 
-    public static Deluge loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
+    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+        Config config = Config.readFromYaml(section, id);
+        return new Deluge(id, config, alertManager, httpBuilder);
+    }
+
+    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(name, config, alertManager);
+        return new Deluge(id, config, alertManager, httpBuilder);
     }
 
     @Override
@@ -216,7 +224,46 @@ public final class Deluge extends AbstractDownloader {
         } catch (DelugeException e) {
             log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
         }
-        return new DownloaderStatistics(0,0);
+        return new DownloaderStatistics(0, 0);
+    }
+
+    /**
+     * 获取当前下载器的限速配置
+     *
+     * @return 限速配置，如果不支持或者请求错误，则可能返回 null
+     */
+    @Override
+    public @Nullable DownloaderSpeedLimiter getSpeedLimiter() {
+        try {
+            ConfigResponse resp = this.client.getConfig();
+            var dto = resp.getConfig();
+            long downloadLimit = dto.getMaxDownloadSpeed() * 1024; // Deluge 接口的单位是 KB/s
+            long uploadLimit = dto.getMaxUploadSpeed() * 1024;
+            return new DownloaderSpeedLimiter(uploadLimit, downloadLimit);
+        } catch (DelugeException e) {
+            log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
+        }
+        return null;
+    }
+
+    /**
+     * 设置当前下载器的限速配置
+     *
+     * @param speedLimiter 限速配置
+     */
+    @Override
+    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+        long uploadLimit = speedLimiter.isUploadUnlimited() ? 0 : speedLimiter.upload() / 1024;
+        long downloadLimit = speedLimiter.isDownloadUnlimited() ? 0 : speedLimiter.download() / 1024;
+        var config = new ConfigRequest();
+        config.setMaxDownloadSpeed(downloadLimit);
+        config.setMaxUploadSpeed(uploadLimit);
+
+        try {
+            this.client.setConfig(config);
+        } catch (DelugeException e) {
+            log.error(tlUI(Lang.DOWNLOADER_DELUGE_API_ERROR), e);
+        }
     }
 
     @Override
@@ -262,7 +309,7 @@ public final class Deluge extends AbstractDownloader {
     @NoArgsConstructor
     @Data
     public static class Config {
-
+        private String name;
         private String type;
         private String endpoint;
         private String password;
@@ -273,9 +320,10 @@ public final class Deluge extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
-        public static Config readFromYaml(ConfigurationSection section) {
+        public static Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Config config = new Config();
-            config.setType("deluge");
+            config.setType("raccoonfink/deluge");
+            config.setName(section.getString("name", alternativeName));
             config.setEndpoint(section.getString("endpoint", ""));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
@@ -292,7 +340,8 @@ public final class Deluge extends AbstractDownloader {
 
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
-            section.set("type", "deluge");
+            section.set("type", "raccoonfink/deluge");
+            section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("password", password);
             section.set("rpc-url", rpcUrl);

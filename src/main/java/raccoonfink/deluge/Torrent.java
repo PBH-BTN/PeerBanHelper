@@ -193,7 +193,7 @@ public final class Torrent implements Comparable<Torrent> {
         return ret;
     }
 
-    public static enum State {
+    public enum State {
         Queued,
         Checking,
         Downloading_Metadata,

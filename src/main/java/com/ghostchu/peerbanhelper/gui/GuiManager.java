@@ -1,8 +1,8 @@
 package com.ghostchu.peerbanhelper.gui;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
+import org.slf4j.event.Level;
 
-import java.util.logging.Level;
 
 public interface GuiManager {
     void setup();
@@ -15,7 +15,7 @@ public interface GuiManager {
 
     void close();
 
-    void onPBHFullyStarted(PeerBanHelperServer server);
+    void onPBHFullyStarted(PeerBanHelper server);
 
     void createNotification(Level level, String title, String description);
 
@@ -28,4 +28,6 @@ public interface GuiManager {
     ProgressDialog createProgressDialog(String title, String description, String buttonText, Runnable buttonEvent, boolean allowCancel);
 
     TaskbarControl taskbarControl();
+
+    void openUrlInBrowser(String url);
 }

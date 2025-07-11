@@ -1,15 +1,22 @@
 package com.ghostchu.peerbanhelper.btn;
 
+import com.ghostchu.peerbanhelper.DownloaderServer;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
-import com.ghostchu.peerbanhelper.btn.ability.*;
+import com.ghostchu.peerbanhelper.btn.ability.BtnAbility;
+import com.ghostchu.peerbanhelper.btn.ability.impl.*;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitBans;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitHistory;
+import com.ghostchu.peerbanhelper.btn.ability.impl.legacy.LegacyBtnAbilitySubmitPeers;
+import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
+import com.ghostchu.peerbanhelper.database.dao.impl.MetadataDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
-import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
+import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.github.mizosoft.methanol.Methanol;
@@ -18,7 +25,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.CookieManager;
@@ -56,16 +62,25 @@ public final class BtnNetwork implements Reloadable {
     private String appSecret;
     @Getter
     private HttpClient httpClient;
-    private PeerBanHelperServer server;
-    @Autowired
-    private PeerRecordDao peerRecordDao;
-    private ModuleMatchCache moduleMatchCache;
+    private final DownloaderServer server;
+    private final PeerRecordDao peerRecordDao;
+    private final TrackedSwarmDao trackedSwarmDao;
+    private final MetadataDao metadataDao;
+    private final HistoryDao historyDao;
+    private final HTTPUtil httpUtil;
+    private final ModuleMatchCache moduleMatchCache;
     private boolean enabled;
 
-    public BtnNetwork(PeerBanHelperServer server, ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache) {
-        this.server = server;
+    public BtnNetwork(ScriptEngine scriptEngine, ModuleMatchCache moduleMatchCache, DownloaderServer downloaderServer, HTTPUtil httpUtil,
+                      MetadataDao metadataDao, HistoryDao historyDao, TrackedSwarmDao trackedSwarmDao, PeerRecordDao peerRecordDao) {
+        this.server = downloaderServer;
         this.scriptEngine = scriptEngine;
         this.moduleMatchCache = moduleMatchCache;
+        this.httpUtil = httpUtil;
+        this.metadataDao = metadataDao;
+        this.historyDao = historyDao;
+        this.peerRecordDao = peerRecordDao;
+        this.trackedSwarmDao = trackedSwarmDao;
         Main.getReloadManager().register(this);
         reloadConfig();
     }
@@ -73,11 +88,10 @@ public final class BtnNetwork implements Reloadable {
     @Override
     public ReloadResult reloadModule() throws Exception {
         reloadConfig();
-        log.info("BtnNetwork reloaded");
         return Reloadable.super.reloadModule();
     }
 
-    public void reloadConfig() {
+    public synchronized void reloadConfig() {
         this.enabled = Main.getMainConfig().getBoolean("btn.enabled");
         this.configUrl = Main.getMainConfig().getString("btn.config-url");
         this.submit = Main.getMainConfig().getBoolean("btn.submit");
@@ -90,6 +104,7 @@ public final class BtnNetwork implements Reloadable {
         setupHttpClient();
         resetScheduler();
         checkIfNeedRetryConfig();
+        log.info("BtnNetwork reloaded");
     }
 
     private void resetAbilities() {
@@ -113,7 +128,7 @@ public final class BtnNetwork implements Reloadable {
         String response = "<Not Provided>";
         int statusCode = 0;
         try {
-            HttpResponse<String> resp = HTTPUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
+            HttpResponse<String> resp = httpUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
             if (resp.statusCode() != 200) {
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body(), 600));
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, resp.statusCode(), resp.body());
@@ -135,22 +150,29 @@ public final class BtnNetwork implements Reloadable {
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER, Main.PBH_BTN_PROTOCOL_IMPL_VERSION, max_protocol_version);
                 throw new IllegalStateException(tlUI(Lang.BTN_INCOMPATIBLE_SERVER));
             }
+            boolean useLegacyAbilities = min_protocol_version <= 10;
             resetScheduler();
             abilities.values().forEach(BtnAbility::unload);
             abilities.clear();
             JsonObject ability = json.get("ability").getAsJsonObject();
-            if (ability.has("submit_peers") && submit) {
-                abilities.put(BtnAbilitySubmitPeers.class, new BtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));
+            if (useLegacyAbilities) {
+                if (ability.has("submit_peers") && submit) {
+                    abilities.put(LegacyBtnAbilitySubmitPeers.class, new LegacyBtnAbilitySubmitPeers(this, httpUtil, ability.get("submit_peers").getAsJsonObject()));
+                }
+                if (ability.has("submit_bans") && submit) {
+                    abilities.put(LegacyBtnAbilitySubmitBans.class, new LegacyBtnAbilitySubmitBans(this, httpUtil, ability.get("submit_bans").getAsJsonObject()));
+                }
+                if (ability.has("submit_histories") && submit) {
+                    abilities.put(LegacyBtnAbilitySubmitHistory.class, new LegacyBtnAbilitySubmitHistory(this, httpUtil, ability.get("submit_histories").getAsJsonObject()));
+                }
+            } else {
+                if (ability.has("submit_bans") && submit) {
+                    abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject(), metadataDao, historyDao));
+                }
+                if (ability.has("submit_swarm") && submit) {
+                    abilities.put(BtnAbilitySubmitSwarm.class, new BtnAbilitySubmitSwarm(this, ability.get("submit_swarm").getAsJsonObject(), metadataDao, trackedSwarmDao));
+                }
             }
-            if (ability.has("submit_bans") && submit) {
-                abilities.put(BtnAbilitySubmitBans.class, new BtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
-            }
-            if (ability.has("submit_histories") && submit) {
-                abilities.put(BtnAbilitySubmitHistory.class, new BtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject()));
-            }
-//            if (ability.has("submit_hitrate") && submit) {
-//                abilities.put(BtnAbilitySubmitRulesHitRate.class, new BtnAbilitySubmitRulesHitRate(this, ability.get("submit_hitrate").getAsJsonObject()));
-//            }
             if (ability.has("rules")) {
                 abilities.put(BtnAbilityRules.class, new BtnAbilityRules(this, scriptEngine, ability.get("rules").getAsJsonObject(), scriptExecute));
             }
@@ -170,7 +192,7 @@ public final class BtnNetwork implements Reloadable {
             configSuccess.set(true);
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
         } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode+" - "+response, 600), e);
+            log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600), e);
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
             configSuccess.set(false);
         }
@@ -196,6 +218,7 @@ public final class BtnNetwork implements Reloadable {
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         this.httpClient = Methanol
                 .newBuilder()
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .userAgent(Main.getUserAgent())
                 .defaultHeader("Content-Type", "application/json")

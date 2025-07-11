@@ -1,6 +1,6 @@
 ERR_BUILD_NO_INFO_FILE: "错误：构建信息文件不存在"
 ERR_CANNOT_LOAD_BUILD_INFO: "错误：无法加载构建信息文件"
-MOTD: "PeerBanHelper v{} - by PBH-BTN Community, Made with Sugar & Love"
+MOTD: "PeerBanHelper v{} [{}] (构建时间 {}) - 由 PBH-BTN 社区维护，使用爱与龙尾巴制作"
 LOADING_CONFIG: "正在加载配置文件……"
 CONFIG_PEERBANHELPER: "已初始化目录结构，相关文件已放置在运行目录的 data 文件夹下，请配置相关文件后，再重新启动 PeerBanHelper"
 ERR_SETUP_CONFIGURATION: "错误：无法初始化配置文件结构"
@@ -44,6 +44,11 @@ DOWNLOADER_QB_FAILED_SAVE_BANLIST: "无法保存 {} ({}) 的 Banlist！{} - {}\n
 DOWNLOADER_TR_MOTD_WARNING: "[受限] 由于 Transmission 的 RPC-API 限制，PeerId 黑名单功能和 ProgressCheatBlocker 功能的过量下载模块不可用"
 DOWNLOADER_TR_DISCONNECT_PEERS: "[重置] 正在断开 Transmission 上的 {} 个种子连接的对等体，以便应用 IP 屏蔽列表的更改"
 DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP: "设置 Transmission 的 BanList 地址时，返回非成功响应：{}。"
+DOWNLOADER_TR_INCORRECT_SET_BANLIST_API_RESP: |
+  到 Transmission，PBH 没有生效
+  更新 BanList 时，返回非成功响应
+  erBanHelper 的外部交互端口，以便 Transmission 从 PBH 拉取 IP 黑名单
+  的 设置 -> 隐私 -> 屏蔽列表 中自动填写的 URL 是否正确，如果不正确，请在 PeerBanHelper 的 config.yml 中正确配置 server 部分的配置文件，确保 Transmission 能够正确连接到 IP 黑名单提供端
 DOWNLOADER_TR_INVALID_RESPONSE: "[错误] Transmission 返回无效 JSON 响应: {}"
 DOWNLOADER_TR_UPDATED_BLOCKLIST: "[响应] Transmission 屏蔽列表已更新成功，现在包含 {} 条规则"
 DOWNLOADER_TR_KNOWN_INCOMPATIBILITY: "[错误] 您正在使用的 Transmission 版本与 PeerBanHelper 不兼容: {}"
@@ -91,7 +96,6 @@ BTN_SHUTTING_DOWN: "[BTN 网络] 正在关闭 BTN 模块……"
 BTN_RECONFIGURING: "[BTN 网络] 发现服务器基本配置更新，正在重新配置 BTN 网络模块……"
 RULE_MATCHER_STRING_CONTAINS: "子串匹配"
 RULE_MATCHER_STRING_ENDS_WITH: "匹配结尾"
-MATCH_STRING_STARTS_WITH: "字符串开头: {}"
 RULE_MATCHER_STRING_STARTS_WITH: "匹配开头"
 RULE_MATCHER_STRING_LENGTH: "匹配长度"
 RULE_MATCHER_STRING_REGEX: "匹配正则"
@@ -195,6 +199,7 @@ STATUS_TEXT_OK: "当前工作正常"
 STATUS_TEXT_LOGIN_FAILED: "尝试登陆到下载器失败"
 STATUS_TEXT_EXCEPTION: "出现异常，请检查 PeerBanHelper 控制台: {}"
 STATUS_TEXT_NEED_PRIVILEGE: "权限不足，请求权限提升（以管理员/root身份运行）"
+STATUS_TEXT_PAUSED: "PeerBanHelper 不会检查已暂停的下载器，请取消暂停"
 SUGGEST_FIREWALL_IPTABELS: "不推荐使用原生 iptables，可能引起网络性能下降。请考虑安装 ipset 代替使用 iptabels"
 SUGGEST_FIREWALL_FIREWALLD: "不推荐使用原生 firewalld，可能引起网络性能下降。请考虑安装 ipset 代替使用 firewalld"
 SUGGEST_FIREWALL_WINDOWS_FIREWALL_DISABLED: "Windows 防火墙目前处于禁用状态，请为 “公用网络” 和 “专用网络” 打开 Windows 防火墙，否则系统防火墙集成将不起作用"
@@ -301,7 +306,6 @@ NET_TYPE_DATACENTER: "数据中心"
 WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED: "配置有效，但无法连接到下载器，请检查日志"
 
 STATUS_TEXT_UNKNOWN: "PeerBanHelper 暂时还未获取到此下载器的信息"
-STATUS_TEXT_PAUSED: "PeerBanHelper 不会检查已暂停的下载器，请取消暂停"
 DOWNLOADER_LOGIN_EXCEPTION: "无法连接到下载器，登录时出现错误：{}"
 DOWNLOADER_LOGIN_IO_EXCEPTION: "无法连接到下载器，登录时出现网络错误：{}"
 DOWNLOADER_LOGIN_INCORRECT_CRED: "鉴权失败，错误的登录凭据。请检查用户名、密码或 Token 是否正确。"
@@ -419,7 +423,7 @@ BTN_ABILITY_RECONFIGURE: "重新配置"
 BTN_ABILITY_RECONFIGURE_DESCRIPTION: "“重新配置” 能力允许 BTN 服务器通知 PeerBanHelper 在间隔一定时间后与 BTN 服务器联系，刷新使用的配置文件，以获取远程服务器的配置更改"
 BTN_ABILITY_RULES: "云端规则"
 BTN_ABILITY_RULES_DESCRIPTION: |
-  “云端规则” 能力允许 BTN 服务器向 PeerBanHelper 定期提供由远程服务器生成的反吸血规则，作为本地反吸血规则的补充。  
+  “云端规则” 能力允许 BTN 服务器向 PeerBanHelper 定期提供由远程服务器生成的反吸血规则，作为本地反吸血规则的补充。
   
   规则版本：**{}**, 当前已加载 **{}** 条规则：
   
@@ -432,7 +436,7 @@ BTN_ABILITY_SUBMIT_BANS: "提交封禁列表"
 BTN_ABILITY_SUBMIT_BANS_DESCRIPTION: "“提交封禁列表” 能力允许 BTN 服务器定期接收 PeerBanHelper 的封禁列表和封禁时的数据快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。"
 BTN_ABILITY_SUBMIT_HISTORY: "提交历史记录"
 BTN_ABILITY_SUBMIT_HISTORY_DESCRIPTION: "“提交历史记录” 能力允许 BTN 服务器定期接收 PeerBanHelper 所跟踪的下载器上的 Peers 活动和最后一次记录的活动数据快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。同时，这些数据还有助于分析是否存在利用 PeerBanHelper 反吸血功能的漏洞，绕过反吸血机制的在野利用。"
-BTN_ABILITY_SUBMIT_SNAPSHOT: "提交快照"
+BTN_ABILITY_SUBMIT_SNAPSHOT: "提交历史记录"
 BTN_ABILITY_SUBMIT_SNAPSHOT_DESCRIPTION: "“提交快照” 能力允许 BTN 服务器定期接收 PeerBanHelper 所跟踪的下载器上的瞬间状态快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。同时，这些数据还有助于 BTN 分析当前网络上的活动，以了解不同时刻网络上的恶意活动的概况。"
 BTN_ABILITY_EXCEPTION: "例外"
 BTN_ABILITY_EXCEPTION_DESCRIPTION: "“例外” 能力允许 BTN 服务器通知 PeerBanHelper 将某些地址排除在检查列表之外。如果指定的地址已被封禁，则将解除封禁。我们使用此功能来处理潜在的破坏行为。如果有人恶意利用 BTN 网络，我们将使用此能力将受到影响的记录从 PeerBanHelper 中删除。"
@@ -492,6 +496,11 @@ GUI_MENU_SHOW_WINDOW: "打开主窗口"
 GUI_MENU_STATS: "统计数据"
 GUI_MENU_STATS_BANNED: "已封禁 {} 个 Peer ({} 个 IP 地址)"
 GUI_MENU_STATS_DOWNLOADER: "已连接 {}/{} 个下载器"
+PORT_MAPPER_PORT_MAPPING: "[PortMapper] 正在尝试为端口 {}/{} 创建自动端口映射……"
+PORT_MAPPER_PORT_MAPPED: "[PortMapper] 已在网卡 {} 的网关上上为本地端口 {}/{} 创建了一个端口映射，外部端口为：{} (外部 IP: {})；TTL：{} 秒"
+PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS: "[PortMapper] 需要注意！尽管 PortMapper 已成功创建了一个或者多个端口映射，但它们的外部地址似乎都是专用 IP 地址，这通常意味着您处于双层 NAT 之后（例如：您的设备连接者一台路由器，但这台路由器处于同为路由模式的光猫之下），端口映射可能不起作用。"
+PORT_MAPPER_PORT_MAPPING_FAILED: "[PortMapper] 在网卡 {} 上创建/更新端口映射 {}/{} 失败，正在重试；如果频繁出现此提示，请检查是否设备接入了多个网络（如：Tailscale）"
+DECENTRALIZED_PORT_FORWARDED: "[Decentralized] 自动端口映射成功：{} -> {} (外部 IP: {})"
 
 PUSH_PROVIDER_API_ADD_FAILURE: "推送渠道创建失败，是否传递的是一个不受支持的推送类型？"
 PUSH_PROVIDER_API_CREATED: "推送渠道创建成功"
@@ -505,15 +514,12 @@ PUSH_PROVIDER_API_TEST_OK: "验证成功，配置有效"
 PUSH_PROVIDER_API_REMOVE_NOT_EXISTS: "无法移除指定的推送渠道，指定的推送渠道并没有在 PeerBanHelper 中注册"
 PUSH_PROVIDER_API_REMOVE_SAVED: "移除成功，配置已保存"
 PUSH_PROVIDER_API_PROVIDER_NOT_EXISTS: "请求的推送渠道未在 PeerBanHelper 中注册"
-PORT_MAPPER_PORT_MAPPING: "[PortMapper] 正在尝试为端口 {}/{} 创建自动端口映射……"
-PORT_MAPPER_PORT_MAPPED: "[PortMapper] 已在网卡 {} 的网关上上为本地端口 {}/{} 创建了一个端口映射，外部端口为：{} (外部 IP: {})；TTL：{} 秒"
-PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS: "[PortMapper] 需要注意！尽管 PortMapper 已成功创建了一个或者多个端口映射，但它们的外部地址似乎都是专用 IP 地址，这通常意味着您处于双层 NAT 之后（例如：您的设备连接者一台路由器，但这台路由器处于同为路由模式的光猫之下），端口映射可能不起作用。"
-PORT_MAPPER_PORT_MAPPING_FAILED: "[PortMapper] 在网卡 {} 上创建/更新端口映射 {}/{} 失败，正在重试；如果频繁出现此提示，请检查是否设备接入了多个网络（如：Tailscale）"
 
 FREE_LICENSE_RENEW_SUCCESS: "新的许可证已生成并激活"
 FREE_LICENSE_RENEW_STILL_ACTIVE: "当前许可证仍在有效期内，无需重新生成"
 FREE_LICENSE_SOURCE: "本地生成的免费许可证"
 FREE_LICENSE_DESCRIPTION: "本地生成的循环免费许可证，仅用于个人用途"
+DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED: "禁用 {} ({}) 的高级设置 “允许来自不同 IP 地址的多重连接” 失败：{} - {}！此功能必须关闭，否则将导致 PCB 封禁误判。"
 DOWNLOADER_PAUSED: "下载器已暂停"
 LAB_EXPERIMENT_DNSJAVA_TITLE: "DNSJava DNS 解析"
 LAB_EXPERIMENT_DNSJAVA_DESCRIPTION: "在部分功能模块中使用 [dnsjava/dnsjava](https://github.com/dnsjava/dnsjava) 替代 JDK 默认的 DNS 解析器，以提供更可靠的主机名和反向 DNS 查询能力，并支持自定义 DNS 服务器和负载均衡的能力。DNSJava 仅在部分功能上工作（如 DNS 反查），其它功能将继续使用 JDK DNS。  \n启用此实验后，您可以在配置文件中配置 DNSJava 的 DNS 服务器地址。"
@@ -531,6 +537,7 @@ MATCH_CONDITION_BOOLEAN: "布尔值"
 MATCH_CONDITION_BOOLEAN_BY_INTEGER: "布尔值 (整数转换)"
 MATCH_CONDITION_BOOLEAN_BY_STRING: "布尔值 (字符串转换)"
 MATCH_STRING_CONTAINS: "字符串包含: {}"
+MATCH_STRING_STARTS_WITH: "字符串开头: {}"
 MATCH_STRING_ENDS_WITH: "字符串结尾: {}"
 MATCH_STRING_EQUALS: "字符串匹配: {}"
 MATCH_STRING_LENGTH: "字符串长度: {}"
@@ -544,7 +551,7 @@ BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT: "当前
 BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER: "当前服务器 BTN 协议实现版本过旧，服务器实现版本号: {}，本地要求最低: {}"
 BTN_CONFIG_STATUS_SUCCESSFUL: "已成功连接到 BTN 服务器"
 BTN_CONFIG_STATUS_EXCEPTION: "配置 BTN 功能时发生意外错误：{}: {}"
-DOWNLOADER_QB_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "请求种子 {} 的 Tracker 列表失败：{} - {}"
+DOWNLOADER_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "请求种子 {} 的 Tracker 列表失败：{} - {}"
 TRACKER_FAILED_TO_UPDATE_TRACKER: "请求更新种子 {} 的 Tracker 列表失败：{} - {}"
 UTILITIES_TRACKER_REPLACED: "已成功替换 {} 个种子的 Tracker"
 DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION: "当前使用的 BiglyBT 适配器版本不受支持，请升级到 {} 或更高版本"
@@ -557,10 +564,10 @@ JCEF_DOWNLOAD_TITLE: "下载 JCEF 数据包"
 JCEF_DOWNLOAD_DESCRIPTION: |
   PeerBanHelper 正在下载 JCEF 数据包以在 GUI 窗口中启用 WebUI 控制台标签卡，这可能需要一点时间...<br/>
   如果不希望启用 JCEF 功能，请添加启动附加参数 nojcef。
+GUI_COMMON_CANCEL: "取消"
 JCEF_DOWNLOAD_UNZIP_DESCRIPTION: 正在解压缩 JCEF 数据包，请稍等...
 IPDB_DOWNLOAD_TITLE: "下载 GeoIP 数据库: {}"
 IPDB_DOWNLOAD_DESCRIPTION: "PeerBanHelper 需要下载 GeoIP 数据库以为反吸血提供 IP 地址的地理位置信息支持，这可能需要一点时间..."
-GUI_COMMON_CANCEL: "取消"
 PBH_PLUS_THANKS_FOR_DONATION_GUI_TITLE: "❤感谢捐赠"
 GUI_TITLE_DEBUG: "🔧调试模式"
 DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE: "严重错误：下载器处于不正确的网络模式下，PeerBanHelper 可能不会工作"
@@ -571,9 +578,15 @@ DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION: |
   
   请注意：你应该正确修复 IP 问题，仅将内部网络 IP 地址从忽略列表中移除会导致 PeerBanHelper 错误地封禁全部入站连接。  
   如需帮助，请加入 PeerBanHelper 社区寻求帮助。**此提示在每个下载器上仅会提示一次。**
-ABOUT_VIEW_CREDIT: "开发人员与社区贡献者..."
+INCOMPATIBLE_PLATFORM_TITLE: "当前平台不受支持"
+INCOMPATIBLE_PLATFORM_DESCRIPTION: "当前平台未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。回退兼容性可能在未来随时被移除。"
+INCOMPATIBLE_BITNESS_TITLE: "32 位平台不受支持"
+INCOMPATIBLE_BITNESS_DESCRIPTION: "在 32 位操作系统/JVM 上运行 PeerBanHelper 未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。回退兼容性可能在未来随时被移除。此提示信息仅显示一次。"
+INCOMPATIBLE_BITNESS_LOG: "在 32 位操作系统/JVM 上运行 PeerBanHelper 未经测试且不受支持，可能出现兼容性或稳定性问题。请**不要**向 PBH-BTN 报告任何在此平台上出现的任何兼容性故障。回退兼容性可能在未来随时被移除。"
+TITLE_INCOMPATIBLE_PLATFORM: "⚠不受支持的平台"
 LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_TITLE: "启用事务批量写入封禁历史记录"
 LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_DESCRIPTION: "在记录封禁历史记录时使用事务以批量写入数据库以提高性能和减少随机磁盘 I/O 操作。"
+ABOUT_VIEW_CREDIT: "开发人员与社区贡献者..."
 TITLE_APP_V_CONTAINER: "📦App-V"
 
 ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_TITLE: "下载器 {} IP 封禁列表更新失败"
@@ -586,11 +599,11 @@ ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
 
 DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。请跟随文档检查前缀设置
 GUI_TRAY_TITLE: "PeerBanHelper"
+
 CRASH_MANAGER_TITLE: "PeerBanHelper 的上次退出可能是意外关闭"
 CRASH_MANAGER_DESCRIPTION: |
   PeerBanHelper 的上次退出可能是非正常关闭。
-  这可能是因为程序崩溃、内存不足，或者操作系统强制关闭了程序。
-  频繁的非正常退出可能导致数据和配置文件损坏，请尽量正常退出 PeerBanHelper。
+  请登录 WebUI 查看 “警报” 以获取更多信息。
 CRASH_MANAGER_GUI_RELATED_TITLE: "非正常退出故障排除向导 - 检测已知问题 - Windows - Java Platform awt.dll"
 CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
   在 Windows 平台上，有时 PeerBanHelper 可能会因为以下原因非正常退出：
@@ -601,3 +614,52 @@ CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
   
   如果 PeerBanHelper 频繁因为上述问题出现崩溃，建议您启动 SWTUI 以禁用可能存在问题的 awt.dll。
   您是否希望切换到 SWT UI 界面？
+GUI_PROGRAM_SWITCH_TO_AUTO: "重启并还原默认 UI 行为..."
+GUI_PROGRAM_SWITCH_TO_SWT: "重启并切换到 SWT UI..."
+
+BTN_ABILITY_SUBMIT_SWARM: "提交种群跟踪数据"
+BTN_ABILITY_SUBMIT_SWARM_DESCRIPTION: |
+  “提交种群跟踪数据” 是 “提交历史记录” 和 “提交快照数据” 的继任者。新的 “提交种群跟踪数据” 以一种更加服务器友好的格式追踪、存储和提交 Peers 数据，以减轻 BTN 服务器的数据聚合分析压力。
+  该能力允许 BTN 服务器定期接收 PeerBanHelper 所跟踪的下载器上的 Peers 活动和最后一次记录的活动数据快照。这些数据有助于 BTN 服务器分析网络上的恶意行为，并动态生成反吸血规则阻断这些恶意行为。同时，这些数据还有助于分析是否存在利用 PeerBanHelper 反吸血功能的漏洞，绕过反吸血机制的在野利用。
+BTN_SUBMITTING_SWARM: "[BTN 网络] 计划任务正在与 BTN 网络同步种群跟踪数据，请稍等……"
+BTN_SUBMITTED_SWARM: "[BTN 网络] 已与 BTN 网络同步 {} 条种群跟踪数据 (分为 {} 次请求)，感谢您对 BTN 网络的支持！"
+
+BTN_SUBMITTING_BAN: "[BTN 网络] 计划任务正在提交封禁历史记录信息至 BTN 网络，请稍等……"
+BTN_SUBMITTED_BAN: "[BTN 网络] 已提交 {} 条封禁历史记录信息 (分为 {} 次请求)，感谢您对 BTN 网络的支持！"
+DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER: "获取下载器 {} 的速度限制器信息失败: {} - {}"
+DOWNLOADER_FAILED_SET_SPEED_LIMITER: "设置下载器 {} 的速度限制器信息失败: {} - {}"
+DOWNLOADER_FAILED_START_TORRENT: "启动下载器上的 {} 种子 {} 失败: {} - {}"
+DOWNLOADER_FAILED_STOP_TORRENT: "暂停下载器上的 {} 种子 {} 失败: {} - {}"
+
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED: "[主动监测] 已还原下载器 {} 的速率限制为开始限制之前的值，新的值：上传={}/s 下载={}/s"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR: "[主动监测] 无法调整下载器 {} 的速率限制，出现了预期外的错误"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_ENABLED: "[主动监测] 由于在指定时间内您已共计上传 {} 数据，速率限制已对下载器 {} 启用。新的值：上传={}/s 下载={}/s"
+
+DATABASE_UPGRADING_RECORDS: "[数据升级] 正在升级 {}，已完成：{}/{}。请不要关闭程序，否则将导致数据损坏！"
+WEBUI_SECURITY_LOGIN_FAILED: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于对方提供了错误的 Token 凭据，因此登录尝试已被阻止。如果这不是预期行为，建议使用防火墙保护 PeerBanHelper 的 WebUI 端口。对方浏览器信息：{}"
+WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN: "[WebUI] 有人正尝试从 {} 登录 PeerBanHelper，但由于登录失败次数过多，PeerBanHelper 已暂时阻止从此位置登录。"
+WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有用户成功从 {} 登录 PeerBanHelper。浏览器信息：{}"
+
+WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE: "有用户成功登录 PeerBanHelper WebUI"
+WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION: "IP 地址 {} 的用户已成功登录 PeerBanHelper WebUI。浏览器信息：{}"
+
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[主动检测] 根据最近的流量统计数据，下载器 {} 的上传速率限制已动态更新为 {} ({})"
+GUI_COPY_TO_CLIPBOARD: "复制到剪贴板"
+GUI_CLEAR_LOGS: "清除日志"
+
+GUI_QT6_WAITING_EXTRACTING: "[Qt6GuiManager] 请等待 Qt6 动态链接库解压缩，这可能需要一些时间……"
+GUI_QT6_WAITING_INIT: "[Qt6GuiManager] 请等待 Qt6 核心初始化，这可能需要一些时间…… 准备就绪后窗口将立刻加载并打开。"
+GUI_QT6_NATIVES_MISSING: "[Qt6GuiManager] 因文件缺失无法加载 Qt6 UI 框架，请重新运行安装程序，并在可选安装组件处勾选 “[可选] Qt6” 组件；或者使用 Swing UI 启动。"
+
+CRASH_MANAGER_CRASH_RECOVERY_ALERT_TITLE: "PeerBanHelper 已从崩溃中自动恢复"
+CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
+  PeerBanHelper 在上次运行中遇到了致命错误并崩溃，但已成功从崩溃中自动恢复。  
+  该问题通常是由于 Java Virtual Machine 内部错误所导致的，如果此错误频繁发生，请向开发者报告并附带下面的技术信息：
+  
+  **崩溃 PID:** {}  
+  **恢复重新启动时间:** {}  
+  **JVM 崩溃日志转储文件位置:** {}  
+  *在反馈问题时，请一同上传崩溃日志转储文件。*
+  
+  对此带来的不便，我们深表歉意。
+BOOT_TIME: "PeerBanHelper 启动完成，用时 {}ms"

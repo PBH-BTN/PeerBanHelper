@@ -1,8 +1,9 @@
 package com.ghostchu.peerbanhelper.module;
 
-import com.ghostchu.peerbanhelper.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
+import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -14,9 +15,9 @@ import org.springframework.stereotype.Component;
 public abstract class AbstractRuleFeatureModule extends AbstractFeatureModule implements RuleFeatureModule {
     @Getter
     private boolean register;
-    public static final CheckResult TEAPOT_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("I'm a teapot"));
-    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"));
-    public static final CheckResult HANDSHAKING_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Peer handshaking"));
+    public static final CheckResult TEAPOT_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("I'm a teapot"), StructuredData.create().add("status", "teapot"));
+    public static final CheckResult OK_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Check passed"), StructuredData.create().add("status", "pass"));
+    public static final CheckResult HANDSHAKING_CHECK_RESULT = new CheckResult(AbstractRuleFeatureModule.class, PeerAction.NO_ACTION, 0, new TranslationComponent("N/A"), new TranslationComponent("Peer handshaking"), StructuredData.create().add("status", "handshaking"));
     @Autowired
     @Getter
     private ModuleMatchCache cache;

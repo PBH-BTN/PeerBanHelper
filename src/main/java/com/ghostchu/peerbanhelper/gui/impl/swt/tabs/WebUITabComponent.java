@@ -21,7 +21,7 @@ public class WebUITabComponent implements TabComponent {
     private Composite webUIComposite;
 
     @Override
-    public TabItem createTab(TabFolder tabFolder) {
+    public TabItem createTab(Display display, TabFolder tabFolder) {
         TabItem webUITab = new TabItem(tabFolder, SWT.NONE);
         webUITab.setText(getTabName());
 
@@ -77,7 +77,7 @@ public class WebUITabComponent implements TabComponent {
         if (browser == null || browser.isDisposed()) {
             browser = new Browser(webUIComposite, SWT.NONE);
             browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            browser.setUrl(lastUrl);
+            navigate(lastUrl);
             webUIComposite.layout(true);
             browser.layout(true);
         }

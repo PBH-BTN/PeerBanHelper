@@ -1,26 +1,57 @@
 package com.ghostchu.peerbanhelper.database.dao.impl;
 
-import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.AbstractPBHDao;
 import com.ghostchu.peerbanhelper.database.table.MetadataEntity;
+import com.j256.ormlite.support.ConnectionSource;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.util.List;
 
 @Component
-public final class MetadataDao extends AbstractPBHDao<MetadataEntity, Long> {
-    public MetadataDao(@Autowired Database database) throws SQLException {
-        super(database.getDataSource(), MetadataEntity.class);
+
+public final class MetadataDao extends AbstractPBHDao<MetadataEntity, String> {
+    public MetadataDao(@Autowired ConnectionSource database) throws SQLException {
+        super(database, MetadataEntity.class);
     }
 
-    @Override
-    public synchronized MetadataEntity createIfNotExists(MetadataEntity data) throws SQLException {
-        List<MetadataEntity> list = queryForMatchingArgs(data);
-        if (list.isEmpty()) {
-            return super.createIfNotExists(data);
+    public String get(String key) {
+        return getOrDefault(key, null);
+    }
+
+    public String getOrDefault(String key, @Nullable String defaultValue) {
+        try {
+            MetadataEntity entity = queryForId(key);
+            if (entity != null) {
+                return entity.getValue();
+            } else {
+                return defaultValue;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        return list.getFirst();
+    }
+
+    public int set(String key, @Nullable String value) {
+        try {
+            if (idExists(key)) {
+                if (value == null) {
+                    return deleteById(key);
+                } else {
+                    MetadataEntity entity = new MetadataEntity();
+                    entity.setKey(key);
+                    entity.setValue(value);
+                    return update(entity);
+                }
+            } else {
+                MetadataEntity entity = new MetadataEntity();
+                entity.setKey(key);
+                entity.setValue(value);
+                return create(entity);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,10 +1,10 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.push.PushManager;
-import com.ghostchu.peerbanhelper.push.PushProvider;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PushWrapperDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
+import com.ghostchu.peerbanhelper.util.push.PushManagerImpl;
+import com.ghostchu.peerbanhelper.util.push.PushProvider;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -24,13 +24,12 @@ import java.util.Optional;
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
 @Component
-@IgnoreScan
 @Slf4j
 public final class PBHPushController extends AbstractFeatureModule {
     @Autowired
     private JavalinWebContainer webContainer;
     @Autowired
-    private PushManager pushManager;
+    private PushManagerImpl pushManager;
 
     @Override
     public boolean isConfigurable() {
@@ -164,8 +163,8 @@ public final class PBHPushController extends AbstractFeatureModule {
     }
 
     private void handlePushProviderList(@NotNull Context ctx) {
-        List<PushWrapper> pushProviders = pushManager.getProviderList()
-                .stream().map(d -> new PushWrapper(d.getName(), d.getConfigType(), d.saveJson()))
+        List<PushWrapperDTO> pushProviders = pushManager.getProviderList()
+                .stream().map(d -> new PushWrapperDTO(d.getName(), d.getConfigType(), d.saveJson()))
                 .toList();
         ctx.json(new StdResp(true, null, pushProviders));
     }
@@ -176,6 +175,4 @@ public final class PBHPushController extends AbstractFeatureModule {
 
     }
 
-    record PushWrapper(String name, String type, JsonObject config) {
-    }
 }

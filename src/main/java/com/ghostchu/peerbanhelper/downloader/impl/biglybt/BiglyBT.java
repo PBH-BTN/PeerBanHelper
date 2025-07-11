@@ -2,34 +2,32 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.alert.AlertManager;
-import com.ghostchu.peerbanhelper.downloader.AbstractDownloader;
-import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
-import com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult;
-import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.peer.PeerImpl;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
+import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
+import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.SetSpeedLimiterBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.CurrentSpeedLimiterBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.MetadataCallbackBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerManagerRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.PeerRecord;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.StatisticsRecord;
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.peer.PeerImpl;
-import com.ghostchu.peerbanhelper.peer.PeerMessage;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
-import com.ghostchu.peerbanhelper.torrent.Tracker;
-import com.ghostchu.peerbanhelper.torrent.TrackerImpl;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MoreBodyHandlers;
 import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -42,6 +40,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Reader;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.URI;
@@ -51,7 +50,11 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Executors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -63,21 +66,18 @@ public final class BiglyBT extends AbstractDownloader {
     private final String connectorPayload;
     private Semver semver = new Semver("0.0.0");
 
-    public BiglyBT(String name, Config config, AlertManager alertManager) {
-        super(name, alertManager);
+    public BiglyBT(String uuid, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+        super(uuid, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        Methanol.Builder builder = Methanol
-                .newBuilder()
+        Methanol.Builder builder = httpBuilder
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .version(HttpClient.Version.valueOf(config.getHttpVersion()))
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .defaultHeader("Authorization", "Bearer " + config.getToken())
-                .defaultHeader("Content-Type", "application/json")
-                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(10, ChronoUnit.SECONDS), CommonUtil.getScheduler())
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .cookieHandler(cm);
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
@@ -86,19 +86,57 @@ public final class BiglyBT extends AbstractDownloader {
         this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
     }
 
-    public static BiglyBT loadFromConfig(String name, JsonObject section, AlertManager alertManager) {
-        Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new BiglyBT(name, config, alertManager);
+    @Override
+    public String getName() {
+        return config.getName();
     }
 
-    public static BiglyBT loadFromConfig(String name, ConfigurationSection section, AlertManager alertManager) {
-        Config config = Config.readFromYaml(section);
-        return new BiglyBT(name, config, alertManager);
+    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+        Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
+        return new BiglyBT(id, config, alertManager, httpBuilder);
+    }
+
+    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+        Config config = Config.readFromYaml(section, id);
+        return new BiglyBT(id, config, alertManager, httpBuilder);
     }
 
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP);
+        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
+    }
+
+    @Override
+    public DownloaderSpeedLimiter getSpeedLimiter() {
+        HttpResponse<String> resp;
+        try {
+            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/speedlimiter"),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        if (resp.statusCode() != 200) {
+            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), resp.statusCode(), resp.body()));
+        }
+        CurrentSpeedLimiterBean currentSpeedLimit = JsonUtil.getGson().fromJson(resp.body(), CurrentSpeedLimiterBean.class);
+        return new DownloaderSpeedLimiter(currentSpeedLimit.getUpload(), currentSpeedLimit.getDownload());
+    }
+
+    @Override
+    public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
+        SetSpeedLimiterBean bean = new SetSpeedLimiterBean(speedLimiter.upload(), speedLimiter.download());
+        try {
+            HttpResponse<String> request = httpClient.send(MutableRequest
+                            .POST(apiEndpoint + "/speedlimiter", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
+                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (request.statusCode() != 200) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), request.statusCode(), request.body()));
+                throw new IllegalStateException("Save BiglyBT SpeedLimiter error: statusCode=" + request.statusCode());
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), "N/A", e.getMessage()), e);
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
@@ -182,7 +220,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     private List<Torrent> fetchTorrents(List<Object> filtersUrlEncoded, boolean includePrivate) {
-        HttpResponse<String> request;
+        HttpResponse<Reader> request;
         try {
             StringBuilder urlBuilder = new StringBuilder(apiEndpoint + "/downloads");
             if (!filtersUrlEncoded.isEmpty()) {
@@ -190,7 +228,7 @@ public final class BiglyBT extends AbstractDownloader {
                 urlBuilder.append(String.join("&filter=", filtersUrlEncoded.stream().map(Object::toString).toArray(String[]::new)));
             }
             request = httpClient.send(MutableRequest.GET(urlBuilder.toString()),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -267,10 +305,10 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<String> resp;
+        HttpResponse<Reader> resp;
         try {
             resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/download/" + torrent.getId() + "/peers"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    MoreBodyHandlers.ofReader());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -283,22 +321,12 @@ public final class BiglyBT extends AbstractDownloader {
         PeerManagerRecord peerManagerRecord = JsonUtil.getGson().fromJson(resp.body(), PeerManagerRecord.class);
         List<Peer> peersList = new ArrayList<>();
         for (PeerRecord peer : peerManagerRecord.getPeers()) {
-            var peerId = new String(ByteUtil.hexToByteArray(peer.getPeerId()), StandardCharsets.ISO_8859_1);
-            if (peerId.length() > 8) {
-                peerId = peerId.substring(0, 8);
-            }
+            var peerId = ByteUtil.hexToByteArray(peer.getPeerId());
             if (peer.getIp() == null || peer.getIp().isBlank()) {
                 continue;
             }
-            var supportedMessages = new ArrayList<PeerMessage>();
-            if (peer.getPeerSupportedMessages() != null) {
-                supportedMessages.addAll(peer.getPeerSupportedMessages().stream().map(str -> {
-                    try {
-                        return PeerMessage.valueOf(str.toUpperCase(Locale.ROOT).replace("-", "_"));
-                    } catch (IllegalArgumentException e) {
-                        return null;
-                    }
-                }).filter(Objects::nonNull).toList());
+            if(peer.getIp().startsWith("/")){
+                peer.setIp(peer.getIp().substring(1));
             }
             peersList.add(new PeerImpl(
                     new PeerAddress(peer.getIp(), peer.getPort()),
@@ -311,7 +339,6 @@ public final class BiglyBT extends AbstractDownloader {
                     peer.getStats().getTotalSent(),
                     peer.getPercentDoneInThousandNotation() / 1000d,
                     null,
-                    supportedMessages,
                     peer.getState() != 30 && peer.getState() != 40
             ));
         }
@@ -325,11 +352,11 @@ public final class BiglyBT extends AbstractDownloader {
                             .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
@@ -343,14 +370,15 @@ public final class BiglyBT extends AbstractDownloader {
                             .build()
                     , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
                 throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
             }
         } catch (Exception e) {
-            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, name, apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
+            log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
             throw new IllegalStateException(e);
         }
     }
+
 
     @Override
     public void close() {
@@ -360,7 +388,7 @@ public final class BiglyBT extends AbstractDownloader {
     @NoArgsConstructor
     @Data
     public static class Config {
-
+        private String name;
         private String type;
         private String endpoint;
         private String token;
@@ -370,13 +398,14 @@ public final class BiglyBT extends AbstractDownloader {
         private boolean ignorePrivate;
         private boolean paused;
 
-        public static Config readFromYaml(ConfigurationSection section) {
+        public static Config readFromYaml(ConfigurationSection section, String alternativeName) {
             Config config = new Config();
             config.setType("biglybt");
             config.setEndpoint(section.getString("endpoint"));
             if (config.getEndpoint().endsWith("/")) { // 浏览器复制党 workaround 一下， 避免连不上的情况
                 config.setEndpoint(config.getEndpoint().substring(0, config.getEndpoint().length() - 1));
             }
+            config.setName(section.getString("name", alternativeName));
             config.setToken(section.getString("token", ""));
             config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
@@ -389,6 +418,7 @@ public final class BiglyBT extends AbstractDownloader {
         public YamlConfiguration saveToYaml() {
             YamlConfiguration section = new YamlConfiguration();
             section.set("type", "biglybt");
+            section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("token", token);
             section.set("http-version", httpVersion);

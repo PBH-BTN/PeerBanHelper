@@ -67,12 +67,20 @@
               )
             }}
           </a-typography-paragraph>
-          <a href="https://afdian.com/a/Ghost_chu?tab=shop" target="_blank">
-            <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" />
+          <a
+            href="https://mbd.pub/o/ghostchu"
+            style="text-decoration: none; transform: scale(0.6); transform-origin: left top"
+            target="_blank"
+          >
+            <!-- <img src="@/assets/support_aifadian.svg" alt="support us!" style="width: 100%" /> -->
+            <mbd />
           </a>
         </a-space>
         <a-split
-          v-if="status?.keyData?.type !== LicenseType.LicenseAifadian"
+          v-if="
+            status?.keyData?.type !== LicenseType.LicenseAifadian &&
+            status?.keyData?.type !== LicenseType.LicenseMbd
+          "
           :size="0.5"
           disabled
           style="width: 100%"
@@ -119,6 +127,7 @@ import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import mbd from './mbdBadge.vue'
 import medal from './plusMedal.vue'
 import tryModal from './plusTryModal.vue'
 

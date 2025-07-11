@@ -36,7 +36,7 @@ public final class TimeoutProtect implements AutoCloseable {
 
     public TimeoutProtect(long timeRestrict, Consumer<TimeoutProtect> timeoutCallback) {
         this.timeRestrict = timeRestrict;
-        this.service = Executors.newVirtualThreadPerTaskExecutor();
+        this.service = Executors.newSingleThreadExecutor();
         this.timeoutCallback = timeoutCallback;
     }
 
@@ -54,9 +54,7 @@ public final class TimeoutProtect implements AutoCloseable {
 
     public void printUnfinishedTasks() {
         if (this.unfinishedTasks != null) {
-            this.unfinishedTasks.forEach(r -> {
-                log.warn(tlUI(Lang.TIMING_UNFINISHED_TASK, r));
-            });
+            this.unfinishedTasks.forEach(r -> log.warn(tlUI(Lang.TIMING_UNFINISHED_TASK, r)));
         }
     }
 

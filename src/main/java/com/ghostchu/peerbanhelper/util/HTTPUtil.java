@@ -7,6 +7,8 @@ import com.github.mizosoft.methanol.WritableBodyPublisher;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -34,16 +36,19 @@ import java.util.zip.GZIPOutputStream;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
+@Component
 public final class HTTPUtil {
-    private static final int MAX_RESEND = 5;
-    private static final CookieManager cookieManager = new CookieManager();
-    private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    private final int MAX_RESEND = 5;
+    private final CookieManager cookieManager = new CookieManager();
+    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     @Getter
     private static SSLContext ignoreSslContext;
-    private static final ProgressTracker tracker = ProgressTracker.newBuilder()
+    private final ProgressTracker tracker = ProgressTracker.newBuilder()
             .bytesTransferredThreshold(60 * 1024) // 60 kB
             .timePassedThreshold(Duration.of(3, ChronoUnit.SECONDS))
             .build();
+    @Autowired(required = false)
+    private ProxySelector proxySelector;
 
     static {
         TrustManager trustManager = new X509ExtendedTrustManager() {
@@ -85,14 +90,25 @@ public final class HTTPUtil {
         }
     }
 
-    public static HttpClient getHttpClient(boolean ignoreSSL, ProxySelector proxySelector) {
-        Methanol.Builder builder = Methanol
-                .newBuilder()
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS), CommonUtil.getScheduler())
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), CommonUtil.getScheduler())
+    public HTTPUtil() {
+
+    }
+
+    public Methanol.Builder newBuilder() {
+        var builder = Methanol.newBuilder()
+                .executor(executor)
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
+                .headersTimeout(Duration.of(25, ChronoUnit.SECONDS), CommonUtil.getScheduler())
                 .cookieHandler(cookieManager);
+        if(proxySelector != null){
+            builder.proxy(proxySelector);
+        }
+        return builder;
+    }
+
+    public HttpClient getHttpClient(boolean ignoreSSL) {
+        var builder = newBuilder();
         if (ignoreSSL) {
             builder.sslContext(ignoreSslContext);
         }
@@ -102,7 +118,7 @@ public final class HTTPUtil {
         return builder.build();
     }
 
-    public static WritableBodyPublisher gzipBody(byte[] bytes) {
+    public WritableBodyPublisher gzipBody(byte[] bytes) {
         WritableBodyPublisher requestBody = WritableBodyPublisher.create();
         try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream());
              InputStream in = new ByteArrayInputStream(bytes)) {
@@ -114,7 +130,7 @@ public final class HTTPUtil {
         return requestBody;
     }
 
-    public static WritableBodyPublisher gzipBody(InputStream is) {
+    public WritableBodyPublisher gzipBody(InputStream is) {
         WritableBodyPublisher requestBody = WritableBodyPublisher.create();
         try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream())) {
             ByteStreams.copy(is, gzipOut);
@@ -125,7 +141,7 @@ public final class HTTPUtil {
         return requestBody;
     }
 
-    public static void onProgress(ProgressTracker.Progress progress) {
+    public void onProgress(ProgressTracker.Progress progress) {
         if (progress.determinate()) { // Overall progress can be measured
             var percent = 100 * progress.value();
             log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, progress.totalBytesTransferred(), progress.contentLength(), String.format("%.2f", percent)));
@@ -137,22 +153,22 @@ public final class HTTPUtil {
         }
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
         return client.sendAsync(request, bodyHandler)
                 .handleAsync((r, t) -> tryResend(client, request, bodyHandler, MAX_RESEND, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
         return client.sendAsync(request, bodyHandler)
                 .handleAsync((r, t) -> tryResend(client, request, bodyHandler, 1, r, t), executor)
                 .thenCompose(Function.identity());
 
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
-        bodyHandler = tracker.tracking(bodyHandler, HTTPUtil::onProgress);
+    public <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
+        bodyHandler = tracker.tracking(bodyHandler, this::onProgress);
         HttpResponse.BodyHandler<T> finalBodyHandler = bodyHandler;
         return client.sendAsync(request, bodyHandler)
                 .handleAsync((r, t) -> tryResend(client, request, finalBodyHandler, 1, r, t), executor)
@@ -161,22 +177,22 @@ public final class HTTPUtil {
     }
 
 
-    public static boolean shouldRetry(HttpResponse<?> r, Throwable t, int count) {
+    public boolean shouldRetry(HttpResponse<?> r, Throwable t, int count) {
         if (count >= MAX_RESEND) {
             return false;
         }
         if (r != null) {
             return r.statusCode() == 500
-                   || r.statusCode() == 502
-                   || r.statusCode() == 503
-                   || r.statusCode() == 504;
+                    || r.statusCode() == 502
+                    || r.statusCode() == 503
+                    || r.statusCode() == 504;
         }
         return false;
     }
 
-    public static <T> CompletableFuture<HttpResponse<T>> tryResend(HttpClient client, HttpRequest request,
-                                                                   HttpResponse.BodyHandler<T> handler, int count,
-                                                                   HttpResponse<T> resp, Throwable t) {
+    public <T> CompletableFuture<HttpResponse<T>> tryResend(HttpClient client, HttpRequest request,
+                                                            HttpResponse.BodyHandler<T> handler, int count,
+                                                            HttpResponse<T> resp, Throwable t) {
         if (shouldRetry(resp, t, count)) {
             if (resp == null) {
                 log.warn("Request to {} failed, retry {}/{}: {}", request.uri().toString(), count, MAX_RESEND, t.getClass().getName() + ": " + t.getMessage());

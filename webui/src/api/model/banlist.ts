@@ -1,10 +1,14 @@
+import type { DownloaderBasicInfo } from './downloader'
+
 export interface BanList {
   address: string
   banMetadata: BanMetadata
+  ipGeoData?: IPGeoData
 }
 
 export interface BanMetadata {
   context: string
+  downloader: DownloaderBasicInfo
   randomId: string
   banAt: number
   unbanAt: number
@@ -13,7 +17,6 @@ export interface BanMetadata {
   rule: string
   description: string
   reverseLookup: string
-  geo?: IPGeoData
 }
 
 export interface Torrent {

@@ -72,44 +72,44 @@
     </a-descriptions-item>
 
     <a-descriptions-item
-      v-if="item.banMetadata.geo"
+      v-if="item.ipGeoData"
       :label="t('page.banlist.banlist.listItem.geo')"
       :span="6"
     >
       <CountryFlag
-        :iso="item.banMetadata.geo?.country?.iso ?? t('page.banlist.banlist.listItem.empty')"
+        :iso="item.ipGeoData?.country?.iso ?? t('page.banlist.banlist.listItem.empty')"
       />
       {{
-        `${item.banMetadata.geo?.country?.name} ${
-          item.banMetadata.geo?.city?.name ?? t('page.banlist.banlist.listItem.empty')
+        `${item.ipGeoData?.country?.name} ${
+          item.ipGeoData?.city?.name ?? t('page.banlist.banlist.listItem.empty')
         }`
       }}
       <!-- <a-link
-        :href="`https://uri.amap.com/marker?position=${item.banMetadata.geo?.city?.location?.longitude},${item.banMetadata.geo?.city?.location?.latitude}`"
+        :href="`https://uri.amap.com/marker?position=${item.ipGeoData?.city?.location?.longitude},${item.ipGeoData?.city?.location?.latitude}`"
         :hoverable="false">
         <icon-location />
       </a-link> -->
     </a-descriptions-item>
     <a-descriptions-item
-      v-if="item.banMetadata.geo?.as"
+      v-if="item.ipGeoData?.as"
       :label="t('page.banlist.banlist.listItem.asn')"
       :span="6"
     >
       <a-space>
-        <a-typography-text> {{ item.banMetadata.geo?.as?.organization }}</a-typography-text>
-        <a-tag :color="getColor((item.banMetadata.geo?.as?.number ?? 0).toString())">{{
-          item.banMetadata.geo?.as?.number
+        <a-typography-text> {{ item.ipGeoData?.as?.organization }}</a-typography-text>
+        <a-tag :color="getColor((item.ipGeoData?.as?.number ?? 0).toString())">{{
+          item.ipGeoData?.as?.number
         }}</a-tag>
         <a-tooltip
           :content="
             t('page.banlist.banlist.listItem.asn.subnet') +
-            item.banMetadata.geo?.as?.network?.ipAddress +
+            item.ipGeoData?.as?.network?.ipAddress +
             '/' +
-            item.banMetadata.geo?.as?.network?.prefixLength
+            item.ipGeoData?.as?.network?.prefixLength
           "
         >
           <a-link
-            :href="`https://2ip.io/analytics/asn-list/?asnId=${item.banMetadata.geo?.as?.number}`"
+            :href="`https://2ip.io/analytics/asn-list/?asnId=${item.ipGeoData?.as?.number}`"
             :hoverable="false"
           >
             <icon-info-circle />
@@ -125,18 +125,18 @@
       {{ item.banMetadata.reverseLookup }}
     </a-descriptions-item>
     <a-descriptions-item
-      v-if="item.banMetadata.geo?.network?.isp"
+      v-if="item.ipGeoData?.network?.isp"
       :label="t('page.banlist.banlist.listItem.network.isp')"
       :span="6"
     >
-      {{ item.banMetadata.geo?.network?.isp }}
+      {{ item.ipGeoData?.network?.isp }}
     </a-descriptions-item>
     <a-descriptions-item
-      v-if="item.banMetadata.geo?.network?.netType"
+      v-if="item.ipGeoData?.network?.netType"
       :label="t('page.banlist.banlist.listItem.network.netType')"
       :span="6"
     >
-      {{ item.banMetadata.geo?.network?.netType }}
+      {{ item.ipGeoData?.network?.netType }}
     </a-descriptions-item>
     <a-descriptions-item :label="t('page.banlist.banlist.listItem.location')" :span="12">
       <!-- 这里非常离奇，只要用了a-typography-text就会被下面一行覆盖，怀疑框架有毛病 -->

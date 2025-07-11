@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class HostResponse extends DelugeResponse {
-    private final List<Host> m_hosts = new ArrayList<Host>();
+    private final List<Host> m_hosts = new ArrayList<>();
 
     public HostResponse(final Integer httpResponseCode, final JSONObject response, final boolean singleResult) throws DelugeException {
         super(httpResponseCode, response);

@@ -1,12 +1,8 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
-import io.javalin.http.ContentType;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -17,7 +13,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Component
-@IgnoreScan
 public final class PBHEasterEggController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final List<String> urls = new ArrayList<>();
@@ -66,24 +61,7 @@ public final class PBHEasterEggController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         javalinWebContainer.javalin()
-                .get("/api/egg", this::handleEgg)
-                .get("/api/egg/neuro", this::neuro) // AI VTuber made by Vedal on Twitch: https://www.twitch.tv/vedal987
-                .get("/api/egg/neurosama", this::neuro);
-    }
-
-
-    private void neuro(Context context) {
-        // Yeeeeet, Neuro!
-        var imageStream = Main.class.getResourceAsStream("/assets/other/Neuro.png");
-        if (imageStream == null) {
-            context.status(HttpStatus.NOT_FOUND);
-            context.result("You killed Neuro! How dare you!?");
-            return;
-        }
-        context
-                .status(HttpStatus.ENHANCE_YOUR_CALM)
-                .contentType(ContentType.IMAGE_PNG)
-                .result(imageStream);
+                .get("/api/egg", this::handleEgg);
     }
 
     private void handleEgg(Context context) {

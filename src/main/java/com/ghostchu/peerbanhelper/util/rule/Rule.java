@@ -9,6 +9,7 @@ import java.util.Map;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
+
 public interface Rule {
     @NotNull
     MatchResult match(@NotNull String content);

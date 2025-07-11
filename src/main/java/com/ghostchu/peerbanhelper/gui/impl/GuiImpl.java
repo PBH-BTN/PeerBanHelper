@@ -1,10 +1,10 @@
 package com.ghostchu.peerbanhelper.gui.impl;
 
-import com.ghostchu.peerbanhelper.PeerBanHelperServer;
+import com.ghostchu.peerbanhelper.PeerBanHelper;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
 import com.ghostchu.peerbanhelper.gui.TaskbarControl;
-
-import java.util.logging.Level;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.event.Level;
 
 public interface GuiImpl {
     void setup();
@@ -15,7 +15,7 @@ public interface GuiImpl {
 
     void close();
 
-    default void onPBHFullyStarted(PeerBanHelperServer server) {
+    default void onPBHFullyStarted(PeerBanHelper server) {
     }
 
     void createNotification(Level level, String title, String description);
@@ -32,5 +32,7 @@ public interface GuiImpl {
 
     boolean supportInteractive();
 
-    void createYesNoDialog(Level level, String title, String description, Runnable yesEvent, Runnable noEvent);
+    void createYesNoDialog(Level level, String title, String description, @Nullable Runnable yesEvent, @Nullable Runnable noEvent);
+
+    void openUrlInBrowser(String url);
 }

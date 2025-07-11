@@ -2,5 +2,6 @@ package com.ghostchu.peerbanhelper.downloader;
 
 public enum DownloaderFeatureFlag {
     READ_PEER_PROTOCOLS,
-    UNBAN_IP
+    UNBAN_IP,
+    TRAFFIC_STATS
 }

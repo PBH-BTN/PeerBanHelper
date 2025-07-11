@@ -6,7 +6,8 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
+import com.ghostchu.peerbanhelper.util.WebUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.web.exception.IPAddressBannedException;
 import com.ghostchu.peerbanhelper.web.exception.NeedInitException;
@@ -15,6 +16,7 @@ import com.ghostchu.peerbanhelper.web.exception.RequirePBHPlusLicenseException;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import inet.ipaddr.IPAddress;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -26,6 +28,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -35,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
@@ -43,9 +47,10 @@ public final class JavalinWebContainer {
     @Setter
     @Getter
     private String token;
-    private final Cache<String, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
+    private final Cache<IPAddress, AtomicInteger> FAIL2BAN = CacheBuilder.newBuilder()
             .expireAfterWrite(ExternalSwitch.parseInt("pbh.web.fail2ban.timeout", 900000), TimeUnit.MILLISECONDS)
             .build();
+    private final Cache<IPAddress, Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
 
     public JavalinWebContainer(ActivationManager activationManager) {
@@ -76,7 +81,6 @@ public final class JavalinWebContainer {
                             staticFiles.directory = new File(Main.getDataDirectory(), "static").getPath();
                             staticFiles.location = Location.EXTERNAL;
                             staticFiles.precompress = false;
-                            staticFiles.aliasCheck = null;
                             staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                             //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
@@ -87,13 +91,11 @@ public final class JavalinWebContainer {
                             staticFiles.directory = "/static";
                             staticFiles.location = Location.CLASSPATH;
                             staticFiles.precompress = false;
-                            staticFiles.aliasCheck = null;
                             staticFiles.skipFileFunction = req -> req.getRequestURI().endsWith("index.html");
                             //staticFiles.headers.put("Cache-Control", "no-cache");
                         });
                         c.spaRoot.addFile("/", "/static/index.html", Location.CLASSPATH);
                     }
-
                 })
                 .exception(IPAddressBannedException.class, (e, ctx) -> {
                     ctx.status(HttpStatus.TOO_MANY_REQUESTS);
@@ -149,18 +151,20 @@ public final class JavalinWebContainer {
                         return;
                     }
                     // 开始登陆验证
-                    if (!allowAttemptLogin(CommonUtil.userIp(ctx))) {
+                    if (!allowAttemptLogin(WebUtil.userIp(ctx), ctx.userAgent())) {
                         throw new IPAddressBannedException();
                     }
                     TokenAuthResult tokenAuthResult = isContextAuthorized(ctx);
                     if (tokenAuthResult == TokenAuthResult.SUCCESS) {
-                        markLoginSuccess(CommonUtil.userIp(ctx));
+                        markLoginSuccess(WebUtil.userIp(ctx), ctx.userAgent());
                         return;
                     }
                     if (tokenAuthResult == TokenAuthResult.FAILED) {
-                        markLoginFailed(CommonUtil.userIp(ctx));
+                        markLoginFailed(WebUtil.userIp(ctx), ctx.userAgent());
                     }
-                    throw new NotLoggedInException();
+                    if (ExternalSwitch.parseBoolean("pbh.web.requireLogin", true)) {
+                        throw new NotLoggedInException();
+                    }
                 })
                 .options("/*", ctx -> ctx.status(200));
         //.get("/robots.txt", ctx -> ctx.result("User-agent: *\nDisallow: /"));
@@ -241,24 +245,50 @@ public final class JavalinWebContainer {
     }
 
     @SneakyThrows
-    public boolean allowAttemptLogin(String ip) {
-        var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
-        return counter.get() <= 10;
+    public boolean allowAttemptLogin(String ip, String userAgent) {
+        var counter = FAIL2BAN.get(getPrefixedIPAddr(ip), () -> new AtomicInteger(0));
+        boolean allowed = counter.get() <= 10;
+        if (!allowed) {
+            log.warn(tlUI(Lang.WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN, ip, userAgent));
+        }
+        return allowed;
     }
 
     @SneakyThrows
-    public void markLoginFailed(String ip) {
-        var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
+    public synchronized void markLoginFailed(String ip, String userAgent) {
+        var counter = FAIL2BAN.get(getPrefixedIPAddr(ip), () -> new AtomicInteger(0));
         counter.incrementAndGet();
+        log.warn(tlUI(Lang.WEBUI_SECURITY_LOGIN_FAILED, ip, userAgent));
+    }
+
+    private IPAddress getPrefixedIPAddr(String ip) {
+        var ipAddr = IPAddressUtil.getIPAddress(ip);
+        if (ipAddr.isIPv4Convertible()) {
+            ipAddr = ipAddr.toIPv4();
+        }
+        if (ipAddr.isIPv4()) {
+            ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 24);
+        } else {
+            ipAddr = IPAddressUtil.toPrefixBlock(ipAddr, 60);
+        }
+        return ipAddr;
     }
 
     @SneakyThrows
-    public void markLoginSuccess(String ip) {
-        var counter = FAIL2BAN.get(ip, () -> new AtomicInteger(0));
+    public synchronized void markLoginSuccess(String ip, String userAgent) {
+        var ipBlock = getPrefixedIPAddr(ip);
+        var counter = FAIL2BAN.get(ipBlock, () -> new AtomicInteger(0));
         counter.set(0);
+        if (LOGIN_SESSION_TIMETABLE.getIfPresent(ipBlock) == null) {
+            LOGIN_SESSION_TIMETABLE.put(ipBlock, System.currentTimeMillis());
+            log.info(tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS, ip, userAgent));
+            Main.getGuiManager().createNotification(Level.INFO,
+                    tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE),
+                    tlUI(Lang.WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION, ip, userAgent));
+        }
     }
 
-    private Cache<String, AtomicInteger> fail2Ban() {
+    private Cache<IPAddress, AtomicInteger> fail2Ban() {
         return FAIL2BAN;
     }
 

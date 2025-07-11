@@ -8,6 +8,7 @@ export default {
   'plus.type': 'Type',
   'plus.type.local': 'Local',
   'plus.type.afdian': 'Aifadian',
+  'plus.type.mbd': 'MianBaoDuo',
   'plus.licenseTo': 'License to',
   'plus.startAt': 'Issued on',
   'plus.expireAt': 'Expire on',

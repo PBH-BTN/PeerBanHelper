@@ -1,5 +1,13 @@
 <template>
   <a-form-item
+    field="config.name"
+    :label="t('page.dashboard.editModal.label.name')"
+    required
+    :rules="[{ match: /^[^.\t\n/]+$/ }]"
+  >
+    <a-input v-model="config.name" allow-clear />
+  </a-form-item>
+  <a-form-item
     field="config.endpoint"
     :label="t('page.dashboard.editModal.label.endpoint')"
     validate-trigger="blur"

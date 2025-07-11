@@ -2,22 +2,21 @@ package com.ghostchu.peerbanhelper.module.impl.rule;
 
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.database.dao.impl.ScriptStorageDao;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.module.AbstractRuleFeatureModule;
 import com.ghostchu.peerbanhelper.module.CheckResult;
 import com.ghostchu.peerbanhelper.module.PeerAction;
-import com.ghostchu.peerbanhelper.peer.Peer;
-import com.ghostchu.peerbanhelper.scriptengine.CompiledScript;
-import com.ghostchu.peerbanhelper.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.torrent.Torrent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
-import com.ghostchu.peerbanhelper.util.MiscUtil;
 import com.ghostchu.peerbanhelper.util.SharedObject;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
-import com.ghostchu.peerbanhelper.util.paging.Page;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.WebUtil;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
+import com.ghostchu.peerbanhelper.util.scriptengine.CompiledScript;
+import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -42,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,7 +52,6 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-@IgnoreScan
 public final class ExpressionRule extends AbstractRuleFeatureModule implements Reloadable {
     private final static String VERSION = "2";
     private final long maxScriptExecuteTime = 1500;
@@ -61,6 +60,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
     private final List<CompiledScript> scripts = Collections.synchronizedList(new ArrayList<>());
     private final ScriptStorageDao scriptStorageDao;
     private long banDuration;
+    private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
     public ExpressionRule(JavalinWebContainer javalinWebContainer, ScriptEngine scriptEngine, ScriptStorageDao scriptStorageDao) {
         super();
@@ -175,7 +175,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         if(ip == null){
             throw new IllegalArgumentException("Safe check for IPAddress failed, the IP cannot be null");
         }
-        return (ip.isLocal() || ip.isLoopback()) && !MiscUtil.isUsingReserveProxy(context);
+        return (ip.isLocal() || ip.isLoopback()) && !WebUtil.isUsingReserveProxy(context);
     }
 
     private boolean insideDirectory(File allowRange, File targetFile) {
@@ -224,28 +224,27 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
 
     @SneakyThrows
     @Override
-    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public @NotNull CheckResult shouldBanPeer(@NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         AtomicReference<CheckResult> checkResult = new AtomicReference<>(pass());
-        try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
-            for (var compiledScript : scripts) {
-                exec.submit(() -> {
-                    CheckResult expressionRun = runExpression(compiledScript, torrent, peer, downloader, ruleExecuteExecutor);
-                    if (expressionRun.action() == PeerAction.SKIP) {
-                        checkResult.set(expressionRun); // 提前退出
-                        return;
-                    }
-                    if (expressionRun.action() == PeerAction.BAN) {
-                        if (checkResult.get().action() != PeerAction.SKIP) {
-                            checkResult.set(expressionRun);
-                        }
-                    }
-                });
+
+        for (CompletableFuture<Void> future : scripts.stream().map(compiledScript -> CompletableFuture.runAsync(() -> {
+            CheckResult expressionRun = runExpression(compiledScript, torrent, peer, downloader);
+            if (expressionRun.action() == PeerAction.SKIP) {
+                checkResult.set(expressionRun); // 提前退出
+                return;
             }
+            if (expressionRun.action() == PeerAction.BAN) {
+                if (checkResult.get().action() != PeerAction.SKIP) {
+                    checkResult.set(expressionRun);
+                }
+            }
+        }, parallelService)).toList()) {
+            future.join();
         }
         return checkResult.get();
     }
 
-    public CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader, @NotNull ExecutorService ruleExecuteExecutor) {
+    public CheckResult runExpression(CompiledScript script, @NotNull Torrent torrent, @NotNull Peer peer, @NotNull Downloader downloader) {
         return getCache().readCacheButWritePassOnly(this, script.expression().hashCode() + peer.getCacheKey(), () -> {
             CheckResult result;
             try {
@@ -299,7 +298,7 @@ public final class ExpressionRule extends AbstractRuleFeatureModule implements R
         initScripts();
         log.info(tlUI(Lang.RULE_ENGINE_COMPILING));
         long start = System.currentTimeMillis();
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (var executor = Executors.newWorkStealingPool()) {
             File scriptDir = new File(Main.getDataDirectory(), "scripts");
             File[] scripts = scriptDir.listFiles();
             if (scripts != null) {

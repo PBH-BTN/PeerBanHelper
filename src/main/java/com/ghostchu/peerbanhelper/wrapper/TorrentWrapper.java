@@ -1,6 +1,6 @@
 package com.ghostchu.peerbanhelper.wrapper;
 
-import com.ghostchu.peerbanhelper.torrent.Torrent;
+import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

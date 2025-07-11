@@ -5,23 +5,12 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.DownloaderLastStatus;
-import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.jcef.JCEFAppFactory;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
-import com.google.common.eventbus.Subscribe;
-import lombok.Cleanup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import me.friwi.jcefmaven.CefInitializationException;
-import me.friwi.jcefmaven.EnumProgress;
-import me.friwi.jcefmaven.UnsupportedPlatformException;
-import org.cef.CefApp;
-import org.cef.CefClient;
-import org.cef.browser.CefBrowser;
-import org.cef.browser.CefMessageRouter;
-import org.cef.handler.CefKeyboardHandlerAdapter;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.event.Level;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -38,7 +27,6 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
-import java.util.logging.Level;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -52,8 +40,6 @@ public final class SwingMainWindow extends JFrame {
     private final WindowMenuBar windowTitleBar;
     @Getter
     private final TrayMenu trayMenu;
-    @Getter
-    private final WebUITab webuiTab;
     private JPanel mainPanel;
     private JTabbedPane tabbedPane;
     private JPanel tabbedPaneLogs;
@@ -87,7 +73,7 @@ public final class SwingMainWindow extends JFrame {
         setIconImage(imageIcon.getImage());
         setVisible(!swingGUI.isSilentStart());
         this.logsTab = new LogsTab(this);
-        this.webuiTab = new WebUITab(this);
+        //this.webuiTab = new WebUITab(this);
     }
 
 
@@ -126,7 +112,7 @@ public final class SwingMainWindow extends JFrame {
     @Override
     public void dispose() {
         Main.getEventBus().unregister(this);
-        this.webuiTab.close();
+        //this.webuiTab.close();
         super.dispose();
     }
 
@@ -212,160 +198,6 @@ public final class SwingMainWindow extends JFrame {
         // TODO: place custom component creation code here
     }
 
-    public static class WebUITab implements AutoCloseable {
-        private final SwingMainWindow parent;
-        private CefApp app;
-        private CefClient client;
-        private CefBrowser browser;
-        private Component awtComponent;
-        private JCEFSwingDevTools devToolsDialog_ = null;
-
-        public WebUITab(SwingMainWindow parent) {
-            this.parent = parent;
-            Main.getEventBus().register(this);
-        }
-
-        @Subscribe
-        public void onPeerBanHelperStarted(PBHServerStartedEvent event) {
-            Thread.startVirtualThread(this::initJCEFEngine);
-        }
-
-        private void initJCEFEngine() {
-            if (ExternalSwitch.parseBoolean("pbh.nojcef", false)
-                    || Arrays.asList(Main.getStartupArgs()).contains("nojcef")
-                    || !new File("enable-jcef.txt").exists()) { // File 是可执行文件同目录下的，这是预期行为 (install4j)
-                return;
-            }
-
-            try {
-                var jcefBuilder = JCEFAppFactory.createBuilder(Main.getDataDirectory(), Main.DEF_LOCALE);
-                @Cleanup
-                var progressDialog = Main.getGuiManager().createProgressDialog(
-                        tlUI(Lang.JCEF_DOWNLOAD_TITLE),
-                        tlUI(Lang.JCEF_DOWNLOAD_DESCRIPTION),
-                        tlUI(Lang.GUI_COMMON_CANCEL),
-                        null, false);
-                jcefBuilder.setProgressHandler((enumProgress, v) -> {
-                    if (enumProgress == EnumProgress.DOWNLOADING) {
-                        progressDialog.show();
-                        progressDialog.setProgressDisplayIndeterminate(false);
-                        progressDialog.updateProgress(v / 100.0f);
-                    }
-                    if (enumProgress == EnumProgress.EXTRACTING) {
-                        progressDialog.setDescription(tlUI(Lang.JCEF_DOWNLOAD_UNZIP_DESCRIPTION));
-                        progressDialog.show();
-                        progressDialog.updateProgress(v);
-                        progressDialog.setProgressDisplayIndeterminate(true);
-                    }
-                });
-                this.app = jcefBuilder.build();
-                this.parent.tabbedPane.addTab(tlUI(Lang.GUI_TABBED_WEBUI), null);
-                this.parent.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowActivated(WindowEvent e) {
-                        checkIfBrowserShouldActive();
-                    }
-
-                    @Override
-                    public void windowDeactivated(WindowEvent e) {
-                        checkIfBrowserShouldActive();
-                    }
-                });
-                checkIfBrowserShouldActive();
-            } catch (IOException e) {
-                log.error("Unable to load WebUI component", e);
-            } catch (UnsupportedPlatformException e) {
-                log.warn(tlUI(Lang.JCEF_BROWSER_UNSUPPORTED_PLATFORM));
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (CefInitializationException e) {
-                log.warn(tlUI(Lang.JCEF_BROWSER_UNSUPPORTED_EXCEPTION));
-            }
-        }
-
-        private void checkIfBrowserShouldActive() {
-            // debug output the event id mapping to the event name
-            SwingUtilities.invokeLater(() -> {
-                if (parent.isDisplayable() && parent.isVisible()) {
-                    activeBrowser(this.parent.tabbedPane.indexOfTab(tlUI(Lang.GUI_TABBED_WEBUI)));
-                } else {
-                    deActiveBrowser(this.parent.tabbedPane.indexOfTab(tlUI(Lang.GUI_TABBED_WEBUI)));
-                }
-            });
-        }
-
-        private void activeBrowser(int tabPos) {
-            if (this.browser == null) {
-                this.client = app.createClient();
-                CefMessageRouter msgRouter = CefMessageRouter.create();
-                client.addMessageRouter(msgRouter);
-                if (ExternalSwitch.parseBoolean("jcef.dev-tools", Main.getMeta().isSnapshotOrBeta() || "LiveDebug".equalsIgnoreCase(ExternalSwitch.parse("pbh.release")))) {
-                    client.addKeyboardHandler(new CefKeyboardHandlerAdapter() {
-                        @Override
-                        public boolean onKeyEvent(CefBrowser browser, CefKeyEvent event) {
-                            if (event.type == CefKeyEvent.EventType.KEYEVENT_KEYUP) {
-                                switch (event.windows_key_code) {
-                                    // F12 开发者工具
-                                    case 123:
-                                        devToolsShow(browser);
-                                        break;
-                                    default:
-                                        return false;
-                                }
-                            }
-                            return true;
-                        }
-                    });
-                }
-                this.browser = client.createBrowser(URI.create("http://127.0.0.1:" + Main.getServer().getWebContainer().javalin().port() + "?token=" + Main.getServer().getWebContainer().getToken()).toString(), false, false);
-                this.awtComponent = this.browser.getUIComponent();
-                this.parent.tabbedPane.setComponentAt(tabPos, this.awtComponent);
-            }
-        }
-
-        private void deActiveBrowser(int tabPos) {
-            this.parent.tabbedPane.setComponentAt(tabPos, new JPanel());
-            if (this.browser != null) {
-                this.browser.close(true);
-                this.browser = null;
-                if (this.client != null) {
-                    this.client.dispose();
-                    this.client = null;
-                }
-            }
-        }
-
-        /**
-         * 开发者工具显示或隐藏
-         * @param cefBrowser 显示开发者工具的浏览器
-         */
-        private void devToolsShow(CefBrowser cefBrowser) {
-            if (cefBrowser.getURL().startsWith("devtools://")) {
-                Thread.startVirtualThread(() -> parent.getSwingGUI().createDialog(Level.WARNING, "Cannot open devtools for a devtools page", "You cannot open PeerBanHelper devtools for a PeerBanHelper devtools page. (WHY YOU DO THAT? ARE YOU CRAZY?)", () -> {
-                }));
-                return;
-            }
-            if (devToolsDialog_ != null) {
-                devToolsDialog_.dispose();
-            }
-            // 因为是开发者工具，不能影响内容页面的显示，所以单独新建一个窗体显示
-            var title = "PeerBanHelper WebUI DevTools (" + app.getVersion().toString() + ")";
-            devToolsDialog_ = new JCEFSwingDevTools(new JFrame(), title, cefBrowser);
-//            devToolsDialog_ = new DevToolsDialog(owner_, "开发者工具", cefBrowser);
-            var maxAllowedWidth = Math.min(1280, Toolkit.getDefaultToolkit().getScreenSize().width);
-            var maxAllowedHeight = Math.min(720, Toolkit.getDefaultToolkit().getScreenSize().height);
-            devToolsDialog_.setSize(maxAllowedWidth, maxAllowedHeight);
-            devToolsDialog_.setVisible(true);
-        }
-
-        @Override
-        public void close() {
-            deActiveBrowser(this.parent.tabbedPane.indexOfTab(tlUI(Lang.GUI_TABBED_WEBUI)));
-            this.app.dispose();
-            CefApp.getInstance().dispose();
-        }
-    }
-
     public static class TrayMenu {
         private final SwingMainWindow parent;
         private boolean persistFlagTrayMessageSent;
@@ -428,8 +260,8 @@ public final class SwingMainWindow extends JFrame {
             var totalDownloaders = 0L;
             var healthDownloaders = 0L;
             if (Main.getServer() != null) {
-                totalDownloaders = Main.getServer().getDownloaders().size();
-                healthDownloaders = Main.getServer().getDownloaders().stream().filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
+                totalDownloaders = Main.getServer().getDownloaderManager().getDownloaders().size();
+                healthDownloaders = Main.getServer().getDownloaderManager().getDownloaders().stream().filter(m -> m.getLastStatus() == DownloaderLastStatus.HEALTHY).count();
             }
             return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_DOWNLOADER, healthDownloaders, totalDownloaders), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/connection.svg")));
         }
@@ -439,8 +271,8 @@ public final class SwingMainWindow extends JFrame {
             var bannedIps = 0L;
             var server = Main.getServer();
             if (server != null) {
-                bannedIps = Main.getServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
-                bannedPeers = Main.getServer().getBannedPeers().values().size();
+                bannedIps = Main.getServer().getDownloaderServer().getBannedPeers().values().stream().map(m -> m.getPeer().getAddress().getIp()).distinct().count();
+                bannedPeers = Main.getServer().getDownloaderServer().getBannedPeers().size();
             }
             return new JMenuItem(tlUI(Lang.GUI_MENU_STATS_BANNED, bannedPeers, bannedIps), new FlatSVGIcon(Main.class.getResource("/assets/icon/tray/banned.svg")));
         }
@@ -499,44 +331,9 @@ public final class SwingMainWindow extends JFrame {
 
         private Component generateDebugMenu() {
             JMenu menu = new JMenu("-DEBUG-");
-            JMenuItem disableJCEF = new JMenuItem("禁用 JCEF", new FlatSVGIcon(Main.class.getResource("/assets/icon/common/uac_shield.svg")));
-            JMenuItem enableJCEF = new JMenuItem("启用 JCEF", new FlatSVGIcon(Main.class.getResource("/assets/icon/common/uac_shield.svg")));
             JMenuItem disableCheckUpdates = new JMenuItem("禁用检查更新", new FlatSVGIcon(Main.class.getResource("/assets/icon/common/uac_shield.svg")));
             JMenuItem enableCheckUpdates = new JMenuItem("启用检查更新", new FlatSVGIcon(Main.class.getResource("/assets/icon/common/uac_shield.svg")));
-            var jcefFlagFile = new File("enable-jcef.txt");
             var disableCheckUpdatesFile = new File("disable-checking-updates.txt");
-            enableJCEF.addActionListener(e -> {
-                try {
-                    if (jcefFlagFile.exists()) {
-                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已处于启用状态，无需再次启用.", () -> {
-                        });
-                    } else {
-                        jcefFlagFile.createNewFile();
-                        Main.getGuiManager().createDialog(Level.INFO, "启用 JCEF", "JCEF 已启用，请重启 PeerBanHelper 以使其生效.", () -> {
-                        });
-                    }
-                } catch (IOException ex) {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "启用 JCEF", "无法启用 JCEF （写入启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
-                    });
-                    log.error("启用 JCEF 失败", ex);
-                }
-            });
-            disableJCEF.addActionListener(e -> {
-                try {
-                    if (jcefFlagFile.exists()) {
-                        jcefFlagFile.delete();
-                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已禁用，可关闭 PeerBanHelper 后删除 `jcef` 以释放磁盘空间.", () -> {
-                        });
-                    } else {
-                        Main.getGuiManager().createDialog(Level.INFO, "禁用 JCEF", "JCEF 已处于禁用状态，无需再次禁用。", () -> {
-                        });
-                    }
-                } catch (Exception ex) {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用 JCEF", "无法禁用 JCEF（删除启用 JCEF 标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
-                    });
-                    log.error("无法禁用 JCEF", ex);
-                }
-            });
             enableCheckUpdates.addActionListener(e -> {
                 if (!disableCheckUpdatesFile.exists()) {
                     Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已处于启用状态，无需再次启用", () -> {
@@ -547,7 +344,7 @@ public final class SwingMainWindow extends JFrame {
                     Main.getGuiManager().createDialog(Level.INFO, "启用检查更新（测试版）", "更新检查已启用，请重启 PeerBanHelper 以使其生效.", () -> {
                     });
                 } else {
-                    Main.getGuiManager().createDialog(Level.SEVERE, "启用检查更新（测试版）", "无法启用更新检查（删除禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    Main.getGuiManager().createDialog(Level.ERROR, "启用检查更新（测试版）", "无法启用更新检查（删除禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
                     });
                 }
             });
@@ -562,18 +359,15 @@ public final class SwingMainWindow extends JFrame {
                         Main.getGuiManager().createDialog(Level.INFO, "禁用检查更新（测试版）", "更新检查已禁用，但已计划的更新仍会在下次启动时安装。", () -> {
                         });
                     } else {
-                        Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                        Main.getGuiManager().createDialog(Level.ERROR, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
                         });
                     }
                 } catch (IOException ex) {
                     log.error("禁用检查更新失败", ex);
-                    Main.getGuiManager().createDialog(Level.SEVERE, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
+                    Main.getGuiManager().createDialog(Level.ERROR, "禁用检查更新（测试版）", "无法禁用更新检查（创建禁用检查更新标志失败），遇到了 IO 错误，请以管理员身份运行 PeerBanHelper 然后再试一次。", () -> {
                     });
                 }
             });
-            menu.add(disableJCEF);
-            menu.add(enableJCEF);
-            menu.addSeparator();
             menu.add(disableCheckUpdates);
             menu.add(enableCheckUpdates);
             return menu;
@@ -589,16 +383,6 @@ public final class SwingMainWindow extends JFrame {
                     log.warn("Unable to open data directory {} in desktop env.", Main.getDataDirectory().getPath());
                 }
             });
-//            JMenuItem switchToSWT = new JMenuItem(tlUI(Lang.GUI_PROGRAM_SWITCH_TO_SWT));
-//            switchToSWT.addActionListener(e -> {
-//                Main.getMainConfig().set("gui", "swt");
-//                try {
-//                    Main.getMainConfig().save(Main.getMainConfigFile());
-//                    System.exit(0);
-//                } catch (IOException ex) {
-//                    log.error("Unable to switch to SWT", ex);
-//                }
-//            });
             if (!ExternalSwitch.parseBoolean("pbh.app-v")) {
                 menu.add(openDataDirectory);
             }
@@ -612,9 +396,7 @@ public final class SwingMainWindow extends JFrame {
         private JMenu generateWebUIMenu() {
             JMenu webUIMenu = new JMenu(tlUI(Lang.GUI_MENU_WEBUI));
             JMenuItem openWebUIMenuItem = new JMenuItem(tlUI(Lang.GUI_MENU_WEBUI_OPEN));
-            openWebUIMenuItem.addActionListener(e -> {
-                parent.openWebUI();
-            });
+            openWebUIMenuItem.addActionListener(e -> parent.openWebUI());
             webUIMenu.add(openWebUIMenuItem);
             JMenuItem copyWebUIToken = new JMenuItem(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
             copyWebUIToken.addActionListener(e -> {
@@ -628,8 +410,6 @@ public final class SwingMainWindow extends JFrame {
             webUIMenu.add(copyWebUIToken);
             return webUIMenu;
         }
-
-
     }
 
     public static class LogsTab {
@@ -648,6 +428,9 @@ public final class SwingMainWindow extends JFrame {
     }
 
     public static class LogEntryRenderer extends JTextArea implements ListCellRenderer<LogEntry> {
+        private static final Color errorBackground = new Color(255, 204, 187);
+        private static final Color warnBackground = new Color(255, 238, 204);
+
         public LogEntryRenderer() {
             setLineWrap(true);       // 启用自动换行
             setWrapStyleWord(true);  // 换行时按单词
@@ -666,11 +449,11 @@ public final class SwingMainWindow extends JFrame {
                 setForeground(list.getForeground());
                 switch (value.level()) {
                     case ERROR -> {
-                        setBackground(new Color(255, 204, 187));
+                        setBackground(errorBackground);
                         setForeground(Color.BLACK);
                     }
                     case WARN -> {
-                        setBackground(new Color(255, 238, 204));
+                        setBackground(warnBackground);
                         setForeground(Color.BLACK);
                     }
                 }

@@ -1,3 +1,4 @@
+**/target/
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -52,3 +53,10 @@ PeerBanHelper.jar
 *.pkg
 install4j/output
 install4j/project.install4j~
+
+*.log
+disable-checking-updates.txt
+enable-jcef.txt
+webui/.eslintcache
+**/static
+debug.log

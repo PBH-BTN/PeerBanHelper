@@ -30,7 +30,8 @@ export interface donateStatus {
 
 export enum LicenseType {
   LicenseLocal = 'local',
-  LicenseAifadian = 'afdian'
+  LicenseAifadian = 'afdian',
+  LicenseMbd = 'mbd'
 }
 export interface KeyData {
   createAt: number

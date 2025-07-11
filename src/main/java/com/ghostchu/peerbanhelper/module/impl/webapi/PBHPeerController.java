@@ -1,22 +1,26 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
-import com.ghostchu.peerbanhelper.database.dao.impl.HistoryDao;
-import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
-import com.ghostchu.peerbanhelper.ipdb.IPDB;
-import com.ghostchu.peerbanhelper.ipdb.IPGeoData;
-import com.ghostchu.peerbanhelper.lab.Experiments;
-import com.ghostchu.peerbanhelper.lab.Laboratory;
+import com.ghostchu.peerbanhelper.database.dao.impl.*;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.rule.ActiveMonitoringModule;
+import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerInfoDTO;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
-import com.ghostchu.peerbanhelper.util.context.IgnoreScan;
 import com.ghostchu.peerbanhelper.util.dns.DNSLookup;
-import com.ghostchu.peerbanhelper.util.paging.Page;
-import com.ghostchu.peerbanhelper.util.paging.Pageable;
+import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
+import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.lab.Experiments;
+import com.ghostchu.peerbanhelper.util.lab.Laboratory;
+import com.ghostchu.peerbanhelper.util.query.Orderable;
+import com.ghostchu.peerbanhelper.util.query.Page;
+import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import com.google.common.net.HostAndPort;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +29,12 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
-@IgnoreScan
 public final class PBHPeerController extends AbstractFeatureModule {
     private final JavalinWebContainer javalinWebContainer;
     private final HistoryDao historyDao;
@@ -38,11 +42,15 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private final ActiveMonitoringModule activeMonitoringModule;
     private final Laboratory laboratory;
     private final DNSLookup dnsLookup;
+    private final DownloaderManagerImpl downloaderManager;
+    private final TorrentDao torrentDao;
+    private final RuleDao ruleDao;
+    private final ModuleDao moduleDao;
 
     public PBHPeerController(JavalinWebContainer javalinWebContainer,
                              HistoryDao historyDao, PeerRecordDao peerRecordDao,
                              ActiveMonitoringModule activeMonitoringModule,
-                             Laboratory laboratory, DNSLookup dnsLookup) {
+                             Laboratory laboratory, DNSLookup dnsLookup, DownloaderManagerImpl downloaderManager, TorrentDao torrentDao, RuleDao ruleDao, ModuleDao moduleDao) {
         super();
         this.javalinWebContainer = javalinWebContainer;
         this.historyDao = historyDao;
@@ -50,6 +58,10 @@ public final class PBHPeerController extends AbstractFeatureModule {
         this.activeMonitoringModule = activeMonitoringModule;
         this.laboratory = laboratory;
         this.dnsLookup = dnsLookup;
+        this.downloaderManager = downloaderManager;
+        this.torrentDao = torrentDao;
+        this.ruleDao = ruleDao;
+        this.moduleDao = moduleDao;
     }
 
     @Override
@@ -79,7 +91,8 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleInfo(Context ctx) throws SQLException {
         // 转换 IP 格式到 PBH 统一内部格式
         activeMonitoringModule.flush();
-        var ipAddress = IPAddressUtil.getIPAddress(ctx.pathParam("ip"));
+        HostAndPort hostAndPort = HostAndPort.fromString(ctx.pathParam("ip"));
+        var ipAddress = IPAddressUtil.getIPAddress(hostAndPort.getHost());
         String ip = ipAddress.toNormalizedString();
         long banCount = historyDao.queryBuilder()
                 .where()
@@ -146,7 +159,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
             }
         } catch (Exception ignored) {
         }
-        var info = new PeerInfo(
+        var info = new PeerInfoDTO(
                 upDownResult != null || banCount > 0 || torrentAccessCount > 0,
                 ip, firstTimeSeenTS, lastTimeSeenTS, banCount, torrentAccessCount, uploadedToPeer, downloadedFromPeer, geoIP, ptrLookup);
         ctx.json(new StdResp(true, null, info));
@@ -156,14 +169,22 @@ public final class PBHPeerController extends AbstractFeatureModule {
     private void handleBanHistory(Context ctx) throws SQLException {
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
-        var builder = historyDao.queryBuilder()
-                .orderBy("banAt", false);
+        var builder = new Orderable(Map.of("banAt", false), ctx)
+                .addMapping("torrent.name", "torrentName")
+                .addMapping("torrent.infoHash", "torrentInfoHash")
+                .addMapping("torrent.size", "torrentSize")
+                .addMapping("module.name", "module")
+                .addMapping("rule.rule", "rule")
+                .apply(historyDao.queryBuilder()  .join(torrentDao.queryBuilder().setAlias("torrent"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                        .join(ruleDao.queryBuilder().setAlias("rule")
+                                        .join(moduleDao.queryBuilder().setAlias("module"), QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND)
+                                , QueryBuilder.JoinType.LEFT, QueryBuilder.JoinWhereOperation.AND));
         var where = builder
                 .where()
                 .eq("ip", new SelectArg(ip));
         builder.setWhere(where);
         var queryResult = historyDao.queryByPaging(builder, pageable);
-        var result = queryResult.getResults().stream().map(r -> new PBHBanController.BanLogResponse(locale(ctx), r)).toList();
+        var result = queryResult.getResults().stream().map(r -> new BanLogDTO(locale(ctx), downloaderManager, r)).toList();
         ctx.json(new StdResp(true, null, new Page<>(pageable, queryResult.getTotal(), result)));
     }
 
@@ -171,8 +192,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
         activeMonitoringModule.flush();
         String ip = IPAddressUtil.getIPAddress(ctx.pathParam("ip")).toNormalizedString();
         Pageable pageable = new Pageable(ctx);
-        var builder = peerRecordDao.queryBuilder()
-                .orderBy("lastTimeSeen", false);
+        var builder = new Orderable(Map.of("lastTimeSeen", false), ctx).apply(peerRecordDao.queryBuilder());
         var where = builder
                 .where()
                 .eq("address", new SelectArg(ip));
@@ -186,17 +206,4 @@ public final class PBHPeerController extends AbstractFeatureModule {
 
     }
 
-    public record PeerInfo(
-            boolean found,
-            String address,
-            long firstTimeSeen,
-            long lastTimeSeen,
-            long banCount,
-            long torrentAccessCount,
-            long uploadedToPeer,
-            long downloadedFromPeer,
-            IPGeoData geo,
-            String ptrLookup
-    ) {
-    }
 }
