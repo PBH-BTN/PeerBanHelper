@@ -56,18 +56,26 @@ PeerBanHelper Credit
 
 贡献者 - Contributors:
     (按字母顺序排序)
+    1476523
     AmeroHan
     Anuskuss
+    AstroProfundis
     BUnipendix
     ccloli
     cddjr
     chisaato
     CreeperAWA
     cxzlw
+    david082321
     DDSRem
+    mahoshojoHCG
     MirrorCY
     Rbqwow
     SaikiCode
+    tbc0309
+    TioaChan
+    WordlessEcho
+
 
 本地化 - Internalization:
     简体中文(zh-CN): PBH-BTN
@@ -393,7 +401,7 @@ AI 工具人 - AI Assistant:
 
 
 [speed:50]
-感谢在爱发电上捐赠支持我们的朋友们
+感谢在面包多和爱发电上捐赠支持我们的朋友们
 以及在世界各个角落用实际行动传承互联网精神的 BTer
 
 

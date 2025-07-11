@@ -1,27 +1,36 @@
 launcher.peerbanhelper.gui=PeerBanHelper
 launcher.peerbanhelper.gui.swt=PeerBanHelper (SWT UI)
-launcher.peerbanhelper.silent=PeerBanHelper (静默启动)
-launcher.peerbanhelper.nogui=PeerBanHelper (无GUI, 控制台)
-launcher.peerbanhelper.nogui.lowram=PeerBanHelper (无GUI, 控制台, 小内存模式(使用更多CPU和磁盘IO))
-launcher.peerbanhelper.service=PeerBanHelper (服务)
-launcher.peerbanhelper.updater=PeerBanHelper 检查更新
-checkbox.followsystemstartup=登录时自动启动到系统托盘
-peerbanhelper.description=PeerBanHelper
-checkbox.registersystemservice=输入服务注册代码并将其注册为系统服务
-checkbox.registersystemservice.help=<html>[高级用户功能]注册为系统服务将会带来许多副作用，只有在查阅文档或请求技术支持之后，才能获得服务注册代码，并以系统服务方式安装PeerBanHelper。<br>如果您对当前所在平台的系统服务运行方式并不了解，请不要勾选该复选框，并以常规方式安装。</html>
-checkbox.registersystemservice.error=服务注册代码不正确，请取消勾选 “注册为系统服务” 复选框
-systemservice.note=将 PeerBanHelper 安装为系统服务时，Windows 系统下配置文件将被存储在 C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper 位置，访问此位置需要您拥有管理员权限。\nPeerBanHelper 将在系统启动时自动启动。
-components.peerbanhelper=PeerBanHelper
-components.peerbanhelper.description=PeerBanHelper 的核心主程序，包含了主程序代码和必要的运行文件
-components.jcef=[可选] JCEF
-components.jcef.description=可选的 JCEF (Java 嵌入式 Chromium 框架)，用以支持 PeerBanHelper GUI 模式下的 WebUI 控制台标签页功能，禁用后将隐藏 WebUI 控制台标签页，用户将需要通过系统浏览器访问 WebUI。（勾选后将在 PeerBanHelper 启动时下载）
-components.disable-checking-updates=[可选] 禁用自动更新
-components.disable-checking-updates.description=禁用 install4j 的 PeerBanHelper 更新检查和自动升级程序。禁用后在新版本发布时您需要手动下载安装包执行更新操作。PBH-BTN 仅提供最近 3 个版本的 PeerBanHelper 技术支持和 API 服务。过期的 PeerBanHelper 版本可能无法访问 API、BTN 网络或者是订阅的规则（特别是规则格式发生变动时）。
-components.qt6=[可选] Qt6
-components.qt6.description=Qt6 UI 框架，允许您在 Windows x64 平台上使用 Qt6 作为 UI 替代，以解决 Swing/SWT 中的崩溃问题
+launcher.peerbanhelper.silent=PeerBanHelper (Silent Launch)
+launcher.peerbanhelper.nogui=PeerBanHelper (No GUI, Console)
+launcher.peerbanhelper.nogui.lowram=PeerBanHelper (No GUI, Console, Low RAM Mode (Uses More CPU & Disk IO))
+launcher.peerbanhelper.service=PeerBanHelper (Service)
+launcher.peerbanhelper.updater=PeerBanHelper Update Check
 
-runatlogin.label=开机自动启动
-runatlogin.option.no=不启动
-runatlogin.option.yes=显式窗口启动
-runatlogin.option.silent=静默启动到系统托盘
-installing.edgewebview2=正在安装 Microsoft Edge WebView 2...
+checkbox.followsystemstartup=Launch automatically to system tray on login
+peerbanhelper.description=PeerBanHelper
+
+checkbox.registersystemservice=Enter service registration code and install as a system service
+checkbox.registersystemservice.help=<html>[Advanced User Feature] Registering as a system service may have many side effects. Only after consulting the documentation or requesting technical support can you obtain the service registration code and install PeerBanHelper as a system service.
+If you are unfamiliar with how system services operate on your current platform, do not check this box and install in the conventional way.</html>
+checkbox.registersystemservice.error=Invalid service registration code. Please uncheck the "Register as a system service" option.
+
+systemservice.note=When installing PeerBanHelper as a system service on Windows, the configuration files will be stored in C:\Windows\System32\config\systemprofile\AppData\Local\PeerBanHelper. Accessing this location requires administrator privileges.\nPeerBanHelper will launch automatically at system startup.
+
+components.peerbanhelper=PeerBanHelper
+components.peerbanhelper.description=The core program of PeerBanHelper, including the main code and essential runtime files
+
+components.jcef=[Optional] JCEF
+components.jcef.description=Optional JCEF (Java Chromium Embedded Framework), used to support the WebUI console tab in PeerBanHelper GUI mode. Disabling this will hide the WebUI console tab, requiring users to access WebUI via a system browser. (Will be downloaded upon PeerBanHelper launch if selected)
+
+components.disable-checking-updates=[Optional] Disable automatic updates
+components.disable-checking-updates.description=Disables install4j's PeerBanHelper update checks and auto-upgrade program. Once disabled, you will need to manually download and install updates when new versions are released. PBH-BTN only provides technical support and API services for the latest 3 versions of PeerBanHelper. Outdated versions may lose access to APIs, BTN networks, or subscribed rules (especially when rule formats change).
+
+components.qt6=[Optional] Qt6
+components.qt6.description=The Qt6 UI framework, allowing you to use Qt6 as an alternative UI on Windows x64 platforms to resolve crashes in Swing/SWT.
+
+runatlogin.label=Launch at system startup
+runatlogin.option.no=Do not launch
+runatlogin.option.yes=Launch with visible window
+runatlogin.option.silent=Launch silently to system tray
+
+installing.edgewebview2=Installing Microsoft Edge WebView2...

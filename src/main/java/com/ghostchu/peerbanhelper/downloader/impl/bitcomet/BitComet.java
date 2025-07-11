@@ -78,6 +78,7 @@ public final class BitComet extends AbstractDownloader {
                 .defaultHeader("Client-Type", "BitComet WebUI")
                 .defaultHeader("User-Agent", "PeerBanHelper BitComet Adapter")
                 .followRedirects(HttpClient.Redirect.ALWAYS)
+                .connectTimeout(Duration.of(10,ChronoUnit.SECONDS))
                 .requestTimeout(Duration.of(30, ChronoUnit.SECONDS));
         if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
             builder.sslContext(HTTPUtil.getIgnoreSslContext());
@@ -299,7 +300,7 @@ public final class BitComet extends AbstractDownloader {
         }
         var response = JsonUtil.standard().fromJson(request.body(), BCTaskListResponse.class);
 
-        Semaphore semaphore = new Semaphore(4);
+        Semaphore semaphore = new Semaphore(3);
         List<BCTaskTorrentResponse> torrentResponses = CompletableFutures.allAsList(response.getTasks().stream()
                 .filter(t -> t.getType().equals("BT"))
                 .map(torrent-> CompletableFuture.supplyAsync(()->{
