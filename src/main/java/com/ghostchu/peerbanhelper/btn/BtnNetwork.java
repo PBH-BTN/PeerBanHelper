@@ -81,8 +81,10 @@ public final class BtnNetwork implements Reloadable {
         this.historyDao = historyDao;
         this.peerRecordDao = peerRecordDao;
         this.trackedSwarmDao = trackedSwarmDao;
-        Main.getReloadManager().register(this);
-        reloadConfig();
+        new Thread(() -> {
+            Main.getReloadManager().register(this);
+            reloadConfig();
+        }).start();
     }
 
     @Override
