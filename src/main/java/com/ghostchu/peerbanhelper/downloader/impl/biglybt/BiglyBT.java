@@ -103,7 +103,7 @@ public final class BiglyBT extends AbstractDownloader {
 
     @Override
     public List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP);
+        return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
     }
 
     @Override
@@ -378,6 +378,7 @@ public final class BiglyBT extends AbstractDownloader {
             throw new IllegalStateException(e);
         }
     }
+
 
     @Override
     public void close() {
