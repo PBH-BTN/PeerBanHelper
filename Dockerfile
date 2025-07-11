@@ -1,4 +1,5 @@
 FROM --platform=$BUILDPLATFORM node:current-alpine as build_web
+ARG GIT_HASH
 COPY webui /webui
 WORKDIR /webui
 RUN corepack enable pnpm && CI=1 pnpm i && pnpm run build
