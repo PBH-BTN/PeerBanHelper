@@ -30,8 +30,8 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
     __APP_HASH__: JSON.stringify(
-      (await exec('git rev-parse HEAD').catch(() => null))?.stdout.toString() ??
-        process.env.GIT_HASH
+      process.env.GIT_HASH ??
+        (await exec('git rev-parse HEAD').catch(() => null))?.stdout.toString()
     )
   },
   resolve: {
