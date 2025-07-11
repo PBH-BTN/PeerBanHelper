@@ -204,7 +204,7 @@ public final class PBHPeerController extends AbstractFeatureModule {
             result.setDownloader(downloaderManager.getDownloadInfo(result.getDownloader()).name());
         }
         page.setResults(results);
-        ctx.json(new StdResp(true, null, page);
+        ctx.json(new StdResp(true, null, page));
     }
 
 
