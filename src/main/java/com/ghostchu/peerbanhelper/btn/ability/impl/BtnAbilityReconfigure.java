@@ -4,12 +4,11 @@ import com.ghostchu.peerbanhelper.btn.BtnNetwork;
 import com.ghostchu.peerbanhelper.btn.ability.AbstractBtnAbility;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
-
-import java.net.http.HttpResponse;
+import okhttp3.Request;
+import okhttp3.Response;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -53,24 +52,36 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
     }
 
     private void checkIfReconfigure() {
-        HttpResponse<String> resp =  btnNetwork.getHttpUtil().retryableSend(btnNetwork.getHttpClient(), MutableRequest.GET(btnNetwork.getConfigUrl()), HttpResponse.BodyHandlers.ofString()).join();
-        if (resp.statusCode() != 200) {
-            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body()));
-            log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, resp.statusCode() + " - " + resp.body()));
-            return;
-        }
-        JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
-        JsonObject ability = json.get("ability").getAsJsonObject();
-        if (!ability.has("reconfigure")) {
-            setLastStatus(true, new TranslationComponent(Lang.BTN_RECONFIGURE_DISABLED_BY_SERVER));
-            return;
-        }
-        JsonObject reconfigure = ability.get("reconfigure").getAsJsonObject();
-        if (!reconfigure.get("version").getAsString().equals(this.version)) {
-            log.info(tlUI(Lang.BTN_RECONFIGURING));
-            setLastStatus(true, new TranslationComponent(Lang.BTN_RECONFIGURE_PREPARE_RECONFIGURE));
-            btnNetwork.configBtnNetwork();
-            setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
+        Request request = new Request.Builder()
+                .url(btnNetwork.getConfigUrl())
+                .get()
+                .build();
+                
+        try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
+            if (response.code() != 200) {
+                String responseBody = response.body() != null ? response.body().string() : "";
+                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
+                log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, response.code() + " - " + responseBody));
+                return;
+            }
+            
+            String responseBody = response.body() != null ? response.body().string() : "";
+            JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
+            JsonObject ability = json.get("ability").getAsJsonObject();
+            if (!ability.has("reconfigure")) {
+                setLastStatus(true, new TranslationComponent(Lang.BTN_RECONFIGURE_DISABLED_BY_SERVER));
+                return;
+            }
+            JsonObject reconfigure = ability.get("reconfigure").getAsJsonObject();
+            if (!reconfigure.get("version").getAsString().equals(this.version)) {
+                log.info(tlUI(Lang.BTN_RECONFIGURING));
+                setLastStatus(true, new TranslationComponent(Lang.BTN_RECONFIGURE_PREPARE_RECONFIGURE));
+                btnNetwork.configBtnNetwork();
+                setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
+            }
+        } catch (Exception e) {
+            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, -1, e.getMessage()));
+            log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, e.getMessage()), e);
         }
     }
 

@@ -8,11 +8,16 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okio.BufferedSink;
+import okio.GzipSink;
+import okio.Okio;
 
-import java.net.http.HttpResponse;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,20 +73,27 @@ public final class LegacyBtnAbilitySubmitPeers extends AbstractBtnAbility {
                 return;
             }
             LegacyBtnPeerPing ping = new LegacyBtnPeerPing(System.currentTimeMillis(), btnPeers);
-            MutableRequest request = MutableRequest.POST(endpoint, httpUtil.gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8))).header("Content-Encoding", "gzip");
-            httpUtil.nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString()).thenAccept(r -> {
-                if (r.statusCode() != 200) {
-                    log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                    setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
+            byte[] jsonBytes = JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8);
+            RequestBody body = createGzipRequestBody(jsonBytes);
+            Request request = new Request.Builder()
+                    .url(endpoint)
+                    .post(body)
+                    .header("Content-Encoding", "gzip")
+                    .build();
+                    
+            try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
+                if (response.code() != 200) {
+                    String responseBody = response.body() != null ? response.body().string() : "";
+                    log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
+                    setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
                 } else {
                     log.info(tlUI(Lang.BTN_SUBMITTED_PEERS, btnPeers.size()));
                     setLastStatus(true, new TranslationComponent(Lang.BTN_REPORTED_DATA, btnPeers.size()));
                 }
-            }).exceptionally(e -> {
+            } catch (Exception e) {
                 log.warn(tlUI(Lang.BTN_REQUEST_FAILS), e);
                 setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
-                return null;
-            });
+            }
         } catch (Throwable e) {
             log.error(tlUI(Lang.BTN_SUBMIT_PEERS_FAILED), e);
             setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
@@ -93,6 +105,22 @@ public final class LegacyBtnAbilitySubmitPeers extends AbstractBtnAbility {
         List<LegacyBtnPeer> btnPeers = new ArrayList<>();
         btnNetwork.getServer().getLivePeersSnapshot().forEach((pa, pm) -> pm.forEach(meta -> btnPeers.add(LegacyBtnPeer.from(meta.getTorrent(), meta.getPeer()))));
         return btnPeers;
+    }
+
+    private RequestBody createGzipRequestBody(byte[] data) {
+        return new RequestBody() {
+            @Override
+            public okhttp3.MediaType contentType() {
+                return okhttp3.MediaType.get("application/json");
+            }
+
+            @Override
+            public void writeTo(BufferedSink sink) throws IOException {
+                BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
+                gzipSink.write(data);
+                gzipSink.close();
+            }
+        };
     }
 
     @Override

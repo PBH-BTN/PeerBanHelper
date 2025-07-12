@@ -11,12 +11,17 @@ import com.ghostchu.peerbanhelper.database.table.HistoryEntity;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.j256.ormlite.dao.CloseableWrappedIterable;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okio.BufferedSink;
+import okio.GzipSink;
+import okio.Okio;
 
-import java.net.http.HttpResponse;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -122,15 +127,42 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
 
     private long createSubmitRequest(List<HistoryEntity> historyEntities) throws RuntimeException {
         BtnBanPing ping = new BtnBanPing(historyEntities.stream().map(BtnBan::from).toList());
-        MutableRequest request = MutableRequest.POST(endpoint,  btnNetwork.getHttpUtil().gzipBody(JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8)))
-                .header("Content-Encoding", "gzip");
-        HttpResponse<String> resp =  btnNetwork.getHttpUtil().nonRetryableSend(btnNetwork.getHttpClient(), request, HttpResponse.BodyHandlers.ofString()).join();
-        if (resp.statusCode() < 200 && resp.statusCode() >= 400) {
-            log.error(tlUI(Lang.BTN_REQUEST_FAILS, resp.statusCode() + " - " + resp.body()));
-            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body()));
-            throw new IllegalStateException(tlUI(new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.statusCode(), resp.body())));
-        } else {
-            return historyEntities.getLast().getId();
+        byte[] jsonBytes = JsonUtil.getGson().toJson(ping).getBytes(StandardCharsets.UTF_8);
+        RequestBody body = createGzipRequestBody(jsonBytes);
+        Request request = new Request.Builder()
+                .url(endpoint)
+                .post(body)
+                .header("Content-Encoding", "gzip")
+                .build();
+        try (Response resp = btnNetwork.getHttpClient().newCall(request).execute()) {
+            if (resp.code() < 200 || resp.code() >= 400) {
+                String responseBody = resp.body() != null ? resp.body().string() : "";
+                log.error(tlUI(Lang.BTN_REQUEST_FAILS, resp.code() + " - " + responseBody));
+                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody));
+                throw new IllegalStateException(tlUI(new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody)));
+            } else {
+                return historyEntities.getLast().getId();
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.BTN_REQUEST_FAILS, e.getMessage()), e);
+            setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, -1, e.getMessage()));
+            throw new IllegalStateException(tlUI(new TranslationComponent(Lang.BTN_HTTP_ERROR, -1, e.getMessage())), e);
         }
+    }
+
+    private RequestBody createGzipRequestBody(byte[] data) {
+        return new RequestBody() {
+            @Override
+            public okhttp3.MediaType contentType() {
+                return okhttp3.MediaType.get("application/json");
+            }
+
+            @Override
+            public void writeTo(BufferedSink sink) throws IOException {
+                BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
+                gzipSink.write(data);
+                gzipSink.close();
+            }
+        };
     }
 }

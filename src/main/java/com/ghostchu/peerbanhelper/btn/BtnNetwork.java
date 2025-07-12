@@ -13,24 +13,19 @@ import com.ghostchu.peerbanhelper.database.dao.impl.PeerRecordDao;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.scriptengine.ScriptEngine;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.stereotype.Component;
 
-import java.net.CookieManager;
-import java.net.CookiePolicy;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,25 +38,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
-@Getter
 @Component
 // 特别注意：该类不允许静态初始化任何内容
 public final class BtnNetwork implements Reloadable {
-    @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = Collections.synchronizedMap(new HashMap<>());
 
     private final ScriptEngine scriptEngine;
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
     private TranslationComponent configResult;
     private boolean scriptExecute;
-    @Getter
     private ScheduledExecutorService executeService = null;
     private String configUrl;
     private boolean submit;
     private String appId;
     private String appSecret;
-    @Getter
-    private HttpClient httpClient;
+    private OkHttpClient httpClient;
     private final DownloaderServer server;
     private final PeerRecordDao peerRecordDao;
     private final TrackedSwarmDao trackedSwarmDao;
@@ -129,15 +120,19 @@ public final class BtnNetwork implements Reloadable {
     public synchronized void configBtnNetwork() {
         String response = "<Not Provided>";
         int statusCode = 0;
-        try {
-            HttpResponse<String> resp = httpUtil.retryableSend(httpClient, MutableRequest.GET(configUrl), HttpResponse.BodyHandlers.ofString()).join();
-            if (resp.statusCode() != 200) {
-                log.error(tlUI(Lang.BTN_CONFIG_FAILS, resp.statusCode() + " - " + resp.body(), 600));
-                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, resp.statusCode(), resp.body());
+        Request request = new Request.Builder()
+                .url(configUrl)
+                .get()
+                .build();
+        try (Response resp = httpClient.newCall(request).execute()) {
+            statusCode = resp.code();
+            if (statusCode != 200) {
+                response = resp.body() != null ? resp.body().string() : "";
+                log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600));
+                configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, statusCode, response);
                 return;
             }
-            statusCode = resp.statusCode();
-            response = resp.body();
+            response = resp.body() != null ? resp.body().string() : "";
             JsonObject json = JsonParser.parseString(response).getAsJsonObject();
             if (!json.has("min_protocol_version")) {
                 throw new IllegalStateException(tlUI(Lang.MISSING_VERSION_PROTOCOL_FIELD));
@@ -194,7 +189,7 @@ public final class BtnNetwork implements Reloadable {
             configSuccess.set(true);
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_SUCCESSFUL);
         } catch (Throwable e) {
-            log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600), e);
+            log.error(tlUI(Lang.BTN_CONFIG_FAILS, e.getMessage()), e);
             configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_EXCEPTION, e.getClass().getName(), e.getMessage());
             configSuccess.set(false);
         }
@@ -216,24 +211,25 @@ public final class BtnNetwork implements Reloadable {
     }
 
     private void setupHttpClient() {
-        CookieManager cm = new CookieManager();
-        cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        this.httpClient = Methanol
-                .newBuilder()
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(Main.getUserAgent())
-                .defaultHeader("Content-Type", "application/json")
-                .defaultHeader("BTN-AppID", appId)
-                .defaultHeader("BTN-AppSecret", appSecret)
-                .defaultHeader("X-BTN-AppID", appId)
-                .defaultHeader("X-BTN-AppSecret", appSecret)
-                .defaultHeader("Authentication", "Bearer " + appId + "@" + appSecret)
-                .requestTimeout(Duration.ofMinutes(1))
+        this.httpClient = new OkHttpClient.Builder()
+                .followRedirects(true)
+                .cookieJar(new HTTPUtil.PBHCookieJar())
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .header("User-Agent", Main.getUserAgent())
+                            .header("Content-Type", "application/json")
+                            .header("BTN-AppID", appId)
+                            .header("BTN-AppSecret", appSecret)
+                            .header("X-BTN-AppID", appId)
+                            .header("X-BTN-AppSecret", appSecret)
+                            .header("Authentication", "Bearer " + appId + "@" + appSecret);
+                    return chain.proceed(requestBuilder.build());
+                })
+                .callTimeout(Duration.ofMinutes(1))
                 .connectTimeout(Duration.ofSeconds(10))
-                .headersTimeout(Duration.ofSeconds(15))
-                .readTimeout(Duration.ofSeconds(30), CommonUtil.getScheduler())
-                .cookieHandler(cm).build();
+                .readTimeout(Duration.ofSeconds(30))
+                .build();
     }
 
     public void close() {
