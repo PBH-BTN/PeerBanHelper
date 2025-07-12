@@ -1,12 +1,17 @@
 package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.extras.components.FlatButton;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.alert.AlertLevel;
+import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.AboutWindow;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.event.Level;
@@ -18,6 +23,7 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -39,7 +45,7 @@ public class WindowMenuBar {
     }
 
     private void updateMenuBar() {
-        SwingUtilities.invokeLater(()-> parent.setJMenuBar(setupMenuBar()));
+        SwingUtilities.invokeLater(() -> parent.setJMenuBar(setupMenuBar()));
     }
 
     private JMenuBar setupMenuBar() {
@@ -53,8 +59,54 @@ public class WindowMenuBar {
         }
         //menuBar.add(Box.createGlue());
         menuBar.add(generateHelpAbout());
+        menuBar.add(Box.createGlue());
+        menuBar.add(generateAlertsButton());
         parent.add(menuBar, BorderLayout.NORTH);
         return menuBar;
+    }
+
+    private Component generateAlertsButton() {
+        FlatButton alertButton = new FlatButton();
+        alertButton.setButtonType(FlatButton.ButtonType.toolBarButton);
+        alertButton.setFocusable(false);
+        alertButton.addActionListener(event -> {
+            bridge.getWebUiUrl().ifPresent(uri-> parent.getSwingGUI().openWebpage(uri));
+        });
+        CommonUtil.getScheduler().scheduleAtFixedRate(() -> {
+            if (bridge == null) {
+                alertButton.setEnabled(false);
+                return;
+            }
+            var alerts = bridge.getAlerts();
+            String text = alerts.isEmpty() ? "" : String.valueOf(alerts.size());
+            // found most important level by AlertLevel order
+            AlertLevel highestLevel = alerts.stream()
+                    .map(AlertEntity::getLevel)
+                    .max(AlertLevel::compareTo)
+                    .orElse(null);
+            SwingUtilities.invokeLater(() -> {
+                alertButton.setText(text);
+                if (highestLevel == null || alerts.isEmpty()) {
+                    alertButton.setBackground(new Color(0,0,0,1));
+                    alertButton.setForeground(null);
+                    alertButton.setIcon(new FlatSVGIcon(Main.class.getResource("/assets/icon/common/alert.svg")));
+                    alertButton.setEnabled(false);
+                } else {
+                    alertButton.setEnabled(true);
+                    alertButton.setIcon(new FlatSVGIcon(Main.class.getResource("/assets/icon/common/alert_white.svg")));
+                    var bgColor = switch (highestLevel) {
+                        case INFO -> Color.decode("#0969da");
+                        case WARN -> Color.decode("#bc4c00");
+                        case ERROR, FATAL -> Color.decode("#cf222e");
+                        case TIP -> Color.decode("#1f883d");
+                    };
+                    alertButton.setBackground(bgColor);
+                    alertButton.setForeground(Color.WHITE);
+                }
+            });
+        }, 0L, 1L, TimeUnit.SECONDS);
+        // alertButton.addActionListener( e -> JOptionPane.showMessageDialog( null, "Hello User! How are you?", "User", JOptionPane.INFORMATION_MESSAGE ) );
+        return alertButton;
     }
 
     private Component generateHelpAbout() {
@@ -106,9 +158,10 @@ public class WindowMenuBar {
         webUIMenu.add(openWebUIMenuItem);
         JMenuItem copyWebUIToken = new JMenuItem(tlUI(Lang.GUI_COPY_WEBUI_TOKEN));
         copyWebUIToken.setEnabled(bridge != null && bridge.getWebUiToken().isPresent());
-        copyWebUIToken.addActionListener(e -> bridge.getWebUiToken().ifPresent(content->{
+        copyWebUIToken.addActionListener(e -> bridge.getWebUiToken().ifPresent(content -> {
             SwingMainWindow.copyText(content);
-            parent.getSwingGUI().createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)), ()->{});
+            parent.getSwingGUI().createDialog(Level.INFO, tlUI(Lang.GUI_COPY_TO_CLIPBOARD_TITLE), String.format(tlUI(Lang.GUI_COPY_TO_CLIPBOARD_DESCRIPTION, content)), () -> {
+            });
         }));
         webUIMenu.add(copyWebUIToken);
         return webUIMenu;

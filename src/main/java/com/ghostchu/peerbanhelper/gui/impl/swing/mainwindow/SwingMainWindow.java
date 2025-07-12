@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.LogsTab;
@@ -10,6 +11,7 @@ import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.WindowMenu
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.component.WindowTitle;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
+import com.google.common.eventbus.Subscribe;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -73,6 +75,12 @@ public final class SwingMainWindow extends JFrame {
         //this.webuiTab = new WebUITab(this);
         Main.getEventBus().register(this);
     }
+
+    @Subscribe
+    public void onWebServerStarted(WebServerStartedEvent event) {
+        this.bridge = Main.getApplicationContext().getBean(PBHGuiBridge.class);
+    }
+
 
     public static void setTabTitle(JPanel tab, String title) {
         JTabbedPane tabbedPane = (JTabbedPane) SwingUtilities.getAncestorOfClass(JTabbedPane.class, tab);

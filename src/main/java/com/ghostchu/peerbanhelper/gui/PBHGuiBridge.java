@@ -1,21 +1,23 @@
 package com.ghostchu.peerbanhelper.gui;
 
-import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.alert.AlertManager;
+import com.ghostchu.peerbanhelper.database.table.AlertEntity;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 @Component
 public class PBHGuiBridge {
-    private final PeerBanHelper peerBanHelper;
     private final JavalinWebContainer javalinWebContainer;
+    private final AlertManager alertManager;
 
-    public PBHGuiBridge(PeerBanHelper peerBanHelper, JavalinWebContainer javalinWebContainer) {
+    public PBHGuiBridge(JavalinWebContainer javalinWebContainer, AlertManager alertManager) {
         // Constructor logic if needed
-        this.peerBanHelper = peerBanHelper;
         this.javalinWebContainer = javalinWebContainer;
+        this.alertManager = alertManager;
     }
 
     public Optional<String> getWebUiToken() {
@@ -29,5 +31,9 @@ public class PBHGuiBridge {
             return  Optional.empty();
         }
 
+    }
+
+    public List<AlertEntity> getAlerts() {
+        return alertManager.getUnreadAlerts();
     }
 }
