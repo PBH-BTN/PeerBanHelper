@@ -14,7 +14,7 @@ set "PID=%~1"
 set "DEST_DIR=%LOCALAPPDATA%\PeerBanHelper"
 set "HS_ERR_FILENAME=hs_err_pid%PID%.log"
 set "GUI_EXE_NAME=PeerBanHelper-GUI.exe"
-set "GUI_PARAM=crashRecovery:%PID%"
+set "GUI_PARAM=crashRecovery:%PID% silent"
 
 echo.
 echo ----------------------------------------------------
