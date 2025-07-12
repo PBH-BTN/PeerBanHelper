@@ -12,7 +12,6 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.github.mizosoft.methanol.Methanol;
 import com.google.gson.JsonObject;
 import com.vdurmont.semver4j.Semver;
 import cordelia.client.TrClient;
@@ -44,10 +43,7 @@ public final class Transmission extends AbstractDownloader {
     public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
         super(id, alertManager);
         this.config = config;
-        // TODO: 临时解决方案 - 需要重构 TrClient 以使用 OkHttp
-        // 当前使用 Methanol.Builder 作为临时适配
-        com.github.mizosoft.methanol.Methanol.Builder methanolBuilder = com.github.mizosoft.methanol.Methanol.newBuilder();
-        this.client = new TrClient(methanolBuilder, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), java.net.http.HttpClient.Version.valueOf(config.getHttpVersion()));
+        this.client = new TrClient(httpUtil, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), config.getHttpVersion());
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
