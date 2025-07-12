@@ -499,45 +499,51 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
     @Override
     public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<Reader> resp;
         try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId()),
-                    MoreBodyHandlers.ofReader());
+            Request request = new Request.Builder()
+                    .url(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId())
+                    .get()
+                    .build();
+            
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, response.code(), response.body() != null ? response.body().string() : "null"));
+                }
+                String responseBody = response.body().string();
+                JsonObject object = JsonParser.parseString(responseBody).getAsJsonObject();
+                JsonObject peers = object.getAsJsonObject("peers");
+                
+                List<Peer> peersList = new ArrayList<>();
+                for (String s : peers.keySet()) {
+                    JsonObject singlePeerObject = peers.getAsJsonObject(s);
+                    QBittorrentPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentPeer.class);
+                    if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
+                        continue;
+                    }
+                    if (qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()) {
+                        continue;
+                    }
+                    if (qbPeer.getRawIp().contains(".onion") || qbPeer.getRawIp().contains(".i2p")) {
+                        continue;
+                    }
+                    // 一个 QB 本地化问题的 Workaround
+                    if (qbPeer.getPeerId() == null || qbPeer.getPeerId().equals("Unknown") || qbPeer.getPeerId().equals("未知")) {
+                        qbPeer.setPeerIdClient("");
+                    }
+                    if (qbPeer.getClientName() != null) {
+                        if (qbPeer.getClientName().startsWith("Unknown [") && qbPeer.getClientName().endsWith("]")) {
+                            String mid = qbPeer.getClientName().substring("Unknown [".length(), qbPeer.getClientName().length() - 1);
+                            qbPeer.setClient(mid);
+                        }
+                    }
+                    qbPeer.setRawIp(s);
+                    peersList.add(qbPeer);
+                }
+                return peersList;
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
-        }
-        JsonObject object = JsonParser.parseReader(resp.body()).getAsJsonObject();
-        JsonObject peers = object.getAsJsonObject("peers");
-        List<Peer> peersList = new ArrayList<>();
-        for (String s : peers.keySet()) {
-            JsonObject singlePeerObject = peers.getAsJsonObject(s);
-            QBittorrentPeer qbPeer = JsonUtil.getGson().fromJson(singlePeerObject.toString(), QBittorrentPeer.class);
-            if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
-                continue;
-            }
-            if (qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()) {
-                continue;
-            }
-            if (qbPeer.getRawIp().contains(".onion") || qbPeer.getRawIp().contains(".i2p")) {
-                continue;
-            }
-            // 一个 QB 本地化问题的 Workaround
-            if (qbPeer.getPeerId() == null || qbPeer.getPeerId().equals("Unknown") || qbPeer.getPeerId().equals("未知")) {
-                qbPeer.setPeerIdClient("");
-            }
-            if (qbPeer.getClientName() != null) {
-                if (qbPeer.getClientName().startsWith("Unknown [") && qbPeer.getClientName().endsWith("]")) {
-                    String mid = qbPeer.getClientName().substring("Unknown [".length(), qbPeer.getClientName().length() - 1);
-                    qbPeer.setClient(mid);
-                }
-            }
-            qbPeer.setRawIp(s);
-            peersList.add(qbPeer);
-        }
-        return peersList;
     }
 
     protected void setBanListIncrement(Collection<BanMetadata> added) {
