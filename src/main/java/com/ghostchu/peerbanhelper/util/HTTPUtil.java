@@ -46,10 +46,14 @@ public final class HTTPUtil {
     }
 
     public OkHttpClient.Builder addProgressTracker(OkHttpClient.Builder builder) {
+        return addProgressTracker(builder, progressListener);
+    }
+
+    public OkHttpClient.Builder addProgressTracker(OkHttpClient.Builder builder, ProgressListener customProgressListener) {
         return builder.addNetworkInterceptor(chain -> {
             Response originalResponse = chain.proceed(chain.request());
             return originalResponse.newBuilder()
-                    .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                    .body(new ProgressResponseBody(originalResponse.body(), customProgressListener))
                     .build();
         });
     }
@@ -159,7 +163,7 @@ public final class HTTPUtil {
     }
 
 
-    interface ProgressListener {
+    public interface ProgressListener {
         void update(long bytesRead, long contentLength, boolean done);
     }
 

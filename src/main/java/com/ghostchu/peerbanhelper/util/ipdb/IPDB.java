@@ -311,12 +311,28 @@ public final class IPDB implements AutoCloseable {
             progressDialog.show();
             progressDialog.setComment(mirror.getIPDBUrl());
             
+            // 创建带有进度追踪器的 HTTP 客户端
+            var progressTrackingHttpClient = httpUtil.addProgressTracker(httpUtil.newBuilder(), new HTTPUtil.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    if (contentLength > 0) {
+                        float progress = (float) bytesRead / contentLength;
+                        progressDialog.updateProgress(progress);
+                    }
+                }
+            })
+                    .connectTimeout(Duration.ofSeconds(15))
+                    .readTimeout(Duration.ofSeconds(30))
+                    .callTimeout(Duration.ofMinutes(2))
+                    .followRedirects(true)
+                    .build();
+            
             Request request = new Request.Builder()
                     .url(mirror.getIPDBUrl())
                     .get()
                     .build();
                     
-            try (Response response = httpClient.newCall(request).execute()) {
+            try (Response response = progressTrackingHttpClient.newCall(request).execute()) {
                 if (response.code() == 200) {
                     if (mirror.supportXzip()) {
                         try {
