@@ -3,17 +3,14 @@ package com.ghostchu.peerbanhelper.util.push.impl;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import okhttp3.*;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,14 +71,24 @@ public final class BarkPushProvider extends AbstractPushProvider {
         map.put("device_key", config.getDeviceKey());
         map.put("group", config.getMessageGroup());
         map.put("icon", "https://raw.githubusercontent.com/PBH-BTN/PeerBanHelper/refs/heads/master/src/main/resources/assets/icon.png");
-        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false),
-                MutableRequest.POST(config.getBackendUrl()
-                                , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
-                        .header("Content-Type", "application/json")
-                , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-        ).join();
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException("HTTP Failed while sending push messages to Bark: " + resp.body());
+        
+        RequestBody requestBody = RequestBody.create(
+                JsonUtil.getGson().toJson(map),
+                MediaType.parse("application/json")
+        );
+        
+        Request request = new Request.Builder()
+                .url(config.getBackendUrl())
+                .post(requestBody)
+                .header("Content-Type", "application/json")
+                .build();
+        
+        try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IllegalStateException("HTTP Failed while sending push messages to Bark: " + response.body().string());
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to send push message to Bark", e);
         }
         return true;
     }
