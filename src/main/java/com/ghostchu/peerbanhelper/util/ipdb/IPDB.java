@@ -4,12 +4,6 @@ import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import okhttp3.*;
-import okio.Okio;
-import java.net.InetAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
@@ -24,11 +18,17 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
+import okio.Okio;
 import org.tukaani.xz.XZInputStream;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -317,6 +317,7 @@ public final class IPDB implements AutoCloseable {
                 public void update(long bytesRead, long contentLength, boolean done) {
                     if (contentLength > 0) {
                         float progress = (float) bytesRead / contentLength;
+                        progressDialog.setProgressDisplayIndeterminate(false);
                         progressDialog.updateProgress(progress);
                     }
                 }
