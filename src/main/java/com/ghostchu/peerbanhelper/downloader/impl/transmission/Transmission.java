@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
@@ -27,7 +28,6 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.net.http.HttpClient;
 import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
@@ -41,10 +41,13 @@ public final class Transmission extends AbstractDownloader {
     private final String blocklistUrl;
     private final Config config;
 
-    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
         super(id, alertManager);
         this.config = config;
-        this.client = new TrClient(httpBuilder, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
+        // TODO: 临时解决方案 - 需要重构 TrClient 以使用 OkHttp
+        // 当前使用 Methanol.Builder 作为临时适配
+        com.github.mizosoft.methanol.Methanol.Builder methanolBuilder = com.github.mizosoft.methanol.Methanol.newBuilder();
+        this.client = new TrClient(methanolBuilder, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), java.net.http.HttpClient.Version.valueOf(config.getHttpVersion()));
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
@@ -58,14 +61,14 @@ public final class Transmission extends AbstractDownloader {
         return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
-    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
         Config config = Config.readFromYaml(section, id);
-        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpBuilder);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpUtil);
     }
 
-    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
-        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpBuilder);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpUtil);
     }
 
     @Override

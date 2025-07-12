@@ -30,8 +30,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -554,16 +552,23 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
             banTasks.put(p.getTorrent().getHash(), joiner);
         });
         banTasks.forEach((hash, peers) -> {
+            FormBody formBody = new FormBody.Builder()
+                    .add("hash", hash)
+                    .add("peers", peers.toString())
+                    .build();
+            
             try {
-                HttpResponse<String> request = httpClient.send(MutableRequest
-                                .POST(apiEndpoint + "/transfer/banPeers", FormBodyPublisher.newBuilder()
-                                        .query("hash", hash)
-                                        .query("peers", peers.toString()).build())
-                                .header("Content-Type", "application/x-www-form-urlencoded")
-                        , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                if (request.statusCode() != 200) {
-                    log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-                    throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
+                Request request = new Request.Builder()
+                        .url(apiEndpoint + "/transfer/banPeers")
+                        .post(formBody)
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .build();
+                
+                try (Response response = httpClient.newCall(request).execute()) {
+                    if (!response.isSuccessful()) {
+                        log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body() != null ? response.body().string() : "null"));
+                        throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + response.code());
+                    }
                 }
             } catch (Exception e) {
                 log.error(tlUI(Lang.DOWNLOADER_QB_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
@@ -575,15 +580,23 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected void setBanListFull(Collection<PeerAddress> peerAddresses) {
         StringJoiner joiner = new StringJoiner("\n");
         peerAddresses.stream().map(PeerAddress::getIp).distinct().forEach(joiner::add);
+        
+        FormBody formBody = new FormBody.Builder()
+                .add("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString())))
+                .build();
+        
         try {
-            HttpResponse<String> request = httpClient.send(MutableRequest
-                            .POST(apiEndpoint + "/app/setPreferences", FormBodyPublisher.newBuilder()
-                                    .query("json", JsonUtil.getGson().toJson(Map.of("banned_IPs", joiner.toString()))).build())
-                            .header("Content-Type", "application/x-www-form-urlencoded")
-                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-                throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + request.statusCode());
+            Request request = new Request.Builder()
+                    .url(apiEndpoint + "/app/setPreferences")
+                    .post(formBody)
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .build();
+            
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body() != null ? response.body().string() : "null"));
+                    throw new IllegalStateException("Save qBittorrent banlist error: statusCode=" + response.code());
+                }
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.DOWNLOADER_QB_FAILED_SAVE_BANLIST, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
