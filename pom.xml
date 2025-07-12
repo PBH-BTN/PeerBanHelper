@@ -526,8 +526,6 @@
             <groupId>com.spotify</groupId>
             <artifactId>completable-futures</artifactId>
             <version>0.3.6</version>
-            <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
         </dependency>
     </dependencies>
 </project>
