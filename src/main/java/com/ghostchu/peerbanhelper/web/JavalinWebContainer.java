@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.web;
 import com.formdev.flatlaf.util.StringUtils;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.event.WebServerStartedEvent;
 import com.ghostchu.peerbanhelper.pbhplus.ActivationManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
@@ -52,6 +53,8 @@ public final class JavalinWebContainer {
             .build();
     private final Cache<IPAddress, Long> LOGIN_SESSION_TIMETABLE = CacheBuilder.newBuilder().maximumSize(50).build();
     private static final String[] blockUserAgent = new String[]{"censys", "shodan", "zoomeye", "threatbook", "fofa", "zmap", "nmap", "archive"};
+    @Getter
+    private volatile boolean started;
 
     public JavalinWebContainer(ActivationManager activationManager) {
         JsonMapper gsonMapper = new JsonMapper() {
@@ -203,6 +206,8 @@ public final class JavalinWebContainer {
     public void start(String host, int port, String token) {
         this.token = token;
         javalin.start(host, port);
+        this.started = true;
+        Main.getEventBus().post(new WebServerStartedEvent());
     }
 
     public Javalin javalin() {

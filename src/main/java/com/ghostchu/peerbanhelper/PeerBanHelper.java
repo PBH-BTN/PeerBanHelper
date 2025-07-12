@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
@@ -37,8 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -112,6 +111,7 @@ public class PeerBanHelper implements Reloadable {
         downloaderServer.load();
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
         crashManager.putRunningFlag();
+        Main.getEventBus().post(new PBHServerStartedEvent());
         Main.getGuiManager().onPBHFullyStarted(this);
     }
 

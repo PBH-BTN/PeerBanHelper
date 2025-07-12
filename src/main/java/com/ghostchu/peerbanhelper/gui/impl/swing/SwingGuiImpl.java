@@ -6,6 +6,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.PeerBanHelper;
+import com.ghostchu.peerbanhelper.event.PBHGuiElementPeriodUpdateEvent;
 import com.ghostchu.peerbanhelper.event.PBHLookAndFeelNeedReloadEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.ProgressDialog;
@@ -13,12 +14,13 @@ import com.ghostchu.peerbanhelper.gui.TaskbarControl;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.GuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
+import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.PBHFlatLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.MacOSLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.PBHPlusTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.StandardLafTheme;
 import com.ghostchu.peerbanhelper.gui.impl.swing.theme.impl.UnsupportedPlatformTheme;
-import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow.SwingProgressDialog;
 import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.ghostchu.peerbanhelper.util.logger.JListAppender;
 import com.ghostchu.peerbanhelper.util.logger.LogEntry;
@@ -37,11 +39,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Locale;
-import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Getter
 @Slf4j
@@ -80,16 +79,6 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
     }
 
     private void updateGuiStuff() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(tlUI(Lang.GUI_TITLE_LOADED, "Swing UI", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
-        StringJoiner joiner = new StringJoiner("", " [", "]");
-        joiner.setEmptyValue("");
-        ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
-        SwingUtilities.invokeLater(() -> {
-            if (mainWindow != null) {
-                mainWindow.setTitle(builder.append(joiner).toString());
-            }
-        });
 
         // taskbar
         if (Main.getServer().getDownloaderServer().isGlobalPaused()) {
@@ -97,6 +86,8 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         } else {
             taskbarControl().updateProgress(mainWindow, TaskbarState.OFF, -1.0f);
         }
+
+        Main.getEventBus().post(new PBHGuiElementPeriodUpdateEvent());
     }
 
 

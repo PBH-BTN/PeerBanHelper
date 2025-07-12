@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.gui.impl.swing;
+package com.ghostchu.peerbanhelper.gui.impl.swing.toolwindow;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.MIDIPlayer;
