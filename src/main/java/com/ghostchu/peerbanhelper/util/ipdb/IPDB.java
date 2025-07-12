@@ -1,13 +1,15 @@
 package com.ghostchu.peerbanhelper.util.ipdb;
 
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleProgressDialog;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MutableRequest;
-import com.github.mizosoft.methanol.ProgressTracker;
+import okhttp3.*;
+import okio.Okio;
+import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.maxmind.db.*;
@@ -25,26 +27,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.tukaani.xz.XZInputStream;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.Authenticator;
-import java.net.InetAddress;
-import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -58,7 +48,7 @@ public final class IPDB implements AutoCloseable {
     private final File mmdbASNFile;
     private final boolean autoUpdate;
     private final File mmdbGeoCNFile;
-    private final Methanol httpClient;
+    private final OkHttpClient httpClient;
     private final HTTPUtil httpUtil;
     @Getter
     private DatabaseReader mmdbCity;
@@ -79,20 +69,16 @@ public final class IPDB implements AutoCloseable {
         this.autoUpdate = autoUpdate;
         this.httpUtil =httpUtil;
 //        this.userAgent = userAgent;
-        this.httpClient = Methanol
-                .newBuilder()
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
-                .version(HttpClient.Version.HTTP_1_1)
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .userAgent(userAgent)
-                .requestTimeout(Duration.of(2, ChronoUnit.MINUTES))
-                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .readTimeout(Duration.of(30, ChronoUnit.SECONDS), Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory()))
-                .authenticator(new Authenticator() {
+        this.httpClient = httpUtil.newBuilder()
+                .connectTimeout(Duration.ofSeconds(15))
+                .readTimeout(Duration.ofSeconds(30))
+                .callTimeout(Duration.ofMinutes(2))
+                .followRedirects(true)
+                .authenticator(new okhttp3.Authenticator() {
                     @Override
-                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(accountId, licenseKey.toCharArray());
+                    public Request authenticate(Route route, Response response) throws IOException {
+                        String credential = Credentials.basic(accountId, licenseKey);
+                        return response.request().newBuilder().header("Authorization", credential).build();
                     }
                 })
                 .build();
@@ -319,69 +305,67 @@ public final class IPDB implements AutoCloseable {
     }
 
     private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName) {
-        IPDBDownloadSource mirror = mirrorList.removeFirst();
-        ProgressTracker tracker = ProgressTracker.newBuilder()
-                .bytesTransferredThreshold(16 * 1024) // 16 kB
-                .timePassedThreshold(Duration.of(1, ChronoUnit.SECONDS))
-                .build();
-        var progressDialog = Main.getGuiManager().createProgressDialog(tlUI(Lang.IPDB_DOWNLOAD_TITLE, databaseName), tlUI(Lang.IPDB_DOWNLOAD_DESCRIPTION, databaseName), tlUI(Lang.GUI_COMMON_CANCEL), null, false);
-        progressDialog.show();
-        progressDialog.setComment(mirror.getIPDBUrl());
-        var bodyHandler = tracker.tracking(HttpResponse.BodyHandlers.ofFile(path), item -> {
-            if (!(progressDialog instanceof ConsoleProgressDialog)) {
-                httpUtil.onProgress(item);
-            }
-            progressDialog.setProgressDisplayIndeterminate(!item.determinate());
-            if (item.determinate()) {
-                progressDialog.updateProgress((float) item.totalBytesTransferred() / item.contentLength());
-            } else {
-                progressDialog.updateProgress(0);
-            }
-        });
-        return httpUtil.retryableSend(httpClient, MutableRequest.GET(mirror.getIPDBUrl()), bodyHandler)
-                .thenAccept(r -> {
-                    if (r.statusCode() == 200) {
-                        if (mirror.supportXzip()) {
-                            try {
-                                File tmp = File.createTempFile(databaseName, ".tmp");
-                                try (XZInputStream gzipInputStream = new XZInputStream(new FileInputStream(r.body().toFile()));
-                                     FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
-                                    byte[] buffer = new byte[1024];
-                                    int len;
-                                    while ((len = gzipInputStream.read(buffer)) > 0) {
-                                        fileOutputStream.write(buffer, 0, len);
-                                    }
+        return CompletableFuture.runAsync(() -> {
+            IPDBDownloadSource mirror = mirrorList.removeFirst();
+            var progressDialog = Main.getGuiManager().createProgressDialog(tlUI(Lang.IPDB_DOWNLOAD_TITLE, databaseName), tlUI(Lang.IPDB_DOWNLOAD_DESCRIPTION, databaseName), tlUI(Lang.GUI_COMMON_CANCEL), null, false);
+            progressDialog.show();
+            progressDialog.setComment(mirror.getIPDBUrl());
+            
+            Request request = new Request.Builder()
+                    .url(mirror.getIPDBUrl())
+                    .get()
+                    .build();
+                    
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (response.code() == 200) {
+                    if (mirror.supportXzip()) {
+                        try {
+                            File tmp = File.createTempFile(databaseName, ".tmp");
+                            try (XZInputStream gzipInputStream = new XZInputStream(response.body().byteStream());
+                                 FileOutputStream fileOutputStream = new FileOutputStream(tmp)) {
+                                byte[] buffer = new byte[1024];
+                                int len;
+                                while ((len = gzipInputStream.read(buffer)) > 0) {
+                                    fileOutputStream.write(buffer, 0, len);
                                 }
-                                Files.move(tmp.toPath(), r.body(), StandardCopyOption.REPLACE_EXISTING);
-                                log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
-                                return;
-                            } catch (IOException e) { // 下方统一进行处理
-                                log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED));
                             }
-                        } else { // 直接就是原始文件
+                            Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+                            progressDialog.close();
+                            log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
+                            return;
+                        } catch (IOException e) { 
+                            log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED));
+                        }
+                    } else { 
+                        // 直接保存文件
+                        try (var source = response.body().source();
+                             var sink = Okio.buffer(Okio.sink(path))) {
+                            sink.writeAll(source);
+                            progressDialog.close();
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         }
                     }
-                    if (!mirrorList.isEmpty()) { // 非 200 状态码 或者 gzip 解压出错
-                        log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                        downloadFile(mirrorList, path, databaseName);
-                        return;
-                    }
-                    log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, r.statusCode() + " - " + r.body()));
-                })
-                .exceptionally(e -> {
-                    if (!mirrorList.isEmpty()) {
-                        log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                        return downloadFile(mirrorList, path, databaseName).join();
-                    }
-                    log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, e.getMessage()), e);
-                    File file = path.toFile();
-                    if (file.exists()) {
-                        file.delete(); // 删除下载不完整的文件
-                    }
-                    return null;
-                }).whenComplete((r, e) -> progressDialog.close());
+                }
+                
+                if (!mirrorList.isEmpty()) { 
+                    log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
+                    progressDialog.close();
+                    downloadFile(mirrorList, path, databaseName).join();
+                    return;
+                }
+                progressDialog.close();
+                log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, response.code() + " - " + response.body().string()));
+            } catch (Exception e) {
+                progressDialog.close();
+                if (!mirrorList.isEmpty()) {
+                    log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
+                    downloadFile(mirrorList, path, databaseName).join();
+                    return;
+                }
+                log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, e.getMessage()), e);
+            }
+        });
     }
 
     @Override

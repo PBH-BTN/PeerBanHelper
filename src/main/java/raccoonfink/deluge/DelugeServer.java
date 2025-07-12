@@ -11,7 +11,6 @@ import raccoonfink.deluge.requests.ConfigRequest;
 import raccoonfink.deluge.responses.*;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +22,7 @@ public final class DelugeServer {
 
     private int m_counter = 0;
 
-    public DelugeServer(final String url, final String password, boolean verifySSL, HTTPUtil httpUtil, HttpClient.Version httpVersion, String baUser, String baPassword) {
+    public DelugeServer(final String url, final String password, boolean verifySSL, HTTPUtil httpUtil, String baUser, String baPassword) {
         m_url = url;
         m_password = password;
         this.client = httpUtil.disableSSLVerify(httpUtil.newBuilder().authenticator(new okhttp3.Authenticator() {

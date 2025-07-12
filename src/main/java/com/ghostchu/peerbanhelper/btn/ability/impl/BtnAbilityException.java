@@ -14,7 +14,7 @@ import com.ghostchu.peerbanhelper.util.rule.Rule;
 import com.ghostchu.peerbanhelper.util.rule.RuleMatchResult;
 import com.ghostchu.peerbanhelper.util.rule.RuleParser;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.github.mizosoft.methanol.MutableRequest;
+import okhttp3.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import lombok.Getter;
@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
@@ -101,42 +100,45 @@ public final class BtnAbilityException extends AbstractBtnAbility {
         } else {
             version = btnExceptionRule.getVersion();
         }
-        btnNetwork.getHttpUtil().retryableSend(
-                        btnNetwork.getHttpClient(),
-                        MutableRequest.GET(URLUtil.appendUrl(endpoint, Map.of("rev", version))),
-                        HttpResponse.BodyHandlers.ofString())
-                .thenAccept(r -> {
-                    if (r.statusCode() == 204) {
-                        setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_EXCEPTION_LOADED_FROM_REMOTE, this.btnExceptionRule.getVersion()));
-                        return;
+        
+        Request request = new Request.Builder()
+                .url(URLUtil.appendUrl(endpoint, Map.of("rev", version)))
+                .get()
+                .build();
+                
+        try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
+            if (response.code() == 204) {
+                setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_EXCEPTION_LOADED_FROM_REMOTE, this.btnExceptionRule.getVersion()));
+                return;
+            }
+            if (response.code() != 200) {
+                String body = response.body() != null ? response.body().string() : "";
+                log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + body));
+                setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), body));
+            } else {
+                try {
+                    String body = response.body() != null ? response.body().string() : "";
+                    BtnExceptionRule btr = JsonUtil.getGson().fromJson(body, BtnExceptionRule.class);
+                    this.btnExceptionRule = new BtnExceptionRuleParsed(btr);
+                    Main.getEventBus().post(new BtnExceptionRuleUpdateEvent());
+                    try {
+                        Files.writeString(btnCacheFile.toPath(), body, StandardCharsets.UTF_8);
+                    } catch (IOException ignored) {
                     }
-                    if (r.statusCode() != 200) {
-                        log.error(tlUI(Lang.BTN_REQUEST_FAILS, r.statusCode() + " - " + r.body()));
-                        setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, r.statusCode(), r.body()));
-                    } else {
-                        try {
-                            BtnExceptionRule btr = JsonUtil.getGson().fromJson(r.body(), BtnExceptionRule.class);
-                            this.btnExceptionRule = new BtnExceptionRuleParsed(btr);
-                            Main.getEventBus().post(new BtnExceptionRuleUpdateEvent());
-                            try {
-                                Files.writeString(btnCacheFile.toPath(), r.body(), StandardCharsets.UTF_8);
-                            } catch (IOException ignored) {
-                            }
-                            log.info(tlUI(Lang.BTN_ABILITY_EXCEPTION_UPDATE_RULES_SUCCESSES, this.btnExceptionRule.getVersion()));
-                            setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_EXCEPTION_LOADED_FROM_REMOTE, this.btnExceptionRule.getVersion()));
-                            unbanPeers(btnExceptionRule);
-                            btnNetwork.getModuleMatchCache().invalidateAll();
-                        } catch (JsonSyntaxException e) {
-                            setLastStatus(false, new TranslationComponent("JsonSyntaxException: " + r.statusCode() + " - " + r.body()));
-                            log.error("Unable to parse BtnExceptionRule as a valid Json object: {}-{}", r.statusCode(), r.body(), e);
-                        }
-                    }
-                })
-                .exceptionally((e) -> {
-                    log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
-                    setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
-                    return null;
-                });
+                    log.info(tlUI(Lang.BTN_ABILITY_EXCEPTION_UPDATE_RULES_SUCCESSES, this.btnExceptionRule.getVersion()));
+                    setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_EXCEPTION_LOADED_FROM_REMOTE, this.btnExceptionRule.getVersion()));
+                    unbanPeers(btnExceptionRule);
+                    btnNetwork.getModuleMatchCache().invalidateAll();
+                } catch (JsonSyntaxException e) {
+                    String body = response.body() != null ? response.body().string() : "";
+                    setLastStatus(false, new TranslationComponent("JsonSyntaxException: " + response.code() + " - " + body));
+                    log.error("Unable to parse BtnExceptionRule as a valid Json object: {}-{}", response.code(), body, e);
+                }
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.BTN_REQUEST_FAILS), e);
+            setLastStatus(false, new TranslationComponent(Lang.BTN_UNKNOWN_ERROR, e.getClass().getName() + ": " + e.getMessage()));
+        }
     }
 
     private void unbanPeers(BtnExceptionRuleParsed btr) {

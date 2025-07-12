@@ -27,7 +27,7 @@ import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
 import com.ghostchu.peerbanhelper.wrapper.StructuredData;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
-import com.github.mizosoft.methanol.MutableRequest;
+import okhttp3.*;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
@@ -46,7 +46,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
@@ -292,9 +291,16 @@ public final class IPBlackRuleList extends AbstractRuleFeatureModule implements 
                 throw new RuntimeException(e);
             }
             if (uri.getScheme().startsWith("http")) {
-                var response = httpUtil.retryableSend(httpUtil.getHttpClient(false),
-                        MutableRequest.GET(url), HttpResponse.BodyHandlers.ofString()).join();
-                return new DataUpdateResultDTO(response.statusCode(), null, response.body().getBytes());
+                OkHttpClient client = httpUtil.newBuilder().build();
+                Request request = new Request.Builder()
+                        .url(url)
+                        .get()
+                        .build();
+                try (Response response = client.newCall(request).execute()) {
+                    return new DataUpdateResultDTO(response.code(), null, response.body().bytes());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
             throw new IllegalArgumentException("Invalid URL");
         });

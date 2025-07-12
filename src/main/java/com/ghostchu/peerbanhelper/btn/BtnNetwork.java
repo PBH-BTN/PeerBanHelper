@@ -20,6 +20,7 @@ import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.Reloadable;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,23 +42,35 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 @Component
 // 特别注意：该类不允许静态初始化任何内容
 public final class BtnNetwork implements Reloadable {
+    @Getter
     private final Map<Class<? extends BtnAbility>, BtnAbility> abilities = Collections.synchronizedMap(new HashMap<>());
 
     private final ScriptEngine scriptEngine;
+    @Getter
     private final AtomicBoolean configSuccess = new AtomicBoolean(false);
+    @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
     private ScheduledExecutorService executeService = null;
+    @Getter
     private String configUrl;
+    @Getter
     private boolean submit;
+    @Getter
     private String appId;
+    @Getter
     private String appSecret;
     private OkHttpClient httpClient;
     private final DownloaderServer server;
+    @Getter
     private final PeerRecordDao peerRecordDao;
+    @Getter
     private final TrackedSwarmDao trackedSwarmDao;
+    @Getter
     private final MetadataDao metadataDao;
+    @Getter
     private final HistoryDao historyDao;
+    @Getter
     private final HTTPUtil httpUtil;
     private final ModuleMatchCache moduleMatchCache;
     private boolean enabled;
@@ -230,6 +243,26 @@ public final class BtnNetwork implements Reloadable {
                 .connectTimeout(Duration.ofSeconds(10))
                 .readTimeout(Duration.ofSeconds(30))
                 .build();
+    }
+
+    public OkHttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    public ModuleMatchCache getModuleMatchCache() {
+        return moduleMatchCache;
+    }
+
+    public DownloaderServer getServer() {
+        return server;
+    }
+
+    public ScheduledExecutorService getExecuteService() {
+        return executeService;
+    }
+
+    public HTTPUtil getHttpUtil() {
+        return httpUtil;
     }
 
     public void close() {
