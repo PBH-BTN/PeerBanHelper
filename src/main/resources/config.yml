@@ -9,7 +9,6 @@ language: default
 # GUI 实现
 # auto 由 PeerBanHelper 选择最佳 GUI 实现
 # swing 使用 Java Swing GUI 和 Flatlaf 实现，支持全部平台 (推荐)
-# swt 使用 Eclipse Standard Widget Toolkit (SWT) GUI 实现，仅支持 Windows, macOS, Linux 的 x86_64 平台 (在 Swing 存在问题时使用)
 # disable 禁用任何 GUI
 gui: auto
 # PBH Plus 的捐赠密钥，填写后将激活捐赠功能。
