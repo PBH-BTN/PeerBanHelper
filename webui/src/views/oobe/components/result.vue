@@ -30,6 +30,7 @@ import { InitPBH } from '@/service/init'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEndpointStore } from '@/stores/endpoint'
+import { v1 as uuid } from 'uuid'
 const { t } = useI18n()
 const config = defineModel<InitConfig>({ required: true })
 const loading = ref(true)
@@ -41,7 +42,7 @@ const init = () => {
   InitPBH({
     token: config.value.token,
     downloader: {
-      id: config.value.downloaderConfig.id,
+      id: uuid(),
       config: config.value.downloaderConfig.config
     }
   })
