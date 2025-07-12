@@ -11,11 +11,11 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.github.mizosoft.methanol.Methanol;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import lombok.Data;
@@ -52,10 +52,10 @@ public final class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String id, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public Deluge(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
         super(id, alertManager);
         this.config = config;
-        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), httpBuilder, HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
+        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), httpUtil, HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
     }
 
     @Override
@@ -63,14 +63,14 @@ public final class Deluge extends AbstractDownloader {
         return config.getName();
     }
 
-    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
         Config config = Config.readFromYaml(section, id);
-        return new Deluge(id, config, alertManager, httpBuilder);
+        return new Deluge(id, config, alertManager, httpUtil);
     }
 
-    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(id, config, alertManager, httpBuilder);
+        return new Deluge(id, config, alertManager, httpUtil);
     }
 
     @Override

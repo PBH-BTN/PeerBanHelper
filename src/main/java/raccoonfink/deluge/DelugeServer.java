@@ -1,70 +1,41 @@
 package raccoonfink.deluge;
 
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MutableRequest;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import raccoonfink.deluge.requests.ConfigRequest;
 import raccoonfink.deluge.responses.*;
 
 import java.io.IOException;
-import java.net.*;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 @Slf4j
 public final class DelugeServer {
     private final String m_url;
     private final String m_password;
-    private final HttpClient httpClient;
+    private final OkHttpClient client;
 
-    private final CookieManager m_cookieManager = new CookieManager();
     private int m_counter = 0;
 
-    public DelugeServer(final String url, final String password, boolean verifySSL, Methanol.Builder httpBuilder, HttpClient.Version httpVersion, String baUser, String baPassword) {
+    public DelugeServer(final String url, final String password, boolean verifySSL, HTTPUtil httpUtil, HttpClient.Version httpVersion, String baUser, String baPassword) {
         m_url = url;
         m_password = password;
-        m_cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        this.client = httpUtil.disableSSLVerify(httpUtil.newBuilder().authenticator(new okhttp3.Authenticator() {
+            @Override
+            public @NotNull Request authenticate(@Nullable Route route, @NotNull Response response) throws IOException {
+                String credential = Credentials.basic(baUser, baPassword);
+                return response.request().newBuilder().header("Authorization", credential).build();
+            }
+        }), !verifySSL).build();
 
-        HttpURLConnection.setFollowRedirects(true);
-        Methanol.Builder builder = httpBuilder
-                .version(httpVersion)
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
-                .defaultHeader("Accept", "application/json")
-                .defaultHeader("Content-Type", "application/json")
-                .connectTimeout(Duration.of(10,ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .authenticator(new Authenticator() {
-                    @Override
-                    public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                        return new PasswordAuthentication(baUser, baPassword.toCharArray());
-                    }
-                })
-                .cookieHandler(m_cookieManager);
-        if (!verifySSL && HTTPUtil.getIgnoreSslContext() != null) {
-            builder = builder.sslContext(HTTPUtil.getIgnoreSslContext());
-        }
-        this.httpClient = builder.build();
     }
 
-//    private static void closeQuietly(final Closeable c) {
-//        if (c == null) {
-//            return;
-//        }
-//        try {
-//            c.close();
-//        } catch (final IOException e) {
-//        }
-//    }
 
     public DelugeResponse makeRequest(final DelugeRequest delugeRequest) throws DelugeException {
         int connectionResponseCode;
@@ -72,35 +43,23 @@ public final class DelugeServer {
 
         final String postData = delugeRequest.toPostData(m_counter++);
         //final String cookieHeader = getCookieHeader();
-        HttpResponse<String> resp;
-        try {
-            if (postData != null) {
-                resp = httpClient
-                        .send(MutableRequest.POST(m_url, HttpRequest.BodyPublishers.ofString(postData)),
-                                //.header("Cookie", cookieHeader)
-                                //.header("Content-Length", String.valueOf(postData.getBytes(StandardCharsets.UTF_8).length)),
-                                java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            } else {
-                resp = httpClient
-                        .send(MutableRequest.POST(m_url, HttpRequest.BodyPublishers.noBody()),
-                                //.header("Cookie", cookieHeader),
-                                java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            }
-            connectionResponseCode = resp.statusCode();
+        Request.Builder request = new Request.Builder().url(m_url);
+
+        if (postData != null) {
+            request = request.post(RequestBody.create(postData, MediaType.parse("application/json")));
+        } else {
+            request = request.post(RequestBody.create("", null));
+        }
+        try (Response resp = client.newCall(request.build()).execute()) {
+            connectionResponseCode = resp.code();
             if (connectionResponseCode != 200) {
-                throw new DelugeException(resp.statusCode() + " - " + resp.body());
+                throw new DelugeException(resp.code() + " - " + resp.body());
             }
             jsonResponse = new JSONObject(resp.body());
-//				List<String> setCookie = resp.headers().allValues("Set-Cookie");
-//				if(!setCookie.isEmpty()){
-//					addCookies(setCookie);
-//				}
         } catch (final IOException | JSONException e) {
             throw new DelugeException(e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new DelugeException(e);
         }
+
         try {
             if (jsonResponse.has("error") && !jsonResponse.isNull("error")) {
                 final JSONObject error = jsonResponse.getJSONObject("error");
