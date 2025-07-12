@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
 import com.ghostchu.peerbanhelper.database.dao.impl.*;
+import com.ghostchu.peerbanhelper.database.table.PeerRecordEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
@@ -197,7 +198,13 @@ public final class PBHPeerController extends AbstractFeatureModule {
                 .where()
                 .eq("address", new SelectArg(ip));
         builder.setWhere(where);
-        ctx.json(new StdResp(true, null, peerRecordDao.queryByPaging(builder, pageable)));
+        var page = peerRecordDao.queryByPaging(builder, pageable);
+        var results = page.getResults();
+        for (PeerRecordEntity result : results) {
+            result.setDownloader(downloaderManager.getDownloadInfo(result.getDownloader()).name());
+        }
+        page.setResults(results);
+        ctx.json(new StdResp(true, null, page));
     }
 
 

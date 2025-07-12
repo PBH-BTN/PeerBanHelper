@@ -67,8 +67,12 @@ public final class PushManagerImpl implements Reloadable, PushManager {
         var config = Main.getMainConfig().getConfigurationSection("push-notification");
         if(config == null) return;
         config.getKeys(false).forEach(provider -> {
-            var section = config.getConfigurationSection(provider);
-            registered.add(createPushProvider(provider, section.getString("type"), section));
+            try {
+                var section = config.getConfigurationSection(provider);
+                registered.add(createPushProvider(provider, section.getString("type"), section));
+            }catch (Exception e){
+                log.error("Unable to load Push Provider: {}", provider, e);
+            }
         });
         providerList.clear();
         providerList.addAll(registered);
