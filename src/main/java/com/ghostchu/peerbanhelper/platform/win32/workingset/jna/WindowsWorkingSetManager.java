@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.platform.win32.workingset;
+package com.ghostchu.peerbanhelper.platform.win32.workingset.jna;
 
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
@@ -17,6 +17,7 @@ public class WindowsWorkingSetManager {
     private static final long WORKING_SET_SIZE_AUTO = -1L;
     
     private final Kernel32 kernel32;
+    private final PSAPI psapi;
     private final WinNT.HANDLE currentProcessHandle;
     
     /**
@@ -24,13 +25,12 @@ public class WindowsWorkingSetManager {
      */
     public WindowsWorkingSetManager() {
         this.kernel32 = Kernel32.INSTANCE;
+        this.psapi = PSAPI.INSTANCE;
         this.currentProcessHandle = kernel32.GetCurrentProcess();
         
         if (currentProcessHandle == null) {
-            throw new RuntimeException("无法获取当前进程句柄");
+            throw new RuntimeException("Unable to retrieve current process handle");
         }
-        
-        logger.info("Windows 工作集管理器初始化完成");
     }
     
     /**
@@ -41,21 +41,17 @@ public class WindowsWorkingSetManager {
      */
     public boolean emptyWorkingSet() {
         try {
-            logger.debug("开始清空进程工作集...");
+            boolean result = psapi.EmptyWorkingSet(currentProcessHandle);
             
-            boolean result = kernel32.EmptyWorkingSet(currentProcessHandle);
-            
-            if (result) {
-                logger.info("成功清空进程工作集，不常用内存已移至分页文件");
-            } else {
+            if (!result) {
                 int errorCode = kernel32.GetLastError();
-                logger.warn("清空进程工作集失败，错误代码: {}", errorCode);
+                logger.warn("Unable to empty working set {}", errorCode);
             }
             
             return result;
             
         } catch (Exception e) {
-            logger.error("清空进程工作集时发生异常", e);
+            logger.error("Error while empty working set", e);
             return false;
         }
     }
@@ -69,28 +65,20 @@ public class WindowsWorkingSetManager {
      */
     public boolean setWorkingSetSize(long minSizeBytes, long maxSizeBytes) {
         try {
-            logger.debug("设置进程工作集大小限制: min={}, max={}", minSizeBytes, maxSizeBytes);
-            
-            WinDef.DWORD minSize = new WinDef.DWORD(minSizeBytes == WORKING_SET_SIZE_AUTO ? WORKING_SET_SIZE_AUTO : minSizeBytes);
-            WinDef.DWORD maxSize = new WinDef.DWORD(maxSizeBytes == WORKING_SET_SIZE_AUTO ? WORKING_SET_SIZE_AUTO : maxSizeBytes);
+            WinDef.DWORD minSize = new WinDef.DWORD(minSizeBytes);
+            WinDef.DWORD maxSize = new WinDef.DWORD(maxSizeBytes);
             
             boolean result = kernel32.SetProcessWorkingSetSize(currentProcessHandle, minSize, maxSize);
             
-            if (result) {
-                if (minSizeBytes == WORKING_SET_SIZE_AUTO && maxSizeBytes == WORKING_SET_SIZE_AUTO) {
-                    logger.info("成功设置进程工作集为自动管理模式");
-                } else {
-                    logger.info("成功设置进程工作集大小限制: min={} bytes, max={} bytes", minSizeBytes, maxSizeBytes);
-                }
-            } else {
+            if (!result) {
                 int errorCode = kernel32.GetLastError();
-                logger.warn("设置进程工作集大小失败，错误代码: {}", errorCode);
+                logger.warn("Unable to set working set size: {}", errorCode);
             }
             
             return result;
             
         } catch (Exception e) {
-            logger.error("设置进程工作集大小时发生异常", e);
+            logger.error("Unable to set working set size", e);
             return false;
         }
     }
@@ -113,12 +101,10 @@ public class WindowsWorkingSetManager {
      */
     public boolean compressMemory(long targetSizeBytes) {
         try {
-            logger.info("开始执行内存压缩操作，目标大小: {} bytes", targetSizeBytes);
-            
             // 1. 设置较小的工作集限制
             boolean setResult = setWorkingSetSize(targetSizeBytes, targetSizeBytes);
             if (!setResult) {
-                logger.warn("设置工作集限制失败，但继续执行清空操作");
+                logger.warn("Failed to set working set size to target size: {}", targetSizeBytes);
             }
             
             // 2. 清空工作集
@@ -127,21 +113,19 @@ public class WindowsWorkingSetManager {
             // 3. 恢复自动管理
             boolean autoResult = setAutoManageWorkingSet();
             if (!autoResult) {
-                logger.warn("恢复自动管理模式失败");
+                logger.warn("Failed to restore working set to auto management");
             }
             
             boolean overallResult = emptyResult; // 主要看清空操作是否成功
             
-            if (overallResult) {
-                logger.info("内存压缩操作完成");
-            } else {
-                logger.warn("内存压缩操作部分失败");
+            if (!overallResult) {
+                logger.warn("Failed to compress memory, empty working set failed");
             }
             
             return overallResult;
             
         } catch (Exception e) {
-            logger.error("执行内存压缩操作时发生异常", e);
+            logger.error("Failed to working set", e);
             return false;
         }
     }
@@ -152,8 +136,7 @@ public class WindowsWorkingSetManager {
      * 
      * @return 操作是否成功
      */
-    public boolean trimMemory() {
-        logger.info("执行轻量级内存整理");
+    public boolean trimMemory() {;
         return emptyWorkingSet();
     }
 }

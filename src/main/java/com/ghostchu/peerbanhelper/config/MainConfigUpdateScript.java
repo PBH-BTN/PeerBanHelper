@@ -32,6 +32,11 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 35)
+    public void addWindowsEmptyWorkingSet() {
+        conf.set("performance.windows-empty-working-set", false);
+    }
+
     @UpdateScript(version = 34)
     public void cleanupUnusedFiles(){
         File decentralized = new File(Main.getDataDirectory(), "decentralized");

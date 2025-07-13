@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.platform.win32.workingset;
+package com.ghostchu.peerbanhelper.platform.win32.workingset.jna;
 
 /**
  * 工作集管理相关异常

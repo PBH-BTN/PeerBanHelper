@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.platform.win32.workingset;
+package com.ghostchu.peerbanhelper.platform.win32.workingset.jna;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;

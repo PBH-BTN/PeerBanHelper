@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.platform.win32.workingset;
+package com.ghostchu.peerbanhelper.platform.win32.workingset.jna;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +18,6 @@ public class WorkingSetManagerFactory {
         // 检测操作系统
         String osName = System.getProperty("os.name", "").toLowerCase();
         isWindows = osName.contains("windows");
-        
-        logger.debug("检测到操作系统: {}, Windows支持: {}", osName, isWindows);
     }
     
     /**
@@ -29,7 +27,6 @@ public class WorkingSetManagerFactory {
      */
     public static WindowsWorkingSetManager getInstance() {
         if (!isWindows) {
-            logger.debug("当前平台不是Windows，无法使用工作集管理功能");
             return null;
         }
         
@@ -38,9 +35,7 @@ public class WorkingSetManagerFactory {
                 if (instance == null) {
                     try {
                         instance = new WindowsWorkingSetManager();
-                        logger.info("工作集管理器实例创建成功");
                     } catch (Exception e) {
-                        logger.error("创建工作集管理器实例失败", e);
                         return null;
                     }
                 }
@@ -69,8 +64,6 @@ public class WorkingSetManagerFactory {
         if (manager != null) {
             return manager.trimMemory();
         }
-        
-        logger.debug("无法执行内存整理：工作集管理器不可用");
         return false;
     }
     
@@ -85,8 +78,6 @@ public class WorkingSetManagerFactory {
         if (manager != null) {
             return manager.compressMemory(targetSizeBytes);
         }
-        
-        logger.debug("无法执行内存压缩：工作集管理器不可用");
         return false;
     }
     
