@@ -59,8 +59,8 @@ public class WindowMenuBar {
         }
         //menuBar.add(Box.createGlue());
         menuBar.add(generateHelpAbout());
-        menuBar.add(Box.createGlue());
-        menuBar.add(generateAlertsButton());
+    //    menuBar.add(Box.createGlue());
+    //    menuBar.add(generateAlertsButton());
         parent.add(menuBar, BorderLayout.NORTH);
         return menuBar;
     }
