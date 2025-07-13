@@ -709,6 +709,21 @@ public final class DownloaderServerImpl implements Reloadable, AutoCloseable, Do
         for (ThreadInfo threadInfo : threadMXBean.dumpAllThreads(true, true)) {
             threadDump.append(MsgUtil.threadInfoToString(threadInfo));
         }
+        threadDump.append("\n\n");
+        var deadLockedThreads = threadMXBean.findDeadlockedThreads();
+        var monitorDeadlockedThreads = threadMXBean.findMonitorDeadlockedThreads();
+        if(deadLockedThreads != null){
+            threadDump.append("Deadlocked Threads:\n");
+            for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(deadLockedThreads)) {
+                threadDump.append(MsgUtil.threadInfoToString(threadInfo));
+            }
+        }
+        if(monitorDeadlockedThreads != null){
+            threadDump.append("Monitor Deadlocked Threads:\n");
+            for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(monitorDeadlockedThreads)) {
+                threadDump.append(MsgUtil.threadInfoToString(threadInfo));
+            }
+        }
         log.info(threadDump.toString());
         registerBanWaveTimer();
         Main.getGuiManager().createNotification(Level.WARN, tlUI(Lang.BAN_WAVE_WATCH_DOG_TITLE), tlUI(Lang.BAN_WAVE_WATCH_DOG_DESCRIPTION));
