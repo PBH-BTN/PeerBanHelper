@@ -68,6 +68,11 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
         }
     }
 
+    @Override
+    public boolean isGuiAvailable() {
+        return Desktop.isDesktopSupported();
+    }
+
     private void setUIFont(String fontName) {
         Enumeration<Object> keys = UIManager.getLookAndFeelDefaults().keys();
         while (keys.hasMoreElements()) {

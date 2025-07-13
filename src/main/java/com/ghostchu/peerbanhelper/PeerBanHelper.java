@@ -38,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -117,6 +119,26 @@ public class PeerBanHelper implements Reloadable {
 
     private void checkKnownCrashes() {
         crashManager.checkCrashRecovery();
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        if (os.startsWith("win") && Main.getGuiManager().isGuiAvailable()) {
+            // Fuck awt.dll, nobody care desktop users, told user to use JBR for patch that we really need.v
+            var bean = ManagementFactory.getRuntimeMXBean();
+            if(!bean.getVmVendor().contains("JetBrains")){
+                if(!alertManager.identifierAlertExistsIncludeRead("incompatibility-jre-windows-liberica")) {
+                    alertManager.publishAlert(false, AlertLevel.WARN,
+                            "incompatibility-jre-windows-liberica",
+                            new TranslationComponent(Lang.JBR_REQUIRED_TITLE),
+                            new TranslationComponent(Lang.JBR_REQUIRED_DESCRIPTION, bean.getVmVendor(), bean.getVmVersion()));
+                    Main.getGuiManager().createDialog(Level.WARN, tlUI(new TranslationComponent(Lang.JBR_REQUIRED_TITLE)),
+                            tlUI(new TranslationComponent(Lang.JBR_REQUIRED_DESCRIPTION, bean.getVmVendor(), bean.getVmVersion())),
+                            () -> {
+                            });
+                }
+            }
+        }
+
+
+
 //        if (!crashManager.isRunningFlagExists()) return;
 //        Main.getGuiManager().createDialog(Level.WARN, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
 //            if ("SWING".equals(Main.getGuiManager().getName())) {
@@ -140,7 +162,7 @@ public class PeerBanHelper implements Reloadable {
     }
 
     private void postCompatibilityCheck() {
-        if ( ExternalSwitch.parseBoolean("pbh.forceBitnessCheckFail")) {
+        if (ExternalSwitch.parseBoolean("pbh.forceBitnessCheckFail")) {
             ExchangeMap.UNSUPPORTED_PLATFORM = true;
             ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("unsupported-platform", 10, tlUI(Lang.TITLE_INCOMPATIBLE_PLATFORM)));
             log.warn(tlUI(Lang.INCOMPATIBLE_BITNESS_LOG));
@@ -288,7 +310,6 @@ public class PeerBanHelper implements Reloadable {
     public String getWebUiUrl() {
         return "http://localhost:" + Main.getServer().getHttpdPort() + "/?token=" + UrlEncoderDecoder.encodePath(webContainer.getToken());
     }
-
 
 
     /**
