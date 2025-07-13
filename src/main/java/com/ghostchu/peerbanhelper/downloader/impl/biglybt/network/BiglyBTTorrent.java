@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader.impl.biglybt.network;
 
 import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -32,17 +33,17 @@ public final class BiglyBTTorrent implements Torrent {
     }
 
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getHash() {
+    public @NotNull String getHash() {
         return hash;
     }
 

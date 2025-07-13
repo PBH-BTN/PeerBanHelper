@@ -669,3 +669,15 @@ CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
   
   對此帶來的不便，我們深表歉意。
 BOOT_TIME: "PeerBanHelper 啟動完成，用時 {}ms"
+ECOMODE_FAILED: "Windows EcoQos 效率模式可能與您的平台不相容：{}，操作已取消"
+JBR_REQUIRED_TITLE: "Java 執行時環境不相容"
+JBR_REQUIRED_DESCRIPTION: |
+  PeerBanHelper 在 Windows 平台下需要 JetBrains Runtime (JBR) 才能正常執行。
+
+  您目前正在使用為：{} {}
+
+  對於 Eclipse Adoptium, Azul Zulu, BellSoft Liberica, Oracle/Open JDK 等其它 Java 執行時環境可能不包含 PeerBanHelper 所需要的問題的修復補丁。
+  如果出現與 awt.dll 相關的當機問題請切換到 JetBrains Runtime 或者使用帶有 Java 環境的 PeerBanHelper 安裝程式覆蓋安裝。
+  此提醒僅顯示一次。
+
+  [下載 JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime/releases)

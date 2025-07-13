@@ -1,212 +1,216 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.ProgressTracker;
-import com.github.mizosoft.methanol.WritableBodyPublisher;
-import com.google.common.io.ByteStreams;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okio.*;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedTrustManager;
-import java.io.ByteArrayInputStream;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.CookieManager;
 import java.net.ProxySelector;
-import java.net.Socket;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
-import java.util.zip.GZIPOutputStream;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
 public final class HTTPUtil {
-    private final int MAX_RESEND = 5;
-    private final CookieManager cookieManager = new CookieManager();
-    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     @Getter
     private static SSLContext ignoreSslContext;
-    private final ProgressTracker tracker = ProgressTracker.newBuilder()
-            .bytesTransferredThreshold(60 * 1024) // 60 kB
-            .timePassedThreshold(Duration.of(3, ChronoUnit.SECONDS))
-            .build();
     @Autowired(required = false)
     private ProxySelector proxySelector;
-
-    static {
-        TrustManager trustManager = new X509ExtendedTrustManager() {
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[]{};
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
-            }
-        };
-        try {
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
-            ignoreSslContext = sslContext;
-        } catch (Exception e) {
-            log.error(tlUI(Lang.MODULE_AP_SSL_CONTEXT_FAILURE), e);
-        }
-    }
 
     public HTTPUtil() {
 
     }
 
-    public Methanol.Builder newBuilder() {
-        var builder = Methanol.newBuilder()
-                .executor(executor)
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .connectTimeout(Duration.of(15, ChronoUnit.SECONDS))
-                .headersTimeout(Duration.of(25, ChronoUnit.SECONDS), CommonUtil.getScheduler())
-                .cookieHandler(cookieManager);
-        if(proxySelector != null){
-            builder.proxy(proxySelector);
-        }
-        return builder;
+    @SneakyThrows
+    public OkHttpClient.Builder disableSSLVerify(OkHttpClient.Builder builder, boolean apply) {
+        if(!apply) return  builder;
+        return builder.sslSocketFactory(getIgnoreInitedSslContext().getSocketFactory(), IGNORE_SSL_TRUST_MANAGER_X509)
+                .hostnameVerifier(getIgnoreSslHostnameVerifier());
     }
 
-    public HttpClient getHttpClient(boolean ignoreSSL) {
-        var builder = newBuilder();
-        if (ignoreSSL) {
-            builder.sslContext(ignoreSslContext);
+    public OkHttpClient.Builder addProgressTracker(OkHttpClient.Builder builder) {
+        return addProgressTracker(builder, progressListener);
+    }
+
+    public OkHttpClient.Builder addProgressTracker(OkHttpClient.Builder builder, ProgressListener customProgressListener) {
+        return builder.addNetworkInterceptor(chain -> {
+            Response originalResponse = chain.proceed(chain.request());
+            return originalResponse.newBuilder()
+                    .body(new ProgressResponseBody(originalResponse.body(), customProgressListener))
+                    .build();
+        });
+    }
+
+    public static int responseCount(Response response) {
+        int result = 1;
+        while ((response = response.priorResponse()) != null) {
+            result++;
         }
+        return result;
+    }
+
+    public OkHttpClient.Builder newBuilder() {
+        var okHttpBuilder = new OkHttpClient.Builder()
+                .dispatcher(new Dispatcher(Executors.newVirtualThreadPerTaskExecutor()))
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .fastFallback(true)
+                .retryOnConnectionFailure(true)
+                .cookieJar(new PBHCookieJar())
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .header("User-Agent", Main.getUserAgent());
+                    return chain.proceed(requestBuilder.build());
+                });
         if (proxySelector != null) {
-            builder.proxy(proxySelector);
+            okHttpBuilder.proxySelector(proxySelector);
         }
-        return builder.build();
-    }
-
-    public WritableBodyPublisher gzipBody(byte[] bytes) {
-        WritableBodyPublisher requestBody = WritableBodyPublisher.create();
-        try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream());
-             InputStream in = new ByteArrayInputStream(bytes)) {
-            ByteStreams.copy(in, gzipOut);
-        } catch (IOException ioe) {
-            requestBody.closeExceptionally(ioe);
-            log.error("Failed to compress request body", ioe);
+        if(ExternalSwitch.parseBoolean("pbh.http.logging", false)) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor(log::debug);
+            logging.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+            okHttpBuilder.addNetworkInterceptor(logging);
         }
-        return requestBody;
+        return okHttpBuilder;
     }
 
-    public WritableBodyPublisher gzipBody(InputStream is) {
-        WritableBodyPublisher requestBody = WritableBodyPublisher.create();
-        try (GZIPOutputStream gzipOut = new GZIPOutputStream(requestBody.outputStream())) {
-            ByteStreams.copy(is, gzipOut);
-        } catch (IOException ioe) {
-            requestBody.closeExceptionally(ioe);
-            log.error("Failed to compress request body", ioe);
+    /**
+     * X509TrustManager instance which ignored SSL certification
+     */
+    public static final X509TrustManager IGNORE_SSL_TRUST_MANAGER_X509 = new X509TrustManager() {
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) {
         }
-        return requestBody;
-    }
 
-    public void onProgress(ProgressTracker.Progress progress) {
-        if (progress.determinate()) { // Overall progress can be measured
-            var percent = 100 * progress.value();
-            log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, progress.totalBytesTransferred(), progress.contentLength(), String.format("%.2f", percent)));
-        } else {
-            log.info(tlUI(Lang.DOWNLOAD_PROGRESS, progress.totalBytesTransferred()));
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) {
         }
-        if (progress.done()) {
-            log.info(tlUI(Lang.DOWNLOAD_COMPLETED, progress.totalBytesTransferred()));
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[]{};
         }
+    };
+
+    /**
+     * Get initialized SSLContext instance which ignored SSL certification
+     *
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     */
+    public static SSLContext getIgnoreInitedSslContext() throws NoSuchAlgorithmException, KeyManagementException {
+        var sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, new TrustManager[]{IGNORE_SSL_TRUST_MANAGER_X509}, new SecureRandom());
+        return sslContext;
     }
 
-    public <T> CompletableFuture<HttpResponse<T>> nonRetryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
-        return client.sendAsync(request, bodyHandler)
-                .handleAsync((r, t) -> tryResend(client, request, bodyHandler, MAX_RESEND, r, t), executor)
-                .thenCompose(Function.identity());
-
+    /**
+     * Get HostnameVerifier which ignored SSL certification
+     *
+     * @return
+     */
+    public static HostnameVerifier getIgnoreSslHostnameVerifier() {
+        return (arg0, arg1) -> true;
     }
 
-    public <T> CompletableFuture<HttpResponse<T>> retryableSend(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
-        return client.sendAsync(request, bodyHandler)
-                .handleAsync((r, t) -> tryResend(client, request, bodyHandler, 1, r, t), executor)
-                .thenCompose(Function.identity());
+    private static class ProgressResponseBody extends ResponseBody {
+        private final ResponseBody responseBody;
+        private final ProgressListener progressListener;
+        private BufferedSource bufferedSource;
 
-    }
-
-    public <T> CompletableFuture<HttpResponse<T>> retryableSendProgressTracking(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) {
-        bodyHandler = tracker.tracking(bodyHandler, this::onProgress);
-        HttpResponse.BodyHandler<T> finalBodyHandler = bodyHandler;
-        return client.sendAsync(request, bodyHandler)
-                .handleAsync((r, t) -> tryResend(client, request, finalBodyHandler, 1, r, t), executor)
-                .thenCompose(Function.identity());
-
-    }
-
-
-    public boolean shouldRetry(HttpResponse<?> r, Throwable t, int count) {
-        if (count >= MAX_RESEND) {
-            return false;
+        ProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener) {
+            this.responseBody = responseBody;
+            this.progressListener = progressListener;
         }
-        if (r != null) {
-            return r.statusCode() == 500
-                    || r.statusCode() == 502
-                    || r.statusCode() == 503
-                    || r.statusCode() == 504;
-        }
-        return false;
-    }
 
-    public <T> CompletableFuture<HttpResponse<T>> tryResend(HttpClient client, HttpRequest request,
-                                                            HttpResponse.BodyHandler<T> handler, int count,
-                                                            HttpResponse<T> resp, Throwable t) {
-        if (shouldRetry(resp, t, count)) {
-            if (resp == null) {
-                log.warn("Request to {} failed, retry {}/{}: {}", request.uri().toString(), count, MAX_RESEND, t.getClass().getName() + ": " + t.getMessage());
-            } else {
-                log.warn("Request to {} failed, retry {}/{}: {} ", request.uri().toString(), count, MAX_RESEND, resp.statusCode() + " - " + resp.body());
+        @Override
+        public MediaType contentType() {
+            return responseBody.contentType();
+        }
+
+        @Override
+        public long contentLength() {
+            return responseBody.contentLength();
+        }
+
+        @Override
+        public @NotNull BufferedSource source() {
+            if (bufferedSource == null) {
+                bufferedSource = Okio.buffer(source(responseBody.source()));
             }
-            return client.sendAsync(request, handler)
-                    .handleAsync((r, x) -> tryResend(client, request, handler, count + 1, r, x), executor)
-                    .thenCompose(Function.identity());
-        } else if (t != null) {
-            return CompletableFuture.failedFuture(t);
-        } else {
-            return CompletableFuture.completedFuture(resp);
+            return bufferedSource;
+        }
+
+        private Source source(Source source) {
+            return new ForwardingSource(source) {
+                long totalBytesRead = 0L;
+
+                @Override
+                public long read(@NotNull Buffer sink, long byteCount) throws IOException {
+                    long bytesRead = super.read(sink, byteCount);
+                    // read() returns the number of bytes read, or -1 if this source is exhausted.
+                    totalBytesRead += bytesRead != -1 ? bytesRead : 0;
+                    progressListener.update(totalBytesRead, responseBody.contentLength(), bytesRead == -1);
+                    return bytesRead;
+                }
+            };
         }
     }
 
+
+    public interface ProgressListener {
+        void update(long bytesRead, long contentLength, boolean done);
+    }
+
+    final ProgressListener progressListener = (bytesRead, contentLength, done) -> {
+        if (done) {
+            log.info(tlUI(Lang.DOWNLOAD_COMPLETED, bytesRead));
+        } else {
+            if (contentLength != -1) {
+                log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, bytesRead, contentLength, String.format("%.2f", ((100.0f * bytesRead) / contentLength))));
+            } else {
+                log.info(tlUI(Lang.DOWNLOAD_PROGRESS, bytesRead));
+            }
+        }
+    };
+
+    public static class PBHCookieJar implements CookieJar {
+        private final Map<String, List<Cookie>> cookieStore = new ConcurrentHashMap<>();
+
+        @Override
+        public void saveFromResponse(HttpUrl httpUrl, @NotNull List<Cookie> list) {
+            cookieStore.put(httpUrl.host(), list);
+        }
+
+        @Override
+        public @NotNull List<Cookie> loadForRequest(HttpUrl httpUrl) {
+            List<Cookie> cookies = cookieStore.get(httpUrl.host());
+            return cookies != null ? cookies : new ArrayList<>();
+        }
+    }
 }

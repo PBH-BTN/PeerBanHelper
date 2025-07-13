@@ -7,6 +7,7 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Setter
@@ -45,7 +46,7 @@ public final class QBittorrentEEPeer implements Peer {
     }
 
     @Override
-    public PeerAddress getPeerAddress() {
+    public @NotNull PeerAddress getPeerAddress() {
         if (this.peerAddress == null) {
             this.peerAddress = new PeerAddress(ip, port);
         }
@@ -100,7 +101,7 @@ public final class QBittorrentEEPeer implements Peer {
     }
 
     @Override
-    public String getRawIp() {
+    public @NotNull String getRawIp() {
         return rawIp == null ? ip : rawIp;
     }
 

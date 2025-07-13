@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ghostchu.peerbanhelper</groupId>
     <artifactId>peerbanhelper</artifactId>
-    <version>8.0.4</version>
+    <version>8.0.5</version>
     <packaging>jar</packaging>
 
     <name>PeerBanHelper</name>
@@ -18,7 +18,6 @@
         <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
         <install4j.home>/opt/install4j</install4j.home>
         <flatlafVersion>3.6</flatlafVersion>
-        <swt.version>3.130.0</swt.version>
         <ormlite.version>6.1</ormlite.version>
     </properties>
 
@@ -153,7 +152,8 @@
                 </executions>
                 <configuration>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
+                    </generateGitPropertiesFilename>
                     <commitIdGenerationMode>full</commitIdGenerationMode>
                 </configuration>
             </plugin>
@@ -356,6 +356,14 @@
                     <artifactId>oshi-core</artifactId>
                     <groupId>com.github.oshi</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>jna-platform</artifactId>
+                    <groupId>net.java.dev.jna</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jna</artifactId>
+                    <groupId>net.java.dev.jna</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-email -->
@@ -402,6 +410,16 @@
             <artifactId>oshi-core</artifactId>
             <!-- DO NOT UPDATE, Keep sync with jSystemThemeDetector -->
             <version>5.8.6</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jna-platform</artifactId>
+                    <groupId>net.java.dev.jna</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jna</artifactId>
+                    <groupId>net.java.dev.jna</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.commonmark</groupId>
@@ -424,13 +442,6 @@
             <artifactId>flatlaf-extras</artifactId>
             <version>3.6</version>
         </dependency>
-        <!--
-        https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.win32.win32.x86_64 -->
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
-            <version>${swt.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
@@ -445,11 +456,6 @@
             <groupId>com.ghostchu</groupId>
             <artifactId>simplereloadlib</artifactId>
             <version>1.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mizosoft.methanol</groupId>
-            <artifactId>methanol</artifactId>
-            <version>1.8.3</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -514,11 +520,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.nebula.widgets</groupId>
-            <artifactId>grid</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.5.18</version>
@@ -527,6 +528,27 @@
             <groupId>com.spotify</groupId>
             <artifactId>completable-futures</artifactId>
             <version>0.3.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+        <!-- 使用 OKHTTP，因为 Java 21 的 HttpClient 概率出现 selector manager closed 错误 -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>logging-interceptor</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.10.0</version> </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.10.0</version>
         </dependency>
     </dependencies>
 </project>

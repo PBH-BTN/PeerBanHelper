@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.bittorrent.torrent.Torrent;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.bittorrent.tracker.TrackerImpl;
 import com.ghostchu.peerbanhelper.downloader.*;
+import com.ghostchu.peerbanhelper.downloader.exception.DownloaderRequestException;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
@@ -26,167 +27,173 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MoreBodyHandlers;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.vdurmont.semver4j.Semver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Reader;
+import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 public final class BiglyBT extends AbstractDownloader {
     private final String apiEndpoint;
-    private final HttpClient httpClient;
+    private final OkHttpClient httpClient;
     private final Config config;
     private final String connectorPayload;
     private Semver semver = new Semver("0.0.0");
 
-    public BiglyBT(String uuid, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public BiglyBT(String uuid, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
         super(uuid, alertManager);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        Methanol.Builder builder = httpBuilder
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
-                .version(HttpClient.Version.valueOf(config.getHttpVersion()))
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .defaultHeader("Authorization", "Bearer " + config.getToken())
-                .connectTimeout(Duration.of(10,ChronoUnit.SECONDS))
-                .requestTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .cookieHandler(cm);
-        if (!config.isVerifySsl() && HTTPUtil.getIgnoreSslContext() != null) {
-            builder.sslContext(HTTPUtil.getIgnoreSslContext());
-        }
+
+        var builder = httpUtil.newBuilder()
+                .addInterceptor(chain -> {
+                    Request originalRequest = chain.request();
+                    Request newRequest = originalRequest.newBuilder()
+                            .header("Content-Type", "application/json")
+                            .header("Authorization", "Bearer " + config.getToken())
+                            .build();
+                    return chain.proceed(newRequest);
+                });
+        httpUtil.disableSSLVerify(builder, !config.isVerifySsl());
         this.httpClient = builder.build();
         this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return config.getName();
     }
 
-    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new BiglyBT(id, config, alertManager, httpBuilder);
+        return new BiglyBT(id, config, alertManager, httpUtil);
     }
 
-    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
         Config config = Config.readFromYaml(section, id);
-        return new BiglyBT(id, config, alertManager, httpBuilder);
+        return new BiglyBT(id, config, alertManager, httpUtil);
     }
 
     @Override
-    public List<DownloaderFeatureFlag> getFeatureFlags() {
+    public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
     }
 
     @Override
     public DownloaderSpeedLimiter getSpeedLimiter() {
-        HttpResponse<String> resp;
-        try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/speedlimiter"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+        Request request = new Request.Builder().url(apiEndpoint + "/speedlimiter").get().build();
+        try (Response resp = httpClient.newCall(request).execute()) {
+            if (!resp.isSuccessful()) {
+                throw new DownloaderRequestException(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), resp.code(), resp.body()));
+            }
+            CurrentSpeedLimiterBean currentSpeedLimit = JsonUtil.getGson().fromJson(resp.body().string(), CurrentSpeedLimiterBean.class);
+            return new DownloaderSpeedLimiter(currentSpeedLimit.getUpload(), currentSpeedLimit.getDownload());
+        } catch (IOException e) {
+            throw new DownloaderRequestException(e);
         }
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), resp.statusCode(), resp.body()));
-        }
-        CurrentSpeedLimiterBean currentSpeedLimit = JsonUtil.getGson().fromJson(resp.body(), CurrentSpeedLimiterBean.class);
-        return new DownloaderSpeedLimiter(currentSpeedLimit.getUpload(), currentSpeedLimit.getDownload());
     }
 
     @Override
     public void setSpeedLimiter(DownloaderSpeedLimiter speedLimiter) {
         SetSpeedLimiterBean bean = new SetSpeedLimiterBean(speedLimiter.upload(), speedLimiter.download());
-        try {
-            HttpResponse<String> request = httpClient.send(MutableRequest
-                            .POST(apiEndpoint + "/speedlimiter", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
-                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), request.statusCode(), request.body()));
-                throw new IllegalStateException("Save BiglyBT SpeedLimiter error: statusCode=" + request.statusCode());
+        RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + "/speedlimiter")
+                .post(requestBody)
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), response.code(), response.body().string()));
+                throw new DownloaderRequestException("Save BiglyBT SpeedLimiter error: statusCode=" + response.code());
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), "N/A", e.getMessage()), e);
             throw new IllegalStateException(e);
         }
+
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
     @Override
     public DownloaderLoginResult login0() {
-        HttpResponse<String> resp;
         try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/metadata"), HttpResponse.BodyHandlers.ofString());
-            if (resp.statusCode() == 200) {
-                MetadataCallbackBean metadataCallbackBean = JsonUtil.standard().fromJson(resp.body(), MetadataCallbackBean.class);
-                // 验证版本号
-                var version = metadataCallbackBean.getPluginVersion();
-                this.semver = new Semver(version);
-                // 检查是否大于等于 1.2.8
-                if (this.semver.isLowerThan("1.3.0")) {
-                    return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.2.9"));
+            Request request = new Request.Builder().url(apiEndpoint + "/metadata").get().build();
+            try (Response resp = httpClient.newCall(request).execute()) {
+                if (resp.isSuccessful()) {
+                    MetadataCallbackBean metadataCallbackBean = JsonUtil.standard().fromJson(resp.body().string(), MetadataCallbackBean.class);
+                    // 验证版本号
+                    var version = metadataCallbackBean.getPluginVersion();
+                    this.semver = new Semver(version);
+                    // 检查是否大于等于 1.2.8
+                    if (this.semver.isLowerThan("1.3.0")) {
+                        return new DownloaderLoginResult(DownloaderLoginResult.Status.REQUIRE_TAKE_ACTIONS, new TranslationComponent(Lang.DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION, "1.2.9"));
+                    }
+                    RequestBody requestBody = RequestBody.create(connectorPayload, MediaType.get("application/json"));
+                    Request setConnectorRequest = new Request.Builder()
+                            .url(apiEndpoint + "/setconnector")
+                            .post(requestBody)
+                            .build();
+                    try {
+                        httpClient.newCall(setConnectorRequest).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                log.warn("Unable to set connector for BiglyBT: {}", e.getMessage(), e);
+                            }
+
+                            @Override
+                            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                                response.close();
+                            }
+                        });
+                    } catch (Exception ignored) {
+                    }
+                    return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
                 }
-                MutableRequest request = MutableRequest.POST(apiEndpoint + "/setconnector", HttpRequest.BodyPublishers.ofString(connectorPayload));
-                try {
-                    httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-                } catch (Exception ignored) {
+                if (resp.code() == 403) {
+                    return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
                 }
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.SUCCESS, new TranslationComponent(Lang.STATUS_TEXT_OK));
+                return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, "statusCode=" + resp.code()));
             }
-            if (resp.statusCode() == 403) {
-                return new DownloaderLoginResult(DownloaderLoginResult.Status.INCORRECT_CREDENTIAL, new TranslationComponent(Lang.DOWNLOADER_LOGIN_INCORRECT_CRED));
-            }
-            return new DownloaderLoginResult(DownloaderLoginResult.Status.EXCEPTION, new TranslationComponent(Lang.DOWNLOADER_LOGIN_EXCEPTION, "statusCode=" + resp.statusCode()));
         } catch (Exception e) {
             return new DownloaderLoginResult(DownloaderLoginResult.Status.NETWORK_ERROR, new TranslationComponent(Lang.DOWNLOADER_LOGIN_IO_EXCEPTION, e.getClass().getName() + ": " + e.getMessage()));
         }
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return apiEndpoint;
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "BiglyBT";
     }
 
@@ -211,55 +218,56 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         return fetchTorrents(List.of(BiglyBTDownloadStateConst.ST_DOWNLOADING, BiglyBTDownloadStateConst.ST_SEEDING, BiglyBTDownloadStateConst.ST_ERROR), !config.isIgnorePrivate());
     }
 
     @Override
-    public List<Torrent> getAllTorrents() {
+    public @NotNull List<Torrent> getAllTorrents() {
         return fetchTorrents(Collections.emptyList(), true);
     }
 
     private List<Torrent> fetchTorrents(List<Object> filtersUrlEncoded, boolean includePrivate) {
-        HttpResponse<Reader> request;
-        try {
-            StringBuilder urlBuilder = new StringBuilder(apiEndpoint + "/downloads");
-            if (!filtersUrlEncoded.isEmpty()) {
-                urlBuilder.append("?filter=");
-                urlBuilder.append(String.join("&filter=", filtersUrlEncoded.stream().map(Object::toString).toArray(String[]::new)));
+        StringBuilder urlBuilder = new StringBuilder(apiEndpoint + "/downloads");
+        if (!filtersUrlEncoded.isEmpty()) {
+            urlBuilder.append("?filter=");
+            urlBuilder.append(String.join("&filter=", filtersUrlEncoded.stream().map(Object::toString).toArray(String[]::new)));
+        }
+        Request request = new Request.Builder()
+                .url(urlBuilder.toString())
+                .get()
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, response.code(), response.body().string()));
             }
-            request = httpClient.send(MutableRequest.GET(urlBuilder.toString()),
-                    MoreBodyHandlers.ofReader());
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (request.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_INCORRECT_RESPONSE, request.statusCode(), request.body()));
-        }
-        List<DownloadRecord> torrentDetail = JsonUtil.getGson().fromJson(request.body(), new TypeToken<List<DownloadRecord>>() {
-        }.getType());
-        List<Torrent> torrents = new ArrayList<>();
-        for (DownloadRecord detail : torrentDetail) {
-            if (!includePrivate && detail.getTorrent().isPrivateTorrent()) {
-                continue;
+            List<DownloadRecord> torrentDetail = JsonUtil.getGson().fromJson(response.body().string(), new TypeToken<List<DownloadRecord>>() {
+            }.getType());
+            List<Torrent> torrents = new ArrayList<>();
+            for (DownloadRecord detail : torrentDetail) {
+                if (!includePrivate && detail.getTorrent().isPrivateTorrent()) {
+                    continue;
+                }
+                torrents.add(new BiglyBTTorrent(
+                        detail.getTorrent().getInfoHash(),
+                        detail.getName(),
+                        detail.getTorrent().getInfoHash(),
+                        detail.getTorrent().getSize(),
+                        detail.getTorrent().getSize() - detail.getStats().getRemainingBytes(), // 种子总大小 减去 (包含未选择文件的)尚未下载大小 等于 已下载内容大小
+                        detail.getStats().getCompletedInThousandNotation() / 1000d,
+                        detail.getStats().getRtUploadSpeed(),
+                        detail.getStats().getRtDownloadSpeed(),
+                        detail.getTorrent().isPrivateTorrent(),
+                        detail.getTrackers()));
             }
-            torrents.add(new BiglyBTTorrent(
-                    detail.getTorrent().getInfoHash(),
-                    detail.getName(),
-                    detail.getTorrent().getInfoHash(),
-                    detail.getTorrent().getSize(),
-                    detail.getTorrent().getSize() - detail.getStats().getRemainingBytes(), // 种子总大小 减去 (包含未选择文件的)尚未下载大小 等于 已下载内容大小
-                    detail.getStats().getCompletedInThousandNotation() / 1000d,
-                    detail.getStats().getRtUploadSpeed(),
-                    detail.getStats().getRtDownloadSpeed(),
-                    detail.getTorrent().isPrivateTorrent(),
-                    detail.getTrackers()));
+            return torrents;
+        } catch (IOException e) {
+            throw new DownloaderRequestException(e);
         }
-        return torrents;
     }
 
     @Override
-    public List<Tracker> getTrackers(Torrent torrent) {
+    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
         BiglyBTTorrent biglyBTTorrent = (BiglyBTTorrent) torrent;
         if (biglyBTTorrent.getTrackers() == null) {
             return Collections.emptyList();
@@ -268,93 +276,98 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
         StringBuilder sb = new StringBuilder();
         for (Tracker tracker : trackers) {
             tracker.getTrackersInGroup().forEach(t -> sb.append(t).append("\n"));
             sb.append("\n");
         }
-        HttpResponse<String> resp;
-        try {
-            resp = httpClient.send(
-                    MutableRequest.PATCH(apiEndpoint + "/download/" + torrent.getId() + "/trackers",
-                            HttpRequest.BodyPublishers.ofString(sb.toString().trim())),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.TRACKER_FAILED_TO_UPDATE_TRACKER, torrent.getHash(), resp.statusCode(), resp.body()));
+        RequestBody requestBody = RequestBody.create(sb.toString().trim(), MediaType.get("text/plain"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + "/download/" + torrent.getId() + "/trackers")
+                .patch(requestBody)
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new DownloaderRequestException(tlUI(Lang.TRACKER_FAILED_TO_UPDATE_TRACKER, torrent.getHash(), response.code(), response.body().string()));
+            }
+        } catch (IOException e) {
+            throw new DownloaderRequestException(e);
         }
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
-        HttpResponse<String> resp;
-        try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/statistics"),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+    public @NotNull DownloaderStatistics getStatistics() {
+        Request request = new Request.Builder()
+                .url(apiEndpoint + "/statistics")
+                .get()
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, response.code(), response.body().string()));
+            }
+            StatisticsRecord statisticsRecord = JsonUtil.getGson().fromJson(response.body().string(), StatisticsRecord.class);
+            return new DownloaderStatistics(statisticsRecord.getOverallDataBytesSent(), statisticsRecord.getOverallDataBytesReceived());
+        } catch (IOException e) {
+            throw new DownloaderRequestException(e);
         }
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_FAILED_REQUEST_STATISTICS, resp.statusCode(), resp.body()));
-        }
-        StatisticsRecord statisticsRecord = JsonUtil.getGson().fromJson(resp.body(), StatisticsRecord.class);
-        return new DownloaderStatistics(statisticsRecord.getOverallDataBytesSent(), statisticsRecord.getOverallDataBytesReceived());
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
-        HttpResponse<Reader> resp;
-        try {
-            resp = httpClient.send(MutableRequest.GET(apiEndpoint + "/download/" + torrent.getId() + "/peers"),
-                    MoreBodyHandlers.ofReader());
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        if (resp.statusCode() == 404) { // 种子被删除或者种子错误时会返回 404
-            return new ArrayList<>(); // 不能为不可变列表
-        }
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, resp.statusCode(), resp.body()));
-        }
-        PeerManagerRecord peerManagerRecord = JsonUtil.getGson().fromJson(resp.body(), PeerManagerRecord.class);
-        List<Peer> peersList = new ArrayList<>();
-        for (PeerRecord peer : peerManagerRecord.getPeers()) {
-            var peerId = ByteUtil.hexToByteArray(peer.getPeerId());
-            if (peer.getIp() == null || peer.getIp().isBlank()) {
-                continue;
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
+        Request request = new Request.Builder()
+                .url(apiEndpoint + "/download/" + torrent.getId() + "/peers")
+                .get()
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (response.code() == 404) { // 种子被删除或者种子错误时会返回 404
+                return new ArrayList<>(); // 不能为不可变列表
             }
-            if(peer.getIp().startsWith("/")){
-                peer.setIp(peer.getIp().substring(1));
+            if (!response.isSuccessful()) {
+                throw new IllegalStateException(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_REQUEST_PEERS_LIST_IN_TORRENT, response.code(), response.body().string()));
             }
-            peersList.add(new PeerImpl(
-                    new PeerAddress(peer.getIp(), peer.getPort()),
-                    peer.getIp(),
-                    peerId,
-                    peer.getClient(),
-                    peer.getStats().getRtDownloadSpeed(),
-                    peer.getStats().getTotalReceived(),
-                    peer.getStats().getRtUploadSpeed(),
-                    peer.getStats().getTotalSent(),
-                    peer.getPercentDoneInThousandNotation() / 1000d,
-                    null,
-                    peer.getState() != 30 && peer.getState() != 40
-            ));
+
+            PeerManagerRecord peerManagerRecord = JsonUtil.getGson().fromJson(response.body().string(), PeerManagerRecord.class);
+            List<Peer> peersList = new ArrayList<>();
+            for (PeerRecord peer : peerManagerRecord.getPeers()) {
+                var peerId = ByteUtil.hexToByteArray(peer.getPeerId());
+                if (peer.getIp() == null || peer.getIp().isBlank()) {
+                    continue;
+                }
+                if (peer.getIp().startsWith("/")) {
+                    peer.setIp(peer.getIp().substring(1));
+                }
+                peersList.add(new PeerImpl(
+                        new PeerAddress(peer.getIp(), peer.getPort()),
+                        peer.getIp(),
+                        peerId,
+                        peer.getClient(),
+                        peer.getStats().getRtDownloadSpeed(),
+                        peer.getStats().getTotalReceived(),
+                        peer.getStats().getRtUploadSpeed(),
+                        peer.getStats().getTotalSent(),
+                        peer.getPercentDoneInThousandNotation() / 1000d,
+                        null,
+                        peer.getState() != 30 && peer.getState() != 40
+                ));
+            }
+            return peersList;
+        } catch (IOException e) {
+            throw new DownloaderRequestException(e);
         }
-        return peersList;
     }
 
     private void setBanListIncrement(Collection<BanMetadata> added) {
         BanBean bean = new BanBean(added.stream().map(b -> b.getPeer().getAddress().getIp()).distinct().toList());
-        try {
-            HttpResponse<String> request = httpClient.send(MutableRequest
-                            .POST(apiEndpoint + "/bans", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
-                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-                throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
+        RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + "/bans")
+                .post(requestBody)
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));
+                throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + response.code());
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_INCREAMENT_BAN_FAILED, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);
@@ -364,15 +377,15 @@ public final class BiglyBT extends AbstractDownloader {
 
     private void setBanListFull(Collection<PeerAddress> peerAddresses) {
         BanListReplacementBean bean = new BanListReplacementBean(peerAddresses.stream().map(PeerAddress::getIp).distinct().toList(), false);
-        try {
-            HttpResponse<String> request = httpClient.send(MutableRequest.newBuilder()
-                            .uri(URI.create(apiEndpoint + "/bans"))
-                            .method("PUT", HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(bean)))
-                            .build()
-                    , HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (request.statusCode() != 200) {
-                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, getName(), apiEndpoint, request.statusCode(), "HTTP ERROR", request.body()));
-                throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + request.statusCode());
+        RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + "/bans")
+                .put(requestBody)
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, getName(), apiEndpoint, response.code(), "HTTP ERROR", response.body().string()));
+                throw new IllegalStateException("Save BiglyBT banlist error: statusCode=" + response.code());
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.DOWNLOADER_BIGLYBT_FAILED_SAVE_BANLIST, getName(), apiEndpoint, "N/A", e.getClass().getName(), e.getMessage()), e);

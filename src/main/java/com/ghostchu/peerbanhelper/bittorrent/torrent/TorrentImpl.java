@@ -1,6 +1,7 @@
 package com.ghostchu.peerbanhelper.bittorrent.torrent;
 
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @Setter
 public final class TorrentImpl implements Torrent {
@@ -27,17 +28,17 @@ public final class TorrentImpl implements Torrent {
     }
 
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getHash() {
+    public @NotNull String getHash() {
         return hash;
     }
 

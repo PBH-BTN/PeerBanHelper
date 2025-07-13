@@ -21,7 +21,7 @@
     @page-size-change="changePageSize"
   >
     <template #downloader="{ record }">
-      <a-tag :color="getColor(record.downloader)">{{ record.downloader }}</a-tag>
+      <a-tag :color="getColor(record.downloader.id)">{{ record.downloader.name }}</a-tag>
     </template>
     <template #peerId="{ record }">
       <p>

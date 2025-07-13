@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.Peer;
 import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
+import org.jetbrains.annotations.NotNull;
 
 public final class TRPeer implements Peer {
 
@@ -15,7 +16,7 @@ public final class TRPeer implements Peer {
     }
 
     @Override
-    public PeerAddress getPeerAddress() {
+    public @NotNull PeerAddress getPeerAddress() {
         if (this.peerAddress == null) {
             this.peerAddress = new PeerAddress(backend.getAddress(), backend.getPort());
         }
@@ -68,7 +69,7 @@ public final class TRPeer implements Peer {
     }
 
     @Override
-    public String getRawIp() {
+    public @NotNull String getRawIp() {
         return backend.getAddress();
     }
 

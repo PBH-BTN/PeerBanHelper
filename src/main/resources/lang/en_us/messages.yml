@@ -658,3 +658,15 @@ CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
   
   We apologize for any inconvenience caused.
 BOOT_TIME: "PeerBanHelper started in {}ms"
+ECOMODE_FAILED: "Windows EcoQos may incompatible with your platform: {}, operation cancelled"
+JBR_REQUIRED_TITLE: "Java Runtime Environment Incompatible"
+JBR_REQUIRED_DESCRIPTION: |
+  PeerBanHelper requires JetBrains Runtime (JBR) to run properly on Windows platforms.
+
+  You are currently using: {} {}
+
+  Other Java runtime environments such as Eclipse Adoptium, Azul Zulu, BellSoft Liberica, Oracle/Open JDK may not include patches for issues that PeerBanHelper needs.
+  If you experience crashes related to awt.dll, please switch to JetBrains Runtime or use the PeerBanHelper installer with bundled Java environment.
+  This reminder will only be shown once.
+
+  [Download JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime/releases)

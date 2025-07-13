@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.downloader;
 
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 
 public record DownloaderLoginResult(@Getter com.ghostchu.peerbanhelper.downloader.DownloaderLoginResult.Status status,
@@ -21,7 +22,7 @@ public record DownloaderLoginResult(@Getter com.ghostchu.peerbanhelper.downloade
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "DownloaderLoginResult{" +
                 "status=" + status +
                 ", message=" + message +

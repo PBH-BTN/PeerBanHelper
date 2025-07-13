@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.metric.impl.inmemory;
 import com.ghostchu.peerbanhelper.metric.BasicMetrics;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 // 简易记录，后续看情况添加 SQLite 数据库记录更详细的信息
@@ -45,7 +46,7 @@ public final class InMemoryMetrics implements BasicMetrics {
     }
 
     @Override
-    public synchronized void recordPeerBan(PeerAddress address, BanMetadata metadata) {
+    public synchronized void recordPeerBan( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }
@@ -55,7 +56,7 @@ public final class InMemoryMetrics implements BasicMetrics {
     }
 
     @Override
-    public synchronized void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
+    public synchronized void recordPeerUnban( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }
