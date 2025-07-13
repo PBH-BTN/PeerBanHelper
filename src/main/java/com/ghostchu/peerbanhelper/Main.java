@@ -332,7 +332,9 @@ public class Main {
         shutdownThread.setDaemon(false);
         shutdownThread.setName("ShutdownThread");
         Runtime.getRuntime().addShutdownHook(shutdownThread);
-    }    private static void initGUI(String[] args) {
+    }
+
+    private static void initGUI(String[] args) {
         String guiType = mainConfig.getString("gui", "auto");
         if ("auto".equals(guiType)) guiType = "swing";
 
@@ -348,9 +350,9 @@ public class Main {
         }
 
         switch (guiType) {
-            case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
             //case "qt" -> guiManager = new PBHGuiManager(new com.ghostchu.peerbanhelper.gui.impl.qt.QtGuiImpl(args));
-            default -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
+            case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
+            default -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
         }
 
         guiManager.setup();
