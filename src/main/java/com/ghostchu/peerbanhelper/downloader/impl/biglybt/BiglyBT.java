@@ -167,7 +167,7 @@ public final class BiglyBT extends AbstractDownloader {
 
                             @Override
                             public void onResponse(@NotNull Call call, @NotNull Response response) {
-
+                                response.close();
                             }
                         });
                     } catch (Exception ignored) {
