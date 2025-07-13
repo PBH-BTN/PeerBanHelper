@@ -179,6 +179,11 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         var queryWhere = queryBuilder.where().eq("torrent_id", t);
         queryBuilder.setWhere(queryWhere);
         Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);
+        var results = page.getResults();
+        for (PeerRecordEntity result : results) {
+            result.setDownloader(downloaderManager.getDownloadInfo(result.getDownloader()).name());
+        }
+        page.setResults(results);
         ctx.json(new StdResp(true, null, page));
     }
 
