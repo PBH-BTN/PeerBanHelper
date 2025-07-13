@@ -8,7 +8,6 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiBridge;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingTray;
 import com.ghostchu.peerbanhelper.gui.impl.swing.mainwindow.SwingMainWindow;
 import com.ghostchu.peerbanhelper.text.Lang;
-import com.ghostchu.peerbanhelper.util.CommonUtil;
 import com.google.common.eventbus.Subscribe;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +38,8 @@ public class TrayMenu {
     @Subscribe
     public void onPeerBanHelperStarted(PBHServerStartedEvent event) {
         this.bridge = Main.getApplicationContext().getBean(PBHGuiBridge.class);
-        CommonUtil.getScheduler().scheduleAtFixedRate(this::updateTrayMenus, 0, 1, java.util.concurrent.TimeUnit.SECONDS);
+        SwingUtilities.invokeLater(this::updateTrayMenus);
+        //CommonUtil.getScheduler().scheduleAtFixedRate(this::updateTrayMenus, 0, 1, java.util.concurrent.TimeUnit.SECONDS);
     }
 
     private void setupSystemTray() {
