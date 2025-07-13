@@ -92,7 +92,7 @@ public final class BtnNetwork implements Reloadable {
 
     @Override
     public ReloadResult reloadModule() throws Exception {
-        reloadConfig();
+        new Thread(this::reloadConfig).start();
         return Reloadable.super.reloadModule();
     }
 

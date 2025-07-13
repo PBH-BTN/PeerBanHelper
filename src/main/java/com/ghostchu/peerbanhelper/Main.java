@@ -179,7 +179,7 @@ public class Main {
         }
 
         try {
-            var targetLevel = ExternalSwitch.parse("pbh.log.level", Main.getMeta().isSnapshotOrBeta() ? "DEBUG" : "INFO");
+            var targetLevel = ExternalSwitch.parse("pbh.log.level");
             if (targetLevel != null) {
                 ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
                 rootLogger.setLevel(Level.toLevel(targetLevel));
