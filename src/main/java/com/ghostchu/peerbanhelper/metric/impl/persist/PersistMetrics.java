@@ -99,7 +99,7 @@ public final class PersistMetrics implements BasicMetrics {
     }
 
     @Override
-    public void recordPeerBan(@NotNull @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
+    public void recordPeerBan( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }
@@ -146,7 +146,7 @@ public final class PersistMetrics implements BasicMetrics {
     }
 
     @Override
-    public void recordPeerUnban(@NotNull @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
+    public void recordPeerUnban( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }

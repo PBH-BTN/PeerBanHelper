@@ -16,7 +16,7 @@ public final class TRPeer implements Peer {
     }
 
     @Override
-    public @NotNull @NotNull PeerAddress getPeerAddress() {
+    public @NotNull PeerAddress getPeerAddress() {
         if (this.peerAddress == null) {
             this.peerAddress = new PeerAddress(backend.getAddress(), backend.getPort());
         }
@@ -69,7 +69,7 @@ public final class TRPeer implements Peer {
     }
 
     @Override
-    public @NotNull @NotNull String getRawIp() {
+    public @NotNull String getRawIp() {
         return backend.getAddress();
     }
 

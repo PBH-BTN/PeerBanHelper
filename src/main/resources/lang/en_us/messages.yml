@@ -658,3 +658,4 @@ CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
   
   We apologize for any inconvenience caused.
 BOOT_TIME: "PeerBanHelper started in {}ms"
+ECOMODE_FAILED: "Windows EcoQos may incompatible with your platform: {}, operation cancelled"

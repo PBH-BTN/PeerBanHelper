@@ -42,7 +42,7 @@ public final class QBittorrentPeer implements Peer {
     }
 
     @Override
-    public @NotNull @NotNull PeerAddress getPeerAddress() {
+    public @NotNull PeerAddress getPeerAddress() {
         if (this.peerAddress == null) {
             this.peerAddress = new PeerAddress(ip, port);
         }
@@ -97,7 +97,7 @@ public final class QBittorrentPeer implements Peer {
     }
 
     @Override
-    public @NotNull @NotNull String getRawIp() {
+    public @NotNull String getRawIp() {
         return rawIp == null ? ip : rawIp;
     }
 

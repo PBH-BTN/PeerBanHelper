@@ -663,3 +663,4 @@ CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
   
   对此带来的不便，我们深表歉意。
 BOOT_TIME: "PeerBanHelper 启动完成，用时 {}ms"
+ECOMODE_FAILED: "Windows EcoQos 效率模式可能与您的平台不兼容：{}，操作已取消"

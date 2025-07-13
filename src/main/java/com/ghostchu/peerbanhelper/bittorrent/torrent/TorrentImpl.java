@@ -28,17 +28,17 @@ public final class TorrentImpl implements Torrent {
     }
 
     @Override
-    public @NotNull @NotNull String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public @NotNull @NotNull String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public @NotNull @NotNull String getHash() {
+    public @NotNull String getHash() {
         return hash;
     }
 

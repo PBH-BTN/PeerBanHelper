@@ -35,7 +35,7 @@ public final class PeerImpl implements Peer {
     }
 
     @Override
-    public @NotNull @NotNull PeerAddress getPeerAddress() {
+    public  @NotNull PeerAddress getPeerAddress() {
         return peerAddress;
     }
 
@@ -85,7 +85,7 @@ public final class PeerImpl implements Peer {
     }
 
     @Override
-    public @NotNull @NotNull String getRawIp() {
+    public @NotNull String getRawIp() {
         return rawIp;
     }
 }

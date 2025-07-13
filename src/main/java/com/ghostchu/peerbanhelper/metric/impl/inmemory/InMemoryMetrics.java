@@ -46,7 +46,7 @@ public final class InMemoryMetrics implements BasicMetrics {
     }
 
     @Override
-    public synchronized void recordPeerBan(@NotNull @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
+    public synchronized void recordPeerBan( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }
@@ -56,7 +56,7 @@ public final class InMemoryMetrics implements BasicMetrics {
     }
 
     @Override
-    public synchronized void recordPeerUnban(@NotNull @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
+    public synchronized void recordPeerUnban( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }
