@@ -64,12 +64,15 @@ public final class BiglyBT extends AbstractDownloader {
         CookieManager cm = new CookieManager();
         cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
-        var builder = httpUtil.newBuilder().authenticator(new Authenticator() {
-            @Override
-            public @NotNull Request authenticate(@Nullable Route route, @NotNull Response response) {
-                return response.request().newBuilder().header("Authorization", "Bearer " + config.getToken()).build();
-            }
-        });
+        var builder = httpUtil.newBuilder()
+                .addInterceptor(chain -> {
+                    Request originalRequest = chain.request();
+                    Request newRequest = originalRequest.newBuilder()
+                            .header("Content-Type", "application/json")
+                            .header("Authorization", "Bearer " + config.getToken())
+                            .build();
+                    return chain.proceed(newRequest);
+                });
         httpUtil.disableSSLVerify(builder, !config.isVerifySsl());
         this.httpClient = builder.build();
         this.connectorPayload = JsonUtil.getGson().toJson(new ConnectorData("PeerBanHelper", Main.getMeta().getVersion(), Main.getMeta().getAbbrev()));

@@ -66,6 +66,9 @@ public final class TrClient {
                     return chain.proceed(requestBuilder.build());
                 })
                 .authenticator((route, response) -> {
+                    if(HTTPUtil.responseCount(response) > 1) {
+                        return null;
+                    }
                     String credential = Credentials.basic(user, password == null ? "" : password);
                     return response.request().newBuilder()
                             .header("Authorization", credential)

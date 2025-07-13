@@ -55,6 +55,9 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .writeTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .authenticator((route, response) -> {
+                    if (HTTPUtil.responseCount(response) > 1) {
+                        return null;
+                    }
                     String credential = Credentials.basic(config.getBasicAuth().getUser(), config.getBasicAuth().getPass());
                     return response.request().newBuilder()
                             .header("Authorization", credential)

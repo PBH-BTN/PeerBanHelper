@@ -64,6 +64,14 @@ public final class HTTPUtil {
         });
     }
 
+    public static int responseCount(Response response) {
+        int result = 1;
+        while ((response = response.priorResponse()) != null) {
+            result++;
+        }
+        return result;
+    }
+
     public OkHttpClient.Builder newBuilder() {
         var okHttpBuilder = new OkHttpClient.Builder()
                 .dispatcher(new Dispatcher(Executors.newVirtualThreadPerTaskExecutor()))

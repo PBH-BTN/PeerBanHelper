@@ -3,8 +3,6 @@ package raccoonfink.deluge;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import raccoonfink.deluge.requests.ConfigRequest;
@@ -25,16 +23,14 @@ public final class DelugeServer {
     public DelugeServer(final String url, final String password, boolean verifySSL, HTTPUtil httpUtil, String baUser, String baPassword) {
         m_url = url;
         m_password = password;
-        this.client = httpUtil.disableSSLVerify(httpUtil.newBuilder().authenticator(new okhttp3.Authenticator() {
-            @Override
-            public @NotNull Request authenticate(@Nullable Route route, @NotNull Response response) {
-                String credential = Credentials.basic(baUser, baPassword);
-                return response.request().newBuilder().header("Authorization", credential).build();
+        this.client = httpUtil.disableSSLVerify(httpUtil.newBuilder().authenticator((route, response) -> {
+            if (HTTPUtil.responseCount(response) > 1) {
+                return null;
             }
+            String credential = Credentials.basic(baUser, baPassword);
+            return response.request().newBuilder().header("Authorization", credential).build();
         }), !verifySSL).build();
-
     }
-
 
     public DelugeResponse makeRequest(final DelugeRequest delugeRequest) throws DelugeException {
         int connectionResponseCode;
