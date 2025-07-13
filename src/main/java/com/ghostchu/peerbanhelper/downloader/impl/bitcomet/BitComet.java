@@ -56,7 +56,7 @@ public final class BitComet extends AbstractDownloader {
     private String serverId;
     private Semver serverVersion;
     private String serverName;
-    protected final ExecutorService parallelService = Executors.newWorkStealingPool();
+    private final ExecutorService parallelService = Executors.newWorkStealingPool();
 
     public BitComet(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
         super(id, alertManager);
@@ -82,7 +82,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return config.getName();
     }
 
@@ -103,7 +103,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public List<DownloaderFeatureFlag> getFeatureFlags() {
+    public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
         if (is211Newer()) {
             flags.add(DownloaderFeatureFlag.UNBAN_IP);
@@ -112,12 +112,12 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
@@ -198,12 +198,12 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return apiEndpoint;
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "BitComet";
     }
 
@@ -227,7 +227,7 @@ public final class BitComet extends AbstractDownloader {
         }
     }
 
-    private boolean queryNeedReConfigureIpFilter() throws IOException, InterruptedException {
+    private boolean queryNeedReConfigureIpFilter() throws IOException {
         RequestBody requestBody = RequestBody.create("{}", MediaType.get("application/json"));
         Request request = new Request.Builder()
                 .url(apiEndpoint + BCEndpoint.GET_IP_FILTER_CONFIG.getEndpoint())
@@ -251,7 +251,7 @@ public final class BitComet extends AbstractDownloader {
         }
     }
 
-    private void enableIpFilter() throws IOException, InterruptedException {
+    private void enableIpFilter() throws IOException {
         Map<String, Object> settings = new HashMap<>() {{
             put("ip_filter_config", new HashMap<>() {{
                 put("enable_ipfilter", true);
@@ -283,7 +283,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         Map<String, String> requirements = new HashMap<>();
         requirements.put("group_state", "ACTIVE");
         requirements.put("sort_key", "");
@@ -292,7 +292,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getAllTorrents() {
+    public @NotNull List<Torrent> getAllTorrents() {
         Map<String, String> requirements = new HashMap<>();
         requirements.put("group_state", "ALL");
         requirements.put("sort_key", "");
@@ -365,7 +365,7 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public List<Tracker> getTrackers(Torrent torrent) {
+    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
         Map<String, Object> requirements = new HashMap<>();
         requirements.put("task_id", torrent.getId());
         requirements.put("max_count", String.valueOf(Integer.MAX_VALUE));
@@ -391,17 +391,17 @@ public final class BitComet extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
         // Unsupported Operation
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
+    public @NotNull DownloaderStatistics getStatistics() {
         return new DownloaderStatistics(0L, 0L);
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         Map<String, Object> requirements = new HashMap<>();
         requirements.put("groups", List.of("peers_connected")); // 2.11 Beta 3 可以限制获取哪一类 Peers，注意下面仍需要检查，因为旧版本不支持
         requirements.put("task_id", torrent.getId());

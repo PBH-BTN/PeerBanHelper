@@ -117,12 +117,7 @@ public final class HTTPUtil {
      * @return
      */
     public static HostnameVerifier getIgnoreSslHostnameVerifier() {
-        return new HostnameVerifier() {
-            @Override
-            public boolean verify(String arg0, SSLSession arg1) {
-                return true;
-            }
-        };
+        return (arg0, arg1) -> true;
     }
 
     private static class ProgressResponseBody extends ResponseBody {
@@ -146,7 +141,7 @@ public final class HTTPUtil {
         }
 
         @Override
-        public BufferedSource source() {
+        public @NotNull BufferedSource source() {
             if (bufferedSource == null) {
                 bufferedSource = Okio.buffer(source(responseBody.source()));
             }
@@ -158,7 +153,7 @@ public final class HTTPUtil {
                 long totalBytesRead = 0L;
 
                 @Override
-                public long read(Buffer sink, long byteCount) throws IOException {
+                public long read(@NotNull Buffer sink, long byteCount) throws IOException {
                     long bytesRead = super.read(sink, byteCount);
                     // read() returns the number of bytes read, or -1 if this source is exhausted.
                     totalBytesRead += bytesRead != -1 ? bytesRead : 0;
@@ -174,17 +169,14 @@ public final class HTTPUtil {
         void update(long bytesRead, long contentLength, boolean done);
     }
 
-    final ProgressListener progressListener = new ProgressListener() {
-        @Override
-        public void update(long bytesRead, long contentLength, boolean done) {
-            if (done) {
-                log.info(tlUI(Lang.DOWNLOAD_COMPLETED, bytesRead));
+    final ProgressListener progressListener = (bytesRead, contentLength, done) -> {
+        if (done) {
+            log.info(tlUI(Lang.DOWNLOAD_COMPLETED, bytesRead));
+        } else {
+            if (contentLength != -1) {
+                log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, bytesRead, contentLength, String.format("%.2f", ((100.0f * bytesRead) / contentLength))));
             } else {
-                if (contentLength != -1) {
-                    log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, bytesRead, contentLength, String.format("%.2f", ((100.0f * bytesRead) / contentLength))));
-                } else {
-                    log.info(tlUI(Lang.DOWNLOAD_PROGRESS, bytesRead));
-                }
+                log.info(tlUI(Lang.DOWNLOAD_PROGRESS, bytesRead));
             }
         }
     };
@@ -200,7 +192,7 @@ public final class HTTPUtil {
         @Override
         public @NotNull List<Cookie> loadForRequest(HttpUrl httpUrl) {
             List<Cookie> cookies = cookieStore.get(httpUrl.host());
-            return cookies != null ? cookies : new ArrayList<Cookie>();
+            return cookies != null ? cookies : new ArrayList<>();
         }
     }
 }

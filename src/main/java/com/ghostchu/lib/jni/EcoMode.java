@@ -1,6 +1,7 @@
 package com.ghostchu.lib.jni;
 
 import com.ghostchu.peerbanhelper.Main;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,13 +23,17 @@ public final class EcoMode {
             File tmpFile = new File(Main.getDataDirectory(), "pbh-jni-lib.dll");
             tmpFile.deleteOnExit();
             if (arch.contains("aarch64")) {
-                Files.write(tmpFile.toPath(), Main.class.getResourceAsStream("/native/windows/ghost-common-jni_vc2015_aarch64.dll").readAllBytes());
+                @Cleanup
+                var inputStream =  Main.class.getResourceAsStream("/native/windows/ghost-common-jni_vc2015_aarch64.dll");
+                Files.write(tmpFile.toPath(),inputStream.readAllBytes());
             } else {
-                Files.write(tmpFile.toPath(), Main.class.getResourceAsStream("/native/windows/ghost-common-jni_vc2015_amd64.dll").readAllBytes());
+                @Cleanup
+                var inputStream =  Main.class.getResourceAsStream("/native/windows/ghost-common-jni_vc2015_amd64.dll");
+                Files.write(tmpFile.toPath(), inputStream.readAllBytes());
             }
             System.load(tmpFile.getAbsolutePath());
         } catch (Throwable e) {
-            log.error("Unable load JNI native libraries", e);
+            log.error("Unable load JNI native libraries for EcoMode", e);
         }
         try {
             String data = setEcoMode(enable);

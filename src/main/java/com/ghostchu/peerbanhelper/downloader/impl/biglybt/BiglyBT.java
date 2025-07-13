@@ -76,7 +76,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return config.getName();
     }
 
@@ -91,7 +91,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public List<DownloaderFeatureFlag> getFeatureFlags() {
+    public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.READ_PEER_PROTOCOLS, DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
     }
 
@@ -130,12 +130,12 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
@@ -185,12 +185,12 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return apiEndpoint;
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "BiglyBT";
     }
 
@@ -215,12 +215,12 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         return fetchTorrents(List.of(BiglyBTDownloadStateConst.ST_DOWNLOADING, BiglyBTDownloadStateConst.ST_SEEDING, BiglyBTDownloadStateConst.ST_ERROR), !config.isIgnorePrivate());
     }
 
     @Override
-    public List<Torrent> getAllTorrents() {
+    public @NotNull List<Torrent> getAllTorrents() {
         return fetchTorrents(Collections.emptyList(), true);
     }
 
@@ -264,7 +264,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public List<Tracker> getTrackers(Torrent torrent) {
+    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
         BiglyBTTorrent biglyBTTorrent = (BiglyBTTorrent) torrent;
         if (biglyBTTorrent.getTrackers() == null) {
             return Collections.emptyList();
@@ -273,7 +273,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
         StringBuilder sb = new StringBuilder();
         for (Tracker tracker : trackers) {
             tracker.getTrackersInGroup().forEach(t -> sb.append(t).append("\n"));
@@ -294,7 +294,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
+    public @NotNull DownloaderStatistics getStatistics() {
         Request request = new Request.Builder()
                 .url(apiEndpoint + "/statistics")
                 .get()
@@ -311,7 +311,7 @@ public final class BiglyBT extends AbstractDownloader {
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         Request request = new Request.Builder()
                 .url(apiEndpoint + "/download/" + torrent.getId() + "/peers")
                 .get()

@@ -20,6 +20,7 @@ import okhttp3.Response;
 import okio.BufferedSink;
 import okio.GzipSink;
 import okio.Okio;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -159,7 +160,7 @@ public final class BtnAbilitySubmitSwarm extends AbstractBtnAbility {
             }
 
             @Override
-            public void writeTo(BufferedSink sink) throws IOException {
+            public void writeTo(@NotNull BufferedSink sink) throws IOException {
                 BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
                 gzipSink.write(data);
                 gzipSink.close();

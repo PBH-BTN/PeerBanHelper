@@ -4,7 +4,6 @@ import javax.net.ssl.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public final class EmptyKeyRelaxedTrustSSLContext extends SSLContextSpi {
@@ -13,7 +12,7 @@ public final class EmptyKeyRelaxedTrustSSLContext extends SSLContextSpi {
     private final SSLContext m_delegate;
 
     public EmptyKeyRelaxedTrustSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
-        SSLContext customContext = null;
+        SSLContext customContext;
 
         // Use a blank list of key managers so no SSL keys will be available
         KeyManager[] keyManager = null;

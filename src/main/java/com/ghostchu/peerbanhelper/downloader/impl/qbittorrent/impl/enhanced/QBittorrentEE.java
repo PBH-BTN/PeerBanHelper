@@ -50,11 +50,6 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
     }
 
-    @Override
-    public String getName() {
-        return config.getName();
-    }
-
     public static QBittorrentEE loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
         QBittorrentEEConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentEEConfigImpl.class);
         return new QBittorrentEE(id, config, alertManager, httpUtil);
@@ -80,7 +75,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "qBittorrentEE";
     }
 
@@ -95,7 +90,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId())

@@ -8,6 +8,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
+import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public final class QBittorrent extends AbstractQbittorrent {
@@ -38,7 +39,7 @@ public final class QBittorrent extends AbstractQbittorrent {
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "qBittorrent";
     }
 

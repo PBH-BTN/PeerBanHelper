@@ -74,12 +74,9 @@ public final class IPDB implements AutoCloseable {
                 .readTimeout(Duration.ofSeconds(30))
                 .callTimeout(Duration.ofMinutes(2))
                 .followRedirects(true)
-                .authenticator(new okhttp3.Authenticator() {
-                    @Override
-                    public Request authenticate(Route route, Response response) throws IOException {
-                        String credential = Credentials.basic(accountId, licenseKey);
-                        return response.request().newBuilder().header("Authorization", credential).build();
-                    }
+                .authenticator((route, response) -> {
+                    String credential = Credentials.basic(accountId, licenseKey);
+                    return response.request().newBuilder().header("Authorization", credential).build();
                 })
                 .build();
         if (needUpdateMMDB(mmdbCityFile)) {

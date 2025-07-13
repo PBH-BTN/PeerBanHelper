@@ -15,7 +15,6 @@ import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import okhttp3.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
@@ -25,11 +24,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -55,14 +54,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .writeTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .authenticator(new okhttp3.Authenticator() {
-                    @Override
-                    public Request authenticate(@Nullable Route route, @NotNull Response response) throws IOException {
-                        String credential = Credentials.basic(config.getBasicAuth().getUser(), config.getBasicAuth().getPass());
-                        return response.request().newBuilder()
-                                .header("Authorization", credential)
-                                .build();
-                    }
+                .authenticator((route, response) -> {
+                    String credential = Credentials.basic(config.getBasicAuth().getUser(), config.getBasicAuth().getPass());
+                    return response.request().newBuilder()
+                            .header("Authorization", credential)
+                            .build();
                 });
         httpUtil.disableSSLVerify(builder, !config.isVerifySsl());
         this.httpClient = builder.build();
@@ -78,17 +74,17 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return config.getName();
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
@@ -145,7 +141,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
 
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return apiEndpoint;
     }
 
@@ -185,12 +181,12 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         return fetchTorrents(true, !config.isIgnorePrivate());
     }
 
     @Override
-    public List<Torrent> getAllTorrents() {
+    public @NotNull List<Torrent> getAllTorrents() {
         return fetchTorrents(false, true);
     }
 
@@ -245,12 +241,12 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public List<DownloaderFeatureFlag> getFeatureFlags() {
+    public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
     }
 
     @Override
-    public List<Tracker> getTrackers(Torrent torrent) {
+    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/torrents/trackers?hash=" + torrent.getId())
@@ -282,7 +278,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
         List<Tracker> trackerList = getTrackers(torrent);
         removeTracker(torrent, trackerList);
         addTracker(torrent, trackers);
@@ -475,7 +471,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
+    public @NotNull DownloaderStatistics getStatistics() {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/sync/maindata")
@@ -496,7 +492,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         try {
             Request request = new Request.Builder()
                     .url(apiEndpoint + "/sync/torrentPeers?hash=" + torrent.getId())

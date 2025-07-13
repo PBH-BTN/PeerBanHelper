@@ -70,7 +70,6 @@ public final class BtnNetwork implements Reloadable {
     private final MetadataDao metadataDao;
     @Getter
     private final HistoryDao historyDao;
-    @Getter
     private final HTTPUtil httpUtil;
     private final ModuleMatchCache moduleMatchCache;
     private boolean enabled;
@@ -133,7 +132,7 @@ public final class BtnNetwork implements Reloadable {
 
     public synchronized void configBtnNetwork() {
         String response;
-        int statusCode = 0;
+        int statusCode;
         Request request = new Request.Builder()
                 .url(configUrl)
                 .get()

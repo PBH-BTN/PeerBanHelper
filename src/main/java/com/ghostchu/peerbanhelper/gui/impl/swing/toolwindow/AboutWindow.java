@@ -237,12 +237,12 @@ public class AboutWindow {
 
     private void processCommand(Object item) {
         try {
-            if (item instanceof SpeedCommand cmd) {
-                delay = cmd.speed;
+            if (item instanceof SpeedCommand(int speed)) {
+                delay = speed;
                 printTimer.setDelay(delay);
-            } else if (item instanceof ColorCommand cmd) {
-                fgColor = cmd.fg;
-                bgColor = cmd.bg;
+            } else if (item instanceof ColorCommand(Color fg, Color bg)) {
+                fgColor = fg;
+                bgColor = bg;
                 textPane.setForeground(fgColor);
                 textPane.setBackground(bgColor);
             } else if (item instanceof ClearCommand) {

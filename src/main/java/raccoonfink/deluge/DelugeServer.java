@@ -27,7 +27,7 @@ public final class DelugeServer {
         m_password = password;
         this.client = httpUtil.disableSSLVerify(httpUtil.newBuilder().authenticator(new okhttp3.Authenticator() {
             @Override
-            public @NotNull Request authenticate(@Nullable Route route, @NotNull Response response) throws IOException {
+            public @NotNull Request authenticate(@Nullable Route route, @NotNull Response response) {
                 String credential = Credentials.basic(baUser, baPassword);
                 return response.request().newBuilder().header("Authorization", credential).build();
             }

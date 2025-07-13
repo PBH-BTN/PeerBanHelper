@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -172,17 +173,17 @@ public final class QBittorrentTorrent implements Torrent {
     private Boolean privateTorrent; // null in old versions
 
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return hash;
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getHash() {
+    public @NotNull String getHash() {
         return hash;
     }
 
@@ -217,7 +218,7 @@ public final class QBittorrentTorrent implements Torrent {
     }
 
     @Override
-    public String getHashedIdentifier() {
+    public @NotNull String getHashedIdentifier() {
         return Torrent.super.getHashedIdentifier();
     }
 }

@@ -23,6 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import raccoonfink.deluge.DelugeException;
@@ -58,7 +59,7 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return config.getName();
     }
 
@@ -73,22 +74,22 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return config.getEndpoint();
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "Deluge";
     }
 
@@ -120,7 +121,7 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         List<Torrent> torrents = new ArrayList<>();
         try {
             for (PBHActiveTorrentsResponse.ActiveTorrentsResponseDTO activeTorrent : this.client.getActiveTorrents().getActiveTorrents()) {
@@ -166,12 +167,12 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getAllTorrents() {
+    public @NotNull List<Torrent> getAllTorrents() {
         return getTorrents();
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         if (!(torrent instanceof DelugeTorrent delugeTorrent)) {
             throw new IllegalStateException("The torrent object not a instance of DelugeTorrent");
         }
@@ -179,18 +180,18 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public List<Tracker> getTrackers(Torrent torrent) {
+    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
         return List.of();
     }
 
     @Override
-    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
 
     }
 
     @SneakyThrows
     @Override
-    public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -215,7 +216,7 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
+    public @NotNull DownloaderStatistics getStatistics() {
         try {
             PBHStatisticsResponse resp = this.client.queryStatistics();
             var dto = resp.getStatistics();

@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -49,7 +50,7 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return config.getName();
     }
 
@@ -68,22 +69,22 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return config.getEndpoint();
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "Transmission";
     }
 
@@ -93,7 +94,7 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public List<DownloaderFeatureFlag> getFeatureFlags() {
+    public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
     }
 
@@ -152,12 +153,12 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         return fetchTorrents(true, !config.isIgnorePrivate());
     }
 
     @Override
-    public List<Torrent> getAllTorrents() {
+    public @NotNull List<Torrent> getAllTorrents() {
         return fetchTorrents(false, true);
     }
 
@@ -176,19 +177,19 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         TRTorrent trTorrent = (TRTorrent) torrent;
         return trTorrent.getPeers();
     }
 
     @Override
-    public List<Tracker> getTrackers(Torrent torrent) {
+    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
         TRTorrent trTorrent = (TRTorrent) torrent;
         return trTorrent.getTrackers();
     }
 
     @Override
-    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
         StringJoiner trackersJoiner = new StringJoiner("\n\n"); // 空一行
         trackers.forEach(t -> trackersJoiner.add(t.toString()));
         RqTorrentSet set = RqTorrentSet.builder()
@@ -200,7 +201,7 @@ public final class Transmission extends AbstractDownloader {
 
     @SneakyThrows
     @Override
-    public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
@@ -216,7 +217,7 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
+    public @NotNull DownloaderStatistics getStatistics() {
         RqSessionStats sessionStats = new RqSessionStats();
         TypedResponse<RsSessionStats> sessionStatsResp = client.execute(sessionStats);
         var stats = sessionStatsResp.getArgs();

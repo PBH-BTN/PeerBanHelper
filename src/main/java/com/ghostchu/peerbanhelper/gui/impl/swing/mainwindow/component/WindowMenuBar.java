@@ -69,9 +69,7 @@ public class WindowMenuBar {
         FlatButton alertButton = new FlatButton();
         alertButton.setButtonType(FlatButton.ButtonType.toolBarButton);
         alertButton.setFocusable(false);
-        alertButton.addActionListener(event -> {
-            bridge.getWebUiUrl().ifPresent(uri-> parent.getSwingGUI().openWebpage(uri));
-        });
+        alertButton.addActionListener(event -> bridge.getWebUiUrl().ifPresent(uri-> parent.getSwingGUI().openWebpage(uri)));
         CommonUtil.getScheduler().scheduleAtFixedRate(() -> {
             if (bridge == null) {
                 alertButton.setEnabled(false);

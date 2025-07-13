@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.bittorrent.peer;
 
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 
@@ -34,7 +35,7 @@ public final class PeerImpl implements Peer {
     }
 
     @Override
-    public PeerAddress getPeerAddress() {
+    public @NotNull @NotNull PeerAddress getPeerAddress() {
         return peerAddress;
     }
 
@@ -84,7 +85,7 @@ public final class PeerImpl implements Peer {
     }
 
     @Override
-    public String getRawIp() {
+    public @NotNull @NotNull String getRawIp() {
         return rawIp;
     }
 }
