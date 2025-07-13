@@ -665,7 +665,7 @@ JBR_REQUIRED_DESCRIPTION: |
 
   You are currently using: {} {}
 
-  Other Java runtime environments such as Eclipse Adoptium, Azul Zulu, BellSoft Liberca, Oracle/Open JDK may not include patches for issues that PeerBanHelper needs.
+  Other Java runtime environments such as Eclipse Adoptium, Azul Zulu, BellSoft Liberica, Oracle/Open JDK may not include patches for issues that PeerBanHelper needs.
   If you experience crashes related to awt.dll, please switch to JetBrains Runtime or use the PeerBanHelper installer with bundled Java environment.
   This reminder will only be shown once.
 

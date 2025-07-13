@@ -676,7 +676,7 @@ JBR_REQUIRED_DESCRIPTION: |
 
   您目前正在使用為：{} {}
 
-  對於 Eclipse Adoptium, Azul Zulu, BellSoft Liberca, Oracle/Open JDK 等其它 Java 執行時環境可能不包含 PeerBanHelper 所需要的問題的修復補丁。
+  對於 Eclipse Adoptium, Azul Zulu, BellSoft Liberica, Oracle/Open JDK 等其它 Java 執行時環境可能不包含 PeerBanHelper 所需要的問題的修復補丁。
   如果出現與 awt.dll 相關的當機問題請切換到 JetBrains Runtime 或者使用帶有 Java 環境的 PeerBanHelper 安裝程式覆蓋安裝。
   此提醒僅顯示一次。
 
