@@ -22,12 +22,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -226,9 +225,7 @@ public final class BtnNetwork implements Reloadable {
     }
 
     private void setupHttpClient() {
-        this.httpClient = new OkHttpClient.Builder()
-                .followRedirects(true)
-                .cookieJar(new HTTPUtil.PBHCookieJar())
+        this.httpClient = httpUtil.newBuilder()
                 .addInterceptor(chain -> {
                     Request original = chain.request();
                     Request.Builder requestBuilder = original.newBuilder()
@@ -241,15 +238,8 @@ public final class BtnNetwork implements Reloadable {
                             .header("Authentication", "Bearer " + appId + "@" + appSecret);
                     return chain.proceed(requestBuilder.build());
                 })
-                .authenticator(new Authenticator() {
-                    @Override
-                    public @Nullable Request authenticate(@Nullable Route route, @NotNull Response response) throws IOException {
-                        return response.request().newBuilder().header("Authorization", "Bearer " + appId + "@" + appSecret).build();
-                    }
-                })
+                .authenticator((route, response) -> response.request().newBuilder().header("Authorization", "Bearer " + appId + "@" + appSecret).build())
                 .callTimeout(Duration.ofMinutes(1))
-                .connectTimeout(Duration.ofSeconds(10))
-                .readTimeout(Duration.ofSeconds(30))
                 .build();
     }
 

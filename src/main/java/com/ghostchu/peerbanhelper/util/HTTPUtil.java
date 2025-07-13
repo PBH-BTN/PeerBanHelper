@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -65,8 +66,14 @@ public final class HTTPUtil {
                 .followRedirects(true)
                 .followSslRedirects(true)
                 .fastFallback(true)
-                .retryOnConnectionFailure(false)
-                .cookieJar(new PBHCookieJar());
+                .retryOnConnectionFailure(true)
+                .cookieJar(new PBHCookieJar())
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .header("User-Agent", Main.getUserAgent());
+                    return chain.proceed(requestBuilder.build());
+                });
         if (proxySelector != null) {
             okHttpBuilder.proxySelector(proxySelector);
         }

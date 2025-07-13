@@ -1,5 +1,6 @@
 package cordelia.client;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
@@ -58,13 +59,19 @@ public final class TrClient {
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .writeTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .header("User-Agent", Main.getUserAgent());
+                    return chain.proceed(requestBuilder.build());
+                })
                 .authenticator((route, response) -> {
                     String credential = Credentials.basic(user, password == null ? "" : password);
                     return response.request().newBuilder()
                             .header("Authorization", credential)
                             .build();
                 });
-        
+
         httpUtil.disableSSLVerify(builder, !verifySSL);
         this.httpClient = builder.build();
     }
@@ -83,7 +90,6 @@ public final class TrClient {
             Request request = new Request.Builder()
                     .url(url)
                     .post(requestBody)
-                    .header("Content-Type", "application/json")
                     .header(Session.SESSION_ID, session(false).id())
                     .build();
             

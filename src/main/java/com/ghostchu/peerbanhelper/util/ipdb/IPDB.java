@@ -67,7 +67,7 @@ public final class IPDB implements AutoCloseable {
         this.mmdbASNFile = new File(directory, "GeoIP-ASN.mmdb");
         this.mmdbGeoCNFile = new File(directory, "GeoCN.mmdb");
         this.autoUpdate = autoUpdate;
-        this.httpUtil =httpUtil;
+        this.httpUtil = httpUtil;
 //        this.userAgent = userAgent;
         this.httpClient = httpUtil.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
@@ -310,29 +310,25 @@ public final class IPDB implements AutoCloseable {
             var progressDialog = Main.getGuiManager().createProgressDialog(tlUI(Lang.IPDB_DOWNLOAD_TITLE, databaseName), tlUI(Lang.IPDB_DOWNLOAD_DESCRIPTION, databaseName), tlUI(Lang.GUI_COMMON_CANCEL), null, false);
             progressDialog.show();
             progressDialog.setComment(mirror.getIPDBUrl());
-            
+
             // 创建带有进度追踪器的 HTTP 客户端
-            var progressTrackingHttpClient = httpUtil.addProgressTracker(httpUtil.newBuilder(), new HTTPUtil.ProgressListener() {
-                @Override
-                public void update(long bytesRead, long contentLength, boolean done) {
-                    if (contentLength > 0) {
-                        float progress = (float) bytesRead / contentLength;
-                        progressDialog.setProgressDisplayIndeterminate(false);
-                        progressDialog.updateProgress(progress);
-                    }
-                }
-            })
+            var progressTrackingHttpClient = httpUtil.addProgressTracker(httpUtil.newBuilder(), (bytesRead, contentLength, done) -> {
+                        if (contentLength > 0) {
+                            float progress = (float) bytesRead / contentLength;
+                            progressDialog.setProgressDisplayIndeterminate(false);
+                            progressDialog.updateProgress(progress);
+                        }
+                    })
                     .connectTimeout(Duration.ofSeconds(15))
-                    .readTimeout(Duration.ofSeconds(30))
-                    .callTimeout(Duration.ofMinutes(2))
-                    .followRedirects(true)
+                    .readTimeout(Duration.ofMinutes(10))
+                    .callTimeout(Duration.ofMinutes(15))
                     .build();
-            
+
             Request request = new Request.Builder()
                     .url(mirror.getIPDBUrl())
                     .get()
                     .build();
-                    
+
             try (Response response = progressTrackingHttpClient.newCall(request).execute()) {
                 if (response.code() == 200) {
                     if (mirror.supportXzip()) {
@@ -350,10 +346,10 @@ public final class IPDB implements AutoCloseable {
                             progressDialog.close();
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
-                        } catch (IOException e) { 
+                        } catch (IOException e) {
                             log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED));
                         }
-                    } else { 
+                    } else {
                         // 直接保存文件
                         try (var source = response.body().source();
                              var sink = Okio.buffer(Okio.sink(path))) {
@@ -364,8 +360,8 @@ public final class IPDB implements AutoCloseable {
                         }
                     }
                 }
-                
-                if (!mirrorList.isEmpty()) { 
+
+                if (!mirrorList.isEmpty()) {
                     log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
                     progressDialog.close();
                     downloadFile(mirrorList, path, databaseName).join();
