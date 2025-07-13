@@ -22,11 +22,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -98,6 +99,7 @@ public final class BtnNetwork implements Reloadable {
     }
 
     public synchronized void reloadConfig() {
+        log.info("Reconfiguring BtnNetwork...");
         this.enabled = Main.getMainConfig().getBoolean("btn.enabled");
         this.configUrl = Main.getMainConfig().getString("btn.config-url");
         this.submit = Main.getMainConfig().getBoolean("btn.submit");
@@ -131,7 +133,7 @@ public final class BtnNetwork implements Reloadable {
     }
 
     public synchronized void configBtnNetwork() {
-        String response = "<Not Provided>";
+        String response;
         int statusCode = 0;
         Request request = new Request.Builder()
                 .url(configUrl)
@@ -140,12 +142,12 @@ public final class BtnNetwork implements Reloadable {
         try (Response resp = httpClient.newCall(request).execute()) {
             statusCode = resp.code();
             if (statusCode != 200) {
-                response = resp.body() != null ? resp.body().string() : "";
+                response = resp.body().string();
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600));
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, statusCode, response);
                 return;
             }
-            response = resp.body() != null ? resp.body().string() : "";
+            response = resp.body().string();
             JsonObject json = JsonParser.parseString(response).getAsJsonObject();
             if (!json.has("min_protocol_version")) {
                 throw new IllegalStateException(tlUI(Lang.MISSING_VERSION_PROTOCOL_FIELD));
@@ -238,6 +240,12 @@ public final class BtnNetwork implements Reloadable {
                             .header("X-BTN-AppSecret", appSecret)
                             .header("Authentication", "Bearer " + appId + "@" + appSecret);
                     return chain.proceed(requestBuilder.build());
+                })
+                .authenticator(new Authenticator() {
+                    @Override
+                    public @Nullable Request authenticate(@Nullable Route route, @NotNull Response response) throws IOException {
+                        return response.request().newBuilder().header("Authorization", "Bearer " + appId + "@" + appSecret).build();
+                    }
                 })
                 .callTimeout(Duration.ofMinutes(1))
                 .connectTimeout(Duration.ofSeconds(10))
