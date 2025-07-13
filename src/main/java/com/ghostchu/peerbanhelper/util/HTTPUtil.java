@@ -200,7 +200,7 @@ public final class HTTPUtil {
     };
 
     public static class PBHCookieJar implements CookieJar {
-        private final Map<String, List<Cookie>> cookieStore = new HashMap<>();
+        private final Map<String, List<Cookie>> cookieStore = new ConcurrentHashMap<>();
 
         @Override
         public void saveFromResponse(HttpUrl httpUrl, @NotNull List<Cookie> list) {
