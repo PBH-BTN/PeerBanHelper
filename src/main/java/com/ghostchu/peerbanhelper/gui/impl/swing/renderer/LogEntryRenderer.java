@@ -8,6 +8,7 @@ import java.awt.*;
 public class LogEntryRenderer extends JTextArea implements ListCellRenderer<LogEntry> {
     private static final Color errorBackground = new Color(255, 204, 187);
     private static final Color warnBackground = new Color(255, 238, 204);
+    private static final Color debugBackground = new Color(204, 255, 204); // 可选：信息级别的背景色
 
     public LogEntryRenderer() {
         setLineWrap(true);       // 启用自动换行
@@ -32,6 +33,10 @@ public class LogEntryRenderer extends JTextArea implements ListCellRenderer<LogE
                 }
                 case WARN -> {
                     setBackground(warnBackground);
+                    setForeground(Color.BLACK);
+                }
+                case DEBUG -> {
+                    setBackground(debugBackground);
                     setForeground(Color.BLACK);
                 }
             }

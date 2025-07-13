@@ -90,7 +90,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
             log.error(tlUI(Lang.BTN_ABILITY_EXCEPTION_LOADED_FROM_CACHE_FAILED));
             setLastStatus(false, new TranslationComponent(e.getClass().getName() + ": " + e.getMessage()));
         }
-        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::updateRule, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getScheduler().scheduleWithFixedDelay(this::updateRule, ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void updateRule() {

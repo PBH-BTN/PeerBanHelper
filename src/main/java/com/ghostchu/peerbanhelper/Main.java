@@ -108,8 +108,8 @@ public class Main {
         setupConfDirectory(args);
         loadFlagsProperties();
         setupConfiguration();
-        setupLogback();
         meta = buildMeta();
+        setupLogback();
         String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
         log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
@@ -179,14 +179,15 @@ public class Main {
         }
 
         try {
-            var targetLevel = ExternalSwitch.parse("pbh.log.level");
+            var targetLevel = ExternalSwitch.parse("pbh.log.level", Main.getMeta().isSnapshotOrBeta() ? "DEBUG" : "INFO");
             if (targetLevel != null) {
-                var rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-                ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
-                logbackLogger.setLevel(Level.toLevel(targetLevel));
+                ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+                rootLogger.setLevel(Level.toLevel(targetLevel));
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            log.warn("Failed to set log level", e);
         }
+
     }
 
     public static ReloadResult reloadModule() {

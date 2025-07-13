@@ -51,7 +51,7 @@ public final class BtnNetwork implements Reloadable {
     @Getter
     private TranslationComponent configResult;
     private boolean scriptExecute;
-    private ScheduledExecutorService executeService = null;
+    private ScheduledExecutorService scheduler = null;
     @Getter
     private String configUrl;
     @Getter
@@ -119,14 +119,14 @@ public final class BtnNetwork implements Reloadable {
     }
 
     private void resetScheduler() {
-        if (executeService != null) {
-            executeService.shutdownNow();
+        if (scheduler != null) {
+            scheduler.shutdown();
         }
         if (enabled) {
-            executeService = Executors.newScheduledThreadPool(2);
-            executeService.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 0, 600, TimeUnit.SECONDS);
+            scheduler = Executors.newScheduledThreadPool(2);
+            scheduler.scheduleWithFixedDelay(this::checkIfNeedRetryConfig, 0, 600, TimeUnit.SECONDS);
         } else {
-            executeService = null;
+            scheduler = null;
         }
     }
 
@@ -254,8 +254,8 @@ public final class BtnNetwork implements Reloadable {
         return server;
     }
 
-    public ScheduledExecutorService getExecuteService() {
-        return executeService;
+    public ScheduledExecutorService getScheduler() {
+        return scheduler;
     }
 
     public HTTPUtil getHttpUtil() {
@@ -264,7 +264,7 @@ public final class BtnNetwork implements Reloadable {
 
     public void close() {
         log.info(tlUI(Lang.BTN_SHUTTING_DOWN));
-        executeService.shutdown();
+        scheduler.shutdown();
         abilities.values().forEach(BtnAbility::unload);
         abilities.clear();
     }

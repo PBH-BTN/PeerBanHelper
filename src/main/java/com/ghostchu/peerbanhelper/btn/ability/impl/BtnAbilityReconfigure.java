@@ -48,7 +48,7 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
     @Override
     public void load() {
         setLastStatus(true, new TranslationComponent(Lang.BTN_STAND_BY));
-        btnNetwork.getExecuteService().scheduleWithFixedDelay(this::checkIfReconfigure, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
+        btnNetwork.getScheduler().scheduleWithFixedDelay(this::checkIfReconfigure, interval + ThreadLocalRandom.current().nextLong(randomInitialDelay), interval, TimeUnit.MILLISECONDS);
     }
 
     private void checkIfReconfigure() {

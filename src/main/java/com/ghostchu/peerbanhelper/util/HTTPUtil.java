@@ -1,17 +1,22 @@
 package com.ghostchu.peerbanhelper.util;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import okhttp3.logging.HttpLoggingInterceptor;
 import okio.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.net.ssl.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.security.KeyManagementException;
@@ -76,6 +81,11 @@ public final class HTTPUtil {
                 });
         if (proxySelector != null) {
             okHttpBuilder.proxySelector(proxySelector);
+        }
+        if(ExternalSwitch.parseBoolean("pbh.http.logging", false)) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor(log::debug);
+            logging.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+            okHttpBuilder.addNetworkInterceptor(logging);
         }
         return okHttpBuilder;
     }
