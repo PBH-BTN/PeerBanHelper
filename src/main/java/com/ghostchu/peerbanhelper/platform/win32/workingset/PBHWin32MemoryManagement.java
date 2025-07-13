@@ -3,6 +3,7 @@ package com.ghostchu.peerbanhelper.platform.win32.workingset;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
 import com.sun.management.GarbageCollectionNotificationInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.management.NotificationEmitter;
@@ -14,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 public class PBHWin32MemoryManagement {
     private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
@@ -22,8 +24,10 @@ public class PBHWin32MemoryManagement {
         if (!WorkingSetManagerFactory.isSupported() || !Main.getMainConfig().getBoolean("performance.windows-empty-working-set")) {
             return;
         }
+        log.debug("PBHWin32MemoryManagement initialized, hooking memory management.");
         hookMemoryManagement();
         service.scheduleWithFixedDelay(this::runJob, 1L, 10L, TimeUnit.MINUTES);
+        log.debug("PBHWin32MemoryManagement scheduled to run every 10 minutes.");
     }
 
     private void hookMemoryManagement() {
@@ -56,6 +60,7 @@ public class PBHWin32MemoryManagement {
     }
 
     private void releaseMemory() {
+        log.debug("Releasing memory by emptying working set.");
         WorkingSetManagerFactory.trimMemory();
     }
 

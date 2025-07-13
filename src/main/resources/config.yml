@@ -134,4 +134,4 @@ performance:
   windows-ecoqos-api: true
   # 启用 Windows 平台上的工作集内存管理，周期性或在 PeerBanHelper 进行内存回收时将不使用或者不活跃的内存释放或者转移到分页文件
   # Enable Windows Platform working set memory management, periodically or when PeerBanHelper do memory reclaim, it will release or swap out unused or inactive memory to page file
-  windows-empty-working-set: true
+  windows-empty-working-set: false
