@@ -51,7 +51,7 @@ public final class TrClient {
             .create();
     private final OkHttpClient httpClient;
 
-    public TrClient(HTTPUtil httpUtil, String url, String user, String password, boolean verifySSL, String httpVersion) {
+    public TrClient(HTTPUtil httpUtil, String url, String user, String password, boolean verifySSL) {
         this.url = url;
         // Note: For simplicity, we're not implementing cookie handling for now
         

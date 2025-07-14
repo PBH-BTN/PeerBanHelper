@@ -330,7 +330,6 @@ public final class Deluge extends AbstractDownloader {
             }
             config.setPassword(section.getString("password", ""));
             config.setRpcUrl(section.getString("rpc-url", "/json"));
-            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
@@ -345,7 +344,6 @@ public final class Deluge extends AbstractDownloader {
             section.set("endpoint", endpoint);
             section.set("password", password);
             section.set("rpc-url", rpcUrl);
-            section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);

@@ -610,7 +610,6 @@ public final class BitComet extends AbstractDownloader {
         private String username;
         private String password;
         private boolean incrementBan;
-        private String httpVersion;
         private boolean verifySsl;
         private boolean ignorePrivate;
         private boolean paused;
@@ -626,7 +625,6 @@ public final class BitComet extends AbstractDownloader {
             config.setUsername(section.getString("username", ""));
             config.setPassword(section.getString("password", ""));
             config.setIncrementBan(section.getBoolean("increment-ban", true));
-            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             config.setPaused(section.getBoolean("paused", false));
@@ -641,7 +639,6 @@ public final class BitComet extends AbstractDownloader {
             section.set("username", username);
             section.set("password", password);
             section.set("increment-ban", incrementBan);
-            section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
             section.set("paused", paused);

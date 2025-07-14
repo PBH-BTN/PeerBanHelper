@@ -18,7 +18,6 @@ public final class QBittorrentEEConfigImpl implements QBittorrentConfig {
     private String username;
     private String password;
     private QBittorrentBasicAuth basicAuth;
-    private String httpVersion;
     private boolean incrementBan;
     private boolean verifySsl;
     private boolean useShadowBan;
@@ -39,7 +38,6 @@ public final class QBittorrentEEConfigImpl implements QBittorrentConfig {
         basicauthDTO.setUser(section.getString("basic-auth.user"));
         basicauthDTO.setPass(section.getString("basic-auth.pass"));
         config.setBasicAuth(basicauthDTO);
-        config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
         config.setIncrementBan(section.getBoolean("increment-ban", false));
         config.setUseShadowBan(section.getBoolean("use-shadow-ban", false));
         config.setVerifySsl(section.getBoolean("verify-ssl", true));
@@ -58,7 +56,6 @@ public final class QBittorrentEEConfigImpl implements QBittorrentConfig {
         section.set("password", password);
         section.set("basic-auth.user", Objects.requireNonNullElse(basicAuth.getUser(), ""));
         section.set("basic-auth.pass", Objects.requireNonNullElse(basicAuth.getPass(), ""));
-        section.set("http-version", httpVersion);
         section.set("increment-ban", incrementBan);
         section.set("use-shadow-ban", useShadowBan);
         section.set("verify-ssl", verifySsl);

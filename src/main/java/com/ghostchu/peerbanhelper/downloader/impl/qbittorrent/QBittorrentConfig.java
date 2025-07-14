@@ -18,7 +18,6 @@ public interface QBittorrentConfig {
 
     QBittorrentBasicAuth getBasicAuth();
 
-    String getHttpVersion();
 
     boolean isIncrementBan();
 
@@ -42,7 +41,6 @@ public interface QBittorrentConfig {
 
     void setBasicAuth(QBittorrentBasicAuth basicAuth);
 
-    void setHttpVersion(String httpVersion);
 
     void setIncrementBan(boolean incrementBan);
 
