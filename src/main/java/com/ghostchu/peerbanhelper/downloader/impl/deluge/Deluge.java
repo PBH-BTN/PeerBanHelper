@@ -313,7 +313,6 @@ public final class Deluge extends AbstractDownloader {
         private String type;
         private String endpoint;
         private String password;
-        private String httpVersion;
         private boolean verifySsl;
         private String rpcUrl;
         private boolean incrementBan;
