@@ -22,13 +22,6 @@
   <a-form-item field="config.password" :label="t('page.dashboard.editModal.label.password')">
     <a-input-password v-model="config.password" allow-clear></a-input-password>
   </a-form-item>
-  <a-form-item field="config.httpVersion" :label="t('page.dashboard.editModal.label.httpVersion')">
-    <a-radio-group v-model="config.httpVersion">
-      <a-radio value="HTTP_1_1">1.1</a-radio>
-      <a-radio value="HTTP_2">2.0</a-radio>
-    </a-radio-group>
-    <template #extra>{{ t('page.dashboard.editModal.label.httpVersion.description') }}</template>
-  </a-form-item>
   <a-form-item
     field="config.incrementBan"
     default-checked
