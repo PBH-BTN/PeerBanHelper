@@ -154,7 +154,7 @@ public final class TextManager implements Reloadable {
                 }
                 loadedLanguages.add(locale);
             }
-        } else if (!"zh_cn".equals(locale)) {
+        } else if (!"en_us".equals(locale)) {
             // 如果无法加载请求的语言，使用回退语言
             return false;
         }
@@ -227,7 +227,7 @@ public final class TextManager implements Reloadable {
         YamlConfiguration configuration = languageFilesManager.getDistribution(locale);
         if (configuration == null) {
             configuration = new YamlConfiguration();
-            configuration.loadFromString(languageFilesManager.getDistribution("zh_cn").saveToString());
+            configuration.loadFromString(languageFilesManager.getDistribution("en_us").saveToString());
         }
         configuration.set(path, text);
         languageFilesManager.deploy(locale, configuration);
@@ -282,7 +282,7 @@ public final class TextManager implements Reloadable {
 
         YamlConfiguration yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution(locale);
         if (yamlConfiguration == null) {
-            yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("zh_cn");
+            yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("en_us");
             if (yamlConfiguration == null) {
                 log.warn("The locale {} are not supported and fallback locale zh_cn load failed.", locale);
                 return "Unsupported locale " + locale;

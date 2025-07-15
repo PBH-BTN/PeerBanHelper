@@ -266,7 +266,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         try {
             final long torrentSize = torrent.getSize();
             final long completedSize = torrent.getCompletedSize();
-            final long computedCompletedSize = Math.max(completedSize, clientTask.getLastTorrentCompleteSize());
+            final long computedCompletedSize = Math.max(completedSize, clientTask.getLastTorrentCompletedSize());
             // 过滤
             if (torrentSize <= 0) {
                 return pass();
@@ -397,7 +397,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             // 无论如何都写入缓存，同步更改
             clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
-            clientTask.setLastTorrentCompleteSize(Math.max(torrent.getCompletedSize(), clientTask.getLastTorrentCompleteSize()));
+            clientTask.setLastTorrentCompletedSize(Math.max(torrent.getCompletedSize(), clientTask.getLastTorrentCompletedSize()));
             progressRecorder.put(client, lastRecordedProgress);
         }
     }
@@ -466,7 +466,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         private String downloader;
         private long banDelayWindowEndAt;
         private long fastPcbTestExecuteAt;
-        private long lastTorrentCompleteSize;
+        private long lastTorrentCompletedSize;
     }
 
     @AllArgsConstructor
