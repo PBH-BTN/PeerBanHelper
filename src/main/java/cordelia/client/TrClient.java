@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
@@ -56,6 +57,7 @@ public final class TrClient {
         // Note: For simplicity, we're not implementing cookie handling for now
         
         OkHttpClient.Builder builder = httpUtil.newBuilder()
+                .proxy(Proxy.NO_PROXY)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .writeTimeout(Duration.of(30, ChronoUnit.SECONDS))
