@@ -248,7 +248,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                 .filter(task -> task.getPeerIp().equals(peerIpString) && downloader.getId().equals(task.getDownloader()))
                 .findFirst().orElse(null);
         if (clientTask == null) {
-            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getId(), 0L, 0L);
+            clientTask = new ClientTask(peerIpString, 0d, 0L, 0L, 0, 0, System.currentTimeMillis(), System.currentTimeMillis(), downloader.getId(), 0L, 0L, 0L);
             lastRecordedProgress.add(clientTask);
         }
         long uploadedIncremental; // 上传增量
@@ -266,6 +266,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         try {
             final long torrentSize = torrent.getSize();
             final long completedSize = torrent.getCompletedSize();
+            final long computedCompletedSize = Math.max(completedSize, clientTask.getLastTorrentCompleteSize());
             // 过滤
             if (torrentSize <= 0) {
                 return pass();
@@ -274,6 +275,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             var structuredData =  StructuredData.create()
                     .add("torrentSize", torrentSize)
                     .add("completedSize", completedSize)
+                    .add("computedCompletedSize", computedCompletedSize)
                     .add("peerReportUploaded", peer.getUploaded())
                     .add("peerLastReportUploaded", clientTask.getLastReportUploaded())
                     .add("prefixTrackingUploadedIncreaseTotal",prefixTrackingUploadedIncreaseTotal)
@@ -323,7 +325,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                     }
                 } else if (ExternalSwitch.parse("pbh.pcb.disable-completed-excessive") == null && completedSize > 0 && actualUploaded > completedSize) {
                     // 下载量超过任务大小，检查
-                    long maxAllowedExcessiveThreshold = (long) (completedSize * excessiveThreshold);
+                    long maxAllowedExcessiveThreshold = (long) (computedCompletedSize * excessiveThreshold);
                     structuredData.add("maxAllowedExcessiveThreshold", maxAllowedExcessiveThreshold);
                     if (actualUploaded > maxAllowedExcessiveThreshold) {
                         clientTask.setBanDelayWindowEndAt(0L);
@@ -395,6 +397,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
             // 无论如何都写入缓存，同步更改
             clientTask.setLastReportUploaded(peer.getUploaded());
             clientTask.setLastReportProgress(peer.getProgress());
+            clientTask.setLastTorrentCompleteSize(Math.max(torrent.getCompletedSize(), clientTask.getLastTorrentCompleteSize()));
             progressRecorder.put(client, lastRecordedProgress);
         }
     }
@@ -463,6 +466,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
         private String downloader;
         private long banDelayWindowEndAt;
         private long fastPcbTestExecuteAt;
+        private long lastTorrentCompleteSize;
     }
 
     @AllArgsConstructor
