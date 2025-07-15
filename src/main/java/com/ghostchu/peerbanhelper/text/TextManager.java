@@ -284,7 +284,7 @@ public final class TextManager implements Reloadable {
         if (yamlConfiguration == null) {
             yamlConfiguration = INSTANCE_HOLDER.languageFilesManager.getDistribution("en_us");
             if (yamlConfiguration == null) {
-                log.warn("The locale {} are not supported and fallback locale zh_cn load failed.", locale);
+                log.warn("The locale {} are not supported and fallback locale en_us load failed.", locale);
                 return "Unsupported locale " + locale;
             }
         }
