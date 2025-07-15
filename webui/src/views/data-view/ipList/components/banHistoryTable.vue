@@ -2,7 +2,7 @@
   <a-table
     :stripe="true"
     :columns="columns"
-    :data="list"
+    :data="data?.data.results"
     :loading="loading"
     :pagination="{
       total,
@@ -70,7 +70,6 @@
 import { GetIPBanHistoryList } from '@/service/data'
 import { useEndpointStore } from '@/stores/endpoint'
 import { formatFileSize } from '@/utils/file'
-import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 
@@ -80,8 +79,9 @@ const { t, d } = useI18n()
 const { ip } = defineProps<{
   ip: string
 }>()
-const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh } =
-  usePagination(GetIPBanHistoryList, {
+const { data, total, current, loading, pageSize, changeCurrent, changePageSize } = usePagination(
+  GetIPBanHistoryList,
+  {
     defaultParams: [
       {
         ip: ip,
@@ -96,9 +96,8 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
     },
     cacheKey: (params) =>
       `${endpointState.endpoint}-banlogs-${params?.[0].page || 1}-${params?.[0].pageSize || 10}`
-  })
-
-watch(() => endpointState.endpoint, refresh)
+  }
+)
 
 const columns = [
   {
@@ -142,7 +141,6 @@ const columns = [
     tooltip: true
   }
 ]
-const list = computed(() => data.value?.data.results)
 </script>
 
 <style scoped>
