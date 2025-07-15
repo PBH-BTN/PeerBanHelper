@@ -32,9 +32,6 @@ import io.javalin.util.JavalinBindException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,52 +182,6 @@ public class PeerBanHelper implements Reloadable {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
-        // run some junky test code here
-
-        OkHttpClient client = httpUtil.newBuilder().build();
-        Request request = new Request.Builder()
-                .url("http://127.0.0.1:8888")
-                .get()
-                .build();
-        try (Response response = client.newCall(request).execute()) {
-            System.out.println(response.body().string());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        client = httpUtil.newBuilder().build();
-        request = new Request.Builder()
-                .url("https://www.baidu.com")
-                .get()
-                .build();
-        try (Response response = client.newCall(request).execute()) {
-            System.out.println(response.body().string());
-        } catch (Exception e) {
-
-        }
-
-
-        client = httpUtil.newBuilder().build();
-        request = new Request.Builder()
-                .url("http://192.168.0.1")
-                .get()
-                .build();
-        try (Response response = client.newCall(request).execute()) {
-            System.out.println(response.body().string());
-        } catch (Exception e) {
-
-        }
-
-         client = httpUtil.newBuilder().build();
-         request = new Request.Builder()
-                .url("https://www.google.com")
-                .get()
-                .build();
-        try (Response response = client.newCall(request).execute()) {
-            System.out.println(response.body().string());
-        } catch (Exception e) {
-
-        }
     }
 
 
