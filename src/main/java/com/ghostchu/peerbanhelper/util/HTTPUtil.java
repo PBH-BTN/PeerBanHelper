@@ -69,7 +69,7 @@ public final class HTTPUtil implements Reloadable {
         };
         this.proxyHost = Main.getMainConfig().getString("proxy.host", "127.0.0.1");
         this.proxyPort = Main.getMainConfig().getInt("proxy.port", 7890);
-        for (String proxy : Main.getMainConfig().getString("proxy.bypass", "").split("\\|")) {
+        for (String proxy : Main.getMainConfig().getString("proxy.non-proxy-hosts", "").split("\\|")) {
             if (!proxy.isEmpty()) {
                 try {
                     proxyBypasses.add(Pattern.compile(proxy.replace("*", ".*").replace("?", ".?")));
@@ -77,9 +77,6 @@ public final class HTTPUtil implements Reloadable {
                     log.error("Invalid proxy bypass pattern: {}", proxy, e);
                 }
             }
-        }
-        for (String s : Main.getMainConfig().getString("proxy.bypass", "").split("\\|")) {
-            proxyBypasses.add(Pattern.compile(s.replace("*", ".*").replace("?", ".?")));
         }
         if (proxyType == Proxy.Type.DIRECT) {
             this.proxyInstance = Proxy.NO_PROXY;
@@ -131,14 +128,17 @@ public final class HTTPUtil implements Reloadable {
                         var host = uri.getHost();
                         for (Pattern proxyBypass : proxyBypasses) {
                             if (proxyBypass.matcher(host).matches()) {
+                               log.debug("Direct route for host: {}, matched pattern: {}", host, proxyBypass.pattern());
                                 return List.of(Proxy.NO_PROXY);
                             }
                         }
                         if (InetAddresses.isInetAddress(host)) {
                             if (IPAddressUtil.getIPAddress(host).isLocal()) {
+                                log.debug("Direct route for host: {}, local IP", host);
                                 return List.of(Proxy.NO_PROXY);
                             }
                         }
+                        log.debug("Route via proxyInstance: {}", host);
                         return List.of(proxyInstance);
                     }
 
