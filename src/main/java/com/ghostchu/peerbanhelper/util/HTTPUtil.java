@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.simplereloadlib.ReloadResult;
 import com.ghostchu.simplereloadlib.ReloadStatus;
 import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.net.InetAddresses;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,6 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import okio.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.HostnameVerifier;
@@ -22,19 +22,19 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ProxySelector;
+import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -43,12 +43,10 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class HTTPUtil implements Reloadable {
     @Getter
     private static SSLContext ignoreSslContext;
-    @Autowired(required = false)
-    private ProxySelector proxySelector;
     private Proxy.Type proxyType;
     private @Nullable String proxyHost;
     private int proxyPort;
-    private @Nullable String proxyBypass;
+    private List<Pattern> proxyBypasses = Collections.synchronizedList(new ArrayList<>());
     private Proxy proxyInstance;
 
 
@@ -65,13 +63,24 @@ public final class HTTPUtil implements Reloadable {
 
     private void reloadConfig() {
         this.proxyType = switch (Main.getMainConfig().getInt("proxy.setting", 0)) {
-            case 2 -> Proxy.Type.HTTP;
-            case 3 -> Proxy.Type.SOCKS;
+            case 1 -> Proxy.Type.HTTP;
+            case 2 -> Proxy.Type.SOCKS;
             default -> Proxy.Type.DIRECT;
         };
         this.proxyHost = Main.getMainConfig().getString("proxy.host", "127.0.0.1");
         this.proxyPort = Main.getMainConfig().getInt("proxy.port", 7890);
-        this.proxyBypass = Main.getMainConfig().getString("proxy.bypass");
+        for (String proxy : Main.getMainConfig().getString("proxy.bypass", "").split("\\|")) {
+            if (!proxy.isEmpty()) {
+                try {
+                    proxyBypasses.add(Pattern.compile(proxy.replace("*", ".*").replace("?", ".?")));
+                } catch (Exception e) {
+                    log.error("Invalid proxy bypass pattern: {}", proxy, e);
+                }
+            }
+        }
+        for (String s : Main.getMainConfig().getString("proxy.bypass", "").split("\\|")) {
+            proxyBypasses.add(Pattern.compile(s.replace("*", ".*").replace("?", ".?")));
+        }
         if (proxyType == Proxy.Type.DIRECT) {
             this.proxyInstance = Proxy.NO_PROXY;
         } else {
@@ -116,7 +125,28 @@ public final class HTTPUtil implements Reloadable {
                 .fastFallback(true)
                 .retryOnConnectionFailure(true)
                 .cookieJar(new PBHCookieJar())
-                .proxy(proxyInstance)
+                .proxySelector(new ProxySelector() {
+                    @Override
+                    public List<Proxy> select(URI uri) {
+                        var host = uri.getHost();
+                        for (Pattern proxyBypass : proxyBypasses) {
+                            if (proxyBypass.matcher(host).matches()) {
+                                return List.of(Proxy.NO_PROXY);
+                            }
+                        }
+                        if (InetAddresses.isInetAddress(host)) {
+                            if (IPAddressUtil.getIPAddress(host).isLocal()) {
+                                return List.of(Proxy.NO_PROXY);
+                            }
+                        }
+                        return List.of(proxyInstance);
+                    }
+
+                    @Override
+                    public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
+
+                    }
+                })
                 .addInterceptor(chain -> {
                     Request original = chain.request();
                     Request.Builder requestBuilder = original.newBuilder()
