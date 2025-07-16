@@ -4,17 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import okhttp3.*;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,15 +82,26 @@ public final class ServerChanPushProvider extends AbstractPushProvider {
         if (config.getOpenId() != null) {
             map.put("openid", config.getOpenId());
         }
-        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false),
-                MutableRequest.POST("https://sctapi.ftqq.com/" + config.getSendKey() + ".send"
-                                , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(map)))
-                        .header("Content-Type", "application/json")
-                , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-        ).join();
-        if (resp.statusCode() != 200) {
-            ServerChanResponse scr = JsonUtil.getGson().fromJson(resp.body(), ServerChanResponse.class);
-            throw new IllegalStateException("HTTP Failed while sending push messages to ServerChan: " + scr.getMessage());
+        
+        RequestBody requestBody = RequestBody.create(
+                JsonUtil.getGson().toJson(map),
+                MediaType.parse("application/json")
+        );
+        
+        Request request = new Request.Builder()
+                .url("https://sctapi.ftqq.com/" + config.getSendKey() + ".send")
+                .post(requestBody)
+                .header("Content-Type", "application/json")
+                .build();
+        
+        try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                String responseBody = response.body().string();
+                ServerChanResponse scr = JsonUtil.getGson().fromJson(responseBody, ServerChanResponse.class);
+                throw new IllegalStateException("HTTP Failed while sending push messages to ServerChan: " + scr.getMessage());
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to send push message to ServerChan", e);
         }
         return true;
     }

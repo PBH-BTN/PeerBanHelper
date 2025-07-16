@@ -8,10 +8,10 @@ import com.ghostchu.peerbanhelper.bittorrent.tracker.Tracker;
 import com.ghostchu.peerbanhelper.downloader.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.github.mizosoft.methanol.Methanol;
 import com.google.gson.JsonObject;
 import com.vdurmont.semver4j.Semver;
 import cordelia.client.TrClient;
@@ -24,10 +24,10 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.net.http.HttpClient;
 import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
@@ -41,16 +41,16 @@ public final class Transmission extends AbstractDownloader {
     private final String blocklistUrl;
     private final Config config;
 
-    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
         super(id, alertManager);
         this.config = config;
-        this.client = new TrClient(httpBuilder, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), HttpClient.Version.valueOf(config.getHttpVersion()));
+        this.client = new TrClient(httpUtil, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl());
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return config.getName();
     }
 
@@ -58,33 +58,33 @@ public final class Transmission extends AbstractDownloader {
         return pbhServerAddress + "/blocklist/p2p-plain-format";
     }
 
-    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
         Config config = Config.readFromYaml(section, id);
-        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpBuilder);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpUtil);
     }
 
-    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static Transmission loadFromConfig(String id, String pbhServerAddress, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
         Transmission.Config config = JsonUtil.getGson().fromJson(section.toString(), Transmission.Config.class);
-        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpBuilder);
+        return new Transmission(id, generateBlocklistUrl(pbhServerAddress), config, alertManager, httpUtil);
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return config.getEndpoint();
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "Transmission";
     }
 
@@ -94,7 +94,7 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public List<DownloaderFeatureFlag> getFeatureFlags() {
+    public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
     }
 
@@ -153,12 +153,12 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         return fetchTorrents(true, !config.isIgnorePrivate());
     }
 
     @Override
-    public List<Torrent> getAllTorrents() {
+    public @NotNull List<Torrent> getAllTorrents() {
         return fetchTorrents(false, true);
     }
 
@@ -177,19 +177,19 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         TRTorrent trTorrent = (TRTorrent) torrent;
         return trTorrent.getPeers();
     }
 
     @Override
-    public List<Tracker> getTrackers(Torrent torrent) {
+    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
         TRTorrent trTorrent = (TRTorrent) torrent;
         return trTorrent.getTrackers();
     }
 
     @Override
-    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
         StringJoiner trackersJoiner = new StringJoiner("\n\n"); // 空一行
         trackers.forEach(t -> trackersJoiner.add(t.toString()));
         RqTorrentSet set = RqTorrentSet.builder()
@@ -201,7 +201,7 @@ public final class Transmission extends AbstractDownloader {
 
     @SneakyThrows
     @Override
-    public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         RqBlockList updateBlockList = new RqBlockList();
         TypedResponse<RsBlockList> updateBlockListResp = client.execute(updateBlockList);
         if (!updateBlockListResp.isSuccess()) {
@@ -217,7 +217,7 @@ public final class Transmission extends AbstractDownloader {
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
+    public @NotNull DownloaderStatistics getStatistics() {
         RqSessionStats sessionStats = new RqSessionStats();
         TypedResponse<RsSessionStats> sessionStatsResp = client.execute(sessionStats);
         var stats = sessionStatsResp.getArgs();
@@ -350,7 +350,6 @@ public final class Transmission extends AbstractDownloader {
         private String endpoint;
         private String username;
         private String password;
-        private String httpVersion;
         private boolean verifySsl;
         private String rpcUrl;
         private boolean ignorePrivate;
@@ -367,7 +366,6 @@ public final class Transmission extends AbstractDownloader {
             config.setUsername(section.getString("username", ""));
             config.setPassword(section.getString("password", ""));
             config.setRpcUrl(section.getString("rpc-url", "/transmission/rpc"));
-            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             config.setPaused(section.getBoolean("paused", false));
@@ -382,7 +380,6 @@ public final class Transmission extends AbstractDownloader {
             section.set("username", username);
             section.set("password", password);
             section.set("rpc-url", rpcUrl);
-            section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
             section.set("paused", paused);

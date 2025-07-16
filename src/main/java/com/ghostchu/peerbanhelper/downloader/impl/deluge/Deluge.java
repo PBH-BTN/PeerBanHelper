@@ -11,11 +11,11 @@ import com.ghostchu.peerbanhelper.downloader.DownloaderSpeedLimiter;
 import com.ghostchu.peerbanhelper.downloader.DownloaderStatistics;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.StrUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
-import com.github.mizosoft.methanol.Methanol;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import lombok.Data;
@@ -23,6 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import raccoonfink.deluge.DelugeException;
@@ -33,7 +34,6 @@ import raccoonfink.deluge.responses.DelugeListMethodsResponse;
 import raccoonfink.deluge.responses.PBHActiveTorrentsResponse;
 import raccoonfink.deluge.responses.PBHStatisticsResponse;
 
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -52,44 +52,44 @@ public final class Deluge extends AbstractDownloader {
     private final DelugeServer client;
     private final Config config;
 
-    public Deluge(String id, Config config, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public Deluge(String id, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
         super(id, alertManager);
         this.config = config;
-        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), httpBuilder, HttpClient.Version.valueOf(config.getHttpVersion()), null, null);
+        this.client = new DelugeServer(config.getEndpoint() + config.getRpcUrl(), config.getPassword(), config.isVerifySsl(), httpUtil, null, null);
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return config.getName();
     }
 
-    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static Deluge loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
         Config config = Config.readFromYaml(section, id);
-        return new Deluge(id, config, alertManager, httpBuilder);
+        return new Deluge(id, config, alertManager, httpUtil);
     }
 
-    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, Methanol.Builder httpBuilder) {
+    public static Deluge loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new Deluge(id, config, alertManager, httpBuilder);
+        return new Deluge(id, config, alertManager, httpUtil);
     }
 
     @Override
-    public JsonObject saveDownloaderJson() {
+    public @NotNull JsonObject saveDownloaderJson() {
         return JsonUtil.getGson().toJsonTree(config).getAsJsonObject();
     }
 
     @Override
-    public YamlConfiguration saveDownloader() {
+    public @NotNull YamlConfiguration saveDownloader() {
         return config.saveToYaml();
     }
 
     @Override
-    public String getEndpoint() {
+    public @NotNull String getEndpoint() {
         return config.getEndpoint();
     }
 
     @Override
-    public String getType() {
+    public @NotNull String getType() {
         return "Deluge";
     }
 
@@ -121,7 +121,7 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getTorrents() {
+    public @NotNull List<Torrent> getTorrents() {
         List<Torrent> torrents = new ArrayList<>();
         try {
             for (PBHActiveTorrentsResponse.ActiveTorrentsResponseDTO activeTorrent : this.client.getActiveTorrents().getActiveTorrents()) {
@@ -167,12 +167,12 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public List<Torrent> getAllTorrents() {
+    public @NotNull List<Torrent> getAllTorrents() {
         return getTorrents();
     }
 
     @Override
-    public List<Peer> getPeers(Torrent torrent) {
+    public @NotNull List<Peer> getPeers(@NotNull Torrent torrent) {
         if (!(torrent instanceof DelugeTorrent delugeTorrent)) {
             throw new IllegalStateException("The torrent object not a instance of DelugeTorrent");
         }
@@ -180,18 +180,18 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public List<Tracker> getTrackers(Torrent torrent) {
+    public @NotNull List<Tracker> getTrackers(@NotNull Torrent torrent) {
         return List.of();
     }
 
     @Override
-    public void setTrackers(Torrent torrent, List<Tracker> trackers) {
+    public void setTrackers(@NotNull Torrent torrent, @NotNull List<Tracker> trackers) {
 
     }
 
     @SneakyThrows
     @Override
-    public void setBanList(Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
+    public void setBanList(@NotNull Collection<PeerAddress> fullList, @Nullable Collection<BanMetadata> added, @Nullable Collection<BanMetadata> removed, boolean applyFullList) {
         if (removed != null && removed.isEmpty() && added != null && config.isIncrementBan() && !applyFullList) {
             setBanListIncrement(added);
         } else {
@@ -216,7 +216,7 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
+    public @NotNull DownloaderStatistics getStatistics() {
         try {
             PBHStatisticsResponse resp = this.client.queryStatistics();
             var dto = resp.getStatistics();
@@ -313,7 +313,6 @@ public final class Deluge extends AbstractDownloader {
         private String type;
         private String endpoint;
         private String password;
-        private String httpVersion;
         private boolean verifySsl;
         private String rpcUrl;
         private boolean incrementBan;
@@ -330,7 +329,6 @@ public final class Deluge extends AbstractDownloader {
             }
             config.setPassword(section.getString("password", ""));
             config.setRpcUrl(section.getString("rpc-url", "/json"));
-            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIncrementBan(section.getBoolean("increment-ban", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
@@ -345,7 +343,6 @@ public final class Deluge extends AbstractDownloader {
             section.set("endpoint", endpoint);
             section.set("password", password);
             section.set("rpc-url", rpcUrl);
-            section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);

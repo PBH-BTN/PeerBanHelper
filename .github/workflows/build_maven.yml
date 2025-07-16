@@ -8,10 +8,8 @@ on:
 jobs:
   WebUI:
     uses: ./.github/workflows/build_fe.yml
-  JNI:
-    uses: ./.github/workflows/build_jni.yml
   Maven:
-    needs: [WebUI,JNI]
+    needs: [WebUI]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,12 +18,6 @@ jobs:
         with:
           name: webui-dist
           path: src/main/resources/static
-      - uses: actions/download-artifact@v4
-        name: Download JNI Library
-        with:
-          pattern: jni-*
-          merge-multiple: true
-          path: src/main/resources/native/windows
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"

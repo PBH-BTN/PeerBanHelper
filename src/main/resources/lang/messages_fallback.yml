@@ -663,3 +663,20 @@ CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
   
   对此带来的不便，我们深表歉意。
 BOOT_TIME: "PeerBanHelper 启动完成，用时 {}ms"
+ECOMODE_FAILED: "Windows EcoQos 效率模式可能与您的平台不兼容：{}，操作已取消"
+JBR_REQUIRED_TITLE: "Java 运行时环境不兼容"
+JBR_REQUIRED_DESCRIPTION: |
+  PeerBanHelper 在 Windows 平台下需要 JetBrains Runtime (JBR) 才能正常运行。  
+  
+  您当前正在使用为：{} {}
+  
+  对于 Eclipse Adoptium, Azul Zulu, BellSoft Liberica, Oracle/Open JDK 等其它 Java 运行时环境可能不包含 PeerBanHelper 所需要的问题的修复补丁。  
+  如果出现与 awt.dll 相关的崩溃问题请切换到 JetBrains Runtime 或者**使用带有 Java 环境的 PeerBanHelper 安装程序覆盖安装**。  
+  此提醒仅显示一次。
+  
+  [下载 JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime/releases)
+LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_TITLE: "Win32平台：清空工作集"
+LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_DESCRIPTION: |
+  在 Windows 平台上，PeerBanHelper 将在 Full GC（或者每隔一段时间）调用 Win32 API 清空自身进程工作集以释放内存。  
+  不活跃的内存页将被转移到操作系统分页文件中，可能引起短暂性能下降和磁盘 I/O，但有助于释放进程占用的物理内存以供其他应用程序使用。  
+  更改此设定需要重新启动 PeerBanHelper 以使其生效。

@@ -1,4 +1,4 @@
-config-version: 34
+config-version: 35
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -9,7 +9,6 @@ language: default
 # GUI 实现
 # auto 由 PeerBanHelper 选择最佳 GUI 实现
 # swing 使用 Java Swing GUI 和 Flatlaf 实现，支持全部平台 (推荐)
-# swt 使用 Eclipse Standard Widget Toolkit (SWT) GUI 实现，仅支持 Windows, macOS, Linux 的 x86_64 平台 (在 Swing 存在问题时使用)
 # disable 禁用任何 GUI
 gui: auto
 # PBH Plus 的捐赠密钥，填写后将激活捐赠功能。
@@ -120,7 +119,7 @@ proxy:
   # 0 = 不使用代理 - No proxy
   # 1 = 使用系统代理 - Use system proxy
   # 2 = 使用 HTTP(s) 代理 - Use HTTP(s) proxy
-  setting: 1
+  setting: 0
   # 代理服务器地址 - Proxy server host
   host: "127.0.0.1"
   # 代理服务器端口号 - Proxy server port

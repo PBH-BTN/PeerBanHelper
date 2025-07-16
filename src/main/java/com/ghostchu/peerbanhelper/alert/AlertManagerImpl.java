@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -144,6 +145,15 @@ public final class AlertManagerImpl implements AlertManager {
 
         }
         return alertLevel;
+    }
+
+    @Override
+    public @NotNull List<AlertEntity> getUnreadAlerts() {
+        try {
+            return  alertDao.getUnreadAlertsUnPaged();
+        } catch (SQLException e) {
+            return List.of();
+        }
     }
 
 }

@@ -40,4 +40,6 @@ public final class ProgressCheatBlockerPersistEntity {
     private Timestamp banDelayWindowEndAt;
     @DatabaseField(canBeNull = false)
     private long fastPcbTestExecuteAt;
+    @DatabaseField(canBeNull = false)
+    private long lastLastTorrentCompletedProgress;
 }

@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.bittorrent.peer.PeerFlag;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -20,7 +21,7 @@ public final class DelugePeer implements Peer {
     private PeerFlag flags;
 
     @Override
-    public String getRawIp() {
+    public @NotNull String getRawIp() {
         return peerAddress.getIp();
     }
 

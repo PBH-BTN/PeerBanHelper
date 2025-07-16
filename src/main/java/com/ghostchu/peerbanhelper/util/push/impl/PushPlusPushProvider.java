@@ -4,18 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.push.AbstractPushProvider;
-import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,19 +86,29 @@ public final class PushPlusPushProvider extends AbstractPushProvider {
             put("content", content);
             put("template", "markdown");
         }};
-        HttpResponse<String> resp = httpUtil.retryableSend(httpUtil.getHttpClient(false),
-                MutableRequest.POST("https://www.pushplus.plus/send"
-                                , HttpRequest.BodyPublishers.ofString(JsonUtil.getGson().toJson(args)))
-                        .header("Content-Type", "application/json")
-                , java.net.http.HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-        ).join();
-        if (resp.statusCode() != 200) {
-            throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + resp.body());
-        } else {
-            PushPlusResponse ppr = JsonUtil.getGson().fromJson(resp.body(), PushPlusResponse.class);
+        
+        RequestBody requestBody = RequestBody.create(
+                JsonUtil.getGson().toJson(args),
+                MediaType.parse("application/json")
+        );
+        
+        Request request = new Request.Builder()
+                .url("https://www.pushplus.plus/send")
+                .post(requestBody)
+                .header("Content-Type", "application/json")
+                .build();
+        
+        try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + response.body().string());
+            }
+            String responseBody = response.body().string();
+            PushPlusResponse ppr = JsonUtil.getGson().fromJson(responseBody, PushPlusResponse.class);
             if (ppr.getCode() != 200) {
                 throw new IllegalStateException("HTTP Failed while sending push messages to PushPlus: " + ppr.getMsg());
             }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to send push message to PushPlus", e);
         }
         return true;
     }

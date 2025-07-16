@@ -7,6 +7,8 @@ import com.ghostchu.peerbanhelper.database.table.TorrentEntity;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManagerImpl;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BanLogDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.PeerRecordEntityDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentEntityDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TorrentInfoDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.query.Orderable;
@@ -179,7 +181,22 @@ public final class PBHTorrentController extends AbstractFeatureModule {
         var queryWhere = queryBuilder.where().eq("torrent_id", t);
         queryBuilder.setWhere(queryWhere);
         Page<PeerRecordEntity> page = peerRecordDao.queryByPaging(queryBuilder, pageable);
-        ctx.json(new StdResp(true, null, page));
+        ctx.json(new StdResp(true, null,  Page.map(page, (entity)-> new PeerRecordEntityDTO(entity.getId(),
+                entity.getAddress(),
+                TorrentEntityDTO.from(entity.getTorrent()),
+                downloaderManager.getDownloadInfo(entity.getDownloader()),
+                entity.getPeerId(),
+                entity.getClientName(),
+                entity.getUploaded(),
+                entity.getUploadedOffset(),
+                entity.getUploadSpeed(),
+                entity.getDownloaded(),
+                entity.getDownloadedOffset(),
+                entity.getDownloadSpeed(),
+                entity.getLastFlags(),
+                entity.getFirstTimeSeen(),
+                entity.getLastTimeSeen()
+        ))));
     }
 
     @Override

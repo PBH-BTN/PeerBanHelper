@@ -13,7 +13,6 @@ import com.ghostchu.peerbanhelper.gui.PBHGuiManager;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.gui.impl.console.ConsoleGuiImpl;
 import com.ghostchu.peerbanhelper.gui.impl.swing.SwingGuiImpl;
-import com.ghostchu.peerbanhelper.gui.impl.swt.SwtGuiImpl;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TextManager;
 import com.ghostchu.peerbanhelper.util.*;
@@ -109,8 +108,8 @@ public class Main {
         setupConfDirectory(args);
         loadFlagsProperties();
         setupConfiguration();
-        setupLogback();
         meta = buildMeta();
+        setupLogback();
         String defLocaleTag = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
         log.info("Current system language tag: {}", defLocaleTag);
         DEF_LOCALE = mainConfig.getString("language");
@@ -182,12 +181,13 @@ public class Main {
         try {
             var targetLevel = ExternalSwitch.parse("pbh.log.level");
             if (targetLevel != null) {
-                var rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-                ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) rootLogger;
-                logbackLogger.setLevel(Level.toLevel(targetLevel));
+                ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+                rootLogger.setLevel(Level.toLevel(targetLevel));
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            log.warn("Failed to set log level", e);
         }
+
     }
 
     public static ReloadResult reloadModule() {
@@ -333,7 +333,9 @@ public class Main {
         shutdownThread.setDaemon(false);
         shutdownThread.setName("ShutdownThread");
         Runtime.getRuntime().addShutdownHook(shutdownThread);
-    }    private static void initGUI(String[] args) {
+    }
+
+    private static void initGUI(String[] args) {
         String guiType = mainConfig.getString("gui", "auto");
         if ("auto".equals(guiType)) guiType = "swing";
 
@@ -349,10 +351,9 @@ public class Main {
         }
 
         switch (guiType) {
-            case "swing" -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
-            case "swt" -> guiManager = new PBHGuiManager(new SwtGuiImpl(args));
             //case "qt" -> guiManager = new PBHGuiManager(new com.ghostchu.peerbanhelper.gui.impl.qt.QtGuiImpl(args));
-            default -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
+            case "console" -> guiManager = new PBHGuiManager(new ConsoleGuiImpl(args));
+            default -> guiManager = new PBHGuiManager(new SwingGuiImpl(args));
         }
 
         guiManager.setup();

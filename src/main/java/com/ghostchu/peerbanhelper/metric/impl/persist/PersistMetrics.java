@@ -18,6 +18,7 @@ import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
@@ -98,7 +99,7 @@ public final class PersistMetrics implements BasicMetrics {
     }
 
     @Override
-    public void recordPeerBan(PeerAddress address, BanMetadata metadata) {
+    public void recordPeerBan( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }
@@ -145,7 +146,7 @@ public final class PersistMetrics implements BasicMetrics {
     }
 
     @Override
-    public void recordPeerUnban(PeerAddress address, BanMetadata metadata) {
+    public void recordPeerUnban( @NotNull PeerAddress address, @NotNull BanMetadata metadata) {
         if (metadata.isBanForDisconnect()) {
             return;
         }

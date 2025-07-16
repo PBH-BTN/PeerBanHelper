@@ -32,6 +32,16 @@ public final class MainConfigUpdateScript {
 //        }
     }
 
+    @UpdateScript(version = 35)
+    public void migrateProxySettings(){
+        switch (conf.getInt("proxy.setting", 0)) { // 旧版本不代理，现在调整为不代理
+            case 0 -> {} // 旧版本是不代理，现在也不代理
+            case 1 -> { conf.set("proxy.setting", 0); } // 旧版本是跟随系统代理，现在调整为不代理
+            case 2 -> { conf.set("proxy.setting", 1); } // HTTP 代理保持现状
+            case 3 -> { conf.set("proxy.setting", 2); } // SOCKS 代理保持现状
+        }
+    }
+
     @UpdateScript(version = 34)
     public void cleanupUnusedFiles(){
         File decentralized = new File(Main.getDataDirectory(), "decentralized");

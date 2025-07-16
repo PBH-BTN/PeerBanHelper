@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.database.Database;
 import com.ghostchu.peerbanhelper.database.dao.impl.tmp.TrackedSwarmDao;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
@@ -13,6 +14,7 @@ import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
+import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -37,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -112,11 +114,38 @@ public class PeerBanHelper implements Reloadable {
         downloaderServer.load();
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
         crashManager.putRunningFlag();
+        Main.getEventBus().post(new PBHServerStartedEvent());
         Main.getGuiManager().onPBHFullyStarted(this);
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        System.gc();
+        Thread.startVirtualThread(() -> {
+            if (os.startsWith("win")) {
+                WorkingSetManagerFactory.trimMemory();
+            }
+        });
     }
 
     private void checkKnownCrashes() {
         crashManager.checkCrashRecovery();
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        if (os.startsWith("win") && Main.getGuiManager().isGuiAvailable()) {
+            // Fuck awt.dll, nobody care desktop users, told user to use JBR for patch that we really need.v
+            var bean = ManagementFactory.getRuntimeMXBean();
+            if (!bean.getVmVendor().contains("JetBrains")) {
+                if (!alertManager.identifierAlertExistsIncludeRead("incompatibility-jre-windows-liberica")) {
+                    alertManager.publishAlert(false, AlertLevel.WARN,
+                            "incompatibility-jre-windows-liberica",
+                            new TranslationComponent(Lang.JBR_REQUIRED_TITLE),
+                            new TranslationComponent(Lang.JBR_REQUIRED_DESCRIPTION, bean.getVmVendor(), bean.getVmVersion()));
+                    Main.getGuiManager().createDialog(Level.WARN, tlUI(new TranslationComponent(Lang.JBR_REQUIRED_TITLE)),
+                            tlUI(new TranslationComponent(Lang.JBR_REQUIRED_DESCRIPTION, bean.getVmVendor(), bean.getVmVersion())),
+                            () -> {
+                            });
+                }
+            }
+        }
+
+
 //        if (!crashManager.isRunningFlagExists()) return;
 //        Main.getGuiManager().createDialog(Level.WARN, tlUI(Lang.CRASH_MANAGER_TITLE), tlUI(Lang.CRASH_MANAGER_DESCRIPTION), () -> {
 //            if ("SWING".equals(Main.getGuiManager().getName())) {
@@ -140,7 +169,7 @@ public class PeerBanHelper implements Reloadable {
     }
 
     private void postCompatibilityCheck() {
-        if ( ExternalSwitch.parseBoolean("pbh.forceBitnessCheckFail")) {
+        if (ExternalSwitch.parseBoolean("pbh.forceBitnessCheckFail")) {
             ExchangeMap.UNSUPPORTED_PLATFORM = true;
             ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("unsupported-platform", 10, tlUI(Lang.TITLE_INCOMPATIBLE_PLATFORM)));
             log.warn(tlUI(Lang.INCOMPATIBLE_BITNESS_LOG));
@@ -160,8 +189,6 @@ public class PeerBanHelper implements Reloadable {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
-        // run some junky test code here
-
     }
 
 
@@ -288,7 +315,6 @@ public class PeerBanHelper implements Reloadable {
     public String getWebUiUrl() {
         return "http://localhost:" + Main.getServer().getHttpdPort() + "/?token=" + UrlEncoderDecoder.encodePath(webContainer.getToken());
     }
-
 
 
     /**

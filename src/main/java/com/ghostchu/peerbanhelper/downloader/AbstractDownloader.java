@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.MsgUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
@@ -23,12 +24,12 @@ public abstract class AbstractDownloader implements Downloader {
     }
 
     @Override
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public DownloaderLoginResult login() {
+    public @NotNull DownloaderLoginResult login() {
         if(isPaused()){
             lastStatus = DownloaderLastStatus.PAUSED;
             statusMessage = new TranslationComponent(Lang.STATUS_TEXT_PAUSED);
@@ -81,28 +82,28 @@ public abstract class AbstractDownloader implements Downloader {
     public abstract DownloaderLoginResult login0() throws Exception;
 
     @Override
-    public DownloaderLastStatus getLastStatus() {
+    public @NotNull DownloaderLastStatus getLastStatus() {
         return lastStatus;
     }
 
     @Override
-    public void setLastStatus(DownloaderLastStatus lastStatus, TranslationComponent statusMessage) {
+    public void setLastStatus(@NotNull DownloaderLastStatus lastStatus, @NotNull TranslationComponent statusMessage) {
         this.lastStatus = lastStatus;
         this.statusMessage = statusMessage;
     }
 
     @Override
-    public TranslationComponent getLastStatusMessage() {
+    public @NotNull TranslationComponent getLastStatusMessage() {
         return statusMessage;
     }
 
     @Override
-    public DownloaderStatistics getStatistics() {
+    public @NotNull DownloaderStatistics getStatistics() {
         return new DownloaderStatistics(0, 0);
     }
 
     @Override
-    public List<DownloaderFeatureFlag> getFeatureFlags() {
+    public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
         return List.of(DownloaderFeatureFlag.UNBAN_IP);
     }
 
