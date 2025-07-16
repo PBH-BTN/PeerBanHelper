@@ -152,23 +152,45 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                 .le("timestamp", end.getTime())
                 .queryBuilder()
                 .groupBy("timestamp")
+                .orderBy("timestamp", true)
                 .queryRaw()) {
-            return results.getResults().stream().map(args ->
+            
+            List<TrafficData> trafficDataList = results.getResults().stream().map(args ->
                     new TrafficData(
                             new Timestamp(Long.parseLong(args[0])),
                             Long.parseLong(args[1]),
                             Long.parseLong(args[2]),
                             Long.parseLong(args[3]),
                             Long.parseLong(args[4])
-                    )
-            ).map(data -> new TrafficDataComputed(data.getTimestamp(),
-                    data.getDataOverallUploaded() - data.getDataOverallUploadedAtStart(),
-                    data.getDataOverallDownloaded() - data.getDataOverallDownloadedAtStart())).toList();
+                    )).toList();
+            
+            // 计算增量：当前时间点的总量减去前一个时间点的总量
+            List<TrafficDataComputed> result = new java.util.ArrayList<>();
+            for (int i = 0; i < trafficDataList.size(); i++) {
+                TrafficData current = trafficDataList.get(i);
+                long uploadedIncrement;
+                long downloadedIncrement;
+                
+                if (i == 0) {
+                    // 第一个时间点：使用当前值减去开始值
+                    uploadedIncrement = current.getDataOverallUploaded() - current.getDataOverallUploadedAtStart();
+                    downloadedIncrement = current.getDataOverallDownloaded() - current.getDataOverallDownloadedAtStart();
+                } else {
+                    // 后续时间点：使用当前值减去前一个时间点的值
+                    TrafficData previous = trafficDataList.get(i - 1);
+                    uploadedIncrement = current.getDataOverallUploaded() - previous.getDataOverallUploaded();
+                    downloadedIncrement = current.getDataOverallDownloaded() - previous.getDataOverallDownloaded();
+                }
+                
+                result.add(new TrafficDataComputed(current.getTimestamp(), uploadedIncrement, downloadedIncrement));
+            }
+            
+            return result;
         }
     }
 
     public List<TrafficDataComputed> getSpecificDownloaderOverallData(String downloadName, Timestamp start, Timestamp end) throws SQLException {
-        return queryBuilder().orderBy("timestamp", true)
+        List<TrafficJournalEntity> entities = queryBuilder().orderBy("timestamp", true)
                 .where()
                 .eq("downloader", downloadName)
                 .and()
@@ -176,16 +198,37 @@ public final class TrafficJournalDao extends AbstractPBHDao<TrafficJournalEntity
                 .and()
                 .le("timestamp", end.getTime())
                 .queryBuilder()
-                .query().stream().map(e -> new TrafficData(
-                        new Timestamp(e.getTimestamp()),
-                        e.getDataOverallUploadedAtStart(),
-                        e.getDataOverallUploaded(),
-                        e.getDataOverallDownloadedAtStart(),
-                        e.getDataOverallDownloaded()))
-                .map(data -> new TrafficDataComputed(data.getTimestamp(),
-                        data.getDataOverallUploaded() - data.getDataOverallUploadedAtStart(),
-                        data.getDataOverallDownloaded() - data.getDataOverallDownloadedAtStart()))
-                .toList();
+                .query();
+        
+        List<TrafficData> trafficDataList = entities.stream().map(e -> new TrafficData(
+                new Timestamp(e.getTimestamp()),
+                e.getDataOverallUploadedAtStart(),
+                e.getDataOverallUploaded(),
+                e.getDataOverallDownloadedAtStart(),
+                e.getDataOverallDownloaded())).toList();
+        
+        // 计算增量：当前时间点的总量减去前一个时间点的总量
+        List<TrafficDataComputed> result = new java.util.ArrayList<>();
+        for (int i = 0; i < trafficDataList.size(); i++) {
+            TrafficData current = trafficDataList.get(i);
+            long uploadedIncrement;
+            long downloadedIncrement;
+            
+            if (i == 0) {
+                // 第一个时间点：使用当前值减去开始值
+                uploadedIncrement = current.getDataOverallUploaded() - current.getDataOverallUploadedAtStart();
+                downloadedIncrement = current.getDataOverallDownloaded() - current.getDataOverallDownloadedAtStart();
+            } else {
+                // 后续时间点：使用当前值减去前一个时间点的值
+                TrafficData previous = trafficDataList.get(i - 1);
+                uploadedIncrement = current.getDataOverallUploaded() - previous.getDataOverallUploaded();
+                downloadedIncrement = current.getDataOverallDownloaded() - previous.getDataOverallDownloaded();
+            }
+            
+            result.add(new TrafficDataComputed(current.getTimestamp(), uploadedIncrement, downloadedIncrement));
+        }
+        
+        return result;
     }
 
     @Data
