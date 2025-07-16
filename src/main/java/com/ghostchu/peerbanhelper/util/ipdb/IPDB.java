@@ -75,6 +75,9 @@ public final class IPDB implements AutoCloseable {
                 .callTimeout(Duration.ofMinutes(2))
                 .followRedirects(true)
                 .authenticator((route, response) -> {
+                    if (response.request().header("Authorization") != null) {
+                        return null; // 已经尝试过认证，不再重试
+                    }
                     String credential = Credentials.basic(accountId, licenseKey);
                     return response.request().newBuilder().header("Authorization", credential).build();
                 })
