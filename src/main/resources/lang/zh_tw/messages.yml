@@ -1,6 +1,6 @@
 ERR_BUILD_NO_INFO_FILE: "錯誤：構建資訊文件不存在"
 ERR_CANNOT_LOAD_BUILD_INFO: "錯誤：無法載入構建資訊文件"
-MOTD: "PeerBanHelper v{} [{}] (Compiled at {}) - by PBH-BTN Community, Made with Sugar & Love"
+MOTD: "PeerBanHelper v{} [{}] (構建時間 {}) - 由 PBH-BTN 社群維護，使用愛與龍尾巴製作"
 LOADING_CONFIG: "正在載入設定檔……"
 CONFIG_PEERBANHELPER: "已初始化目錄結構，相關文件已放置在執行目錄的 data 資料夾下，請配置相關文件後，再重新啟動 PeerBanHelper"
 ERR_SETUP_CONFIGURATION: "錯誤：無法初始化設定檔結構"
@@ -21,17 +21,17 @@ MODULE_IBL_MATCH_IP: "匹配 IP 規則: {}"
 MODULE_IBL_MATCH_IP_RULE: "匹配 IP黑名單訂閱 規則: {}, IP 位址: {}, 備註: {}"
 MODULE_IBL_MATCH_ASN: "匹配 ASN 規則: {}"
 MODULE_IBL_MATCH_REGION: "匹配國家或地區 ISO 程式碼規則: {}"
-MODULE_IBL_EXCEPTION_GEOIP: "匹配 GeoIP 資訊時出現異常，請回報錯誤給開發者"
+MODULE_IBL_EXCEPTION_GEOIP: "匹配 GeoIP 資訊時出現異常，請回饋錯誤給開發者"
 MODULE_IBL_MATCH_PORT: "匹配 Port 規則: {}"
 MODULE_PID_MATCH_PEER_ID: "匹配 PeerId 規則: {}"
 MODULE_IBL_MATCH_CITY: "匹配城市名稱規則: {}"
-MODULE_PCB_EXCESSIVE_DOWNLOAD: "客戶端下載過量：種子大小：{}，上傳給此對等體的總量：{}，最大允許的過量下載總量：{}"
-MODULE_PCB_EXCESSIVE_DOWNLOAD_INCOMPLETE: "客戶端下載過量：種子大小：{} ({} 已下載)，上傳給此對等體的總量：{}，最大允許的過量下載總量：{}"
-MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP: "客戶端進度：{}，實際進度：{}，客戶端的進度多於本機進度，跳過檢測"
-MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS: "客戶端進度：{}，實際進度：{}，差值：{}"
-MODULE_PCB_PEER_BAN_REWIND: "客戶端進度：{}，實際進度：{}，上次記錄進度：{}，本次回退進度：{}，差值：{}"
+MODULE_PCB_EXCESSIVE_DOWNLOAD: "用戶端下載過量：種子大小：{}，上傳給此對等體的總量：{}，最大允許的過量下載總量：{}"
+MODULE_PCB_EXCESSIVE_DOWNLOAD_INCOMPLETE: "用戶端下載過量：種子大小：{} ({} 已下載)，上傳給此對等體的總量：{}，最大允許的過量下載總量：{}"
+MODULE_PCB_PEER_MORE_THAN_LOCAL_SKIP: "用戶端進度：{}，實際進度：{}，用戶端的進度多於本機進度，跳過檢測"
+MODULE_PCB_PEER_BAN_INCORRECT_PROGRESS: "用戶端進度：{}，實際進度：{}，差值：{}"
+MODULE_PCB_PEER_BAN_REWIND: "用戶端進度：{}，實際進度：{}，上次記錄進度：{}，本次回退進度：{}，差值：{}"
 MODULE_PCB_SKIP_UNKNOWN_SIZE_TORRENT: "種子大小未知"
-GUI_BUTTON_RESIZE_TABLE: "按此調整列寬"
+GUI_BUTTON_RESIZE_TABLE: "按下調整列寬"
 MODULE_AP_SSL_CONTEXT_FAILURE: "初始化 SSLContext 時出錯"
 MODULE_MDB_MULTI_DIALING_NOT_DETECTED: "未發現多撥下載"
 MODULE_MDB_MULTI_DIALING_DETECTED: "發現多撥下載，請持續關注，子網：{}，觸發IP：{}"
@@ -41,7 +41,6 @@ DOWNLOADER_QB_FAILED_REQUEST_TORRENT_LIST: "請求 Torrents 列表失敗 - {} - 
 DOWNLOADER_QB_FAILED_REQUEST_PEERS_LIST_IN_TORRENT: "請求 Torrent 的 Peers 列表失敗 - {} - {}"
 DOWNLOADER_QB_API_PREFERENCES_ERR: "qBittorrent 的偏好設定 API 返回了非 200 預期響應 - {} - {}"
 DOWNLOADER_QB_FAILED_SAVE_BANLIST: "無法儲存 {} ({}) 的 Banlist！{} - {}\n{}"
-DOWNLOADER_QB_FAILED_SAVE_SPEED_LIMITER: "無法儲存 {} ({}) 的限速配置！{} - {}\n{}"
 DOWNLOADER_TR_MOTD_WARNING: "[受限] 由於 Transmission 的 RPC-API 限制，PeerId 黑名單功能和 ProgressCheatBlocker 功能的過量下載模組不可用"
 DOWNLOADER_TR_DISCONNECT_PEERS: "[重設] 正在斷開 Transmission 上的 {} 個種子連接的對等體，以便套用 IP 封鎖列表的更改"
 DOWNLOADER_TR_INCORRECT_BANLIST_API_RESP: "設定 Transmission 的 BanList 地址時，返回非成功響應：{}。"
@@ -70,13 +69,13 @@ BTN_REQUEST_FAILS: "[BTN 網路] 請求時出現錯誤，操作已取消 {}"
 BTN_CONFIG_FAILS: "[BTN 網路] 所連接的 BTN 網路實例未返回有效配置響應，BTN 網路功能可能不會正常工作 {}，將在 {} 秒後重試"
 MODULE_BTN_BAN: "[BTN 封禁] 匹配 {} 規則集（{}）：{}"
 BTN_NETWORK_CONNECTING: "[BTN 網路] 請等待我們連接到 BTN 網路……"
-BTN_NETWORK_NOT_ENABLED: "[BTN 網路] 未啟用 BTN 功能：此 PeerBanHelper 客戶端未加入 BTN 網路"
+BTN_NETWORK_NOT_ENABLED: "[BTN 網路] 未啟用 BTN 功能：此 PeerBanHelper 用戶端未加入 BTN 網路"
 BTN_NETWORK_ENABLED: "[BTN 網路] 功能已啟用"
 BANLIST_INVOKER_REGISTERED: "[BanListInvoker] 已註冊：{}"
 BANLIST_INVOKER_IPFILTER_FAIL: "[BanListInvoker] 清空 ipfilter.dat 文件失敗，出現 I/O 錯誤"
 BANLIST_INVOKER_COMMAND_EXEC_TIMEOUT: "[BanListInvoker] 執行指令 {} 時超時，PBH 不再繼續等待行程"
 BANLIST_INVOKER_COMMAND_EXEC_FAILED: "[BanListInvoker] 執行指令 {} 時，行程返回非零狀態碼（{}），這可能意味著指令未被成功執行，請查看"
-BTN_INCOMPATIBLE_SERVER: "[BTN 網路] 您所連接的 BTN 實例與目前 BTN 客戶端不相容"
+BTN_INCOMPATIBLE_SERVER: "[BTN 網路] 您所連接的 BTN 實例與目前 BTN 用戶端不相容"
 BTN_SUBMITTING_PEERS: "[BTN 網路] 計劃任務正在向 BTN 網路提交目前下載的 Peers 列表，請稍等……"
 BTN_SUBMITTED_PEERS: "[BTN 網路] 已向 BTN 網路提交 {} 個 Peers，感謝您對 BTN 網路的支持！"
 BTN_SUBMITTING_BANS: "[BTN 網路] 計劃任務正在向 BTN 網路提交自上次匯報以來新增的封禁條目，請稍等……"
@@ -97,7 +96,6 @@ BTN_SHUTTING_DOWN: "[BTN 網路] 正在關閉 BTN 模組……"
 BTN_RECONFIGURING: "[BTN 網路] 發現伺服器基本配置更新，正在重新配置 BTN 網路模組……"
 RULE_MATCHER_STRING_CONTAINS: "子串匹配"
 RULE_MATCHER_STRING_ENDS_WITH: "匹配結尾"
-MATCH_STRING_STARTS_WITH: "字串開頭: {}"
 RULE_MATCHER_STRING_STARTS_WITH: "匹配開頭"
 RULE_MATCHER_STRING_LENGTH: "匹配長度"
 RULE_MATCHER_STRING_REGEX: "匹配正則"
@@ -201,6 +199,7 @@ STATUS_TEXT_OK: "目前工作正常"
 STATUS_TEXT_LOGIN_FAILED: "嘗試登入到下載器失敗"
 STATUS_TEXT_EXCEPTION: "出現異常，請檢查 PeerBanHelper 控制台: {}"
 STATUS_TEXT_NEED_PRIVILEGE: "權限不足，請求權限提升（以管理員/root身份執行）"
+STATUS_TEXT_PAUSED: "PeerBanHelper 不會檢查已暫停的下載器，請取消暫停"
 SUGGEST_FIREWALL_IPTABELS: "不推薦使用原生 iptables，可能引起網路性能下降。請考慮安裝 ipset 代替使用 iptabels"
 SUGGEST_FIREWALL_FIREWALLD: "不推薦使用原生 firewalld，可能引起網路性能下降。請考慮安裝 ipset 代替使用 firewalld"
 SUGGEST_FIREWALL_WINDOWS_FIREWALL_DISABLED: "Windows 防火牆目前處於停用狀態，請為「公用網路」和「私人網路」打開 Windows 防火牆，否則系統防火牆整合將不起作用"
@@ -217,7 +216,7 @@ LIBRARIES_LOADER_DETERMINE_TEST_RESULT: "下載測試結果："
 LIBRARIES_DOWNLOAD_DIALOG_TITLE: "下載依賴文件"
 LIBRARIES_DOWNLOAD_DIALOG_DESCRIPTION: "正在下載：{}"
 LIBRARIES_DOWNLOAD_DIALOG_BAR_TEXT: "下載進度：{}/{}"
-LIBRARIES_DOWNLOAD_DIALOG_TOOLTIP: "正在下載所需的執行階段依賴文件，請稍等……"
+LIBRARIES_DOWNLOAD_DIALOG_TOOLTIP: "正在下載所需的執行時依賴文件，請稍等……"
 LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER: "測試最佳鏡像源"
 LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_DESCRIPTION: "正在測試共 {} 個 Maven 鏡像倉庫，最多 15 秒……"
 LIBRARIES_DOWNLOAD_DIALOG_TEST_SERVER_TOOLTIP: "使用最佳的鏡像源可在下載依賴文件時顯著提升下載速度。"
@@ -248,7 +247,7 @@ COMMAND_EXECUTOR_FAILED: "[CommandExecutor] 系統終端指令執行失敗：{}"
 COMMAND_EXECUTOR_FAILED_TIMEOUT: "[CommandExecutor] 系統終端指令執行超時：{}"
 DOWNLOADER_DELUGE_PLUGIN_NOT_INSTALLED: "無法登入到下載器 {}，此 Deluge 下載器必須正確載入 PeerBanHelper Deluge Adapter 擴展外掛程式：https://github.com/PBH-BTN/PBH-Adapter-Deluge"
 DOWNLOADER_DELUGE_API_ERROR: "執行 Deluge RPC 呼叫失敗，操作被忽略"
-DOWNLOADER_UNHANDLED_EXCEPTION: "發生了一個未處理的異常，請回報給 PeerBanHelper 開發者，此錯誤已被跳過……"
+DOWNLOADER_UNHANDLED_EXCEPTION: "發生了一個未處理的異常，請回饋給 PeerBanHelper 開發者，此錯誤已被跳過……"
 WEB_ENDPOINT_REGISTERED: "[註冊] WebAPI 端點已註冊：{}"
 SKIP_LOAD_PLUGIN_FOR_NATIVE_IMAGE: "檢測到Native Images，跳過載入外掛程式"
 ERR_CANNOT_LOAD_PLUGIN: "[註冊] 無法載入外掛程式：{}"
@@ -307,7 +306,6 @@ NET_TYPE_DATACENTER: "資料中心"
 WEBUI_VALIDATION_DOWNLOAD_LOGIN_FAILED: "配置有效，但無法連接到下載器，請檢查日誌"
 
 STATUS_TEXT_UNKNOWN: "PeerBanHelper 暫時還未獲取到此下載器的資訊"
-STATUS_TEXT_PAUSED: "PeerBanHelper 不會檢查已暫停的下載器，請取消暫停"
 DOWNLOADER_LOGIN_EXCEPTION: "無法連接到下載器，登入時出現錯誤：{}"
 DOWNLOADER_LOGIN_IO_EXCEPTION: "無法連接到下載器，登入時出現網路錯誤：{}"
 DOWNLOADER_LOGIN_INCORRECT_CRED: "鑒權失敗，錯誤的登入憑據。請檢查使用者名稱、密碼或 Token 是否正確。"
@@ -395,10 +393,10 @@ UNABLE_TO_PUSH_ALERT_VIA_PROVIDERS: "透過通知推送渠道推送消息失敗"
 UNABLE_TO_PUSH_ALERT_VIA: "通過 {} 通知推送渠道推送消息失敗"
 UNABLE_TO_PUSH_ALERT: "推送消息失敗"
 UNKNOWN_PUSH_PROVIDER: "未知類型的推送渠道: {} - {}"
-UNABLE_EXECUTE_MODULE: "無法執行模組 {}，請回報此錯誤給 PeerBanHelper 開發者"
+UNABLE_EXECUTE_MODULE: "無法執行模組 {}，請回饋此錯誤給 PeerBanHelper 開發者"
 UNABLE_RETRIEVE_PEERS: "獲取 Peers 失敗"
 UNABLE_COMPLETE_SCHEDULE_TASKS: "執行計劃任務時出現未知錯誤"
-UNABLE_COMPLETE_PEER_BAN_TASK: "執行 Peer 封禁任務時出現錯誤，請回報此錯誤給 PeerBanHelper 開發者"
+UNABLE_COMPLETE_PEER_BAN_TASK: "執行 Peer 封禁任務時出現錯誤，請回饋此錯誤給 PeerBanHelper 開發者"
 UNFINISHED_RUNNABLE: "未完成的任務: {}"
 UNABLE_CLOSE_DOWNLOADER: "關閉下載器 {} 時出現錯誤"
 UNABLE_LOAD_BTN_ABILITY: "載入 BTN 能力 {} 時出現錯誤"
@@ -420,12 +418,12 @@ UNABLE_SET_SQLITE_OPTIMIZED_PRAGMA: "設定 SQLite 最佳化的 PRAGMA 參數時
 THREAD_INTERRUPTED: "執行緒強制終止，操作已被取消"
 DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY: "無法獲取 BitComet 任務詳情資訊"
 ALERT_SNAPSHOT: "您目前正在使用的是 PeerBanHelper 的非穩定版本"
-ALERT_SNAPSHOT_DESCRIPTION: "非穩定版本的構建僅用於測試，且可能存在嚴重缺陷。在繼續使用非穩定版本前，請做好資料備份。如遇到錯誤，請前往 [Issue Tracker](https://github.com/PBH-BTN/PeerBanHelper/issues) 回報。"
+ALERT_SNAPSHOT_DESCRIPTION: "非穩定版本的構建僅用於測試，且可能存在嚴重缺陷。在繼續使用非穩定版本前，請做好資料備份。如遇到錯誤，請前往 [Issue Tracker](https://github.com/PBH-BTN/PeerBanHelper/issues) 回饋。"
 BTN_ABILITY_RECONFIGURE: "重新配置"
 BTN_ABILITY_RECONFIGURE_DESCRIPTION: "「重新配置」能力允許 BTN 伺服器通知 PeerBanHelper 在間隔一定時間後與 BTN 伺服器聯繫，重新整理使用的設定檔，以獲取遠端伺服器的配置更改"
 BTN_ABILITY_RULES: "雲端規則"
 BTN_ABILITY_RULES_DESCRIPTION: |
-  「雲端規則」能力允許 BTN 伺服器向 PeerBanHelper 定期提供由遠端伺服器生成的反吸血規則，作為本機反吸血規則的補充。  
+ 「雲端規則」能力允許 BTN 伺服器向 PeerBanHelper 定期提供由遠端伺服器生成的反吸血規則，作為本機反吸血規則的補充。
   
   規則版本：**{}**, 目前已載入 **{}** 條規則：
   
@@ -498,6 +496,11 @@ GUI_MENU_SHOW_WINDOW: "打開主視窗"
 GUI_MENU_STATS: "統計資料"
 GUI_MENU_STATS_BANNED: "已封禁 {} 個 Peer ({} 個 IP 位址)"
 GUI_MENU_STATS_DOWNLOADER: "已連接 {}/{} 個下載器"
+PORT_MAPPER_PORT_MAPPING: "[PortMapper] 正在嘗試為埠 {}/{} 建立自動埠映射……"
+PORT_MAPPER_PORT_MAPPED: "[PortMapper] 已在網卡 {} 的閘道器上上為本機埠 {}/{} 建立了一個埠映射，外部埠為：{} (外部 IP: {})；TTL：{} 秒"
+PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS: "[PortMapper] 需要注意！儘管 PortMapper 已成功建立了一個或者多個埠映射，但它們的外部地址似乎都是專用 IP 位址，這通常意味著您處於雙層 NAT 之後（例如：您的裝置連接者一台路由器，但這台路由器處於同為路由模式的光纖數據機之下），埠映射可能不起作用。"
+PORT_MAPPER_PORT_MAPPING_FAILED: "[PortMapper] 在網卡 {} 上建立/更新埠映射 {}/{} 失敗，正在重試；如果頻繁出現此提示，請檢查是否裝置接入了多個網路（如：Tailscale）"
+DECENTRALIZED_PORT_FORWARDED: "[Decentralized] 自動埠映射成功：{} -> {} (外部 IP: {})"
 
 PUSH_PROVIDER_API_ADD_FAILURE: "推送渠道建立失敗，是否傳遞的是一個不受支援的推送類型？"
 PUSH_PROVIDER_API_CREATED: "推送渠道建立成功"
@@ -511,27 +514,12 @@ PUSH_PROVIDER_API_TEST_OK: "驗證成功，配置有效"
 PUSH_PROVIDER_API_REMOVE_NOT_EXISTS: "無法移除指定的推送渠道，指定的推送渠道並沒有在 PeerBanHelper 中註冊"
 PUSH_PROVIDER_API_REMOVE_SAVED: "移除成功，配置已儲存"
 PUSH_PROVIDER_API_PROVIDER_NOT_EXISTS: "請求的推送渠道未在 PeerBanHelper 中註冊"
-PORT_MAPPER_PORT_MAPPING: "[PortMapper] 正在嘗試為埠 {}/{} 建立自動埠映射……"
-PORT_MAPPER_PORT_MAPPED: "[PortMapper] 已在網卡 {} 的閘道器上上為本機埠 {}/{} 建立了一個埠映射，外部埠為：{} (外部 IP: {})；TTL：{} 秒"
-PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS: "[PortMapper] 需要注意！儘管 PortMapper 已成功建立了一個或者多個埠映射，但它們的外部地址似乎都是專用 IP 位址，這通常意味著您處於雙層 NAT 之後（例如：您的裝置連接者一台路由器，但這台路由器處於同為路由模式的光纖數據機之下），埠映射可能不起作用。"
-PORT_MAPPER_PORT_MAPPING_FAILED: "[PortMapper] 在網卡 {} 上建立/更新埠映射 {}/{} 失敗，正在重試；如果頻繁出現此提示，請檢查是否裝置接入了多個網路（如：Tailscale）"
-LAB_EXPERIMENT_IPFS_TITLE: "IPFS 去中心化網路"
-LAB_EXPERIMENT_IPFS_DESCRIPTION: |
-  [IPFS (星際文件系統)](https://ipfs.tech/) 是一個無中心伺服器的分布式網路。每一台電腦都是 IPFS 網路中的一個節點。  
-  IPFS 靈活且富有彈性，您可以透過 IPFS 儲存和尋找文件和傳遞資料或資源，並且隨著資源變得逐漸熱門，速度和可存取性都會自動改善。當一個資料不再被任何節點需要（且無人刻意保留它）時，它也會隨著時間推移而從網路中自動淘汰移除。  
-  不需要伺服器，您也可以分享自己的封禁列表或者 IP 規則給其它人。  
-  
-  要使用 IPFS 功能，請啟用此實驗，並在設定檔中配置 Kubo IPFS 客戶端的 RPC 地址。  
-  啟用後您將能夠訂閱其它人分享給您的位於 IPFS/IPNS 之上的 IP 規則。
-IPFS_INIT_FAILED: "[IPFS] 初始化 Kubo IPFS RPC 失敗，IPFS 功能將不可用，請確認 Kubo IPFS 是否正在執行，若您不使用 IPFS 相關功能，可忽略此警告資訊: {}"
-IPFS_INIT_WELCOME: "[IPFS] 已成功連接到 Kubo IPFS RPC，版本 {}。PeerBanHelper 已成功透過 Kubo 連接 IPFS 網路，並提供擴充功能"
-IPFS_BANLIST_PUBLISHED: "[IPFS] 已更新封禁列表到 IPFS，並一同更新了 IPNS 記錄"
-MODULE_IBL_UPDATE_IPFS_NOT_AVAILABLE: "無法從 IPFS/IPNS 更新規則訂閱，因為 IPFS 功能未啟用"
 
 FREE_LICENSE_RENEW_SUCCESS: "新的許可證已生成並啟用"
 FREE_LICENSE_RENEW_STILL_ACTIVE: "目前許可證仍在有效期內，無需重新生成"
 FREE_LICENSE_SOURCE: "本機生成的免費許可證"
 FREE_LICENSE_DESCRIPTION: "本機生成的循環免費許可證，僅用於個人用途"
+DOWNLOADER_QB_DISABLE_SAME_IP_MULTI_CONNECTION_FAILED: "停用 {} ({}) 的進階設定「允許來自不同 IP 位址的多重連接」失敗：{} - {}！此功能必須關閉，否則將導致 PCB 封禁誤判。"
 DOWNLOADER_PAUSED: "下載器已暫停"
 LAB_EXPERIMENT_DNSJAVA_TITLE: "DNSJava DNS 解析"
 LAB_EXPERIMENT_DNSJAVA_DESCRIPTION: "在部分功能模組中使用 [dnsjava/dnsjava](https://github.com/dnsjava/dnsjava) 替代 JDK 預設的 DNS 解析器，以提供更可靠的主機名稱和反向 DNS 查詢能力，並支援自訂 DNS 伺服器和負載均衡的能力。DNSJava 僅在部分功能上工作（如 DNS 反查），其它功能將繼續使用 JDK DNS。  \n啟用此實驗後，您可以在設定檔中配置 DNSJava 的 DNS 伺服器地址。"
@@ -549,6 +537,7 @@ MATCH_CONDITION_BOOLEAN: "布林值"
 MATCH_CONDITION_BOOLEAN_BY_INTEGER: "布林值 (整數轉換)"
 MATCH_CONDITION_BOOLEAN_BY_STRING: "布林值 (字串轉換)"
 MATCH_STRING_CONTAINS: "字串包含: {}"
+MATCH_STRING_STARTS_WITH: "字串開頭: {}"
 MATCH_STRING_ENDS_WITH: "字串結尾: {}"
 MATCH_STRING_EQUALS: "字串匹配: {}"
 MATCH_STRING_LENGTH: "字串長度: {}"
@@ -558,11 +547,11 @@ JSON_MATCHER_NOT_MET: "表達式未滿足: {} 於 {} 上"
 DOWNLOADER_API_TEST_BYPASS_PAUSED: "下載器配置已暫存，請在稍後啟用"
 STATUS_BAR_GLOBAL_PAUSED: "⏸全域暫停"
 BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST: "向 URL {} 發送 HTTP 請求失敗，HTTP 狀態碼: {}，遠端響應：{}"
-BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT: "目前客戶端 BTN 協議實現版本過舊，本機實現版本號: {}，伺服器要求最低: {}"
+BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_CLIENT: "目前用戶端 BTN 協議實現版本過舊，本機實現版本號: {}，伺服器要求最低: {}"
 BTN_CONFIG_STATUS_UNSUCCESSFUL_INCOMPATIBLE_BTN_PROTOCOL_VERSION_SERVER: "目前伺服器 BTN 協議實現版本過舊，伺服器實現版本號: {}，本機要求最低: {}"
 BTN_CONFIG_STATUS_SUCCESSFUL: "已成功連接到 BTN 伺服器"
 BTN_CONFIG_STATUS_EXCEPTION: "配置 BTN 功能時發生意外錯誤：{}: {}"
-DOWNLOADER_QB_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "請求種子 {} 的 Tracker 列表失敗：{} - {}"
+DOWNLOADER_FAILED_REQUEST_TRACKER_LIST_ON_TORRENT: "請求種子 {} 的 Tracker 列表失敗：{} - {}"
 TRACKER_FAILED_TO_UPDATE_TRACKER: "請求更新種子 {} 的 Tracker 列表失敗：{} - {}"
 UTILITIES_TRACKER_REPLACED: "已成功取代 {} 個種子的 Tracker"
 DOWNLOADER_BIGLYBT_INCORRECT_ADAPTER_VERSION: "目前使用的 BiglyBT 適配器版本不受支援，請升級到 {} 或更高版本"
@@ -575,10 +564,10 @@ JCEF_DOWNLOAD_TITLE: "下載 JCEF 封包"
 JCEF_DOWNLOAD_DESCRIPTION: |
   PeerBanHelper 正在下載 JCEF 封包以在 GUI 視窗中啟用 WebUI 控制台標籤卡，這可能需要一點時間...<br/>
   如果不希望啟用 JCEF 功能，請新增啟動附加參數 nojcef。
+GUI_COMMON_CANCEL: "取消"
 JCEF_DOWNLOAD_UNZIP_DESCRIPTION: 正在解壓縮 JCEF 封包，請稍等...
 IPDB_DOWNLOAD_TITLE: "下載 GeoIP 資料庫: {}"
 IPDB_DOWNLOAD_DESCRIPTION: "PeerBanHelper 需要下載 GeoIP 資料庫以為反吸血提供 IP 位址的地理位置資訊支援，這可能需要一點時間..."
-GUI_COMMON_CANCEL: "取消"
 PBH_PLUS_THANKS_FOR_DONATION_GUI_TITLE: "❤感謝捐贈"
 GUI_TITLE_DEBUG: "🔧除錯模式"
 DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_TITLE: "嚴重錯誤：下載器處於不正確的網路模式下，PeerBanHelper 可能不會工作"
@@ -589,95 +578,105 @@ DOWNLOADER_DOCKER_INCORRECT_NETWORK_DETECTED_DESCRIPTION: |
   
   請注意：你應該正確修復 IP 問題，僅將內部網路 IP 位址從忽略列表中移除會導致 PeerBanHelper 錯誤地封禁全部入站連接。  
   如需幫助，請加入 PeerBanHelper 社群尋求幫助。**此提示在每個下載器上僅會提示一次。**
-ABOUT_VIEW_CREDIT: "開發人員與社群貢獻者..."
+INCOMPATIBLE_PLATFORM_TITLE: "目前平台不受支援"
+INCOMPATIBLE_PLATFORM_DESCRIPTION: "目前平台未經測試且不受支援，可能出現相容性或穩定性問題。請**不要**向 PBH-BTN 報告任何在此平台上出現的任何相容性故障。回退相容性可能在未來隨時被移除。"
+INCOMPATIBLE_BITNESS_TITLE: "32 位平台不受支援"
+INCOMPATIBLE_BITNESS_DESCRIPTION: "在 32 位作業系統/JVM 上執行 PeerBanHelper 未經測試且不受支援，可能出現相容性或穩定性問題。請**不要**向 PBH-BTN 報告任何在此平台上出現的任何相容性故障。回退相容性可能在未來隨時被移除。此提示資訊僅顯示一次。"
+INCOMPATIBLE_BITNESS_LOG: "在 32 位作業系統/JVM 上執行 PeerBanHelper 未經測試且不受支援，可能出現相容性或穩定性問題。請**不要**向 PBH-BTN 報告任何在此平台上出現的任何相容性故障。回退相容性可能在未來隨時被移除。"
+TITLE_INCOMPATIBLE_PLATFORM: "⚠不受支援的平台"
 LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_TITLE: "啟用事務批次寫入封禁歷史記錄"
 LAB_EXPERIMENT_TRANSACTION_BATCH_BAN_HISTORY_WRITE_DESCRIPTION: "在記錄封禁歷史記錄時使用事務以批次寫入資料庫以提高性能和減少隨機磁碟 I/O 操作。"
+ABOUT_VIEW_CREDIT: "開發人員與社群貢獻者..."
 TITLE_APP_V_CONTAINER: "📦App-V"
 
-ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_TITLE: "下载器 {} IP 封禁列表更新失败"
+ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_TITLE: "下載器 {} IP 封禁列表更新失敗"
 ALERT_DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED_DESCRIPTION: |
-  PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。
-  请检查并确保已正确配置 "设置 -> 基础设置 -> WebUI -> 前缀" 配置项，确保指向 PeerBanHelper WebUI 的地址，并可以被 Transmission 访问和连接（仅通过浏览器访问确认是不够的）。
-  如果此配置不正确，则 Transmission 将无法正确封禁和解除封禁任何 IP 地址。
+  PeerBanHelper 無法更新 {} 的 IP 封禁列表，因為 Transmission 通知我們封禁列表更新失敗。
+  請檢查並確保已正確配置「設定 -> 基礎設定 -> WebUI -> 前綴」配置項，確保指向 PeerBanHelper WebUI 的地址，並可以被 Transmission 存取和連接（僅透過瀏覽器存取確認是不夠的）。
+  如果此配置不正確，則 Transmission 將無法正確封禁和解除封禁任何 IP 位址。
   
-  如果需要任何配置帮助，请参阅支持文档或在社区中请求帮助。
+  如果需要任何配置幫助，請參閱支援文件或在社群中請求幫助。
 
-DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: PeerBanHelper 无法更新 {} 的 IP 封禁列表，因为 Transmission 通知我们封禁列表更新失败。请跟随文档检查前缀设置
+DOWNLOADER_TRANSMISSION_BLOCKLIST_UPDATE_FAILED: PeerBanHelper 無法更新 {} 的 IP 封禁列表，因為 Transmission 通知我們封禁列表更新失敗。請跟隨文件檢查前綴設定
 GUI_TRAY_TITLE: "PeerBanHelper"
-CRASH_MANAGER_TITLE: "PeerBanHelper 的上次退出可能是意外关闭"
-CRASH_MANAGER_DESCRIPTION: |
-  PeerBanHelper 的上次退出可能是非正常关闭。
-  这可能是因为程序崩溃、内存不足，或者操作系统强制关闭了程序。
-  频繁的非正常退出可能导致数据和配置文件损坏，请尽量正常退出 PeerBanHelper。
-CRASH_MANAGER_GUI_RELATED_TITLE: "非正常退出故障排除向导 - 检测已知问题 - Windows - Java Platform awt.dll"
-CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
-  在 Windows 平台上，有时 PeerBanHelper 可能会因为以下原因非正常退出：
-  
-  1. 用户有意或无意切换屏幕分辨率或 DPI 设置，或者使用远程桌面连接（RDP）
-  2. 显示驱动程序崩溃时导致的连带崩溃
-  3. 与显示器连接/断开连接时崩溃
-  
-  如果 PeerBanHelper 频繁因为上述问题出现崩溃，建议您启动 SWTUI 以禁用可能存在问题的 awt.dll。
-  您是否希望切换到 SWT UI 界面？
 
+CRASH_MANAGER_TITLE: "PeerBanHelper 的上次退出可能是意外關閉"
+CRASH_MANAGER_DESCRIPTION: |
+  PeerBanHelper 的上次退出可能是非正常關閉。
+  請登入 WebUI 查看「警報」以獲取更多資訊。
+CRASH_MANAGER_GUI_RELATED_TITLE: "非正常退故障排除嚮導 - 檢測已知問題 - Windows - Java Platform awt.dll"
+CRASH_MANAGER_GUI_RELATED_DESCRIPTION: |
+  在 Windows 平台上，有時 PeerBanHelper 可能會因為以下原因非正常退出：
+  
+  1. 使用者有意或無意切換螢幕解析度或 DPI 設定，或者使用遠端桌面連接（RDP）
+  2. 顯示驅動程式崩潰時導致的連帶崩潰
+  3. 與顯示器連接/斷開連接時崩潰
+  
+  如果 PeerBanHelper 頻繁因為上述問題出現崩潰，建議您啟動 SWTUI 以停用可能存在問題的 awt.dll。
+  您是否希望切換到 SWT UI 介面？
 GUI_PROGRAM_SWITCH_TO_AUTO: "重啟並還原預設 UI 行為..."
 GUI_PROGRAM_SWITCH_TO_SWT: "重啟並切換到 SWT UI..."
 
-BTN_ABILITY_SUBMIT_SWARM: "提交種群追蹤數據"
+BTN_ABILITY_SUBMIT_SWARM: "提交種群跟蹤資料"
 BTN_ABILITY_SUBMIT_SWARM_DESCRIPTION: |
-  「提交種群追蹤數據」是「提交歷史記錄」和「提交快照數據」的繼任者。新的「提交種群追蹤數據」以一種更加伺服器友好的格式追蹤、儲存和提交 Peers 數據，以減輕 BTN 伺服器的數據聚合分析壓力。
-  該能力允許 BTN 伺服器定期接收 PeerBanHelper 所追蹤的下載器上的 Peers 活動和最後一次記錄的活動數據快照。這些數據有助於 BTN 伺服器分析網路上的惡意行為，並動態生成反吸血規則阻斷這些惡意行為。同時，這些數據還有助於分析是否存在利用 PeerBanHelper 反吸血功能的漏洞，繞過反吸血機制的在野利用。
-BTN_SUBMITTING_SWARM: "[BTN 網路] 計劃任務正在與 BTN 網路同步種群追蹤數據，請稍等……"
-BTN_SUBMITTED_SWARM: "[BTN 網路] 已與 BTN 網路同步 {} 條種群追蹤數據 (分為 {} 次請求)，感謝您對 BTN 網路的支持！"
+ 「提交種群跟蹤資料」是「提交歷史記錄」和「提交快照資料」的繼任者。新的「提交種群跟蹤資料」以一種更加伺服器友好的格式追蹤、儲存和提交 Peers 資料，以減輕 BTN 伺服器的資料聚合分析壓力。
+  該能力允許 BTN 伺服器定期接收 PeerBanHelper 所跟蹤的下載器上的 Peers 活動和最後一次記錄的活動資料快照。這些資料有助於 BTN 伺服器分析網路上的惡意行為，並動態生成反吸血規則阻斷這些惡意行為。同時，這些資料還有助於分析是否存在利用 PeerBanHelper 反吸血功能的漏洞，繞過反吸血機制的在野利用。
+BTN_SUBMITTING_SWARM: "[BTN 網路] 計劃任務正在與 BTN 網路同步種群跟蹤資料，請稍等……"
+BTN_SUBMITTED_SWARM: "[BTN 網路] 已與 BTN 網路同步 {} 條種群跟蹤資料 (分為 {} 次請求)，感謝您對 BTN 網路的支持！"
 
-BTN_SUBMITTING_BAN: "[BTN 網路] 計劃任務正在提交封禁歷史記錄信息至 BTN 網路，請稍等……"
-BTN_SUBMITTED_BAN: "[BTN 網路] 已提交 {} 條封禁歷史記錄信息 (分為 {} 次請求)，感謝您對 BTN 網路的支持！"
-DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER: "獲取下載器 {} 的速度限制器信息失敗: {} - {}"
-DOWNLOADER_FAILED_SET_SPEED_LIMITER: "設定下載器 {} 的速度限制器信息失敗: {} - {}"
+BTN_SUBMITTING_BAN: "[BTN 網路] 計劃任務正在提交封禁歷史記錄資訊至 BTN 網路，請稍等……"
+BTN_SUBMITTED_BAN: "[BTN 網路] 已提交 {} 條封禁歷史記錄資訊 (分為 {} 次請求)，感謝您對 BTN 網路的支持！"
+DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER: "獲取下載器 {} 的速度限制器資訊失敗: {} - {}"
+DOWNLOADER_FAILED_SET_SPEED_LIMITER: "設定下載器 {} 的速度限制器資訊失敗: {} - {}"
 DOWNLOADER_FAILED_START_TORRENT: "啟動下載器上的 {} 種子 {} 失敗: {} - {}"
 DOWNLOADER_FAILED_STOP_TORRENT: "暫停下載器上的 {} 種子 {} 失敗: {} - {}"
 
 MODULE_ACTIVE_MONITORING_SPEED_LIMITER_DISABLED: "[主動監測] 已還原下載器 {} 的速率限制為開始限制之前的值，新的值：上傳={}/s 下載={}/s"
 MODULE_ACTIVE_MONITORING_SPEED_LIMITER_UNEXCEPTED_ERROR: "[主動監測] 無法調整下載器 {} 的速率限制，出現了預期外的錯誤"
-MODULE_ACTIVE_MONITORING_SPEED_LIMITER_ENABLED: "[主動監測] 由於在指定時間內您已共計上傳 {} 數據，速率限制已對下載器 {} 啟用。新的值：上傳={}/s 下載={}/s"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_ENABLED: "[主動監測] 由於在指定時間內您已共計上傳 {} 資料，速率限制已對下載器 {} 啟用。新的值：上傳={}/s 下載={}/s"
 
-DATABASE_UPGRADING_RECORDS: "[數據升級] 正在升級 {}，已完成：{}/{}。請不要關閉程序，否則將導致數據損壞！"
-WEBUI_SECURITY_LOGIN_FAILED: "[WebUI] 有人正嘗試從 {} 登入 PeerBanHelper，但由於對方提供了錯誤的 Token 憑證，因此登入嘗試已被阻止。如果這不是預期行為，建議使用防火牆保護 PeerBanHelper 的 WebUI 端口。對方瀏覽器信息：{}"
+DATABASE_UPGRADING_RECORDS: "[資料升級] 正在升級 {}，已完成：{}/{}。請不要關閉程式，否則將導致資料損壞！"
+WEBUI_SECURITY_LOGIN_FAILED: "[WebUI] 有人正嘗試從 {} 登入 PeerBanHelper，但由於對方提供了錯誤的 Token 憑據，因此登入嘗試已被阻止。如果這不是預期行為，建議使用防火牆保護 PeerBanHelper 的 WebUI 埠。對方瀏覽器資訊：{}"
 WEBUI_SECURITY_LOGIN_FAILED_FAIL2BAN: "[WebUI] 有人正嘗試從 {} 登入 PeerBanHelper，但由於登入失敗次數過多，PeerBanHelper 已暫時阻止從此位置登入。"
-WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有用戶成功從 {} 登入 PeerBanHelper。瀏覽器信息：{}"
+WEBUI_SECURITY_LOGIN_SUCCESS: "[WebUI] 已有使用者成功從 {} 登入 PeerBanHelper。瀏覽器資訊：{}"
 
-WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE: "有用戶成功登入 PeerBanHelper WebUI"
-WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION: "IP 地址 {} 的用戶已成功登入 PeerBanHelper WebUI。瀏覽器信息：{}"
+WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_TITLE: "有使用者成功登入 PeerBanHelper WebUI"
+WEBUI_SECURITY_LOGIN_SUCCESS_NOTIFICATION_DESCRIPTION: "IP 位址 {} 的使用者已成功登入 PeerBanHelper WebUI。瀏覽器資訊：{}"
 
-MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[主動檢測] 根據最近的流量統計數據，下載器 {} 的上傳速率限制已動態更新為 {} ({})"
+MODULE_ACTIVE_MONITORING_SPEED_LIMITER_SLIDING_WINDOW_NEW_APPLIED: "[主動檢測] 根據最近的流量統計資料，下載器 {} 的上傳速率限制已動態更新為 {} ({})"
 GUI_COPY_TO_CLIPBOARD: "複製到剪貼簿"
 GUI_CLEAR_LOGS: "清除日誌"
 
 GUI_QT6_WAITING_EXTRACTING: "[Qt6GuiManager] 請等待 Qt6 動態連結庫解壓縮，這可能需要一些時間……"
-GUI_QT6_WAITING_INIT: "[Qt6GuiManager] 請等待 Qt6 核心初始化，這可能需要一些時間…… 準備就緒後窗口將立刻加載並打開。"
-GUI_QT6_NATIVES_MISSING: "[Qt6GuiManager] 因文件缺失無法加載 Qt6 UI 框架，請重新運行安裝程序，並在可選安裝組件處勾選「[可選] Qt6」組件；或者使用 Swing UI 啟動。"
+GUI_QT6_WAITING_INIT: "[Qt6GuiManager] 請等待 Qt6 核心初始化，這可能需要一些時間…… 準備就緒後視窗將立刻載入並打開。"
+GUI_QT6_NATIVES_MISSING: "[Qt6GuiManager] 因文件缺失無法載入 Qt6 UI 框架，請重新執行安裝程式，並在可選安裝元件處勾選「[可選] Qt6」元件；或者使用 Swing UI 啟動。"
 
-CRASH_MANAGER_CRASH_RECOVERY_ALERT_TITLE: "PeerBanHelper 已從崩潰中自動恢復"
+CRASH_MANAGER_CRASH_RECOVERY_ALERT_TITLE: "PeerBanHelper 已從崩潰中自動復原"
 CRASH_MANAGER_CRASH_RECOVERY_ALERT_DESCRIPTION: |
-  PeerBanHelper 在上次運行中遇到了致命錯誤並崩潰，但已成功從崩潰中自動恢復。  
-  該問題通常是由於 Java Virtual Machine 內部錯誤所導致的，如果此錯誤頻繁發生，請向開發者報告並附帶下面的技術信息：
+  PeerBanHelper 在上次執行中遇到了致命錯誤並崩潰，但已成功從崩潰中自動復原。  
+  該問題通常是由於 Java Virtual Machine 內部錯誤所導致的，如果此錯誤頻繁發生，請向開發者報告並附帶下面的技術資訊：
   
   **崩潰 PID:** {}  
-  **恢復重新啟動時間:** {}  
-  **JVM 崩潰日誌轉儲文件位置:** {}  
-  *在反饋問題時，請一同上傳崩潰日誌轉儲文件。*
+  **復原重新啟動時間:** {}  
+  **JVM 崩潰日誌轉儲檔案位置:** {}  
+  *在回饋問題時，請一同上傳崩潰日誌轉儲文件。*
   
   對此帶來的不便，我們深表歉意。
 BOOT_TIME: "PeerBanHelper 啟動完成，用時 {}ms"
 ECOMODE_FAILED: "Windows EcoQos 效率模式可能與您的平台不相容：{}，操作已取消"
 JBR_REQUIRED_TITLE: "Java 執行時環境不相容"
 JBR_REQUIRED_DESCRIPTION: |
-  PeerBanHelper 在 Windows 平台下需要 JetBrains Runtime (JBR) 才能正常執行。
-
+  PeerBanHelper 在 Windows 平台下需要 JetBrains Runtime (JBR) 才能正常執行。  
+  
   您目前正在使用為：{} {}
-
-  對於 Eclipse Adoptium, Azul Zulu, BellSoft Liberica, Oracle/Open JDK 等其它 Java 執行時環境可能不包含 PeerBanHelper 所需要的問題的修復補丁。
-  如果出現與 awt.dll 相關的當機問題請切換到 JetBrains Runtime 或者使用帶有 Java 環境的 PeerBanHelper 安裝程式覆蓋安裝。
+  
+  對於 Eclipse Adoptium, Azul Zulu, BellSoft Liberica, Oracle/Open JDK 等其它 Java 執行時環境可能不包含 PeerBanHelper 所需要的問題的修復補丁。  
+  如果出現與 awt.dll 相關的崩潰問題請切換到 JetBrains Runtime 或者**使用帶有 Java 環境的 PeerBanHelper 安裝程式覆蓋安裝**。  
   此提醒僅顯示一次。
-
+  
   [下載 JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime/releases)
+LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_TITLE: "Win32平台：清空工作集"
+LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_DESCRIPTION: |
+  在 Windows 平台上，PeerBanHelper 將在 Full GC（或者每隔一段時間）呼叫 Win32 API 清空自身行程工作集以釋放記憶體。  
+  不活躍的記憶體頁將被轉移到作業系統分頁文件中，可能引起短暫性能下降和磁碟 I/O，但有助於釋放行程占用的物理記憶體以供其他應用程式使用。  
+  更改此設定需要重新啟動 PeerBanHelper 以使其生效。
