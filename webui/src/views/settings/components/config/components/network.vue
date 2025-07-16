@@ -83,7 +83,6 @@ import formArray from '../../profile/components/formArray.vue'
 
 const supportedProxyType = [
   ProxySetting.NO_PROXY,
-  ProxySetting.SYSTEM_PROXY,
   ProxySetting.HTTP_PROXY,
   ProxySetting.SOCKS_PROXY
 ]

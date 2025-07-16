@@ -35,7 +35,7 @@ public class WindowTitle {
             if(parent.getTitle().equals(newTitle)) {
                 return; // no change
             }
-            SwingUtilities.invokeLater(() -> parent.setTitle(builder.append(joiner).toString()));
+            SwingUtilities.invokeLater(() -> parent.setTitle(newTitle));
         }, 0L, 3L, TimeUnit.SECONDS);
     }
 }
