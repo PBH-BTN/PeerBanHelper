@@ -374,7 +374,7 @@ public final class ProgressCheatBlocker extends AbstractRuleFeatureModule implem
                         clientTask.setRewindCounter(clientTask.getRewindCounter() + 1);
                         clientTask.setBanDelayWindowEndAt(0L);
                         progressRecorder.invalidate(client); // 封禁时，移除缓存
-                        return new CheckResult(getClass(), PeerAction.BAN, 0, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
+                        return new CheckResult(getClass(), PeerAction.BAN, banDuration, new TranslationComponent(Lang.PCB_RULE_PROGRESS_REWIND),
                                 new TranslationComponent(Lang.MODULE_PCB_PEER_BAN_REWIND,
                                         percent(clientProgress),
                                         percent(actualProgress),
