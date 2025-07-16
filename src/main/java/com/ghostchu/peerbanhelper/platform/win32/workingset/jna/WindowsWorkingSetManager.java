@@ -136,7 +136,7 @@ public class WindowsWorkingSetManager {
      * 
      * @return 操作是否成功
      */
-    public boolean trimMemory() {;
+    public boolean trimMemory() {
         return emptyWorkingSet();
     }
 }
