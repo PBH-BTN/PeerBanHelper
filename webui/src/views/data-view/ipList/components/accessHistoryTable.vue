@@ -186,7 +186,7 @@ watch(
   () => ip,
   (newIp) => {
     if (newIp) {
-      run({ ip: newIp, page: 1, pageSize: 10 })
+      run({ ip: newIp, page: 1, pageSize: 5 })
     }
   },
   { immediate: true }
