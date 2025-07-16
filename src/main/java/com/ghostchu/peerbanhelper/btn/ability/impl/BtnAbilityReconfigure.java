@@ -58,14 +58,14 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
                 .build();
                 
         try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
-            if (response.code() != 200) {
-                String responseBody = response.body() != null ? response.body().string() : "";
+            if (!response.isSuccessful()) {
+                String responseBody = response.body().string();
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
                 log.error(tlUI(Lang.BTN_RECONFIGURE_CHECK_FAILED, response.code() + " - " + responseBody));
                 return;
             }
             
-            String responseBody = response.body() != null ? response.body().string() : "";
+            String responseBody = response.body().string();
             JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
             JsonObject ability = json.get("ability").getAsJsonObject();
             if (!ability.has("reconfigure")) {

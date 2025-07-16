@@ -111,13 +111,13 @@ public final class BtnAbilityException extends AbstractBtnAbility {
                 setLastStatus(true, new TranslationComponent(Lang.BTN_ABILITY_EXCEPTION_LOADED_FROM_REMOTE, this.btnExceptionRule.getVersion()));
                 return;
             }
-            if (response.code() != 200) {
-                String body = response.body() != null ? response.body().string() : "";
+            if (!response.isSuccessful()) {
+                String body = response.body().string();
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + body));
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), body));
             } else {
                 try {
-                    String body = response.body() != null ? response.body().string() : "";
+                    String body = response.body().string();
                     BtnExceptionRule btr = JsonUtil.getGson().fromJson(body, BtnExceptionRule.class);
                     this.btnExceptionRule = new BtnExceptionRuleParsed(btr);
                     Main.getEventBus().post(new BtnExceptionRuleUpdateEvent());
@@ -130,7 +130,7 @@ public final class BtnAbilityException extends AbstractBtnAbility {
                     unbanPeers(btnExceptionRule);
                     btnNetwork.getModuleMatchCache().invalidateAll();
                 } catch (JsonSyntaxException e) {
-                    String body = response.body() != null ? response.body().string() : "";
+                    String body = response.body().string();
                     setLastStatus(false, new TranslationComponent("JsonSyntaxException: " + response.code() + " - " + body));
                     log.error("Unable to parse BtnExceptionRule as a valid Json object: {}-{}", response.code(), body, e);
                 }
