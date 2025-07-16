@@ -49,7 +49,8 @@ public class PBHWin32MemoryManagement {
                                         .from((CompositeData) notification.getUserData());
                                 boolean isFullGc =
                                         "end of major GC".equals(info.getGcAction())
-                                                || info.getGcName().matches(".*(Full|Old|MarkSweep|Tenured|CMS).*");     // 各收集器命名差异兜底
+                                                || info.getGcName().matches(".*(Full|Old|MarkSweep|Tenured|CMS|G1|ZGC|Shenandoah).*")
+                                                || "end of cycle".equals(info.getGcAction()); // 适配更多GC类型
                                 if (isFullGc) {
                                     releaseMemory();
                                 }
