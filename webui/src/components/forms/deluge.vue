@@ -34,13 +34,6 @@
     <a-switch v-model="config.incrementBan" />
     <template #extra> {{ t('page.dashboard.editModal.label.incrementBan.description') }}</template>
   </a-form-item>
-  <a-form-item field="config.httpVersion" :label="t('page.dashboard.editModal.label.httpVersion')">
-    <a-radio-group v-model="config.httpVersion">
-      <a-radio value="HTTP_1_1">1.1</a-radio>
-      <a-radio value="HTTP_2">2.0</a-radio>
-    </a-radio-group>
-    <template #extra>{{ t('page.dashboard.editModal.label.httpVersion.description') }} </template>
-  </a-form-item>
   <a-form-item
     field="config.ignorePrivate"
     :label="t('page.dashboard.editModal.label.ignorePrivate')"

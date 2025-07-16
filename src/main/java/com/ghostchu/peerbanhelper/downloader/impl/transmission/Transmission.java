@@ -44,7 +44,7 @@ public final class Transmission extends AbstractDownloader {
     public Transmission(String id, String blocklistUrl, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
         super(id, alertManager);
         this.config = config;
-        this.client = new TrClient(httpUtil, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl(), config.getHttpVersion());
+        this.client = new TrClient(httpUtil, config.getEndpoint() + config.getRpcUrl(), config.getUsername(), config.getPassword(), config.isVerifySsl());
         this.blocklistUrl = blocklistUrl;
         log.warn(tlUI(Lang.DOWNLOADER_TR_MOTD_WARNING));
     }
@@ -350,7 +350,6 @@ public final class Transmission extends AbstractDownloader {
         private String endpoint;
         private String username;
         private String password;
-        private String httpVersion;
         private boolean verifySsl;
         private String rpcUrl;
         private boolean ignorePrivate;
@@ -367,7 +366,6 @@ public final class Transmission extends AbstractDownloader {
             config.setUsername(section.getString("username", ""));
             config.setPassword(section.getString("password", ""));
             config.setRpcUrl(section.getString("rpc-url", "/transmission/rpc"));
-            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             config.setPaused(section.getBoolean("paused", false));
@@ -382,7 +380,6 @@ public final class Transmission extends AbstractDownloader {
             section.set("username", username);
             section.set("password", password);
             section.set("rpc-url", rpcUrl);
-            section.set("http-version", httpVersion);
             section.set("verify-ssl", verifySsl);
             section.set("ignore-private", ignorePrivate);
             section.set("paused", paused);

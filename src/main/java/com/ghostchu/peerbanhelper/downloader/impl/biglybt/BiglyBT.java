@@ -408,7 +408,6 @@ public final class BiglyBT extends AbstractDownloader {
         private String type;
         private String endpoint;
         private String token;
-        private String httpVersion;
         private boolean incrementBan;
         private boolean verifySsl;
         private boolean ignorePrivate;
@@ -424,7 +423,6 @@ public final class BiglyBT extends AbstractDownloader {
             config.setName(section.getString("name", alternativeName));
             config.setToken(section.getString("token", ""));
             config.setIncrementBan(section.getBoolean("increment-ban", true));
-            config.setHttpVersion(section.getString("http-version", "HTTP_1_1"));
             config.setVerifySsl(section.getBoolean("verify-ssl", true));
             config.setIgnorePrivate(section.getBoolean("ignore-private", false));
             config.setPaused(section.getBoolean("paused", false));
@@ -437,7 +435,6 @@ public final class BiglyBT extends AbstractDownloader {
             section.set("name", name);
             section.set("endpoint", endpoint);
             section.set("token", token);
-            section.set("http-version", httpVersion);
             section.set("increment-ban", incrementBan);
             section.set("ignore-private", ignorePrivate);
             section.set("verify-ssl", verifySsl);

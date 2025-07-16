@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
 import com.ghostchu.peerbanhelper.module.impl.rule.*;
 import com.ghostchu.peerbanhelper.module.impl.webapi.*;
+import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
@@ -115,6 +116,13 @@ public class PeerBanHelper implements Reloadable {
         crashManager.putRunningFlag();
         Main.getEventBus().post(new PBHServerStartedEvent());
         Main.getGuiManager().onPBHFullyStarted(this);
+        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+        System.gc();
+        Thread.startVirtualThread(() -> {
+            if (os.startsWith("win")) {
+                WorkingSetManagerFactory.trimMemory();
+            }
+        });
     }
 
     private void checkKnownCrashes() {
@@ -123,8 +131,8 @@ public class PeerBanHelper implements Reloadable {
         if (os.startsWith("win") && Main.getGuiManager().isGuiAvailable()) {
             // Fuck awt.dll, nobody care desktop users, told user to use JBR for patch that we really need.v
             var bean = ManagementFactory.getRuntimeMXBean();
-            if(!bean.getVmVendor().contains("JetBrains")){
-                if(!alertManager.identifierAlertExistsIncludeRead("incompatibility-jre-windows-liberica")) {
+            if (!bean.getVmVendor().contains("JetBrains")) {
+                if (!alertManager.identifierAlertExistsIncludeRead("incompatibility-jre-windows-liberica")) {
                     alertManager.publishAlert(false, AlertLevel.WARN,
                             "incompatibility-jre-windows-liberica",
                             new TranslationComponent(Lang.JBR_REQUIRED_TITLE),
@@ -136,7 +144,6 @@ public class PeerBanHelper implements Reloadable {
                 }
             }
         }
-
 
 
 //        if (!crashManager.isRunningFlagExists()) return;
