@@ -9,6 +9,7 @@ import raccoonfink.deluge.requests.ConfigRequest;
 import raccoonfink.deluge.responses.*;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +24,8 @@ public final class DelugeServer {
     public DelugeServer(final String url, final String password, boolean verifySSL, HTTPUtil httpUtil, String baUser, String baPassword) {
         m_url = url;
         m_password = password;
-        this.client = httpUtil.disableSSLVerify(httpUtil.newBuilder().authenticator((route, response) -> {
+        this.client = httpUtil
+                .disableSSLVerify(httpUtil.newBuilder().proxy(Proxy.NO_PROXY).authenticator((route, response) -> {
             if (HTTPUtil.responseCount(response) > 1) {
                 return null;
             }

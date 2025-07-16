@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 
+import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -65,6 +66,7 @@ public final class BitComet extends AbstractDownloader {
         this.apiEndpoint = config.getEndpoint();
         
         var builder = httpUtil.newBuilder()
+                .proxy(Proxy.NO_PROXY)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .writeTimeout(Duration.of(30, ChronoUnit.SECONDS))

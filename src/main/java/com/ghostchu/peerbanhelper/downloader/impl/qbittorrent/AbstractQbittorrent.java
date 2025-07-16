@@ -29,6 +29,7 @@ import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -51,6 +52,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
         
         var builder = httpUtil.newBuilder()
+                .proxy(Proxy.NO_PROXY)
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .writeTimeout(Duration.of(30, ChronoUnit.SECONDS))

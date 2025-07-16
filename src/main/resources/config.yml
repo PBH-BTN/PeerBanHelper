@@ -119,7 +119,7 @@ proxy:
   # 0 = 不使用代理 - No proxy
   # 1 = 使用系统代理 - Use system proxy
   # 2 = 使用 HTTP(s) 代理 - Use HTTP(s) proxy
-  setting: 1
+  setting: 0
   # 代理服务器地址 - Proxy server host
   host: "127.0.0.1"
   # 代理服务器端口号 - Proxy server port

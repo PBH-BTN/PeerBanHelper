@@ -3,6 +3,10 @@ package com.ghostchu.peerbanhelper.util;
 import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.simplereloadlib.ReloadResult;
+import com.ghostchu.simplereloadlib.ReloadStatus;
+import com.ghostchu.simplereloadlib.Reloadable;
+import com.google.common.net.InetAddresses;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +14,7 @@ import okhttp3.*;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okio.*;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.HostnameVerifier;
@@ -18,35 +22,72 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.net.ProxySelector;
+import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
 @Slf4j
 @Component
-public final class HTTPUtil {
+public final class HTTPUtil implements Reloadable {
     @Getter
     private static SSLContext ignoreSslContext;
-    @Autowired(required = false)
-    private ProxySelector proxySelector;
+    private Proxy.Type proxyType;
+    private @Nullable String proxyHost;
+    private int proxyPort;
+    private List<Pattern> proxyBypasses = Collections.synchronizedList(new ArrayList<>());
+    private Proxy proxyInstance;
+
 
     public HTTPUtil() {
+        Main.getReloadManager().register(this);
+        reloadConfig();
+    }
 
+    @Override
+    public ReloadResult reloadModule() throws Exception {
+        reloadConfig();
+        return new ReloadResult(ReloadStatus.SUCCESS, "", null);
+    }
+
+    private void reloadConfig() {
+        this.proxyType = switch (Main.getMainConfig().getInt("proxy.setting", 0)) {
+            case 1 -> Proxy.Type.HTTP;
+            case 2 -> Proxy.Type.SOCKS;
+            default -> Proxy.Type.DIRECT;
+        };
+        this.proxyHost = Main.getMainConfig().getString("proxy.host", "127.0.0.1");
+        this.proxyPort = Main.getMainConfig().getInt("proxy.port", 7890);
+        for (String proxy : Main.getMainConfig().getString("proxy.non-proxy-hosts", "").split("\\|")) {
+            if (!proxy.isEmpty()) {
+                try {
+                    proxyBypasses.add(Pattern.compile(proxy.replace("*", ".*").replace("?", ".?")));
+                } catch (Exception e) {
+                    log.error("Invalid proxy bypass pattern: {}", proxy, e);
+                }
+            }
+        }
+        if (proxyType == Proxy.Type.DIRECT) {
+            this.proxyInstance = Proxy.NO_PROXY;
+        } else {
+            this.proxyInstance = new Proxy(proxyType, InetSocketAddress.createUnresolved(proxyHost, proxyPort));
+        }
     }
 
     @SneakyThrows
     public OkHttpClient.Builder disableSSLVerify(OkHttpClient.Builder builder, boolean apply) {
-        if(!apply) return  builder;
+        if (!apply) return builder;
         return builder.sslSocketFactory(getIgnoreInitedSslContext().getSocketFactory(), IGNORE_SSL_TRUST_MANAGER_X509)
                 .hostnameVerifier(getIgnoreSslHostnameVerifier());
     }
@@ -81,16 +122,38 @@ public final class HTTPUtil {
                 .fastFallback(true)
                 .retryOnConnectionFailure(true)
                 .cookieJar(new PBHCookieJar())
+                .proxySelector(new ProxySelector() {
+                    @Override
+                    public List<Proxy> select(URI uri) {
+                        var host = uri.getHost();
+                        for (Pattern proxyBypass : proxyBypasses) {
+                            if (proxyBypass.matcher(host).matches()) {
+                               log.debug("Direct route for host: {}, matched pattern: {}", host, proxyBypass.pattern());
+                                return List.of(Proxy.NO_PROXY);
+                            }
+                        }
+                        if (InetAddresses.isInetAddress(host)) {
+                            if (IPAddressUtil.getIPAddress(host).isLocal()) {
+                                log.debug("Direct route for host: {}, local IP", host);
+                                return List.of(Proxy.NO_PROXY);
+                            }
+                        }
+                        log.debug("Route via proxyInstance: {}", host);
+                        return List.of(proxyInstance);
+                    }
+
+                    @Override
+                    public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
+
+                    }
+                })
                 .addInterceptor(chain -> {
                     Request original = chain.request();
                     Request.Builder requestBuilder = original.newBuilder()
                             .header("User-Agent", Main.getUserAgent());
                     return chain.proceed(requestBuilder.build());
                 });
-        if (proxySelector != null) {
-            okHttpBuilder.proxySelector(proxySelector);
-        }
-        if(ExternalSwitch.parseBoolean("pbh.http.logging", false)) {
+        if (ExternalSwitch.parseBoolean("pbh.http.logging", false)) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor(log::debug);
             logging.setLevel(HttpLoggingInterceptor.Level.HEADERS);
             okHttpBuilder.addNetworkInterceptor(logging);

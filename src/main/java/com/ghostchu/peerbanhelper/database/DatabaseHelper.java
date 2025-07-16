@@ -51,7 +51,7 @@ public final class DatabaseHelper {
 
     private void performUpgrade() throws SQLException {
         Dao<MetadataEntity, String> metadata = DaoManager.createDao(getDataSource(), MetadataEntity.class);
-        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "16"));
+        MetadataEntity version = metadata.createIfNotExists(new MetadataEntity("version", "17"));
         int v = Integer.parseInt(version.getValue());
         if (v < 3) {
             try {
@@ -152,6 +152,15 @@ public final class DatabaseHelper {
                 log.error("Unable to upgrade database schema", err);
             }
             v = 16;
+        }
+        if (v == 16) {
+            try {
+                var pcbDao = DaoManager.createDao(getDataSource(), ProgressCheatBlockerPersistEntity.class);
+                database.getDataSource().getReadWriteConnection(pcbDao.getTableName()).executeStatement("ALTER TABLE " + pcbDao.getTableName() + " ADD COLUMN lastLastTorrentCompletedProgress BIGINT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
+            } catch (Exception err) {
+                log.error("Unable to upgrade database schema", err);
+            }
+            v = 17;
         }
 
         version.setValue(String.valueOf(v));

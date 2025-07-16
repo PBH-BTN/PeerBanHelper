@@ -189,8 +189,6 @@ public class PeerBanHelper implements Reloadable {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
-        // run some junky test code here
-
     }
 
 
