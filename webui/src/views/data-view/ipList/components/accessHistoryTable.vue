@@ -111,6 +111,7 @@ import { useEndpointStore } from '@/stores/endpoint'
 import { getColor } from '@/utils/color'
 import { formatFileSize } from '@/utils/file'
 import { IconInfoCircle } from '@arco-design/web-vue/es/icon'
+import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 const { t, d } = useI18n()
@@ -126,7 +127,8 @@ const {
   loading: tableLoading,
   pageSize,
   changeCurrent,
-  changePageSize
+  changePageSize,
+  run
 } = usePagination(GetIPAccessHistoryList, {
   defaultParams: [
     {
@@ -180,6 +182,15 @@ const columns = [
     tooltip: true
   }
 ]
+watch(
+  () => ip,
+  (newIp) => {
+    if (newIp) {
+      run({ ip: newIp, page: 1, pageSize: 10 })
+    }
+  },
+  { immediate: true }
+)
 const parseFlags = (flags: string) =>
   flags
     .split(' ')

@@ -80,7 +80,7 @@ const { t, d } = useI18n()
 const { ip } = defineProps<{
   ip: string
 }>()
-const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh } =
+const { data, total, current, loading, pageSize, changeCurrent, changePageSize, refresh, run } =
   usePagination(GetIPBanHistoryList, {
     defaultParams: [
       {
@@ -99,6 +99,15 @@ const { data, total, current, loading, pageSize, changeCurrent, changePageSize, 
   })
 
 watch(() => endpointState.endpoint, refresh)
+watch(
+  () => ip,
+  (newIp) => {
+    if (newIp) {
+      run({ ip: newIp, page: 1, pageSize: 10 })
+    }
+  },
+  { immediate: true }
+)
 
 const columns = [
   {
