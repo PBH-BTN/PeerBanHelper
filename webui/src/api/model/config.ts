@@ -68,9 +68,8 @@ export interface IpDatabase {
 }
 export enum ProxySetting {
   NO_PROXY = 0,
-  SYSTEM_PROXY = 1,
-  HTTP_PROXY = 2,
-  SOCKS_PROXY = 3
+  HTTP_PROXY = 1,
+  SOCKS_PROXY = 2
 }
 
 export interface Proxy {
