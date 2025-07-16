@@ -36,6 +36,6 @@ public class WindowTitle {
                 return; // no change
             }
             SwingUtilities.invokeLater(() -> parent.setTitle(builder.append(joiner).toString()));
-        }, 0L, 30L, TimeUnit.SECONDS);
+        }, 0L, 3L, TimeUnit.SECONDS);
     }
 }
