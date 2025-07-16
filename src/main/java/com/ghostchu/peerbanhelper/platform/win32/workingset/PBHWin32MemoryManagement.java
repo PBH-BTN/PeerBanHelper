@@ -1,7 +1,8 @@
 package com.ghostchu.peerbanhelper.platform.win32.workingset;
 
-import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.platform.win32.workingset.jna.WorkingSetManagerFactory;
+import com.ghostchu.peerbanhelper.util.lab.Experiments;
+import com.ghostchu.peerbanhelper.util.lab.Laboratory;
 import com.sun.management.GarbageCollectionNotificationInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,14 +21,18 @@ import java.util.concurrent.TimeUnit;
 public class PBHWin32MemoryManagement {
     private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
 
-    public PBHWin32MemoryManagement() {
-        if (!WorkingSetManagerFactory.isSupported() || !Main.getMainConfig().getBoolean("performance.windows-empty-working-set")) {
-            return;
+    public PBHWin32MemoryManagement(Laboratory laboratory) {
+        try {
+            if (!WorkingSetManagerFactory.isSupported() || !laboratory.isExperimentActivated(Experiments.WIN32_EMPTY_WORKING_SET.getExperiment())) {
+                return;
+            }
+            log.debug("PBHWin32MemoryManagement initialized, hooking memory management.");
+            hookMemoryManagement();
+            service.scheduleWithFixedDelay(this::runJob, 1L, 10L, TimeUnit.MINUTES);
+            log.debug("PBHWin32MemoryManagement scheduled to run every 10 minutes.");
+        } catch (Throwable e) {
+            log.warn("Failed to initialize PBHWin32MemoryManagement, memory management may not work properly.", e);
         }
-        log.debug("PBHWin32MemoryManagement initialized, hooking memory management.");
-        hookMemoryManagement();
-        service.scheduleWithFixedDelay(this::runJob, 1L, 10L, TimeUnit.MINUTES);
-        log.debug("PBHWin32MemoryManagement scheduled to run every 10 minutes.");
     }
 
     private void hookMemoryManagement() {
