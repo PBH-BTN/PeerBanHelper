@@ -104,7 +104,7 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
             ifNets.addAll(Arrays.asList(ipv6));
         }
         Map<String, String> result = Collections.synchronizedMap(new TreeMap<>());
-        try (ExecutorService executorService = Executors.newSingleThreadExecutor()) {
+        try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
             ifNets.forEach(ip -> futures.add(CompletableFuture.runAsync(() -> {
                 var client = createHttpClient(ip);
                 var body = RequestBody.create(JsonUtil.standard().toJson(Map.of("ifaddr", ip)), MediaType.parse("application/json"));
