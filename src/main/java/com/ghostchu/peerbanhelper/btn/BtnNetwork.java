@@ -167,13 +167,13 @@ public final class BtnNetwork implements Reloadable {
             JsonObject ability = json.get("ability").getAsJsonObject();
             if (useLegacyAbilities) {
                 if (ability.has("submit_peers") && submit) {
-                    abilities.put(LegacyBtnAbilitySubmitPeers.class, new LegacyBtnAbilitySubmitPeers(this, httpUtil, ability.get("submit_peers").getAsJsonObject()));
+                    abilities.put(LegacyBtnAbilitySubmitPeers.class, new LegacyBtnAbilitySubmitPeers(this, ability.get("submit_peers").getAsJsonObject()));
                 }
                 if (ability.has("submit_bans") && submit) {
-                    abilities.put(LegacyBtnAbilitySubmitBans.class, new LegacyBtnAbilitySubmitBans(this, httpUtil, ability.get("submit_bans").getAsJsonObject()));
+                    abilities.put(LegacyBtnAbilitySubmitBans.class, new LegacyBtnAbilitySubmitBans(this, ability.get("submit_bans").getAsJsonObject()));
                 }
                 if (ability.has("submit_histories") && submit) {
-                    abilities.put(LegacyBtnAbilitySubmitHistory.class, new LegacyBtnAbilitySubmitHistory(this, httpUtil, ability.get("submit_histories").getAsJsonObject()));
+                    abilities.put(LegacyBtnAbilitySubmitHistory.class, new LegacyBtnAbilitySubmitHistory(this, ability.get("submit_histories").getAsJsonObject()));
                 }
             } else {
                 if (ability.has("submit_bans") && submit) {
@@ -191,6 +191,9 @@ public final class BtnNetwork implements Reloadable {
             }
             if (ability.has("exception")) {
                 abilities.put(BtnAbilityException.class, new BtnAbilityReconfigure(this, ability.get("exception").getAsJsonObject()));
+            }
+            if (ability.has("heartbeat")) {
+                abilities.put(BtnAbilityHeartBeat.class, new BtnAbilityHeartBeat(this, ability.get("heartbeat").getAsJsonObject()));
             }
             abilities.values().forEach(a -> {
                 try {

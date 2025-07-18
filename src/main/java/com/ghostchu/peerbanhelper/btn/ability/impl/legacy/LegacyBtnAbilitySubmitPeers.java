@@ -6,7 +6,6 @@ import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeer;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerPing;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +32,9 @@ public final class LegacyBtnAbilitySubmitPeers extends AbstractBtnAbility {
     private final long interval;
     private final String endpoint;
     private final long randomInitialDelay;
-    private final HTTPUtil httpUtil;
 
-    public LegacyBtnAbilitySubmitPeers(BtnNetwork btnNetwork, HTTPUtil httpUtil, JsonObject ability) {
+    public LegacyBtnAbilitySubmitPeers(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
-        this.httpUtil = httpUtil;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();

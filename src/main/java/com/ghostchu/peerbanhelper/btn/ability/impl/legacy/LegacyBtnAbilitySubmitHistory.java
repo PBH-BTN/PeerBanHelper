@@ -7,7 +7,6 @@ import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistory;
 import com.ghostchu.peerbanhelper.btn.ping.legacy.LegacyBtnPeerHistoryPing;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.query.Pageable;
 import com.google.gson.JsonObject;
@@ -44,11 +43,9 @@ public final class LegacyBtnAbilitySubmitHistory extends AbstractBtnAbility {
     private final long randomInitialDelay;
     private final File file;
     private final Lock lock = new ReentrantLock();
-    private final HTTPUtil httpUtil;
 
-    public LegacyBtnAbilitySubmitHistory(BtnNetwork btnNetwork, HTTPUtil httpUtil, JsonObject ability) {
+    public LegacyBtnAbilitySubmitHistory(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
-        this.httpUtil = httpUtil;
         this.interval = ability.get("interval").getAsLong();
         this.endpoint = ability.get("endpoint").getAsString();
         this.randomInitialDelay = ability.get("random_initial_delay").getAsLong();

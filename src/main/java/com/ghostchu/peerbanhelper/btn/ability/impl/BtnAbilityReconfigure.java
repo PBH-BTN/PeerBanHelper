@@ -20,8 +20,6 @@ public final class BtnAbilityReconfigure extends AbstractBtnAbility {
     private final long interval;
     private final long randomInitialDelay;
     private final String version;
-    private boolean lastStatus;
-    private String lastErrorMsg;
 
     public BtnAbilityReconfigure(BtnNetwork btnNetwork, JsonObject ability) {
         this.btnNetwork = btnNetwork;
