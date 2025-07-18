@@ -26,37 +26,38 @@ public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Lo
         return queryByPaging(queryBuilder, pageable);
     }
 
-    public int upsert(TrackedSwarmEntity entity) throws SQLException {
-        TrackedSwarmEntity inDatabase = queryBuilder()
+    public int upsert(TrackedSwarmEntity newData) throws SQLException {
+        TrackedSwarmEntity lastData = queryBuilder()
                 .where()
-                .eq("ip", entity.getIp())
+                .eq("ip", newData.getIp())
                 .and()
-                .eq("port", entity.getPort())
+                .eq("port", newData.getPort())
                 .and()
-                .eq("infoHash", entity.getInfoHash())
+                .eq("infoHash", newData.getInfoHash())
                 .and()
-                .eq("downloader", entity.getDownloader()).queryForFirst();
-        if (inDatabase != null) {
-            if (entity.getDownloadedOffset() < inDatabase.getDownloadedOffset()
-                    || entity.getUploadedOffset() < inDatabase.getUploadedOffset()) {
-                long newDownloaded = inDatabase.getDownloadedOffset() - entity.getDownloadedOffset();
-                long newUploaded = inDatabase.getUploadedOffset() - entity.getUploadedOffset();
-                // 如果数据库中的偏移量小于当前提交的偏移量，则更新偏移量
-                inDatabase.setDownloaded(inDatabase.getDownloaded() + newDownloaded);
-                inDatabase.setUploaded(inDatabase.getUploaded() + newUploaded);
-            } else {
-                inDatabase.setDownloaded(entity.getDownloadedOffset());
-                inDatabase.setUploaded(entity.getUploadedOffset());
+                .eq("downloader", newData.getDownloader()).queryForFirst();
+        if (lastData != null) {
+            long newDownloaded;
+            long newUploaded;
+            if (newData.getDownloadedOffset() < lastData.getDownloadedOffset()
+                    || newData.getUploadedOffset() < lastData.getUploadedOffset()) {
+                newDownloaded = newData.getDownloadedOffset() - lastData.getDownloadedOffset();
+                newUploaded = newData.getUploadedOffset() - lastData.getUploadedOffset();
+            }else{
+                newDownloaded = newData.getDownloadedOffset();
+                newUploaded = newData.getUploadedOffset();
             }
-            inDatabase.setDownloadedOffset(entity.getDownloadedOffset());
-            inDatabase.setUploadedOffset(entity.getUploadedOffset());
-            inDatabase.setClientName(entity.getClientName());
-            inDatabase.setPeerId(entity.getPeerId());
-            inDatabase.setLastFlags(entity.getLastFlags());
-            inDatabase.setLastTimeSeen(entity.getLastTimeSeen());
-            return update(entity);
+            lastData.setDownloaded(lastData.getDownloaded() + newDownloaded);
+            lastData.setUploaded(lastData.getUploaded() + newUploaded);
+            lastData.setDownloadedOffset(newData.getDownloadedOffset());
+            lastData.setUploadedOffset(newData.getUploadedOffset());
+            lastData.setClientName(newData.getClientName());
+            lastData.setPeerId(newData.getPeerId());
+            lastData.setLastFlags(newData.getLastFlags());
+            lastData.setLastTimeSeen(newData.getLastTimeSeen());
+            return update(lastData);
         } else {
-            return create(entity);
+            return create(newData);
         }
     }
 }
