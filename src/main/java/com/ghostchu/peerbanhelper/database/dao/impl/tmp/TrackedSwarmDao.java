@@ -37,8 +37,8 @@ public final class TrackedSwarmDao extends AbstractPBHDao<TrackedSwarmEntity, Lo
                 .and()
                 .eq("downloader", entity.getDownloader()).queryForFirst();
         if (inDatabase != null) {
-            if (inDatabase.getDownloadedOffset() < entity.getDownloadedOffset()
-                    || inDatabase.getUploadedOffset() < entity.getUploadedOffset()) {
+            if (entity.getDownloadedOffset() < inDatabase.getDownloadedOffset()
+                    || entity.getUploadedOffset() < inDatabase.getUploadedOffset()) {
                 long newDownloaded = inDatabase.getDownloadedOffset() - entity.getDownloadedOffset();
                 long newUploaded = inDatabase.getUploadedOffset() - entity.getUploadedOffset();
                 // 如果数据库中的偏移量小于当前提交的偏移量，则更新偏移量
