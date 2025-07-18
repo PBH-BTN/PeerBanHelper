@@ -22,6 +22,8 @@ public final class TrackedSwarmEntity { // 需要创建为临时表
     private int port;
     @DatabaseField(canBeNull = false, index = true, uniqueCombo = true)
     private String infoHash;
+    @DatabaseField(canBeNull = false, index = true)
+    private Boolean torrentIsPrivate;
     @DatabaseField(canBeNull = false, uniqueCombo = true)
     private String downloader;
     @DatabaseField(canBeNull = false)

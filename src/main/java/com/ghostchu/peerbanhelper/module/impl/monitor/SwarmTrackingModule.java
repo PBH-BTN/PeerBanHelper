@@ -119,6 +119,7 @@ public final class SwarmTrackingModule extends AbstractFeatureModule implements 
                             peer.getPeerAddress().getAddress().toNormalizedString(),
                             peer.getPeerAddress().getPort(),
                             torrent.getHash(),
+                            torrent.isPrivate(),
                             downloader.getId(),
                             torrent.getProgress(),
                             peer.getPeerId(),
