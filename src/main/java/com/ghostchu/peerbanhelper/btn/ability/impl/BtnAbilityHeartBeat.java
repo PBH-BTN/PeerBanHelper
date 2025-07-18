@@ -128,7 +128,14 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         }
 
         for (CompletableFuture<Void> future : futures) {
-            future.join();
+            try {
+                future.get(30, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                log.warn("Heartbeat request timed out");
+                future.cancel(true);
+            } catch (InterruptedException | ExecutionException e) {
+                log.warn("Heartbeat request failed", e);
+            }
         }
 
         if (anySuccess.get()) {
@@ -150,17 +157,28 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
                 .socketFactory(new SocketFactory() {
                     @Override
                     public Socket createSocket(String host, int port) throws IOException {
-                        return new Socket(host, port, InetAddresses.forString(ifNet), 0);
+                        try {
+                            return new Socket(host, port, InetAddresses.forString(ifNet), 0);
+                        } catch (IllegalArgumentException e) {
+                            throw new IOException("Invalid local IP address: " + ifNet, e);
+                        }
                     }
 
+                    @Override
                     public Socket createSocket(InetAddress address, int port) throws IOException {
-                        return new Socket(address, port, InetAddresses.forString(ifNet), 0);
+                        try {
+                            return new Socket(address, port, InetAddresses.forString(ifNet), 0);
+                        } catch (IllegalArgumentException e) {
+                            throw new IOException("Invalid local IP address: " + ifNet, e);
+                        }
                     }
 
+                    @Override
                     public Socket createSocket(String host, int port, InetAddress clientAddress, int clientPort) throws IOException {
                         return new Socket(host, port, clientAddress, clientPort);
                     }
 
+                    @Override
                     public Socket createSocket(InetAddress address, int port, InetAddress clientAddress, int clientPort) throws IOException {
                         return new Socket(address, port, clientAddress, clientPort);
                     }
