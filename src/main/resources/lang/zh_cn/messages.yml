@@ -682,7 +682,7 @@ LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_DESCRIPTION: |
   更改此设定需要重新启动 PeerBanHelper 以使其生效。
 BTN_HEARTBEAT_TITLE: "心跳更新"
 BTN_HEARTBEAT_DESCRIPTION: |
-  该能力允许 BTN 网络请求 PeerBanHelper 每个一定时间向 BTN 服务器发送一个心跳请求，以更新在 BTN 网络上的状态。
+  该能力允许 BTN 网络请求 PeerBanHelper 每隔一定时间向 BTN 服务器发送一个心跳请求，以更新在 BTN 网络上的状态。
   有时该功能还被用来检测您的可用 IP 地址，以便更新在 BTN 网络上的记录。这取决于服务器的要求。
   
   当前状态：
