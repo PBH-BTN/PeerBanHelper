@@ -128,7 +128,14 @@ public final class BtnAbilityHeartBeat extends AbstractBtnAbility {
         }
 
         for (CompletableFuture<Void> future : futures) {
-            future.join();
+            try {
+                future.get(30, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                log.warn("Heartbeat request timed out");
+                future.cancel(true);
+            } catch (InterruptedException | ExecutionException e) {
+                log.warn("Heartbeat request failed", e);
+            }
         }
 
         if (anySuccess.get()) {
