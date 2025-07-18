@@ -96,8 +96,8 @@ public class Main {
     @Getter
     private static long startupAt = System.currentTimeMillis();
     private static String userAgent;
-    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 11;
-    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "0.1.0";
+    public static final int PBH_BTN_PROTOCOL_IMPL_VERSION = 12;
+    public static final String PBH_BTN_PROTOCOL_READABLE_VERSION = "2.0.0";
     private static PluginManager pluginManager;
     private static long bootSince;
 
@@ -123,7 +123,6 @@ public class Main {
         Thread.ofPlatform().name("Bootstrap").start(() -> {
             guiManager.taskbarControl().updateProgress(null, TaskbarState.INDETERMINATE, 0.0f);
             pbhServerAddress = mainConfig.getString("server.prefix", "http://127.0.0.1:" + mainConfig.getInt("server.http"));
-            setupProxySettings();
             setupScriptEngine();
             try {
                 log.info(tlUI(Lang.SPRING_CONTEXT_LOADING));
@@ -193,38 +192,7 @@ public class Main {
     public static ReloadResult reloadModule() {
         setupConfiguration();
         loadFlagsProperties();
-        setupProxySettings();
         return ReloadResult.builder().status(ReloadStatus.SUCCESS).reason("OK!").build();
-    }
-
-    private static void setupProxySettings() {
-        var proxySection = mainConfig.getConfigurationSection("proxy");
-        if (proxySection == null) return;
-        String host = proxySection.getString("host");
-        String port = String.valueOf(proxySection.getInt("port"));
-        String nonProxyHost = proxySection.getString("non-proxy-hosts", "");
-
-        // 在设置新的代理属性之前，移除所有现有的设定
-        System.clearProperty("http.proxyHost");
-        System.clearProperty("http.proxyPort");
-        System.clearProperty("https.proxyHost");
-        System.clearProperty("https.proxyPort");
-        System.clearProperty("http.nonProxyHosts");
-        System.clearProperty("https.nonProxyHosts");
-        System.clearProperty("java.net.useSystemProxies");
-
-        switch (proxySection.getInt("setting")) {
-            case 1 -> System.setProperty("java.net.useSystemProxies", "true");
-            case 2 -> {
-                System.setProperty("http.proxyHost", host);
-                System.setProperty("http.proxyPort", port);
-                System.setProperty("https.proxyHost", host);
-                System.setProperty("https.proxyPort", port);
-                System.setProperty("http.nonProxyHosts", nonProxyHost);
-                System.setProperty("https.nonProxyHosts", nonProxyHost);
-            }
-            default -> System.setProperty("java.net.useSystemProxies", "false");
-        }
     }
 
     private static void setupConfDirectory(String[] args) {

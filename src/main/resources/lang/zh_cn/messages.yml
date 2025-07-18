@@ -675,3 +675,19 @@ JBR_REQUIRED_DESCRIPTION: |
   此提醒仅显示一次。
   
   [下载 JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime/releases)
+LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_TITLE: "Win32平台：清空工作集"
+LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_DESCRIPTION: |
+  在 Windows 平台上，PeerBanHelper 将在 Full GC（或者每隔一段时间）调用 Win32 API 清空自身进程工作集以释放内存。  
+  不活跃的内存页将被转移到操作系统分页文件中，可能引起短暂性能下降和磁盘 I/O，但有助于释放进程占用的物理内存以供其他应用程序使用。  
+  更改此设定需要重新启动 PeerBanHelper 以使其生效。
+BTN_HEARTBEAT_TITLE: "心跳更新"
+BTN_HEARTBEAT_DESCRIPTION: |
+  该能力允许 BTN 网络请求 PeerBanHelper 每隔一定时间向 BTN 服务器发送一个心跳请求，以更新在 BTN 网络上的状态。
+  有时该功能还被用来检测您的可用 IP 地址，以便更新在 BTN 网络上的记录。这取决于服务器的要求。
+  
+  当前状态：
+  {}
+BTN_HEARTBEAT_UPDATING: "[BTN 网络] 计划任务正在向 BTN 网络更新心跳信息，请稍等……"
+BTN_HEARTBEAT_UPDATED: "[BTN 网络] 已通过 {} 次请求向 BTN 网络更新心跳信息。"
+BTN_HEARTBEAT_SUCCESS: "已成功与服务器交换心跳信息"
+BTN_HEARTBEAT_FAILED: "没有任何网路接口可用来发送心跳信息，所有网络请求均已失败"
