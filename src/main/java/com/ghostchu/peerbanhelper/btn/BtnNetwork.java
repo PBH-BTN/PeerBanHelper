@@ -139,7 +139,7 @@ public final class BtnNetwork implements Reloadable {
                 .build();
         try (Response resp = httpClient.newCall(request).execute()) {
             statusCode = resp.code();
-            if (statusCode != 200) {
+            if (!resp.isSuccessful()) {
                 response = resp.body().string();
                 log.error(tlUI(Lang.BTN_CONFIG_FAILS, statusCode + " - " + response, 600));
                 configResult = new TranslationComponent(Lang.BTN_CONFIG_STATUS_UNSUCCESSFUL_HTTP_REQUEST, configUrl, statusCode, response);

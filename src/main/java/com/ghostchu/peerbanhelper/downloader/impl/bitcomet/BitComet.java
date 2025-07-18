@@ -342,6 +342,9 @@ public final class BitComet extends AbstractDownloader {
                             }
                         } catch (IOException | InterruptedException e) {
                             log.warn(tlUI(Lang.DOWNLOADER_BITCOMET_UNABLE_FETCH_TASK_SUMMARY), e);
+                            if (e instanceof InterruptedException) {
+                                Thread.currentThread().interrupt();
+                            }
                             return null;
                         } finally {
                             semaphore.release();

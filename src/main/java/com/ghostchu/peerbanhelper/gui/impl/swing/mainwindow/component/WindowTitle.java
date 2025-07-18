@@ -31,7 +31,11 @@ public class WindowTitle {
             StringJoiner joiner = new StringJoiner("", " [", "]");
             joiner.setEmptyValue("");
             ExchangeMap.GUI_DISPLAY_FLAGS.forEach(flag -> joiner.add(flag.getContent()));
-            SwingUtilities.invokeLater(() -> parent.setTitle(builder.append(joiner).toString()));
-        }, 0L, 1L, TimeUnit.SECONDS);
+            String newTitle = builder.append(joiner).toString();
+            if(parent.getTitle().equals(newTitle)) {
+                return; // no change
+            }
+            SwingUtilities.invokeLater(() -> parent.setTitle(newTitle));
+        }, 0L, 3L, TimeUnit.SECONDS);
     }
 }

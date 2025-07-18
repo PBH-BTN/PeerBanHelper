@@ -131,8 +131,8 @@ public final class LegacyBtnAbilitySubmitHistory extends AbstractBtnAbility {
                         .build();
                 
                 try (Response response = btnNetwork.getHttpClient().newCall(request).execute()) {
-                    if (response.code() != 200) {
-                        String responseBody = response.body() != null ? response.body().string() : "";
+                    if (!response.isSuccessful()) {
+                        String responseBody = response.body().string();
                         log.error(tlUI(Lang.BTN_REQUEST_FAILS, response.code() + " - " + responseBody));
                         setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, response.code(), responseBody));
                         return;

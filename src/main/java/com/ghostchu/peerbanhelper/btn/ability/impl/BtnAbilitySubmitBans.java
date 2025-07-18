@@ -136,7 +136,7 @@ public final class BtnAbilitySubmitBans extends AbstractBtnAbility {
                 .header("Content-Encoding", "gzip")
                 .build();
         try (Response resp = btnNetwork.getHttpClient().newCall(request).execute()) {
-            if (resp.code() < 200 || resp.code() >= 400) {
+            if (!resp.isSuccessful()) { // 检查2xx状态码
                 String responseBody = resp.body() != null ? resp.body().string() : "";
                 log.error(tlUI(Lang.BTN_REQUEST_FAILS, resp.code() + " - " + responseBody));
                 setLastStatus(false, new TranslationComponent(Lang.BTN_HTTP_ERROR, resp.code(), responseBody));

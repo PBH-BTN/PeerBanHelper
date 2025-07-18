@@ -49,7 +49,7 @@ public final class DelugeServer {
         }
         try (Response resp = client.newCall(request.build()).execute()) {
             connectionResponseCode = resp.code();
-            if (connectionResponseCode != 200) {
+            if (!resp.isSuccessful()) {
                 throw new DelugeException(resp.code() + " - " + resp.body());
             }
             jsonResponse = new JSONObject(resp.body());
