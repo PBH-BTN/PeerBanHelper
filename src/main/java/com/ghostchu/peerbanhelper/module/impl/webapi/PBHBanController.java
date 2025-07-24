@@ -127,12 +127,49 @@ public final class PBHBanController extends AbstractFeatureModule {
     }
 
     private void handleBans(Context ctx) {
-        long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
-        long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
-        boolean ignoreBanForDisconnect = Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
-        var search = ctx.queryParam("search");
-        var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit, ignoreBanForDisconnect, search);
-        ctx.json(new StdResp(true, null, banResponseList.toList()));
+        /*
+         * Two modes are supported here for backward-compatibility:
+         *  1.  Old feed-stream style:   limit + lastBanTime (no page/pageSize)
+         *  2.  New pagination style:    page + pageSize
+         *
+         *  The controller detects the presence of the `page` query parameter.
+         */
+
+        boolean hasPageParam = ctx.queryParam("page") != null;
+
+        boolean ignoreBanForDisconnect =
+                Boolean.parseBoolean(Objects.requireNonNullElse(ctx.queryParam("ignoreBanForDisconnect"), "true"));
+        String search = ctx.queryParam("search");
+
+        if (hasPageParam) {
+            /* ---------------- Pagination path ---------------- */
+            Pageable pageable = new Pageable(ctx); // reads page & pageSize
+
+            // We always sort by ban time (desc) as default
+            var banStream = getBanResponseStream(locale(ctx),
+                    -1,       // lastBanTime unused
+                    -1,       // limit unused
+                    ignoreBanForDisconnect,
+                    search);
+
+            List<BanDTO> allResults = banStream.toList();
+            long total = allResults.size();
+
+            long skip = pageable.getZeroBasedPage() * pageable.getSize();
+            List<BanDTO> pageResults = allResults.stream()
+                    .skip(skip)
+                    .limit(pageable.getSize())
+                    .toList();
+
+            ctx.json(new StdResp(true, null, new Page<>(pageable, total, pageResults)));
+        } else {
+            /* ---------------- Legacy feed-stream path ---------------- */
+            long limit = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("limit"), "-1"));
+            long lastBanTime = Long.parseLong(Objects.requireNonNullElse(ctx.queryParam("lastBanTime"), "-1"));
+
+            var banResponseList = getBanResponseStream(locale(ctx), lastBanTime, limit, ignoreBanForDisconnect, search);
+            ctx.json(new StdResp(true, null, banResponseList.toList()));
+        }
     }
 
     @Override
