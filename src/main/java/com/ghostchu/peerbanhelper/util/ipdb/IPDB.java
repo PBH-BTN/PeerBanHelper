@@ -317,8 +317,8 @@ public final class IPDB implements AutoCloseable {
             // 创建带有进度追踪器的 HTTP 客户端
             var progressTrackingHttpClient = httpUtil.addProgressTracker(httpUtil.newBuilder())
                     .connectTimeout(Duration.ofSeconds(15))
-                    .readTimeout(Duration.ofMinutes(10))
-                    .callTimeout(Duration.ofMinutes(15))
+                    .readTimeout(Duration.ofMinutes(1))
+                    .callTimeout(Duration.ofMinutes(3))
                     .build();
 
             Request request = new Request.Builder()
