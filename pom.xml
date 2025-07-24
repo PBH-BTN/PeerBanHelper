@@ -550,5 +550,11 @@
             <artifactId>jna-platform</artifactId>
             <version>5.10.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.modelcontextprotocol.sdk/mcp -->
+        <dependency>
+            <groupId>io.modelcontextprotocol.sdk</groupId>
+            <artifactId>mcp</artifactId>
+            <version>0.10.0</version>
+        </dependency>
     </dependencies>
 </project>

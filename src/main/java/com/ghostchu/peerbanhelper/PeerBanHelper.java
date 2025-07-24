@@ -290,6 +290,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHUtilitiesController.class);
         moduleManager.register(BackgroundModule.class);
         moduleManager.register(SwarmTrackingModule.class);
+        moduleManager.register(PBHMCPController.class);
     }
 
     public IPDBResponse queryIPDB(PeerAddress address) {
