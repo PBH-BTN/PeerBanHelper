@@ -2,6 +2,7 @@ package com.ghostchu.peerbanhelper.util.pow;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,7 +26,7 @@ public class PoWClient {
                 try {
                     MessageDigest digest = MessageDigest.getInstance(algorithm);
                     ByteBuffer buffer = ByteBuffer.allocate(8);
-                    long nonce = threadId;
+                    long nonce = new SecureRandom().nextLong() + threadId;
                     while (!found.get()) {
                         digest.reset();
                         digest.update(challenge);
