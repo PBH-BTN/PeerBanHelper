@@ -9,6 +9,7 @@ import com.ghostchu.peerbanhelper.event.PBHServerStartedEvent;
 import com.ghostchu.peerbanhelper.exchange.ExchangeMap;
 import com.ghostchu.peerbanhelper.gui.TaskbarState;
 import com.ghostchu.peerbanhelper.module.ModuleManager;
+import com.ghostchu.peerbanhelper.module.impl.ai.mcp.MCPController;
 import com.ghostchu.peerbanhelper.module.impl.background.BackgroundModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.ActiveMonitoringModule;
 import com.ghostchu.peerbanhelper.module.impl.monitor.SwarmTrackingModule;
@@ -290,7 +291,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHUtilitiesController.class);
         moduleManager.register(BackgroundModule.class);
         moduleManager.register(SwarmTrackingModule.class);
-        moduleManager.register(PBHMCPController.class);
+        moduleManager.register(MCPController.class);
     }
 
     public IPDBResponse queryIPDB(PeerAddress address) {
