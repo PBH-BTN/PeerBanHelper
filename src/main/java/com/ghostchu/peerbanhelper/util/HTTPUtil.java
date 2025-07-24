@@ -128,7 +128,7 @@ public final class HTTPUtil implements Reloadable {
                         var host = uri.getHost();
                         for (Pattern proxyBypass : proxyBypasses) {
                             if (proxyBypass.matcher(host).matches()) {
-                               log.debug("Direct route for host: {}, matched pattern: {}", host, proxyBypass.pattern());
+                                log.debug("Direct route for host: {}, matched pattern: {}", host, proxyBypass.pattern());
                                 return List.of(Proxy.NO_PROXY);
                             }
                         }
@@ -246,18 +246,34 @@ public final class HTTPUtil implements Reloadable {
     }
 
 
-    public interface ProgressListener {
-        void update(long bytesRead, long contentLength, boolean done);
+    public abstract static class ProgressListener {
+        private long lastUpdateAt = 0;
+        private long lastBytesRead = 0L;
+
+        void update(long bytesRead, long contentLength, boolean done) {
+            if (System.currentTimeMillis() - lastUpdateAt < 5000 && (bytesRead - lastBytesRead < 1024 * 1024) && !done) {
+                // 如果距离上次更新小于 5 秒则不更新且且读取的字节数小于 1MB且不是完成状态，则不更新
+                return;
+            }
+            this.lastUpdateAt = System.currentTimeMillis();
+            this.lastBytesRead = bytesRead;
+            update0(bytesRead, contentLength, done);
+        }
+
+        abstract void update0(long bytesRead, long contentLength, boolean done);
     }
 
-    final ProgressListener progressListener = (bytesRead, contentLength, done) -> {
-        if (done) {
-            log.info(tlUI(Lang.DOWNLOAD_COMPLETED, bytesRead));
-        } else {
-            if (contentLength != -1) {
-                log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, bytesRead, contentLength, String.format("%.2f", ((100.0f * bytesRead) / contentLength))));
+    final ProgressListener progressListener = new ProgressListener() {
+        @Override
+        void update0(long bytesRead, long contentLength, boolean done) {
+            if (done) {
+                log.info(tlUI(Lang.DOWNLOAD_COMPLETED, bytesRead));
             } else {
-                log.info(tlUI(Lang.DOWNLOAD_PROGRESS, bytesRead));
+                if (contentLength != -1) {
+                    log.info(tlUI(Lang.DOWNLOAD_PROGRESS_DETERMINED, bytesRead, contentLength, String.format("%.2f", ((100.0f * bytesRead) / contentLength))));
+                } else {
+                    log.info(tlUI(Lang.DOWNLOAD_PROGRESS, bytesRead));
+                }
             }
         }
     };
