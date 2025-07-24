@@ -18,7 +18,10 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.Credentials;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okio.Okio;
 import org.tukaani.xz.XZInputStream;
 
@@ -312,13 +315,7 @@ public final class IPDB implements AutoCloseable {
             progressDialog.setComment(mirror.getIPDBUrl());
 
             // 创建带有进度追踪器的 HTTP 客户端
-            var progressTrackingHttpClient = httpUtil.addProgressTracker(httpUtil.newBuilder(), (bytesRead, contentLength, done) -> {
-                        if (contentLength > 0) {
-                            float progress = (float) bytesRead / contentLength;
-                            progressDialog.setProgressDisplayIndeterminate(false);
-                            progressDialog.updateProgress(progress);
-                        }
-                    })
+            var progressTrackingHttpClient = httpUtil.addProgressTracker(httpUtil.newBuilder())
                     .connectTimeout(Duration.ofSeconds(15))
                     .readTimeout(Duration.ofMinutes(10))
                     .callTimeout(Duration.ofMinutes(15))
