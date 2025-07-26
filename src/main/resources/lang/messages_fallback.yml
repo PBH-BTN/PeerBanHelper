@@ -680,6 +680,11 @@ LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_DESCRIPTION: |
   在 Windows 平台上，PeerBanHelper 将在 Full GC（或者每隔一段时间）调用 Win32 API 清空自身进程工作集以释放内存。  
   不活跃的内存页将被转移到操作系统分页文件中，可能引起短暂性能下降和磁盘 I/O，但有助于释放进程占用的物理内存以供其他应用程序使用。  
   更改此设定需要重新启动 PeerBanHelper 以使其生效。
+BACKGROUND_TASK_EXCEPTION_TITLE: "{} 失败"
+BACKGROUND_TASK_EXCEPTION_DESCRIPTION: |
+  最后状态: {}: {}  
+  进度: {}  
+  错误信息: {}
 BTN_HEARTBEAT_TITLE: "心跳更新"
 BTN_HEARTBEAT_DESCRIPTION: |
   该能力允许 BTN 网络请求 PeerBanHelper 每隔一定时间向 BTN 服务器发送一个心跳请求，以更新在 BTN 网络上的状态。
