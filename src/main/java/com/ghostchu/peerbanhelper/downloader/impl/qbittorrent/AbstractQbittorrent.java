@@ -53,6 +53,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
         
         var builder = httpUtil.newBuilder()
                 .proxy(Proxy.NO_PROXY)
+                .connectionPool(new ConnectionPool(getMaxConcurrentPeerRequestSlots()+10, 5, TimeUnit.MINUTES))
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .writeTimeout(Duration.of(30, ChronoUnit.SECONDS))
