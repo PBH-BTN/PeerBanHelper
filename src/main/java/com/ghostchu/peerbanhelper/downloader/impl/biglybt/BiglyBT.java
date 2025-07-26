@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -67,6 +68,7 @@ public final class BiglyBT extends AbstractDownloader {
 
         var builder = httpUtil.newBuilder()
                 .proxy(Proxy.NO_PROXY)
+                .connectionPool(new ConnectionPool(getMaxConcurrentPeerRequestSlots()+10, 5, TimeUnit.MINUTES))
                 .addInterceptor(chain -> {
                     Request originalRequest = chain.request();
                     Request newRequest = originalRequest.newBuilder()
