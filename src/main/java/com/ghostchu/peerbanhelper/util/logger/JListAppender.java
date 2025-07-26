@@ -11,15 +11,16 @@ import com.google.common.collect.EvictingQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.event.Level;
 
+import java.lang.ref.SoftReference;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class JListAppender extends AppenderBase<ILoggingEvent> {
 
-    public static final LinkedBlockingDeque<LogEntry> logEntryDeque = new LinkedBlockingDeque<>(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200));
+    public static final LinkedBlockingDeque<SoftReference<LogEntry>> logEntryDeque = new LinkedBlockingDeque<>(ExternalSwitch.parseInt("pbh.logger.logEntryDeque.size", 200));
     public static final AtomicBoolean allowWriteLogEntryDeque = new AtomicBoolean(true);
-    public static final EvictingQueue<LogEntry> ringDeque = EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100));
+    public static final EvictingQueue<SoftReference<LogEntry>> ringDeque = EvictingQueue.create(ExternalSwitch.parseInt("pbh.logger.ringDeque.size", 100));
     private static final AtomicInteger seq = new AtomicInteger(0);
     private PatternLayout layout;
     private static final ThrowableProxyConverter converter = new ThrowableProxyConverter();
@@ -61,7 +62,7 @@ public final class JListAppender extends AppenderBase<ILoggingEvent> {
                     slf4jLevel,
                     formattedMessage.trim(),
                     seq.incrementAndGet());
-            logEntryDeque.add(postAccessLog);
+            logEntryDeque.add(new SoftReference<>(postAccessLog));
         }
         var rawLog = new LogEntry(
                 eventObject.getTimeStamp(),
@@ -69,7 +70,7 @@ public final class JListAppender extends AppenderBase<ILoggingEvent> {
                 slf4jLevel,
                 formattedMessage.startsWith("[") ? StringUtils.substringAfter(formattedMessage.trim(), ": ") : formattedMessage.trim(),
                 seq.incrementAndGet());
-        ringDeque.add(rawLog);
+        ringDeque.add(new SoftReference<>(rawLog));
         Main.getEventBus().post(new NewLogEntryCreatedEvent(rawLog));
     }
 }

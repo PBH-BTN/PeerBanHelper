@@ -35,6 +35,7 @@ import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -286,7 +287,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
     private void initLoggerRedirection() {
         JScrollPane scrollPane = mainWindow.getLoggerScrollPane();  // 获取 JList 所在的 JScrollPane
-        JList<LogEntry> logList = mainWindow.getLoggerTextList();
+        JList<SoftReference<LogEntry>> logList = mainWindow.getLoggerTextList();
         BoundedRangeModel scrollModel = scrollPane.getVerticalScrollBar().getModel();
 
         // 用于追踪用户是否在最底部
@@ -307,7 +308,7 @@ public final class SwingGuiImpl extends ConsoleGuiImpl implements GuiImpl {
 
         JListAppender.allowWriteLogEntryDeque.set(true);
         CommonUtil.getScheduler().scheduleWithFixedDelay(() -> SwingUtilities.invokeLater(() -> {
-            DefaultListModel<LogEntry> model = (DefaultListModel<LogEntry>) logList.getModel();
+            DefaultListModel<SoftReference<LogEntry>> model = (DefaultListModel<SoftReference<LogEntry>>) logList.getModel();
             while (!JListAppender.logEntryDeque.isEmpty()) {
                 var logEntry = JListAppender.logEntryDeque.poll();
                 if (logEntry == null) return;

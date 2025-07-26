@@ -24,6 +24,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.ref.SoftReference;
 import java.util.Locale;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -42,7 +43,7 @@ public final class SwingMainWindow extends JFrame {
     private JTabbedPane tabbedPane;
     private JPanel tabbedPaneLogs;
     @Getter
-    private JList<LogEntry> loggerTextList;
+    private JList<SoftReference<LogEntry>> loggerTextList;
     @Getter
     private JScrollPane loggerScrollPane;
     private PBHGuiBridge bridge;
