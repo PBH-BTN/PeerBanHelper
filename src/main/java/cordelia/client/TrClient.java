@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -58,6 +59,7 @@ public final class TrClient {
         
         OkHttpClient.Builder builder = httpUtil.newBuilder()
                 .proxy(Proxy.NO_PROXY)
+                .connectionPool(new ConnectionPool(24, 5, TimeUnit.MINUTES))
                 .connectTimeout(Duration.of(10, ChronoUnit.SECONDS))
                 .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
                 .writeTimeout(Duration.of(30, ChronoUnit.SECONDS))

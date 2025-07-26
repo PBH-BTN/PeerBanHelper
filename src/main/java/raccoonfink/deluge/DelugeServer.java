@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.Proxy;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public final class DelugeServer {
@@ -25,7 +26,7 @@ public final class DelugeServer {
         m_url = url;
         m_password = password;
         this.client = httpUtil
-                .disableSSLVerify(httpUtil.newBuilder().proxy(Proxy.NO_PROXY).authenticator((route, response) -> {
+                .disableSSLVerify(httpUtil.newBuilder().proxy(Proxy.NO_PROXY).connectionPool(new ConnectionPool(24, 5, TimeUnit.MINUTES)).authenticator((route, response) -> {
             if (HTTPUtil.responseCount(response) > 1) {
                 return null;
             }
