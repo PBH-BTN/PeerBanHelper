@@ -670,3 +670,19 @@ JBR_REQUIRED_DESCRIPTION: |
   This reminder will only be shown once.
 
   [Download JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime/releases)
+LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_TITLE: "Win32 Platform: Empty Working Set"
+LAB_EXPERIMENT_WIN32_EMPTY_WORKING_SET_DESCRIPTION: |
+  On the Windows platform, PeerBanHelper will call the Win32 API to empty its process working set during Full GC (or at regular intervals) to release memory.  
+  Inactive memory pages will be moved to the operating system's paging file, which may cause temporary performance degradation and disk I/O, but helps free up physical memory used by the process for other applications.  
+  Changing this setting requires restarting PeerBanHelper to take effect.
+BTN_HEARTBEAT_TITLE: "Heartbeat Update"
+BTN_HEARTBEAT_DESCRIPTION: |
+  This feature allows the BTN network to request PeerBanHelper to send heartbeat requests to the BTN server at regular intervals to update its status on the BTN network.
+  Sometimes this feature is also used to detect your available IP address in order to update records on the BTN network. This depends on the server's requirements.
+  
+  Current status:
+  {}
+BTN_HEARTBEAT_UPDATING: "[BTN Network] Scheduled task is updating heartbeat information to the BTN network, please wait..."
+BTN_HEARTBEAT_UPDATED: "[BTN Network] Heartbeat information has been updated to the BTN network through {} requests."
+BTN_HEARTBEAT_SUCCESS: "Successfully exchanged heartbeat information with the server"
+BTN_HEARTBEAT_FAILED: "No network interfaces available to send heartbeat information, all network requests have failed"

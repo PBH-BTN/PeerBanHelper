@@ -20,6 +20,8 @@ public class BtnSwarm {
     private int port;
     @SerializedName("torrent_identifier")
     private String torrentIdentifier;
+    @SerializedName("torrent_is_private")
+    private Boolean torrentIsPrivate;
     @SerializedName("downloader")
     private String downloader;
     @SerializedName("downloader_progress")
@@ -51,6 +53,7 @@ public class BtnSwarm {
         btnSwarm.setIp(entity.getIp());
         btnSwarm.setPort(entity.getPort());
         btnSwarm.setTorrentIdentifier(InfoHashUtil.getHashedIdentifier(entity.getInfoHash()));
+        btnSwarm.setTorrentIsPrivate(entity.getTorrentIsPrivate());
         btnSwarm.setDownloader(entity.getDownloader());
         btnSwarm.setDownloaderProgress(entity.getDownloaderProgress());
         btnSwarm.setPeerId(entity.getPeerId());
