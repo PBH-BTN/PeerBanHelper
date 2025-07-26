@@ -1,9 +1,6 @@
 import { type BanList, type UnbanResult } from '@/api/model/banlist'
 import { useEndpointStore } from '@/stores/endpoint'
-import {
-  type CommonResponse,
-  type CommonResponseWithPage
-} from '@/api/model/common'
+import { type CommonResponse, type CommonResponseWithPage } from '@/api/model/common'
 import urlJoin from 'url-join'
 import { getCommonHeader } from './utils'
 

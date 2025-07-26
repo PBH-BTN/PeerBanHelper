@@ -48,8 +48,8 @@ class AutoUpdateMessageChannel extends MessageChannel {
       refresh
     }
     this.refreshMap.set(currentId, item)
-    return (action: 'loading' | 'idle' | 'unmont') => {
-      if (action === 'unmont') {
+    return (action: 'loading' | 'idle' | 'unmount') => {
+      if (action === 'unmount') {
         this.refreshMap.delete(currentId)
       } else {
         item.status = action
@@ -140,7 +140,7 @@ export const useAutoUpdatePlugin = <R, P extends unknown[]>(
   callbackRef.value = autoupdateStore.polling(() => queryInstance.context.refresh())
 
   onUnmounted(() => {
-    callbackRef.value?.('unmont')
+    callbackRef.value?.('unmount')
   })
 
   return {

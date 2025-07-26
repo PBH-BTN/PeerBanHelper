@@ -27,79 +27,79 @@
       </a-space>
     </a-space>
     <!-- paginated list (no virtual scroll / infinite load) -->
-    <a-list
-      ref="banlist"
-      :data="list"
-    >
-      <template #item="{ item, index }">
+    <a-list :data="list">
+      <template #item="{ item }">
         <a-list-item>
           <banListItem :item="item" @unban="refresh()" />
         </a-list-item>
       </template>
       <template #scroll-loading>
-        <a-spin v-if="loading && list.length === 0" style="width: 100%; height: 150px" />
+        <a-space v-if="loading && list.length === 0" style="height: 150px">
+          <a-spin style="width: 100%" />
+        </a-space>
         <a-empty v-else-if="list.length === 0" style="width: 100%; height: 150px" />
       </template>
     </a-list>
 
     <!-- pagination controls -->
-    <a-pagination
-      :total="total"
-      :current="current"
-      :page-size="pageSize"
-      show-page-size
-      @change="changeCurrent"
-      @page-size-change="changePageSize"
-    />
+    <a-space fill style="display: flex; justify-content: end">
+      <a-pagination
+        :total="total"
+        :current="current"
+        :page-size="pageSize"
+        show-page-size
+        @change="changeCurrent"
+        @page-size-change="changePageSize"
+      />
+    </a-space>
   </a-space>
 </template>
 
 <script setup lang="ts">
-import type { BanList } from '@/api/model/banlist'
 import AsyncMethod from '@/components/asyncMethod.vue'
 import { getBanListPaginated, unbanIP } from '@/service/banList'
-import { useAutoUpdatePlugin } from '@/stores/autoUpdate'
+import { useAutoUpdate, useAutoUpdatePlugin } from '@/stores/autoUpdate'
 import { useEndpointStore } from '@/stores/endpoint'
 import { Message } from '@arco-design/web-vue'
 import { useDebounceFn } from '@vueuse/core'
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePagination } from 'vue-request'
 import banListItem from './banListItem.vue'
-
-const banlist = ref()
 const endpointState = useEndpointStore()
+const autoUpdateStore = useAutoUpdate()
 const searchString = ref('')
 const { t } = useI18n()
 
-const {
-  data,
-  total,
-  current,
-  pageSize,
-  loading,
-  changeCurrent,
-  changePageSize,
-  refresh,
-  run
-} = usePagination(
-  getBanListPaginated,
-  {
-    defaultParams: [
-      {
-        page: 1,
-        pageSize: 10,
-        search: ''
+const { total, data, current, pageSize, loading, changeCurrent, changePageSize, refresh, run } =
+  usePagination(
+    getBanListPaginated,
+    {
+      defaultParams: [
+        {
+          page: 1,
+          pageSize: 10,
+          search: ''
+        }
+      ],
+      pagination: {
+        currentKey: 'page',
+        pageSizeKey: 'pageSize',
+        totalKey: 'data.total'
       }
-    ],
-    pagination: {
-      currentKey: 'page',
-      pageSizeKey: 'pageSize',
-      totalKey: 'data.total'
-    }
-  },
-  [useAutoUpdatePlugin]
-)
+    },
+    [useAutoUpdatePlugin]
+  )
+
+const pollingHandler = autoUpdateStore.polling(() => {
+  if (current.value === 1) refresh()
+})
+
+onUnmounted(() => {
+  if (pollingHandler) {
+    pollingHandler('unmount')
+  }
+})
 
 const handleUnban = async (address: string) => {
   const { count } = await (await unbanIP(address)).data
@@ -122,7 +122,6 @@ const handleUnban = async (address: string) => {
 watch(
   () => endpointState.endpoint,
   () => {
-    changeCurrent(1)
     refresh()
   }
 )
@@ -130,7 +129,6 @@ watch(
 run({ page: 1, pageSize: 10, search: '' })
 
 const list = computed(() => data.value?.data.results ?? [])
-
 const debouncedSearch = useDebounceFn((v: string) => {
   searchString.value = v
   changeCurrent(1)
