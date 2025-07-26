@@ -24,7 +24,7 @@ public final class MCPController extends AbstractFeatureModule {
 
     private final JavalinWebContainer javalinWebContainer;
     private final MCPToolsRegistry toolsRegistry;
-    
+
     public MCPController(JavalinWebContainer javalinWebContainer, MCPToolsRegistry toolsRegistry) {
         super();
         this.javalinWebContainer = javalinWebContainer;
@@ -70,12 +70,20 @@ public final class MCPController extends AbstractFeatureModule {
     private void initializeTools() {
         // 清空现有工具
         toolsRegistry.clearAll();
-        
-        // 注册所有工具
-        toolsRegistry.registerTool("get_pbh_status", "Get PeerBanHelper current status", this::handleGetStatusTool);
-        toolsRegistry.registerTool("get_pbh_config", "Get PeerBanHelper configuration information", this::handleGetConfigTool);
-        toolsRegistry.registerTool("get_peer_statistics", "Get peer ban statistics and counts", this::handleGetPeerStatisticsTool);
-        
+
+        McpSchema.JsonSchema noInput = new McpSchema.JsonSchema(
+                "object", // type
+                Map.of(), // properties
+                List.of(), // required
+                null, // additionalProperties
+                Map.of(), // definitions
+                Map.of()  // patternProperties
+        );
+
+        toolsRegistry.registerTool("get_pbh_status", "Get PeerBanHelper current status", noInput, this::handleGetStatusTool);
+        toolsRegistry.registerTool("get_pbh_config", "Get PeerBanHelper configuration information", noInput, this::handleGetConfigTool);
+        toolsRegistry.registerTool("get_peer_statistics", "Get peer ban statistics and counts", noInput, this::handleGetPeerStatisticsTool);
+
         log.info("Registered {} MCP tools", toolsRegistry.getToolCount());
     }
 
@@ -87,14 +95,14 @@ public final class MCPController extends AbstractFeatureModule {
         javalinWebContainer.javalin()
                 .post("/api/mcp", this::handleMCPRequest, Role.ANYONE)
                 .get("/api/mcp", this::handleMCPInfo, Role.ANYONE);
-        
+
         // 兼容性端点
         javalinWebContainer.javalin()
                 .get("/api/mcp/info", this::handleMCPInfo, Role.ANYONE)
                 .get("/api/mcp/tools", this::handleListTools, Role.ANYONE)
                 .post("/api/mcp/tools/invoke", this::handleInvokeTool, Role.ANYONE)
                 .post("/api/mcp/initialize", this::handleInitialize, Role.ANYONE);
-        
+
         log.info("MCP HTTP routes registered");
     }
 
@@ -105,24 +113,24 @@ public final class MCPController extends AbstractFeatureModule {
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> request = ctx.bodyAsClass(Map.class);
-            
+
             String method = (String) request.get("method");
             Object params = request.get("params");
             Object id = request.get("id");
-            
+
             Map<String, Object> response = new java.util.HashMap<>();
             response.put("jsonrpc", "2.0");
             response.put("id", id);
-            
+
             if (method == null) {
                 response.put("error", Map.of(
-                    "code", -32600,
-                    "message", "Invalid Request"
+                        "code", -32600,
+                        "message", "Invalid Request"
                 ));
                 ctx.json(response);
                 return;
             }
-            
+
             try {
                 Object result = switch (method) {
                     case "initialize" -> handleInitializeRPC(params);
@@ -130,27 +138,27 @@ public final class MCPController extends AbstractFeatureModule {
                     case "tools/call" -> handleCallToolRPC(params);
                     default -> throw new RuntimeException("Method not found: " + method);
                 };
-                
+
                 response.put("result", result);
             } catch (Exception e) {
                 response.put("error", Map.of(
-                    "code", -32603,
-                    "message", "Internal error",
-                    "data", e.getMessage()
+                        "code", -32603,
+                        "message", "Internal error",
+                        "data", e.getMessage()
                 ));
             }
-            
+
             ctx.json(response);
-            
+
         } catch (Exception e) {
             log.error("Error handling MCP request", e);
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(Map.of(
-                "jsonrpc", "2.0",
-                "error", Map.of(
-                    "code", -32700,
-                    "message", "Parse error"
-                )
+                    "jsonrpc", "2.0",
+                    "error", Map.of(
+                            "code", -32700,
+                            "message", "Parse error"
+                    )
             ));
         }
     }
@@ -160,15 +168,15 @@ public final class MCPController extends AbstractFeatureModule {
      */
     private Object handleInitializeRPC(Object params) {
         return Map.of(
-            "protocolVersion", "2024-11-05",
-            "capabilities", Map.of(
-                "tools", Map.of("listChanged", false),
-                "logging", Map.of()
-            ),
-            "serverInfo", Map.of(
-                "name", "PeerBanHelper",
-                "version", "1.0.0"
-            )
+                "protocolVersion", "2024-11-05",
+                "capabilities", Map.of(
+                        "tools", Map.of("listChanged", false),
+                        "logging", Map.of()
+                ),
+                "serverInfo", Map.of(
+                        "name", "PeerBanHelper",
+                        "version", "1.0.0"
+                )
         );
     }
 
@@ -188,9 +196,9 @@ public final class MCPController extends AbstractFeatureModule {
         Map<String, Object> toolParams = (Map<String, Object>) params;
         String toolName = (String) toolParams.get("name");
         Map<String, Object> arguments = (Map<String, Object>) toolParams.get("arguments");
-        
+
         final Map<String, Object> finalArguments = arguments != null ? arguments : Map.of();
-        
+
         // 使用注册中心查找并执行工具
         return toolsRegistry.getToolHandler(toolName)
                 .map(handler -> createMCPToolResult(handler.apply(finalArguments)))
@@ -202,8 +210,8 @@ public final class MCPController extends AbstractFeatureModule {
      */
     private Map<String, Object> createMCPToolResult(Map<String, Object> toolResult) {
         return Map.of(
-            "content", toolResult.get("content"),
-            "isError", toolResult.get("isError")
+                "content", toolResult.get("content"),
+                "isError", toolResult.get("isError")
         );
     }
 
@@ -212,11 +220,11 @@ public final class MCPController extends AbstractFeatureModule {
      */
     private Map<String, Object> createMCPErrorResult(String errorMessage) {
         return Map.of(
-            "content", List.of(Map.of(
-                "type", "text",
-                "text", errorMessage
-            )),
-            "isError", true
+                "content", List.of(Map.of(
+                        "type", "text",
+                        "text", errorMessage
+                )),
+                "isError", true
         );
     }
 
@@ -233,7 +241,7 @@ public final class MCPController extends AbstractFeatureModule {
                             "description", tool.description()
                     ))
                     .toList();
-            
+
             Map<String, Object> info = Map.of(
                     "name", "PeerBanHelper",
                     "version", "1.0.0",
@@ -245,7 +253,7 @@ public final class MCPController extends AbstractFeatureModule {
                     ),
                     "availableTools", availableTools
             );
-            
+
             ctx.json(new StdResp(true, "MCP server info", info));
         } catch (Exception e) {
             log.error("Error handling MCP info request", e);
@@ -272,7 +280,7 @@ public final class MCPController extends AbstractFeatureModule {
                             )
                     ))
                     .toList();
-            
+
             ctx.json(new StdResp(true, "Available tools", Map.of("tools", toolsForResponse)));
         } catch (Exception e) {
             log.error("Error handling list tools request", e);
@@ -315,15 +323,15 @@ public final class MCPController extends AbstractFeatureModule {
             String toolName = (String) requestBody.get("name");
             @SuppressWarnings("unchecked")
             Map<String, Object> arguments = (Map<String, Object>) requestBody.get("arguments");
-            
+
             if (toolName == null) {
                 ctx.status(HttpStatus.BAD_REQUEST);
                 ctx.json(new StdResp(false, "Tool name is required", null));
                 return;
             }
-            
+
             final Map<String, Object> finalArguments = arguments != null ? arguments : Map.of();
-            
+
             // 使用注册中心查找并执行工具
             Map<String, Object> result = toolsRegistry.getToolHandler(toolName)
                     .map(handler -> handler.apply(finalArguments))
@@ -334,9 +342,9 @@ public final class MCPController extends AbstractFeatureModule {
                             )),
                             "isError", true
                     ));
-            
+
             ctx.json(new StdResp(true, "Tool executed", result));
-            
+
         } catch (Exception e) {
             log.error("Error handling tool invocation", e);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -354,7 +362,7 @@ public final class MCPController extends AbstractFeatureModule {
                     "webui_port", javalinWebContainer.javalin().port(),
                     "uptime_ms", System.currentTimeMillis() // 简化的运行时间
             );
-            
+
             return Map.of(
                     "content", List.of(Map.of(
                             "type", "text",
@@ -385,7 +393,7 @@ public final class MCPController extends AbstractFeatureModule {
                     "mcp_enabled", true,
                     "token_auth", javalinWebContainer.getToken() != null && !javalinWebContainer.getToken().isBlank()
             );
-            
+
             return Map.of(
                     "content", List.of(Map.of(
                             "type", "text",
@@ -418,7 +426,7 @@ public final class MCPController extends AbstractFeatureModule {
                     "active_sessions", "N/A (not yet integrated)",
                     "ban_rules_count", "N/A (not yet integrated)"
             );
-            
+
             return Map.of(
                     "content", List.of(Map.of(
                             "type", "text",
