@@ -72,9 +72,9 @@ public final class IPDB implements AutoCloseable {
         this.autoUpdate = autoUpdate;
         this.httpUtil = httpUtil;
 //        this.userAgent = userAgent;
-        this.httpClient = httpUtil.newBuilder()
+        this.httpClient = httpUtil.addProgressTracker(httpUtil.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
-                .readTimeout(Duration.ofSeconds(30))
+                .readTimeout(Duration.ofMinutes(1))
                 .callTimeout(Duration.ofMinutes(2))
                 .followRedirects(true)
                 .authenticator((route, response) -> {
@@ -83,7 +83,7 @@ public final class IPDB implements AutoCloseable {
                     }
                     String credential = Credentials.basic(accountId, licenseKey);
                     return response.request().newBuilder().header("Authorization", credential).build();
-                })
+                }))
                 .build();
         if (needUpdateMMDB(mmdbCityFile)) {
             updateMMDB(databaseCity, mmdbCityFile);
@@ -310,23 +310,14 @@ public final class IPDB implements AutoCloseable {
     private CompletableFuture<Void> downloadFile(List<IPDBDownloadSource> mirrorList, Path path, String databaseName) {
         return CompletableFuture.runAsync(() -> {
             IPDBDownloadSource mirror = mirrorList.removeFirst();
-            var progressDialog = Main.getGuiManager().createProgressDialog(tlUI(Lang.IPDB_DOWNLOAD_TITLE, databaseName), tlUI(Lang.IPDB_DOWNLOAD_DESCRIPTION, databaseName), tlUI(Lang.GUI_COMMON_CANCEL), null, false);
-            progressDialog.show();
-            progressDialog.setComment(mirror.getIPDBUrl());
-
             // 创建带有进度追踪器的 HTTP 客户端
-            var progressTrackingHttpClient = httpUtil.addProgressTracker(httpUtil.newBuilder())
-                    .connectTimeout(Duration.ofSeconds(15))
-                    .readTimeout(Duration.ofMinutes(1))
-                    .callTimeout(Duration.ofMinutes(3))
-                    .build();
 
             Request request = new Request.Builder()
                     .url(mirror.getIPDBUrl())
                     .get()
                     .build();
 
-            try (Response response = progressTrackingHttpClient.newCall(request).execute()) {
+            try (Response response = httpClient.newCall(request).execute()) {
                 if (response.code() == 200) {
                     if (mirror.supportXzip()) {
                         try {
@@ -340,7 +331,6 @@ public final class IPDB implements AutoCloseable {
                                 }
                             }
                             Files.move(tmp.toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                            progressDialog.close();
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         } catch (IOException e) {
@@ -351,7 +341,6 @@ public final class IPDB implements AutoCloseable {
                         try (var source = response.body().source();
                              var sink = Okio.buffer(Okio.sink(path))) {
                             sink.writeAll(source);
-                            progressDialog.close();
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         }
@@ -360,14 +349,11 @@ public final class IPDB implements AutoCloseable {
 
                 if (!mirrorList.isEmpty()) {
                     log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
-                    progressDialog.close();
                     downloadFile(mirrorList, path, databaseName).join();
                     return;
                 }
-                progressDialog.close();
                 log.error(tlUI(Lang.IPDB_UPDATE_FAILED, databaseName, response.code() + " - " + response.body().string()));
             } catch (Exception e) {
-                progressDialog.close();
                 if (!mirrorList.isEmpty()) {
                     log.warn(tlUI(Lang.IPDB_RETRY_WITH_BACKUP_SOURCE));
                     downloadFile(mirrorList, path, databaseName).join();
