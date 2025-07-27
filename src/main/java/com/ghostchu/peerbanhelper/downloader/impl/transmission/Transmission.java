@@ -95,7 +95,7 @@ public final class Transmission extends AbstractDownloader {
 
     @Override
     public @NotNull List<DownloaderFeatureFlag> getFeatureFlags() {
-        return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS);
+        return List.of(DownloaderFeatureFlag.UNBAN_IP, DownloaderFeatureFlag.TRAFFIC_STATS ,DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
     }
 
     @Override
@@ -328,6 +328,30 @@ public final class Transmission extends AbstractDownloader {
         TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
         if (!sessionSetResp.isSuccess()) {
             log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), sessionSetResp.getResult()));
+        }
+    }
+
+    @Override
+    public int getBTProtocolPort() {
+        RqSessionGet sessionGet = new RqSessionGet(List.of(Fields.PEER_PORT));
+        TypedResponse<RsSessionGet> sessionGetResp = client.execute(sessionGet);
+        if (sessionGetResp.isSuccess()) {
+            RsSessionGet args = sessionGetResp.getArgs();
+            return args.getPeerPort();
+        }
+        log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT, getName(), sessionGetResp.getResult()));
+        return -1;
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+        RqSessionSet set = RqSessionSet.builder()
+                .peerPortRandomOnStart(false)
+                .peerPort(port)
+                .build();
+        TypedResponse<RsSessionGet> sessionSetResp = client.execute(set);
+        if (!sessionSetResp.isSuccess()) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT, getName(), sessionSetResp.getResult()));
         }
     }
 

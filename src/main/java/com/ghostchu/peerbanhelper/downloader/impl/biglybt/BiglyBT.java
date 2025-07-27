@@ -13,7 +13,9 @@ import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.BiglyBTTorrent
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.ConnectorData;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.BanListReplacementBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.SetListenPort;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.clientbound.SetSpeedLimiterBean;
+import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.CurrentListenPort;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.CurrentSpeedLimiterBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.bean.serverbound.MetadataCallbackBean;
 import com.ghostchu.peerbanhelper.downloader.impl.biglybt.network.wrapper.DownloadRecord;
@@ -134,6 +136,39 @@ public final class BiglyBT extends AbstractDownloader {
             throw new IllegalStateException(e);
         }
 
+    }
+
+    @Override
+    public int getBTProtocolPort() {
+        Request request = new Request.Builder().url(apiEndpoint + "/listenport").get().build();
+        try (Response resp = httpClient.newCall(request).execute()) {
+            if (!resp.isSuccessful()) {
+                throw new DownloaderRequestException(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), resp.code(), resp.body()));
+            }
+            CurrentListenPort listenPort = JsonUtil.getGson().fromJson(resp.body().string(), CurrentListenPort.class);
+            return listenPort.getPort();
+        } catch (IOException e) {
+            throw new DownloaderRequestException(e);
+        }
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+        SetListenPort bean = new SetListenPort(port);
+        RequestBody requestBody = RequestBody.create(JsonUtil.getGson().toJson(bean), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + "/listenport")
+                .post(requestBody)
+                .build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), response.code(), response.body().string()));
+                throw new DownloaderRequestException("Save BiglyBT ListenPort error: statusCode=" + response.code());
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), "N/A", e.getMessage()), e);
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override

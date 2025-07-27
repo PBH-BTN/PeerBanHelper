@@ -107,6 +107,7 @@ public final class BitComet extends AbstractDownloader {
         List<DownloaderFeatureFlag> flags = new ArrayList<>(1);
         if (is211Newer()) {
             flags.add(DownloaderFeatureFlag.UNBAN_IP);
+            flags.add(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT);
         }
         return flags;
     }
@@ -526,7 +527,9 @@ public final class BitComet extends AbstractDownloader {
 
     @Override
     public void close() {
-
+        if(!parallelService.isShutdown()) {
+            parallelService.shutdownNow();
+        }
     }
 
     @Override
@@ -601,6 +604,65 @@ public final class BitComet extends AbstractDownloader {
             }
         } catch (Exception e) {
             log.error(tlUI(Lang.DOWNLOADER_FAILED_SET_SPEED_LIMITER, getName(), e.getClass().getName() + ": " + e.getMessage()), e);
+        }
+    }
+
+    @Override
+    public int getBTProtocolPort() {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(map), MediaType.get("application/json"));
+            Request request = new Request.Builder()
+                    .url(apiEndpoint + BCEndpoint.GET_CONNECTION_CONFIG.getEndpoint())
+                    .post(requestBody)
+                    .header("Authorization", "Bearer " + this.deviceToken)
+                    .build();
+
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT, getName(), response.code() + " " + response.body().string()));
+                    return -1;
+                }
+                var configResp = JsonUtil.standard().fromJson(response.body().string(), BCConnectionConfigResponse.class);
+                if (!"ok".equalsIgnoreCase(configResp.getErrorCode())) {
+                    log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_SPEED_LIMITER, getName(), configResp.getErrorMessage()));
+                }
+                return configResp.getConnectionConfig().getListenPortTcp();
+            }
+        } catch (Exception e) {
+            log.error(tlUI(Lang.DOWNLOADER_FAILED_RETRIEVE_BT_PROTOCOL_PORT, getName(), e.getClass().getName() + ": " + e.getMessage()), e);
+            return -1;
+        }
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+        Map<String, Object> settings = new HashMap<>() {{
+            put("connection_config", new HashMap<>() {{
+                put("enable_listen_tcp", true);
+                put("listen_port_tcp", port);
+            }});
+        }};
+
+        RequestBody requestBody = RequestBody.create(JsonUtil.standard().toJson(settings), MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url(apiEndpoint + BCEndpoint.SET_CONNECTION_CONFIG.getEndpoint())
+                .post(requestBody)
+                .header("Authorization", "Bearer " + this.deviceToken)
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error(tlUI(Lang.DOWNLOADER_BC_CONFIG_IP_FILTER_FAILED));
+                return;
+            }
+            var configResp = JsonUtil.standard().fromJson(response.body().string(), BCConfigSetResponse.class);
+            if (!"ok".equalsIgnoreCase(configResp.getErrorCode())) {
+                log.error(tlUI(Lang.DOWNLOADER_FAILED_SAVE_BT_PROTOCOL_PORT));
+                throw new IllegalStateException("Failed to save BitComet BT Protocol Port: " + configResp.getErrorMessage());
+            }
+        }catch (Exception e){
+            throw new IllegalStateException("Failed to save BitComet BT Protocol Port",e);
         }
     }
 

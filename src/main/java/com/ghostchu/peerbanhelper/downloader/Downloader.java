@@ -214,4 +214,7 @@ public interface Downloader extends AutoCloseable {
      * @param speedLimiter 限速配置
      */
     void setSpeedLimiter(@Nullable DownloaderSpeedLimiter speedLimiter);
+
+    int getBTProtocolPort();
+    void setBTProtocolPort(int port);
 }
