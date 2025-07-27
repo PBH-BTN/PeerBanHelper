@@ -73,6 +73,7 @@ public final class JavalinWebContainer {
                     c.showJavalinBanner = false;
                     c.jsonMapper(gsonMapper);
                     c.useVirtualThreads = true;
+                    c.startupWatcherEnabled = false;
                     if (Main.getMainConfig().getBoolean("server.allow-cors")
                             || ExternalSwitch.parse("pbh.allowCors") != null
                     ) {
