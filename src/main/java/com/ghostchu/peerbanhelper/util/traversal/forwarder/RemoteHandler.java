@@ -32,6 +32,8 @@ public class RemoteHandler extends ChannelInboundHandlerAdapter {
             if (msg instanceof ByteBuf buf) {
                 buf.release();
             }
+            log.debug("Client channel inactive, closing remote connection: {}", connectionInfo.getRemoteAddress());
+            ctx.close();
         }
     }
     
@@ -45,7 +47,20 @@ public class RemoteHandler extends ChannelInboundHandlerAdapter {
     
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.error("Remote handler exception: {}", connectionInfo.getRemoteAddress(), cause);
+        // 对于常见的网络连接重置异常，使用debug级别日志
+        if (cause instanceof java.net.SocketException && 
+            cause.getMessage() != null && 
+            (cause.getMessage().contains("Connection reset") || 
+             cause.getMessage().contains("Connection aborted"))) {
+            log.debug("Remote connection reset: {}", connectionInfo.getRemoteAddress());
+        } else {
+            log.error("Remote handler exception: {}", connectionInfo.getRemoteAddress(), cause);
+        }
+        
+        // 确保客户端连接也被关闭
+        if (clientChannel.isActive()) {
+            clientChannel.close();
+        }
         ctx.close();
     }
 }

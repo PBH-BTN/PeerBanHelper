@@ -18,7 +18,8 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
     private final SocketForwarder forwarder;
     private final ConnectionInfo connectionInfo;
     
-    private Channel remoteChannel;
+    private volatile Channel remoteChannel;
+    private volatile boolean remoteConnected = false;
     
     public ProxyHandler(String remoteHost, int remotePort, SocketForwarder forwarder, ConnectionInfo connectionInfo) {
         this.remoteHost = remoteHost;
@@ -35,6 +36,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000) // 10秒连接超时
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
@@ -47,17 +49,24 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
         
         future.addListener((ChannelFutureListener) channelFuture -> {
             if (channelFuture.isSuccess()) {
+                remoteConnected = true;
                 log.debug("Connected to remote successfully {}:{}", remoteHost, remotePort);
+                // 连接成功后，触发读取操作
+                ctx.channel().config().setAutoRead(true);
             } else {
                 log.error("Unable to connect to remote {}:{}", remoteHost, remotePort, channelFuture.cause());
+                remoteConnected = false;
                 ctx.channel().close();
             }
         });
+        
+        // 暂停自动读取，等待远程连接建立
+        ctx.channel().config().setAutoRead(false);
     }
     
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (remoteChannel != null && remoteChannel.isActive()) {
+        if (remoteConnected && remoteChannel != null && remoteChannel.isActive()) {
             // 将客户端数据转发到远程服务器（上传）
             if (msg instanceof ByteBuf buf) {
                 int bytes = buf.readableBytes();
@@ -65,16 +74,19 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
             }
             remoteChannel.writeAndFlush(msg);
         } else {
-            // 如果远程连接未建立或已关闭，释放消息
+            // 如果远程连接未建立或已关闭，释放消息并关闭客户端连接
             if (msg instanceof ByteBuf buf) {
                 buf.release();
             }
+            log.warn("Remote connection not ready, closing client connection: {}", connectionInfo.getClientAddress());
+            ctx.channel().close();
         }
     }
     
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         log.debug("Client disconnected: {}", connectionInfo.getClientAddress());
+        remoteConnected = false;
         if (remoteChannel != null && remoteChannel.isActive()) {
             remoteChannel.close();
         }
@@ -83,7 +95,16 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
     
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.debug("Exception in proxy handler: {}",connectionInfo.getRemoteAddress().getHostString()+":"+connectionInfo.getRemoteAddress().getPort(), cause);
+        // 对于常见的网络连接重置异常，使用debug级别日志
+        if (cause instanceof java.net.SocketException && 
+            cause.getMessage() != null && 
+            (cause.getMessage().contains("Connection reset") || 
+             cause.getMessage().contains("Connection aborted"))) {
+            log.debug("Client connection reset: {}", connectionInfo.getClientAddress());
+        } else {
+            log.debug("Exception in proxy handler: {}", connectionInfo.getRemoteAddress().getHostString()+":"+connectionInfo.getRemoteAddress().getPort(), cause);
+        }
+        remoteConnected = false;
         ctx.close();
     }
 }

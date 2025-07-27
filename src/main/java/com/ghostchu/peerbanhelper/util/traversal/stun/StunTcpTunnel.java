@@ -84,8 +84,8 @@ public class StunTcpTunnel implements AutoCloseable {
                 socket.close();
             } catch (IOException e) {
                 log.debug("Keep-Alive request invalid, tunnel closed.", e);
-                stunListener.onClose(e);
                 valid.set(false);
+                stunListener.onClose(e);
                 try {
                     close();
                 } catch (Exception ignored) {
