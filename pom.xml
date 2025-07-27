@@ -571,7 +571,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.117.Final</version>
+            <version>4.2.3.Final</version>
         </dependency>
     </dependencies>
 </project>
