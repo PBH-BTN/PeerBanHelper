@@ -4,6 +4,7 @@ import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.offbynull.portmapper.mapper.PortMapper;
 import com.offbynull.portmapper.mapper.PortType;
 import com.sun.net.httpserver.HttpServer;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
@@ -12,6 +13,7 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -46,6 +48,12 @@ public class StunTcpTunnel implements AutoCloseable {
     }
 
     public void createMapping(int localPort) throws IOException {
+        if(localPort == 0){
+            @Cleanup
+            var tmpSocket = new ServerSocket(0);
+            localPort = tmpSocket.getLocalPort();
+            tmpSocket.close();
+        }
         pbhPortMapper.mapPort(portMappers , PortType.TCP, localPort).join();
         StunClient stunClient = new StunClient(STUN_SERVERS, "0.0.0.0", localPort, false);
         var mappingResult = stunClient.getMapping();

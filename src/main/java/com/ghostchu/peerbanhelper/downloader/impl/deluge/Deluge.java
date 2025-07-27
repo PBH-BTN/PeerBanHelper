@@ -267,6 +267,16 @@ public final class Deluge extends AbstractDownloader {
     }
 
     @Override
+    public int getBTProtocolPort() {
+        return 0;
+    }
+
+    @Override
+    public void setBTProtocolPort(int port) {
+
+    }
+
+    @Override
     public void close() {
 
     }

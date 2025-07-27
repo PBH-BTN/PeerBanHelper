@@ -59,7 +59,7 @@ public class SocketForwarder {
                             ConnectionInfo connectionInfo = new ConnectionInfo(clientAddress, localAddress, remoteAddress);
                             
                             activeConnections.put(clientAddress.getHostString()+":"+clientAddress.getPort(), connectionInfo);
-                            log.debug("Connection created: {}", connectionInfo.getConnectionStatus());
+                            log.info("Connection created: {}", connectionInfo.getConnectionStatus());
                             
                             ch.pipeline().addLast(new ProxyHandler(remoteHost, remotePort, SocketForwarder.this, connectionInfo));
                         }

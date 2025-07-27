@@ -69,7 +69,9 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
         synchronized (scanMappersLock) {
             try {
                 if (this.mappers != null) return;
+                log.info(tlUI(Lang.PORTMAPPER_SCANNING));
                 this.mappers = PortMapperFactory.discover(networkBus, processBus);
+                log.info(tlUI(Lang.PORTMAPPER_SCANNED, mappers.size()));
             } catch (InterruptedException exception) {
                 log.warn("Unable to lookup port mappers", exception);
             }
@@ -133,7 +135,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                         anyExternal = true;
                     }
                     var mappedPort = entry.getValue();
-                    log.info(tlUI(Lang.PORT_MAPPER_PORT_MAPPED, entry.getKey().toString(), mappedPort.getInternalPort(), mappedPort.getPortType().name(), mappedPort.getExternalPort(), mappedPort.getExternalAddress().getHostAddress(), mappedPort.getLifetime()));
+                    log.info(tlUI(Lang.PORT_MAPPER_PORT_MAPPED, entry.getKey().getSourceAddress().getHostAddress(), mappedPort.getInternalPort(), mappedPort.getPortType().name(), mappedPort.getExternalPort(), mappedPort.getExternalAddress().getHostAddress(), mappedPort.getLifetime()));
                 }
                 if (!anyExternal) {
                     log.warn(tlUI(Lang.PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS));

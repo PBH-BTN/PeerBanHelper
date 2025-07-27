@@ -696,3 +696,14 @@ BTN_HEARTBEAT_UPDATING: "[BTN 网络] 计划任务正在向 BTN 网络更新心�
 BTN_HEARTBEAT_UPDATED: "[BTN 网络] 已通过 {} 次请求向 BTN 网络更新心跳信息。"
 BTN_HEARTBEAT_SUCCESS: "已成功与服务器交换心跳信息"
 BTN_HEARTBEAT_FAILED: "没有任何网路接口可用来发送心跳信息，所有网络请求均已失败"
+
+PORTMAPPER_SCANNING: "[PortMapper] 正在后台探测网络接口上可用的 UPnP-IGD/NAT-PMP/PCP 设备，可能需要一些时间……"
+PORTMAPPER_SCANNED: "[PortMapper] 共找到 {} 个 UPnP-IGD/NAT-PMP/PCP 设备，服务已启动"
+
+BTSTUN_RESTART: "[BT-STUN] 正在启动服务，目标下载器：{}，请稍等……"
+BTSTUN_ON_TUNNEL_CLOSE: "[BT-STUN] 下载器 {} 的隧道已关闭"
+BTSTUN_UNABLE_START: "[BT-STUN] 下载器 {} 的隧道创建失败"
+BTSTUN_ON_TUNNEL_CREATED: "[BT-STUN] 下载器 {} 的隧道已创建，本地端点: {}, 远程端点: {}"
+BTSTUN_FORWARDER_EXCEPTION: "[BT-STUN] 下载器 {} 的隧道转发器创建出错，错误信息: {}"
+BTSTUN_MODIFY_DOWNLOADER_BT_PORT: "[BT-STUN] 正在修改下载器 {} 的 BT 监听端口为 {}，请稍等……"
+BTSTUN_TUNNEL_CREATE_SUCCESSFULLY: "[BT-STUN] 下载器 {} 的隧道已成功创建: {} <-> {} <-> {}"

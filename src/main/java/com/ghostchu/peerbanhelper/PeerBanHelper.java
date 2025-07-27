@@ -20,9 +20,11 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.LazyLoad;
+import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunInstance;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -80,6 +82,8 @@ public class PeerBanHelper implements Reloadable {
     private CrashManager crashManager;
     @Autowired
     private HTTPUtil httpUtil;
+    @Autowired
+    private PBHPortMapper pBHPortMapper;
 
 
     public PeerBanHelper() {
@@ -111,7 +115,6 @@ public class PeerBanHelper implements Reloadable {
         postCompatibilityCheck();
         registerModules();
         sendSnapshotAlert();
-        runTestCode();
         downloaderServer.load();
         Main.getGuiManager().taskbarControl().updateProgress(null, TaskbarState.OFF, 0.0f);
         crashManager.putRunningFlag();
@@ -124,6 +127,7 @@ public class PeerBanHelper implements Reloadable {
                 WorkingSetManagerFactory.trimMemory();
             }
         });
+        runTestCode();
     }
 
     private void checkKnownCrashes() {
@@ -190,6 +194,15 @@ public class PeerBanHelper implements Reloadable {
             return;
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
+
+        Thread.startVirtualThread(()->{
+            try {
+                Thread.sleep(15000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            downloaderManager.forEach(d-> new BTStunInstance(pBHPortMapper, d));
+        });
     }
 
 
