@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.util.traversal;
+package com.ghostchu.peerbanhelper.util.traversal.stun;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

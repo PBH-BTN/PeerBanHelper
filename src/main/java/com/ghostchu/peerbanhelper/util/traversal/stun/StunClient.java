@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.util.traversal;
+package com.ghostchu.peerbanhelper.util.traversal.stun;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -200,7 +200,7 @@ public class StunClient {
             throw new IOException("Invalid STUN response type: " + Integer.toHexString(messageType));
         }
         
-        buf.getShort(); // messageLength (跳过)
+        buf.getShort(); // messageLength
         int magicCookie = buf.getInt();
         if (magicCookie != 0x2112A442) {
             throw new IOException("Invalid magic cookie");

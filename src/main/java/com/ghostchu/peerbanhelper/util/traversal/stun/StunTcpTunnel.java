@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.util.traversal;
+package com.ghostchu.peerbanhelper.util.traversal.stun;
 
 import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.offbynull.portmapper.mapper.PortMapper;
@@ -42,13 +42,10 @@ public class StunTcpTunnel implements AutoCloseable {
                 .fastFallback(false)
                 .retryOnConnectionFailure(false)
                 .build();
-        System.out.println("Scanning port mappers...");
         this.portMappers = pbhPortMapper.getMappers();
-        System.out.println("Found " + portMappers.size() + " port mappers.");
     }
 
     public void createMapping(int localPort) throws IOException {
-        System.out.println("Port mapping...");
         pbhPortMapper.mapPort(portMappers , PortType.TCP, localPort).join();
         StunClient stunClient = new StunClient(STUN_SERVERS, "0.0.0.0", localPort, false);
         var mappingResult = stunClient.getMapping();

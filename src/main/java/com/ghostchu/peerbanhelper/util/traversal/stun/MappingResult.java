@@ -1,4 +1,4 @@
-package com.ghostchu.peerbanhelper.util.traversal;
+package com.ghostchu.peerbanhelper.util.traversal.stun;
 
 import java.net.InetSocketAddress;
 
