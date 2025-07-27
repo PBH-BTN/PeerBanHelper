@@ -562,5 +562,10 @@
             <artifactId>ice4j</artifactId>
             <version>3.2-9-gb64c86f</version>
         </dependency>
+        <dependency>
+            <groupId>com.offbynull.portmapper</groupId>
+            <artifactId>portmapper</artifactId>
+            <version>2.0.6</version>
+        </dependency>
     </dependencies>
 </project>

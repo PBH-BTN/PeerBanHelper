@@ -1,5 +1,8 @@
 package com.ghostchu.peerbanhelper.util.traversal;
 
+import com.ghostchu.peerbanhelper.util.PBHPortMapper;
+import com.offbynull.portmapper.mapper.PortMapper;
+import com.offbynull.portmapper.mapper.PortType;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Dispatcher;
@@ -27,8 +30,11 @@ public class StunTcpTunnel implements AutoCloseable {
     private final StunListener stunListener;
     private final ScheduledExecutorService keepAliveService = Executors.newScheduledThreadPool(1, runnable -> Thread.ofVirtual().name("StunTcpTunnel-KeepAlive").unstarted(runnable));
     private final AtomicBoolean valid = new AtomicBoolean(false);
+    private final PBHPortMapper pbhPortMapper;
+    private final List<PortMapper> portMappers;
 
-    public StunTcpTunnel(StunListener stunListener) {
+    public StunTcpTunnel(PBHPortMapper pbhPortMapper, StunListener stunListener) {
+        this.pbhPortMapper = pbhPortMapper;
         this.stunListener = stunListener;
         this.okHttpClient = new OkHttpClient.Builder()
                 .dispatcher(new Dispatcher(Executors.newVirtualThreadPerTaskExecutor()))
@@ -36,10 +42,15 @@ public class StunTcpTunnel implements AutoCloseable {
                 .fastFallback(false)
                 .retryOnConnectionFailure(false)
                 .build();
+        System.out.println("Scanning port mappers...");
+        this.portMappers = pbhPortMapper.getMappers();
+        System.out.println("Found " + portMappers.size() + " port mappers.");
     }
 
-    public void createMapping() throws IOException {
-        StunClient stunClient = new StunClient(STUN_SERVERS, "0.0.0.0", false);
+    public void createMapping(int localPort) throws IOException {
+        System.out.println("Port mapping...");
+        pbhPortMapper.mapPort(portMappers , PortType.TCP, localPort).join();
+        StunClient stunClient = new StunClient(STUN_SERVERS, "0.0.0.0", localPort, false);
         var mappingResult = stunClient.getMapping();
         var interResult = mappingResult.interAddress();
         var outerResult = mappingResult.outerAddress();
@@ -81,7 +92,7 @@ public class StunTcpTunnel implements AutoCloseable {
     private boolean testMapping(InetSocketAddress interResult, InetSocketAddress outerResult) throws IOException {
         HttpServer httpServer = HttpServer.create(interResult, 0);
         httpServer.createContext("/test", exchange -> {
-            exchange.sendResponseHeaders(204, 0);
+            exchange.sendResponseHeaders(204, -1);
             exchange.close();
         });
         httpServer.start();

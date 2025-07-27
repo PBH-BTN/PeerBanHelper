@@ -15,6 +15,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 public class StunClient {
 
+    private final int sourcePort;
+
     public static class ServerUnavailable extends IOException {
         public ServerUnavailable(String message, Throwable cause) {
             super(message, cause);
@@ -30,12 +32,13 @@ public class StunClient {
     private DatagramSocket udpSocket;
     private Socket tcpSocket;
 
-    public StunClient(List<String> stunServerList, String sourceHost, boolean udp) {
+    public StunClient(List<String> stunServerList, String sourceHost, int localPort, boolean udp) {
         if (stunServerList == null || stunServerList.isEmpty()) {
             throw new IllegalArgumentException("STUN server list cannot be empty");
         }
         this.stunServerList = stunServerList;
         this.sourceHost = sourceHost;
+        this.sourcePort = localPort;
         this.udp = udp;
     }
     
@@ -43,8 +46,7 @@ public class StunClient {
      * 获取NAT映射
      */
     public MappingResult getMapping() throws IOException {
-        String firstServer = stunServerList.get(0);
-        
+        String firstServer = stunServerList.getFirst();
         while (true) {
             try {
                 return getMappingFromServer();
@@ -90,7 +92,7 @@ public class StunClient {
             // 按照Natter的做法，不绑定具体端口，让系统自动分配
             // 这样可以避免"Already bound"错误
             InetAddress bindAddress = InetAddress.getByName(sourceHost);
-            socket.bind(new InetSocketAddress(bindAddress, 0));
+            socket.bind(new InetSocketAddress(bindAddress, sourcePort));
             
             // 连接到STUN服务器
             socket.connect(new InetSocketAddress(stunHost, stunPort));
