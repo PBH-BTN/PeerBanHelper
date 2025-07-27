@@ -556,5 +556,11 @@
             <artifactId>mcp</artifactId>
             <version>0.10.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jitsi/ice4j -->
+        <dependency>
+            <groupId>org.jitsi</groupId>
+            <artifactId>ice4j</artifactId>
+            <version>3.2-9-gb64c86f</version>
+        </dependency>
     </dependencies>
 </project>
