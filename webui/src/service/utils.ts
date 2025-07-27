@@ -16,7 +16,7 @@ export function getCommonHeader(): Headers {
   headers.set('X-TimeZone', dayjs.tz.guess())
   const { authToken } = useEndpointStore()
 
-  headers.set('Authorization', `Bearer ${authToken}`)
+  if (process.env.NODE_ENV !== 'production') headers.set('Authorization', `Bearer ${authToken}`)
 
   return headers
 }
