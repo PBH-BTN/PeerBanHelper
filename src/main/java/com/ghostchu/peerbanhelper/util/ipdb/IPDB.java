@@ -334,7 +334,7 @@ public final class IPDB implements AutoCloseable {
                             log.info(tlUI(Lang.IPDB_UPDATE_SUCCESS, databaseName));
                             return;
                         } catch (IOException e) {
-                            log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED));
+                            log.warn(tlUI(Lang.IPDB_UNGZIP_FAILED, databaseName));
                         }
                     } else {
                         // 直接保存文件
