@@ -139,7 +139,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                     log.warn(tlUI(Lang.PORT_MAPPER_PORT_MAPPED_BUT_INTERNAL_ADDRESS));
                 }
                 return mappedPorts.values().stream().findFirst().orElse(null);
-            });
+            }, Executors.newVirtualThreadPerTaskExecutor());
         } catch (Exception e) {
             log.error(tlUI(Lang.PORT_MAPPER_PORT_MAPPING_FAILED, "N/A", localPort, portType.name()), e);
             return CompletableFuture.completedFuture(null);
