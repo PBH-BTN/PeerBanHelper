@@ -211,7 +211,7 @@ public class PeerBanHelper implements Reloadable {
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
                     databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), httpUtil);
         } catch (Exception e) {
-            log.info(tlUI(Lang.IPDB_INVALID, e));
+            log.info(tlUI(Lang.IPDB_INVALID),e );
         }
     }
 
