@@ -97,14 +97,17 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
         connectionStats.remove(socketAddress);
     }
 
+    @Override
     public long getEstablishedConnections() {
         return connectionMap.size();
     }
 
+    @Override
     public ConnectionTable getConnectionMap() {
         return connectionMap;
     }
 
+    @Override
     public Map<SocketAddress, ConnectionStatistics> getConnectionStats() {
         return connectionStats;
     }
