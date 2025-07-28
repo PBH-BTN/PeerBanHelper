@@ -73,7 +73,6 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
         try {
             // 连接到远程服务器
             remoteSocket = new Socket();
-            remoteSocket.bind(new InetSocketAddress(getRandomLocalIP(), 0));
             remoteSocket.connect(new InetSocketAddress(remoteHost, remotePort), 5000);
             // 创建两个线程进行双向数据转发
             Socket finalRemoteSocket = remoteSocket;
@@ -90,13 +89,6 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
             closeSocket(clientSocket);
             closeSocket(remoteSocket);
         }
-    }
-
-    private String getRandomLocalIP() {
-        int a = ThreadLocalRandom.current().nextInt(0, 255);
-        int b = ThreadLocalRandom.current().nextInt(0, 255);
-        int c = ThreadLocalRandom.current().nextInt(0, 255);
-        return "127." + a + "." + b + "." + c; // 使用本地回环地址的变体区分不同 Peer
     }
 
     private void onSocketClosed(SocketAddress socketAddress, Exception e) {
