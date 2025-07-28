@@ -17,10 +17,14 @@ public class SocketCopyWorker implements Runnable, AutoCloseable {
         this.to = to;
     }
 
-    public Thread start() {
+    public Thread startAsync() {
         return Thread.ofVirtual()
                 .name("SocketCopy-" + from.getRemoteSocketAddress() + " -> " + to.getRemoteSocketAddress())
                 .start(this);
+    }
+
+    public void startSync() {
+        run();
     }
 
     @Override

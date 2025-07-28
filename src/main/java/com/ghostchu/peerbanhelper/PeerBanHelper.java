@@ -24,7 +24,6 @@ import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
-import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunInstance;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -195,9 +194,9 @@ public class PeerBanHelper implements Reloadable {
         }
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
 
-        Thread.startVirtualThread(()->{
-            downloaderManager.forEach(d-> new BTStunInstance(pBHPortMapper, d));
-        });
+//        Thread.startVirtualThread(()->{
+//            downloaderManager.forEach(d-> new BTStunInstance(pBHPortMapper, d));
+//        });
     }
 
 

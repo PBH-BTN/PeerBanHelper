@@ -132,3 +132,11 @@ performance:
   # Enable EcoQoS API on Windows Platform for power saving, for exchange, the program performance will reduce and cronjobs may delay
   # https://devblogs.microsoft.com/performance-diagnostics/introducing-ecoqos/
   windows-ecoqos-api: true
+
+stun:
+  servers:
+    - "turn.cloudflare.com:3478"
+    - "stun.nextcloud.com:3478"
+    - "stun.sipnet.com:3478"
+  sourceHost: "0.0.0.0"
+  availableTest: true

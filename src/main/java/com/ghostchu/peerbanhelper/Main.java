@@ -104,7 +104,7 @@ public class Main {
     public static void main(String[] args) {
         bootSince = System.currentTimeMillis();
         startupArgs = args;
-        System.setProperty("sun.net.useExclusiveBind", "false"); // Fuck JDK on Windows
+        System.setProperty("sun.net.useExclusiveBind", "false");
         setupReloading();
         setupConfDirectory(args);
         loadFlagsProperties();

@@ -86,7 +86,6 @@ public class StunClient {
         String[] parts = serverStr.split(":");
         String stunHost = parts[0];
         int stunPort = parts.length > 1 ? Integer.parseInt(parts[1]) : 3478;
-        
         if (udp) {
             return getMappingUdp(stunHost, stunPort);
         } else {
@@ -95,41 +94,26 @@ public class StunClient {
     }
     
     private MappingResult getMappingTcp(String stunHost, int stunPort) throws IOException {
-        try (Socket socket = new Socket()) {
-            socket.setReuseAddress(true);
-            socket.setTcpNoDelay(true);
-            socket.setSoTimeout(3000);
-            
-            // 按照Natter的做法，不绑定具体端口，让系统自动分配
-            // 这样可以避免"Already bound"错误
-            InetAddress bindAddress = InetAddress.getByName(sourceHost);
-            socket.bind(new InetSocketAddress(bindAddress, sourcePort));
-            
+        try (Socket socket = StunSocketTool.getSocket()) {
+            socket.setSoLinger(true, 0);
+            socket.bind(new InetSocketAddress(sourceHost, sourcePort));
             // 连接到STUN服务器
             socket.connect(new InetSocketAddress(stunHost, stunPort));
-            
             InetSocketAddress innerAddr = (InetSocketAddress) socket.getLocalSocketAddress();
-            
             // 构造STUN Binding Request
             byte[] request = createStunBindingRequest();
             socket.getOutputStream().write(request);
             socket.getOutputStream().flush();
-            
             // 读取响应
             byte[] buffer = new byte[1500];
             int bytesRead = socket.getInputStream().read(buffer);
-            
             if (bytesRead < 20) {
                 throw new ServerUnavailable("Invalid STUN response length", null);
             }
-            
             // 解析响应
             InetSocketAddress outerAddr = parseStunResponse(buffer, bytesRead);
-
             log.debug("STUN TCP: outer={}, inner={}, stunHost={}, stunPort={}", outerAddr, innerAddr,  stunHost, stunPort);
-            
             return new MappingResult(innerAddr, outerAddr);
-            
         } catch (IOException e) {
             throw new ServerUnavailable("STUN server unavailable: " + e.getMessage(), e);
         }
