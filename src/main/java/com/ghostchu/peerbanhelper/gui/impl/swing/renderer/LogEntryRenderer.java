@@ -4,13 +4,11 @@ import com.ghostchu.peerbanhelper.util.logger.LogEntry;
 
 import javax.swing.*;
 import java.awt.*;
-import java.lang.ref.SoftReference;
 
-public class LogEntryRenderer extends JTextArea implements ListCellRenderer<SoftReference<LogEntry>> {
+public class LogEntryRenderer extends JTextArea implements ListCellRenderer<LogEntry> {
     private static final Color errorBackground = new Color(255, 204, 187);
     private static final Color warnBackground = new Color(255, 238, 204);
     private static final Color debugBackground = new Color(204, 255, 204); // 可选：信息级别的背景色
-    private static final String oomLogRemoved = "<out of memory, logs has been recycled>";
 
     public LogEntryRenderer() {
         setLineWrap(true);       // 启用自动换行
@@ -19,13 +17,7 @@ public class LogEntryRenderer extends JTextArea implements ListCellRenderer<Soft
     }
 
     @Override
-    public Component getListCellRendererComponent(JList<? extends SoftReference<LogEntry>> list, SoftReference<LogEntry> entry, int index, boolean isSelected, boolean cellHasFocus) {
-        var value = entry.get();
-        if (value == null) {
-            setText(oomLogRemoved);
-            return this;
-        }
-
+    public Component getListCellRendererComponent(JList<? extends LogEntry> list, LogEntry value, int index, boolean isSelected, boolean cellHasFocus) {
         setText(value.content().trim()); // 设置单元格内容
 
         if (isSelected) {

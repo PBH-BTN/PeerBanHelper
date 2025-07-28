@@ -19,12 +19,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.lang.ref.SoftReference;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
@@ -115,9 +113,7 @@ public final class PBHLogsController extends AbstractFeatureModule {
         if (offset > JListAppender.getSeq().longValue()) {
             offset = 0; // PBH 重启，但是 WebUI 没有刷新
         }
-        for (SoftReference<LogEntry> ref : JListAppender.ringDeque) {
-            var logEntry = ref.get();
-            if(logEntry == null) continue;
+        for (LogEntry logEntry : JListAppender.ringDeque) {
             if (logEntry.seq() > offset) {
                 ctx.send(new StdResp(true, null,
                         new WebSocketLogEntryDTO(
@@ -146,14 +142,13 @@ public final class PBHLogsController extends AbstractFeatureModule {
 
     private void handleLogs(Context ctx) {
         ctx.status(200);
-        var list = JListAppender.ringDeque.stream().map(SoftReference::get).filter(Objects::nonNull)
-                .map(e -> new WebSocketLogEntryDTO(
-                         e.time(),
-                         e.thread(),
-                         e.level().name(),
-                         e.content(),
-                         e.seq()
-                 )).toList();
+        var list = JListAppender.ringDeque.stream().map(e -> new WebSocketLogEntryDTO(
+                e.time(),
+                e.thread(),
+                e.level().name(),
+                e.content(),
+                e.seq()
+        )).toList();
         ctx.json(new StdResp(true, null, list));
     }
 
