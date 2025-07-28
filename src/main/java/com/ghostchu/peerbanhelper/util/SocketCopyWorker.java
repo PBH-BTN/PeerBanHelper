@@ -1,20 +1,26 @@
 package com.ghostchu.peerbanhelper.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.function.Consumer;
 
 @Slf4j
 public class SocketCopyWorker implements Runnable, AutoCloseable {
     private final Socket from;
     private final Socket to;
+    private final Consumer<Integer> trafficConsumer;
+    private final Consumer<Exception> closeListener;
 
-    public SocketCopyWorker(Socket from, Socket to) {
+    public SocketCopyWorker(Socket from, Socket to, @Nullable Consumer<Exception> connDisconnectListener, @Nullable Consumer<Integer> trafficConsumer) {
         this.from = from;
         this.to = to;
+        this.closeListener = connDisconnectListener == null ? e -> {} : connDisconnectListener;
+        this.trafficConsumer = trafficConsumer == null ? len -> {} : trafficConsumer;
     }
 
     public Thread startAsync() {
@@ -38,22 +44,30 @@ public class SocketCopyWorker implements Runnable, AutoCloseable {
                 if (len == -1) break;
                 out.write(data, 0, len);
                 out.flush();
+                trafficConsumer.accept(len);
             }
         } catch (IOException e) {
             log.debug("Forward socket from {} to {} is closed due exception", from, to, e);
-            close();
+            closeConnection();
+            closeListener.accept(e);
+        }
+    }
+
+    public void closeConnection() {
+        try {
+            from.close();
+        } catch (IOException e) {
+            log.debug("Failed to close from socket: {}", from, e);
+        }
+        try {
+            to.close();
+        } catch (IOException e) {
+            log.debug("Failed to close to socket: {}", to, e);
         }
     }
 
     public void close() {
-        try {
-            from.close();
-        } catch (IOException ignored) {
-        } finally {
-            try {
-                to.close();
-            } catch (IOException ignored) {
-            }
-        }
+        closeConnection();
+        closeListener.accept(null);
     }
 }

@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.traversal.stun;
 
-import io.netty.util.internal.UnstableApi;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.net.*;
@@ -115,7 +115,7 @@ public class StunClient {
         }
     }
 
-    @UnstableApi
+    @ApiStatus.Experimental
     private MappingResult getMappingUdp(String stunHost, int stunPort) throws IOException {
         try (DatagramSocket udpSocket = new DatagramSocket()) {
             udpSocket.setReuseAddress(true);

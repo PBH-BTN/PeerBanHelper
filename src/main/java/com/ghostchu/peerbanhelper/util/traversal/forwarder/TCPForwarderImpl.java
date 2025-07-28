@@ -1,31 +1,31 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 
 import com.ghostchu.peerbanhelper.util.SocketCopyWorker;
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionTable;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.StandardSocketOptions;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.net.*;
+import java.util.Map;
+import java.util.concurrent.*;
 
+/*
+    @TODO: 需要重构：换 NIO 优化性能，但是好不容跑起来就先这样了
+ */
 @Slf4j
 public class TCPForwarderImpl implements AutoCloseable, Forwarder {
     private final int proxyPort;
     private final String proxyHost;
     private final String remoteHost;
     private final int remotePort;
-
     private ServerSocket proxySocket;
     private volatile boolean running = false;
     private final ExecutorService netIOExecutor = Executors.newVirtualThreadPerTaskExecutor();
-
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
+    private final ConnectionTable connectionMap = new ConnectionTable();
+    private final Map<SocketAddress, ConnectionStatistics> connectionStats = new ConcurrentHashMap<>();
 
     public TCPForwarderImpl(String proxyHost, int proxyPort, String remoteHost, int remotePort, String keepAliveHost, int keepAlivePort) {
         this.proxyHost = proxyHost;
@@ -77,17 +77,36 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
 
             // 创建两个线程进行双向数据转发
             Socket finalRemoteSocket = remoteSocket;
-
+            ConnectionStatistics statistics = new ConnectionStatistics();
+            var downloaded = statistics.getDownloaded();
+            var uploaded = statistics.getUploaded();
             // 客户端到远程服务器的数据转发
-            netIOExecutor.submit(() -> new SocketCopyWorker(clientSocket, finalRemoteSocket).startSync());
+            netIOExecutor.submit(() -> new SocketCopyWorker(clientSocket, finalRemoteSocket, (exception) -> onSocketClosed(clientSocket.getRemoteSocketAddress(), exception), downloaded::add).startSync());
             // 远程服务器到客户端的数据转发
-            netIOExecutor.submit(() -> new SocketCopyWorker(finalRemoteSocket, clientSocket).startSync());
-
+            netIOExecutor.submit(() -> new SocketCopyWorker(finalRemoteSocket, clientSocket, (exception) -> onSocketClosed(clientSocket.getRemoteSocketAddress(), exception), uploaded::add).startSync());
+            connectionStats.put(clientSocket.getRemoteSocketAddress(), statistics);
         } catch (IOException e) {
             log.error("Error connecting to remote server: {}", e.getMessage());
             closeSocket(clientSocket);
             closeSocket(remoteSocket);
         }
+    }
+
+    private void onSocketClosed(SocketAddress socketAddress, Exception e) {
+        connectionMap.remove(socketAddress);
+        connectionStats.remove(socketAddress);
+    }
+
+    public long getEstablishedConnections() {
+        return connectionMap.size();
+    }
+
+    public ConnectionTable getConnectionMap() {
+        return connectionMap;
+    }
+
+    public Map<SocketAddress, ConnectionStatistics> getConnectionStats() {
+        return connectionStats;
     }
 
     private void closeSocket(Socket socket) {
