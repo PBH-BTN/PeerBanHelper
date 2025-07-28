@@ -76,14 +76,36 @@ public class StunTcpTunnel implements AutoCloseable {
         }
     }
 
+//    private void registerKeepAliveTask(InetSocketAddress interResult, InetSocketAddress outerResult) {
+//        keepAliveService.scheduleWithFixedDelay(() -> {
+//            Socket socket = new Socket();
+//            try {
+//                socket.connect(outerResult, 5000);
+//                socket.close();
+//            } catch (IOException e) {
+//                log.debug("Keep-Alive request invalid, tunnel closed.", e);
+//                valid.set(false);
+//                stunListener.onClose(e);
+//                try {
+//                    close();
+//                } catch (Exception ignored) {
+//                }
+//            }
+//        }, 0L, 10L, TimeUnit.SECONDS);
+//    }
+
     private void registerKeepAliveTask(InetSocketAddress interResult, InetSocketAddress outerResult) {
         keepAliveService.scheduleWithFixedDelay(() -> {
-            Socket socket = new Socket();
-            try {
-                socket.connect(outerResult, 5000);
-                socket.close();
+            try (Socket socket = new Socket()) {
+                socket.setReuseAddress(true);
+                socket.setSoTimeout(5000);
+                // 绑定到内部地址
+                socket.bind(interResult);
+                // 连接到一个公网地址，保持 NAT 映射活跃
+                socket.connect(new InetSocketAddress("1.1.1.1", 53), 5000);
+                log.debug("NAT tunnel keep-alive sent from {} to maintain mapping", interResult);
             } catch (IOException e) {
-                log.debug("Keep-Alive request invalid, tunnel closed.", e);
+                log.debug("Keep-Alive request failed, tunnel may be closed: {}", e.getMessage());
                 valid.set(false);
                 stunListener.onClose(e);
                 try {
@@ -91,7 +113,7 @@ public class StunTcpTunnel implements AutoCloseable {
                 } catch (Exception ignored) {
                 }
             }
-        }, 0L, 10L, TimeUnit.SECONDS);
+        }, 0L, 4L, TimeUnit.MINUTES); // 每4分钟发送一次
     }
 
     private boolean testMapping(InetSocketAddress interResult, InetSocketAddress outerResult) throws IOException {

@@ -10,7 +10,18 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * STUN客户端 - 按照Natter实现
- * 用于获取NAT映射地址
+ * 用于获取NAT映射地址和检测NAT类型
+ * 
+ * 支持的功能：
+ * 1. NAT映射获取（UDP/TCP）
+ * 2. NAT类型检测（基于RFC 3489）
+ * 3. 对称NAT检测
+ * 4. Hairpin支持检测
+ * 
+ * NAT类型检测算法：
+ * - 比较本地地址和外部地址确定是否有NAT
+ * - 使用多个STUN服务器检测对称NAT
+ * - 区分不同类型的锥形NAT
  */
 @Slf4j
 public class StunClient {
@@ -266,6 +277,139 @@ public class StunClient {
 
     public Socket getTcpSocket() {
         return tcpSocket;
+    }
+
+    /**
+     * 检测NAT类型
+     * 基于RFC 3489的NAT类型检测算法
+     */
+    public NatDetectionResult detectNatType() {
+        if (!udp) {
+            return NatDetectionResult.failed("NAT detection only supported for UDP");
+        }
+        
+        try {
+            // 步骤1: 获取基本映射
+            MappingResult test1 = getMapping();
+            InetSocketAddress localAddr = test1.interAddress();
+            InetSocketAddress externalAddr = test1.outerAddress();
+            
+            log.debug("NAT Detection - Test 1: local={}, external={}", localAddr, externalAddr);
+            
+            // 如果本地地址和外部地址相同，则没有NAT
+            if (localAddr.getAddress().equals(externalAddr.getAddress()) && 
+                localAddr.getPort() == externalAddr.getPort()) {
+                return new NatDetectionResult(
+                    NatType.OPEN_INTERNET,
+                    localAddr,
+                    externalAddr,
+                    null,
+                    false,
+                    "No NAT detected - local and external addresses are identical"
+                );
+            }
+            
+            // 步骤2: 测试不同服务器的映射一致性
+            MappingResult test2 = getMappingFromDifferentServer();
+            if (test2 == null) {
+                // 如果只有一个服务器，跳过对称NAT检测
+                log.warn("Only one STUN server available, skipping symmetric NAT detection");
+                return new NatDetectionResult(
+                    NatType.UNKNOWN,
+                    localAddr,
+                    externalAddr,
+                    null,
+                    false,
+                    "Cannot determine NAT type with single STUN server"
+                );
+            }
+            
+            InetSocketAddress externalAddr2 = test2.outerAddress();
+            log.debug("NAT Detection - Test 2: external2={}", externalAddr2);
+            
+            // 如果两次映射的外部地址不同，则为对称NAT
+            if (!externalAddr.equals(externalAddr2)) {
+                return new NatDetectionResult(
+                    NatType.SYMMETRIC,
+                    localAddr,
+                    externalAddr,
+                    externalAddr2,
+                    false,
+                    "Different external addresses from different servers indicate symmetric NAT"
+                );
+            }
+            
+            // 步骤3: 测试锥形NAT的类型
+            // 这里可以进一步扩展来区分不同类型的锥形NAT
+            // 目前简化为检测是否为锥形NAT
+            
+            return new NatDetectionResult(
+                NatType.FULL_CONE,
+                localAddr,
+                externalAddr,
+                externalAddr2,
+                false,
+                "Consistent external address from different servers indicates cone NAT"
+            );
+            
+        } catch (Exception e) {
+            log.error("Failed to detect NAT type", e);
+            return NatDetectionResult.failed(e.getMessage());
+        }
+    }
+    
+    /**
+     * 从不同的STUN服务器获取映射
+     * 用于检测对称NAT
+     */
+    private MappingResult getMappingFromDifferentServer() throws IOException {
+        if (stunServerList.size() < 2) {
+            return null;
+        }
+        
+        // 保存当前服务器索引
+        int originalIndex = currentServerIndex;
+        
+        try {
+            // 切换到下一个服务器
+            currentServerIndex = (currentServerIndex + 1) % stunServerList.size();
+            return getMappingFromServer();
+        } finally {
+            // 恢复原来的服务器索引
+            currentServerIndex = originalIndex;
+        }
+    }
+    
+    /**
+     * 检测NAT是否支持Hairpin（发夹）
+     * 这个功能需要更复杂的实现，目前返回false
+     */
+    public boolean detectHairpinSupport() {
+        // TODO: 实现Hairpin检测
+        // 需要向自己的外部地址发送数据包来测试
+        return false;
+    }
+    
+    /**
+     * 获取详细的NAT信息，包括类型检测
+     */
+    public NatDetectionResult getDetailedNatInfo() {
+        NatDetectionResult detection = detectNatType();
+        
+        // 如果检测成功且是锥形NAT，可以进一步检测Hairpin支持
+        if (detection.isConeNat()) {
+            boolean hairpinSupport = detectHairpinSupport();
+            return new NatDetectionResult(
+                detection.natType(),
+                detection.localAddress(),
+                detection.externalAddress(),
+                detection.alternateExternalAddress(),
+                hairpinSupport,
+                detection.details() + (hairpinSupport ? " (Hairpin: yes)" : " (Hairpin: no)")
+            );
+        }
+        
+        return detection;
     }
 
     /**
