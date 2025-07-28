@@ -12,15 +12,14 @@ import com.offbynull.portmapper.mapper.MappedPort;
 import com.offbynull.portmapper.mapper.PortMapper;
 import com.offbynull.portmapper.mapper.PortType;
 import com.offbynull.portmapper.mappers.natpmp.NatPmpPortMapper;
+import com.offbynull.portmapper.mappers.pcp.PcpPortMapper;
+import com.offbynull.portmapper.mappers.upnpigd.UpnpIgdPortMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -68,15 +67,35 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
 
     private void scanMappers() {
         synchronized (scanMappersLock) {
-            try {
-                if (this.mappers != null) return;
-                log.info(tlUI(Lang.PORTMAPPER_SCANNING));
-                //this.mappers = PortMapperFactory.discover(networkBus, processBus);
-                this.mappers = new ArrayList<>(NatPmpPortMapper.identify(networkBus, processBus));
-                log.info(tlUI(Lang.PORTMAPPER_SCANNED, mappers.size()));
-            } catch (InterruptedException exception) {
-                log.warn("Unable to lookup port mappers", exception);
-            }
+            if (this.mappers != null) return;
+            log.info(tlUI(Lang.PORTMAPPER_SCANNING));
+            //this.mappers = PortMapperFactory.discover(networkBus, processBus);
+            this.mappers =Collections.synchronizedList(new ArrayList<>());
+            CompletableFuture<Void> scanNatPmp = CompletableFuture.runAsync(()-> {
+                try {
+                    this.mappers.addAll(NatPmpPortMapper.identify(networkBus, processBus));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            CompletableFuture<Void> scanUpnp = CompletableFuture.runAsync(()-> {
+                try {
+                    this.mappers.addAll(UpnpIgdPortMapper.identify(networkBus));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            CompletableFuture<Void> scanPCP = CompletableFuture.runAsync(()-> {
+                try {
+                    this.mappers.addAll(PcpPortMapper.identify(networkBus, processBus));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            scanNatPmp.join();
+            scanUpnp.join();
+            scanPCP.join();
+            log.info(tlUI(Lang.PORTMAPPER_SCANNED, mappers.size()));
         }
     }
 
