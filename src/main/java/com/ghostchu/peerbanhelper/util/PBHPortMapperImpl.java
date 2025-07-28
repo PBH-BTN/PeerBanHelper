@@ -40,7 +40,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
         this.process = ProcessGateway.create();
         this.networkBus = network.getBus();
         this.processBus = process.getBus();
-        Thread.ofPlatform().start(this::scanMappers);
+        Thread.ofPlatform().name("PortMapperScanner").start(this::scanMappers);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 if (originalToRefreshedPortMap.isEmpty()) {
