@@ -74,8 +74,7 @@ public class BTStunInstance implements StunListener, AutoCloseable {
         var forwarderServerPort = inter.getPort();
         var downloaderShouldListenOn = outer.getPort();
         var downloaderHost = URI.create(downloader.getEndpoint()).getHost();
-        Forwarder forwarder = new TCPForwarderImpl("0.0.0.0", inter.getPort(), downloaderHost, forwarderServerPort,
-                inter.getHostString(), inter.getPort());
+        Forwarder forwarder = new TCPForwarderImpl("0.0.0.0", forwarderServerPort, downloaderHost, downloaderShouldListenOn, inter.getHostString(), inter.getPort());
         try {
             forwarder.start();
         } catch (IOException e) {
