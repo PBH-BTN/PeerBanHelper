@@ -4,9 +4,11 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.PBHPortMapper;
-import com.ghostchu.peerbanhelper.util.traversal.forwarder.TCPForwarder;
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.Forwarder;
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.TCPForwarderImpl;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
-import com.ghostchu.peerbanhelper.util.traversal.stun.StunTcpTunnel;
+import com.ghostchu.peerbanhelper.util.traversal.stun.tunnel.StunTcpTunnel;
+import com.ghostchu.peerbanhelper.util.traversal.stun.tunnel.StunTcpTunnelImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,7 +56,7 @@ public class BTStunInstance implements StunListener, AutoCloseable {
             }
         }
         log.info(tlUI(Lang.BTSTUN_RESTART, downloader.getName()));
-        this.tunnel = new StunTcpTunnel(portMapper, this);
+        this.tunnel = new StunTcpTunnelImpl(portMapper, this);
         try {
             this.tunnel.createMapping(0);
         } catch (IOException e) {
@@ -72,7 +74,7 @@ public class BTStunInstance implements StunListener, AutoCloseable {
         var forwarderServerPort = inter.getPort();
         var downloaderShouldListenOn = outer.getPort();
         var downloaderHost = URI.create(downloader.getEndpoint()).getHost();
-        TCPForwarder forwarder = new TCPForwarder("0.0.0.0", inter.getPort(), downloaderHost, forwarderServerPort,
+        Forwarder forwarder = new TCPForwarderImpl("0.0.0.0", inter.getPort(), downloaderHost, forwarderServerPort,
                 inter.getHostString(), inter.getPort());
         try {
             forwarder.start();
@@ -102,12 +104,20 @@ public class BTStunInstance implements StunListener, AutoCloseable {
     @Override
     public void close() throws Exception {
         shutdown.set(true);
-        sched.shutdownNow();
+        sched.shutdown();
         if (this.tunnel != null) {
             try {
                 this.tunnel.close();
             } catch (Exception ignored) {
             }
+        }
+        try {
+            if(!sched.awaitTermination(10 ,TimeUnit.SECONDS)){
+                sched.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            sched.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 }

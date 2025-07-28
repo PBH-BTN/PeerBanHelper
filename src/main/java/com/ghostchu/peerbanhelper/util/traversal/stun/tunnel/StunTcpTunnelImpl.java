@@ -1,12 +1,14 @@
-package com.ghostchu.peerbanhelper.util.traversal.stun;
+package com.ghostchu.peerbanhelper.util.traversal.stun.tunnel;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.PBHPortMapper;
+import com.ghostchu.peerbanhelper.util.traversal.stun.StunClient;
+import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
+import com.ghostchu.peerbanhelper.util.traversal.stun.StunSocketTool;
 import com.offbynull.portmapper.mapper.PortMapper;
 import com.offbynull.portmapper.mapper.PortType;
 import com.sun.net.httpserver.HttpServer;
 import lombok.Cleanup;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -21,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
-public class StunTcpTunnel implements AutoCloseable {
+public class StunTcpTunnelImpl implements StunTcpTunnel {
     private final StunListener stunListener;
     private final ScheduledExecutorService keepAliveService = Executors.newScheduledThreadPool(1, runnable -> Thread.ofVirtual().name("StunTcpTunnel-KeepAlive").unstarted(runnable));
     private final AtomicBoolean valid = new AtomicBoolean(false);
@@ -29,13 +31,13 @@ public class StunTcpTunnel implements AutoCloseable {
     private final List<PortMapper> portMappers;
     private Socket keepAliveSocket;
 
-    public StunTcpTunnel(PBHPortMapper pbhPortMapper, StunListener stunListener) {
+    public StunTcpTunnelImpl(PBHPortMapper pbhPortMapper, StunListener stunListener) {
         this.pbhPortMapper = pbhPortMapper;
         this.stunListener = stunListener;
         this.portMappers = pbhPortMapper.getMappers();
     }
 
-    @SneakyThrows
+    @Override
     public void createMapping(int localPort) throws IOException {
         if (localPort == 0) {
             @Cleanup
@@ -66,7 +68,6 @@ public class StunTcpTunnel implements AutoCloseable {
         }
     }
 
-    @SneakyThrows
     private boolean testMapping(InetSocketAddress interResult, InetSocketAddress outerResult) throws IOException {
         HttpServer httpServer = HttpServer.create(interResult, 0);
         httpServer.createContext("/test", exchange -> {
@@ -100,6 +101,7 @@ public class StunTcpTunnel implements AutoCloseable {
         }
     }
 
+    @Override
     public boolean isValid() {
         return valid.get();
     }

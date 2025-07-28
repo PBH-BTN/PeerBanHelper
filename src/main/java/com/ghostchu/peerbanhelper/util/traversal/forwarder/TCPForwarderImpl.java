@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class TCPForwarder {
+public class TCPForwarderImpl implements AutoCloseable, Forwarder {
     private final int proxyPort;
     private final String proxyHost;
     private final String remoteHost;
@@ -27,7 +27,7 @@ public class TCPForwarder {
 
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
 
-    public TCPForwarder(String proxyHost, int proxyPort, String remoteHost, int remotePort, String keepAliveHost, int keepAlivePort) {
+    public TCPForwarderImpl(String proxyHost, int proxyPort, String remoteHost, int remotePort, String keepAliveHost, int keepAlivePort) {
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
         this.remoteHost = remoteHost;
@@ -36,6 +36,7 @@ public class TCPForwarder {
     }
 
     @SneakyThrows
+    @Override
     public void start() throws IOException {
         System.setProperty("sun.net.useExclusiveBind", "false");
         this.proxySocket = new ServerSocket();
@@ -78,9 +79,9 @@ public class TCPForwarder {
             Socket finalRemoteSocket = remoteSocket;
 
             // 客户端到远程服务器的数据转发
-            netIOExecutor.submit(()->new SocketCopyWorker(clientSocket, finalRemoteSocket).startSync());
+            netIOExecutor.submit(() -> new SocketCopyWorker(clientSocket, finalRemoteSocket).startSync());
             // 远程服务器到客户端的数据转发
-           netIOExecutor.submit(()->new SocketCopyWorker(finalRemoteSocket, clientSocket).startSync());
+            netIOExecutor.submit(() -> new SocketCopyWorker(finalRemoteSocket, clientSocket).startSync());
 
         } catch (IOException e) {
             log.error("Error connecting to remote server: {}", e.getMessage());
@@ -99,24 +100,24 @@ public class TCPForwarder {
         }
     }
 
-    public void stop() {
+    @Override
+    public void close() {
         running = false;
+        sched.shutdown();
+        netIOExecutor.shutdown();
         try {
-            sched.shutdown();
             if (proxySocket != null) {
                 proxySocket.close();
             }
-            netIOExecutor.shutdown();
-            try {
-                if (!netIOExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                    netIOExecutor.shutdownNow();
-                }
-            } catch (InterruptedException e) {
+        } catch (Exception ignored) {
+        }
+        try {
+            if (!netIOExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
                 netIOExecutor.shutdownNow();
-                Thread.currentThread().interrupt();
             }
-        } catch (IOException e) {
-            log.error("Error stopping TCP forwarder: {}", e.getMessage());
+        } catch (InterruptedException e) {
+            netIOExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 }
