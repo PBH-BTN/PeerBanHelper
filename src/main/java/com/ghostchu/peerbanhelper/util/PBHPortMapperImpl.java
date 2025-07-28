@@ -40,7 +40,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
         this.process = ProcessGateway.create();
         this.networkBus = network.getBus();
         this.processBus = process.getBus();
-        Thread.startVirtualThread(this::scanMappers);
+        Thread.ofPlatform().start(this::scanMappers);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 if (originalToRefreshedPortMap.isEmpty()) {
@@ -77,21 +77,21 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-            });
+            }, Executors.newVirtualThreadPerTaskExecutor());
             CompletableFuture<Void> scanUpnp = CompletableFuture.runAsync(()-> {
                 try {
                     this.mappers.addAll(UpnpIgdPortMapper.identify(networkBus));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-            });
+            }, Executors.newVirtualThreadPerTaskExecutor());
             CompletableFuture<Void> scanPCP = CompletableFuture.runAsync(()-> {
                 try {
                     this.mappers.addAll(PcpPortMapper.identify(networkBus, processBus));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-            });
+            }, Executors.newVirtualThreadPerTaskExecutor());
             scanNatPmp.join();
             scanUpnp.join();
             scanPCP.join();
