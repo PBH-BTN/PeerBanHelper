@@ -4,7 +4,7 @@ import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderFeatureFlag;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.PBHPortMapper;
-import com.ghostchu.peerbanhelper.util.traversal.forwarder.SocketForwarder;
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.TCPForwarder;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunTcpTunnel;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +74,7 @@ public class BTStunInstance implements StunListener, AutoCloseable {
         var forwarderServerPort = inter.getPort();
         var downloaderShouldListenOn = outer.getPort();
         var downloaderHost = URI.create(downloader.getEndpoint()).getHost();
-        SocketForwarder forwarder = new SocketForwarder(forwarderServerPort, downloaderHost, downloaderShouldListenOn);
+        TCPForwarder forwarder = new TCPForwarder(inter.getHostString(), forwarderServerPort, "127.0.0.1", 8060);
         try {
             forwarder.start();
         } catch (IOException e) {

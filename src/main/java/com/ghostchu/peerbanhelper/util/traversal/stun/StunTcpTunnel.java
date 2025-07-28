@@ -162,6 +162,6 @@ public class StunTcpTunnel implements AutoCloseable {
     public void close() throws Exception {
         valid.set(false);
         keepAliveService.close();
-        stunListener.onClose(null);
+       // stunListener.onClose(null);
     }
 }

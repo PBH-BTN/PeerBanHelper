@@ -11,6 +11,7 @@ import com.offbynull.portmapper.gateways.process.internalmessages.KillProcessReq
 import com.offbynull.portmapper.mapper.MappedPort;
 import com.offbynull.portmapper.mapper.PortMapper;
 import com.offbynull.portmapper.mapper.PortType;
+import com.offbynull.portmapper.mappers.natpmp.NatPmpPortMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -70,7 +71,8 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             try {
                 if (this.mappers != null) return;
                 log.info(tlUI(Lang.PORTMAPPER_SCANNING));
-                this.mappers = PortMapperFactory.discover(networkBus, processBus);
+                //this.mappers = PortMapperFactory.discover(networkBus, processBus);
+                this.mappers = new ArrayList<>(NatPmpPortMapper.identify(networkBus, processBus));
                 log.info(tlUI(Lang.PORTMAPPER_SCANNED, mappers.size()));
             } catch (InterruptedException exception) {
                 log.warn("Unable to lookup port mappers", exception);

@@ -196,11 +196,6 @@ public class PeerBanHelper implements Reloadable {
         ExchangeMap.GUI_DISPLAY_FLAGS.add(new ExchangeMap.DisplayFlag("debug-mode", 20, tlUI(Lang.GUI_TITLE_DEBUG)));
 
         Thread.startVirtualThread(()->{
-            try {
-                Thread.sleep(15000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
             downloaderManager.forEach(d-> new BTStunInstance(pBHPortMapper, d));
         });
     }
