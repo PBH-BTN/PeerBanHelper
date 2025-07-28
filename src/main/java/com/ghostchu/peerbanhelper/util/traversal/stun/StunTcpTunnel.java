@@ -13,9 +13,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.StandardSocketOptions;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -25,6 +27,7 @@ public class StunTcpTunnel implements AutoCloseable {
     private final AtomicBoolean valid = new AtomicBoolean(false);
     private final PBHPortMapper pbhPortMapper;
     private final List<PortMapper> portMappers;
+    private Socket keepAliveSocket;
 
     public StunTcpTunnel(PBHPortMapper pbhPortMapper, StunListener stunListener) {
         this.pbhPortMapper = pbhPortMapper;
@@ -41,11 +44,11 @@ public class StunTcpTunnel implements AutoCloseable {
             tmpSocket.close();
         }
         pbhPortMapper.mapPort(portMappers, PortType.TCP, localPort).join();
-        StunClient stunClient = new StunClient(Main.getMainConfig().getStringList("stun.servers"), Main.getMainConfig().getString("stun.sourceHost"), localPort, false);
+        StunClient stunClient = new StunClient(Main.getMainConfig().getStringList("stun.servers"), "0.0.0.0", localPort, false);
         var mappingResult = stunClient.getMapping();
         var interResult = mappingResult.interAddress();
         var outerResult = mappingResult.outerAddress();
-        log.debug("Inter address: {}, Outer address: {}", interResult, outerResult);
+        log.debug("STUN CreateMapping: Inter address: {}, Outer address: {}", interResult, outerResult);
         try {
             if (Main.getMainConfig().getBoolean("stun.availableTest", true)) {
                 var testPass = testMapping(interResult, outerResult);
@@ -55,6 +58,7 @@ public class StunTcpTunnel implements AutoCloseable {
                 }
             }
             valid.set(true);
+            startNATHolder(interResult.getHostString(), interResult.getPort());
             stunListener.onCreate(interResult, outerResult);
         } catch (IOException e) {
             log.error("Failed to test mapping with outer address: {}", outerResult, e);
@@ -72,7 +76,7 @@ public class StunTcpTunnel implements AutoCloseable {
         httpServer.start();
         // use raw socket to send http request to test mapping
         try (Socket httpSocket = new Socket()) {
-            httpSocket.setSoLinger(true,0);
+            httpSocket.setSoLinger(true, 0);
             httpSocket.connect(outerResult, 5000);
             String request = "GET /test HTTP/1.1\r\n" +
                     "Host: " + interResult.getHostString() + "\r\n" +
@@ -100,11 +104,63 @@ public class StunTcpTunnel implements AutoCloseable {
         return valid.get();
     }
 
+    private void startNATHolder(String keepAliveHost, int keepAlivePort) {
+        keepAliveService.scheduleAtFixedRate(() -> keepAliveNATTunnel(keepAliveHost, keepAlivePort), 1L, 10L, TimeUnit.SECONDS);
+    }
+
+    private void keepAliveNATTunnel(String keepAliveHost, int keepAlivePort) {
+        try {
+            log.debug("Sending NAT Keep-Alive request from {}:{}", keepAliveHost, keepAlivePort);
+            Socket socket = getKeepAliveSocket(keepAliveHost, keepAlivePort);
+            socket.getOutputStream().write(("HEAD / HTTP/1.1\r\nHost: qq.com\r\nUser-Agent: PeerBanHelper-NAT-Keeper/1.0\r\nConnection: keep-alive\r\n\r\n").getBytes());
+            socket.getOutputStream().flush();
+            byte[] buffer = new byte[1024];
+            int bytesRead = socket.getInputStream().read(buffer);
+            if (bytesRead > 0) {
+                String statusLine = new String(buffer, 0, bytesRead);
+                log.debug("NAT Keep-Alive request result: {}", statusLine);
+            }
+        } catch (IOException e) {
+            log.warn("Failed to send NAT Keep-Alive request: {}", e.getMessage());
+            if (keepAliveSocket != null) {
+                try {
+                    keepAliveSocket.close();
+                } catch (IOException ex) {
+                    // ignore
+                }
+                keepAliveSocket = null;
+            }
+        }
+    }
+
+    private Socket getKeepAliveSocket(String keepAliveHost, int keepAlivePort) throws IOException {
+        if (this.keepAliveSocket != null && this.keepAliveSocket.isConnected() && !this.keepAliveSocket.isClosed()) {
+            return keepAliveSocket;
+        }
+        this.keepAliveSocket = StunSocketTool.getSocket();
+        log.debug("Creating keep-alive socket for NAT traversal keep-alive from {}:{}", keepAliveHost, keepAlivePort);
+        this.keepAliveSocket.bind(new InetSocketAddress(keepAliveHost, keepAlivePort));
+        if (keepAliveSocket.supportedOptions().contains(StandardSocketOptions.SO_REUSEPORT)) {
+            keepAliveSocket.setOption(StandardSocketOptions.SO_REUSEPORT, true);
+        }
+        if (keepAliveSocket.supportedOptions().contains(StandardSocketOptions.SO_REUSEADDR)) {
+            keepAliveSocket.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+        }
+        keepAliveSocket.connect(new InetSocketAddress("qq.com", 80), 1000);
+        return keepAliveSocket;
+    }
+
 
     @Override
     public void close() throws Exception {
         valid.set(false);
         keepAliveService.close();
         stunListener.onClose(null);
+        if(keepAliveSocket != null && !keepAliveSocket.isClosed()) {
+            try {
+                keepAliveSocket.close();
+            } catch (IOException ignored) {
+            }
+        }
     }
 }

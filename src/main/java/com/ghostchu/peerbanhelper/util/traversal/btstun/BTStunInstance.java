@@ -35,7 +35,6 @@ public class BTStunInstance implements StunListener, AutoCloseable {
         if (!downloader.getFeatureFlags().contains(DownloaderFeatureFlag.LIVE_UPDATE_BT_PROTOCOL_PORT)) {
             throw new IllegalArgumentException("Downloader does not support live update of BT protocol port");
         }
-        log.info("BTStunInstance created");
         sched.scheduleWithFixedDelay(() -> {
             try {
                 if (shutdown.get()) return;
@@ -66,7 +65,6 @@ public class BTStunInstance implements StunListener, AutoCloseable {
             }
         }
     }
-
 
     @Override
     public void onCreate(@NotNull InetSocketAddress inter, @NotNull InetSocketAddress outer) {
