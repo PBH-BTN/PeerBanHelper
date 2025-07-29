@@ -6,4 +6,8 @@ public interface StunTcpTunnel extends AutoCloseable {
     void createMapping(int localPort) throws IOException;
 
     boolean isValid();
+
+    long getLastSuccessHeartbeatAt();
+
+    long getStartedAt();
 }

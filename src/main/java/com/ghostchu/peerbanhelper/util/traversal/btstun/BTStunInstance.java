@@ -30,6 +30,8 @@ public class BTStunInstance implements StunListener, AutoCloseable {
     private StunTcpTunnel tunnel;
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
+    @Nullable
+    private Forwarder tcpForwarder;
 
     public BTStunInstance(PBHPortMapper portMapper, Downloader downloader) {
         this.portMapper = portMapper;
@@ -68,15 +70,19 @@ public class BTStunInstance implements StunListener, AutoCloseable {
         }
     }
 
+    public StunTcpTunnel getTunnel() {
+        return tunnel;
+    }
+
     @Override
     public void onCreate(@NotNull InetSocketAddress inter, @NotNull InetSocketAddress outer) {
         log.info(tlUI(Lang.BTSTUN_ON_TUNNEL_CREATED, downloader.getName(), inter.getHostString() + ":" + inter.getPort(), outer.getHostString() + ":" + outer.getPort()));
         var forwarderServerPort = inter.getPort();
         var downloaderShouldListenOn = outer.getPort();
         var downloaderHost = URI.create(downloader.getEndpoint()).getHost();
-        Forwarder forwarder = new TCPForwarderImpl("0.0.0.0", forwarderServerPort, downloaderHost, downloaderShouldListenOn, inter.getHostString(), inter.getPort());
+        this.tcpForwarder = new TCPForwarderImpl("0.0.0.0", forwarderServerPort, downloaderHost, downloaderShouldListenOn, inter.getHostString(), inter.getPort());
         try {
-            forwarder.start();
+            tcpForwarder.start();
         } catch (IOException e) {
             log.info(tlUI(Lang.BTSTUN_FORWARDER_EXCEPTION, downloader.getName()), e);
             try {
@@ -98,6 +104,10 @@ public class BTStunInstance implements StunListener, AutoCloseable {
     @Override
     public void onClose(@Nullable Throwable throwable) {
         log.info(tlUI(Lang.BTSTUN_ON_TUNNEL_CLOSE, downloader.getName()), throwable);
+    }
+
+    public @Nullable Forwarder getTcpForwarder() {
+        return tcpForwarder;
     }
 
     @Override

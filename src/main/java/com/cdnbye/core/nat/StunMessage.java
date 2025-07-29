@@ -161,7 +161,6 @@ public class StunMessage {
 //        System.out.println("StunMessageType " + type);
         // Message Length
         int messageLength = data[offset++] << 8 | data[offset++];
-        System.out.println("messageLength " + messageLength);
         // Magic Cookie
         magicCookie = data[offset++] << 24 | data[offset++] << 16 | data[offset++] << 8 | data[offset++];
 

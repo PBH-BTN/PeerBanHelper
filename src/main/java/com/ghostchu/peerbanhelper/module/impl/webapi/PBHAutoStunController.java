@@ -1,0 +1,204 @@
+package com.ghostchu.peerbanhelper.module.impl.webapi;
+
+import com.ghostchu.peerbanhelper.downloader.Downloader;
+import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
+import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ProxyConnectionDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TunnelInfoDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TunnelsDTO;
+import com.ghostchu.peerbanhelper.text.Lang;
+import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskRunnable;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunInstance;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.BTStunManager;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
+import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
+import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
+import com.ghostchu.peerbanhelper.web.Role;
+import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
+import io.javalin.http.Context;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import static com.ghostchu.peerbanhelper.text.TextManager.tl;
+
+@Component
+@Slf4j
+public class PBHAutoStunController extends AbstractFeatureModule {
+    private final JavalinWebContainer javalinWebContainer;
+    private final BackgroundTaskManager backgroundTaskManager;
+    private final StunManager stunManager;
+    private final BTStunManager bTStunManager;
+    private final DownloaderManager downloaderManager;
+
+    public PBHAutoStunController(JavalinWebContainer javalinWebContainer, BackgroundTaskManager backgroundTaskManager, StunManager stunManager, BTStunManager bTStunManager, DownloaderManager downloaderManager) {
+        super();
+        this.javalinWebContainer = javalinWebContainer;
+        this.backgroundTaskManager = backgroundTaskManager;
+        this.stunManager = stunManager;
+        this.bTStunManager = bTStunManager;
+        this.downloaderManager = downloaderManager;
+    }
+
+    @Override
+    public boolean isConfigurable() {
+        return false;
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return "WebAPI - AutoSTUN";
+    }
+
+    @Override
+    public @NotNull String getConfigName() {
+        return "webeapi-autostun";
+    }
+
+    @Override
+    public void onEnable() {
+        javalinWebContainer.javalin()
+                .get("/api/autostun/info", this::status, Role.USER_READ)
+                .post("/api/autostun/refreshNatType", this::refreshNatType, Role.USER_WRITE)
+                .post("/api/autostun/runNetworkEnvironmentTest", this::networkEnvironmentTest, Role.USER_WRITE)
+                .post("/api/autostun/restart", this::autoStunRestart, Role.USER_WRITE)
+                .get("/api/autostun/tunnels", this::tunnels, Role.USER_READ)
+                .get("/api/autostun/tunnel/{downloader}/info", this::tunnelInfo, Role.USER_READ)
+                .get("/api/autostun/tunnel/{downloader}/connections", this::tunnelConnections, Role.USER_READ);
+
+    }
+
+    private void tunnelConnections(@NotNull Context context) {
+        var downloaderId = context.pathParam("downloader");
+        var downloader = downloaderManager.getDownloaderById(downloaderId);
+        if (downloader == null) {
+            context.json(new StdResp(false, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_NOT_EXISTS, downloaderId)), null));
+            return;
+        }
+        var stunInstance = bTStunManager.getStunInstance(downloader);
+        if (stunInstance == null) {
+            context.json(new StdResp(false, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_NOT_EXISTS, downloader.getName())), null));
+            return;
+        }
+        var forwarder = stunInstance.getTcpForwarder();
+        if (forwarder == null) {
+            context.json(new StdResp(false, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_FORWARDER_NOT_EXISTS, downloader.getName())), List.of()));
+            return;
+        }
+        List<ProxyConnectionDTO> connectionList = new LinkedList<>();
+        for (Map.Entry<SocketAddress, SocketAddress> connection : forwarder.getClientAddressAsKeyConnectionMap().entrySet()) {
+            InetSocketAddress clientAddress = new InetSocketAddress("0.0.0.0", 0);
+            InetSocketAddress proxyLAddress = new InetSocketAddress("0.0.0.0", 0);
+            if (connection.getKey() instanceof InetSocketAddress clientInetSocketAddress) {
+                clientAddress = clientInetSocketAddress;
+            }
+            if (connection.getValue() instanceof InetSocketAddress proxyInetSocketAddress) {
+                proxyLAddress = proxyInetSocketAddress;
+            }
+            ConnectionStatistics statistics = forwarder.getClientAddressAsKeyConnectionStats().get(clientAddress);
+            ProxyConnectionDTO proxyConnectionDTO = new ProxyConnectionDTO(
+                    clientAddress.getHostString(),
+                    clientAddress.getPort(),
+                    forwarder.getProxyHost(),
+                    forwarder.getProxyPort(),
+                    proxyLAddress.getHostString(),
+                    proxyLAddress.getPort(),
+                    statistics.getEstablishedAt(),
+                    statistics.getLastActivityAt(),
+                    statistics.getUploaded().sum(),
+                    statistics.getDownloaded().sum()
+            );
+            connectionList.add(proxyConnectionDTO);
+        }
+        context.json(new StdResp(true, null, connectionList));
+    }
+
+    private void tunnelInfo(@NotNull Context context) {
+        var downloaderId = context.pathParam("downloader");
+        var downloader = downloaderManager.getDownloaderById(downloaderId);
+        if (downloader == null) {
+            context.json(new StdResp(false, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_NOT_EXISTS, downloaderId)), null));
+            return;
+        }
+        var stunInstance = bTStunManager.getStunInstance(downloader);
+        if (stunInstance == null) {
+            context.json(new StdResp(false, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_NOT_EXISTS, downloader.getName())), null));
+            return;
+        }
+        context.json(new StdResp(true, null, toTunnelInfoDto(stunInstance)));
+    }
+
+    private void tunnels(@NotNull Context context) {
+        List<TunnelsDTO> tunnels = new ArrayList<>();
+        for (Map.Entry<Downloader, BTStunInstance> entry : bTStunManager.getDownloadStunInstances().entrySet()) {
+            var downloader = entry.getKey();
+            var stunInstance = entry.getValue();
+            tunnels.add(new TunnelsDTO(downloaderManager.getDownloadInfo(downloader), toTunnelInfoDto(stunInstance)));
+
+        }
+        context.json(new StdResp(true, null, tunnels));
+    }
+
+    private TunnelInfoDTO toTunnelInfoDto(BTStunInstance stunInstance) {
+        return new TunnelInfoDTO(
+                stunInstance.getTunnel() != null && stunInstance.getTunnel().isValid(),
+                stunInstance.getTunnel() != null ? stunInstance.getTunnel().getStartedAt() : 0,
+                stunInstance.getTunnel() != null ? stunInstance.getTunnel().getLastSuccessHeartbeatAt() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionHandled() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getConnectionFailed() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getTotalUploaded() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getTotalDownloaded() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getEstablishedConnections() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getProxyHost() : "???",
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getProxyPort() : 0,
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getRemoteHost() : "???",
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getRemotePort() : 0
+        );
+    }
+
+    private void autoStunRestart(@NotNull Context context) {
+        try {
+            bTStunManager.reloadModule();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        context.json(new StdResp(true, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_RESTARTED)), null));
+    }
+
+    private void networkEnvironmentTest(@NotNull Context context) {
+
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    private void refreshNatType(@NotNull Context context) {
+        var bgTask = new BackgroundTaskRunnable(new TranslationComponent(Lang.BACKGROUND_TASK_NAME_UPDATE_NAT_STATUS)) {
+            @Override
+            public void run() {
+                var natType = stunManager.refreshNatType();
+                tlog.info("New detected NAT type now is: " + natType.name());
+            }
+        };
+        backgroundTaskManager.registerAndStart(bgTask);
+        context.json(new StdResp(true, null, false, bgTask));
+    }
+
+    @Override
+    public void onDisable() {
+
+    }
+
+    private void status(@NotNull Context context) {
+
+    }
+
+
+}

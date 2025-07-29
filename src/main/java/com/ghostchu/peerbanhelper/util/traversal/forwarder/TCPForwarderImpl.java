@@ -2,7 +2,8 @@ package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 
 import com.ghostchu.peerbanhelper.util.SocketCopyWorker;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
-import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionTable;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.net.*;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.LongAdder;
 
 /*
     @TODO: 需要重构：换 NIO 优化性能，但是好不容跑起来就先这样了
@@ -24,8 +26,11 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
     private volatile boolean running = false;
     private final ExecutorService netIOExecutor = Executors.newVirtualThreadPerTaskExecutor();
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
-    private final ConnectionTable connectionMap = new ConnectionTable();
+    //                  ClientAddress, ProxyLAddress
+    private final BiMap<SocketAddress, SocketAddress> connectionMap = HashBiMap.create();
     private final Map<SocketAddress, ConnectionStatistics> connectionStats = new ConcurrentHashMap<>();
+    private final LongAdder connectionHandled = new LongAdder();
+    private final LongAdder connectionFailed = new LongAdder();
 
     public TCPForwarderImpl(String proxyHost, int proxyPort, String remoteHost, int remotePort, String keepAliveHost, int keepAlivePort) {
         this.proxyHost = proxyHost;
@@ -59,10 +64,12 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
                 if (clientSocket != null) {
                     // 为每个客户端连接创建一个处理线程
                     netIOExecutor.submit(() -> handleClient(clientSocket));
+                    connectionHandled.increment();
                 }
             } catch (IOException e) {
                 if (running) {
                     log.error("Error accepting client connection", e);
+                    connectionFailed.increment();
                 }
             }
         }
@@ -74,20 +81,23 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
             // 连接到远程服务器
             remoteSocket = new Socket();
             remoteSocket.connect(new InetSocketAddress(remoteHost, remotePort), 5000);
+            connectionMap.put(clientSocket.getRemoteSocketAddress(), remoteSocket.getLocalSocketAddress());
             // 创建两个线程进行双向数据转发
             Socket finalRemoteSocket = remoteSocket;
             ConnectionStatistics statistics = new ConnectionStatistics();
             var downloaded = statistics.getDownloaded();
             var uploaded = statistics.getUploaded();
+            statistics.setEstablishedAt();
             // 客户端到远程服务器的数据转发
-            netIOExecutor.submit(() -> new SocketCopyWorker(clientSocket, finalRemoteSocket, (exception) -> onSocketClosed(clientSocket.getRemoteSocketAddress(), exception), downloaded::add).startSync());
+            netIOExecutor.submit(() -> new SocketCopyWorker(clientSocket, finalRemoteSocket, (exception) -> onSocketClosed(clientSocket.getRemoteSocketAddress(), exception), downloaded::add, statistics::setLastActivityAt).startSync());
             // 远程服务器到客户端的数据转发
-            netIOExecutor.submit(() -> new SocketCopyWorker(finalRemoteSocket, clientSocket, (exception) -> onSocketClosed(clientSocket.getRemoteSocketAddress(), exception), uploaded::add).startSync());
+            netIOExecutor.submit(() -> new SocketCopyWorker(finalRemoteSocket, clientSocket, (exception) -> onSocketClosed(clientSocket.getRemoteSocketAddress(), exception), uploaded::add, statistics::setLastActivityAt).startSync());
             connectionStats.put(clientSocket.getRemoteSocketAddress(), statistics);
         } catch (IOException e) {
             log.error("Error connecting to remote server: {}", e.getMessage());
             closeSocket(clientSocket);
             closeSocket(remoteSocket);
+            connectionFailed.increment();
         }
     }
 
@@ -102,13 +112,58 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
     }
 
     @Override
-    public ConnectionTable getConnectionMap() {
+    public BiMap<SocketAddress, SocketAddress> getClientAddressAsKeyConnectionMap() {
         return connectionMap;
     }
 
     @Override
-    public Map<SocketAddress, ConnectionStatistics> getConnectionStats() {
+    public BiMap<SocketAddress, SocketAddress> getProxyLAddressAsKeyConnectionMap() {
+        return connectionMap.inverse();
+    }
+
+    @Override
+    public Map<SocketAddress, ConnectionStatistics> getClientAddressAsKeyConnectionStats() {
         return connectionStats;
+    }
+
+    @Override
+    public long getTotalDownloaded() {
+        return connectionStats.values().stream().mapToLong(stats -> stats.getDownloaded().sum()).sum();
+    }
+
+    @Override
+    public long getTotalUploaded() {
+        return connectionStats.values().stream().mapToLong(stats -> stats.getUploaded().sum()).sum();
+    }
+
+    @Override
+    public long getConnectionFailed() {
+        return connectionFailed.sum();
+    }
+
+    @Override
+    public long getConnectionHandled() {
+        return connectionHandled.sum();
+    }
+
+    @Override
+    public int getProxyPort() {
+        return proxyPort;
+    }
+
+    @Override
+    public int getRemotePort() {
+        return remotePort;
+    }
+
+    @Override
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    @Override
+    public String getRemoteHost() {
+        return remoteHost;
     }
 
     private void closeSocket(Socket socket) {

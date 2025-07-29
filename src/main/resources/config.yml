@@ -151,3 +151,6 @@ stun:
   # 启用可用性测试
   # Enable available test
   availableTest: true
+
+auto-stun:
+  enabled: false

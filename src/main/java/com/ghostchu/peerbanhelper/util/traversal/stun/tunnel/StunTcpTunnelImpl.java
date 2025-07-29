@@ -2,9 +2,9 @@ package com.ghostchu.peerbanhelper.util.traversal.stun.tunnel;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.PBHPortMapper;
-import com.ghostchu.peerbanhelper.util.traversal.stun.TcpStunClient;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunSocketTool;
+import com.ghostchu.peerbanhelper.util.traversal.stun.TcpStunClient;
 import com.offbynull.portmapper.mapper.PortMapper;
 import com.offbynull.portmapper.mapper.PortType;
 import com.sun.net.httpserver.HttpServer;
@@ -30,6 +30,8 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
     private final PBHPortMapper pbhPortMapper;
     private final List<PortMapper> portMappers;
     private Socket keepAliveSocket;
+    private long startedAt;
+    private long lastSuccessHeartbeatAt;
 
     public StunTcpTunnelImpl(PBHPortMapper pbhPortMapper, StunListener stunListener) {
         this.pbhPortMapper = pbhPortMapper;
@@ -39,6 +41,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
 
     @Override
     public void createMapping(int localPort) throws IOException {
+        startedAt = System.currentTimeMillis();
         if (localPort == 0) {
             @Cleanup
             var tmpSocket = new ServerSocket(0);
@@ -46,7 +49,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
             tmpSocket.close();
         }
         pbhPortMapper.mapPort(portMappers, PortType.TCP, localPort).join();
-        TcpStunClient tcpStunClient = new TcpStunClient(Main.getMainConfig().getStringList("stun.servers"), "0.0.0.0", localPort);
+        TcpStunClient tcpStunClient = new TcpStunClient(Main.getMainConfig().getStringList("stun.tcp-servers"), "0.0.0.0", localPort);
         var mappingResult = tcpStunClient.getMapping();
         var interResult = mappingResult.interAddress();
         var outerResult = mappingResult.outerAddress();
@@ -106,6 +109,16 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         return valid.get();
     }
 
+    @Override
+    public long getLastSuccessHeartbeatAt() {
+        return lastSuccessHeartbeatAt;
+    }
+
+    @Override
+    public long getStartedAt() {
+        return startedAt;
+    }
+
     private void startNATHolder(String keepAliveHost, int keepAlivePort) {
         keepAliveService.scheduleAtFixedRate(() -> keepAliveNATTunnel(keepAliveHost, keepAlivePort), 1L, 10L, TimeUnit.SECONDS);
     }
@@ -122,6 +135,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
                 String statusLine = new String(buffer, 0, bytesRead);
                 log.debug("NAT Keep-Alive request result: {}", statusLine);
             }
+            lastSuccessHeartbeatAt = System.currentTimeMillis();
         } catch (IOException e) {
             log.warn("Failed to send NAT Keep-Alive request: {}", e.getMessage());
             if (keepAliveSocket != null) {

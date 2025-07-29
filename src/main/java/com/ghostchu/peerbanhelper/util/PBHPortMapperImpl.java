@@ -19,7 +19,10 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -70,24 +73,24 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             if (this.mappers != null) return;
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
             //this.mappers = PortMapperFactory.discover(networkBus, processBus);
-            this.mappers = Collections.synchronizedList(new ArrayList<>());
+            List<PortMapper> mapper = Collections.synchronizedList(new ArrayList<>());
             CompletableFuture<Void> scanNatPmp = CompletableFuture.runAsync(()-> {
                 try {
-                    this.mappers.addAll(NatPmpPortMapper.identify(networkBus, processBus));
+                    mapper.addAll(NatPmpPortMapper.identify(networkBus, processBus));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }, Executors.newVirtualThreadPerTaskExecutor());
             CompletableFuture<Void> scanUpnp = CompletableFuture.runAsync(()-> {
                 try {
-                    this.mappers.addAll(UpnpIgdPortMapper.identify(networkBus));
+                    mapper.addAll(UpnpIgdPortMapper.identify(networkBus));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }, Executors.newVirtualThreadPerTaskExecutor());
             CompletableFuture<Void> scanPCP = CompletableFuture.runAsync(()-> {
                 try {
-                    this.mappers.addAll(PcpPortMapper.identify(networkBus, processBus));
+                    mapper.addAll(PcpPortMapper.identify(networkBus, processBus));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -95,6 +98,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             scanNatPmp.join();
             scanUpnp.join();
             scanPCP.join();
+            this.mappers = mapper;
             log.info(tlUI(Lang.PORTMAPPER_SCANNED, mappers.size()));
         }
     }

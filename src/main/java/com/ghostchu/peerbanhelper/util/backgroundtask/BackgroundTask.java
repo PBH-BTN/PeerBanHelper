@@ -28,8 +28,6 @@ public interface BackgroundTask extends Runnable {
 
     Collection<BackgroundTaskRunnable.Logger.LogEntry> getLogs();
 
-    String getName();
-
     @NotNull BackgroundTaskStatus getTaskStatus();
 
     boolean isCancellable();

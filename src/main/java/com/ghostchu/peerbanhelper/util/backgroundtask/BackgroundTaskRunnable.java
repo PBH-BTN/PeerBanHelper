@@ -76,11 +76,6 @@ public abstract class BackgroundTaskRunnable implements BackgroundTask {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
     public @NotNull BackgroundTaskStatus getTaskStatus() {
         return taskStatus;
     }

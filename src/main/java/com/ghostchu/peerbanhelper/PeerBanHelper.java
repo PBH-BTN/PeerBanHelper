@@ -303,7 +303,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(BackgroundModule.class);
         moduleManager.register(SwarmTrackingModule.class);
         moduleManager.register(MCPController.class);
-
+        moduleManager.register(PBHAutoStunController.class);
     }
 
     public IPDBResponse queryIPDB(PeerAddress address) {

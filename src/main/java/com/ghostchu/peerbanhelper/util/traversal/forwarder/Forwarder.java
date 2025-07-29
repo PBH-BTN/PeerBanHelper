@@ -1,7 +1,7 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
-import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionTable;
+import com.google.common.collect.BiMap;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -12,7 +12,25 @@ public interface Forwarder extends AutoCloseable {
 
     long getEstablishedConnections();
 
-    ConnectionTable getConnectionMap();
+    BiMap<SocketAddress, SocketAddress> getClientAddressAsKeyConnectionMap();
 
-    Map<SocketAddress, ConnectionStatistics> getConnectionStats();
+    BiMap<SocketAddress, SocketAddress> getProxyLAddressAsKeyConnectionMap();
+
+    Map<SocketAddress, ConnectionStatistics> getClientAddressAsKeyConnectionStats();
+
+    long getTotalDownloaded();
+
+    long getTotalUploaded();
+
+    long getConnectionFailed();
+
+    long getConnectionHandled();
+
+    int getProxyPort();
+
+    int getRemotePort();
+
+    String getProxyHost();
+
+    String getRemoteHost();
 }

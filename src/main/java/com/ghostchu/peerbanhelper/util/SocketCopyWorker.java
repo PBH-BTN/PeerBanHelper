@@ -15,12 +15,15 @@ public class SocketCopyWorker implements Runnable, AutoCloseable {
     private final Socket to;
     private final Consumer<Integer> trafficConsumer;
     private final Consumer<Exception> closeListener;
+    private final Runnable trafficActivityRunnable;
 
-    public SocketCopyWorker(Socket from, Socket to, @Nullable Consumer<Exception> connDisconnectListener, @Nullable Consumer<Integer> trafficConsumer) {
+    public SocketCopyWorker(Socket from, Socket to, @Nullable Consumer<Exception> connDisconnectListener, @Nullable Consumer<Integer> trafficConsumer, @Nullable Runnable onTrafficActivity) {
         this.from = from;
         this.to = to;
         this.closeListener = connDisconnectListener == null ? e -> {} : connDisconnectListener;
         this.trafficConsumer = trafficConsumer == null ? len -> {} : trafficConsumer;
+        this.trafficActivityRunnable = onTrafficActivity == null ? () -> {
+        } : onTrafficActivity;
     }
 
     public Thread startAsync() {
@@ -45,6 +48,7 @@ public class SocketCopyWorker implements Runnable, AutoCloseable {
                 out.write(data, 0, len);
                 out.flush();
                 trafficConsumer.accept(len);
+                trafficActivityRunnable.run();
             }
         } catch (IOException e) {
             log.debug("Forward socket from {} to {} is closed due exception", from, to, e);
