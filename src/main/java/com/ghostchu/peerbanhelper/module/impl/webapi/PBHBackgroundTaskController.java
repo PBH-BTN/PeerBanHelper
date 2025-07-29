@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.BackgroundTaskMetaDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTask;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskStatus;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -50,7 +51,7 @@ public class PBHBackgroundTaskController extends AbstractFeatureModule {
                 .get("/api/tasks/list", this::listBackgroundTasks, Role.USER_READ)
                 .get("/api/tasks/{taskId}/meta", this::handleTaskMeta, Role.USER_READ)
                 .get("/api/tasks/{taskId}/logs", this::handleTaskLogs, Role.USER_WRITE)
-                .post("/api/tasks/{taskId}/cancel", this::handleTaskCancel, Role.USER_WRITE);
+                .delete("/api/tasks/{taskId}", this::handleTaskCancel, Role.USER_WRITE);
     }
 
     private void handleTaskLogs(@NotNull Context context) {
@@ -95,7 +96,20 @@ public class PBHBackgroundTaskController extends AbstractFeatureModule {
             BackgroundTask task = entry.getValue();
             taskMetaList.add(toDto(context, id, task));
         }
-        context.json(taskMetaList);
+        // 将错误的任务放在最前面，取消、完成的任务放在最后面，其它任务在中间按照开始时间倒序排序
+        taskMetaList.sort((o1, o2) -> {
+            if (o1.status() == o2.status()) {
+                return Long.compare(o2.startedAt(), o1.startedAt());
+            }
+            // 错误的任务排在最前面
+            if (o1.status() == BackgroundTaskStatus.ERROR) return -1;
+            if (o2.status() == BackgroundTaskStatus.ERROR) return 1;
+            // 取消和完成的任务排在最后面
+            if (o1.status() == BackgroundTaskStatus.CANCELLED || o1.status() == BackgroundTaskStatus.COMPLETED) return 1;
+            if (o2.status() == BackgroundTaskStatus.CANCELLED || o2.status() == BackgroundTaskStatus.COMPLETED) return -1;
+            return 0; // 其它任务按照开始时间倒序排序
+        });
+        context.json(new StdResp(true, null, taskMetaList));
     }
 
     private BackgroundTaskMetaDTO toDto(Context context, String id, BackgroundTask task) {

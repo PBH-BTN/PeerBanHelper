@@ -17,8 +17,8 @@ public class StdResp {
         this.message = message;
         this.data = data;
     }
-    public StdResp(boolean showLogs, @Nullable String message, BackgroundTask task){
-        this.success = true;
+    public StdResp(boolean success, @Nullable String message, boolean showLogs, BackgroundTask task){
+        this.success = success;
         this.backgroundTask = new BackgroundTaskInfo(task.getId(), showLogs);
         this.message = message;
         this.data = null;

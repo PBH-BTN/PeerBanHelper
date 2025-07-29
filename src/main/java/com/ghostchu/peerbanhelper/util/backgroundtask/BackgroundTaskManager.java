@@ -9,14 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 
@@ -36,8 +30,15 @@ public class BackgroundTaskManager {
 
     private void printTasks() {
         var set = backgroundTasks.entrySet();
-        log.info(tlUI(Lang.BACKGROUND_TASK_PRINT_TITLE, set.size()));
+        List<Map.Entry<String, BackgroundTask>> printList = new ArrayList<>(set.size());
         for (Map.Entry<String, BackgroundTask> entry : set) {
+            if (entry.getValue().getTaskStatus() != BackgroundTaskStatus.RUNNING) continue;
+            printList.add(entry);
+        }
+        if (printList.isEmpty()) return;
+        printList.sort((o1, o2) -> Long.compare(o2.getValue().getStartAt(), o1.getValue().getStartAt()));
+        log.info(tlUI(Lang.BACKGROUND_TASK_PRINT_TITLE, printList.size()));
+        for (Map.Entry<String, BackgroundTask> entry : printList) {
             var task = entry.getValue();
             var percent = task.isIndeterminate() ? "--%" : String.format("%.2f", entry.getValue().getProgress()) + "%";
             log.info(tlUI(Lang.BACKGROUND_TASK_PRINT_ITEM_RUNNING, tlUI(task.getTitle()), percent));
@@ -49,13 +50,14 @@ public class BackgroundTaskManager {
         var givenId = UUID.randomUUID().toString();
         backgroundTasks.put(backgroundTask.getId(), backgroundTask); // 先 add，避免race
         backgroundTask.setStartAt(System.currentTimeMillis());
+        backgroundTask.setTaskStatus(BackgroundTaskStatus.RUNNING);
         return Map.entry(givenId, CompletableFuture.runAsync(backgroundTask, defaultExecutor)
                 .whenComplete((v, throwable) -> {
                     backgroundTask.setEndedAt(System.currentTimeMillis());
                     backgroundTasks.remove(givenId);
                     if (throwable != null) {
                         backgroundTask.setTaskStatus(BackgroundTaskStatus.ERROR);
-                        log.error(tlUI(Lang.BACKGROUND_TASK_PRINT_ITEM_ERROR,tlUI(backgroundTask.getTitle())), throwable);
+                        log.error(tlUI(Lang.BACKGROUND_TASK_PRINT_ITEM_ERROR, tlUI(backgroundTask.getTitle())), throwable);
                         alertManager.publishAlert(true, AlertLevel.ERROR,
                                 "background-task-failure-" + UUID.randomUUID(),
                                 new TranslationComponent(Lang.BACKGROUND_TASK_EXCEPTION_TITLE),
@@ -64,6 +66,7 @@ public class BackgroundTaskManager {
                     } else {
                         backgroundTask.setTaskStatus(BackgroundTaskStatus.COMPLETED);
                     }
+                    sched.schedule(() -> backgroundTasks.remove(backgroundTask.getId()), 5, TimeUnit.MINUTES);
                 }));
     }
 

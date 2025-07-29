@@ -93,7 +93,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
-                .get("/api/general/refreshNatStatus", this::handleRefreshNatStatus, Role.USER_READ)
+                .post("/api/general/refreshNatStatus", this::handleRefreshNatStatus, Role.USER_WRITE)
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
                 .get("/api/general/stacktrace", this::handleDumpStackTrace, Role.USER_READ)
                 .get("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
@@ -109,11 +109,18 @@ public final class PBHGeneralController extends AbstractFeatureModule {
       var bgTask = new BackgroundTaskRunnable("Update NAT Status"){
             @Override
             public void run() {
+                log.info("任务内日志: 开始更新 NAT 状态...");
                 bTStunManager.refreshNatType();
+                log.info("任务内日志: NAT 状态已更新为: " + bTStunManager.getCachedNatType().name());
+                try {
+                    Thread.sleep(15000);// test
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
         backgroundTaskManager.registerAndStart(bgTask);
-        context.json(new StdResp(false, null, bgTask));
+        context.json(new StdResp(true, null, false, bgTask));
     }
 
     private void handleTriggerCrash(@NotNull Context context) {
