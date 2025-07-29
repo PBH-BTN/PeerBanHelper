@@ -70,7 +70,7 @@ public class TcpStunClient {
 
     private MappingResult getMappingTcp(String stunHost, int stunPort) throws IOException {
         try (Socket socket = StunSocketTool.getSocket()) {
-            socket.setSoLinger(true, 0);
+            //socket.setSoLinger(true, 0);
             socket.bind(new InetSocketAddress(sourceHost, sourcePort));
             // 连接到STUN服务器
             socket.connect(new InetSocketAddress(stunHost, stunPort));

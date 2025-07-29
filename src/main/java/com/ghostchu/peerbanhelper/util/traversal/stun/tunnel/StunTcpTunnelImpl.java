@@ -80,7 +80,7 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
         httpServer.start();
         // use raw socket to send http request to test mapping
         try (Socket httpSocket = new Socket()) {
-            httpSocket.setSoLinger(true, 0);
+            //httpSocket.setSoLinger(true, 0);
             httpSocket.connect(outerResult, 5000);
             String request = "GET /test HTTP/1.1\r\n" +
                     "Host: " + interResult.getHostString() + "\r\n" +
