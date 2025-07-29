@@ -35,6 +35,7 @@ public final class MainConfigUpdateScript {
     @UpdateScript(version = 36)
     public void stunSettings(YamlConfiguration bundle){
         conf.set("stun", bundle.getConfigurationSection("stun"));
+        conf.set("auto-stun", bundle.getConfigurationSection("auto-stun"));
     }
 
     @UpdateScript(version = 35)
