@@ -19,15 +19,7 @@ import java.util.concurrent.Executors;
 @Component
 public class BackgroundTaskManager {
     private final Map<String, BackgroundTask> backgroundTasks = Collections.synchronizedMap(new LinkedHashMap<>());
-    private final ExecutorService defaultExecutor = Executors.newThreadPerTaskExecutor(r -> {
-        Thread thread = new Thread(r);
-        if (r instanceof BackgroundTask backgroundTask) {
-            thread.setName(backgroundTask.getName());
-            thread.setPriority(Thread.MIN_PRIORITY);
-        }
-        thread.setDaemon(true);
-        return thread;
-    });
+    private final ExecutorService defaultExecutor = Executors.newWorkStealingPool(16);
     private final AlertManager alertManager;
 
     public BackgroundTaskManager(AlertManager alertManager) {
