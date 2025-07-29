@@ -3,28 +3,25 @@ package com.ghostchu.peerbanhelper.util.traversal.btstun;
 import com.cdnbye.core.nat.NatType;
 import com.cdnbye.core.nat.StunClient;
 import com.ghostchu.peerbanhelper.Main;
-import com.ghostchu.peerbanhelper.downloader.Downloader;
-import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class StunManager implements AutoCloseable{
-    private final Map<Downloader, BTStunInstance> perDownloaderStun = Collections.synchronizedMap(new HashMap<>());
-    private final PBHPortMapper portMapper;
+public class StunManager implements AutoCloseable {
     private NatType cachedNatType = NatType.Unknown;
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
 
-    public StunManager(PBHPortMapper portMapper) {
-        this.portMapper = portMapper;
+    public StunManager() {
         scheduledExecutorService.scheduleWithFixedDelay(this::refreshNatType, 0, 1, TimeUnit.HOURS);
     }
 
@@ -64,7 +61,7 @@ public class StunManager implements AutoCloseable{
 
     @Override
     public void close() throws Exception {
-        if(!this.scheduledExecutorService.isShutdown()) {
+        if (!this.scheduledExecutorService.isShutdown()) {
             this.scheduledExecutorService.shutdown();
         }
     }
