@@ -24,6 +24,7 @@ import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.UrlEncoderDecoder;
 import com.ghostchu.peerbanhelper.util.ipdb.IPDB;
 import com.ghostchu.peerbanhelper.util.ipdb.IPGeoData;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.ghostchu.simplereloadlib.ReloadResult;
@@ -83,6 +84,8 @@ public class PeerBanHelper implements Reloadable {
     private HTTPUtil httpUtil;
     @Autowired
     private PBHPortMapper pBHPortMapper;
+    @Autowired
+    private StunManager bTStunManager;
 
 
     public PeerBanHelper() {

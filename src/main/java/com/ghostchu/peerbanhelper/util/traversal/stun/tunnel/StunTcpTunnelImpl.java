@@ -2,7 +2,7 @@ package com.ghostchu.peerbanhelper.util.traversal.stun.tunnel;
 
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.util.PBHPortMapper;
-import com.ghostchu.peerbanhelper.util.traversal.stun.StunClient;
+import com.ghostchu.peerbanhelper.util.traversal.stun.TcpStunClient;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunListener;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunSocketTool;
 import com.offbynull.portmapper.mapper.PortMapper;
@@ -46,8 +46,8 @@ public class StunTcpTunnelImpl implements StunTcpTunnel {
             tmpSocket.close();
         }
         pbhPortMapper.mapPort(portMappers, PortType.TCP, localPort).join();
-        StunClient stunClient = new StunClient(Main.getMainConfig().getStringList("stun.servers"), "0.0.0.0", localPort, false);
-        var mappingResult = stunClient.getMapping();
+        TcpStunClient tcpStunClient = new TcpStunClient(Main.getMainConfig().getStringList("stun.servers"), "0.0.0.0", localPort);
+        var mappingResult = tcpStunClient.getMapping();
         var interResult = mappingResult.interAddress();
         var outerResult = mappingResult.outerAddress();
         log.debug("STUN CreateMapping: Inter address: {}, Outer address: {}", interResult, outerResult);

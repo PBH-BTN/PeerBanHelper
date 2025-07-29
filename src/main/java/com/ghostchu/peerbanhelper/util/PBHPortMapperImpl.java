@@ -70,7 +70,7 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             if (this.mappers != null) return;
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
             //this.mappers = PortMapperFactory.discover(networkBus, processBus);
-            this.mappers =Collections.synchronizedList(new ArrayList<>());
+            this.mappers = Collections.synchronizedList(new ArrayList<>());
             CompletableFuture<Void> scanNatPmp = CompletableFuture.runAsync(()-> {
                 try {
                     this.mappers.addAll(NatPmpPortMapper.identify(networkBus, processBus));

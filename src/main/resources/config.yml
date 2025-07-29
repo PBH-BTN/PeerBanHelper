@@ -134,9 +134,15 @@ performance:
   windows-ecoqos-api: true
 
 stun:
-  servers:
+  tcp-servers:
     - "turn.cloudflare.com:3478"
     - "stun.nextcloud.com:3478"
     - "stun.sipnet.com:3478"
+  udp-servers:
+    - "stun.nextcloud.com:3478"
+    - "stun.miwifi.com:3478"
+    - "stun.syncthing.net:3478"
+    - "stun.l.google.com:3478"
+    - "stun.cdnbye.com:3478"
   sourceHost: "0.0.0.0"
   availableTest: true

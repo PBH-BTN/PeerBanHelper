@@ -14,6 +14,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
+import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
 import com.ghostchu.peerbanhelper.web.JavalinWebContainer;
 import com.ghostchu.peerbanhelper.web.Role;
 import com.ghostchu.peerbanhelper.web.wrapper.StdResp;
@@ -66,6 +67,8 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private PeerBanHelper peerBanHelper;
     @Autowired
     private DownloaderServer downloaderServer;
+    @Autowired
+    private StunManager bTStunManager;
 
     @Override
     public boolean isConfigurable() {
@@ -237,6 +240,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
         network.put("use_proxy", proxy == 1 || proxy == 2 || proxy == 3);
         network.put("reverse_proxy", WebUtil.isUsingReserveProxy(context));
         network.put("client_ip", userIp);
+        network.put("nat_type", bTStunManager.getCachedNatType().name());
         return network;
     }
 
