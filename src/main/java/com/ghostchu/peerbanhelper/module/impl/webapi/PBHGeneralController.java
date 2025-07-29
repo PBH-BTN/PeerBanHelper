@@ -110,7 +110,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
             @Override
             public void run() {
                 var natType = bTStunManager.refreshNatType();
-                log.info("New detected NAT type now is: " + natType.name());
+                tlog.info("New detected NAT type now is: " + natType.name());
             }
         };
         backgroundTaskManager.registerAndStart(bgTask);

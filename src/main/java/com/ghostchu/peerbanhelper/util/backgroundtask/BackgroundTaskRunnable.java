@@ -14,7 +14,7 @@ public abstract class BackgroundTaskRunnable implements BackgroundTask {
     private boolean indeterminate = true;
     private TranslationComponent title;
     private TranslationComponent message;
-    public Logger log = new Logger();
+    public Logger tlog = new Logger();
     private BackgroundTaskStatus taskStatus = BackgroundTaskStatus.NOT_STARTED;
     private boolean cancellable = false;
     private final AtomicBoolean requestCancel = new AtomicBoolean(false);
@@ -72,7 +72,7 @@ public abstract class BackgroundTaskRunnable implements BackgroundTask {
 
     @Override
     public EvictingQueue<Logger.LogEntry> getLogs() {
-        return log.getLogs();
+        return tlog.getLogs();
     }
 
     @Override
