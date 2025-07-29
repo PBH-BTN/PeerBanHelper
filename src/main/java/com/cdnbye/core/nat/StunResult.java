@@ -17,8 +17,7 @@ public class StunResult {
     private final InetSocketAddress ipAddr;
     private final NatType natType;
 
-    public StunResult(NatType natType, InetSocketAddress ipAddr)
-    {
+    public StunResult(NatType natType, InetSocketAddress ipAddr) {
         this.natType = natType;
         this.ipAddr = ipAddr;
     }

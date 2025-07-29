@@ -90,20 +90,17 @@ public class StunMessage {
         }
     }
 
-    public StunMessage()
-    {
+    public StunMessage() {
         this.transactionId = new byte[12];
         new Random().nextBytes(this.transactionId);
     }
 
-    public StunMessage(StunMessageType type)
-    {
+    public StunMessage(StunMessageType type) {
         this();
         this.type = type;
     }
 
-    public StunMessage(StunMessageType type, StunChangeRequest changeRequest)
-    {
+    public StunMessage(StunMessageType type, StunChangeRequest changeRequest) {
         this();
         this.type = type;
         this.changeRequest = changeRequest;
@@ -146,32 +143,19 @@ public class StunMessage {
 
         // STUN Message Type
         int messageType = data[offset++] << 8 | data[offset++];
-        if (messageType == StunMessageType.BindingErrorResponse.value())
-        {
+        if (messageType == StunMessageType.BindingErrorResponse.value()) {
             type = StunMessageType.BindingErrorResponse;
-        }
-        else if (messageType == StunMessageType.BindingRequest.value())
-        {
+        } else if (messageType == StunMessageType.BindingRequest.value()) {
             type = StunMessageType.BindingRequest;
-        }
-        else if (messageType == StunMessageType.BindingResponse.value())
-        {
+        } else if (messageType == StunMessageType.BindingResponse.value()) {
             type = StunMessageType.BindingResponse;
-        }
-        else if (messageType == StunMessageType.SharedSecretErrorResponse.value())
-        {
+        } else if (messageType == StunMessageType.SharedSecretErrorResponse.value()) {
             type = StunMessageType.SharedSecretErrorResponse;
-        }
-        else if (messageType == StunMessageType.SharedSecretRequest.value())
-        {
+        } else if (messageType == StunMessageType.SharedSecretRequest.value()) {
             type = StunMessageType.SharedSecretRequest;
-        }
-        else if (messageType == StunMessageType.SharedSecretResponse.value())
-        {
+        } else if (messageType == StunMessageType.SharedSecretResponse.value()) {
             type = StunMessageType.SharedSecretResponse;
-        }
-        else
-        {
+        } else {
             throw new IllegalArgumentException("Invalid STUN message type value !");
         }
 //        System.out.println("StunMessageType " + type);
@@ -187,8 +171,7 @@ public class StunMessage {
         offset += 12;
 
         //--- Message attributes ---------------------------------------------
-        while (offset - 20 < messageLength)
-        {
+        while (offset - 20 < messageLength) {
 //            System.out.println("offset " + offset);
             /* RFC 3489 11.2.
                 Each attribute is TLV encoded, with a 16 bit type, 16 bit length, and variable value:
@@ -209,22 +192,19 @@ public class StunMessage {
             int length = data[offset++] << 8 | data[offset++];
 //            System.out.println("Attribute Length " + length);
             // MAPPED-ADDRESS
-            if (type == AttributeType.MappedAddress)
-            {
+            if (type == AttributeType.MappedAddress) {
 //                System.out.println("type == AttributeType.MappedAddress");
                 mappedAddress = parseIPAddr(data, offset);
 //                System.out.println("mappedAddress " + mappedAddress.getAddress() + " " + mappedAddress.getPort());
                 offset += 8;
             }
             // RESPONSE-ADDRESS
-            else if (type == AttributeType.ResponseAddress)
-            {
+            else if (type == AttributeType.ResponseAddress) {
                 responseAddress = parseIPAddr(data, offset);
                 offset += 8;
             }
             // CHANGE-REQUEST
-            else if (type == AttributeType.ChangeRequest)
-            {
+            else if (type == AttributeType.ChangeRequest) {
 				/*
                     The CHANGE-REQUEST attribute is used by the client to request that
                     the server use a different address and/or port when sending the
@@ -255,14 +235,12 @@ public class StunMessage {
                 offset++;
             }
             // SOURCE-ADDRESS
-            else if (type == AttributeType.SourceAddress)
-            {
+            else if (type == AttributeType.SourceAddress) {
                 sourceAddress = parseIPAddr(data, offset);
                 offset += 8;
             }
             // CHANGED-ADDRESS
-            else if (type == AttributeType.ChangedAddress)
-            {
+            else if (type == AttributeType.ChangedAddress) {
                 changedAddress = parseIPAddr(data, offset);
                 offset += 8;
             }
@@ -279,13 +257,11 @@ public class StunMessage {
 //                offset += length;
 //            }
             // MESSAGE-INTEGRITY
-            else if (type == AttributeType.MessageIntegrity)
-            {
+            else if (type == AttributeType.MessageIntegrity) {
                 offset += length;
             }
             // ERROR-CODE
-            else if (type == AttributeType.ErrorCode)
-            {
+            else if (type == AttributeType.ErrorCode) {
 				/* 3489 11.2.9.
                     0                   1                   2                   3
                     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -302,8 +278,7 @@ public class StunMessage {
                 offset += length;
             }
             // UNKNOWN-ATTRIBUTES
-            else if (type == AttributeType.UnknownAttribute)
-            {
+            else if (type == AttributeType.UnknownAttribute) {
                 offset += length;
             }
             // REFLECTED-FROM
@@ -320,16 +295,14 @@ public class StunMessage {
 //                offset += length;
 //            }
             // Unknown
-            else
-            {
+            else {
                 offset += length;
             }
         }
     }
 
     // Converts this to raw STUN packet.
-    public byte[] toByteData()
-    {
+    public byte[] toByteData() {
 			/* RFC 5389 6.
                 All STUN messages MUST start with a 20-byte header followed by zero
                 or more Attributes.  The STUN header contains a STUN message type,
@@ -359,18 +332,18 @@ public class StunMessage {
         //--- message header -------------------------------------
 
         // STUN Message Type (2 bytes)
-        msg[offset++] = (byte)((type.value() >> 8) & 0x3F);
-        msg[offset++] = (byte)(type.value() & 0xFF);
+        msg[offset++] = (byte) ((type.value() >> 8) & 0x3F);
+        msg[offset++] = (byte) (type.value() & 0xFF);
 
         // Message Length (2 bytes) will be assigned at last.
         msg[offset++] = 0;
         msg[offset++] = 0;
 
         // Magic Cookie
-        msg[offset++] = (byte)((magicCookie >> 24) & 0xFF);
-        msg[offset++] = (byte)((magicCookie >> 16) & 0xFF);
-        msg[offset++] = (byte)((magicCookie >> 8) & 0xFF);
-        msg[offset++] = (byte)(magicCookie & 0xFF);
+        msg[offset++] = (byte) ((magicCookie >> 24) & 0xFF);
+        msg[offset++] = (byte) ((magicCookie >> 16) & 0xFF);
+        msg[offset++] = (byte) ((magicCookie >> 8) & 0xFF);
+        msg[offset++] = (byte) (magicCookie & 0xFF);
 
         // Transaction ID (16 bytes)
         System.arraycopy(transactionId, 0, msg, offset, 12);
@@ -391,18 +364,13 @@ public class StunMessage {
                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             */
 
-        if (mappedAddress != null)
-        {
+        if (mappedAddress != null) {
             storeEndPoint(AttributeType.MappedAddress, mappedAddress, msg, offset);
             offset += 12;
-        }
-        else if (responseAddress != null)
-        {
+        } else if (responseAddress != null) {
             storeEndPoint(AttributeType.ResponseAddress, responseAddress, msg, offset);
             offset += 12;
-        }
-        else if (changeRequest != null)
-        {
+        } else if (changeRequest != null) {
 				/*
                     The CHANGE-REQUEST attribute is used by the client to request that
                     the server use a different address and/or port when sending the
@@ -428,22 +396,18 @@ public class StunMessage {
 
             // Attribute header
             msg[offset++] = (byte) (AttributeType.ChangeRequest.value() >> 8);
-            msg[offset++] = (byte)(AttributeType.ChangeRequest.value() & 0xFF);
+            msg[offset++] = (byte) (AttributeType.ChangeRequest.value() & 0xFF);
             msg[offset++] = 0;
             msg[offset++] = 4;
 
             msg[offset++] = 0;
             msg[offset++] = 0;
             msg[offset++] = 0;
-            msg[offset++] = (byte)((changeRequest.isChangeIp() ? 1 : 0) << 2 | (changeRequest.isChangePort() ? 1 : 0) << 1);
-        }
-        else if (sourceAddress != null)
-        {
+            msg[offset++] = (byte) ((changeRequest.isChangeIp() ? 1 : 0) << 2 | (changeRequest.isChangePort() ? 1 : 0) << 1);
+        } else if (sourceAddress != null) {
             storeEndPoint(AttributeType.SourceAddress, sourceAddress, msg, offset);
             offset += 12;
-        }
-        else if (changedAddress != null)
-        {
+        } else if (changedAddress != null) {
             storeEndPoint(AttributeType.ChangedAddress, changedAddress, msg, offset);
             offset += 12;
         }
@@ -473,8 +437,7 @@ public class StunMessage {
 //            Array.Copy(userBytes, 0, msg, offset, userBytes.Length);
 //            offset += userBytes.Length;
 //        }
-        else if (errorCode != null)
-        {
+        else if (errorCode != null) {
             /* 3489 11.2.9.
                 0                   1                   2                   3
                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -491,15 +454,15 @@ public class StunMessage {
             msg[offset++] = 0;
             msg[offset++] = (byte) AttributeType.ErrorCode.value();
             msg[offset++] = 0;
-            msg[offset++] = (byte)(4 + reasonBytes.length);
+            msg[offset++] = (byte) (4 + reasonBytes.length);
 
             // Empty
             msg[offset++] = 0;
             msg[offset++] = 0;
             // Class
-            msg[offset++] = (byte)Math.floor(errorCode.getCode() / 100.0);
+            msg[offset++] = (byte) Math.floor(errorCode.getCode() / 100.0);
             // Number
-            msg[offset++] = (byte)(errorCode.getCode() & 0xFF);
+            msg[offset++] = (byte) (errorCode.getCode() & 0xFF);
             // ReasonPhrase
             System.arraycopy(reasonBytes, 0, msg, offset, reasonBytes.length);
             offset += reasonBytes.length;
@@ -511,8 +474,8 @@ public class StunMessage {
 //        }
 
         // Update Message Length. NOTE: 20 bytes header not included.
-        msg[2] = (byte)((offset - 20) >> 8);
-        msg[3] = (byte)((offset - 20) & 0xFF);
+        msg[2] = (byte) ((offset - 20) >> 8);
+        msg[3] = (byte) ((offset - 20) & 0xFF);
 
         // Make retVal with actual size.
         byte[] retVal = new byte[offset];
@@ -521,8 +484,7 @@ public class StunMessage {
         return retVal;
     }
 
-    private static InetSocketAddress parseIPAddr(byte[] data, int offset)
-    {
+    private static InetSocketAddress parseIPAddr(byte[] data, int offset) {
         /*
             It consists of an eight bit address family, and a sixteen bit
             port, followed by a fixed length value representing the IP address.
@@ -566,7 +528,7 @@ public class StunMessage {
 //        ip[1] = data[offset++];
 //        ip[2] = data[offset++];
 //        ip[3] = data[offset];
-        String ip = byte2Int(data[offset++])+"."+byte2Int(data[offset++])+"."+byte2Int(data[offset++])+"."+byte2Int(data[offset++]);
+        String ip = byte2Int(data[offset++]) + "." + byte2Int(data[offset++]) + "." + byte2Int(data[offset++]) + "." + byte2Int(data[offset++]);
 //        System.out.println("parseIPAddr ip " + ip);
         // offset总共加了8
 
@@ -590,8 +552,7 @@ public class StunMessage {
         return Integer.valueOf(result.toString(), 2);
     }
 
-    private static void storeEndPoint(AttributeType type, InetSocketAddress endPoint, byte[] message, int offset)
-    {
+    private static void storeEndPoint(AttributeType type, InetSocketAddress endPoint, byte[] message, int offset) {
         /*
             It consists of an eight bit address family, and a sixteen bit
             port, followed by a fixed length value representing the IP address.
@@ -606,18 +567,18 @@ public class StunMessage {
         */
 
         // Header
-        message[offset++] = (byte)(type.value >> 8);
-        message[offset++] = (byte)(type.value & 0xFF);
+        message[offset++] = (byte) (type.value >> 8);
+        message[offset++] = (byte) (type.value & 0xFF);
         message[offset++] = 0;
         message[offset++] = 8;
 
         // Unused
         message[offset++] = 0;
         // Family
-        message[offset++] = (byte)0x01;
+        message[offset++] = (byte) 0x01;
         // Port
-        message[offset++] = (byte)(endPoint.getPort() >> 8);
-        message[offset++] = (byte)(endPoint.getPort() & 0xFF);
+        message[offset++] = (byte) (endPoint.getPort() >> 8);
+        message[offset++] = (byte) (endPoint.getPort() & 0xFF);
         // Address
         byte[] ipBytes = endPoint.getAddress().getAddress();
         message[offset++] = ipBytes[0];

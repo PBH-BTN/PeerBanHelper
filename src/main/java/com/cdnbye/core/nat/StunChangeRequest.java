@@ -28,8 +28,7 @@ public class StunChangeRequest {
     /// </summary>
     /// <param name="changeIp">Specifies if STUN server must send response to different IP than request was received.</param>
     /// <param name="changePort">Specifies if STUN server must send response to different port than request was received.</param>
-    public StunChangeRequest(boolean changeIp, boolean changePort)
-    {
+    public StunChangeRequest(boolean changeIp, boolean changePort) {
         this.changeIp = changeIp;
         this.changePort = changePort;
     }
