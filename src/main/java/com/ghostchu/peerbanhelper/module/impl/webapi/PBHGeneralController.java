@@ -106,17 +106,11 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     }
 
     private void handleRefreshNatStatus(@NotNull Context context) {
-      var bgTask = new BackgroundTaskRunnable("Update NAT Status"){
+        var bgTask = new BackgroundTaskRunnable(new TranslationComponent(Lang.BACKGROUND_TASK_NAME_UPDATE_NAT_STATUS)) {
             @Override
             public void run() {
-                log.info("任务内日志: 开始更新 NAT 状态...");
-                bTStunManager.refreshNatType();
-                log.info("任务内日志: NAT 状态已更新为: " + bTStunManager.getCachedNatType().name());
-                try {
-                    Thread.sleep(15000);// test
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                var natType = bTStunManager.refreshNatType();
+                log.info("New detected NAT type now is: " + natType.name());
             }
         };
         backgroundTaskManager.registerAndStart(bgTask);

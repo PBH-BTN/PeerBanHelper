@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BackgroundTaskRunnable implements BackgroundTask {
     private final String id = UUID.randomUUID().toString();
-    private final String name;
     private double progress = 0.0d;
     private boolean indeterminate = true;
     private TranslationComponent title;
@@ -22,8 +21,8 @@ public abstract class BackgroundTaskRunnable implements BackgroundTask {
     private long startAt = 0;
     private long endedAt = 0;
 
-    public BackgroundTaskRunnable(String name) {
-        this.name = name;
+    public BackgroundTaskRunnable(@NotNull TranslationComponent title) {
+        this.title = title;
     }
 
     @Override
