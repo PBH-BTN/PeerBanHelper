@@ -12,6 +12,8 @@ import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ReloadEntryDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.*;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
+import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskRunnable;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
 import com.ghostchu.peerbanhelper.util.rule.ModuleMatchCache;
 import com.ghostchu.peerbanhelper.util.traversal.btstun.StunManager;
@@ -69,6 +71,8 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     private DownloaderServer downloaderServer;
     @Autowired
     private StunManager bTStunManager;
+    @Autowired
+    private BackgroundTaskManager backgroundTaskManager;
 
     @Override
     public boolean isConfigurable() {
@@ -89,6 +93,7 @@ public final class PBHGeneralController extends AbstractFeatureModule {
     public void onEnable() {
         webContainer.javalin()
                 .get("/api/general/status", this::handleStatusGet, Role.USER_READ)
+                .get("/api/general/refreshNatStatus", this::handleRefreshNatStatus, Role.USER_READ)
                 .get("/api/general/checkModuleAvailable", this::handleModuleAvailable, Role.USER_READ)
                 .get("/api/general/stacktrace", this::handleDumpStackTrace, Role.USER_READ)
                 .get("/api/general/heapdump", this::handleHeapDump, Role.USER_WRITE)
@@ -98,6 +103,17 @@ public final class PBHGeneralController extends AbstractFeatureModule {
                 .patch("/api/general/global", this::handleGlobalConfig, Role.USER_WRITE)
                 .get("/api/general/{configName}", this::handleConfigGet, Role.USER_WRITE)
                 .put("/api/general/{configName}", this::handleConfigPut, Role.USER_WRITE);
+    }
+
+    private void handleRefreshNatStatus(@NotNull Context context) {
+      var bgTask = new BackgroundTaskRunnable("Update NAT Status"){
+            @Override
+            public void run() {
+                bTStunManager.refreshNatType();
+            }
+        };
+        backgroundTaskManager.registerAndStart(bgTask);
+        context.json(new StdResp(false, null, bgTask));
     }
 
     private void handleTriggerCrash(@NotNull Context context) {
