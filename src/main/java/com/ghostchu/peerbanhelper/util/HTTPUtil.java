@@ -46,7 +46,7 @@ public final class HTTPUtil implements Reloadable {
     private Proxy.Type proxyType;
     private @Nullable String proxyHost;
     private int proxyPort;
-    private List<Pattern> proxyBypasses = Collections.synchronizedList(new ArrayList<>());
+    private final List<Pattern> proxyBypasses = Collections.synchronizedList(new ArrayList<>());
     private Proxy proxyInstance;
 
 
@@ -69,6 +69,7 @@ public final class HTTPUtil implements Reloadable {
         };
         this.proxyHost = Main.getMainConfig().getString("proxy.host", "127.0.0.1");
         this.proxyPort = Main.getMainConfig().getInt("proxy.port", 7890);
+        proxyBypasses.clear();
         for (String proxy : Main.getMainConfig().getString("proxy.non-proxy-hosts", "").split("\\|")) {
             if (!proxy.isEmpty()) {
                 try {

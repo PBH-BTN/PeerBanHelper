@@ -205,13 +205,13 @@ public class PeerBanHelper implements Reloadable {
         try {
             String accountId = Main.getMainConfig().getString("ip-database.account-id", "");
             String licenseKey = Main.getMainConfig().getString("ip-database.license-key", "");
-            String databaseCity = Main.getMainConfig().getString("ip-database.database-city", "");
-            String databaseASN = Main.getMainConfig().getString("ip-database.database-asn", "");
+            String databaseCity = Main.getMainConfig().getString("ip-database.database-city", "GeoLite2-City");
+            String databaseASN = Main.getMainConfig().getString("ip-database.database-asn", "GeoLite2-ASN");
             boolean autoUpdate = Main.getMainConfig().getBoolean("ip-database.auto-update");
             this.ipdb = new IPDB(new File(Main.getDataDirectory(), "ipdb"), accountId, licenseKey,
                     databaseCity, databaseASN, autoUpdate, Main.getUserAgent(), httpUtil);
         } catch (Exception e) {
-            log.info(tlUI(Lang.IPDB_INVALID, e));
+            log.info(tlUI(Lang.IPDB_INVALID),e );
         }
     }
 
