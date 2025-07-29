@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+// todo: 需要添加一个定时器，只有下载器状态正常才启动 STUN，不正常了特别是连不上就关闭 STUN
 @Component
 @Slf4j
 public class BTStunManager implements AutoCloseable, Reloadable {
