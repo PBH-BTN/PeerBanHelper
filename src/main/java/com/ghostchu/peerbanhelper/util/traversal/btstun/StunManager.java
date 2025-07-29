@@ -11,17 +11,21 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class StunManager {
+public class StunManager implements AutoCloseable{
     private final Map<Downloader, BTStunInstance> perDownloaderStun = Collections.synchronizedMap(new HashMap<>());
     private final PBHPortMapper portMapper;
     private NatType cachedNatType = NatType.Unknown;
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
 
     public StunManager(PBHPortMapper portMapper) {
         this.portMapper = portMapper;
-        Thread.ofVirtual().name("StunManager-RefreshNatType").start(this::refreshNatType);
+        scheduledExecutorService.scheduleWithFixedDelay(this::refreshNatType, 0, 1, TimeUnit.HOURS);
     }
 
     @NotNull
@@ -38,7 +42,7 @@ public class StunManager {
         for (String stunServer : shuffledServers) {
             String[] stun = stunServer.split(":");
             if (stun.length != 2) {
-                log.warn("Invalid STUN server format: {}, skipping", stunServer);
+                log.debug("Invalid STUN server format: {}, skipping", stunServer);
                 continue;
             }
             try {
@@ -48,13 +52,20 @@ public class StunManager {
                     log.debug("Successfully determined NAT type {} using server {}", natType, stunServer);
                     return cachedNatType;
                 }
-                log.warn("STUN server {} returned Unknown NAT type, trying next server", stunServer);
+                log.debug("STUN server {} returned Unknown NAT type, trying next server", stunServer);
             } catch (Exception e) {
-                log.warn("Failed to query STUN server {}: {}, trying next server", stunServer, e.getMessage());
+                log.debug("Failed to query STUN server {}: {}, trying next server", stunServer, e.getMessage());
             }
         }
-        log.error("All STUN servers failed or returned Unknown NAT type");
+        log.error("All STUN servers failed or returned Unknown NAT type, NAT type check failed");
         this.cachedNatType = NatType.Unknown;
         return cachedNatType;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if(!this.scheduledExecutorService.isShutdown()) {
+            this.scheduledExecutorService.shutdown();
+        }
     }
 }
