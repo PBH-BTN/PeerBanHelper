@@ -20,11 +20,11 @@ public class BackgroundTaskManager {
     private final Map<String, BackgroundTask> backgroundTasks = Collections.synchronizedMap(new LinkedHashMap<>());
     private final ExecutorService defaultExecutor = Executors.newThreadPerTaskExecutor(r -> {
         Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        if (r instanceof BackgroundTaskRunnable backgroundTaskRunnable) {
-            thread.setName(backgroundTaskRunnable.getName());
+        if (r instanceof BackgroundTask backgroundTask) {
+            thread.setName(backgroundTask.getName());
             thread.setPriority(Thread.MIN_PRIORITY);
         }
+        thread.setDaemon(true);
         return thread;
     });
     private final AlertManager alertManager;
@@ -34,24 +34,32 @@ public class BackgroundTaskManager {
     }
 
     @NotNull
-    public CompletableFuture<Void> registerAndStart(@NotNull BackgroundTask backgroundTask) {
+    public Map.Entry<String, CompletableFuture<Void>> registerAndStart(@NotNull BackgroundTask backgroundTask) {
         var givenId = UUID.randomUUID().toString();
         backgroundTasks.put(givenId, backgroundTask); // 先 add，避免race
-        return CompletableFuture.runAsync(backgroundTask, defaultExecutor)
+        return Map.entry(givenId, CompletableFuture.runAsync(backgroundTask, defaultExecutor)
                 .whenComplete((v, throwable) -> {
                     backgroundTasks.remove(givenId);
                     if (throwable != null) {
+                        backgroundTask.setTaskStatus(BackgroundTaskStatus.ERROR);
                         alertManager.publishAlert(true, AlertLevel.ERROR,
                                 "background-task-failure-" + UUID.randomUUID(),
                                 new TranslationComponent(Lang.BACKGROUND_TASK_EXCEPTION_TITLE),
                                 new TranslationComponent(Lang.BACKGROUND_TASK_EXCEPTION_DESCRIPTION, backgroundTask.getTitle(), backgroundTask.getMessage(), backgroundTask.getProgress(), throwable.getClass().getName() + ": " + throwable.getMessage())
                         );
+                    } else {
+                        backgroundTask.setTaskStatus(BackgroundTaskStatus.COMPLETED);
                     }
-                });
+                }));
     }
 
     @NotNull
     public Map<String, BackgroundTask> getBackgroundTasks() {
         return backgroundTasks;
+    }
+
+    @NotNull
+    public BackgroundTask getBackgroundTask(String id) {
+        return backgroundTasks.get(id);
     }
 }

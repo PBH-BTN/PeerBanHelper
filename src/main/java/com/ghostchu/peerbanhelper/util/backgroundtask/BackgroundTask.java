@@ -1,12 +1,13 @@
 package com.ghostchu.peerbanhelper.util.backgroundtask;
 
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
+import org.jetbrains.annotations.NotNull;
 
-public interface BackgroundTask extends Runnable{
+public interface BackgroundTask extends Runnable {
 
-    void updateProgress(double progress);
+    BackgroundTask updateProgress(double progress);
 
-    void updateIndeterminate(boolean indeterminate);
+    BackgroundTask updateIndeterminate(boolean indeterminate);
 
     double getProgress();
 
@@ -21,4 +22,8 @@ public interface BackgroundTask extends Runnable{
     BackgroundTask setMessage(TranslationComponent message);
 
     String getName();
+
+    @NotNull BackgroundTaskStatus getTaskStatus();
+
+    void setTaskStatus(@NotNull BackgroundTaskStatus taskStatus);
 }
