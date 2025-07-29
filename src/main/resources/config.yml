@@ -1,4 +1,4 @@
-config-version: 35
+config-version: 36
 # 设置程序语言
 # Set the program language
 # default 跟随操作系统 (Follow the operating system)
@@ -134,15 +134,20 @@ performance:
   windows-ecoqos-api: true
 
 stun:
+  # 支持 TCP 协议的 STUN 服务器列表
+  # TCP protocol supported STUN servers
   tcp-servers:
     - "turn.cloudflare.com:3478"
     - "stun.nextcloud.com:3478"
     - "stun.sipnet.com:3478"
+  # 支持 UDP 协议的 STUN 服务器列表
+  # UDP protocol supported STUN servers
   udp-servers:
     - "stun.nextcloud.com:3478"
     - "stun.miwifi.com:3478"
     - "stun.syncthing.net:3478"
     - "stun.l.google.com:3478"
     - "stun.cdnbye.com:3478"
-  sourceHost: "0.0.0.0"
+  # 启用可用性测试
+  # Enable available test
   availableTest: true
