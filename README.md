@@ -127,6 +127,7 @@ PeerBanHelper 使用 [JProfiler all-in one Java profiler](https://www.ej-technol
 - [simple-java-mail](https://www.simplejavamail.org/)
 - [PF4J](https://pf4j.org/)
 - [completable-futures](https://github.com/spotify/completable-futures)
+- [cdnbye/NatTypeDetector](https://github.com/cdnbye/NatTypeDetector)
 
 ### WebUI
 
