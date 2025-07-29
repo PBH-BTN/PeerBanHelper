@@ -5,5 +5,6 @@ public enum BackgroundTaskStatus {
     RUNNING,
     PAUSED,
     ERROR,
+    CANCELLED,
     COMPLETED,
 }

@@ -5,9 +5,11 @@ import com.google.common.collect.EvictingQueue;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BackgroundTaskRunnable implements BackgroundTask {
+    private final String id = UUID.randomUUID().toString();
     private final String name;
     private double progress = 0.0d;
     private boolean indeterminate = true;
@@ -124,6 +126,10 @@ public abstract class BackgroundTaskRunnable implements BackgroundTask {
     @Override
     public void cancel() {
         requestCancel.set(true);
+    }
+    @Override
+    public String getId() {
+        return id;
     }
 
     public static class Logger {

@@ -1,9 +1,10 @@
 package com.ghostchu.peerbanhelper.util.backgroundtask;
 
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
-import com.google.common.collect.EvictingQueue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface BackgroundTask extends Runnable {
@@ -14,6 +15,7 @@ public interface BackgroundTask extends Runnable {
 
     double getProgress();
 
+    @Nullable
     TranslationComponent getMessage();
 
     TranslationComponent getTitle();
@@ -24,7 +26,7 @@ public interface BackgroundTask extends Runnable {
 
     BackgroundTask setMessage(TranslationComponent message);
 
-    EvictingQueue<BackgroundTaskRunnable.Logger.LogEntry> getLogs();
+    Collection<BackgroundTaskRunnable.Logger.LogEntry> getLogs();
 
     String getName();
 
@@ -47,4 +49,6 @@ public interface BackgroundTask extends Runnable {
     void cancel();
 
     void setTaskStatus(@NotNull BackgroundTaskStatus taskStatus);
+
+    String getId();
 }
