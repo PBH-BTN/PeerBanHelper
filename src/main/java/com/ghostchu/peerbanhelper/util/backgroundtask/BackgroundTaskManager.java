@@ -5,6 +5,7 @@ import com.ghostchu.peerbanhelper.alert.AlertManager;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -37,8 +38,10 @@ public class BackgroundTaskManager {
     public Map.Entry<String, CompletableFuture<Void>> registerAndStart(@NotNull BackgroundTask backgroundTask) {
         var givenId = UUID.randomUUID().toString();
         backgroundTasks.put(givenId, backgroundTask); // 先 add，避免race
+        backgroundTask.setStartAt(System.currentTimeMillis());
         return Map.entry(givenId, CompletableFuture.runAsync(backgroundTask, defaultExecutor)
                 .whenComplete((v, throwable) -> {
+                    backgroundTask.setEndedAt(System.currentTimeMillis());
                     backgroundTasks.remove(givenId);
                     if (throwable != null) {
                         backgroundTask.setTaskStatus(BackgroundTaskStatus.ERROR);
@@ -58,7 +61,7 @@ public class BackgroundTaskManager {
         return backgroundTasks;
     }
 
-    @NotNull
+    @Nullable
     public BackgroundTask getBackgroundTask(String id) {
         return backgroundTasks.get(id);
     }

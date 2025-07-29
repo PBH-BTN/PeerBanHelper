@@ -269,6 +269,8 @@ public class PeerBanHelper implements Reloadable {
      */
     private void registerModules() {
         log.info(tlUI(Lang.WAIT_FOR_MODULES_STARTUP));
+        moduleManager.register(BackgroundModule.class);
+        moduleManager.register(PBHGeneralController.class);
         moduleManager.register(IPBlackList.class);
         moduleManager.register(PeerIdBlacklist.class);
         moduleManager.register(ClientNameBlacklist.class);
@@ -290,7 +292,6 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(PBHPlusController.class);
         moduleManager.register(PBHOOBEController.class);
         moduleManager.register(PBHChartController.class);
-        moduleManager.register(PBHGeneralController.class);
         moduleManager.register(PBHTorrentController.class);
         moduleManager.register(PBHPeerController.class);
         moduleManager.register(PBHAlertController.class);
@@ -302,6 +303,7 @@ public class PeerBanHelper implements Reloadable {
         moduleManager.register(BackgroundModule.class);
         moduleManager.register(SwarmTrackingModule.class);
         moduleManager.register(MCPController.class);
+
     }
 
     public IPDBResponse queryIPDB(PeerAddress address) {

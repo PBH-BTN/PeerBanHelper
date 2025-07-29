@@ -707,3 +707,7 @@ BTSTUN_ON_TUNNEL_CREATED: "[BT-STUN] 下载器 {} 的隧道已创建，本地端
 BTSTUN_FORWARDER_EXCEPTION: "[BT-STUN] 下载器 {} 的隧道转发器创建出错，错误信息: {}"
 BTSTUN_MODIFY_DOWNLOADER_BT_PORT: "[BT-STUN] 正在修改下载器 {} 的 BT 监听端口为 {}，请稍等……"
 BTSTUN_TUNNEL_CREATE_SUCCESSFULLY: "[BT-STUN] 下载器 {} 的隧道已成功创建: {} <-> {} <-> {}"
+
+BACKGROUND_TASK_NOT_FOUND: "无法找到指定的后台任务，指定的任务可能已经结束"
+BACKGROUND_TASK_CANNOT_CANCEL: "此任务不支持取消"
+BACKGROUND_TASK_CANCEL_REQUESTED: "已成功通知任务取消"

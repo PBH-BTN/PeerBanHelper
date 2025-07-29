@@ -5,6 +5,8 @@ import com.google.common.collect.EvictingQueue;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.event.Level;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public abstract class BackgroundTaskRunnable implements BackgroundTask {
     private final String name;
     private double progress = 0.0d;
@@ -13,6 +15,10 @@ public abstract class BackgroundTaskRunnable implements BackgroundTask {
     private TranslationComponent message;
     public Logger log = new Logger();
     private BackgroundTaskStatus taskStatus = BackgroundTaskStatus.NOT_STARTED;
+    private boolean cancellable = false;
+    private final AtomicBoolean requestCancel = new AtomicBoolean(false);
+    private long startAt = 0;
+    private long endedAt = 0;
 
     public BackgroundTaskRunnable(String name) {
         this.name = name;
@@ -63,8 +69,9 @@ public abstract class BackgroundTaskRunnable implements BackgroundTask {
         return this;
     }
 
-    public Logger getLog() {
-        return log;
+    @Override
+    public EvictingQueue<Logger.LogEntry> getLogs() {
+        return log.getLogs();
     }
 
     @Override
@@ -80,6 +87,43 @@ public abstract class BackgroundTaskRunnable implements BackgroundTask {
     @Override
     public void setTaskStatus(@NotNull BackgroundTaskStatus taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    @Override
+    public boolean isCancellable() {
+        return cancellable;
+    }
+
+    @Override
+    public void setStartAt(long startAt) {
+        this.startAt = startAt;
+    }
+    @Override
+    public long getStartAt() {
+        return startAt;
+    }
+    @Override
+    public void setEndedAt(long endedAt) {
+        this.endedAt = endedAt;
+    }
+    @Override
+    public long getEndedAt() {
+        return endedAt;
+    }
+
+    @Override
+    public AtomicBoolean getRequestCancel() {
+        return requestCancel;
+    }
+
+    @Override
+    public void setCancellable(boolean cancellable) {
+        this.cancellable = cancellable;
+    }
+
+    @Override
+    public void cancel() {
+        requestCancel.set(true);
     }
 
     public static class Logger {
