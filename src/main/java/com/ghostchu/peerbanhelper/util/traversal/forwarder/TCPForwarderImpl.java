@@ -65,6 +65,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
                     // 为每个客户端连接创建一个处理线程
                     netIOExecutor.submit(() -> handleClient(clientSocket));
                     connectionHandled.increment();
+                    log.debug("Fuck, accepted new client connection: {}", clientSocket.getRemoteSocketAddress());
                 }
             } catch (IOException e) {
                 if (running) {
@@ -81,6 +82,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
             // 连接到远程服务器
             remoteSocket = new Socket();
             remoteSocket.connect(new InetSocketAddress(remoteHost, remotePort), 5000);
+            log.debug("Shit, connected to backend: {}", new InetSocketAddress(remoteHost, remotePort));
             connectionMap.put(clientSocket.getRemoteSocketAddress(), remoteSocket.getLocalSocketAddress());
             // 创建两个线程进行双向数据转发
             Socket finalRemoteSocket = remoteSocket;
