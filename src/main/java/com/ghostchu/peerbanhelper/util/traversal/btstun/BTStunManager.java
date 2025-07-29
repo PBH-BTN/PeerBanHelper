@@ -6,6 +6,7 @@ import com.ghostchu.peerbanhelper.util.PBHPortMapper;
 import com.ghostchu.peerbanhelper.util.traversal.stun.NatDetectionResult;
 import com.ghostchu.peerbanhelper.util.traversal.stun.NatType;
 import com.ghostchu.peerbanhelper.util.traversal.stun.StunClient;
+import com.offbynull.portmapper.mapper.MappedPort;
 import com.offbynull.portmapper.mapper.PortType;
 import com.sun.net.httpserver.HttpServer;
 import lombok.Cleanup;
@@ -65,24 +66,32 @@ public class BTStunManager {
         });
         httpServer.start();
         var publicIp = stunClient.getMapping().outerAddress().getHostString();
-        if(testFor(new InetSocketAddress(publicIp, serverListenPort))){
+        if (testFor(new InetSocketAddress(publicIp, serverListenPort))) {
             return NetworkReachability.RAW_INTERNET;
         }
-        portMapper.mapPort(portMapper.getMappers(), PortType.TCP, serverListenPort).join();
-        if(testFor(new InetSocketAddress(publicIp, serverListenPort))){
-            return NetworkReachability.IGD_OPEN;
+        MappedPort mappedPort = null;
+        try {
+            mappedPort = portMapper.mapPort(portMapper.getMappers(), PortType.TCP, serverListenPort).join();
+            if (testFor(new InetSocketAddress(publicIp, serverListenPort))) {
+                return NetworkReachability.IGD_OPEN;
+            }
+            var natType = stunClient.detectNatType();
+            if (natType.isFullCone()) {
+                return NetworkReachability.FULLCONE_HOLE_PUNCH_OPEN;
+            }
+            if (!natType.isSymmetric()) {
+                return NetworkReachability.DUALSIDE_HOLE_PUNCH_OPEN;
+            }
+            return NetworkReachability.ONLY_OUTGOING_CONNECTION;
+        } finally {
+            if (mappedPort != null) {
+                portMapper.unmapPort(portMapper.getMappers(), mappedPort).thenAccept((ignored) -> {
+                });
+            }
         }
-        var natType = stunClient.detectNatType();
-        if(natType.isFullCone()){
-            return NetworkReachability.FULLCONE_HOLE_PUNCH_OPEN;
-        }
-        if(!natType.isSymmetric()){
-            return NetworkReachability.DUALSIDE_HOLE_PUNCH_OPEN;
-        }
-        return  NetworkReachability.ONLY_OUTGOING_CONNECTION;
     }
 
-    public boolean testFor(InetSocketAddress address){
+    public boolean testFor(InetSocketAddress address) {
         // use raw socket to send http request to test mapping
         try (Socket httpSocket = new Socket()) {
             httpSocket.setSoLinger(true, 0);
