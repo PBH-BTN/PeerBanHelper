@@ -143,11 +143,12 @@ stun:
   # 支持 UDP 协议的 STUN 服务器列表
   # UDP protocol supported STUN servers
   udp-servers:
+    - "stun.cdnbye.com:3478"
     - "stun.nextcloud.com:3478"
     - "stun.miwifi.com:3478"
     - "stun.syncthing.net:3478"
     - "stun.l.google.com:3478"
-    - "stun.cdnbye.com:3478"
+
   # 启用可用性测试
   # Enable available test
   availableTest: true

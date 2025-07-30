@@ -134,26 +134,6 @@
         <file path="./updater.png" />
       </iconImageFiles>
     </launcher>
-    <launcher name="PeerBanHelper NoGUI LowRAM" id="267" excludeFromMenu="true" swtApp="true" checkUpdater="true">
-      <executable name="PeerBanHelper-NoGUI-LowRAM" iconSet="true" executableDir="." redirectStderr="false" executableMode="console" checkConsoleParameter="true">
-        <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
-      </executable>
-      <java mainClass="com.ghostchu.peerbanhelper.MainJumpLoader" vmParameters="${compiler:startupFlagPlatformNoGUILowRAM}" arguments="nogui nojcef">
-        <classPath>
-          <scanDirectory location="libraries" failOnError="false" />
-          <archive location="PeerBanHelper.jar" failOnError="false" />
-        </classPath>
-        <vmOptions>
-          <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
-        </vmOptions>
-      </java>
-      <vmOptionsFile mode="content" overwriteMode="2">
-        <content>-include-options ${compiler:jvmOptionsFile}</content>
-      </vmOptionsFile>
-      <iconImageFiles>
-        <file path="./icon.png" />
-      </iconImageFiles>
-    </launcher>
     <launcher name="PeerBanHelper Service" id="291" excludeFromMenu="true" checkUpdater="true">
       <executable name="PeerBanHelper-Service" iconSet="true" executableDir="." redirectStderr="false" executableMode="service" checkConsoleParameter="true">
         <versionInfo include="true" fileDescription="${i18n:peerbanhelper.description}" legalCopyright="PBH-BTN Community - Licensed under GPLv3 licenses. https://www.gnu.org/licenses/quick-guide-gplv3.en.html" internalName="peerbanhelper" />
@@ -478,6 +458,55 @@ return true;
                 </serializedBean>
                 <condition>context.getBooleanVariable("registerSystemService")</condition>
               </action>
+              <group name="Firewall Settings" id="305" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
+                <beans>
+                  <action name="Firewall Main Executable" id="299" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">26</property>
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(Main) Incoming TCP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall Silent Executable" id="300" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">66</property>
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(GUI Silent) Incoming TCP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall NoGUI Executable" id="301" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">28</property>
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(NoGUI) Incoming TCP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall Main Executable" id="302" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">26</property>
+                      <property name="protocol" type="enum" class="com.install4j.runtime.beans.actions.firewall.WindowsFirewallProtocol" value="UDP" />
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(Main) Incoming UDP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall Silent Executable" id="303" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">66</property>
+                      <property name="protocol" type="enum" class="com.install4j.runtime.beans.actions.firewall.WindowsFirewallProtocol" value="UDP" />
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(GUI Silent) Incoming UDP</property>
+                    </serializedBean>
+                  </action>
+                  <action name="Firewall NoGUI Executable" id="304" beanClass="com.install4j.runtime.beans.actions.firewall.AddWindowsFirewallRuleAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                    <serializedBean>
+                      <property name="launcherId" type="string">28</property>
+                      <property name="protocol" type="enum" class="com.install4j.runtime.beans.actions.firewall.WindowsFirewallProtocol" value="UDP" />
+                      <property name="publicProfile" type="boolean" value="true" />
+                      <property name="ruleName" type="string">PeerBanHelper(NoGUI) Incoming UDP</property>
+                    </serializedBean>
+                  </action>
+                </beans>
+              </group>
               <group name="Install Microsoft Edge Webview2 on Windows" id="287" beanClass="com.install4j.runtime.beans.groups.ActionGroup">
                 <beans>
                   <action id="288" beanClass="com.install4j.runtime.beans.actions.registry.ReadRegistryValueAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
