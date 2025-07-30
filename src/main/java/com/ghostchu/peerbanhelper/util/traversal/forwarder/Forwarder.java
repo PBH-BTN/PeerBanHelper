@@ -1,22 +1,23 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
 import com.google.common.collect.BiMap;
 
 import java.io.IOException;
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.util.Map;
 
-public interface Forwarder extends AutoCloseable {
+public interface Forwarder extends AutoCloseable, NatAddressProvider {
     void start() throws IOException;
 
     long getEstablishedConnections();
 
-    BiMap<SocketAddress, SocketAddress> getClientAddressAsKeyConnectionMap();
+    BiMap<InetSocketAddress, InetSocketAddress> getDownstreamAddressAsKeyConnectionMap();
 
-    BiMap<SocketAddress, SocketAddress> getProxyLAddressAsKeyConnectionMap();
+    BiMap<InetSocketAddress, InetSocketAddress> getProxyLAddressAsKeyConnectionMap();
 
-    Map<SocketAddress, ConnectionStatistics> getClientAddressAsKeyConnectionStats();
+    Map<InetSocketAddress, ConnectionStatistics> getDownstreamAddressAsKeyConnectionStats();
 
     long getTotalDownloaded();
 
@@ -28,9 +29,9 @@ public interface Forwarder extends AutoCloseable {
 
     int getProxyPort();
 
-    int getRemotePort();
+    int getUpstreamPort();
 
     String getProxyHost();
 
-    String getRemoteHost();
+    String getUpstremHost();
 }

@@ -27,6 +27,7 @@ import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.ByteUtil;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
@@ -61,8 +62,8 @@ public final class BiglyBT extends AbstractDownloader {
     private final String connectorPayload;
     private Semver semver = new Semver("0.0.0");
 
-    public BiglyBT(String uuid, Config config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(uuid, alertManager);
+    public BiglyBT(String uuid, Config config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(uuid, alertManager, natAddressProvider);
         this.config = config;
         this.apiEndpoint = config.getEndpoint();
         CookieManager cm = new CookieManager();
@@ -89,14 +90,14 @@ public final class BiglyBT extends AbstractDownloader {
         return config.getName();
     }
 
-    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static BiglyBT loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = JsonUtil.getGson().fromJson(section.toString(), Config.class);
-        return new BiglyBT(id, config, alertManager, httpUtil);
+        return new BiglyBT(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
-    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static BiglyBT loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         Config config = Config.readFromYaml(section, id);
-        return new BiglyBT(id, config, alertManager, httpUtil);
+        return new BiglyBT(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
     @Override
@@ -377,7 +378,7 @@ public final class BiglyBT extends AbstractDownloader {
                     peer.setIp(peer.getIp().substring(1));
                 }
                 peersList.add(new PeerImpl(
-                        new PeerAddress(peer.getIp(), peer.getPort()),
+                        natTranslate(new PeerAddress(peer.getIp(), peer.getPort())),
                         peer.getIp(),
                         peerId,
                         peer.getClient(),

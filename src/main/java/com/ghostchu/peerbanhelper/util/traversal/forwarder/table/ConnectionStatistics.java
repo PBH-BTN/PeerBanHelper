@@ -3,17 +3,17 @@ package com.ghostchu.peerbanhelper.util.traversal.forwarder.table;
 import java.util.concurrent.atomic.LongAdder;
 
 public class ConnectionStatistics {
-    private final LongAdder downloaded = new LongAdder();
-    private final LongAdder uploaded = new LongAdder();
+    private final LongAdder toUpstreamBytes = new LongAdder();
+    private final LongAdder toDownstreamBytes = new LongAdder();
     private long establishedAt;
     private long lastActivityAt;
 
-    public LongAdder getDownloaded() {
-        return downloaded;
+    public LongAdder getToUpstreamBytes() {
+        return toUpstreamBytes;
     }
 
-    public LongAdder getUploaded() {
-        return uploaded;
+    public LongAdder getToDownstreamBytes() {
+        return toDownstreamBytes;
     }
 
     public long getEstablishedAt() {

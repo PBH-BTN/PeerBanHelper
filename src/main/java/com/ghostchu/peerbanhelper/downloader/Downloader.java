@@ -51,6 +51,8 @@ public interface Downloader extends AutoCloseable {
     @NotNull
     String getType();
 
+    int getFailedLoginAttempts();
+
     /**
      * 登录到此下载器
      *

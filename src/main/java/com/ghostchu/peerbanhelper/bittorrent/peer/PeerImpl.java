@@ -88,4 +88,8 @@ public final class PeerImpl implements Peer {
     public @NotNull String getRawIp() {
         return rawIp;
     }
+
+    public void setPeerAddress(@NotNull PeerAddress peerAddress) {
+        this.peerAddress = peerAddress;
+    }
 }

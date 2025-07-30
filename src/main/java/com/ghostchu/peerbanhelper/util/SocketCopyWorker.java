@@ -51,7 +51,7 @@ public class SocketCopyWorker implements Runnable, AutoCloseable {
                 trafficActivityRunnable.run();
             }
         } catch (IOException e) {
-            log.debug("Forward socket from {} to {} is closed due exception", from, to, e);
+            //log.debug("Forward socket from {} to {} is closed due exception", from, to, e);
             closeConnection();
             closeListener.accept(e);
         }

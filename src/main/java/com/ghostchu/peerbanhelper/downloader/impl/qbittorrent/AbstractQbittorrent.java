@@ -13,6 +13,7 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.cache.Cache;
@@ -46,8 +47,8 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
     protected final Cache<String, TorrentProperties> torrentPropertiesCache;
     protected final ExecutorService parallelService = Executors.newWorkStealingPool();
 
-    public AbstractQbittorrent(String id, QBittorrentConfig config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(id, alertManager);
+    public AbstractQbittorrent(String id, QBittorrentConfig config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(id, alertManager, natAddressProvider);
         this.config = config;
         this.apiEndpoint = config.getEndpoint() + "/api/v2";
 
@@ -536,6 +537,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             qbPeer.setClient(mid);
                         }
                     }
+                    qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
                     qbPeer.setRawIp(s);
                     peersList.add(qbPeer);
                 }

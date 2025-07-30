@@ -101,6 +101,10 @@ public final class QBittorrentPeer implements Peer {
         return rawIp == null ? ip : rawIp;
     }
 
+    public void setPeerAddress(PeerAddress peerAddress) {
+        this.peerAddress = peerAddress;
+    }
+
     public String getConnection() {
         return connection;
     }

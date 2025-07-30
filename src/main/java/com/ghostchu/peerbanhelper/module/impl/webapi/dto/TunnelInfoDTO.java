@@ -11,11 +11,11 @@ public class TunnelInfoDTO {
     private long lastSuccessHeartbeatAt;
     private long connectionsHandled;
     private long connectionsFailed;
-    private long totalUploaded;
-    private long totalDownloaded;
+    private long totalToDownstreamBytes;
+    private long totalToUpstreamBytes;
     private long establishedConnections;
     private String proxyHost;
     private int proxyPort;
-    private String remoteHost;
-    private int remotePort;
+    private String upstreamHost;
+    private int upstreamPort;
 }

@@ -3,8 +3,8 @@ package com.ghostchu.peerbanhelper.module.impl.webapi;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.ProxyConnectionDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TunnelInfoDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TunnelProxyConnectionDTO;
 import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TunnelsDTO;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,30 +93,27 @@ public class PBHAutoStunController extends AbstractFeatureModule {
             context.json(new StdResp(false, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_DOWNLOADER_TUNNEL_FORWARDER_NOT_EXISTS, downloader.getName())), List.of()));
             return;
         }
-        List<ProxyConnectionDTO> connectionList = new LinkedList<>();
-        for (Map.Entry<SocketAddress, SocketAddress> connection : forwarder.getClientAddressAsKeyConnectionMap().entrySet()) {
-            InetSocketAddress clientAddress = new InetSocketAddress("0.0.0.0", 0);
-            InetSocketAddress proxyLAddress = new InetSocketAddress("0.0.0.0", 0);
-            if (connection.getKey() instanceof InetSocketAddress clientInetSocketAddress) {
-                clientAddress = clientInetSocketAddress;
-            }
-            if (connection.getValue() instanceof InetSocketAddress proxyInetSocketAddress) {
-                proxyLAddress = proxyInetSocketAddress;
-            }
-            ConnectionStatistics statistics = forwarder.getClientAddressAsKeyConnectionStats().get(clientAddress);
-            ProxyConnectionDTO proxyConnectionDTO = new ProxyConnectionDTO(
-                    clientAddress.getHostString(),
-                    clientAddress.getPort(),
+        List<TunnelProxyConnectionDTO> connectionList = new LinkedList<>();
+        for (Map.Entry<InetSocketAddress, InetSocketAddress> connection : forwarder.getDownstreamAddressAsKeyConnectionMap().entrySet()) {
+            var downstreamAddr = connection.getKey();
+            var proxyLAddr = connection.getValue();
+            ConnectionStatistics statistics = forwarder.getDownstreamAddressAsKeyConnectionStats().get(downstreamAddr);
+            if (statistics == null) continue; // disconnected during getting
+            TunnelProxyConnectionDTO tunnelProxyConnectionDTO = new TunnelProxyConnectionDTO(
+                    downstreamAddr.getHostString(),
+                    downstreamAddr.getPort(),
                     forwarder.getProxyHost(),
                     forwarder.getProxyPort(),
-                    proxyLAddress.getHostString(),
-                    proxyLAddress.getPort(),
+                    proxyLAddr.getHostString(),
+                    proxyLAddr.getPort(),
+                    forwarder.getUpstremHost(),
+                    forwarder.getUpstreamPort(),
                     statistics.getEstablishedAt(),
                     statistics.getLastActivityAt(),
-                    statistics.getUploaded().sum(),
-                    statistics.getDownloaded().sum()
+                    statistics.getToDownstreamBytes().sum(),
+                    statistics.getToUpstreamBytes().sum()
             );
-            connectionList.add(proxyConnectionDTO);
+            connectionList.add(tunnelProxyConnectionDTO);
         }
         context.json(new StdResp(true, null, connectionList));
     }
@@ -160,8 +156,8 @@ public class PBHAutoStunController extends AbstractFeatureModule {
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getEstablishedConnections() : 0,
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getProxyHost() : "???",
                 stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getProxyPort() : 0,
-                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getRemoteHost() : "???",
-                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getRemotePort() : 0
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getUpstremHost() : "???",
+                stunInstance.getTcpForwarder() != null ? stunInstance.getTcpForwarder().getUpstreamPort() : 0
         );
     }
 

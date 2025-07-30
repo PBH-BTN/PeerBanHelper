@@ -1,44 +1,83 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 
+import com.ghostchu.peerbanhelper.Main;
+import com.ghostchu.peerbanhelper.event.PeerBanEvent;
+import com.ghostchu.peerbanhelper.util.IPAddressUtil;
 import com.ghostchu.peerbanhelper.util.SocketCopyWorker;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.util.traversal.forwarder.table.ConnectionStatistics;
+import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
+import com.google.common.eventbus.Subscribe;
+import inet.ipaddr.IPAddress;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 
 /*
     @TODO: 需要重构：换 NIO 优化性能，但是好不容跑起来就先这样了
  */
 @Slf4j
-public class TCPForwarderImpl implements AutoCloseable, Forwarder {
+public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressProvider {
     private final int proxyPort;
     private final String proxyHost;
-    private final String remoteHost;
-    private final int remotePort;
+    private final String upstremHost;
+    private final int upstreamPort;
+    private final Map<PeerAddress, ?> banListReference;
     private ServerSocket proxySocket;
     private volatile boolean running = false;
     private final ExecutorService netIOExecutor = Executors.newVirtualThreadPerTaskExecutor();
     private final ScheduledExecutorService sched = Executors.newScheduledThreadPool(1, Thread.ofVirtual().factory());
     //                  ClientAddress, ProxyLAddress
-    private final BiMap<SocketAddress, SocketAddress> connectionMap = HashBiMap.create();
-    private final Map<SocketAddress, ConnectionStatistics> connectionStats = new ConcurrentHashMap<>();
+    private final BiMap<InetSocketAddress, InetSocketAddress> connectionMap = Maps.synchronizedBiMap(HashBiMap.create());
+    private final Map<InetSocketAddress, ConnectionStatistics> connectionStats = Collections.synchronizedMap(new HashMap<>());
+    private final Map<InetSocketAddress, Socket> socketAddressSocketMap = Collections.synchronizedMap(new HashMap<>());
     private final LongAdder connectionHandled = new LongAdder();
     private final LongAdder connectionFailed = new LongAdder();
 
-    public TCPForwarderImpl(String proxyHost, int proxyPort, String remoteHost, int remotePort, String keepAliveHost, int keepAlivePort) {
+    public TCPForwarderImpl(Map<PeerAddress, ?> banListReference, String proxyHost, int proxyPort, String upstreamHost, int upstreamPort) {
+        this.banListReference = banListReference;
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
-        this.remoteHost = remoteHost;
-        this.remotePort = remotePort;
-        log.info("TCPForwarder created: proxy {}:{}, remote {}:{}, keep-alive {}:{}", proxyHost, proxyPort, remoteHost, remotePort, keepAliveHost, keepAlivePort);
+        this.upstremHost = upstreamHost;
+        this.upstreamPort = upstreamPort;
+        log.info("TCPForwarder created: proxy {}:{}, upstream {}:{}", proxyHost, proxyPort, upstreamHost, upstreamPort);
+        sched.scheduleAtFixedRate(this::cleanupBannedConnections, 0, 15, TimeUnit.SECONDS);
+        Main.getEventBus().register(this);
     }
+
+    @Subscribe
+    public void onPeerBanned(PeerBanEvent peerBanEvent) {
+        var bannedPeerAddr = peerBanEvent.getPeer().getAddress();
+        log.debug("Received PeerBanEvent for {}", bannedPeerAddr);
+        for (Map.Entry<InetSocketAddress, InetSocketAddress> connectionPair : connectionMap.entrySet()) {
+            if (connectionPair.getKey() instanceof InetSocketAddress inetSocketAddress) {
+                var inetAddress = inetSocketAddress.getAddress();
+                IPAddress downstreamAddress = IPAddressUtil.getIPAddress(inetAddress.getHostAddress());
+                if (bannedPeerAddr.contains(downstreamAddress)) {
+                    var downstreamSocket = socketAddressSocketMap.get(inetSocketAddress);
+                    var upstreamSocket = socketAddressSocketMap.get(connectionPair.getValue());
+                    log.debug("Closing connection from banned address from banEvent: {}", inetSocketAddress);
+                    closeSocket(downstreamSocket);
+                    closeSocket(upstreamSocket);
+                }
+            }
+        }
+    }
+
 
     @SneakyThrows
     @Override
@@ -60,46 +99,87 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
     private void acceptConnections() {
         while (running) {
             try {
-                Socket clientSocket = proxySocket.accept();
-                if (clientSocket != null) {
+                Socket downstreamSocket = proxySocket.accept();
+                if (downstreamSocket != null) {
                     // 为每个客户端连接创建一个处理线程
-                    netIOExecutor.submit(() -> handleClient(clientSocket));
+                    netIOExecutor.submit(() -> handleClient(downstreamSocket));
                     connectionHandled.increment();
-                    log.debug("Fuck, accepted new client connection: {}", clientSocket.getRemoteSocketAddress());
+                    log.debug("Accepted new downstream connection: {}", downstreamSocket.getRemoteSocketAddress());
                 }
             } catch (IOException e) {
                 if (running) {
-                    log.error("Error accepting client connection", e);
+                    log.error("Error accepting downstream connection", e);
                     connectionFailed.increment();
                 }
             }
         }
     }
 
-    private void handleClient(Socket clientSocket) {
-        Socket remoteSocket = null;
+    private void handleClient(Socket downstreamSocket) {
+        if (!(downstreamSocket.getRemoteSocketAddress() instanceof InetSocketAddress)) {
+            closeSocket(downstreamSocket);
+        }
+        if (downstreamSocket.getRemoteSocketAddress() instanceof InetSocketAddress inetSocketAddress) {
+            IPAddress downstreamIpAddress = IPAddressUtil.getIPAddress(inetSocketAddress.getAddress().getHostAddress());
+            for (PeerAddress peerAddress : banListReference.keySet()) {
+                if (peerAddress.getAddress().contains(downstreamIpAddress)) {
+                    log.debug("Decline banned connection to connect from {}:{}", downstreamIpAddress, downstreamSocket.getPort());
+                    try {
+                        downstreamSocket.setOption(StandardSocketOptions.SO_LINGER, 1);
+                        downstreamSocket.close();
+                    } catch (IOException ignored) {
+                    }
+                    return;
+                }
+            }
+        }
+        Socket upstreamSocket = null;
         try {
             // 连接到远程服务器
-            remoteSocket = new Socket();
-            remoteSocket.connect(new InetSocketAddress(remoteHost, remotePort), 5000);
-            log.debug("Shit, connected to backend: {}", new InetSocketAddress(remoteHost, remotePort));
-            connectionMap.put(clientSocket.getRemoteSocketAddress(), remoteSocket.getLocalSocketAddress());
+            upstreamSocket = new Socket();
+            upstreamSocket.connect(new InetSocketAddress(upstremHost, upstreamPort), 5000);
+            if (!(upstreamSocket.getRemoteSocketAddress() instanceof InetSocketAddress)) {
+                closeSocket(upstreamSocket);
+            }
+            if (!(upstreamSocket.getLocalSocketAddress() instanceof InetSocketAddress)) {
+                closeSocket(upstreamSocket);
+            }
+            log.debug("Connected to upstream: {}, starting dual directory forward channel", new InetSocketAddress(upstremHost, upstreamPort));
             // 创建两个线程进行双向数据转发
-            Socket finalRemoteSocket = remoteSocket;
+            Socket finalUpstreamSocket = upstreamSocket;
             ConnectionStatistics statistics = new ConnectionStatistics();
-            var downloaded = statistics.getDownloaded();
-            var uploaded = statistics.getUploaded();
+            var toUpstreamBytes = statistics.getToUpstreamBytes();
+            var toDownstreamBytes = statistics.getToDownstreamBytes();
             statistics.setEstablishedAt();
             // 客户端到远程服务器的数据转发
-            netIOExecutor.submit(() -> new SocketCopyWorker(clientSocket, finalRemoteSocket, (exception) -> onSocketClosed(clientSocket.getRemoteSocketAddress(), exception), downloaded::add, statistics::setLastActivityAt).startSync());
+            netIOExecutor.submit(() -> new SocketCopyWorker(downstreamSocket, finalUpstreamSocket, (exception) -> onSocketClosed(downstreamSocket.getRemoteSocketAddress(), exception), toUpstreamBytes::add, statistics::setLastActivityAt).startSync());
             // 远程服务器到客户端的数据转发
-            netIOExecutor.submit(() -> new SocketCopyWorker(finalRemoteSocket, clientSocket, (exception) -> onSocketClosed(clientSocket.getRemoteSocketAddress(), exception), uploaded::add, statistics::setLastActivityAt).startSync());
-            connectionStats.put(clientSocket.getRemoteSocketAddress(), statistics);
+            netIOExecutor.submit(() -> new SocketCopyWorker(finalUpstreamSocket, downstreamSocket, (exception) -> onSocketClosed(downstreamSocket.getRemoteSocketAddress(), exception), toDownstreamBytes::add, statistics::setLastActivityAt).startSync());
+            connectionStats.put((InetSocketAddress) downstreamSocket.getRemoteSocketAddress(), statistics);
+            connectionMap.put((InetSocketAddress) downstreamSocket.getRemoteSocketAddress(), (InetSocketAddress) upstreamSocket.getLocalSocketAddress());
+            socketAddressSocketMap.put((InetSocketAddress) downstreamSocket.getRemoteSocketAddress(), downstreamSocket);
+            socketAddressSocketMap.put((InetSocketAddress) upstreamSocket.getLocalSocketAddress(), upstreamSocket);
         } catch (IOException e) {
-            log.error("Error connecting to remote server: {}", e.getMessage());
-            closeSocket(clientSocket);
-            closeSocket(remoteSocket);
+            log.error("Error connecting to upstream server: {}", e.getMessage());
+            closeSocket(downstreamSocket);
+            closeSocket(upstreamSocket);
             connectionFailed.increment();
+        }
+    }
+
+    private void cleanupBannedConnections() {
+        for (PeerAddress peerAddress : banListReference.keySet()) {
+            IPAddress bannedAddress = peerAddress.getAddress();
+            for (Map.Entry<InetSocketAddress, InetSocketAddress> connectionPair : connectionMap.entrySet()) {
+                IPAddress clientAddress = IPAddressUtil.getIPAddress(connectionPair.getKey().getAddress().getHostAddress());
+                if (bannedAddress.contains(clientAddress)) {
+                    log.debug("Closing connection from banned address: {}", connectionPair.getKey());
+                    Socket downstreamSocket = socketAddressSocketMap.get(connectionPair.getKey());
+                    Socket upstreamSocket = socketAddressSocketMap.get(connectionPair.getValue());
+                    closeSocket(downstreamSocket);
+                    closeSocket(upstreamSocket);
+                }
+            }
         }
     }
 
@@ -114,28 +194,28 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
     }
 
     @Override
-    public BiMap<SocketAddress, SocketAddress> getClientAddressAsKeyConnectionMap() {
+    public BiMap<InetSocketAddress, InetSocketAddress> getDownstreamAddressAsKeyConnectionMap() {
         return connectionMap;
     }
 
     @Override
-    public BiMap<SocketAddress, SocketAddress> getProxyLAddressAsKeyConnectionMap() {
+    public BiMap<InetSocketAddress, InetSocketAddress> getProxyLAddressAsKeyConnectionMap() {
         return connectionMap.inverse();
     }
 
     @Override
-    public Map<SocketAddress, ConnectionStatistics> getClientAddressAsKeyConnectionStats() {
+    public Map<InetSocketAddress, ConnectionStatistics> getDownstreamAddressAsKeyConnectionStats() {
         return connectionStats;
     }
 
     @Override
     public long getTotalDownloaded() {
-        return connectionStats.values().stream().mapToLong(stats -> stats.getDownloaded().sum()).sum();
+        return connectionStats.values().stream().mapToLong(stats -> stats.getToUpstreamBytes().sum()).sum();
     }
 
     @Override
     public long getTotalUploaded() {
-        return connectionStats.values().stream().mapToLong(stats -> stats.getUploaded().sum()).sum();
+        return connectionStats.values().stream().mapToLong(stats -> stats.getToDownstreamBytes().sum()).sum();
     }
 
     @Override
@@ -154,8 +234,8 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
     }
 
     @Override
-    public int getRemotePort() {
-        return remotePort;
+    public int getUpstreamPort() {
+        return upstreamPort;
     }
 
     @Override
@@ -164,8 +244,8 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
     }
 
     @Override
-    public String getRemoteHost() {
-        return remoteHost;
+    public String getUpstremHost() {
+        return upstremHost;
     }
 
     private void closeSocket(Socket socket) {
@@ -197,5 +277,10 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder {
             netIOExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+
+    @Override
+    public @Nullable InetSocketAddress translate(@Nullable InetSocketAddress nattedAddress) {
+        return connectionMap.inverse().get(nattedAddress);
     }
 }

@@ -10,12 +10,16 @@ import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.HTTPUtil;
 import com.ghostchu.peerbanhelper.util.json.JsonUtil;
+import com.ghostchu.peerbanhelper.util.traversal.NatAddressProvider;
 import com.ghostchu.peerbanhelper.wrapper.BanMetadata;
 import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,8 +32,8 @@ import static com.ghostchu.peerbanhelper.text.TextManager.tlUI;
 public final class QBittorrentEE extends AbstractQbittorrent {
     private final BanHandler banHandler;
 
-    public QBittorrentEE(String id, QBittorrentEEConfigImpl config, AlertManager alertManager, HTTPUtil httpUtil) {
-        super(id, config, alertManager, httpUtil);
+    public QBittorrentEE(String id, QBittorrentEEConfigImpl config, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
+        super(id, config, alertManager, httpUtil, natAddressProvider);
         if (config.isUseShadowBan()) {
             this.banHandler = new BanHandlerShadowBan(httpClient, config.getName(), apiEndpoint);
         } else {
@@ -50,14 +54,14 @@ public final class QBittorrentEE extends AbstractQbittorrent {
         }
     }
 
-    public static QBittorrentEE loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static QBittorrentEE loadFromConfig(String id, JsonObject section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         QBittorrentEEConfigImpl config = JsonUtil.getGson().fromJson(section.toString(), QBittorrentEEConfigImpl.class);
-        return new QBittorrentEE(id, config, alertManager, httpUtil);
+        return new QBittorrentEE(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
-    public static QBittorrentEE loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil) {
+    public static QBittorrentEE loadFromConfig(String id, ConfigurationSection section, AlertManager alertManager, HTTPUtil httpUtil, NatAddressProvider natAddressProvider) {
         QBittorrentEEConfigImpl config = QBittorrentEEConfigImpl.readFromYaml(section, id);
-        return new QBittorrentEE(id, config, alertManager, httpUtil);
+        return new QBittorrentEE(id, config, alertManager, httpUtil, natAddressProvider);
     }
 
     public DownloaderLoginResult login0() {
@@ -132,6 +136,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                             qbPeer.setClient(mid);
                         }
                     }
+                    qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
                     qbPeer.setRawIp(s);
                     peersList.add(qbPeer);
                 }

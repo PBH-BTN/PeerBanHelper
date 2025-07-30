@@ -109,6 +109,10 @@ public final class QBittorrentEEPeer implements Peer {
         return connection;
     }
 
+    public void setPeerAddress(PeerAddress peerAddress) {
+        this.peerAddress = peerAddress;
+    }
+
     @Override
     public String toString() {
         return "QBEEPeer{" +

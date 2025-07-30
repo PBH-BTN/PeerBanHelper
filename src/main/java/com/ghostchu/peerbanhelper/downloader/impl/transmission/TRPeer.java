@@ -6,20 +6,20 @@ import com.ghostchu.peerbanhelper.wrapper.PeerAddress;
 import cordelia.rpc.types.Peers;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Function;
+
 public final class TRPeer implements Peer {
 
     private final Peers backend;
     private transient PeerAddress peerAddress;
 
-    public TRPeer(Peers backend) {
+    public TRPeer(Peers backend, Function<PeerAddress, PeerAddress> natConverter) {
         this.backend = backend;
+        this.peerAddress = natConverter.apply(new PeerAddress(backend.getAddress(), backend.getPort()));
     }
 
     @Override
     public @NotNull PeerAddress getPeerAddress() {
-        if (this.peerAddress == null) {
-            this.peerAddress = new PeerAddress(backend.getAddress(), backend.getPort());
-        }
         return this.peerAddress;
     }
 
