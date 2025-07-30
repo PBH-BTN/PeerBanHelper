@@ -77,21 +77,21 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             CompletableFuture<Void> scanNatPmp = CompletableFuture.runAsync(()-> {
                 try {
                     mapper.addAll(NatPmpPortMapper.identify(networkBus, processBus));
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, Executors.newVirtualThreadPerTaskExecutor());
             CompletableFuture<Void> scanUpnp = CompletableFuture.runAsync(()-> {
                 try {
                     mapper.addAll(UpnpIgdPortMapper.identify(networkBus));
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, Executors.newVirtualThreadPerTaskExecutor());
             CompletableFuture<Void> scanPCP = CompletableFuture.runAsync(()-> {
                 try {
                     mapper.addAll(PcpPortMapper.identify(networkBus, processBus));
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, Executors.newVirtualThreadPerTaskExecutor());

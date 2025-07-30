@@ -64,6 +64,8 @@ PeerBanHelper 仅支持对传统 IPv4 或 IPv6 地址的反吸血，如遇 I2P �
 
 1 群：932978658
 
+或者：[Telegram](https://t.me/+_t3Nt5GZ6bJmYjBl)
+
 ## 声明
 
 **使用本软件意味着你同意以下声明：** 

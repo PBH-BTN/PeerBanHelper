@@ -132,11 +132,6 @@ public final class DatabaseHelper {
                     var downloaderName = historyEntity.getDownloader();
                     historyEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
                 }));
-                var peerRecordDao = DaoManager.createDao(getDataSource(), PeerRecordEntity.class);
-                recordBatchUpdate("DownloaderName Converting (PeerRecord)", peerRecordDao, (peerRecordEntity -> {
-                    var downloaderName = peerRecordEntity.getDownloader();
-                    peerRecordEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
-                }));
                 var progressCheatBlockerPersistDao = DaoManager.createDao(getDataSource(), ProgressCheatBlockerPersistEntity.class);
                 recordBatchUpdate("DownloaderName Converting (ProgressCheatBlockerPersist)", progressCheatBlockerPersistDao, (progressCheatBlockerPersistEntity -> {
                     var downloaderName = progressCheatBlockerPersistEntity.getDownloader();
@@ -157,6 +152,11 @@ public final class DatabaseHelper {
             try {
                 var pcbDao = DaoManager.createDao(getDataSource(), ProgressCheatBlockerPersistEntity.class);
                 database.getDataSource().getReadWriteConnection(pcbDao.getTableName()).executeStatement("ALTER TABLE " + pcbDao.getTableName() + " ADD COLUMN lastLastTorrentCompletedProgress BIGINT NOT NULL DEFAULT 0", DatabaseConnection.DEFAULT_RESULT_FLAGS);
+                var peerRecordDao = DaoManager.createDao(getDataSource(), PeerRecordEntity.class);
+                recordBatchUpdate("DownloaderName Converting (PeerRecord)", peerRecordDao, (peerRecordEntity -> {
+                    var downloaderName = peerRecordEntity.getDownloader();
+                    peerRecordEntity.setDownloader(ConfigTransfer.downloaderNameToUUID.getOrDefault(downloaderName, downloaderName));
+                }));
             } catch (Exception err) {
                 log.error("Unable to upgrade database schema", err);
             }

@@ -14,7 +14,7 @@ public abstract class AbstractDownloader implements Downloader {
     public final AlertManager alertManager;
     protected final String id;
     private DownloaderLastStatus lastStatus = DownloaderLastStatus.UNKNOWN;
-    private TranslationComponent statusMessage;
+    private TranslationComponent statusMessage = new TranslationComponent(Lang.STATUS_TEXT_UNKNOWN);
     private int failedLoginAttempts = 0;
     private long nextLoginTry = 0L;
 
