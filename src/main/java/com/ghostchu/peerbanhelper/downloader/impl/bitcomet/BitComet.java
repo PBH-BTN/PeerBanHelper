@@ -98,7 +98,7 @@ public final class BitComet extends AbstractDownloader {
     private static PeerAddress parseAddress(String address, int port, int listenPort) {
         address = address.trim();
         HostAndPort hostAndPort = HostAndPort.fromString(address);
-        return new PeerAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(port));
+        return new PeerAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(port), hostAndPort.getHost());
     }
 
     @Override
@@ -435,7 +435,7 @@ public final class BitComet extends AbstractDownloader {
             }
             return stream.map(peer -> new PeerImpl(
                     natTranslate(parseAddress(peer.getIp(), peer.getRemotePort(), peer.getListenPort())),
-                    peer.getIp(),
+
                     ByteUtil.hexToByteArray(peer.getPeerId()),
                     peer.getClientType(),
                     peer.getDlRate(),

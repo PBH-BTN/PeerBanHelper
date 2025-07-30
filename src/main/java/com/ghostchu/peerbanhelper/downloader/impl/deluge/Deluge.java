@@ -133,7 +133,7 @@ public final class Deluge extends AbstractDownloader {
                         peerId = peerId.substring(0, 8);
                     }
                     DelugePeer delugePeer = new DelugePeer(
-                            natTranslate(new PeerAddress(peer.getIp(), peer.getPort())),
+                            natTranslate(new PeerAddress(peer.getIp(), peer.getPort(), peer.getIp())),
                             peerId,
                             peer.getClientName(),
                             peer.getTotalDownload(),

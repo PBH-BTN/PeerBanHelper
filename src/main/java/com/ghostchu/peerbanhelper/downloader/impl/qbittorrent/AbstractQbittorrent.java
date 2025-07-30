@@ -524,7 +524,7 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                     if (qbPeer.getPeerAddress().getIp() == null || qbPeer.getPeerAddress().getIp().isBlank()) {
                         continue;
                     }
-                    if (qbPeer.getRawIp().contains(".onion") || qbPeer.getRawIp().contains(".i2p")) {
+                    if (s.contains(".onion") || s.contains(".i2p")) {
                         continue;
                     }
                     // 一个 QB 本地化问题的 Workaround
@@ -537,8 +537,9 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                             qbPeer.setClient(mid);
                         }
                     }
+                    qbPeer.getPeerAddress().setRawIp(s);
                     qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
-                    qbPeer.setRawIp(s);
+
                     peersList.add(qbPeer);
                 }
                 return peersList;

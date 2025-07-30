@@ -15,7 +15,7 @@ public final class TRPeer implements Peer {
 
     public TRPeer(Peers backend, Function<PeerAddress, PeerAddress> natConverter) {
         this.backend = backend;
-        this.peerAddress = natConverter.apply(new PeerAddress(backend.getAddress(), backend.getPort()));
+        this.peerAddress = natConverter.apply(new PeerAddress(backend.getAddress(), backend.getPort(), backend.getAddress()));
     }
 
     @Override
@@ -66,11 +66,6 @@ public final class TRPeer implements Peer {
     @Override
     public boolean isHandshaking() {
         return getDownloadSpeed() <= 0 && getUploadSpeed() <= 0;
-    }
-
-    @Override
-    public @NotNull String getRawIp() {
-        return backend.getAddress();
     }
 
 }

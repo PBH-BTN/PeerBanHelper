@@ -120,7 +120,7 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                     if ("HTTP".equalsIgnoreCase(qbPeer.getConnection()) || "HTTPS".equalsIgnoreCase(qbPeer.getConnection()) || "Web".equalsIgnoreCase(qbPeer.getConnection())) {
                         continue;
                     }
-                    if (qbPeer.getRawIp().contains(".onion") || qbPeer.getRawIp().contains(".i2p")) {
+                    if (s.contains(".onion") || s.contains(".i2p")) {
                         continue;
                     }
                     if (qbPeer.getShadowBanned() != null && qbPeer.getShadowBanned()) {
@@ -136,8 +136,8 @@ public final class QBittorrentEE extends AbstractQbittorrent {
                             qbPeer.setClient(mid);
                         }
                     }
+                    qbPeer.getPeerAddress().setRawIp(s);
                     qbPeer.setPeerAddress(natTranslate(qbPeer.getPeerAddress()));
-                    qbPeer.setRawIp(s);
                     peersList.add(qbPeer);
                 }
                 return peersList;
