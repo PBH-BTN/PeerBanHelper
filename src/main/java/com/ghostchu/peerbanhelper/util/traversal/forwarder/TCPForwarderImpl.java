@@ -182,7 +182,7 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         var incomingAddress = downstreamSocket.getAddress();
         var upstreamAddress = new InetSocketAddress(upstremHost, upstreamPort);
         InetAddress outgoingAddress;
-        if (upstreamAddress.getAddress().isLoopbackAddress() && ExternalSwitch.parseBoolean("pbh.TCPForwarder.useFriendlyAddressForLoopback", true)) {
+        if (upstreamAddress.getAddress().isLoopbackAddress() && downstreamSocket.getAddress() instanceof Inet4Address && ExternalSwitch.parseBoolean("pbh.TCPForwarder.useFriendlyAddressForLoopback", true)) {
             byte[] bytes = new byte[4];
             bytes[0] = 127;
             bytes[1] = incomingAddress.getAddress()[1];
