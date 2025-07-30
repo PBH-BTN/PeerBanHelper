@@ -13,9 +13,8 @@
     <variables>
       <variable name="jarPath" value="../target/PeerBanHelper.jar" />
       <variable name="librariesPath" value="../target/libraries" />
-      <variable name="startupFlagPlatform" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatform}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" />
-      <variable name="startupFlagPlatformNoGUI" value="-Xmx512M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" />
-      <variable name="startupFlagPlatformNoGUILowRAM" value="-Xmx168M -Xms16M -Xss512k -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j -Djava.awt.headless=true -Dpbh.geoIpCache.timeout=30000 -Dpbh.geoIpCache.size=100 -Dpbh.moduleMatchCache.weight=25000 -Dpbh.modulematchcache.timeout=30000 -Dpbh.gui.logs.maxSize=50 -Dpbh.logger.logEntryDeque.size=100 -Dpbh.logger.ringDeque.size=50 -Dpbh.module.activeMonitorModule.diskWriteCache.timeout=30000 -Dpbh.module.activeMonitorModule.diskWriteCache.size=1500 -Dpbh.module.progressCheatBlocker.recorder.timeout=30000 -Dpbh.module.progressCheatBlocker.recorder.weight=6000000" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUILowRAM}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUILowRAM}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUILowRAM}" />
+      <variable name="startupFlagPlatform" value="-XX:+UseZGC -XX:SoftMaxHeapSize=256M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatform}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatform}" />
+      <variable name="startupFlagPlatformNoGUI" value="-XX:+UseZGC -XX:SoftMaxHeapSize=256M -XX:ZUncommitDelay=1 -Xss512k -XX:+UseStringDeduplication -XX:+ShrinkHeapInSteps -Dfile.encoding=UTF-8 -Dpbh.usePlatformConfigLocation=true -Dpbh.release=install4j" overrideWindows="true" valueWindows="-Dsun.net.useExclusiveBind=false -XX:OnError=&quot;scripts\win-error-handler.bat %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideMacos="true" valueMacos="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" overrideUnix="true" valueUnix="-XX:OnError=&quot;scripts/win-error-handler.sh %p&quot; ${compiler:startupFlagPlatformNoGUI}" />
       <variable name="jvmOptionsFile" value="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideWindows="true" valueWindows="${LOCALAPPDATA}\PeerBanHelper\java.vmoptions" overrideMacos="true" valueMacos="${user.home}/Library/Application Support/PeerBanHelper" overrideUnix="true" valueUnix="${user.home}/.config/PeerBanHelper" />
     </variables>
     <jreBundles jdkProviderId="JBR" release="21/21.0.7-b1038.58" />
@@ -67,6 +66,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
+          <options version="-23" line="+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
@@ -87,6 +87,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
+          <options version="-23" line="+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
@@ -107,6 +108,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
+          <options version="-23" line="+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
@@ -127,6 +129,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
+          <options version="-23" line="+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
@@ -144,6 +147,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
+          <options version="-23" line="+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
