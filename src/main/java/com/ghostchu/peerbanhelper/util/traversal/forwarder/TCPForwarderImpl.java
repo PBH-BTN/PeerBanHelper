@@ -1,5 +1,6 @@
 package com.ghostchu.peerbanhelper.util.traversal.forwarder;
 
+import com.ghostchu.peerbanhelper.ExternalSwitch;
 import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.event.PeerBanEvent;
 import com.ghostchu.peerbanhelper.util.IPAddressUtil;
@@ -116,8 +117,9 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
     }
 
     private void handleClient(Socket downstreamSocket) {
-        if (!(downstreamSocket.getRemoteSocketAddress() instanceof InetSocketAddress)) {
+        if (!(downstreamSocket.getRemoteSocketAddress() instanceof InetSocketAddress downstreamSocketAddress)) {
             closeSocket(downstreamSocket);
+            return;
         }
         if (downstreamSocket.getRemoteSocketAddress() instanceof InetSocketAddress inetSocketAddress) {
             IPAddress downstreamIpAddress = IPAddressUtil.getIPAddress(inetSocketAddress.getAddress().getHostAddress());
@@ -136,13 +138,14 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
         Socket upstreamSocket = null;
         try {
             // 连接到远程服务器
-            upstreamSocket = new Socket();
-            upstreamSocket.connect(new InetSocketAddress(upstremHost, upstreamPort), 5000);
-            if (!(upstreamSocket.getRemoteSocketAddress() instanceof InetSocketAddress)) {
+            upstreamSocket = connectToUpstreamFriendly(downstreamSocketAddress);
+            if (!(upstreamSocket.getRemoteSocketAddress() instanceof InetSocketAddress upstreamRemoteSocketAddress)) {
                 closeSocket(upstreamSocket);
+                return;
             }
-            if (!(upstreamSocket.getLocalSocketAddress() instanceof InetSocketAddress)) {
+            if (!(upstreamSocket.getLocalSocketAddress() instanceof InetSocketAddress upstreamLocalSocketAddress)) {
                 closeSocket(upstreamSocket);
+                return;
             }
             log.debug("Connected to upstream: {}, starting dual directory forward channel", new InetSocketAddress(upstremHost, upstreamPort));
             // 创建两个线程进行双向数据转发
@@ -152,19 +155,51 @@ public class TCPForwarderImpl implements AutoCloseable, Forwarder, NatAddressPro
             var toDownstreamBytes = statistics.getToDownstreamBytes();
             statistics.setEstablishedAt();
             // 客户端到远程服务器的数据转发
-            netIOExecutor.submit(() -> new SocketCopyWorker(downstreamSocket, finalUpstreamSocket, (exception) -> onSocketClosed(downstreamSocket.getRemoteSocketAddress(), exception), toUpstreamBytes::add, statistics::setLastActivityAt).startSync());
+            netIOExecutor.submit(() -> new SocketCopyWorker(downstreamSocket, finalUpstreamSocket, (exception) -> onSocketClosed(downstreamSocketAddress, exception), toUpstreamBytes::add, statistics::setLastActivityAt).startSync());
             // 远程服务器到客户端的数据转发
-            netIOExecutor.submit(() -> new SocketCopyWorker(finalUpstreamSocket, downstreamSocket, (exception) -> onSocketClosed(downstreamSocket.getRemoteSocketAddress(), exception), toDownstreamBytes::add, statistics::setLastActivityAt).startSync());
-            connectionStats.put((InetSocketAddress) downstreamSocket.getRemoteSocketAddress(), statistics);
-            connectionMap.put((InetSocketAddress) downstreamSocket.getRemoteSocketAddress(), (InetSocketAddress) upstreamSocket.getLocalSocketAddress());
-            socketAddressSocketMap.put((InetSocketAddress) downstreamSocket.getRemoteSocketAddress(), downstreamSocket);
-            socketAddressSocketMap.put((InetSocketAddress) upstreamSocket.getLocalSocketAddress(), upstreamSocket);
+            netIOExecutor.submit(() -> new SocketCopyWorker(finalUpstreamSocket, downstreamSocket, (exception) -> onSocketClosed(downstreamSocketAddress, exception), toDownstreamBytes::add, statistics::setLastActivityAt).startSync());
+            connectionStats.put(downstreamSocketAddress, statistics);
+            connectionMap.put(downstreamSocketAddress, upstreamLocalSocketAddress);
+            socketAddressSocketMap.put(downstreamSocketAddress, downstreamSocket);
+            socketAddressSocketMap.put(upstreamLocalSocketAddress, upstreamSocket);
         } catch (IOException e) {
             log.error("Error connecting to upstream server: {}", e.getMessage());
             closeSocket(downstreamSocket);
             closeSocket(upstreamSocket);
             connectionFailed.increment();
         }
+    }
+
+//    private Socket connectToUpstreamDefault() throws IOException {
+//        Socket upstreamSocket = new Socket();
+//        var upstreamAddress = new InetSocketAddress(upstremHost, upstreamPort);
+//        upstreamSocket.connect(upstreamAddress, 5000);
+//        return upstreamSocket;
+//    }
+// 友好绑定，优先使用本地原始 IP（第一个 byte 替换为 127），和原始端口；若失败退回本地原始 IP 和随机端口；再失败回退系统默认行为
+    private Socket connectToUpstreamFriendly(InetSocketAddress downstreamSocket) throws IOException {
+        Socket upstreamSocket = new Socket();
+        var incomingAddress = downstreamSocket.getAddress();
+        var upstreamAddress = new InetSocketAddress(upstremHost, upstreamPort);
+        InetAddress outgoingAddress;
+        if (upstreamAddress.getAddress().isLoopbackAddress() && ExternalSwitch.parseBoolean("pbh.TCPForwarder.useFriendlyAddressForLoopback", true)) {
+            byte[] bytes = new byte[4];
+            bytes[0] = 127;
+            bytes[1] = incomingAddress.getAddress()[1];
+            bytes[2] = incomingAddress.getAddress()[2];
+            bytes[3] = incomingAddress.getAddress()[3];
+            outgoingAddress = InetAddress.getByAddress(bytes);
+            try {
+                upstreamSocket.bind(new InetSocketAddress(outgoingAddress, downstreamSocket.getPort()));
+            } catch (IOException ioe) {
+                try {
+                    upstreamSocket.bind(new InetSocketAddress(outgoingAddress, 0));
+                } catch (IOException ignored) {
+                } // okay default to random port and default ip...
+            }
+        }
+        upstreamSocket.connect(upstreamAddress, 5000);
+        return upstreamSocket;
     }
 
     private void cleanupBannedConnections() {
