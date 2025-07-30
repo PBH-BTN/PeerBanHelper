@@ -66,7 +66,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="-23" line="+ZGenerational" />
+          <options version="-23" line="-XX:+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
@@ -87,7 +87,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="-23" line="+ZGenerational" />
+          <options version="-23" line="-XX:+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
@@ -108,7 +108,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="-23" line="+ZGenerational" />
+          <options version="-23" line="-XX:+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
@@ -129,7 +129,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="-23" line="+ZGenerational" />
+          <options version="-23" line="-XX:+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
@@ -147,7 +147,7 @@
           <archive location="PeerBanHelper.jar" failOnError="false" />
         </classPath>
         <vmOptions>
-          <options version="-23" line="+ZGenerational" />
+          <options version="-23" line="-XX:+ZGenerational" />
           <options version="24-" line="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow" />
         </vmOptions>
       </java>
