@@ -74,21 +74,21 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
             log.info(tlUI(Lang.PORTMAPPER_SCANNING));
             //this.mappers = PortMapperFactory.discover(networkBus, processBus);
             List<PortMapper> mapper = Collections.synchronizedList(new ArrayList<>());
-            CompletableFuture<Void> scanNatPmp = CompletableFuture.runAsync(()-> {
+            CompletableFuture<Void> scanNatPmp = CompletableFuture.runAsync(() -> {
                 try {
                     mapper.addAll(NatPmpPortMapper.identify(networkBus, processBus));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, Executors.newVirtualThreadPerTaskExecutor());
-            CompletableFuture<Void> scanUpnp = CompletableFuture.runAsync(()-> {
+            CompletableFuture<Void> scanUpnp = CompletableFuture.runAsync(() -> {
                 try {
                     mapper.addAll(UpnpIgdPortMapper.identify(networkBus));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, Executors.newVirtualThreadPerTaskExecutor());
-            CompletableFuture<Void> scanPCP = CompletableFuture.runAsync(()-> {
+            CompletableFuture<Void> scanPCP = CompletableFuture.runAsync(() -> {
                 try {
                     mapper.addAll(PcpPortMapper.identify(networkBus, processBus));
                 } catch (Exception e) {
@@ -116,7 +116,10 @@ public final class PBHPortMapperImpl implements PBHPortMapper {
         return CompletableFuture.supplyAsync(() -> {
             for (PortMapper mapper : mappers) {
                 try {
-                    mapper.unmapPort(originalToRefreshedPortMap.get(mappedPort));
+                    var originalToRefresh = originalToRefreshedPortMap.get(mappedPort);
+                    if (originalToRefresh != null) {
+                        mapper.unmapPort(originalToRefresh);
+                    }
                     mapper.unmapPort(mappedPort);
                     originalToRefreshedPortMap.remove(mappedPort);
                 } catch (InterruptedException ignored) {
