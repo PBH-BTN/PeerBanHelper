@@ -171,7 +171,11 @@ public abstract class AbstractQbittorrent extends AbstractDownloader {
                 if (info.getLibtorrent() == null) {
                     return false;
                 }
-                return !info.getLibtorrent().isBlank();
+                boolean loggedIn = !info.getLibtorrent().isBlank();
+                if (loggedIn && getLastStatus() != DownloaderLastStatus.HEALTHY) {
+                    updatePreferences();
+                }
+                return loggedIn;
             }
         } catch (Exception e) {
             return false;
