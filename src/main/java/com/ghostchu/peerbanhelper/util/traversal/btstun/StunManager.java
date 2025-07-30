@@ -44,7 +44,7 @@ public class StunManager implements AutoCloseable {
             }
             try {
                 NatType natType = StunClient.query(stun[0], Integer.parseInt(stun[1]), InetAddress.getLocalHost().getHostAddress()).getNatType();
-                if (natType != NatType.Unknown) {
+                if (natType != NatType.Unknown && natType != NatType.UdpBlocked) {
                     this.cachedNatType = natType;
                     log.debug("Successfully determined NAT type {} using server {}", natType, stunServer);
                     return cachedNatType;
@@ -55,7 +55,7 @@ public class StunManager implements AutoCloseable {
             }
         }
         log.error("All STUN servers failed or returned Unknown NAT type, NAT type check failed");
-        this.cachedNatType = NatType.Unknown;
+        this.cachedNatType = NatType.UdpBlocked;
         return cachedNatType;
     }
 
