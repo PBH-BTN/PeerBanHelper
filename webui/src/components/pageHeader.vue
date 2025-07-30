@@ -1,7 +1,12 @@
 <template>
   <a-page-header class="header" :class="mobileLayout === 0 ? 'mobile' : ''" :show-back="false">
     <template #title>
-      <a v-if="mobileLayout === 0" target="_blank" href="https://github.com/PBH-BTN/PeerBanHelper">
+      <a
+        v-if="mobileLayout === 0"
+        target="_blank"
+        href="https://github.com/PBH-BTN/PeerBanHelper"
+        style="cursor: pointer"
+      >
         <a-space size="mini">
           <img v-if="isDark" src="@/assets/logo-dark.png" alt="logo" class="logo" />
           <img v-else src="@/assets/logo.png" alt="logo" class="logo" />
@@ -18,7 +23,11 @@
         @menu-item-click="goto"
       >
         <a-menu-item :style="{ padding: 0, marginLeft: 0 }" disabled>
-          <a href="https://github.com/PBH-BTN/PeerBanHelper" target="_blank">
+          <a
+            href="https://github.com/PBH-BTN/PeerBanHelper"
+            target="_blank"
+            style="cursor: pointer"
+          >
             <a-space size="mini">
               <img v-if="isDark" src="@/assets/logo-dark.png" alt="logo" class="logo" />
               <img v-else src="@/assets/logo.png" alt="logo" class="logo" />
