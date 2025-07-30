@@ -1,11 +1,10 @@
 package com.ghostchu.peerbanhelper.module.impl.webapi;
 
+import com.ghostchu.peerbanhelper.Main;
 import com.ghostchu.peerbanhelper.downloader.Downloader;
 import com.ghostchu.peerbanhelper.downloader.DownloaderManager;
 import com.ghostchu.peerbanhelper.module.AbstractFeatureModule;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TunnelInfoDTO;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TunnelProxyConnectionDTO;
-import com.ghostchu.peerbanhelper.module.impl.webapi.dto.TunnelsDTO;
+import com.ghostchu.peerbanhelper.module.impl.webapi.dto.*;
 import com.ghostchu.peerbanhelper.text.Lang;
 import com.ghostchu.peerbanhelper.text.TranslationComponent;
 import com.ghostchu.peerbanhelper.util.backgroundtask.BackgroundTaskManager;
@@ -23,10 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.ghostchu.peerbanhelper.text.TextManager.tl;
 
@@ -66,14 +62,39 @@ public class PBHAutoStunController extends AbstractFeatureModule {
     @Override
     public void onEnable() {
         javalinWebContainer.javalin()
-                .get("/api/autostun/info", this::status, Role.USER_READ)
+                .get("/api/autostun/status", this::getModuleStatus, Role.USER_READ)
                 .post("/api/autostun/refreshNatType", this::refreshNatType, Role.USER_WRITE)
-                .post("/api/autostun/runNetworkEnvironmentTest", this::networkEnvironmentTest, Role.USER_WRITE)
                 .post("/api/autostun/restart", this::autoStunRestart, Role.USER_WRITE)
                 .get("/api/autostun/tunnels", this::tunnels, Role.USER_READ)
                 .get("/api/autostun/tunnel/{downloader}/info", this::tunnelInfo, Role.USER_READ)
-                .get("/api/autostun/tunnel/{downloader}/connections", this::tunnelConnections, Role.USER_READ);
+                .get("/api/autostun/tunnel/{downloader}/connections", this::tunnelConnections, Role.USER_READ)
+                .put("/api/autostun/config", this::putModuleConfig, Role.USER_WRITE);
+    }
 
+    private void getModuleStatus(@NotNull Context context) {
+        var section = Main.getMainConfig().getConfigurationSection("auto-stun");
+        if (section == null) throw new IllegalStateException("Auto-stun configuration section not found");
+        AutoStunConfigDto autoStunConfigDto = new AutoStunConfigDto(
+                section.getBoolean("enabled", false),
+                section.getBoolean("use-friendly-loopback-mapping", true),
+                section.getStringList("downloaders").stream()
+                        .map(downloaderManager::getDownloaderById)
+                        .filter(Objects::nonNull)
+                        .map(downloaderManager::getDownloadInfo).toList(),
+                stunManager.getCachedNatType());
+        context.json(new StdResp(true, null, autoStunConfigDto));
+    }
+
+    private void putModuleConfig(@NotNull Context context) throws Exception {
+        AutoStunConfigForm autoStunConfigForm = context.bodyAsClass(AutoStunConfigForm.class);
+        var section = Main.getMainConfig().getConfigurationSection("auto-stun");
+        if (section == null) throw new IllegalStateException("Auto-stun configuration section not found");
+        section.set("enabled", autoStunConfigForm.isEnabled());
+        section.set("use-friendly-loopback-mapping", autoStunConfigForm.isUseFriendlyLoopbackMapping());
+        section.set("downloaders", autoStunConfigForm.getDownloaders());
+        Main.getMainConfig().save(Main.getMainConfigFile());
+        bTStunManager.reloadModule();
+        context.json(new StdResp(true, tl(locale(context), Lang.AUTOSTUN_CONFIG_REAPPLIED), null));
     }
 
     private void tunnelConnections(@NotNull Context context) {
@@ -168,10 +189,6 @@ public class PBHAutoStunController extends AbstractFeatureModule {
             throw new RuntimeException(e);
         }
         context.json(new StdResp(true, tl(locale(context), new TranslationComponent(Lang.AUTOSTUN_RESTARTED)), null));
-    }
-
-    private void networkEnvironmentTest(@NotNull Context context) {
-
     }
 
     @SuppressWarnings("DuplicatedCode")
