@@ -131,7 +131,7 @@ public final class EnhancedRuleSubscriptionModule extends AbstractRuleFeatureMod
                         result = matcher.match(testContent);
                         break;
                     case PEER_ID:
-                        testContent = peer.getPeerClientName(); // or peer ID if available
+                        testContent = peer.getPeerId() != null ? peer.getPeerId().toString() : null;
                         result = matcher.match(testContent);
                         break;
                     case CLIENT_NAME:
@@ -327,6 +327,126 @@ public final class EnhancedRuleSubscriptionModule extends AbstractRuleFeatureMod
     }
     
     /**
+     * 更新指定规则
+     * Update specific rule
+     */
+    public StdResp updateRule(String locale, String ruleId) {
+        try {
+            EnhancedRuleSubInfoEntity ruleInfo = enhancedRuleSubInfoDao.queryForId(ruleId);
+            if (ruleInfo == null) {
+                return new StdResp(false, tl(locale, "Rule not found: " + ruleId), null);
+            }
+            
+            if (!ruleInfo.isEnabled()) {
+                return new StdResp(false, tl(locale, "Rule is disabled: " + ruleId), null);
+            }
+            
+            return updateRuleFromUrl(locale, ruleInfo);
+        } catch (Exception e) {
+            log.error("Error updating enhanced rule: {}", ruleId, e);
+            return new StdResp(false, tl(locale, "Update failed: " + e.getMessage()), null);
+        }
+    }
+    
+    /**
+     * 从URL更新规则数据
+     * Update rule data from URL
+     */
+    private StdResp updateRuleFromUrl(String locale, EnhancedRuleSubInfoEntity ruleInfo) {
+        return getResource(ruleInfo.getSubUrl())
+                .thenApply(data -> {
+                    try {
+                        String content = new String(data, StandardCharsets.UTF_8);
+                        List<?> parsedData = parseRuleData(content, ruleInfo.getRuleTypeEnum());
+                        
+                        // Remove existing matcher
+                        ruleMatchers.removeIf(matcher -> matcher.getRuleId().equals(ruleInfo.getRuleId()));
+                        
+                        // Create new matcher
+                        EnhancedRuleMatcher newMatcher = createMatcher(
+                                ruleInfo.getRuleId(),
+                                ruleInfo.getRuleName(),
+                                ruleInfo.getRuleTypeEnum(),
+                                parsedData
+                        );
+                        
+                        ruleMatchers.add(newMatcher);
+                        
+                        // Update entity
+                        ruleInfo.setLastUpdate(System.currentTimeMillis());
+                        ruleInfo.setEntCount(newMatcher.getDataSize());
+                        enhancedRuleSubInfoDao.update(ruleInfo);
+                        
+                        // Log update
+                        EnhancedRuleSubLogEntity logEntry = new EnhancedRuleSubLogEntity(
+                                null,
+                                ruleInfo.getRuleId(),
+                                System.currentTimeMillis(),
+                                newMatcher.getDataSize(),
+                                IPBanRuleUpdateType.MANUAL,
+                                ruleInfo.getRuleType(),
+                                null
+                        );
+                        enhancedRuleSubLogDao.create(logEntry);
+                        
+                        moduleMatchCache.invalidateAll();
+                        
+                        return new StdResp(true, tl(locale, "Rule updated successfully: " + ruleInfo.getRuleName()), null);
+                    } catch (Exception e) {
+                        log.error("Error processing rule data: {}", ruleInfo.getRuleId(), e);
+                        
+                        // Log error
+                        try {
+                            EnhancedRuleSubLogEntity logEntry = new EnhancedRuleSubLogEntity(
+                                    null,
+                                    ruleInfo.getRuleId(),
+                                    System.currentTimeMillis(),
+                                    0,
+                                    IPBanRuleUpdateType.MANUAL,
+                                    ruleInfo.getRuleType(),
+                                    e.getMessage()
+                            );
+                            enhancedRuleSubLogDao.create(logEntry);
+                        } catch (SQLException ex) {
+                            log.error("Error logging update failure", ex);
+                        }
+                        
+                        return new StdResp(false, tl(locale, "Rule update failed: " + e.getMessage()), null);
+                    }
+                })
+                .exceptionally(throwable -> {
+                    log.error("Error fetching rule data: {}", ruleInfo.getRuleId(), throwable);
+                    return new StdResp(false, tl(locale, "Failed to fetch rule data: " + throwable.getMessage()), null);
+                })
+                .join();
+    }
+    
+    /**
+     * 更新所有规则
+     * Update all rules
+     */
+    public StdResp updateAllRules(String locale) {
+        try {
+            List<EnhancedRuleSubInfoEntity> allRules = enhancedRuleSubInfoDao.queryForAll();
+            List<StdResp> results = new ArrayList<>();
+            
+            for (EnhancedRuleSubInfoEntity rule : allRules) {
+                if (rule.isEnabled()) {
+                    StdResp result = updateRuleFromUrl(locale, rule);
+                    results.add(result);
+                    if (!result.success()) {
+                        log.warn("Failed to update rule: {} - {}", rule.getRuleId(), result.message());
+                    }
+                }
+            }
+            
+            long successCount = results.stream().mapToLong(r -> r.success() ? 1 : 0).sum();
+            long totalCount = results.size();
+            
+            return new StdResp(true, tl(locale, "Updated " + successCount + "/" + totalCount + " rules"), null);
+        } catch (Exception e) {
+            log.error("Error updating all rules", e);
+    /**
      * 获取检查间隔
      * Get check interval
      */
@@ -344,4 +464,11 @@ public final class EnhancedRuleSubscriptionModule extends AbstractRuleFeatureMod
         saveConfig();
         CommonUtil.getScheduler().scheduleWithFixedDelay(this::reloadConfig, 0, checkInterval, TimeUnit.MILLISECONDS);
     }
-}
+    
+    /**
+     * 获取增强规则匹配器列表
+     * Get enhanced rule matchers list
+     */
+    public List<EnhancedRuleMatcher> getRuleMatchers() {
+        return ruleMatchers;
+    }

@@ -42,6 +42,8 @@ public final class DatabaseHelper {
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), BanListEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubInfoEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), RuleSubLogEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), EnhancedRuleSubInfoEntity.class, false);
+        PBHTableUtils.createTableIfNotExists(database.getDataSource(), EnhancedRuleSubLogEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), PeerRecordEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), ProgressCheatBlockerPersistEntity.class, false);
         PBHTableUtils.createTableIfNotExists(database.getDataSource(), TrafficJournalEntity.class, false);

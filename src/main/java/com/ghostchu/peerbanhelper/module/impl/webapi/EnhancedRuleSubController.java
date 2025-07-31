@@ -165,8 +165,7 @@ public final class EnhancedRuleSubController extends AbstractFeatureModule {
      * Manual update all subscription rules
      */
     private StdResp updateAll(String locale) {
-        // TODO: Implement update all logic
-        return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_ALL_UPDATED), null);
+        return enhancedRuleSubscriptionModule.updateAllRules(locale);
     }
     
     /**
@@ -178,18 +177,7 @@ public final class EnhancedRuleSubController extends AbstractFeatureModule {
             return new StdResp(false, tlUI(Lang.IP_BAN_RULE_NO_ID), null);
         }
         
-        try {
-            EnhancedRuleSubInfoEntity ruleInfo = enhancedRuleSubInfoDao.queryForId(ruleId);
-            if (ruleInfo == null) {
-                return new StdResp(false, tlUI(Lang.IP_BAN_RULE_CANT_FIND, ruleId), null);
-            }
-            
-            // TODO: Implement update logic
-            return new StdResp(true, tl(locale, Lang.IP_BAN_RULE_UPDATED, ruleInfo.getRuleName()), null);
-        } catch (SQLException e) {
-            log.error("Error updating enhanced rule: {}", ruleId, e);
-            return new StdResp(false, tl(locale, Lang.IP_BAN_RULE_UPDATE_FAILED, ruleId), null);
-        }
+        return enhancedRuleSubscriptionModule.updateRule(locale, ruleId);
     }
     
     /**
