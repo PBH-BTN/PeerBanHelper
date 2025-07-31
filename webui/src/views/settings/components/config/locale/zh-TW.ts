@@ -116,6 +116,12 @@ export default {
   'page.settings.tab.config.push.form.pushplus.template': '範本',
   'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
 
+  'page.settings.tab.config.push.form.gotify.server_url': '伺服器地址',
+  'page.settings.tab.config.push.form.gotify.server_url.placeholder': 'https://gotify.example.com',
+  'page.settings.tab.config.push.form.gotify.token': '應用程式令牌',
+  'page.settings.tab.config.push.form.gotify.priority': '優先級',
+  'page.settings.tab.config.push.form.gotify.priority.extra': '訊息優先級 (1-10，預設：5)',
+
   'page.settings.tab.config.push.form.action.ok': '確定',
   'page.settings.tab.config.push.form.action.cancel': '取消',
   'page.settings.tab.config.push.form.action.test': '測試'
