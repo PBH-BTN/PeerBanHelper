@@ -4,6 +4,9 @@
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Java ###
+*.class
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
