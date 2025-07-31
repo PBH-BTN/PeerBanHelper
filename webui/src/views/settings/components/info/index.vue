@@ -564,7 +564,7 @@ const webuiHash = computed(() => {
 })
 
 const { data: btnRulesEnable } = useRequest(CheckModuleEnable, {
-  defaultParams: ['btn'],
+  defaultParams: ['BTN Network Online Rules'],
   onSuccess: () => (btnLoading.value = false)
 })
 
