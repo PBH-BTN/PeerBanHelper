@@ -7,9 +7,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import okhttp3.MultipartBody;
+import okhttp3.FormBody;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import org.bspfsystems.yamlconfiguration.file.YamlConfiguration;
@@ -69,17 +68,17 @@ public final class GotifyPushProvider extends AbstractPushProvider {
         Map<String, Object> map = new HashMap<>();
         map.put("title", title);
         map.put("message", content);
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("title", title)
-                .addFormDataPart("message", content)
-                .addFormDataPart("priority", String.valueOf(config.getPriority()))
-                .build();
+
+        FormBody.Builder formBody = new FormBody.Builder();
+
+        var form = formBody.add("title", title)
+                .add("message", content)
+                .add("priority", String.valueOf(config.getPriority())).build();
 
         Request request = new Request.Builder()
                 .url(config.getEndpoint())
-                .post(requestBody)
-                .header("Content-Type", "multipart/form-data")
+                .post(form)
+                .header("Content-Type", "application/x-www-form-urlencoded")
                 .build();
 
         try (Response response = httpUtil.newBuilder().build().newCall(request).execute()) {
