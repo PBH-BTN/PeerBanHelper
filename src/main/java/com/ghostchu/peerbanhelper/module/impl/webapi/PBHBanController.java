@@ -123,7 +123,8 @@ public final class PBHBanController extends AbstractFeatureModule {
                 ctx.queryParam("filterPeerId"),
                 ctx.queryParam("filterTorrentName"),
                 ctx.queryParam("filterModule"),
-                ctx.queryParam("filterRule")
+                ctx.queryParam("filterRule"),
+                ctx.queryParam("filterContext")  // Maps to downloader field
         );
 
         var queryBuilder = orderable

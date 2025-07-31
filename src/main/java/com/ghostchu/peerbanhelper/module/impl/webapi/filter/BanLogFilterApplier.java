@@ -72,6 +72,13 @@ public class BanLogFilterApplier {
             hasWhere = true;
         }
 
+        // Filter by context (discovery location) - maps to downloader field
+        if (isValidFilterValue(filters.getContext())) {
+            if (hasWhere) where.and();
+            where.like("downloader", new SelectArg("%" + sanitizeInput(filters.getContext()) + "%"));
+            hasWhere = true;
+        }
+
         return queryBuilder;
     }
     
