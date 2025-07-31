@@ -65,7 +65,8 @@ public final class PushDeerPushProvider extends AbstractPushProvider {
     public boolean push(String title, String content) {
         Map<String, Object> map = new HashMap<>();
         map.put("pushkey", config.getPushKey());
-        map.put("text", title + "\n\n" + content);
+        map.put("text", title);
+        map.put("desp", content);
         map.put("type", "markdown");
         
         RequestBody requestBody = RequestBody.create(

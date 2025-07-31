@@ -95,6 +95,7 @@ export default {
   'page.settings.tab.config.push.form.type.serverchan': 'Server酱',
   'page.settings.tab.config.push.form.type.telegram': 'Telegram',
   'page.settings.tab.config.push.form.type.bark': 'Bark',
+  'page.settings.tab.config.push.form.type.pushdeer': 'PushDeer',
 
   'page.settings.tab.config.push.form.stmp.host': '主机',
   'page.settings.tab.config.push.form.stmp.port': '端口号',
