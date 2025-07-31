@@ -118,6 +118,9 @@ export default {
   'page.settings.tab.config.push.form.pushplus.template': 'Template',
   'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
 
+  'page.settings.tab.config.push.form.pushdeer.endpoint': 'Endpoint',
+  'page.settings.tab.config.push.form.pushdeer.pushkey': 'Push Key',
+
   'page.settings.tab.config.push.form.action.ok': 'Ok',
   'page.settings.tab.config.push.form.action.cancel': 'Cancel',
   'page.settings.tab.config.push.form.action.test': 'Test'

@@ -116,6 +116,9 @@ export default {
   'page.settings.tab.config.push.form.pushplus.template': '範本',
   'page.settings.tab.config.push.form.pushplus.channel': 'Channel',
 
+  'page.settings.tab.config.push.form.pushdeer.endpoint': '端點',
+  'page.settings.tab.config.push.form.pushdeer.pushkey': '推送金鑰',
+
   'page.settings.tab.config.push.form.action.ok': '確定',
   'page.settings.tab.config.push.form.action.cancel': '取消',
   'page.settings.tab.config.push.form.action.test': '測試'
